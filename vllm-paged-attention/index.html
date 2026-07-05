@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PagedAttention 学习笔记</title>
+<meta name="doc-description" content="vLLM 的核心:借鉴操作系统分页机制管理 KV cache。这是示例项目,可整个文件夹删掉。">
+<meta name="doc-category" content="推理优化">
+<meta name="doc-tags" content="vLLM,KV Cache">
+<style>
+  body{max-width:760px;margin:40px auto;padding:0 20px;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.7;color:#222}
+  h1{border-bottom:2px solid #4f46e5;padding-bottom:8px}
+  a.back{color:#4f46e5;text-decoration:none}
+  blockquote{border-left:3px solid #4f46e5;margin:0;padding:6px 16px;color:#555;background:#f7f8fa}
+</style>
+</head>
+<body>
+<p><a class="back" href="../index.html">← 返回主页</a></p>
+<h1>PagedAttention 学习笔记</h1>
+<blockquote>示例项目,住在 <code>vllm-paged-attention/index.html</code>。它设了 <code>doc-category="推理优化"</code>,所以主页顶部会出现分类过滤条。你可以把整个文件夹删掉,换成自己的项目。</blockquote>
+<p>PagedAttention 把注意力机制里的 KV cache 切成固定大小的块(block),像操作系统管理内存分页一样按需分配,从而大幅减少显存碎片、提升吞吐……</p>
+<p style="margin-top:40px"><a class="back" href="../index.html">← 返回主页</a></p>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>欢迎 · 使用说明</title>
+
+<!-- ↓↓↓ 以下 meta 全部可选,用来控制这个项目在主页卡片上怎么显示 ↓↓↓ -->
+<meta name="doc-title" content="👋 欢迎 & 使用说明">
+<meta name="doc-description" content="这个站点怎么用、怎么加新项目、可选的 meta 标签有哪些。第一次来先看这篇。">
+<meta name="doc-date" content="2026-07-05">
+<meta name="doc-tags" content="说明,入门">
+<!-- doc-category 没写 -> 这个项目不归入任何分类。想启用分类,给某些项目加上 doc-category 即可 -->
+
+<style>
+  body{max-width:760px;margin:40px auto;padding:0 20px;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.7;color:#222}
+  code{background:#f0f0f4;padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:#1a1a2e;color:#e8eaed;padding:16px;border-radius:10px;overflow:auto}
+  pre code{background:none;color:inherit;padding:0}
+  h1{border-bottom:2px solid #4f46e5;padding-bottom:8px}
+  a.back{color:#4f46e5;text-decoration:none}
+</style>
+</head>
+<body>
+<p><a class="back" href="../index.html">← 返回主页</a></p>
+
+<h1>👋 欢迎</h1>
+<p>这是用 GitHub Pages 搭的个人文档库。你现在看到的这篇,就住在 <code>欢迎/index.html</code> ——一个项目一个文件夹,里面一个 <code>index.html</code>,正是你的用法。</p>
+
+<h2>怎么加一个新项目?</h2>
+<ol>
+  <li>在仓库根目录建一个文件夹,名字就是这个项目的 URL,比如 <code>cuda-warp-primitives/</code>(建议用英文/连字符,URL 更干净)。</li>
+  <li>把你写的文档存成该文件夹里的 <code>index.html</code>。项目相关的图片等资源也放这个文件夹里。</li>
+  <li><code>git add . &amp;&amp; git commit -m "新增项目" &amp;&amp; git push</code></li>
+  <li>约 1 分钟后主页自动出现这张卡片,访问 <code>你的用户名.github.io/cuda-warp-primitives/</code> 即可打开。</li>
+</ol>
+<p>卡片标题<strong>默认就是文件夹名</strong>,所以你什么都不加也能用。</p>
+
+<h2>想让卡片更精致?(可选)</h2>
+<p>在项目 <code>index.html</code> 的 <code>&lt;head&gt;</code> 里加这几行:</p>
+<pre><code>&lt;meta name="doc-title"       content="展示用的标题"&gt;
+&lt;meta name="doc-description" content="一句话简介,显示在卡片上"&gt;
+&lt;meta name="doc-category"    content="推理优化"&gt;  &lt;!-- 加了才会出现分类过滤 --&gt;
+&lt;meta name="doc-date"        content="2026-07-05"&gt;
+&lt;meta name="doc-tags"        content="标签1,标签2"&gt;</code></pre>
+<p>都不加也没关系:标题取文件夹名,日期取 git 提交时间,不显示分类。</p>
+
+<p style="margin-top:40px"><a class="back" href="../index.html">← 返回主页</a></p>
+</body>
+</html>

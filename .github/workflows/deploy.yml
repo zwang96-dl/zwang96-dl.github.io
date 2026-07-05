@@ -1,0 +1,43 @@
+name: 构建并部署到 GitHub Pages
+
+on:
+  push:
+    branches: [main]        # 推送到 main 分支时自动触发
+  workflow_dispatch:         # 也可在 Actions 页面手动触发
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只跑一个部署,新的推送会取消进行中的旧部署
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # 拉取完整历史,以便按 git 提交日期排序
+
+      - name: 生成门户主页 index.html
+        run: python3 build.py
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      - name: 打包站点内容
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
