@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<!--mydocs-analytics--><script data-goatcounter="https://zwang96.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script><!--/mydocs-analytics-->
+<!--mydocs-base:AMD GPU 推理优化图解 (ROCm)-->
+<!--mydocs-favicon--><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%99%82%3C/text%3E%3C/svg%3E"><!--/mydocs-favicon-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AMD GPU 推理优化图解 (ROCm) · ML Systems Notebook</title>
+
+<meta name="doc-title" content="AMD GPU 推理优化图解 (ROCm)">
+<meta name="doc-description" content="在 AMD Instinct 显卡上把大模型推理跑快：用大白话 + 示意图 + 表格讲清 ROCm 的 5 大优化杠杆（量化 / 加速库 / vLLM 调优 / 底层 kernel / 测量诊断）。">
+<meta name="doc-date" content="2026-07-05">
+<meta name="doc-tags" content="AMD,ROCm,vLLM,推理优化,GPU,MI300X">
+
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#ffffff; --soft:#f1f3f7; --text:#1a1a2e; --muted:#6b7280;
+    --border:#e5e7eb; --accent:#4f46e5; --accent-soft:#eef2ff;
+    --note:#0969da; --note-bg:#eef4ff;
+    --key:#7c3aed; --key-bg:#f4efff;
+    --tip:#0f766e; --tip-bg:#ecfdf6;
+    --warn:#c2410c; --warn-bg:#fff5ed;
+    --analogy:#b45309; --analogy-bg:#fffbeb;
+    --cmd-bg:#1a1a2e; --cmd-text:#e8eaed; --cmd-comment:#8b93a7;
+    --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme]){
+      --bg:#0f1117; --card:#181b23; --soft:#12151d; --text:#e8eaed; --muted:#9aa0a8;
+      --border:#272b35; --accent:#818cf8; --accent-soft:#1e2130;
+      --note:#4493f8; --note-bg:#12213a;
+      --key:#a371f7; --key-bg:#221a38;
+      --tip:#3fb9a0; --tip-bg:#0f2a26;
+      --warn:#f0883e; --warn-bg:#2a1c12;
+      --analogy:#e0a83e; --analogy-bg:#2a2412;
+      --cmd-bg:#0b0d13; --cmd-text:#e8eaed; --cmd-comment:#6b7280;
+      --shadow:0 1px 3px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1117; --card:#181b23; --soft:#12151d; --text:#e8eaed; --muted:#9aa0a8;
+    --border:#272b35; --accent:#818cf8; --accent-soft:#1e2130;
+    --note:#4493f8; --note-bg:#12213a;
+    --key:#a371f7; --key-bg:#221a38;
+    --tip:#3fb9a0; --tip-bg:#0f2a26;
+    --warn:#f0883e; --warn-bg:#2a1c12;
+    --analogy:#e0a83e; --analogy-bg:#2a2412;
+    --cmd-bg:#0b0d13; --cmd-text:#e8eaed; --cmd-comment:#6b7280;
+    --shadow:0 1px 3px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    line-height:1.75; font-size:16px; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:0 20px}
+  .layout{display:grid; grid-template-columns:230px 1fr; gap:44px; align-items:start}
+
+  /* 顶部 */
+  header{padding:44px 0 8px}
+  .home{font-size:.9rem; color:var(--muted)}
+  h1{font-size:2rem; line-height:1.25; letter-spacing:-.02em; margin:14px 0 8px}
+  .sub{color:var(--muted); font-size:1.08rem; margin:0}
+  .byline{margin-top:16px; display:flex; gap:8px; flex-wrap:wrap}
+  .byline .pill{font-size:.78rem}
+
+  /* 侧栏 TOC */
+  .toc{position:sticky; top:20px; align-self:start; font-size:.9rem}
+  .toc .t{font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:700; margin:0 0 10px}
+  .toc ol{list-style:none; margin:0; padding:0; counter-reset:s}
+  .toc li{counter-increment:s; margin:2px 0}
+  .toc a{display:block; padding:5px 10px; border-radius:8px; color:var(--muted); border-left:2px solid transparent}
+  .toc a::before{content:counter(s) "  "; color:var(--accent); font-variant-numeric:tabular-nums; font-weight:600}
+  .toc a:hover{background:var(--soft); text-decoration:none; color:var(--text)}
+  .toc a.active{background:var(--accent-soft); color:var(--accent); border-left-color:var(--accent); font-weight:600}
+  .theme{margin-top:16px; background:var(--card); border:1px solid var(--border); color:var(--text); border-radius:9px; padding:7px 11px; cursor:pointer; font-size:.85rem; width:100%}
+  .theme:hover{border-color:var(--accent)}
+
+  main{min-width:0; padding-bottom:80px}
+  section{padding-top:26px; margin-top:22px; border-top:1px solid var(--border)}
+  section:first-of-type{border-top:none}
+  h2{font-size:1.5rem; letter-spacing:-.01em; margin:.2em 0 .1em; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  h2 .n{display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:9px; background:var(--accent); color:#fff; font-size:.95rem; font-weight:700; flex:none}
+  h3{font-size:1.15rem; margin:1.4em 0 .3em}
+  h4{font-size:1rem; margin:1.2em 0 .2em}
+  .lead{color:var(--muted); font-size:1.05rem; margin:.4em 0 1em}
+  p{margin:.7em 0}
+  ul,ol{margin:.6em 0; padding-left:1.3em}
+  li{margin:.28em 0}
+  .term{color:var(--accent); font-weight:600}
+  code:not(pre code){background:var(--soft); border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-size:.86em; font-family:"SFMono-Regular",Consolas,Menlo,monospace}
+
+  .badge{display:inline-block; font-size:.72rem; font-weight:700; padding:2px 9px; border-radius:999px; vertical-align:middle}
+  .b-easy{background:var(--tip-bg); color:var(--tip)}
+  .b-mid{background:var(--note-bg); color:var(--note)}
+  .b-adv{background:var(--warn-bg); color:var(--warn)}
+  .pill{display:inline-block; background:var(--accent-soft); color:var(--accent); border-radius:999px; padding:3px 11px; font-size:.8rem; font-weight:600}
+
+  /* callout */
+  .box{border:1px solid var(--border); border-left-width:4px; border-radius:10px; padding:14px 16px; margin:16px 0; background:var(--card)}
+  .box .h{font-weight:700; margin:0 0 4px; font-size:.95rem}
+  .box p:first-of-type{margin-top:0}
+  .box p:last-child{margin-bottom:0}
+  .box.note{border-left-color:var(--note); background:var(--note-bg)}
+  .box.key{border-left-color:var(--key); background:var(--key-bg)}
+  .box.tip{border-left-color:var(--tip); background:var(--tip-bg)}
+  .box.warn{border-left-color:var(--warn); background:var(--warn-bg)}
+  .box.analogy{border-left-color:var(--analogy); background:var(--analogy-bg)}
+  .box.note .h{color:var(--note)} .box.key .h{color:var(--key)} .box.tip .h{color:var(--tip)}
+  .box.warn .h{color:var(--warn)} .box.analogy .h{color:var(--analogy)}
+
+  /* 表格 */
+  .tw{overflow-x:auto; margin:16px 0; border:1px solid var(--border); border-radius:12px}
+  table{border-collapse:collapse; width:100%; font-size:.92rem; min-width:520px}
+  th,td{padding:10px 13px; text-align:left; border-bottom:1px solid var(--border); vertical-align:top}
+  thead th{background:var(--soft); font-weight:700; white-space:nowrap; position:sticky; top:0}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--soft)}
+  td strong{color:var(--text)}
+  .ok{color:var(--tip); font-weight:700}
+  .no{color:var(--warn); font-weight:700}
+
+  /* 命令块 */
+  pre{background:var(--cmd-bg); color:var(--cmd-text); border-radius:11px; padding:15px 17px; overflow-x:auto; margin:14px 0; font-size:.85rem; line-height:1.6}
+  pre code{font-family:"SFMono-Regular",Consolas,Menlo,"JetBrains Mono",monospace}
+  pre .c{color:var(--cmd-comment)}
+  pre .k{color:#f0883e}
+  pre .s{color:#7ee787}
+
+  /* 内联 SVG 示意图（自包含、随深浅色变色） */
+  .fig{margin:18px 0; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px}
+  .fig svg{display:block; width:100%; height:auto}
+  .fig svg text{font-family:inherit}
+  .fig .cap{font-size:.86rem; color:var(--muted); margin-top:10px; text-align:center; line-height:1.6}
+
+  /* 杠杆卡片网格 */
+  .levers{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin:18px 0}
+  .lever{background:var(--card); border:1px solid var(--border); border-radius:13px; padding:15px; position:relative; overflow:hidden}
+  .lever.star{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent)}
+  .lever .ic{font-size:1.7rem}
+  .lever .nm{font-weight:700; margin:6px 0 3px}
+  .lever .ds{font-size:.85rem; color:var(--muted)}
+  .lever .tagtop{position:absolute; top:0; right:0; background:var(--accent); color:#fff; font-size:.66rem; font-weight:700; padding:2px 9px; border-bottom-left-radius:9px}
+
+  /* 两栏对比 */
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0}
+  .col{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px}
+  .col .ct{font-weight:700; font-size:1.02rem; margin:0 0 8px; display:flex; align-items:center; gap:8px}
+  .col ul{margin:.3em 0; padding-left:1.15em}
+  .col li{font-size:.92rem}
+
+  /* 决策树 / 流程 */
+  .tree{margin:16px 0; display:flex; flex-direction:column; gap:10px}
+  .branch{display:grid; grid-template-columns:minmax(140px,220px) 28px 1fr; align-items:center; gap:6px; background:var(--card); border:1px solid var(--border); border-radius:11px; padding:11px 14px}
+  .branch .q{font-weight:600; font-size:.9rem}
+  .branch .ar{color:var(--accent); font-weight:700; text-align:center}
+  .branch .r{font-size:.92rem}
+  .branch .r code{white-space:nowrap}
+
+  .flow{counter-reset:f; display:flex; flex-direction:column; gap:10px; margin:16px 0}
+  .step{counter-increment:f; display:grid; grid-template-columns:34px 1fr; gap:13px; align-items:start; background:var(--card); border:1px solid var(--border); border-radius:11px; padding:13px 15px}
+  .step::before{content:counter(f); background:var(--accent); color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700}
+  .step .st{font-weight:700; margin:0 0 2px}
+  .step .sd{font-size:.9rem; color:var(--muted)}
+  .step.roi1{border-left:4px solid var(--tip)}
+  .step.roi2{border-left:4px solid var(--note)}
+  .step.roi3{border-left:4px solid var(--warn)}
+
+  .refs a{display:block; padding:5px 0}
+  footer.mine{color:var(--muted); font-size:.85rem; margin-top:30px}
+
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr; gap:0}
+    .toc{position:static; margin:8px 0 4px; border:1px solid var(--border); border-radius:12px; padding:12px 14px; background:var(--card)}
+    .cols{grid-template-columns:1fr}
+    .branch{grid-template-columns:1fr; gap:3px}
+    .branch .ar{display:none}
+    h1{font-size:1.6rem}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="home"><a href="../index.html">← ML Systems Notebook</a></div>
+    <h1>在 AMD 显卡上把大模型跑快<br>ROCm 推理优化 · 图解版</h1>
+    <p class="sub">面向「想在 AMD Instinct 显卡上部署大模型、但对 ROCm 不熟」的人。全程讲人话 + 示意图 + 表格，不堆术语。</p>
+    <div class="byline">
+      <span class="pill">AMD Instinct MI300 / MI350</span>
+      <span class="pill">vLLM</span>
+      <span class="pill">面向初学者</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc">
+      <p class="t">目录</p>
+      <ol>
+        <li><a href="#intro">一分钟全景：5 个旋钮</a></li>
+        <li><a href="#why">为什么推理会慢</a></li>
+        <li><a href="#quant">杠杆① 让模型变小</a></li>
+        <li><a href="#libs">杠杆② 换更快的零件</a></li>
+        <li><a href="#vllm">杠杆③ 调好 vLLM 引擎</a></li>
+        <li><a href="#kernels">杠杆④ 亲手打磨 kernel</a></li>
+        <li><a href="#profiling">杠杆⑤ 先测量再动手</a></li>
+        <li><a href="#hardware">MI300 vs MI350 速查</a></li>
+        <li><a href="#checklist">拿来就用：行动清单</a></li>
+        <li><a href="#refs">原文出处 & 说明</a></li>
+      </ol>
+      <button class="theme" id="themeBtn">🌙 切换深/浅色</button>
+    </nav>
+
+    <main>
+
+    <!-- ============ 0 ============ -->
+    <section id="intro">
+      <h2><span class="n">0</span>一分钟全景：优化推理，就是拧这 5 个旋钮</h2>
+      <p class="lead">别被一堆名词吓到。在 AMD 显卡上让大模型「推理」（也就是对外提供问答/生成服务）跑得又快又省，说到底就是拧下面这 5 个旋钮。这篇文章就是逐个把它们讲清楚。</p>
+
+      <div class="levers">
+        <div class="lever"><span class="tagtop">最省事</span><div class="ic">📦</div><div class="nm">① 让模型变小</div><div class="ds">量化：用更少的位数存模型，体积小一半到四分之一，还更快。</div></div>
+        <div class="lever"><div class="ic">⚡</div><div class="nm">② 换更快的零件</div><div class="ds">加速库：同样的计算，换个更聪明的实现（Flash Attention 等）。</div></div>
+        <div class="lever star"><span class="tagtop">最重要</span><div class="ic">🛠️</div><div class="nm">③ 调好 vLLM 引擎</div><div class="ds">一个开关 + 几个参数，收益最大。大多数人主要在这一层花时间。</div></div>
+        <div class="lever"><div class="ic">🔧</div><div class="nm">④ 亲手打磨 kernel</div><div class="ds">进阶：自己写/调底层计算代码。大多数人用不到，了解即可。</div></div>
+        <div class="lever"><div class="ic">🌡️</div><div class="nm">⑤ 先测量再动手</div><div class="ds">用工具量出「到底哪里慢」，别靠猜。这是贯穿始终的习惯。</div></div>
+      </div>
+
+      <div class="box key">
+        <p class="h">一句话记住</p>
+        <p>拧旋钮的顺序建议是：<strong>先量化（省事收益大）→ 再调 vLLM（收益最大）→ 顺手开加速库</strong>；只有当你「测量」发现某个具体环节卡住、而且现成手段救不了时，才需要去「亲手打磨 kernel」。</p>
+      </div>
+
+      <div class="box note">
+        <p class="h">几个名字先混个脸熟（后面都会展开）</p>
+        <p><span class="term">ROCm</span>＝AMD 显卡的软件平台（相当于 NVIDIA 那边的 CUDA）。<span class="term">Instinct MI300X / MI350X</span>＝AMD 面向数据中心的高端计算卡。<span class="term">vLLM</span>＝目前最主流的大模型推理引擎之一，AMD 卡上也能跑。<span class="term">AITER</span>＝AMD 专门为自家卡写的一套加速代码包（本文杠杆③的主角）。</p>
+      </div>
+    </section>
+
+    <!-- ============ 1 ============ -->
+    <section id="why">
+      <h2><span class="n">1</span>先弄懂：推理为什么会慢？ <span class="badge b-easy">入门必读</span></h2>
+      <p class="lead">不搞懂这一点，调优就是瞎拧。好消息是：原理特别简单，一个比喻就能讲明白。</p>
+
+      <p>大模型生成回答分成两步，它们「累」的地方完全不同：</p>
+
+      <div class="cols">
+        <div class="col">
+          <div class="ct">📖 第一步：读题（Prefill）</div>
+          <ul>
+            <li>把你输入的一整段话「一口气」读进去、理解。</li>
+            <li>这一步<strong>计算量大</strong>，显卡的算力被吃得满满的。</li>
+            <li>好比：一次性读完整道题目。</li>
+          </ul>
+        </div>
+        <div class="col">
+          <div class="ct">✍️ 第二步：逐字作答（Decode）</div>
+          <ul>
+            <li>一个字一个字往外蹦，每蹦一个字都要把<strong>整个模型</strong>在显存里过一遍。</li>
+            <li>这一步<strong>算力大量闲置</strong>，卡在「搬数据」上。</li>
+            <li>好比：写一个字，就把整本教材翻一遍。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="box analogy">
+        <p class="h">🍳 关键比喻：厨师很快，但食材来回搬得慢</p>
+        <p>「逐字作答」这一步的瓶颈，<strong>不是显卡算得慢，而是数据从显存搬到计算单元太慢</strong>——就像一个手速飞快的厨师，大部分时间却在等人从仓库把食材搬过来。这叫<span class="term">显存带宽受限</span>（memory-bandwidth-bound）。</p>
+        <p>那怎么办？<strong>让厨师一次多做几份菜</strong>。食材搬一趟，同时服务好几桌客人，搬运成本就被摊薄了。这就是「批处理（batching）」：同时处理更多请求，显卡才不闲着。</p>
+      </div>
+
+      <div class="fig">
+        <svg viewBox="0 0 640 200" role="img" aria-label="显存带宽瓶颈示意图">
+          <rect x="16" y="34" width="184" height="132" rx="12" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="108" y="86" text-anchor="middle" fill="var(--text)" font-size="18" font-weight="700">显存 HBM</text>
+          <text x="108" y="110" text-anchor="middle" fill="var(--muted)" font-size="12.5">容量大 · 但搬数据慢</text>
+          <text x="108" y="132" text-anchor="middle" fill="var(--muted)" font-size="12.5">(权重 + KV cache 都在这)</text>
+          <text x="322" y="82" text-anchor="middle" fill="var(--warn)" font-size="14" font-weight="700">带宽 = 瓶颈</text>
+          <rect x="200" y="94" width="238" height="14" fill="var(--warn)" opacity="0.9"/>
+          <path d="M438 88 L466 101 L438 114 Z" fill="var(--warn)"/>
+          <text x="322" y="132" text-anchor="middle" fill="var(--muted)" font-size="12">每搬一趟都要挤这根「细管子」</text>
+          <rect x="470" y="58" width="154" height="86" rx="12" fill="var(--tip-bg)" stroke="var(--tip)" stroke-width="2"/>
+          <text x="547" y="96" text-anchor="middle" fill="var(--text)" font-size="16" font-weight="700">计算单元</text>
+          <text x="547" y="118" text-anchor="middle" fill="var(--muted)" font-size="12.5">很快，却常在等</text>
+        </svg>
+        <div class="cap">🍳「厨师快、食材搬得慢」——逐字作答就卡在这根细管子上。<br>把 batch 做大 = 搬一趟食材同时炒好几桌，把搬运成本摊薄。</div>
+      </div>
+
+      <div class="box key">
+        <p class="h">由此推出整条优化逻辑（全文的主线）</p>
+        <p>逐字作答是「搬数据」受限 → 想快就得<strong>一次伺候更多请求（大 batch）</strong> → 能同时伺候多少，取决于<strong>显存里放得下多少「KV cache」</strong>（模型记住的上下文，越聊越占地方）→ 所以优化的核心动作就两类：<strong>①把东西变小（省显存）②把该省的开销省掉、该并行的并行起来</strong>。后面 5 个杠杆全都在服务这条主线。</p>
+      </div>
+
+      <p style="color:var(--muted);font-size:.9rem">想更深入理解 prefill / decode / KV cache / 批处理的机制，可以看本站的姊妹篇 <a href="../vllm-tutorial/">vLLM 全面教程</a>，那篇讲得更细。本篇聚焦「在 AMD 卡上怎么调」。</p>
+    </section>
+
+    <!-- ============ 2 ============ -->
+    <section id="quant">
+      <h2><span class="n">2</span>杠杆① 让模型变小：量化 <span class="badge b-easy">最省事</span></h2>
+      <p class="lead">量化是投入产出比最高的第一步，很多时候改一两个参数就能省一半显存。</p>
+
+      <div class="box analogy">
+        <p class="h">🖼️ 什么是量化？</p>
+        <p>模型里全是数字。原本每个数字用 16 个二进制位（bit）存，<span class="term">量化</span>就是改用 8 位甚至 4 位来存——好比把一张高清照片存成压缩版：<strong>体积小了、加载快了，画质（精度）掉一点点，但肉眼几乎看不出</strong>。省下的显存可以用来同时伺候更多请求，于是更快。</p>
+      </div>
+
+      <div class="fig">
+        <svg viewBox="0 0 640 138" role="img" aria-label="显存里装了什么示意图">
+          <text x="16" y="24" fill="var(--muted)" font-size="13">一张显卡的显存里 →</text>
+          <rect x="16" y="36" width="608" height="54" rx="9" fill="var(--soft)" stroke="var(--border)"/>
+          <rect x="18" y="38" width="196" height="50" rx="8" fill="var(--accent)"/>
+          <text x="116" y="68" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="700">模型权重（固定）</text>
+          <rect x="216" y="38" width="300" height="50" fill="var(--key)"/>
+          <text x="366" y="63" text-anchor="middle" fill="#fff" font-size="13.5" font-weight="700">KV cache</text>
+          <text x="366" y="80" text-anchor="middle" fill="#fff" font-size="11" opacity="0.92">（人越多 / 聊越长，越吃显存 →）</text>
+          <rect x="518" y="38" width="104" height="50" rx="8" fill="var(--border)"/>
+          <text x="570" y="68" text-anchor="middle" fill="var(--muted)" font-size="12">预留</text>
+          <text x="320" y="118" text-anchor="middle" fill="var(--muted)" font-size="12.5">量化＝把「权重」和「KV cache」这两块压小 → 腾出空间，同时服务更多人</text>
+        </svg>
+      </div>
+
+      <h3>两件不同的事：压「模型权重」 vs 压「KV cache」</h3>
+      <p>初学最容易混。它们都能省显存，但压的是不同东西，可以同时做：</p>
+      <ul>
+        <li><strong>压权重</strong>：把模型本身变小（FP8、INT4 等）。模型加载更小、算得更快。</li>
+        <li><strong>压 KV cache</strong>：把「对话上下文」的缓存变小（<code>--kv-cache-dtype fp8</code>）。<strong>这是最容易吃到的红利</strong>——一行参数省一半上下文显存，几乎无损，能聊更长/接更多人。</li>
+      </ul>
+
+      <h3>在 AMD 卡上常用的几种量化方式</h3>
+      <div class="tw">
+      <table>
+        <thead><tr><th>方式</th><th>压到几位</th><th>省多少显存</th><th>什么时候用它</th></tr></thead>
+        <tbody>
+          <tr><td><strong>FP8</strong>（8 位浮点）</td><td>8 bit</td><td>约省一半</td><td>生产首选，速度/精度最平衡。MI300 及以上原生支持。</td></tr>
+          <tr><td><strong>FP8 KV cache</strong></td><td>8 bit</td><td>上下文省一半</td><td>几乎所有场景都值得开，一行参数的事。</td></tr>
+          <tr><td><strong>AWQ / GPTQ</strong>（4 位整数）</td><td>4 bit</td><td>约省四分之三</td><td>显存特别紧、要塞下大模型时。精度损失略大些。</td></tr>
+          <tr><td><strong>MXFP4</strong>（4 位）</td><td>4 bit</td><td>约省四分之三</td><td>只有较新的 <strong>MI350 / MI355</strong> 才支持。</td></tr>
+          <tr><td><strong>Quark</strong>（AMD 官方工具）</td><td>FP8 / INT4</td><td>2×～4×</td><td>想用 AMD 官方调好的「预量化模型」，拿来即用最省心。</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="box tip">
+        <p class="h">💡 最容易上手的两招</p>
+        <p><strong>1. 开 FP8 KV cache</strong>（几乎无脑收益）：<br>
+        <strong>2. 直接用 AMD 调好的预量化模型</strong>（省去自己量化的功夫）：</p>
+      </div>
+      <pre><code><span class="c"># 招式1：给任意模型开 FP8 KV cache，上下文显存立省一半</span>
+vllm serve meta-llama/Llama-3.1-8B-Instruct <span class="k">--kv-cache-dtype</span> fp8 <span class="k">--calculate-kv-scales</span>
+
+<span class="c"># 招式2：直接拉 AMD 已经量化好的模型（名字里带 FP8-KV）</span>
+vllm serve amd/Llama-3.1-8B-Instruct-FP8-KV <span class="k">--dtype</span> auto</code></pre>
+
+      <div class="box warn">
+        <p class="h">⚠️ 一个必须记住的注意点</p>
+        <p>量化不是「免费的午餐」——它<strong>可能轻微影响回答质量</strong>。省得越狠（比如 4 位）风险越大。<strong>上线前一定要用你自己的任务测一测质量</strong>，别只看显存省了多少就发布。</p>
+      </div>
+    </section>
+
+    <!-- ============ 3 ============ -->
+    <section id="libs">
+      <h2><span class="n">3</span>杠杆② 换更快的零件：加速库 <span class="badge b-easy">开箱即用</span></h2>
+      <p class="lead">同一个计算，用「更聪明的实现」就能更快。这些库大多是「装上/打开开关」就生效，不用改模型。</p>
+
+      <div class="tw">
+      <table>
+        <thead><tr><th>加速库</th><th>用大白话说，它干嘛</th><th>怎么用</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Flash Attention</strong></td><td>让「注意力」计算少搬很多数据，尤其让第一个字更快出来。</td><td>在 vLLM 里通常自动启用（见下一节的后端选择）。</td></tr>
+          <tr><td><strong>TunableOp</strong></td><td>启动时自动试几种矩阵乘法实现，挑最快的记下来，之后一直用它。</td><td><code>PYTORCH_TUNABLEOP_ENABLED=1</code></td></tr>
+          <tr><td><strong>torch.compile</strong></td><td>把模型「编译」一遍，把零碎操作合并、提速。</td><td>PyTorch 里 <code>torch.compile(mode="max-autotune")</code></td></tr>
+          <tr><td><strong>hipBLASLt</strong></td><td>AMD 优化过的矩阵乘法库（很多加速的底座）。</td><td><code>TORCH_BLAS_PREFER_HIPBLASLT=1</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="box note">
+        <p class="h">AMD 特色：Flash Attention 有两个「引擎」</p>
+        <p>在 AMD 卡上，Flash Attention 有两套实现：<strong>CK（默认，性能强）</strong> 和 <strong>Triton（更灵活）</strong>。用一个环境变量切换：<code>FLASH_ATTENTION_TRITON_AMD_ENABLE="TRUE"</code> 用 Triton，<code>"FALSE"</code> 用 CK。多数情况用默认即可——真正的后端选择，vLLM 会在下一节帮你搞定。</p>
+      </div>
+      <div class="box tip">
+        <p class="h">💡 好消息</p>
+        <p>如果你用 vLLM（下一节），上面这些<strong>大部分已经自动帮你用上了</strong>。这一层你通常不用手动折腾，了解它们「是什么」即可。</p>
+      </div>
+    </section>
+
+    <!-- ============ 4 ============ -->
+    <section id="vllm">
+      <h2><span class="n">4</span>杠杆③ 调好 vLLM 引擎 <span class="badge b-mid">收益最大 · 重点</span></h2>
+      <p class="lead">这是全文最重要的一节。绝大多数人在 AMD 卡上部署，主要就是在这里花时间。好在关键动作不多。</p>
+
+      <h3>第一件事，也是最重要的一件事：打开 AITER</h3>
+      <div class="box analogy">
+        <p class="h">🏎️ AITER 是什么？</p>
+        <p><span class="term">AITER</span>（AI Tensor Engine for ROCm）是 <strong>AMD 专门为自家显卡手写的一整套加速代码包</strong>——好比给车装了「原厂涡轮增压」。它覆盖了推理里最耗时的那些计算（矩阵乘法、注意力、MoE 等）。<strong>在 AMD 卡上，这是收益最大的单个开关。</strong></p>
+      </div>
+      <pre><code><span class="c"># 打开 AITER，然后正常启动服务</span>
+<span class="k">export</span> VLLM_ROCM_USE_AITER=1
+vllm serve meta-llama/Llama-3.3-70B-Instruct</code></pre>
+
+      <div class="box warn">
+        <p class="h">⚠️ 新手最常踩的坑</p>
+        <p>就算你在下面「手动指定了注意力后端」，<strong>也必须同时设 <code>VLLM_ROCM_USE_AITER=1</code></strong>。因为这个总开关还负责矩阵乘法、归一化、MoE 等一大堆加速——不开，这些就走回慢速老路，你会白白损失性能。<strong>记住：AITER 总开关任何时候都要开。</strong></p>
+      </div>
+
+      <h3>第二件事：按你的模型，选对「注意力后端」</h3>
+      <p>「注意力」是模型里最核心也最耗时的计算。AMD 上有好几种实现（后端），选对了能快好几倍。<strong>照下面这张表对号入座即可：</strong></p>
+
+      <div class="tree">
+        <div class="branch"><span class="q">🦙 Llama / Qwen / Mistral 等普通模型</span><span class="ar">→</span><span class="r">用 <code>ROCM_AITER_FA</code>（比老实现快 <strong>2.7～4.4 倍</strong>）</span></div>
+        <div class="branch"><span class="q">🐋 DeepSeek-V3 / R1（这类叫 MLA 模型）</span><span class="ar">→</span><span class="r">用 <code>ROCM_AITER_MLA</code>（比旧实现快 1.2～1.5 倍）</span></div>
+        <div class="branch"><span class="q">🤖 gpt-oss 系列</span><span class="ar">→</span><span class="r">用 <code>ROCM_AITER_UNIFIED_ATTN</code></span></div>
+        <div class="branch"><span class="q">🎮 消费级 Radeon 卡 / 上面都不行</span><span class="ar">→</span><span class="r">用 <code>ROCM_ATTN</code>（兜底，最稳）</span></div>
+      </div>
+
+      <div class="box tip">
+        <p class="h">💡 其实更省心的做法</p>
+        <p>你只要<strong>开了 <code>VLLM_ROCM_USE_AITER=1</code>，vLLM 通常会自动帮你选好合适的后端</strong>——普通模型自动用 FA、DeepSeek 自动用 MLA。上面这张表是当你想手动确认或强制指定时用的。<br>额外提速：普通模型 + 高并发时，再加 <code>VLLM_ROCM_SHUFFLE_KV_CACHE_LAYOUT=1</code> 还能让「逐字作答」再快 15～20%。</p>
+      </div>
+
+      <h3>第三件事：多张卡，怎么分工？</h3>
+      <p>一张卡放不下、或想更快时，就要用多张卡。有 4 种「分工方式」，用大白话理解：</p>
+
+      <div class="tw">
+      <table>
+        <thead><tr><th>分工方式</th><th>大白话比喻</th><th>什么时候用</th></tr></thead>
+        <tbody>
+          <tr><td><strong>TP</strong> 张量并行</td><td>一道菜，4 个厨师一起切一起炒</td><td>模型太大单卡放不下。<strong>首选</strong>，但要卡间高速互联。</td></tr>
+          <tr><td><strong>PP</strong> 流水线并行</td><td>流水线：这几张卡做前半段，那几张做后半段</td><td>卡特别多、或要跨多台机器时。</td></tr>
+          <tr><td><strong>DP</strong> 数据并行</td><td>开 4 个一模一样的窗口，各自接客</td><td>模型放得下单卡，纯粹想提高总吞吐。</td></tr>
+          <tr><td><strong>EP</strong> 专家并行</td><td>把不同「专家」分给不同卡（仅 MoE 模型）</td><td>DeepSeek、Mixtral 这类「专家混合」大模型。</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="box key">
+        <p class="h">怎么选？两条黄金法则</p>
+        <p><strong>1. 能不用多卡就别用</strong>——每多一种并行都有「沟通成本」。<br>
+        <strong>2. 一台机器内（≤8 卡）优先用 TP；超过 8 卡或跨机器才上 PP。</strong><br>
+        特例：DeepSeek 这类 MLA 模型在<strong>高并发</strong>（同时几百个请求）下，用 <strong>DP + EP 组合</strong>比纯 TP 快 16～47%，因为纯 TP 会在每张卡上重复存一份上下文、浪费显存。</p>
+      </div>
+
+      <h3>第四件事：三个一定要会调的旋钮</h3>
+      <div class="tw">
+      <table>
+        <thead><tr><th>参数</th><th>管什么</th><th>怎么调</th></tr></thead>
+        <tbody>
+          <tr><td><code>--gpu-memory-utilization</code></td><td>让 vLLM 用多少比例的显存（默认 0.9）</td><td>想更快调到 0.95；一张卡跑多个模型时调低（如 0.45）。</td></tr>
+          <tr><td><code>--max-num-seqs</code></td><td>最多同时伺候几个请求（默认 1024）</td><td>显存够就调大提吞吐；显存紧就调小。</td></tr>
+          <tr><td><code>--max-num-batched-tokens</code></td><td>每一步最多处理多少字（在线默认 8192）</td><td>调大→首字更快；调小→逐字更稳。</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="box note">
+        <p class="h">一个简单的心算公式</p>
+        <p>要占多少上下文显存 ≈ <code>同时伺候的请求数 (max-num-seqs) × 每个请求最长上下文 (max-model-len)</code>。如果启动报「显存不够/KV cache 放不下」，就把这两个数里的某一个调小。</p>
+      </div>
+
+      <div class="box tip">
+        <p class="h">💡 一个反直觉但很实用的技巧</p>
+        <p>假设你有 8 张卡、模型单卡放得下：<strong>与其把 8 张卡合起来跑「一个」服务，不如拆成 8 个各跑一个服务</strong>（每张卡一个），再用负载均衡分流。总吞吐通常更高——因为省掉了卡之间的沟通开销。</p>
+      </div>
+
+      <h4>把这一节串起来：一条能直接用的启动命令</h4>
+      <pre><code><span class="c"># 普通模型 + AITER + FP8 KV cache 的典型起步姿势</span>
+<span class="k">export</span> VLLM_ROCM_USE_AITER=1
+vllm serve meta-llama/Llama-3.3-70B-Instruct \
+  <span class="k">--tensor-parallel-size</span> 8 \        <span class="c"># 8 卡一起分工（TP）</span>
+  <span class="k">--kv-cache-dtype</span> fp8 \            <span class="c"># 上下文省一半显存</span>
+  <span class="k">--gpu-memory-utilization</span> 0.95 \  <span class="c"># 尽量多用显存</span>
+  <span class="k">--max-model-len</span> 8192</code></pre>
+    </section>
+
+    <!-- ============ 5 ============ -->
+    <section id="kernels">
+      <h2><span class="n">5</span>杠杆④ 亲手打磨 kernel <span class="badge b-adv">进阶 · 了解即可</span></h2>
+      <p class="lead">前面都是「用现成的」。这一层是「自己造/改零件」。<strong>90% 的人用不到</strong>——但知道有这一层、以及各工具的定位，很有帮助。</p>
+
+      <div class="box analogy">
+        <p class="h">🔧 什么是 kernel？</p>
+        <p><span class="term">kernel</span>（核函数）就是「显卡上实际跑的那一小段计算代码」，比如「做一次矩阵乘法」。前面的加速库本质上就是别人写好的高质量 kernel。这一层说的是：当现成 kernel 都不够快时，<strong>自己写一个专门的</strong>。</p>
+      </div>
+
+      <h3>三种自己写 kernel 的工具，难度递增</h3>
+      <div class="tw">
+      <table>
+        <thead><tr><th>工具</th><th>定位</th><th>难度</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Triton</strong></td><td>用类似 Python 的方式写显卡 kernel，最容易上手。</td><td><span class="badge b-mid">中</span></td></tr>
+          <tr><td><strong>Composable Kernel (CK)</strong></td><td>用 C++ 模板拼出高性能 kernel，能把多个操作「融合」成一个。</td><td><span class="badge b-adv">高</span></td></tr>
+          <tr><td><strong>Gluon</strong></td><td>最底层，手动控制到寄存器/缓存级别，专门榨干「热点」kernel。</td><td><span class="badge b-adv">很高</span></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="box key">
+        <p class="h">什么时候才需要下沉到这一层？</p>
+        <p>只有当你：①用了前面所有现成手段 → ②用「测量」（下一节）发现<strong>某一个具体 kernel</strong> 是瓶颈 → ③而且现成的实现确实救不了它。满足这三条，才值得自己写。否则性价比很低。</p>
+      </div>
+
+      <p style="color:var(--muted);font-size:.92rem">如果你真要调 Triton，几个最常用的旋钮先混脸熟：<code>num_stages</code>（流水线级数：单个矩阵乘设 2、注意力设 1）、<code>BLOCK_M/N/K</code>（分块大小）、<code>matrix_instr_nonkdim</code>（在 MI300X 上 <code>16</code> 通常比 <code>32</code> 快）。诊断时用两个环境变量导出中间代码看瓶颈：<code>MLIR_ENABLE_DUMP=1</code> 和 <code>AMDGCN_ENABLE_DUMP=1</code>。</p>
+    </section>
+
+    <!-- ============ 6 ============ -->
+    <section id="profiling">
+      <h2><span class="n">6</span>杠杆⑤ 先测量，再动手 <span class="badge b-mid">贯穿始终</span></h2>
+      <p class="lead">最重要的习惯：<strong>别猜瓶颈在哪，测出来。</strong> AMD 提供了一整套工具，按「你想解决什么问题」对号入座就行。</p>
+
+      <div class="tree">
+        <div class="branch"><span class="q">想快速看：到底是 CPU 慢还是 GPU 慢？</span><span class="ar">→</span><span class="r"><strong>PyTorch Profiler</strong>（最简单，出一张时间线图，用 Perfetto 网站打开看）</span></div>
+        <div class="branch"><span class="q">确认 GPU 慢，想看每个 kernel 的细节</span><span class="ar">→</span><span class="r"><strong>rocprofv3</strong> 命令行 / <strong>ROCm Compute Profiler</strong>（带图表、Roofline 分析）</span></div>
+        <div class="branch"><span class="q">想看整个系统全景（CPU+GPU+多卡）</span><span class="ar">→</span><span class="r"><strong>ROCm Systems Profiler</strong>（全景追踪，探索式找瓶颈）</span></div>
+        <div class="branch"><span class="q">程序崩了 / 报显存访问错误</span><span class="ar">→</span><span class="r"><strong>ROCr Debug Agent</strong>（抓出是哪个 kernel、哪块显存出的错）</span></div>
+      </div>
+
+      <div class="box note">
+        <p class="h">工具速查表</p>
+      </div>
+      <div class="tw">
+      <table>
+        <thead><tr><th>工具</th><th>层次</th><th>一句话</th></tr></thead>
+        <tbody>
+          <tr><td><strong>PyTorch Profiler</strong></td><td>高层</td><td>新手首选，几行代码，看 CPU/GPU 时间线。</td></tr>
+          <tr><td><strong>rocprofv3</strong></td><td>底层</td><td>命令行，不改源码就能抓各种 trace 和硬件计数器。</td></tr>
+          <tr><td><strong>ROCm Compute Profiler</strong><br><span style="color:var(--muted);font-size:.85em">（旧名 Omniperf）</span></td><td>kernel 级</td><td>自动采集 + 图形界面，帮你看懂瓶颈，省去手动解析。</td></tr>
+          <tr><td><strong>ROCm Systems Profiler</strong><br><span style="color:var(--muted);font-size:.85em">（旧名 Omnitrace）</span></td><td>系统级</td><td>CPU+GPU 全景追踪，不预设瓶颈、探索式排查。</td></tr>
+          <tr><td><strong>ROCr Debug Agent</strong></td><td>调试</td><td>专抓显存访问崩溃，定位到具体 kernel。</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <pre><code><span class="c"># 最简单的一招：用 PyTorch Profiler 抓一段，然后拖到 https://ui.perfetto.dev 看</span>
+<span class="k">from</span> torch.profiler <span class="k">import</span> profile, ProfilerActivity
+<span class="k">with</span> profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA]) <span class="k">as</span> prof:
+    model(inputs)
+prof.export_chrome_trace(<span class="s">"trace.json"</span>)</code></pre>
+    </section>
+
+    <!-- ============ 7 ============ -->
+    <section id="hardware">
+      <h2><span class="n">7</span>MI300 vs MI350 速查 <span class="badge b-easy">选卡/调参前先看</span></h2>
+      <p class="lead">AMD 数据中心卡目前主要是两代。它们的差别会直接影响你能用哪些优化，所以值得先看一眼。</p>
+
+      <div class="tw">
+      <table>
+        <thead><tr><th>看点</th><th>MI300 系列<br>(MI300X / MI325X)</th><th>MI350 系列<br>(MI350X / MI355X)</th><th>对你的影响</th></tr></thead>
+        <tbody>
+          <tr><td>显存</td><td>192 / 256 GB</td><td>288 GB</td><td>越大 → 能塞更大模型、更长上下文。</td></tr>
+          <tr><td>片上缓存 (LDS)</td><td>64 KB / 核</td><td><strong>160 KB / 核</strong></td><td>MI350 能用更大的「分块」，kernel 有更多提速空间。</td></tr>
+          <tr><td>4 位超低精度 (MXFP4)</td><td><span class="no">✗ 不支持</span></td><td><span class="ok">✓ 支持</span></td><td>想用 MXFP4 极致省显存，得用 MI350。</td></tr>
+          <tr><td>FP8 格式</td><td>FNUZ 变体</td><td>OCP 变体</td><td>两代格式不同！量化模型要匹配对应格式，别搞混。</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="box note">
+        <p class="h">一句话</p>
+        <p>如果你用 <strong>MI350 / MI355</strong>，额外解锁了 MXFP4 这类更省的 4 位量化，而且底层 kernel 因为缓存更大还能再调优一档。跨代迁移时，<strong>务必重新测一遍性能、并确认 FP8 格式匹配</strong>，别把 MI300 的最优参数直接照搬。</p>
+      </div>
+    </section>
+
+    <!-- ============ 8 ============ -->
+    <section id="checklist">
+      <h2><span class="n">8</span>拿来就用：优化行动清单 <span class="badge b-easy">按性价比排序</span></h2>
+      <p class="lead">如果你只想要一份「照着做」的清单，就是下面这个顺序——从最省事、收益最稳的开始。</p>
+
+      <div class="flow">
+        <div class="step roi1"><div><div class="st">用官方 Docker 镜像起步</div><div class="sd">AMD 提供了预装好 ROCm + PyTorch + vLLM 的镜像，很多加速参数已默认开好，别从零手搭环境。</div></div></div>
+        <div class="step roi1"><div><div class="st">打开 AITER 总开关</div><div class="sd"><code>export VLLM_ROCM_USE_AITER=1</code>——AMD 卡上收益最大的单个动作，永远要开。</div></div></div>
+        <div class="step roi1"><div><div class="st">开 FP8 KV cache</div><div class="sd"><code>--kv-cache-dtype fp8</code>——上下文显存立省一半，几乎无损。</div></div></div>
+        <div class="step roi2"><div><div class="st">确认注意力后端选对了</div><div class="sd">普通模型 → FA；DeepSeek → MLA。开了 AITER 通常自动选好，跑起来 grep 一下日志确认。</div></div></div>
+        <div class="step roi2"><div><div class="st">调好三个旋钮 + 选对多卡分工</div><div class="sd">显存利用率 / 最大并发 / 每步 token；单机 ≤8 卡优先 TP。按你的 SLO（延迟还是吞吐优先）调。</div></div></div>
+        <div class="step roi2"><div><div class="st">需要更省显存再上权重量化</div><div class="sd">FP8 起步；显存实在紧再上 AWQ/MXFP4（4 位）。量化后一定测质量。</div></div></div>
+        <div class="step roi3"><div><div class="st">测量：跑 benchmark + profiler</div><div class="sd">用 <code>vllm bench</code> 和 profiler 量出真实瓶颈，同时看「首字延迟 / 逐字延迟 / 总吞吐」三个指标。</div></div></div>
+        <div class="step roi3"><div><div class="st">（仅当必要）下沉到 kernel 层</div><div class="sd">只有测出某个 kernel 是瓶颈、现成手段救不了，才用 Triton/CK/Gluon 自己写。</div></div></div>
+      </div>
+
+      <div class="box key">
+        <p class="h">三个指标一起看，别只盯一个</p>
+        <p><strong>首字延迟（TTFT）</strong>：多久蹦出第一个字。<strong>逐字延迟（TPOT/ITL）</strong>：之后每个字的间隔（打字快不快）。<strong>吞吐（Throughput）</strong>：整个系统每秒能产出多少字。调参时它们经常此消彼长，一定要三个一起报，按你的业务需求取舍。</p>
+      </div>
+    </section>
+
+    <!-- ============ 9 ============ -->
+    <section id="refs">
+      <h2><span class="n">9</span>原文出处 & 诚实说明</h2>
+      <p>本文是对 AMD ROCm 官方「推理优化」整节（共 7 页）的<strong>易懂重述与浓缩</strong>，目的是让人快速看懂、上手。<strong>精确的参数默认值、命令、支持矩阵会随版本变化，正式使用请以官方最新文档为准</strong>（个别细节如具体 Docker 镜像名建议再核对一次）。</p>
+      <div class="refs">
+        <a href="https://rocm.docs.amd.com/en/latest/how-to/rocm-for-ai/inference-optimization/index.html" target="_blank" rel="noopener">① 推理优化总览（索引页）↗</a>
+        <a href="https://rocm.docs.amd.com/en/latest/how-to/rocm-for-ai/inference-optimization/vllm-optimization.html" target="_blank" rel="noopener">② vLLM V1 性能优化（本文杠杆③主要来源）↗</a>
+        <a href="https://rocm.docs.amd.com/en/latest/how-to/rocm-for-ai/inference-optimization/model-quantization.html" target="_blank" rel="noopener">③ 模型量化（杠杆①）↗</a>
+        <a href="https://rocm.docs.amd.com/en/latest/how-to/rocm-for-ai/inference-optimization/model-acceleration-libraries.html" target="_blank" rel="noopener">④ 模型加速库（杠杆②）↗</a>
+        <a href="https://rocm.docs.amd.com/en/latest/how-to/rocm-for-ai/inference-optimization/optimizing-with-composable-kernel.html" target="_blank" rel="noopener">⑤ Composable Kernel 优化（杠杆④）↗</a>
+        <a href="https://rocm.docs.amd.com/en/latest/how-to/rocm-for-ai/inference-optimization/optimizing-triton-kernel.html" target="_blank" rel="noopener">⑥ Triton kernel 优化（杠杆④）↗</a>
+        <a href="https://rocm.docs.amd.com/en/latest/how-to/rocm-for-ai/inference-optimization/profiling-and-debugging.html" target="_blank" rel="noopener">⑦ 性能分析与调试（杠杆⑤）↗</a>
+        <a href="https://rocm.docs.amd.com/en/latest/how-to/rocm-for-ai/inference-optimization/workload.html" target="_blank" rel="noopener">⑧ MI300/MI350 工作负载优化（最全的「母页」，60 分钟）↗</a>
+      </div>
+      <footer class="mine">姊妹篇：<a href="../vllm-tutorial/">vLLM 全面教程</a>（讲清 PagedAttention / 连续批处理 / KV cache 等底层机制）。</footer>
+    </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // 深/浅色切换：默认跟随系统，点击后记住选择
+  (function(){
+    var btn = document.getElementById('themeBtn');
+    var root = document.documentElement;
+    var saved = localStorage.getItem('rocm-theme');
+    if(saved){ root.setAttribute('data-theme', saved); }
+    function label(){
+      var dark = root.getAttribute('data-theme')==='dark' ||
+                 (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+      btn.textContent = dark ? '☀️ 切换深/浅色' : '🌙 切换深/浅色';
+    }
+    label();
+    btn.onclick = function(){
+      var cur = root.getAttribute('data-theme');
+      var dark = cur==='dark' || (!cur && matchMedia('(prefers-color-scheme: dark)').matches);
+      var next = dark ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('rocm-theme', next);
+      label();
+    };
+  })();
+
+  // 目录高亮当前所在小节
+  (function(){
+    var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+    var map = {};
+    links.forEach(function(a){ var id=a.getAttribute('href').slice(1); map[id]=a; });
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          links.forEach(function(l){ l.classList.remove('active'); });
+          if(map[e.target.id]) map[e.target.id].classList.add('active');
+        }
+      });
+    }, {rootMargin:'-20% 0px -70% 0px'});
+    document.querySelectorAll('main section').forEach(function(s){ obs.observe(s); });
+  })();
+</script>
+<!--mydocs-copyright--><footer style="margin:48px 0 0;padding:20px 16px;text-align:center;font:400 13px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#9aa0a8;border-top:1px solid rgba(128,128,128,.2)">© 2026 zwang96-dl</footer><!--/mydocs-copyright-->
+</body>
+</html>
