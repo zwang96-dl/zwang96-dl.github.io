@@ -44,7 +44,7 @@ IGNORE_DIRS = {"node_modules", "assets", "scripts", "templates"}
 # 只补缺失项、不改正文;幂等(重复构建不会重复注入)。想关掉某项设 False 即可。
 NORMALIZE = {
     "favicon": True,       # 缺图标时注入 <link rel="icon">(📚)
-    "backlink": True,      # 注入「← 站点名」返回首页的浮动链接
+    "backlink": True,      # 智能注入「← 站点名」返回首页链接:仅当页面自身没有回首页链接时才加
     "head_basics": True,   # 缺失时补 <meta charset> 和 viewport
     "title_suffix": True,  # 页签标题统一成「文档名 · 站点名」
     "copyright": True,     # 页脚注入版权声明「© 年份 作者」(可用 meta doc-copyright 按篇覆盖)
@@ -137,6 +137,23 @@ def _apply_title_suffix(html: str, base_title: str) -> str:
     return _insert_in_head(html, "<title>%s</title>" % target)
 
 
+# 视为「已指向首页」的链接目标(命中则认为文档自带返回链接,不再注入)
+HOME_HREFS = {"..", "../", "../index.html", "/", "/index.html", "index.html"}
+
+
+def _has_home_link(html: str) -> bool:
+    """判断文档是否已自带一个指向门户首页的链接。"""
+    for m in re.finditer(r'<a\b[^>]*?\bhref\s*=\s*["\']([^"\']*)["\']', html, re.I):
+        if m.group(1).strip().lower() in HOME_HREFS:
+            return True
+    return False
+
+
+def _strip_block(html: str, name: str) -> str:
+    """移除之前注入的带标记区块(用于开关关闭时清理旧注入,保证两向幂等)。"""
+    return re.sub(r"<!--%s-->.*?<!--/%s-->\s*" % (name, name), "", html, flags=re.S)
+
+
 def _insert_backlink(html: str) -> str:
     """在正文右上角注入「← 站点名」返回首页的浮动链接(用标记保证幂等)。"""
     if "mydocs-backlink" in html:
@@ -195,9 +212,13 @@ def normalize_doc(index: Path, card_title: str) -> bool:
     if NORMALIZE["title_suffix"]:
         html = _apply_title_suffix(html, card_title)
 
-    if NORMALIZE["backlink"]:
+    # 带标记的注入项:先清除旧注入,再按开关决定是否重加(切换开关即生效)
+    html = _strip_block(html, "mydocs-backlink")
+    # 智能:仅当页面自身没有回首页链接时才注入(避免和文档自带的返回链接重复)
+    if NORMALIZE["backlink"] and not _has_home_link(html):
         html = _insert_backlink(html)
 
+    html = _strip_block(html, "mydocs-copyright")
     if NORMALIZE["copyright"]:
         html = _insert_copyright(html)
 
