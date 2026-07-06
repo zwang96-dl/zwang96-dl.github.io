@@ -179,6 +179,17 @@ def _strip_block(html: str, name: str) -> str:
     return re.sub(r"<!--%s-->.*?<!--/%s-->\s*" % (name, name), "", html, flags=re.S)
 
 
+def _insert_before_body_close(html: str, snippet: str) -> str:
+    """把 snippet 插到「最后一个」</body> 之前。
+    必须用最后一个:有些文档内联了整包 JS(如 mermaid),其字符串里含有 '</body>'
+    文本,出现在真正的文档闭合标签之前;插到第一个会破坏 JS 语法。没有则追加到末尾。"""
+    matches = list(re.finditer(r"</body\s*>", html, re.I))
+    if matches:
+        i = matches[-1].start()
+        return html[:i] + snippet + "\n" + html[i:]
+    return html + "\n" + snippet
+
+
 def _insert_backlink(html: str) -> str:
     """在正文右上角注入「← 站点名」返回首页的浮动链接(用标记保证幂等)。"""
     if "mydocs-backlink" in html:
@@ -191,10 +202,7 @@ def _insert_backlink(html: str) -> str:
         'color:#fff;background:#4f46e5;border-radius:999px;text-decoration:none;'
         'box-shadow:0 2px 10px rgba(0,0,0,.25)">← Home</a><!--/mydocs-backlink-->'
     )
-    m = re.search(r"</body\s*>", html, re.I)
-    if m:
-        return html[:m.start()] + link + "\n" + html[m.start():]
-    return html + "\n" + link
+    return _insert_before_body_close(html, link)
 
 
 def _insert_copyright(html: str) -> str:
@@ -209,10 +217,7 @@ def _insert_copyright(html: str) -> str:
         "'Segoe UI',sans-serif;color:#9aa0a8;border-top:1px solid rgba(128,128,128,.2)\">"
         "%s</footer><!--/mydocs-copyright-->" % notice
     )
-    m = re.search(r"</body\s*>", html, re.I)
-    if m:
-        return html[:m.start()] + foot + "\n" + html[m.start():]
-    return html + "\n" + foot
+    return _insert_before_body_close(html, foot)
 
 
 def normalize_doc(index: Path, card_title: str) -> bool:
