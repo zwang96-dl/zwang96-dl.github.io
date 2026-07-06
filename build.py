@@ -50,10 +50,11 @@ NORMALIZE = {
     "copyright": True,     # 页脚注入版权声明「© 年份 作者」(可用 meta doc-copyright 按篇覆盖)
 }
 
-# 📚 favicon 的内联 SVG data URI(首页模板和文档注入共用同一个图标)
+# 🙂 favicon 的内联 SVG data URI(首页模板和文档注入共用同一个图标)
+# 想换图标:把下面 %F0%9F%99%82(🙂)换成其它 emoji 的 URL 编码即可,rebuild 会更新所有页面。
 FAVICON_HREF = (
     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' "
-    "viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E"
+    "viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%99%82%3C/text%3E%3C/svg%3E"
 )
 
 
@@ -206,8 +207,12 @@ def normalize_doc(index: Path, card_title: str) -> bool:
                 html, '<meta name="viewport" content="width=device-width, initial-scale=1">')
 
     if NORMALIZE["favicon"]:
+        html = _strip_block(html, "mydocs-favicon")   # 清掉旧注入,便于换图标时更新
+        # 页面若已自带图标则尊重它;否则注入我们的(带标记,方便日后替换)
         if not re.search(r'rel\s*=\s*["\'][^"\']*icon', html, re.I):
-            html = _insert_in_head(html, '<link rel="icon" href="%s">' % FAVICON_HREF)
+            link = ('<!--mydocs-favicon--><link rel="icon" href="%s">'
+                    '<!--/mydocs-favicon-->' % FAVICON_HREF)
+            html = _insert_in_head(html, link)
 
     if NORMALIZE["title_suffix"]:
         html = _apply_title_suffix(html, card_title)
@@ -285,7 +290,9 @@ def build():
     docs_json = json.dumps(docs, ensure_ascii=False).replace("</", "<\\/")
     site_json = json.dumps(SITE, ensure_ascii=False).replace("</", "<\\/")
 
-    out = PAGE.replace("__DOCS__", docs_json).replace("__SITE__", site_json)
+    out = (PAGE.replace("__DOCS__", docs_json)
+               .replace("__SITE__", site_json)
+               .replace("__FAVICON__", FAVICON_HREF))
     OUTPUT.write_text(out, encoding="utf-8")
 
     print(f"✓ 已生成 {OUTPUT} —— 收录 {len(docs)} 个项目")
@@ -302,7 +309,7 @@ PAGE = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="__FAVICON__">
 <title></title>
 <style>
   :root{
