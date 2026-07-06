@@ -28,7 +28,7 @@ from pathlib import Path
 # ============================================================
 SITE = {
     "title": "ML Systems Notebook",
-    "subtitle": "GPU · 推理 · 服务化 — 深度笔记与速查",
+    "subtitle": "GPU · 推理 · 服务化 — 笔记与速查",
     "author": "zwang96-dl",
     "github": "https://github.com/zwang96-dl",   # 改成你的 GitHub 主页
     "footer": "Hosted on GitHub Pages · auto-generated",
