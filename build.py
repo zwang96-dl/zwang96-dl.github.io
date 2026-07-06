@@ -27,8 +27,8 @@ from pathlib import Path
 #  站点配置 —— 改成你自己的信息
 # ============================================================
 SITE = {
-    "title": "My Docs",
-    "subtitle": "Personal tech notes · summaries · cheat sheets",
+    "title": "ML Systems Notebook",
+    "subtitle": "GPU · 推理 · 服务化 — 深度笔记与速查",
     "author": "zwang96-dl",
     "github": "https://github.com/zwang96-dl",   # 改成你的 GitHub 主页
     "footer": "Hosted on GitHub Pages · auto-generated",
@@ -125,14 +125,38 @@ def _insert_in_head(html: str, snippet: str) -> str:
     return snippet + "\n" + html
 
 
+# 曾用过的站名:仅用于「首次」迁移时剥离旧后缀(之后靠隐藏标记,无需再维护)
+LEGACY_TITLES = ("My Docs",)
+
+
+def _read_base_title(html: str):
+    """读取隐藏标记里记录的原始标题(没有则返回 None)。"""
+    m = re.search(r"<!--mydocs-base:(.*?)-->", html, re.S)
+    return m.group(1) if m else None
+
+
+def _clean_base_title(html: str, raw: str) -> str:
+    """得到不含站名后缀的原始标题:优先读隐藏标记,否则从当前标题剥离已知后缀。"""
+    base = _read_base_title(html)
+    if base is not None:
+        return base
+    for old in (SITE["title"],) + LEGACY_TITLES:
+        s = " · " + old
+        if raw.endswith(s):
+            return raw[: -len(s)]
+    return raw
+
+
 def _apply_title_suffix(html: str, base_title: str) -> str:
-    """把页签标题统一成「文档名 · 站点名」;已带后缀或本身就是站点名则不动。"""
+    """页签标题统一成「原始标题 · 站名」;用隐藏标记记住原始标题,改站名也不叠加。"""
+    # 首次记录原始标题,供日后改站名时正确重算(而非在旧后缀上再叠加)
+    if "mydocs-base:" not in html:
+        html = _insert_in_head(html, "<!--mydocs-base:%s-->" % base_title)
     suffix = " · " + SITE["title"]
     target = base_title if base_title == SITE["title"] else base_title + suffix
     m = re.search(r"(<title[^>]*>)(.*?)(</title>)", html, re.I | re.S)
     if m:
-        cur = m.group(2).strip()
-        if cur.endswith(suffix):          # 幂等:已经统一过就跳过
+        if m.group(2).strip() == target:  # 幂等:已经是目标标题就不动
             return html
         return html[:m.start()] + m.group(1) + target + m.group(3) + html[m.end():]
     return _insert_in_head(html, "<title>%s</title>" % target)
@@ -165,8 +189,7 @@ def _insert_backlink(html: str) -> str:
         'align-items:center;gap:6px;padding:7px 13px;'
         'font:600 13px/1 -apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;'
         'color:#fff;background:#4f46e5;border-radius:999px;text-decoration:none;'
-        'box-shadow:0 2px 10px rgba(0,0,0,.25)">← %s</a><!--/mydocs-backlink-->'
-        % SITE["title"]
+        'box-shadow:0 2px 10px rgba(0,0,0,.25)">← Home</a><!--/mydocs-backlink-->'
     )
     m = re.search(r"</body\s*>", html, re.I)
     if m:
@@ -247,12 +270,9 @@ def collect_docs():
 
         html = read_text(index)
 
-        # 标题: meta doc-title > <title> > 文件夹名
-        title = get_meta(html, "doc-title") or get_title(html) or sub.name
-        # 去掉可能已注入的「 · 站点名」后缀,保证卡片标题干净、重复构建稳定
-        suffix = " · " + SITE["title"]
-        if title.endswith(suffix):
-            title = title[:-len(suffix)]
+        # 标题: meta doc-title > <title> > 文件夹名;再还原成不含站名后缀的原始标题
+        raw_title = get_meta(html, "doc-title") or get_title(html) or sub.name
+        title = _clean_base_title(html, raw_title)
 
         # 构建时给该文档补齐统一外壳(favicon / 返回首页 / head / 标题后缀)
         normalize_doc(index, title)
