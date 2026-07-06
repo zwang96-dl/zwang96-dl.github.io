@@ -54,7 +54,7 @@ NORMALIZE = {
 # GoatCounter 访问统计:去 https://www.goatcounter.com 注册一个 code(用户名),填在这里。
 # 例如注册得到 zwang96,则站点为 https://zwang96.goatcounter.com,把 "zwang96" 填进来。
 # 留空 = 不注入任何统计脚本。
-GOATCOUNTER_CODE = ""
+GOATCOUNTER_CODE = "zwang96"
 
 # 🙂 favicon 的内联 SVG data URI(首页模板和文档注入共用同一个图标)
 # 想换图标:把下面 %F0%9F%99%82(🙂)换成其它 emoji 的 URL 编码即可,rebuild 会更新所有页面。
