@@ -48,7 +48,13 @@ NORMALIZE = {
     "head_basics": True,   # 缺失时补 <meta charset> 和 viewport
     "title_suffix": True,  # 页签标题统一成「文档名 · 站点名」
     "copyright": True,     # 页脚注入版权声明「© 年份 作者」(可用 meta doc-copyright 按篇覆盖)
+    "analytics": True,     # 注入访问统计脚本(需下面填 GOATCOUNTER_CODE,否则不注入)
 }
+
+# GoatCounter 访问统计:去 https://www.goatcounter.com 注册一个 code(用户名),填在这里。
+# 例如注册得到 zwang96,则站点为 https://zwang96.goatcounter.com,把 "zwang96" 填进来。
+# 留空 = 不注入任何统计脚本。
+GOATCOUNTER_CODE = ""
 
 # 🙂 favicon 的内联 SVG data URI(首页模板和文档注入共用同一个图标)
 # 想换图标:把下面 %F0%9F%99%82(🙂)换成其它 emoji 的 URL 编码即可,rebuild 会更新所有页面。
@@ -220,6 +226,24 @@ def _insert_copyright(html: str) -> str:
     return _insert_before_body_close(html, foot)
 
 
+def _analytics_tag() -> str:
+    """返回 GoatCounter 统计脚本标签;未配置 code 时返回空串。"""
+    if not GOATCOUNTER_CODE:
+        return ""
+    return ('<script data-goatcounter="https://%s.goatcounter.com/count" '
+            'async src="//gc.zgo.at/count.js"></script>' % GOATCOUNTER_CODE)
+
+
+def _insert_analytics(html: str) -> str:
+    """注入访问统计脚本到 <head>(带标记,便于换 code 时更新);先清旧再按需重加。"""
+    html = _strip_block(html, "mydocs-analytics")
+    tag = _analytics_tag()
+    if NORMALIZE["analytics"] and tag:
+        html = _insert_in_head(
+            html, "<!--mydocs-analytics-->%s<!--/mydocs-analytics-->" % tag)
+    return html
+
+
 def normalize_doc(index: Path, card_title: str) -> bool:
     """给单个文档 index.html 补齐统一外壳;有改动则写回并返回 True。"""
     html = read_text(index)
@@ -254,6 +278,8 @@ def normalize_doc(index: Path, card_title: str) -> bool:
     html = _strip_block(html, "mydocs-copyright")
     if NORMALIZE["copyright"]:
         html = _insert_copyright(html)
+
+    html = _insert_analytics(html)   # 自带开关与 code 判断
 
     if html != orig:
         index.write_text(html, encoding="utf-8")
@@ -317,7 +343,8 @@ def build():
 
     out = (PAGE.replace("__DOCS__", docs_json)
                .replace("__SITE__", site_json)
-               .replace("__FAVICON__", FAVICON_HREF))
+               .replace("__FAVICON__", FAVICON_HREF)
+               .replace("__ANALYTICS__", _analytics_tag()))
     OUTPUT.write_text(out, encoding="utf-8")
 
     print(f"✓ 已生成 {OUTPUT} —— 收录 {len(docs)} 个项目")
@@ -335,6 +362,7 @@ PAGE = r"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="__FAVICON__">
+__ANALYTICS__
 <title></title>
 <style>
   :root{
