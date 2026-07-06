@@ -27,11 +27,11 @@ from pathlib import Path
 #  站点配置 —— 改成你自己的信息
 # ============================================================
 SITE = {
-    "title": "我的文档库",
-    "subtitle": "个人技术笔记 · 总结 · 速查",
+    "title": "My Docs",
+    "subtitle": "Personal tech notes · summaries · cheat sheets",
     "author": "zwang96-dl",
     "github": "https://github.com/zwang96-dl",   # 改成你的 GitHub 主页
-    "footer": "用 GitHub Pages 托管 · 内容自动生成",
+    "footer": "Hosted on GitHub Pages · auto-generated",
 }
 
 # 输出文件(门户主页)
@@ -39,6 +39,22 @@ OUTPUT = Path("index.html")
 
 # 额外要忽略的文件夹(以 "." 开头的和不含 index.html 的已自动忽略)
 IGNORE_DIRS = {"node_modules", "assets", "scripts", "templates"}
+
+# 文档页规范化:构建时给每个文档 index.html 注入统一「外壳」。
+# 只补缺失项、不改正文;幂等(重复构建不会重复注入)。想关掉某项设 False 即可。
+NORMALIZE = {
+    "favicon": True,       # 缺图标时注入 <link rel="icon">(📚)
+    "backlink": True,      # 注入「← 站点名」返回首页的浮动链接
+    "head_basics": True,   # 缺失时补 <meta charset> 和 viewport
+    "title_suffix": True,  # 页签标题统一成「文档名 · 站点名」
+    "copyright": True,     # 页脚注入版权声明「© 年份 作者」(可用 meta doc-copyright 按篇覆盖)
+}
+
+# 📚 favicon 的内联 SVG data URI(首页模板和文档注入共用同一个图标)
+FAVICON_HREF = (
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' "
+    "viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E"
+)
 
 
 # ============================================================
@@ -91,6 +107,106 @@ def git_last_date(path: Path):
     return None
 
 
+# ------------------------------------------------------------
+#  文档页规范化(构建时注入统一外壳,不改正文)
+# ------------------------------------------------------------
+
+def _insert_in_head(html: str, snippet: str) -> str:
+    """把 snippet 插到 <head> 开头之后;没有 head/html 就兜底放到最前面。"""
+    m = re.search(r"<head\b[^>]*>", html, re.I)
+    if m:
+        i = m.end()
+        return html[:i] + "\n" + snippet + html[i:]
+    m = re.search(r"<html\b[^>]*>", html, re.I)
+    if m:
+        i = m.end()
+        return html[:i] + "\n<head>" + snippet + "</head>" + html[i:]
+    return snippet + "\n" + html
+
+
+def _apply_title_suffix(html: str, base_title: str) -> str:
+    """把页签标题统一成「文档名 · 站点名」;已带后缀或本身就是站点名则不动。"""
+    suffix = " · " + SITE["title"]
+    target = base_title if base_title == SITE["title"] else base_title + suffix
+    m = re.search(r"(<title[^>]*>)(.*?)(</title>)", html, re.I | re.S)
+    if m:
+        cur = m.group(2).strip()
+        if cur.endswith(suffix):          # 幂等:已经统一过就跳过
+            return html
+        return html[:m.start()] + m.group(1) + target + m.group(3) + html[m.end():]
+    return _insert_in_head(html, "<title>%s</title>" % target)
+
+
+def _insert_backlink(html: str) -> str:
+    """在正文右上角注入「← 站点名」返回首页的浮动链接(用标记保证幂等)。"""
+    if "mydocs-backlink" in html:
+        return html
+    link = (
+        '<!--mydocs-backlink--><a href=".." aria-label="Back to home" '
+        'style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;'
+        'align-items:center;gap:6px;padding:7px 13px;'
+        'font:600 13px/1 -apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;'
+        'color:#fff;background:#4f46e5;border-radius:999px;text-decoration:none;'
+        'box-shadow:0 2px 10px rgba(0,0,0,.25)">← %s</a><!--/mydocs-backlink-->'
+        % SITE["title"]
+    )
+    m = re.search(r"</body\s*>", html, re.I)
+    if m:
+        return html[:m.start()] + link + "\n" + html[m.start():]
+    return html + "\n" + link
+
+
+def _insert_copyright(html: str) -> str:
+    """在正文末尾注入版权页脚(用标记保证幂等);可用 meta doc-copyright 按篇覆盖文案。"""
+    if "mydocs-copyright" in html:
+        return html
+    notice = get_meta(html, "doc-copyright") or (
+        "© %s %s" % (datetime.now().strftime("%Y"), SITE["author"]))
+    foot = (
+        '<!--mydocs-copyright--><footer style="margin:48px 0 0;padding:20px 16px;'
+        'text-align:center;font:400 13px/1.5 -apple-system,BlinkMacSystemFont,'
+        "'Segoe UI',sans-serif;color:#9aa0a8;border-top:1px solid rgba(128,128,128,.2)\">"
+        "%s</footer><!--/mydocs-copyright-->" % notice
+    )
+    m = re.search(r"</body\s*>", html, re.I)
+    if m:
+        return html[:m.start()] + foot + "\n" + html[m.start():]
+    return html + "\n" + foot
+
+
+def normalize_doc(index: Path, card_title: str) -> bool:
+    """给单个文档 index.html 补齐统一外壳;有改动则写回并返回 True。"""
+    html = read_text(index)
+    if not html.strip():
+        return False
+    orig = html
+
+    if NORMALIZE["head_basics"]:
+        if not re.search(r"<meta[^>]*\bcharset", html, re.I):
+            html = _insert_in_head(html, '<meta charset="utf-8">')
+        if not re.search(r'name\s*=\s*["\']viewport["\']', html, re.I):
+            html = _insert_in_head(
+                html, '<meta name="viewport" content="width=device-width, initial-scale=1">')
+
+    if NORMALIZE["favicon"]:
+        if not re.search(r'rel\s*=\s*["\'][^"\']*icon', html, re.I):
+            html = _insert_in_head(html, '<link rel="icon" href="%s">' % FAVICON_HREF)
+
+    if NORMALIZE["title_suffix"]:
+        html = _apply_title_suffix(html, card_title)
+
+    if NORMALIZE["backlink"]:
+        html = _insert_backlink(html)
+
+    if NORMALIZE["copyright"]:
+        html = _insert_copyright(html)
+
+    if html != orig:
+        index.write_text(html, encoding="utf-8")
+        return True
+    return False
+
+
 def collect_docs():
     """扫描仓库根目录下每个含 index.html 的文件夹,每个作为一张卡片。"""
     docs = []
@@ -107,6 +223,13 @@ def collect_docs():
 
         # 标题: meta doc-title > <title> > 文件夹名
         title = get_meta(html, "doc-title") or get_title(html) or sub.name
+        # 去掉可能已注入的「 · 站点名」后缀,保证卡片标题干净、重复构建稳定
+        suffix = " · " + SITE["title"]
+        if title.endswith(suffix):
+            title = title[:-len(suffix)]
+
+        # 构建时给该文档补齐统一外壳(favicon / 返回首页 / head / 标题后缀)
+        normalize_doc(index, title)
 
         # 分类(可选): meta doc-category,不填则不分类
         category = get_meta(html, "doc-category") or ""
@@ -154,10 +277,11 @@ def build():
 #  页面模板(HTML + CSS + JS 全内联,生成单文件)
 # ============================================================
 PAGE = r"""<!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E">
 <title></title>
 <style>
   :root{
@@ -232,12 +356,12 @@ PAGE = r"""<!doctype html>
           <span id="doc-count"></span>
         </div>
       </div>
-      <button class="theme-btn" id="theme-btn" title="切换深色/浅色">🌙</button>
+      <button class="theme-btn" id="theme-btn" title="Toggle dark/light">🌙</button>
     </div>
   </header>
 
   <div class="controls">
-    <input class="search" id="search" type="search" placeholder="🔍  搜索项目标题、简介或标签…" autocomplete="off">
+    <input class="search" id="search" type="search" placeholder="🔍  Search by title, description or tags…" autocomplete="off">
     <div class="chips" id="chips"></div>
   </div>
 
@@ -256,7 +380,7 @@ document.getElementById('site-title').textContent = SITE.title;
 document.getElementById('site-subtitle').textContent = SITE.subtitle;
 document.getElementById('site-author').textContent = SITE.author;
 document.getElementById('site-github').href = SITE.github;
-document.getElementById('doc-count').textContent = DOCS.length + ' 个项目';
+document.getElementById('doc-count').textContent = DOCS.length + ' docs';
 document.getElementById('footer').innerHTML = '© ' + (SITE.author||'') + ' · ' + (SITE.footer||'');
 
 // ---- 深色模式 ----
@@ -277,9 +401,9 @@ const hasCats = DOCS.some(d => d.category && d.category.trim());
 let activeCat = 'all';
 const chipsEl = document.getElementById('chips');
 if(hasCats){
-  const cats = ['all', ...Array.from(new Set(DOCS.map(d => d.category || '未分类')))];
+  const cats = ['all', ...Array.from(new Set(DOCS.map(d => d.category || 'Uncategorized')))];
   chipsEl.innerHTML = cats.map(c =>
-    `<span class="chip${c==='all'?' active':''}" data-cat="${encodeURIComponent(c)}">${c==='all'?'全部':escapeHtml(c)}</span>`
+    `<span class="chip${c==='all'?' active':''}" data-cat="${encodeURIComponent(c)}">${c==='all'?'All':escapeHtml(c)}</span>`
   ).join('');
   chipsEl.querySelectorAll('.chip').forEach(el => {
     el.onclick = () => {
@@ -315,14 +439,14 @@ function cardHtml(d){
 function render(){
   const q = searchEl.value.trim().toLowerCase();
   let list = DOCS.filter(d => {
-    if(hasCats && activeCat !== 'all' && (d.category || '未分类') !== activeCat) return false;
+    if(hasCats && activeCat !== 'all' && (d.category || 'Uncategorized') !== activeCat) return false;
     if(!q) return true;
     const hay = (d.title + ' ' + d.description + ' ' + (d.tags||[]).join(' ')).toLowerCase();
     return hay.includes(q);
   });
 
   const main = document.getElementById('main');
-  if(!list.length){ main.innerHTML = '<div class="empty">没有匹配的项目 🤔</div>'; return; }
+  if(!list.length){ main.innerHTML = '<div class="empty">No matching docs 🤔</div>'; return; }
 
   if(!hasCats){
     // 无分类: 直接平铺
@@ -332,7 +456,7 @@ function render(){
 
   // 有分类: 按分类分组
   const groups = {};
-  list.forEach(d => { const k = d.category || '未分类'; (groups[k] = groups[k] || []).push(d); });
+  list.forEach(d => { const k = d.category || 'Uncategorized'; (groups[k] = groups[k] || []).push(d); });
   main.innerHTML = Object.keys(groups).map(cat =>
     `<div class="cat-title">${escapeHtml(cat)} · ${groups[cat].length}</div><div class="grid">${groups[cat].map(cardHtml).join('')}</div>`
   ).join('');
