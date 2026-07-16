@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 14 · Block Table 与 Paged KV Cache — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="logical→physical 的 block table，逻辑连续物理分散；paged KV 与连续 KV 逐值一致。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 14</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 14 · Block Table 与 Paged KV Cache <span class="phase-badge phase-build">Phase 3</span></h1>
+  <p>分页把「逻辑连续、物理分散」变成现实——这正是 PagedAttention 的核心思想。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>logical→physical 的 block table，逻辑连续物理分散；paged KV 与连续 KV 逐值一致。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/cache/block_table.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/cache/block_table.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>PagedKVCache</code>、<code>block table 映射</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 14</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 14</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 13</dd>
+        <dt>完成后下一步</dt><dd>Lesson 15</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>这是整个 vLLM 名字里那个「Paged」的<strong>正主</strong>。<a href="lesson_07.html">Lesson 7</a> 我们把每层 K/V
+     存成<strong>一整段连续的行</strong>；<a href="lesson_12.html">Lesson 12</a> 发现这样会严重浪费显存。
+     本课要解决的就是这个浪费：把 KV 切成固定大小的<strong>物理块（block）</strong>，让一条序列
+     「逻辑上是一整段、物理上却散落在各处」。想透这一课，等于同时想透了三件事——
+     <em>为什么能省显存、地址怎么翻译、为什么散着放结果还一模一样</em>。这三件事对应本课的三个目标：
+     <code>logical→physical</code> 映射、逻辑连续物理分散、<code>paged == 连续</code>。</p>
+
+  <h2 id="problem">先看问题：连续 KV 到底卡在哪 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>回忆本课的 tiny model：<code>layers=2</code>、<code>kv_heads=2</code>（GQA）、<code>head_dim=8</code>。
+     一个 token 每层要存 K、V 各 <code>kv_heads·head_dim = 2·8 = 16</code> 个数，两层合计
+     <code>(16+16)×2 = 64</code> 个数。现在假设显存里能放的 KV 总量固定，我们并发跑几条序列。
+     连续存储的麻烦在于：<strong>每条序列都得预留一段连续空间</strong>。</p>
+  <table>
+    <thead><tr><th>做法</th><th>为一条序列怎么占内存</th><th>问题（用数字说）</th></tr></thead>
+    <tbody>
+      <tr><td>按 <code>max_seq_len</code> 预留</td><td>不管实际多长，一上来就占满 <code>max_seq_len=64</code> 个 token 的连续空间</td>
+          <td>prompt 只有 10 个 token，却占了 64 个的坑 → <strong>浪费 84%</strong>（Lesson 12 的「内部碎片」）</td></tr>
+      <tr><td>按需增长但要求连续</td><td>序列要变长时，原地后面必须<strong>刚好有连续空位</strong></td>
+          <td>空间被其它序列切得七零八落：<strong>总空闲够、却没有一段够长的连续空间</strong>（外部碎片）</td></tr>
+      <tr><td>分页（本课）</td><td>要多少 token 就借几个<strong>固定大小的块</strong>，块与块之间可以不挨着</td>
+          <td>几乎零浪费：只在<strong>最后一个块</strong>里有不满的尾巴</td></tr>
+    </tbody>
+  </table>
+  <p>结论：连续存储的敌人是「必须连续」这四个字。分页把这条要求<strong>拆掉</strong>——
+     逻辑上还是一整段，物理上却允许东一块西一块。</p>
+
+  <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    Block Table = 一张<strong>「逻辑块 → 物理块」的翻译表</strong>。序列只认自己的逻辑块 0,1,2…（永远连续），
+    真实数据放在哪个物理块，由这张表说了算。这正是操作系统<strong>页表（page table）</strong>的思路。</div>
+  <p><strong>类比：图书馆的书架与索引卡。</strong>你要读的「第 1 章、第 2 章、第 3 章」在你脑子里是连续的（逻辑块）；
+     但图书馆可能把第 1 章放在 3 号架、第 2 章放在 5 号架、第 3 章放在 1 号架（物理块）。
+     你不用关心它们在哪——<strong>索引卡（block table）</strong>告诉你「第 i 章 → 几号架」。
+     想读完整本书，管理员按索引卡的顺序把书搬到你桌上排好（这一步叫 <code>gather</code>）。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    索引卡里「第 i 章 → 几号架」是<strong>一对一</strong>的普通映射；但物理块还能<strong>被多条序列共享</strong>
+    （多张索引卡指向同一号架），这就是 <a href="lesson_16.html">Lesson 16</a> 的前缀缓存。
+    另外真实 vLLM<strong>不搬书</strong>——它的 PagedAttention kernel 直接跑到各号架上就地计算，省掉 gather；
+    本课为了能逐值对比，才先老实搬书。</div>
+
+  <h2 id="addr">精确定义：一次寻址的三步 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>给定一个 token 的<strong>逻辑位置</strong> <code>pos</code>（0,1,2,… 就是它在序列里的第几个），
+     和固定的<strong>块大小</strong> <code>block_size</code>（本课示例取 <code>4</code>），寻址分三步：</p>
+  <pre><code>logical = pos // block_size     # 它在第几个逻辑块（整除）
+offset  = pos %  block_size     # 它在这个块里的第几个槽位（取余，范围 0..block_size-1）
+phys    = block_table[logical]  # 查表：逻辑块 → 物理块 id</code></pre>
+  <p>逐符号解释：<code>//</code> 是<strong>整除</strong>，把连续位置切成一段段（每 <code>block_size</code> 个一段）；
+     <code>%</code> 是<strong>取余</strong>，告诉你落在那一段里的第几格；<code>block_table</code> 是一个<strong>列表</strong>，
+     下标是逻辑块号、值是物理块号。三步下来，一个逻辑位置 <code>pos</code> 就被翻译成
+     <strong>「物理块 <code>phys</code> 的第 <code>offset</code> 个槽位」</strong>这样一个真实存放地址。</p>
+  <div class="callout note"><div class="callout-title">输入 / 输出 shape（具体数字）</div>
+    输入：一个整数 <code>pos</code>。输出：<code>(phys, offset)</code> 一对整数。<br>
+    每个物理块每层存的是 <code>block_size</code> 行，每行是一条 token 的 K（或 V）向量，长度
+    <code>kv_heads·head_dim = 16</code>。所以「物理块 phys、layer li」对应的 K 数组 shape =
+    <code>(block_size, 16) = (4, 16)</code>，V 同形。这正是代码里
+    <code>kstore[(li, phys)]</code> 是一个长度 4、每格 16 维的列表的原因。</div>
+
+  <h2 id="worked">小规模手算：一条 10-token 序列怎么落盘 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>设 <code>block_size = 4</code>，一条序列共 <strong>10</strong> 个 token（<code>pos = 0..9</code>）。
+     它需要 <code>ceil(10 / 4) = 3</code> 个逻辑块：L0 装 pos 0-3，L1 装 4-7，L2 装 8-9（最后一块只用了 2 格）。
+     假设分配器手上 0、2 号块已被<strong>别的序列</strong>占着（空洞），于是它按「编号最小的空闲块优先」的规则，
+     先后发给我们物理块 <strong>3、5、1</strong>。得到的 block table 是：</p>
+  <table>
+    <thead><tr><th>逻辑块</th><th>装哪些 pos</th><th>→ 物理块</th></tr></thead>
+    <tbody>
+      <tr><td>L0</td><td>0,1,2,3</td><td><code>block_table[0] = 3</code></td></tr>
+      <tr><td>L1</td><td>4,5,6,7</td><td><code>block_table[1] = 5</code></td></tr>
+      <tr><td>L2</td><td>8,9（还剩 2 空槽）</td><td><code>block_table[2] = 1</code></td></tr>
+    </tbody>
+  </table>
+  <p>所以 <code>block_table = [3, 5, 1]</code>——<strong>逻辑上 0→1→2 连续，物理上 3→5→1 却是跳着的</strong>
+     （这跟本页动画演示的映射完全一致）。现在寻址三个具体 token 试试：</p>
+  <table>
+    <thead><tr><th>pos</th><th>logical = pos//4</th><th>offset = pos%4</th><th>phys = block_table[logical]</th><th>最终地址</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>0</td><td>0</td><td>3</td><td>物理块 3 的第 0 格</td></tr>
+      <tr><td>5</td><td>1</td><td>1</td><td>5</td><td>物理块 5 的第 1 格</td></tr>
+      <tr><td>9</td><td>2</td><td>1</td><td>1</td><td>物理块 1 的第 1 格</td></tr>
+    </tbody>
+  </table>
+  <div class="callout note"><div class="callout-title">执行图：逻辑连续（上）↔ 物理分散（下）</div>
+    <div style="font-family:var(--mono);font-size:.8rem;margin-top:8px">
+      <div style="color:var(--fg-dim);margin-bottom:4px">序列眼中的逻辑块（永远连续）：</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 10px">L0<br><span style="color:var(--fg-dim)">pos 0-3</span></div>
+        <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 10px">L1<br><span style="color:var(--fg-dim)">pos 4-7</span></div>
+        <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 10px">L2<br><span style="color:var(--fg-dim)">pos 8-9</span></div>
+      </div>
+      <div style="margin:6px 0;color:var(--accent)">block_table = [3, 5, 1]　（下标=逻辑块，值=物理块）</div>
+      <div style="color:var(--fg-dim);margin:4px 0">物理内存里的 8 个块（斜线=别人占用的空洞，灰=空闲）：</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        <div style="border:2px dashed var(--warn);border-radius:6px;padding:6px 8px;background:repeating-linear-gradient(45deg,transparent,transparent 4px,color-mix(in srgb,var(--warn) 20%,var(--bg)) 4px,color-mix(in srgb,var(--warn) 20%,var(--bg)) 8px)">#0</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">#1<br>L2</div>
+        <div style="border:2px dashed var(--warn);border-radius:6px;padding:6px 8px;background:repeating-linear-gradient(45deg,transparent,transparent 4px,color-mix(in srgb,var(--warn) 20%,var(--bg)) 4px,color-mix(in srgb,var(--warn) 20%,var(--bg)) 8px)">#2</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">#3<br>L0</div>
+        <div style="border:2px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--fg-dim)">#4</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">#5<br>L1</div>
+        <div style="border:2px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--fg-dim)">#6</div>
+        <div style="border:2px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--fg-dim)">#7</div>
+      </div>
+    </div>
+    <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+      同色实线框 = 本序列借到的物理块，物理编号 3、5、1 并不相邻；斜线块被别的序列占着，正是它们制造了「空洞」。
+      block table 这张表，就是把上面的 L0/L1/L2 一一指到下面对应的物理块。</div>
+  </div>
+
+  <h2 id="gather">为什么物理分散，结果还逐值一致 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>关键洞察：<strong>attention 只看「每个位置的 K/V 是什么」，不看「它们存在内存的哪里」。</strong>
+     位置 pos 的 K 向量该是多少，只由这个 token 和它的位置决定（<a href="lesson_07.html">Lesson 7</a> 讲过），
+     跟它被放进 3 号块还是 5 号块<strong>毫无关系</strong>。所以做 attention 之前，只要把散落的块
+     <strong>按逻辑顺序 <code>pos = 0,1,2,…</code> 收集（gather）</strong>成连续的 K、V，
+     后面就是一模一样的普通 attention：</p>
+  <pre><code>for pos in range(length):        # 严格按逻辑顺序 0,1,2,...
+    phys = block_table[pos // bs] # 该 pos 在哪个物理块
+    off  = pos %  bs             # 在块里第几格
+    K.append(kstore[(layer, phys)][off])   # 取出来，排成连续
+    V.append(vstore[(layer, phys)][off])
+# 此时 K, V 与「连续版 KVCache 的 K, V」逐行相同 → attention 结果误差 = 0</code></pre>
+  <p>所以 <code>run 14</code> 会看到 <strong>paged 与连续 KV 的 logits 最大绝对误差 = 0</strong>。
+     分页只改变「数据存在哪」，不改变「数据是什么」，因此对结果<strong>零影响</strong>——
+     这就是本课第三个目标 <code>paged == 连续</code> 的含义。</p>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「物理块乱序会打乱 token 顺序，结果会变」</td>
+          <td>顺序由 <strong>gather 时严格按 pos 遍历</strong>保证，物理块编号只是「存哪儿」。逻辑序不变，结果就不变（误差 0）。</td></tr>
+      <tr><td>「block_table[logical] 里的物理块号必须连续/递增」</td>
+          <td>恰恰相反，<code>[3,5,1]</code> 完全合法。<strong>允许不连续正是分页的意义</strong>——否则又退回连续存储的碎片问题。</td></tr>
+      <tr><td>「offset 用 <code>pos // block_size</code> 算」</td>
+          <td>写反了。<code>//</code>（整除）得到<strong>逻辑块号</strong>，<code>%</code>（取余）才得到<strong>块内槽位 offset</strong>。搞反会 gather 出错序。</td></tr>
+      <tr><td>「每个 token 单独占一个物理块」</td>
+          <td>一个物理块装 <code>block_size</code> 个 token（本例 4 个）。块是<strong>批发单位</strong>，不是零售——这样表才短、碎片才小。</td></tr>
+      <tr><td>「最后一个块没装满 = 浪费很大」</td>
+          <td>只有<strong>最后一块</strong>可能有不满的尾巴（本例 L2 空了 2 格），最多浪费 <code>block_size-1</code> 个 token 的量，与序列长短无关，是<strong>有界</strong>的小浪费。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>以上讲解全部对应 <code>mini_vllm/cache/block_table.py</code> 里的 <code>PagedKVCache</code>：</p>
+  <table>
+    <thead><tr><th>讲解概念</th><th>对应代码</th></tr></thead>
+    <tbody>
+      <tr><td>block table（逻辑块 → 物理块）</td><td><code>self.block_table: list[int]</code>，下标=逻辑块、值=物理块 id</td></tr>
+      <tr><td>按需借块、遇空洞跳号</td><td><code>_ensure_capacity()</code> 里 <code>self.alloc.allocate()</code>（向 <a href="lesson_13.html">Lesson 13</a> 的 <code>BlockAllocator</code> 借块）</td></tr>
+      <tr><td>寻址三步 <code>pos→(logical,offset)→phys</code></td><td><code>append()</code> 中的 <code>phys = block_table[pos // self.bs]</code>、<code>off = pos % self.bs</code></td></tr>
+      <tr><td>物理存储 shape <code>(block_size, 16)</code></td><td><code>kstore[(layer, phys)]</code> / <code>vstore[(layer, phys)]</code>，值为 <code>[None]*bs</code> 的行数组</td></tr>
+      <tr><td>gather 成逻辑连续 → 与连续版一致</td><td><code>get(layer)</code>：按 <code>pos</code> 顺序取出、排成连续 K/V</td></tr>
+      <tr><td>可读的映射表（Trace/动画用）</td><td><code>logical_to_physical()</code> 返回 <code>[{"logical":i,"physical":p}, …]</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a14">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>block table 如何把逻辑块映射到物理块？为什么可以物理不连续？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 14
+python3 course.py run 14 --trace
+python3 course.py check 14</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 14` 看 block table 与对齐误差。</details>
+    <details><summary>提示 Level 2 · 位置</summary>pos→(logical=pos//bs, offset=pos%bs)。</details>
+    <details><summary>提示 Level 3 · 机制</summary>attention 前 gather 成逻辑顺序 → 结果与连续一致。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>误差必须为 0。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>gather 顺序错</td><td>block table 索引算错</td><td>logical=pos//bs, offset=pos%bs</td></tr><tr><td>越界</td><td>块不够</td><td>增长时按需分配新块</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 14 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>为什么逻辑连续、物理分散不影响 attention 结果？</li><li>block_size 变大/变小对 gather 成本与碎片各有何影响？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>PagedKVCache + block table</td><td>PagedAttention + block table</td><td>逻辑/物理解耦一致</td><td>vLLM kernel 直接在分页布局算，免 gather</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>block table 把逻辑块映射到物理块；逻辑连续、物理可分散，gather 后与连续 KV 一致。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="14">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_15.html">下一步：Lesson 15 · Token Budget 与 Chunked Prefill →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 14 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/blocks_anim.js"></script>
+<script>
+BlocksAnim.mount("#a14", {frames:[{owners:[null,null,null,null,null,null,null,null],desc:"8 个物理块；一条序列按逻辑块申请物理块。",code:"PagedKVCache"},{owners:[null,null,null,0,null,null,null,null],newly:[3],labels:{0:"L0"},desc:"逻辑块 0 -> 物理块 3。",code:"block_table=[3]"},{owners:[null,null,null,0,null,1,null,null],newly:[5],labels:{0:"L0",1:"L1"},desc:"逻辑块 1 -> 物理块 5（物理不连续！）。",code:"block_table=[3,5]"},{owners:[null,2,null,0,null,1,null,null],newly:[1],labels:{0:"L0",1:"L1",2:"L2"},desc:"逻辑块 2 -> 物理块 1。逻辑连续，物理分散。",code:"block_table=[3,5,1]"},{owners:[null,2,null,0,null,1,null,null],labels:{0:"L0",1:"L1",2:"L2"},desc:"attention 前按逻辑顺序 gather -> 与连续 KV 逐值一致（误差 0）。",code:"get(layer) gather"}]});
+</script>
+</body>
+</html>

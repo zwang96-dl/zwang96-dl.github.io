@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 27 · 多模态三层缓存 — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="ProcessorCache / EncoderOutputCache / LLM KV Cache 的职责与 key；避免 stale cache。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 27</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 27 · 多模态三层缓存 <span class="phase-badge phase-learn">Phase 6</span></h1>
+  <p>三层缓存针对不同层级的重复；分不清就会用错缓存、拿到错误结果。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>ProcessorCache / EncoderOutputCache / LLM KV Cache 的职责与 key；避免 stale cache。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/cache.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/multimodal/cache.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>ProcessorCache</code>、<code>EncoderOutputCache</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 27</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 27</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 26</dd>
+        <dt>完成后下一步</dt><dd>Lesson 28</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>多模态推理里，「重复」出现在<strong>三个完全不同的层级</strong>，成本也天差地别：把一张图
+     resize/normalize（便宜）、把它送进 vision encoder + projector 编码成视觉 embedding（<strong>很贵</strong>）、
+     以及文本模型逐层的 K/V（Lesson 7 已缓存）。如果不加区分，要么<strong>白白重算</strong>昂贵的编码，
+     要么<strong>用错缓存</strong>拿到别的图的 embedding。这一课就是把这三层缓存<strong>各归各位</strong>，并搞清
+     「缓存的 key 到底要包含什么」——这是多模态里最隐蔽、最容易踩的一类 bug。</p>
+
+  <h2 id="problem">先看问题：不分层、或 key 太粗会怎样 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>设想两个很常见的场景（本模型里，一张 16×16 图 → grid 2×2 → <strong>4 个 visual token</strong>，
+     每次编码要跑一遍 patch→vision encoder→projector）：</p>
+  <ul>
+    <li><strong>同一张图被多次用到</strong>（多轮对话反复贴同一张图、或一个 batch 里两条请求引用同一张图）：
+        若不缓存编码结果，vision encoder 就<strong>每次都白跑一遍</strong>——这是最贵的一步。</li>
+    <li><strong>换了 encoder / projector，key 却没变</strong>：比如你把 projector 换成另一套权重，
+        但缓存 key 只用「图片内容」做索引 → 新请求<strong>命中了旧 encoder 算出的 embedding</strong>，
+        于是模型「看」到的是用错模型编码的图 —— 这就是 <strong>stale cache</strong>，结果悄悄出错还不报错。</li>
+  </ul>
+  <p>结论：缓存能省大钱，但<strong>命中条件必须精确</strong>——只有「一切影响结果的因素都相同」时才允许命中。</p>
+
+  <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    三层缓存 = 在多模态流水线的三个不同工位，各放一个「这活儿我之前做过就别重做」的备忘本；
+    每个工位备忘的<strong>内容不同</strong>，查备忘用的<strong>钥匙（key）也不同</strong>。</div>
+  <p><strong>类比：三道工序的车间。</strong>①切菜（预处理）② 炒菜（编码，最费火）③ 装盘上桌（文本解码）。
+     切好的菜、炒好的菜、上桌的菜是三种不同的半成品，各自的「回收利用」规则也不同——
+     你不会拿「切好的菜」当「炒好的菜」用。三层缓存正是这个道理。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界</div>
+    车间的「同一道菜」靠肉眼认；缓存靠 <strong>key 精确匹配</strong>。key 少写一个因素（比如「用了哪套炒锅」=encoder 身份），
+    就可能把「用 A 锅炒的」当成「用 B 锅炒的」端出去。所以下面 key 的每一项都不能省。</div>
+
+  <h2 id="threelayers">三层缓存精确定义（对照真实代码）<span class="phase-badge phase-learn">Learn</span></h2>
+  <p>三层各缓存什么、key 是什么、命中省下什么——全部对照 <code>mini_vllm/multimodal/cache.py</code>：</p>
+  <table>
+    <thead><tr><th>缓存层</th><th>缓存的内容</th><th>key 包含</th><th>命中省下</th></tr></thead>
+    <tbody>
+      <tr><td><code>ProcessorCache</code></td><td>预处理后的像素（resize+normalize）、抽帧、grid metadata</td>
+          <td>媒体内容 hash + processor 配置（image_size / mean / std）</td><td>重复的预处理（便宜）</td></tr>
+      <tr><td><code>EncoderOutputCache</code></td><td>视觉编码 + projector 的<strong>输出</strong>（投影后的视觉 embedding）</td>
+          <td>上面全部 + <strong>encoder 身份 + projector 身份 + dtype + schema 版本</strong></td><td>整个 vision encoder + projector（最贵）</td></tr>
+      <tr><td>LLM KV Cache（Lesson 7）</td><td>文本模型各层的 K/V（多模态 prefill 后的上下文）</td>
+          <td>（每条序列各一份，随 token 增长）</td><td>解码时重算历史 K/V</td></tr>
+    </tbody>
+  </table>
+  <div class="callout note"><div class="callout-title">EncoderOutputCache 的 key 为什么要多这么多项？（stale cache 的根源）</div>
+    <code>cache.py</code> 里 encoder key = <code>content_hash(pixels)</code> + <code>processor_cfg</code>
+    + <code>encoder_id</code> + <code>projector_id</code> + <code>dtype</code> + <code>SCHEMA_VERSION</code>。
+    其中 <code>encoder_id</code> 形如 <code>"tinyvis-s4321-h48-l1"</code>（含随机种子、维度、层数），
+    <code>projector_id</code> 形如 <code>"proj-s4321-t32"</code>。<strong>任何一项变了，key 就变，绝不会误命中旧结果</strong>——
+    这正是防 stale cache 的关键。ProcessorCache 只到「像素+预处理配置」即可，因为它不涉及编码模型。</div>
+
+  <div class="callout note" style="border-left-color:var(--decode)"><div class="callout-title">三层缓存执行图（同一张图第二次到来）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem;margin-top:6px">
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px">同一张图<br>再次到来</div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--finished) 15%,var(--bg))">ProcessorCache<br><b>命中</b>✓ 跳过预处理</div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--finished) 15%,var(--bg))">EncoderOutputCache<br><b>命中</b>✓ 跳过 encoder<br>（省最多）</div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px dashed var(--waiting);border-radius:6px;padding:6px 8px">LLM KV Cache<br>每条序列独立<br>（仍需自己的 prefill）</div>
+    </div>
+    <div style="font-size:.76rem;color:var(--fg-dim);margin-top:6px">
+      绿框=命中即跳过；注意最右：即使视觉 embedding 命中了，每条请求的<strong>文本 KV 仍是各自的</strong>——
+      三层是<strong>三件事</strong>，不能互相顶替。</div>
+  </div>
+
+  <h2 id="worked">小例子：同一张图两次到来，省了多少 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>用 <code>run 27</code> 会看到的真实过程（同一张 seed=7 的图）：</p>
+  <table>
+    <thead><tr><th>时刻</th><th>EncoderOutputCache</th><th>vision encoder 是否运行</th></tr></thead>
+    <tbody>
+      <tr><td>第 1 次编码这张图</td><td>miss（key 不在表里）</td><td><strong>运行 1 次</strong>，并把结果 put 进缓存</td></tr>
+      <tr><td>第 2 次编码<strong>同一张</strong>图</td><td>hit（key 命中）</td><td><strong>跳过</strong>，直接取投影后的视觉 embedding</td></tr>
+      <tr><td>换 encoder 身份后再来</td><td>miss（encoder_id 变 → key 变）</td><td>重新运行（<strong>不会</strong>误命中旧的）</td></tr>
+    </tbody>
+  </table>
+  <p><code>content_hash</code> 是像素 JSON 的 sha256 取前 16 位十六进制——它保证「同图必同 key、异图必异 key」（<code>run 27</code> 与
+     <code>tests.lesson_27</code> 都验证了这一点）。缓存底层是 <strong>LRU</strong>（容量满就逐出最久未用），并统计 hits/misses/evictions。</p>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「三层缓存差不多，用一个就行」</td><td>它们缓存<strong>不同层级</strong>的半成品（预处理像素 / 视觉 embedding / 文本 K/V），互不能替代。</td></tr>
+      <tr><td>「缓存 key 用图片内容就够了」</td><td>视觉 embedding 还取决于 <strong>encoder/projector/dtype/schema</strong>；只看内容会命中用错模型的旧结果（stale cache）。</td></tr>
+      <tr><td>「视觉 embedding 命中了，KV 也能省」</td><td>每条请求的<strong>文本上下文不同</strong>，LLM KV Cache 是各序列独立的，不能跨请求顶替。</td></tr>
+      <tr><td>「命中缓存会让输出变化一点」</td><td>缓存的是<strong>精确</strong>的中间量；命中只加速、不改变结果（前提是 key 精确匹配）。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <pre><code>ProcessorCache.key(pixels, cfg)            = "proc|" + content_hash(pixels) + "|" + cfg
+EncoderOutputCache.key(pixels, cfg, enc_id, proj_id, dtype)
+        = "enc|" + content_hash + "|" + cfg + "|" + enc_id + "|" + proj_id + "|" + dtype + "|" + SCHEMA_VERSION
+content_hash(pixels) = sha256(json(pixels))[:16]     # 同图必同、异图必异
+# 底层 _LRU：get()/put()，容量满逐出最久未用，统计 hits/misses/evictions</code></pre>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a27">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>三层缓存分别缓存什么？如何避免用错缓存？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 27
+python3 course.py run 27 --trace
+python3 course.py check 27</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 27` 看命中/未命中。</details>
+    <details><summary>提示 Level 2 · 位置</summary>三层缓存针对不同重复，绝不能混。</details>
+    <details><summary>提示 Level 3 · 机制</summary>encoder cache key 要含 encoder/projector 身份、dtype、schema 版本。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>换 encoder 身份不应误命中旧缓存。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>stale cache</td><td>key 太粗</td><td>key 含 encoder/projector 身份、dtype、schema 版本</td></tr><tr><td>三层混用</td><td>概念混淆</td><td>processor / encoder / KV 各自独立</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 27 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>同一张图在两个请求里出现，哪一层缓存能省最多？</li><li>换了 projector 后，为什么必须让缓存失效？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>ProcessorCache/EncoderOutputCache</td><td>vLLM mm 缓存</td><td>分层缓存一致</td><td>真实 key/eviction 更完善</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>ProcessorCache / EncoderOutputCache / LLM KV Cache 的职责与 key；避免 stale cache。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="27">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_28.html">下一步：Lesson 28 · Multimodal Scheduler →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 27 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a27", {stages: [{title:"ProcessorCache", detail:"预处理像素/抽帧/grid metadata"},{title:"EncoderOutputCache", detail:"视觉编码+projector 的输出"},{title:"LLM KV Cache", detail:"文本各层 K/V"},{title:"Cache Key", detail:"内容hash + 配置 + encoder/projector 身份 + dtype + schema 版本"}]});
+</script>
+</body>
+</html>

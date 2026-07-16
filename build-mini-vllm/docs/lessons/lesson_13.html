@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 13 · Block Allocator — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="物理块 free list、allocate/free、引用计数、OOM、double free、leak 检测。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 13</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 13 · Block Allocator <span class="phase-badge phase-build">Phase 3</span></h1>
+  <p>分配器是分页 KV 与前缀共享的地基；引用计数让「共享」与「安全回收」同时成立。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>物理块 free list、allocate/free、引用计数、OOM、double free、leak 检测。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/cache/block_allocator.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/cache/block_allocator.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>BlockAllocator.allocate/free/incref</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 13</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 13</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 12</dd>
+        <dt>完成后下一步</dt><dd>Lesson 14</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>到这里，KV Cache（<a href="lesson_07.html">Lesson 7</a>）已经能存历史 K/V，但它是<strong>一整条连续数组</strong>：
+     每来一条序列，就得预留 <code>max_seq_len</code> 那么长的空间。<a href="lesson_12.html">Lesson 12</a> 已经算过——
+     这会造成大量浪费（一条只用 20 个 token 的序列，却把 64 个 token 的位置全占了）。
+     本课要做的，是把这块显存<strong>切成固定大小的物理块（block）</strong>，用一个「分配器」按需发放、用完回收。</p>
+  <p>这个分配器是后面所有内存魔法的<strong>地基</strong>：<a href="lesson_14.html">分页 KV（Lesson 14）</a>靠它拿块、
+     <a href="lesson_16.html">前缀共享（Lesson 16）</a>靠它的<strong>引用计数</strong>让多条序列安全地共用同一块。
+     所以这一课要彻底搞清四件事：<em>块怎么发（allocate）、怎么回收（free）、怎么被多方共享而不出错（引用计数）、
+     以及三类经典 bug（OOM / double free / leak）为什么会发生、如何被主动拦下</em>。</p>
+
+  <h2 id="problem">先看问题：不做分配器会怎样 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本模型 <code>max_seq_len=64</code>，块大小 <code>block_size=16</code>（每块装 16 个 token 的 KV）。
+     假设显存池一共只有 <strong>4 个物理块</strong>（=64 个 token 的容量）。两种做法对比：</p>
+  <table>
+    <thead><tr><th>做法</th><th>一条序列占多少块</th><th>4 块能同时跑几条</th></tr></thead>
+    <tbody>
+      <tr><td><strong>预留式</strong>（不分块，按 max_seq_len 连续预留）</td><td>永远 4 块（<code>64/16</code>），哪怕只用 20 个 token</td><td><strong>1</strong> 条</td></tr>
+      <tr><td><strong>分配器 + 分块</strong>（按需申请）</td><td>只占 <code>ceil(20/16)=2</code> 块</td><td><strong>2</strong> 条</td></tr>
+    </tbody>
+  </table>
+  <p>同样 4 块显存，前者只能塞 1 条 20-token 序列（剩下 2 块被白白锁住），后者能塞 2 条——<strong>并发翻倍</strong>。
+     再算一次这块显存有多大：每块 = <code>block_size × 每 token 每层(K+V) × 层数 = 16 × (2·kv_heads·head_dim) × layers
+     = 16 × (2·2·8) × 2 = 1024</code> 个数。省下的每一块都是实打实的显存。这就是要写分配器的动机。</p>
+
+  <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    Block Allocator = 一个<strong>物理块的「借还台」</strong>：谁要用就发一块（allocate），
+    用完还回来（free）；还用一个<strong>计数器（refcount）</strong>记住「这块此刻有几个人在用」，
+    只有降到 0 才敢真正收回，避免收错。</div>
+  <p><strong>类比：图书馆的储物柜。</strong>柜子数量固定（<code>num_blocks</code>），前台有一张「空柜清单」（free list）。
+     你来存东西，前台<strong>挑一个编号最小的空柜</strong>发给你；你取走东西、退柜，它才回到清单里给下一个人。
+     如果一份资料被两个人共用（合租一个柜子），前台会记「这柜有 2 个使用者」，
+     必须<strong>两个人都退</strong>了才清空——这就是引用计数。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    储物柜里放的是你的物品，而 block 里放的是模型算出的 <strong>K/V 向量</strong>（Lesson 7）；
+    更关键的一点：柜子之间<strong>不必物理相邻</strong>——序列可以持有块 <code>[0, 3, 7]</code> 这种不连续的组合，
+    靠一张「块表」把它们串起来（那是 Lesson 14 的事）。分配器<strong>只管发号与计数，不关心谁和谁挨着</strong>，
+    正是这种「不要求连续」消灭了 Lesson 12 的碎片问题。</div>
+
+  <h2 id="define">精确定义：free list、refcount 与四个状态 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>分配器内部只有两样核心数据（对应源码 <code>__init__</code>）：</p>
+  <ul>
+    <li><strong>free list（空闲清单）</strong>：<code>self._free</code>，一个<strong>最小堆</strong>（heap）。
+        堆保证每次弹出的都是<strong>编号最小</strong>的空闲块——结果确定、可读、好 Trace。
+        初始 <code>[0, 1, …, num_blocks−1]</code> 全部空闲。</li>
+    <li><strong>refcount 数组</strong>：<code>self.ref[b]</code> 记录第 <code>b</code> 块<strong>此刻有几个引用</strong>。
+        初始全 0。<code>ref[b]=0</code> 表示空闲，<code>ref[b]≥1</code> 表示在用（值就是使用者个数）。</li>
+  </ul>
+  <p>每一块在任意时刻处于下面 4 个状态之一，状态只由 <code>ref[b]</code> 决定：</p>
+  <table>
+    <thead><tr><th>状态</th><th>ref[b]</th><th>含义</th><th>在 free list 里吗</th></tr></thead>
+    <tbody>
+      <tr><td>空闲 Free</td><td>0</td><td>没人用，可被 allocate</td><td>是</td></tr>
+      <tr><td>独占 Owned</td><td>1</td><td>刚分配，一个序列在用</td><td>否</td></tr>
+      <tr><td>共享 Shared</td><td>≥2</td><td>多条序列共用（前缀共享）</td><td>否</td></tr>
+      <tr><td>非法 Invalid</td><td>&lt;0</td><td>不该出现——一旦要变负就是 double free，主动报错</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p>还有一个纯算术的辅助函数 <code>blocks_needed(n)</code>：装 <code>n</code> 个 token 要几块。逐符号看——</p>
+  <math display="block" class="mathblock">
+    <mrow>
+      <mi>blocks_needed</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo>
+      <mo>=</mo>
+      <mrow>
+        <mo>{</mo>
+        <mtable columnalign="left left">
+          <mtr>
+            <mtd><mn>0</mn></mtd>
+            <mtd><mtext>若&#160;</mtext><mi>n</mi><mo>=</mo><mn>0</mn></mtd>
+          </mtr>
+          <mtr>
+            <mtd>
+              <mi>max</mi><mo stretchy="false">(</mo><mn>1</mn><mo>,</mo>
+              <mi>ceil</mi><mo stretchy="false">(</mo>
+              <mfrac><mi>n</mi><mi>block_size</mi></mfrac>
+              <mo stretchy="false">)</mo><mo stretchy="false">)</mo>
+            </mtd>
+            <mtd><mtext>若&#160;</mtext><mi>n</mi><mo>&gt;</mo><mn>0</mn></mtd>
+          </mtr>
+        </mtable>
+      </mrow>
+    </mrow>
+  </math>
+  <pre><code>  n           = num_tokens，要缓存的 token 数（输入，标量整数）
+  block_size  = 每块能装的 token 数（本课 = 16）
+  ceil(·)     = 向上取整（装不满一块也要占整块）
+  输出         = 需要的块数（标量整数）</code></pre>
+  <p>代入具体数字：<code>blocks_needed(16)=1</code>、<code>blocks_needed(17)=2</code>（多出 1 个 token 就得再占一整块）、
+     <code>blocks_needed(20)=2</code>、<code>blocks_needed(64)=4</code>。注意 <strong>free list / refcount 都是「按块」的整数运算，
+     不涉及任何浮点</strong>——分配器只搬「块编号」，从不碰块里那 1024 个 K/V 数。</p>
+
+  <h2 id="worked">小规模手算：4 块的一生 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>用 <code>BlockAllocator(num_blocks=4, block_size=16)</code> 走一遍完整流程。序列 A、B 是两个请求。
+     每一步都盯住 <strong>free list</strong>（最小堆）和 <strong>ref 数组</strong>怎么变：</p>
+  <table>
+    <thead><tr><th>#</th><th>操作</th><th>free list（堆）</th><th>ref = [b0,b1,b2,b3]</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td><code>__init__</code></td><td>[0,1,2,3]</td><td>[0,0,0,0]</td><td>4 块全空闲</td></tr>
+      <tr><td>1</td><td><code>allocate()→0</code></td><td>[1,2,3]</td><td>[1,0,0,0]</td><td>A 拿到编号最小的 b0，ref 置 1</td></tr>
+      <tr><td>2</td><td><code>allocate()→1</code></td><td>[2,3]</td><td>[1,1,0,0]</td><td>B 拿到 b1</td></tr>
+      <tr><td>3</td><td><code>incref(0)</code></td><td>[2,3]</td><td>[<strong>2</strong>,1,0,0]</td><td>A 的前缀被复用，b0 变共享（ref 2）</td></tr>
+      <tr><td>4</td><td><code>free(0)</code></td><td>[2,3]</td><td>[<strong>1</strong>,1,0,0]</td><td>ref 2→1，<strong>还有人用，不回收</strong></td></tr>
+      <tr><td>5</td><td><code>free(0)</code></td><td>[<strong>0</strong>,2,3]</td><td>[0,1,0,0]</td><td>ref 1→0，回收进 free list</td></tr>
+      <tr><td>6</td><td><code>allocate()→0</code></td><td>[2,3]</td><td>[1,1,0,0]</td><td>b0 又被发出去（复用编号最小的块）</td></tr>
+    </tbody>
+  </table>
+  <p>盯住第 4、5 步：<strong>同样是 free(0)，第一次不回收、第二次才回收</strong>——差别全在 refcount。
+     再看第 6 步：free list 是最小堆，所以回收的 b0 会<strong>优先</strong>被再次发出，编号复用确定可预测。
+     下面把「块池」画出来，配合上表的第 3 步（b0 被 A 共享）看：</p>
+  <div class="callout note"><div class="callout-title">块池执行图（第 3 步状态：b0 共享、b1 独占、b2/b3 空闲）</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;font-family:var(--mono);font-size:.82rem;margin-top:6px">
+      <div style="border:2px solid var(--running);border-radius:8px;padding:8px 12px;background:color-mix(in srgb,var(--running) 18%,var(--bg))">
+        b0<br>ref=2<br><span style="color:var(--fg-dim)">A · A'（共享）</span></div>
+      <div style="border:2px solid var(--running);border-radius:8px;padding:8px 12px;background:color-mix(in srgb,var(--running) 8%,var(--bg))">
+        b1<br>ref=1<br><span style="color:var(--fg-dim)">B（独占）</span></div>
+      <div style="border:2px dashed var(--fg-dim);border-radius:8px;padding:8px 12px">
+        b2<br>ref=0<br><span style="color:var(--fg-dim)">空闲</span></div>
+      <div style="border:2px dashed var(--fg-dim);border-radius:8px;padding:8px 12px">
+        b3<br>ref=0<br><span style="color:var(--fg-dim)">空闲</span></div>
+    </div>
+    <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+      实线框 = 在用（不在 free list）；虚线框 = 空闲（在 free list，可被 allocate）。
+      free list 此刻 = 最小堆 [2,3]，下一次 allocate 会拿到 b2。</div>
+  </div>
+
+  <h2 id="refcount">为什么要引用计数，而不是布尔「已用/空闲」？ <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>如果只用一个布尔标志（<code>used[b] = True/False</code>），单条序列独占时够用；但一旦要<strong>共享</strong>就崩了。
+     设想前缀共享（Lesson 16）：序列 A 和 A' 有相同前缀，共用 b0。</p>
+  <table>
+    <thead><tr><th></th><th>布尔标志 used[b]</th><th>引用计数 ref[b]</th></tr></thead>
+    <tbody>
+      <tr><td>A 与 A' 共用 b0</td><td>只能记 True，<strong>不知道有 2 个用户</strong></td><td>ref=2，如实记录</td></tr>
+      <tr><td>A 先结束、free(b0)</td><td>置 False → b0 被回收 → <strong>A' 的数据被别人覆盖！</strong></td><td>ref 2→1，<strong>不回收</strong>，A' 安全</td></tr>
+      <tr><td>A' 再结束、free(b0)</td><td>（已经错了，无从谈起）</td><td>ref 1→0，此刻才安全回收</td></tr>
+    </tbody>
+  </table>
+  <p>结论：<strong>「有没有人用」是布尔，「有几个人用」才是引用计数</strong>。共享的本质是「一块多主」，
+     只有计数能回答「现在还能不能收」。这也是 <code>incref</code> 存在的唯一理由——它就是「多一个人来登记使用」。</p>
+
+  <h2 id="statemachine">状态机：一块显存的完整生命周期 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>把 refcount 的增减画成状态机，三类经典 bug 就是三条「越界」的红线：</p>
+  <div class="callout note"><div class="callout-title">refcount 状态转移（→ 上的标注是触发的操作）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-family:var(--mono);font-size:.8rem;margin-top:6px">
+      <div style="border:2px dashed var(--fg-dim);border-radius:8px;padding:8px 12px">Free<br>ref=0</div>
+      <div style="text-align:center"><div style="font-size:1.2rem">→</div><small style="color:var(--fg-dim)">allocate</small></div>
+      <div style="border:2px solid var(--running);border-radius:8px;padding:8px 12px">Owned<br>ref=1</div>
+      <div style="text-align:center"><div style="font-size:1.2rem">⇄</div><small style="color:var(--fg-dim)">incref / free</small></div>
+      <div style="border:2px solid var(--running);border-radius:8px;padding:8px 12px;background:color-mix(in srgb,var(--running) 18%,var(--bg))">Shared<br>ref≥2</div>
+    </div>
+    <div style="font-size:1.2rem;text-align:center;margin:2px 0">↑ free 使 ref 归 0 时回到 Free ↑</div>
+    <div style="border-top:1px dashed var(--fg-dim);margin-top:8px;padding-top:6px;font-size:.8rem">
+      三条<strong style="color:var(--decode)">红线（会被主动拦下报错）</strong>：<br>
+      · 从 Free 再 <code>free</code>（ref 要变 −1）→ <strong>double free</strong><br>
+      · 对 Free 的块 <code>incref</code>（incref 一个没分配的块）→ <strong>RuntimeError</strong><br>
+      · free list 空时 <code>allocate</code> → <strong>OOM（MemoryError）</strong>
+    </div>
+  </div>
+  <p>为什么这三条要「主动报错」而不是默默容忍？因为它们都会导致<strong>数据静默损坏</strong>：
+     double free 会把还在用的块发给别人（覆盖数据）；对未分配块 incref 会凭空产生一个「幽灵引用」，
+     让这块永远收不回（leak）；OOM 若不报，就会越界访问不存在的块。<strong>让 bug 大声崩溃，好过让它悄悄算错</strong>。</p>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「free(b) 一调用，块就立刻回收」</td><td>只有 refcount <strong>减到 0</strong> 才回收。共享块（ref≥2）free 一次只是减 1，块仍在用。</td></tr>
+      <tr><td>「用布尔『已用/空闲』就够了」</td><td>共享时会出错：一个用户 free 就把还有人用的块收走，覆盖别人数据。<strong>必须计数</strong>。</td></tr>
+      <tr><td>「OOM 说明程序写错了」</td><td>不一定。free list 空只是显存<strong>暂时</strong>不够，真实系统会靠<strong>抢占/换出</strong>腾块（本课在调度层处理）。分配器只负责如实抛 MemoryError。</td></tr>
+      <tr><td>「分配器要保证序列的块是连续的」</td><td>恰恰不需要。分配器只发编号、只管计数，序列拿到 <code>[0,3,7]</code> 也没问题——「不要求连续」正是它消灭碎片的关键。</td></tr>
+      <tr><td>「incref 和 allocate 都让 ref 变大，是一回事」</td><td>allocate 从 free list <strong>取一个新块</strong>并把 ref 从 0 置 1；incref 是对<strong>已在用</strong>的块把 ref +1。对空闲块 incref 会直接报错。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>以上讲解逐一对应 <code>mini_vllm/cache/block_allocator.py</code>：</p>
+  <table>
+    <thead><tr><th>本课概念</th><th>源码位置</th><th>做了什么</th></tr></thead>
+    <tbody>
+      <tr><td>free list（最小堆）</td><td><code>__init__</code>：<code>heapq.heapify(self._free)</code></td><td>初始化 <code>[0..num_blocks−1]</code> 为最小堆</td></tr>
+      <tr><td>发号（Free→Owned）</td><td><code>allocate()</code></td><td>空则抛 <code>MemoryError</code>（OOM）；否则 <code>heappop</code> 最小块、<code>ref=1</code></td></tr>
+      <tr><td>共享（Owned→Shared）</td><td><code>incref(b)</code></td><td>对未分配块（ref≤0）报错；否则 <code>ref[b]+=1</code></td></tr>
+      <tr><td>还号 / 回收</td><td><code>free(b)</code></td><td>ref≤0 抛 double free；<code>ref[b]-=1</code>，归 0 才 <code>heappush</code> 回 free list</td></tr>
+      <tr><td>算块数</td><td><code>blocks_needed(n)</code></td><td><code>max(1, ceil(n/block_size))</code>，n=0 时返回 0</td></tr>
+      <tr><td>泄漏自检</td><td><code>check_no_leak()</code></td><td>收尾时凡 <code>ref[b]≠0</code> 即报 leak</td></tr>
+    </tbody>
+  </table>
+  <p>读代码时按这个顺序看最省力：<code>__init__</code>（两样数据）→ <code>allocate</code>/<code>free</code>（一发一还）→
+     <code>incref</code>（共享）→ 三处 <code>raise</code>（三类 bug 的拦截点）。下面的动画正是这段逻辑的可视化。</p>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a13">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>物理块如何分配、共享、释放？引用计数怎么防止 double free？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 13
+python3 course.py run 13 --trace
+python3 course.py check 13</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 13` 看分配/释放/OOM/double-free。</details>
+    <details><summary>提示 Level 2 · 位置</summary>用 heap 分配编号最小的空闲块。</details>
+    <details><summary>提示 Level 3 · 机制</summary>引用计数支持共享（前缀缓存）。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>结束必须无泄漏（check_no_leak）。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>double free</td><td>释放已空闲的块</td><td>free 前检查 refcount>0</td></tr><tr><td>leak</td><td>结束时仍有块未释放</td><td>收尾 check_no_leak()</td></tr><tr><td>OOM</td><td>free list 空</td><td>分配前判断，或触发抢占</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 13 --trace
+python3 course.py inspect blocks</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>为什么需要引用计数而不是布尔「已用/空闲」？</li><li>block_size 如何影响块数量与碎片？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>BlockAllocator</td><td>BlockSpaceManager</td><td>free list + 引用计数</td><td>vLLM 还有 CoW、换出、跨设备</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>物理块用 free list + 引用计数管理，支持共享与安全回收，并检测 OOM/double-free/leak。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="13">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_14.html">下一步：Lesson 14 · Block Table 与 Paged KV Cache →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 13 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/blocks_anim.js"></script>
+<script>
+BlocksAnim.mount("#a13", {frames:[{owners:[null,null,null,null],desc:"4 个物理块，全部空闲。",code:"BlockAllocator(num_blocks=4)"},{owners:[0,null,null,null],newly:[0],labels:{0:"A"},desc:"请求 A 分配 b0（refcount=1）。",code:"allocate() -> 0"},{owners:[0,1,null,null],newly:[1],labels:{0:"A",1:"B"},desc:"请求 B 分配 b1。",code:"allocate() -> 1"},{owners:[0,1,null,null],newly:[0],labels:{0:"A x2",1:"B"},desc:"A 共享 b0：incref，refcount=2。",code:"incref(0)"},{owners:[0,1,null,null],labels:{0:"A",1:"B"},desc:"free(b0)：refcount 2->1，尚未回收。",code:"free(0)"},{owners:[null,1,null,null],labels:{1:"B"},desc:"再 free(b0)：1->0，回收进 free list。",code:"free(0) -> 回收"},{owners:[null,1,null,null],labels:{1:"B"},desc:"耗尽后 allocate 抛 MemoryError；重复 free 抛 double-free；未释放即自检报泄漏。",code:"check_no_leak()"}]});
+</script>
+</body>
+</html>

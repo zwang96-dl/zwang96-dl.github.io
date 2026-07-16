@@ -1,0 +1,8 @@
+{
+  "_comment": "Lesson 1 的示例文本：涵盖纯 ASCII、中文（多字节）、以及含 emoji 的混合文本，用来演示 byte-level 编码与不同长度序列的 padding。",
+  "texts": [
+    "Hello",
+    "你好，世界",
+    "mini-vLLM 🚀"
+  ]
+}

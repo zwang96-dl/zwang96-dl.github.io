@@ -1,0 +1,26 @@
+# ============================================================================
+# Build Your Own Mini-vLLM —— 锁定依赖（离线安装用）
+# ============================================================================
+#
+# 核心课程为**纯 Python 标准库**实现：机制模拟器（轨道 A）与后续的纯 Python
+# tiny model（轨道 B）都不依赖任何第三方包。因此本文件**刻意为空**——
+# 这样即使完全没有 pip / 没有网络，课程也能直接运行。
+#
+# 离线安装（在锁定环境：macOS 14+ / Apple Silicon / Python 3.11 / arm64）：
+#
+#   python3 -m pip install \
+#     --no-index \
+#     --find-links offline/wheels/macos-arm64 \
+#     --require-hashes \
+#     -r offline/requirements-lock.txt
+#
+# 由于没有必需依赖，上述命令会立即成功（installs 0 packages）。核心课程随后即可运行：
+#
+#   python3 course.py verify-offline-bundle
+#   python3 course.py doctor --offline
+#   python3 course.py run 0
+#
+# 可选：若想用真实 PyTorch 加速，参见 offline/INSTALL_OFFLINE.md 的「可选加速」章节，
+# 把对应 wheel 放入 offline/wheels/macos-arm64/ 并在 offline/manifests/wheels.json 登记。
+# 那属于 optional bundle，不属于核心必需项。
+# ============================================================================

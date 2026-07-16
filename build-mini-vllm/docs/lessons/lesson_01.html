@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 1 · 文本如何变成 Token — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="byte-level tokenizer：character/byte/token、encode/decode、BOS/EOS/PAD、padding 与 attention mask。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 1</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+
+<div class="layout">
+  <nav class="toc" aria-label="本页目录">
+    <h2>本页目录</h2>
+    <a href="#goal">本节目标</a>
+    <a href="#why">为什么需要</a>
+    <a href="#problem">先看问题</a>
+    <a href="#predict">先预测</a>
+    <a href="#anim">交互式动画</a>
+    <a href="#intuition">直觉类比</a>
+    <a href="#define">精确定义</a>
+    <a href="#worked">小规模手算</a>
+    <a href="#math">词表与数字</a>
+    <a href="#misconception">常见误解</a>
+    <a href="#code">代码导读</a>
+    <a href="#build">动手运行</a>
+    <a href="#hints">四级提示</a>
+    <a href="#errors">常见错误</a>
+    <a href="#trace">Trace & Inspector</a>
+    <a href="#challenge">因果理解</a>
+    <a href="#vllm">真实 vLLM 映射</a>
+    <a href="#summary">总结 & 下一步</a>
+  </nav>
+
+  <main class="content" id="main">
+    <h1>Lesson 1 · 文本如何变成 Token <span class="phase-badge phase-learn">Learn</span></h1>
+    <p>模型看不懂字符串，它只认识<strong>整数序列</strong>。这一课把「文本 → token IDs」这一步
+       彻底摊开：每个 UTF-8 字节就是一个 token。</p>
+
+    <section id="goal">
+      <div class="lesson-header">
+        <dl>
+          <dt>当前目标</dt><dd>读懂并使用真实 byte-level tokenizer：encode/decode、BOS/EOS/PAD、padding + attention mask。</dd>
+          <dt>需要阅读的文件</dt><dd><code>mini_vllm/tokenizer.py</code>、<code>experiments/lesson_01_tokenizer.py</code></dd>
+          <dt>需要修改的文件</dt><dd><code>mini_vllm/tokenizer.py</code>（可选：把某个方法重置后自己重写，用测试驱动）</dd>
+          <dt>需要关注的类或函数</dt><dd><code>ByteTokenizer.encode()</code> / <code>decode()</code> / <code>pad()</code></dd>
+          <dt>实验命令</dt><dd><code>python3 course.py run 1</code></dd>
+          <dt>测试命令</dt><dd><code>python3 course.py check 1</code>（等价 <code>python3 -m unittest tests.lesson_01.test_tokenizer</code>）</dd>
+          <dt>本课依赖</dt><dd>Lesson 0</dd>
+          <dt>完成后下一步</dt><dd>Lesson 2 · Tensor Shape 与矩阵乘法</dd>
+        </dl>
+      </div>
+    </section>
+
+    <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>这是整门课的<strong>第 0 号地基</strong>。神经网络本质是一堆矩阵乘法，它只吃<strong>数字</strong>，
+       从不认识 <code>"你好"</code> 这样的字符串。所以任何一次推理，第一步永远是把文本翻译成一串整数
+       ——这串整数就叫 <strong>token IDs</strong>。后面每一课都建立在它之上：</p>
+    <ul>
+      <li>Lesson 2 的张量形状 <code>[batch, seq, hidden]</code> 里的 <code>seq</code>，就是「这段文本有多少个 token」。</li>
+      <li>Lesson 7 的 KV Cache 大小、Lesson 9 调度器的 token 预算，单位都是 token。</li>
+      <li>模型最后吐出的 <code>logits</code> 形状是 <code>[1, seq, 259]</code>，最后那个 <code>259</code> 就是本课的词表大小。</li>
+    </ul>
+    <p>换句话说：<strong>token 是这门课自始至终的计价单位</strong>。搞不清一段文本会变成多少个、哪几个 token，
+       后面所有的 shape、显存、吞吐都成了空中楼阁。这一课就把「文本 → token IDs」这一步彻底摊开。</p>
+
+    <h2 id="problem">先看问题：为什么不能直接喂字符 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>最朴素的想法是「一个字符给一个编号」。看起来可行，但 Unicode 有
+       <strong>约 15 万</strong> 个字符（还在不断新增 emoji）。如果按字符建词表：</p>
+    <ul>
+      <li>词表要开到 <strong>15 万</strong> 起步——本课模型的 embedding 表本来只有
+          <code>259 × 32 = 8288</code> 个数，按字符建表会瞬间膨胀成
+          <code>150000 × 32 = 480 万</code> 个数，光一张表就大了近 <strong>580 倍</strong>。</li>
+      <li>还是会漏：明天出个新 emoji，词表里没有它，就成了「未登录词 (OOV)」，只能用一个
+          <code>&lt;unk&gt;</code> 兜底，信息直接丢失。</li>
+    </ul>
+    <p>换个角度：无论多生僻的字符，计算机<strong>存储</strong>它时早已把它编码成了一串 <strong>UTF-8 字节</strong>，
+       而字节永远只有 <strong>256</strong> 种取值（0–255）。于是我们干脆<strong>直接把字节当作 token</strong>：</p>
+    <table>
+      <thead><tr><th>方案</th><th>词表大小</th><th>会不会遇到 OOV？</th><th>代价</th></tr></thead>
+      <tbody>
+        <tr><td>按字符建表</td><td>约 15 万，且不封闭</td><td>会（新字符）</td><td>词表巨大、embedding 表爆炸</td></tr>
+        <tr><td><strong>按字节建表（本课）</strong></td><td><strong>256 + 3 = 259</strong>，永久封闭</td><td><strong>永不</strong></td><td>序列变长（一个汉字 = 3 个 token）</td></tr>
+      </tbody>
+    </table>
+    <p>这就是 <strong>byte-level tokenizer</strong>：用「序列更长一点」换来「词表极小、永不 OOV、零依赖」。
+       下面这张表先把三个最容易混的概念分清楚——它们不是一回事：</p>
+    <div class="callout note">
+      <div class="callout-title">character / byte / token 三者的区别（以「你」为例）</div>
+      <table>
+        <thead><tr><th>概念</th><th>是什么</th><th>「你」对应几个</th></tr></thead>
+        <tbody>
+          <tr><td>character 字符</td><td>人眼看到的一个字</td><td>1 个字符</td></tr>
+          <tr><td>byte 字节</td><td>UTF-8 编码后的原始字节</td><td>3 个字节：228, 189, 160</td></tr>
+          <tr><td>token 词元</td><td>模型真正吃进去的输入单位；本课里 1 字节 = 1 token</td><td>3 个 token（id 228,189,160）</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:.82rem;color:var(--fg-dim);margin-top:6px">
+        记忆锚点：<strong>1 个汉字 = 3 个字节 = 3 个 token</strong>；纯英文字母/数字是 1 字节 = 1 token；
+        常见 emoji 是 4 字节 = 4 个 token。</div>
+    </div>
+
+    <h2 id="predict">先预测，再看动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="callout question">
+      <ol style="margin:.3em 0">
+        <li>英文 <code>Hi</code> 和中文 <code>你好</code>，哪个的 token 更多？多几个？</li>
+        <li>一个 emoji 🚀 会变成几个 token？</li>
+        <li>把两句不等长的话放进同一个 batch，短的那句会发生什么？</li>
+      </ol>
+    </div>
+
+    <h2 id="anim">交互式动画：Tokenizer Explorer <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>在下面输入任意文本（中文、emoji 都行），单步观察它如何一步步变成 token id。
+       这是 <code>mini_vllm/tokenizer.py</code> 的镜像。</p>
+
+    <div class="anim" id="anim-tokenizer">
+      <div class="anim-head">
+        <div class="anim-q">这个动画要回答的问题：
+          <small>一段文本怎样一步步变成 token id？中文/emoji 为什么是多个 token？padding 的 mask 从哪来？</small></div>
+      </div>
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg-code)">
+        <label style="font-size:.85rem;color:var(--fg-dim)">输入文本：
+          <input data-anim-input="text" type="text" value="你好 🚀"
+                 style="font:inherit;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--fg);min-width:220px">
+        </label>
+      </div>
+      <div class="anim-stage" style="min-height:70px"></div>
+      <div class="legend">
+        <span class="item"><span class="swatch running"></span>普通 token（实线）</span>
+        <span class="item"><span class="swatch prefill"></span>特殊 token BOS/EOS（双线）</span>
+        <span class="item"><span class="swatch waiting"></span>PAD（虚线）</span>
+      </div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」开始，或直接修改上面的文本。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button" aria-label="上一步">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button" aria-label="播放">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" aria-label="暂停" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button" aria-label="下一步">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button" aria-label="重置">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+    <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="callout tip">
+      <div class="callout-title">一句话解释</div>
+      byte-level tokenizer 就是「把文本按 UTF-8 拆成字节，每个字节 (0–255) 当作一个 token id」，
+      再在词表里补上三个<strong>特殊 token</strong>：BOS(256) / EOS(257) / PAD(258)。
+    </div>
+    <p><strong>直觉类比：拼音字母 vs. 完整词语。</strong>你可以用几万个「词」来记一门语言（像真实大模型的子词词表），
+       也可以只用 26 个字母把任何词拼出来。byte-level 走的是后者的极端版：不用 26 个字母，而用
+       <strong>256 个字节积木</strong>，任何文本——中文、emoji、乱码——都能用这 256 块积木拼出来，每块积木编号固定。</p>
+    <div class="callout warn">
+      <div class="callout-title">类比的边界（别被带偏）</div>
+      字母能拼出词，但字母本身没什么语义；byte-level 也一样——单个字节几乎不携带语义，语义要靠模型
+      在多个字节 token 之间自己学出来。真实大模型（GPT/Llama）用的是 <strong>BPE / 子词</strong> tokenizer：
+      一个 token 往往是「一个常见词或词根」（多个字节合成一块），词表有<strong>几万</strong>个，序列更短、语义更集中。
+      本课选 byte-level 只为一件事：<strong>完全透明、可手算、零依赖</strong>——数据流和张量 shape 与真实系统一模一样。
+    </div>
+
+    <h2 id="define">精确工程定义 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>tokenizer 对外只有三个核心方法。先看签名，再逐个拆解它们的输入 / 输出<strong>到底是什么形状</strong>：</p>
+    <table>
+      <thead><tr><th>方法</th><th>签名</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td><code>encode</code></td><td><code>str → list[int]</code></td><td>取 UTF-8 字节为 id，可选前加 BOS、后加 EOS</td></tr>
+        <tr><td><code>decode</code></td><td><code>list[int] → str</code></td><td>丢弃特殊 token，其余字节按 UTF-8 一次性还原</td></tr>
+        <tr><td><code>pad</code></td><td><code>list[list[int]] → (ids, mask)</code></td><td>补齐到同长，并生成 attention mask</td></tr>
+      </tbody>
+    </table>
+    <p><strong>逐符号解释 <code>pad</code> 的输出形状</strong>（它是三者里唯一涉及二维形状的）。设一批有 <code>B</code> 条序列，
+       补齐后的目标长度为 <code>L</code>（默认取批内最长那条的长度）：</p>
+    <pre><code>input_ids      : shape (B, L)   # 每行是一条补齐后的序列，值 ∈ [0, 259)
+attention_mask : shape (B, L)   # 同形；1 = 真实 token，0 = PAD 位置</code></pre>
+    <ul>
+      <li><code>B</code> = batch 里序列条数（比如同时来了 3 个请求，<code>B = 3</code>）。</li>
+      <li><code>L</code> = 目标长度。<code>pad</code> 里 <code>target = length or max(len(seq))</code>——不给 <code>length</code> 就取批内最长。</li>
+      <li>补进去的位置：<code>input_ids</code> 填 <code>PAD_ID = 258</code>，<code>attention_mask</code> 填 <code>0</code>。</li>
+      <li><code>side="right"</code>（默认）把 PAD 加在<strong>右边</strong>；<code>side="left"</code> 加在左边（生成任务常用左 pad）。</li>
+    </ul>
+    <div class="callout note">
+      <div class="callout-title">mask 为什么必须存在</div>
+      PAD 是<strong>为了凑齐形状</strong>硬塞进去的假 token，本身没有任何含义。如果不告诉下游「这些位置是假的」，
+      attention 就会把 PAD 也当成真词去计算，污染结果。<code>attention_mask</code> 就是那张「哪些是真、哪些是假」的清单，
+      下游据此把 PAD 位置的注意力压成 <code>-∞</code>（Lesson 4 会用到）。
+    </div>
+
+    <h2 id="worked">小规模手算：三个例子走一遍 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>不看代码，纯靠手算把 <code>encode → pad → decode</code> 跑一遍。全程只用两条极短的文本：
+       <code>"Hi"</code> 和 <code>"你"</code>。</p>
+
+    <p><strong>① encode("Hi")（含 BOS）。</strong>英文字母各占 1 个 UTF-8 字节，直接就是它的 ASCII 码：</p>
+    <table>
+      <thead><tr><th>步骤</th><th>结果</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>加 BOS</td><td><code>[256]</code></td><td>序列开始标记</td></tr>
+        <tr><td><code>'H'</code> → 字节</td><td><code>72</code></td><td>ASCII 'H' = 72</td></tr>
+        <tr><td><code>'i'</code> → 字节</td><td><code>105</code></td><td>ASCII 'i' = 105</td></tr>
+        <tr><td><strong>最终 ids</strong></td><td><code>[256, 72, 105]</code></td><td>2 个字符 → 3 个 token（BOS + 2 字节）</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>② encode("你")（含 BOS）。</strong>「你」在 UTF-8 里是 3 个字节，所以展开成 3 个 token：</p>
+    <table>
+      <thead><tr><th>步骤</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>加 BOS</td><td><code>[256]</code></td></tr>
+        <tr><td>「你」→ UTF-8 三字节</td><td><code>228, 189, 160</code></td></tr>
+        <tr><td><strong>最终 ids</strong></td><td><code>[256, 228, 189, 160]</code>（1 个字符 → 4 个 token）</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>③ pad 这一批（右补齐）。</strong>把 <code>"Hi"</code>（长 3）和 <code>"你"</code>（长 4）放进同一个 batch。
+       <code>B = 2</code>，目标长度 <code>L = max(3, 4) = 4</code>。短的那条右边补一个 <code>PAD=258</code>，mask 对应位置填 0：</p>
+    <div class="callout note" style="border-left-color:var(--prefill)">
+      <div class="callout-title">padding + mask 的执行图（B=2, L=4）</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-family:var(--mono);font-size:.8rem;margin-top:6px">
+        <div>
+          <div style="color:var(--fg-dim);margin-bottom:3px">seq[0] = encode("Hi")，真实长度 3 → 右补 1 个 PAD</div>
+          <div style="display:flex;gap:4px;align-items:stretch">
+            <div style="border:2px double var(--prefill);border-radius:6px;padding:6px 8px">256<br><span style="color:var(--fg-dim)">BOS</span></div>
+            <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px">72<br><span style="color:var(--fg-dim)">H</span></div>
+            <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px">105<br><span style="color:var(--fg-dim)">i</span></div>
+            <div style="border:2px dashed var(--waiting);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--waiting) 15%,var(--bg))">258<br><span style="color:var(--fg-dim)">PAD</span></div>
+          </div>
+          <div style="margin-top:3px">mask = <strong>[1, 1, 1, 0]</strong></div>
+        </div>
+        <div>
+          <div style="color:var(--fg-dim);margin-bottom:3px">seq[1] = encode("你")，真实长度 4 → 无需补</div>
+          <div style="display:flex;gap:4px;align-items:stretch">
+            <div style="border:2px double var(--prefill);border-radius:6px;padding:6px 8px">256<br><span style="color:var(--fg-dim)">BOS</span></div>
+            <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px">228</div>
+            <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px">189</div>
+            <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px">160</div>
+          </div>
+          <div style="margin-top:3px">mask = <strong>[1, 1, 1, 1]</strong></div>
+        </div>
+      </div>
+      <div style="font-size:.78rem;color:var(--fg-dim);margin-top:8px">
+        双线框 = 特殊 token(BOS)；实线框 = 真实字节 token；虚线灰框 = PAD（mask=0，下游会忽略它）。
+        最终 <code>input_ids</code> 形状 (2, 4)，<code>attention_mask</code> 形状 (2, 4)。</div>
+    </div>
+
+    <p><strong>④ decode 回去。</strong>拿 seq[1] 的 <code>[256, 228, 189, 160]</code> 还原：先<strong>跳过</strong>特殊 token 256，
+       再把剩下的字节 <code>[228, 189, 160]</code> <strong>一次性</strong>交给 UTF-8 解码器，得到 <code>"你"</code>。
+       关键是「先收集全部字节、再一起 decode」——如果一个字节一个字节地 decode，三字节的「你」会被拦腰截断成
+       <code>�</code>（乱码）。</p>
+
+    <h2 id="math">词表与数字 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>把词表画成一条数轴，就一目了然——<strong>0..255 是字节区，256..258 是特殊区</strong>：</p>
+    <div style="display:flex;align-items:stretch;gap:0;font-family:var(--mono);font-size:.8rem;margin:8px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+      <div style="flex:6;padding:10px;background:color-mix(in srgb,var(--running) 12%,var(--bg));border-right:1px solid var(--border)">
+        <strong>0 – 255</strong>　256 个字节值<br><span style="color:var(--fg-dim)">普通 token（任何文本都由它们拼成）</span></div>
+      <div style="flex:1;padding:10px;text-align:center;background:color-mix(in srgb,var(--prefill) 15%,var(--bg))">
+        <strong>256</strong><br><span style="color:var(--fg-dim)">BOS</span></div>
+      <div style="flex:1;padding:10px;text-align:center;background:color-mix(in srgb,var(--prefill) 15%,var(--bg));border-left:1px solid var(--border)">
+        <strong>257</strong><br><span style="color:var(--fg-dim)">EOS</span></div>
+      <div style="flex:1;padding:10px;text-align:center;background:color-mix(in srgb,var(--waiting) 20%,var(--bg));border-left:1px solid var(--border)">
+        <strong>258</strong><br><span style="color:var(--fg-dim)">PAD</span></div>
+    </div>
+    <p>所以词表大小 <code>vocab_size = 256 + 3 = 259</code>。这个数会一路贯穿全课：它既是 tiny model 的
+       <code>vocab_size</code>，也是模型输出 <code>logits</code> 的最后一维——形状 <code>[1, seq, 259]</code>，
+       意思是「对序列里每个位置，给出下一个 token 落在这 259 个候选上的分数」。</p>
+    <div class="callout note">
+      <div class="callout-title">三个特殊 token 各管什么</div>
+      <table>
+        <thead><tr><th>token</th><th>id</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>BOS</td><td>256</td><td>Begin Of Sequence，标记序列开头（encode 默认加）</td></tr>
+          <tr><td>EOS</td><td>257</td><td>End Of Sequence，生成时模型吐出它 = 该停了</td></tr>
+          <tr><td>PAD</td><td>258</td><td>Padding，纯为补齐 batch 形状而塞入，靠 mask 忽略</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+    <table>
+      <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+      <tbody>
+        <tr><td>「一个字符 = 一个 token」</td><td>只对单字节字符（ASCII 字母/数字）成立。中文一字 = 3 字节 = <strong>3 个 token</strong>，emoji 常是 4 token。token 数看的是<strong>字节数</strong>，不是字符数。</td></tr>
+        <tr><td>「byte-level 会遇到不认识的字 (OOV)」</td><td>永远不会。任何 Unicode 文本都能编码成 UTF-8 字节，而字节只有 256 种、全在词表里。这正是 byte-level 最大的好处——词表<strong>永久封闭</strong>。</td></tr>
+        <tr><td>「decode 时一个字节一个字节地转字符」</td><td>会把多字节字符截断成 <code>�</code>。正确做法是<strong>先收集全部字节</strong>，再 <code>bytes(...).decode("utf-8", errors="replace")</code> 一次性还原。</td></tr>
+        <tr><td>「PAD 和普通 token 一样会参与计算」</td><td>PAD 只是凑形状的假 token。必须靠 <code>attention_mask</code>（PAD 位置 = 0）让下游忽略它，否则结果被污染。</td></tr>
+        <tr><td>「特殊 token 也要按字节 decode 回文本」</td><td>BOS/EOS/PAD 的 id ≥ 256，超出字节范围。decode 时要<strong>跳过</strong>它们（<code>skip_special=True</code>），否则往返对不上。</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="code">代码导读 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>上面讲的每一步，都能在 <code>mini_vllm/tokenizer.py</code> 里一一对上。三个方法各自的核心就一两行：</p>
+    <pre><code># encode()：str -> list[int]
+ids = []
+if add_bos: ids.append(self.bos_id)   # 前加 BOS(256)
+ids.extend(text.encode("utf-8"))      # ← byte-level 的核心：每个字节即一个 id
+if add_eos: ids.append(self.eos_id)   # 后加 EOS(257)
+
+# decode()：list[int] -> str
+byte_vals = [tid for tid in ids if tid &lt; 256]     # 跳过 ≥256 的特殊 token
+return bytes(byte_vals).decode("utf-8", errors="replace")  # 先收集、再一次性还原
+
+# pad()：list[list[int]] -> (input_ids, attention_mask)
+target = length or max(len(x) for x in batch)
+# side="right": seq + [PAD]*n , mask = [1]*len(seq) + [0]*n</code></pre>
+    <div class="callout note">
+      <div class="callout-title">讲解 ⟶ 对应代码</div>
+      <table>
+        <thead><tr><th>本课讲的概念</th><th>代码位置</th></tr></thead>
+        <tbody>
+          <tr><td>「文本按 UTF-8 拆成字节 id」+ 加 BOS/EOS</td><td><code>ByteTokenizer.encode()</code>（<code>text.encode("utf-8")</code>）</td></tr>
+          <tr><td>「先收集全部字节、再一次性还原」+ 跳过特殊 token</td><td><code>ByteTokenizer.decode()</code>（<code>bytes(...).decode(errors="replace")</code>）</td></tr>
+          <tr><td>「补 PAD 到同长 + 生成 mask」+ left/right 方向</td><td><code>ByteTokenizer.pad()</code></td></tr>
+          <tr><td>词表大小 259、BOS/EOS/PAD 的 id</td><td>文件顶部常量 <code>BYTE_VOCAB / BOS_ID / EOS_ID / PAD_ID / VOCAB_SIZE</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+    <pre class="cmd"><code>python3 course.py run 1            # 看 encode/decode/pad 全过程
+python3 course.py run 1 --trace    # 看每个字节、每个 id、每个 mask
+python3 course.py check 1          # 跑测试并推进进度</code></pre>
+    <p>预期输出（节选）：</p>
+    <pre><code>  文本                字符  字节 token    往返  token IDs
+  Hello              5   5     6     ✓  [256, 72, 101, 108, 108, 111]
+  你好，世界              5  15    16     ✓  [256, 228, 189, 160, ...]
+  ✓ 全部文本 encode→decode 无损往返：True</code></pre>
+    <div class="callout tip">
+      <div class="callout-title">想真正「Build」一遍？</div>
+      用 <code>git</code> 把 <code>ByteTokenizer.pad()</code> 的函数体删成 <code>raise NotImplementedError</code>，
+      再靠 <code>python3 course.py check 1</code> 的失败信息和四级提示自己重写；写对了测试就会变绿。
+      （所有恢复都由你手动用 <code>git restore</code> 完成，课程不会自动改你的代码。）
+    </div>
+
+    <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary><code>python3 course.py run 1</code> 看全过程；网页 Explorer 输入你自己的文本观察。</details>
+    <details><summary>提示 Level 2 · 位置</summary>关注 <code>encode()</code>（str→ids，可加 BOS/EOS）、<code>decode()</code>（跳过特殊 token）、<code>pad()</code>（补齐 + mask）。</details>
+    <details><summary>提示 Level 3 · 机制</summary>每个 UTF-8 字节=一个 id(0..255)；中文一字 3 字节=3 token；词表 = 256 + BOS/EOS/PAD = 259。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>常见坑：decode 逐字节解码会截断多字节字符。本实现先收集全部字节，再 <code>bytes(...).decode(errors="replace")</code> 一次性还原。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table>
+      <thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead>
+      <tbody>
+        <tr><td>中文 decode 出现 <code>�</code></td><td>逐字节解码截断了多字节字符</td><td>先收集全部字节再一次性 decode</td></tr>
+        <tr><td>往返不一致</td><td>误把特殊 token 当字节 decode</td><td>decode 时跳过 ≥256 的 id</td></tr>
+        <tr><td>pad 后 mask 全 1</td><td>没区分真实/补齐位置</td><td>真实 token=1，PAD=0</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <pre class="cmd"><code>python3 course.py run 1 --trace                 # 字节/ids/pieces/mask 全部展开
+python3 course.py inspect tokenizer --text "你好 mini-vLLM"</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question">
+      <ol style="margin:.3em 0">
+        <li>为什么 byte-level 永远不会遇到「未登录词（OOV）」？它对词表大小和序列长度各有什么代价？</li>
+        <li>如果一个请求的 prompt 是 100 个汉字，大约会产生多少 token？这对 KV Cache 大小意味着什么？（联系 Lesson 7）</li>
+        <li>left-padding 和 right-padding 对生成有何不同影响？</li>
+      </ol>
+    </div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table>
+      <thead><tr><th>教学实现</th><th>真实 vLLM/HF</th><th>相同点</th><th>简化点</th></tr></thead>
+      <tbody>
+        <tr><td><code>ByteTokenizer</code></td><td>HF <code>AutoTokenizer</code>（BPE/SentencePiece）</td><td>都产出 token id 序列 + 特殊 token</td><td>真实用子词、词表数万、有 merge 规则</td></tr>
+        <tr><td>BOS/EOS/PAD</td><td><code>bos/eos/pad_token_id</code></td><td>概念一致</td><td>真实还有 chat 模板专用特殊 token</td></tr>
+        <tr><td><code>pad()</code> + mask</td><td>tokenizer 的 padding + attention_mask</td><td>mask 语义一致</td><td>真实常配合 left-pad 与 position_ids</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="summary">本节总结 & 下一步</h2>
+    <ul>
+      <li>模型只认整数：文本要先 encode 成 token id 序列。</li>
+      <li>byte-level：每个 UTF-8 字节=一个 token；中文一字=3 token；vocab=259。</li>
+      <li>padding 把一批序列补齐同长，用 attention mask 标记真实位置。</li>
+    </ul>
+    <p style="margin-top:1em">
+      <button class="btn btn-accent" type="button" data-mark-lesson="1">✅ 标记本课已学</button>
+      &nbsp; <a class="btn" href="lesson_02.html">下一步：Lesson 2 · Tensor Shape 与矩阵乘法 →</a>
+    </p>
+
+    <div class="footer">Build Your Own Mini-vLLM · Lesson 1 · 完全离线 · 无第三方依赖</div>
+  </main>
+</div>
+
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/tokenizer_explorer.js"></script>
+<script>
+  TokenizerExplorer.mount("#anim-tokenizer", { text: "你好 🚀", padTo: 12 });
+</script>
+</body>
+</html>

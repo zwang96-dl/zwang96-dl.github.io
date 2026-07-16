@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 23 · Placeholder 与 Embedding Merge — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="PlaceholderRange、merge_multimodal_embeddings、单图/多图/越界/顺序错误的对齐校验。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 23</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 23 · Placeholder 与 Embedding Merge <span class="phase-badge phase-learn">Phase 4</span></h1>
+  <p>placeholder 与合并是把视觉信息塞进文本序列的关键，也是最容易出对齐 bug 的地方。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>PlaceholderRange、merge_multimodal_embeddings、单图/多图/越界/顺序错误的对齐校验。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/placeholders.py</code>、<code>mini_vllm/multimodal/embedding_merge.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/multimodal/embedding_merge.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>merge_multimodal_embeddings()</code>、<code>validate_placeholders()</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 23</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 23</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 22</dd>
+        <dt>完成后下一步</dt><dd>Lesson 24</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>文本模型的 forward 只认识一件东西：一张 <code>(seq, hidden)</code> 的浮点矩阵。可图片不是文字——
+     它经过视觉编码器与 projector 后，是一小块 <code>(4, 32)</code> 的视觉向量（本课每张图 <code>num_patches=4</code>
+     个 visual token，projector 把 <code>vision_hidden=48</code> 投影到 <code>text_hidden=32</code>）。
+     那问题来了：<strong>怎么把这块视觉向量塞进一条纯文本的序列里，还能让文本模型「以为」它一直就在那儿？</strong></p>
+  <p>vLLM 的答案分三步，本课就是它的骨架：
+     <strong>(1) 占位</strong>——在 token 序列里预留一段连续的占位 token（本课用 <code>PAD</code>）；
+     <strong>(2) 校验</strong>——确认这段占位和视觉向量严格对得上（<code>validate_placeholders()</code>）；
+     <strong>(3) 合并</strong>——把占位那几行 embedding 逐位换成视觉向量（<code>merge_multimodal_embeddings()</code>）。
+     合并后的 <code>(seq, 32)</code> 直接喂给 <code>forward(inputs_embeds=...)</code>，文本模型完全无感，照常做因果注意力。
+     这一步是多模态<strong>最容易出对齐 bug、也最需要守护</strong>的地方——错一行，整段视觉信息就贴错了位置。</p>
+
+  <h2 id="problem">先看问题：不校验，一个 token 的错位有多致命 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课 tokenizer 是 <strong>byte-level</strong>：每个 UTF-8 字节 = 1 个 token id（0..255），中文一字 = 3 字节 = 3 个 token；
+     vocab 一共 <code>259</code>（256 字节 + BOS/EOS/PAD）。设我们要处理这条输入：
+     <code>BOS + "Hi" + &lt;图&gt; + "?"</code>。展开成 token：</p>
+  <table>
+    <thead><tr><th>位置 pos</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead>
+    <tbody>
+      <tr><td>token</td><td>BOS</td><td>H</td><td>i</td><td>PAD</td><td>PAD</td><td>PAD</td><td>PAD</td><td>?</td></tr>
+      <tr><td>来源</td><td>文本</td><td>文本</td><td>文本</td><td colspan="4" style="text-align:center;background:color-mix(in srgb,var(--decode) 15%,var(--bg))">图片占位（4 个，= num_patches）</td><td>文本</td></tr>
+    </tbody>
+  </table>
+  <p>正确的占位是 <code>[3, 4)</code> 共 <strong>4 个</strong> PAD，恰好等于这张图的 4 个 visual token。现在假设上游少写了一个 PAD，
+     只留了 3 个（占位 <code>[3, 3)</code>… 其实变成 <code>[3,6)</code> 长度 3）：</p>
+  <ul>
+    <li>视觉向量有 <strong>4 行</strong>，占位却只有 <strong>3 行</strong>——第 4 行视觉向量<strong>无处安放</strong>，被悄悄丢弃，
+        模型只看到 ¾ 张图。</li>
+    <li>更糟的是：后面的 <code>"?"</code> 本该在 pos 7，现在整条序列的位置全部左移，
+        <strong>RoPE 位置编码、因果掩码全部错位</strong>——一个 off-by-one 让整段生成崩坏，却<strong>不报错</strong>。</li>
+  </ul>
+  <p>这类 bug 最阴险的地方是<strong>静默</strong>：结果只是「变差」，不会崩，很难定位。所以本课的核心不是「合并」这一行赋值，
+     而是合并<strong>之前</strong>那道<strong>带定位信息</strong>的校验闸门——把错误在源头拦下，并直接告诉你错在第几个媒体。</p>
+
+  <h2 id="intuition">一句话解释 + 直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    <strong>PlaceholderRange</strong> = 一张「预留座位」的登记条：记下这段媒体从<em>哪一行开始</em>（offset）、
+    <em>占几行</em>（length）、<em>是第几个媒体</em>（media_index）、<em>什么模态</em>（modality）。
+    <strong>merge</strong> = 按登记条把这几个座位上的「文本 embedding」换成「视觉 embedding」。</div>
+  <p><strong>类比：剧院预留座位。</strong>先买 3 张连号票（BOS/H/i 是普通观众），中间给一个 4 人乐团<strong>预留 4 个连座</strong>
+     （4 个 PAD），最后再来 1 位观众（?）。开场前，检票员（<code>validate_placeholders</code>）逐条核对：
+     乐团人数是否正好等于预留座位数？座位是否在场内、没和别人重叠、编号连续？核对无误，乐团才入座
+     （<code>merge</code> 逐位替换）。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    预留的座位「本来是空的」，而占位 PAD 是有 embedding 的——只是它的<strong>值无所谓</strong>，反正整行都会被覆盖。
+    另外，检票员不会「帮你补票」：校验只<strong>发现并报错</strong>，绝不自动改数量或挪位置。真正的对齐必须在上游
+    （<code>inputs.py</code> 的 parse）就算对，校验只是最后一道保险。</p></div>
+
+  <h2 id="define">精确定义：字段、shape 与 merge 公式 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p><strong>PlaceholderRange</strong> 是一个只装 4 个字段的数据类（<code>placeholders.py</code>）：</p>
+  <table>
+    <thead><tr><th>字段</th><th>含义</th><th>上例（那张图）取值</th></tr></thead>
+    <tbody>
+      <tr><td><code>offset</code></td><td>在 input_ids 中的起始行号</td><td><code>3</code></td></tr>
+      <tr><td><code>length</code></td><td>占多少行（= 该媒体的 visual token 数）</td><td><code>4</code></td></tr>
+      <tr><td><code>media_index</code></td><td>第几个媒体（从 0 数）</td><td><code>0</code></td></tr>
+      <tr><td><code>modality</code></td><td>"image" 或 "video"</td><td><code>"image"</code></td></tr>
+    </tbody>
+  </table>
+  <p>它描述的区间是<strong>左闭右开</strong>的 <code>[offset, offset+length)</code>，即上例的 <code>[3, 7)</code>，覆盖 pos 3、4、5、6 共 4 行。</p>
+  <div class="callout note"><div class="callout-title">merge 的形状（用本模型的具体数字）</div>
+    <pre><code>merge_multimodal_embeddings(text_embeds, ranges, visual_embeds) -> out
+  text_embeds   : (seq, hidden) = (8, 32)   # 按 input_ids 查 embedding 表（vocab=259）
+  visual_embeds : list，第 k 项形状 (ranges[k].length, hidden) = (4, 32)
+  out           : (seq, hidden) = (8, 32)   # 与 text_embeds 同形，只有占位那几行被替换</code></pre>
+    逐符号：<code>seq=8</code> 是序列长度；<code>hidden=32</code> 是 <code>text_hidden</code>；
+    <code>(4, 32)</code> 里的 <code>4</code> 是这张图的 visual token 数，<code>32</code> 必须 <strong>= text_hidden</strong>
+    （视觉侧原本是 <code>vision_hidden=48</code>，靠 projector 投到 32——对不上就是 projector 输出维度没接对）。</div>
+  <p>替换规则本身极简，就是一段逐行赋值（<code>embedding_merge.py</code> 第 35–36 行）：</p>
+  <pre><code>for k, r in enumerate(ranges):        # 遍历每个媒体
+    for i in range(r.length):          # 遍历这段占位的每一行
+        out[r.offset + i] = vis[i]     # 占位第 i 行 ← 视觉第 i 行</code></pre>
+  <p>也就是把 <code>out[offset .. offset+length-1]</code> 这几行，逐位换成 <code>visual_embeds[k]</code> 的第 0..length-1 行。
+     其余行（真正的文本 token）原样保留。</p>
+
+  <h2 id="worked">小规模手算：一图 + 二图，从校验到替换 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p><strong>例 1（单图，就是上面的序列）：</strong><code>seq=8</code>，
+     <code>ranges = [PlaceholderRange(offset=3, length=4, media_index=0, "image")]</code>，
+     <code>visual_embeds = [V]</code>，<code>V.shape = (4, 32)</code>。跟着 <code>validate_placeholders</code> 走一遍：</p>
+  <table>
+    <thead><tr><th>检查</th><th>代入</th><th>结论</th></tr></thead>
+    <tbody>
+      <tr><td>数量一致</td><td><code>len(ranges)=1</code> vs <code>len(media_visual_lens)=1</code></td><td>✓</td></tr>
+      <tr><td>顺序正确</td><td>k=0：<code>media_index=0 == 0</code></td><td>✓</td></tr>
+      <tr><td>长度匹配</td><td><code>length=4 == media_visual_lens[0]=4</code></td><td>✓</td></tr>
+      <tr><td>不越界</td><td><code>offset=3 ≥ 0</code> 且 <code>3+4=7 ≤ seq=8</code></td><td>✓</td></tr>
+      <tr><td>不重叠</td><td><code>offset=3 &gt; prev_end=-1</code></td><td>✓，更新 <code>prev_end = 3+4-1 = 6</code></td></tr>
+    </tbody>
+  </table>
+  <p>五关全过，进入 merge：把 <code>out</code> 的第 3、4、5、6 行换成 <code>V</code> 的第 0、1、2、3 行。下面是这一步的执行图。</p>
+
+  <div class="callout note" style="border-left-color:var(--decode)">
+    <div class="callout-title">合并执行图：占位行被视觉向量逐位替换（其余行不动）</div>
+    <div style="font-family:var(--mono);font-size:.78rem;margin-top:6px">
+      <div style="color:var(--fg-dim);margin-bottom:3px">text_embeds (8×32) — 查表得到，PAD 行的值无所谓：</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">
+        <div style="border:2px solid var(--running);border-radius:6px;padding:5px 7px">pos0<br>BOS</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:5px 7px">pos1<br>H</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:5px 7px">pos2<br>i</div>
+        <div style="border:2px dashed var(--fg-dim);border-radius:6px;padding:5px 7px;color:var(--fg-dim)">pos3<br>PAD</div>
+        <div style="border:2px dashed var(--fg-dim);border-radius:6px;padding:5px 7px;color:var(--fg-dim)">pos4<br>PAD</div>
+        <div style="border:2px dashed var(--fg-dim);border-radius:6px;padding:5px 7px;color:var(--fg-dim)">pos5<br>PAD</div>
+        <div style="border:2px dashed var(--fg-dim);border-radius:6px;padding:5px 7px;color:var(--fg-dim)">pos6<br>PAD</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:5px 7px">pos7<br>?</div>
+      </div>
+      <div style="text-align:center;font-size:1.3rem;margin:4px 0">↓ merge：out[3..6] ← V[0..3]</div>
+      <div style="color:var(--fg-dim);margin-bottom:3px">out (8×32) — 只有 [3,7) 变了：</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">
+        <div style="border:2px solid var(--running);border-radius:6px;padding:5px 7px">pos0<br>BOS</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:5px 7px">pos1<br>H</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:5px 7px">pos2<br>i</div>
+        <div style="border:2px solid var(--decode);border-radius:6px;padding:5px 7px">pos3<br>V[0]</div>
+        <div style="border:2px solid var(--decode);border-radius:6px;padding:5px 7px">pos4<br>V[1]</div>
+        <div style="border:2px solid var(--decode);border-radius:6px;padding:5px 7px">pos5<br>V[2]</div>
+        <div style="border:2px solid var(--decode);border-radius:6px;padding:5px 7px">pos6<br>V[3]</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:5px 7px">pos7<br>?</div>
+      </div>
+    </div>
+    <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+      虚线灰框 = 占位 PAD（值无所谓）；实线蓝框 = 被换上的视觉向量；实线橙框 = 保持原样的文本 token。</div>
+  </div>
+
+  <p><strong>例 2（双图，看顺序与重叠）：</strong>序列 <code>BOS a &lt;图0&gt; b &lt;图1&gt; c</code>，
+     <code>seq=12</code>，两段占位 <code>PR(offset=2, length=4, media_index=0)</code> 与
+     <code>PR(offset=7, length=4, media_index=1)</code>，<code>media_visual_lens=[4,4]</code>。走「不重叠」检查：</p>
+  <table>
+    <thead><tr><th>k</th><th>区间 [offset, offset+length)</th><th><code>offset &gt; prev_end</code>？</th><th>更新 prev_end = offset+length-1</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>[2, 6)</td><td><code>2 &gt; -1</code> ✓</td><td><code>2+4-1 = 5</code></td></tr>
+      <tr><td>1</td><td>[7, 11)</td><td><code>7 &gt; 5</code> ✓（中间隔着 pos6 的 "b"）</td><td><code>7+4-1 = 10</code></td></tr>
+    </tbody>
+  </table>
+  <p>若第二张图误写成 <code>offset=5</code>，则 <code>5 &gt; prev_end=5</code> 不成立（<code>5 &lt;= 5</code>），
+     触发「区间重叠」报错——因为 pos 5 被两张图同时认领了。</p>
+
+  <h2 id="checks">五道校验闸门逐条拆解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p><code>validate_placeholders(ranges, media_visual_lens, seq_len)</code> 按顺序设了 5 道闸（对应源码第 26–44 行），
+     任何一道不过就抛出<strong>带定位信息</strong>的 <code>ValueError</code>：</p>
+  <table>
+    <thead><tr><th>#</th><th>闸门</th><th>判据（源码）</th><th>拦住什么</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>数量一致</td><td><code>len(ranges) == len(media_visual_lens)</code></td><td>占位段数 ≠ 媒体数（多传/漏传一张图）</td></tr>
+      <tr><td>2</td><td>顺序正确</td><td><code>r.media_index == k</code>（第 k 段就该指向媒体 k）</td><td>占位顺序和媒体顺序对不上</td></tr>
+      <tr><td>3</td><td>长度匹配</td><td><code>r.length == media_visual_lens[k]</code></td><td>占位行数 ≠ 该图 visual token 数（如 3≠4）</td></tr>
+      <tr><td>4</td><td>不越界</td><td><code>0 ≤ offset</code> 且 <code>offset+length ≤ seq_len</code></td><td>区间超出序列（尾部溢出/负起点）</td></tr>
+      <tr><td>5</td><td>不重叠</td><td><code>offset &gt; prev_end</code>（上段闭区间终点）</td><td>两段占位抢同一行</td></tr>
+    </tbody>
+  </table>
+  <div class="callout tip"><div class="callout-title">为什么顺序这么重要</div>
+    第 2 关要求「第 k 个 placeholder 的 <code>media_index</code> 恰好是 k」。这保证 <code>ranges[k]</code> 与
+    <code>visual_embeds[k]</code> 是<strong>下标一一对应</strong>的——merge 里直接用 <code>vis = visual_embeds[k]</code>
+    去填 <code>ranges[k]</code>。一旦顺序乱了，就会「图 0 的向量填进图 1 的座位」，静默贴错。</div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「占位用哪个 token、它的 embedding 是什么，得算准」</td><td>无所谓。占位那几行整行都会被视觉向量<strong>覆盖</strong>，原值再也不参与计算。本课随手用 <code>PAD</code> 只是为了占位方便。</td></tr>
+      <tr><td>「图片会被 tokenizer 变成一些特殊 token id」</td><td>不会。图片走的是<strong>另一条路</strong>（视觉编码器 → projector → 视觉向量），token 序列里只是<strong>预留 4 个空位</strong>，真正的信息在 merge 时才注入 embedding 层。</td></tr>
+      <tr><td>「一张图固定就是 1 个 token」</td><td>本课一张图 = <code>num_patches = 4</code> 个 token（grid 2×2）。图越大 / patch 越小，token 越多；<code>length</code> 必须等于这个数，不是恒为 1。</td></tr>
+      <tr><td>「视觉向量维度和文本不一样也能塞」</td><td>不行。合并进的是同一张 <code>(seq, 32)</code> 矩阵，视觉向量必须先被 projector 投到 <code>text_hidden=32</code>；否则 merge 里 <code>len(vis[0]) != hidden</code> 直接报错。</td></tr>
+      <tr><td>「校验会顺手帮我补齐/纠正对不上的地方」</td><td>不会。<code>validate_placeholders</code> 只<strong>发现并抛错</strong>，不改数据。对齐必须在上游 parse 时就正确。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>本课讲的概念</th><th>对应代码</th></tr></thead>
+    <tbody>
+      <tr><td>占位登记条（offset/length/media_index/modality）</td><td><code>PlaceholderRange</code>（<code>placeholders.py</code> 第 15–20 行）</td></tr>
+      <tr><td>5 道校验闸门（数量/顺序/长度/越界/重叠）</td><td><code>validate_placeholders()</code>（<code>placeholders.py</code> 第 23–44 行）</td></tr>
+      <tr><td>逐位替换 <code>out[offset+i] = vis[i]</code></td><td><code>merge_multimodal_embeddings()</code> 的双层循环（<code>embedding_merge.py</code> 第 29–36 行）</td></tr>
+      <tr><td>视觉维度必须 = text_hidden 的检查</td><td><code>embedding_merge.py</code> 第 31–34 行（<code>len(vis[0]) != hidden</code>）</td></tr>
+      <tr><td>合并前先调校验</td><td><code>embedding_merge.py</code> 第 27 行调用 <code>validate_placeholders(...)</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a23">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>视觉 embedding 如何精确替换占位、且不出对齐错误？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 23
+python3 course.py run 23 --trace
+python3 course.py check 23</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 23` 看合并与错误检测。</details>
+    <details><summary>提示 Level 2 · 位置</summary>占位处 embedding 被视觉 embedding 逐位替换。</details>
+    <details><summary>提示 Level 3 · 机制</summary>对齐错误（数量/长度/越界/重叠）必须报错。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>视觉 embedding 维度须等于 text_hidden。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>数量不一致</td><td>占位与媒体不匹配</td><td>validate 会报错并定位</td></tr><tr><td>长度不符</td><td>visual token 数算错</td><td>长度=该媒体 visual token 数</td></tr><tr><td>维度不符</td><td>projector 没对齐</td><td>视觉 embedding 维度=text_hidden</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 23 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>如果两张图的占位区间重叠会发生什么？为什么必须禁止？</li><li>为什么占位 token 本身的 embedding 值无关紧要？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>merge_multimodal_embeddings</td><td>vLLM embedding merge</td><td>逐位替换一致</td><td>真实按 PlaceholderRange 批量合并</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>PlaceholderRange、merge_multimodal_embeddings、单图/多图/越界/顺序错误的对齐校验。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="23">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_24.html">下一步：Lesson 24 · Multimodal Prefill 与 Text Decode →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 23 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a23", {stages: [{title:"文本 embedding 查表", detail:"占位 token 的 embedding 无所谓"},{title:"校验对齐", detail:"数量/长度/越界/重叠/顺序"},{title:"逐位替换", detail:"占位区间 ← 视觉 embedding"},{title:"合并结果", detail:"(seq, hidden) 供 prefill"}]});
+</script>
+</body>
+</html>

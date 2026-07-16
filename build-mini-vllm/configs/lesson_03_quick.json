@@ -1,0 +1,5 @@
+{
+  "_comment": "Lesson 3：加载 tiny_text checkpoint，对 prompt 做一次前向。",
+  "checkpoint": "assets/checkpoints/tiny_text.json",
+  "prompt": "Hello"
+}

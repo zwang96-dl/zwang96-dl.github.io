@@ -1,0 +1,4 @@
+{"_comment":"Lesson 15：长 prompt + 短请求，比较开/关 chunked prefill 对短请求 TTFT 的影响。",
+ "block_size":8,"max_num_seqs":2,"max_num_batched_tokens":8,"short_id":"short",
+ "requests":[{"id":"long","prompt":"The quick brown fox jumps over the lazy dog again today","max_new_tokens":4,"arrival":0},
+             {"id":"short","prompt":"Hi","max_new_tokens":6,"arrival":0}]}

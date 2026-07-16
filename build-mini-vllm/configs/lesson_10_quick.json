@@ -1,0 +1,5 @@
+{"_comment":"Lesson 10：错峰到达的请求，演示 continuous batching。",
+ "block_size":8,"num_blocks":64,"max_num_seqs":3,"max_num_batched_tokens":64,
+ "requests":[{"id":"A","prompt":"Hello there","max_new_tokens":6,"arrival":0},
+             {"id":"B","prompt":"Hi","max_new_tokens":4,"arrival":1},
+             {"id":"C","prompt":"The fox","max_new_tokens":5,"arrival":3}]}

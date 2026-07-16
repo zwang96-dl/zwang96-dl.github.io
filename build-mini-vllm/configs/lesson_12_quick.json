@@ -1,0 +1,2 @@
+{"_comment":"Lesson 12：连续预留 vs 分页的碎片对比。",
+ "max_seq_len":64,"block_size":8,"seq_lens":[5,12,3,20,7]}

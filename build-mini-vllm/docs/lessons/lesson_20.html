@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 20 · 图片如何变成 Tensor — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="RGB、resize/crop/pad、normalize、channel-last vs channel-first、dtype。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 20</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 20 · 图片如何变成 Tensor <span class="phase-badge phase-learn">Phase 4</span></h1>
+  <p>模型只吃张量；不理解图片如何变成张量，多模态就无从谈起。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>RGB、resize/crop/pad、normalize、channel-last vs channel-first、dtype。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/image_processor.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/multimodal/image_processor.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>TinyImageProcessor.preprocess()</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 20</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 20</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 19</dd>
+        <dt>完成后下一步</dt><dd>Lesson 21</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>神经网络里没有「图片」这种东西——它只会做<strong>矩阵乘法</strong>。所以一张 JPG／PNG 必须先被翻译成一块
+     <strong>形状固定、数值规整的浮点张量</strong>，模型才看得懂。这一步叫<strong>图像预处理（image preprocessing）</strong>，
+     是整条多模态主线的入口：图片先在这里变成张量，下一课（<a href="lesson_21.html">Lesson 21</a>）才能把它切成
+     <code>patch_size=8</code>、<code>grid=2×2</code> 的 <strong>4 个 visual token</strong>，再和文本 token 拼在一起喂进模型。
+     入口错了，后面全错，所以这一课要把「一张图到底怎么变成一串数」彻底讲透。</p>
+
+  <h2 id="problem">先看问题：直接把原图喂给模型会怎样 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课视觉塔的输入是<strong>写死</strong>的：<code>image_size=16</code>，即它只接受一张
+     <code>16×16×3</code> 的图（3 是 RGB 三个颜色通道）。可现实里用户上传的图<strong>什么尺寸都有</strong>。
+     假设来了三张图：</p>
+  <table>
+    <thead><tr><th>用户的原图</th><th>形状 (H, W, 3)</th><th>像素值</th><th>直接喂进去会怎样</th></tr></thead>
+    <tbody>
+      <tr><td>一张小图标</td><td>(8, 8, 3)</td><td>整数 0..255</td><td>只有 192 个数，喂不满 768 个位置 → 形状对不上，报错</td></tr>
+      <tr><td>一张手机照片</td><td>(3000, 4000, 3)</td><td>整数 0..255</td><td>3600 万个数，权重矩阵是按 16×16 设计的 → 形状对不上，报错</td></tr>
+      <tr><td>同一张照片</td><td>(3000, 4000, 3)</td><td>整数 0..255</td><td>就算形状对，<code>0..255</code> 这么大的整数会让第一层输出爆到几千 → 训练/数值不稳</td></tr>
+    </tbody>
+  </table>
+  <p>两个硬问题浮出水面：<strong>①尺寸不统一</strong>（模型要固定形状），<strong>②数值不规整</strong>
+     （<code>uint8</code> 的 0..255 太大、且是整数）。预处理就是专门解决这两件事——把任意
+     <code>(H, W, 3)</code> 的整数图，统一成 <code>(16, 16, 3)</code> 的、数值落在 <code>[-1, 1]</code> 附近的浮点张量。</p>
+
+  <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    图像预处理 = 把「五花八门的原图」统一裁成模型的<strong>标准证件照</strong>：
+    尺寸固定（resize）、颜色刻度统一（normalize）、并按模型习惯的顺序摆放数字（channel layout）。</div>
+  <p><strong>类比：办证件照。</strong>照相馆不管你本人多高、穿什么，都会把你拍成同一规格
+     （比如 <code>16×16</code>）、同一底色、同一亮度范围的照片——因为后台系统只认这一种规格。
+     模型就是那个「只认标准规格」的后台系统。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    证件照会尽量「拍得好看」，但预处理<strong>不追求好看，只追求一致与稳定</strong>：
+    它可能把图拉变形、把颜色压成 <code>[-1,1]</code> 的抽象数值——人眼看着别扭，模型却正好需要。
+    另外，<strong>训练时用什么 <code>mean/std</code>、什么 <code>image_size</code>，推理时必须一模一样</strong>，
+    否则等于给模型看了一张「没见过规格」的照片，结果会明显变差。</div>
+
+  <h2 id="pipeline">精确定义：预处理四步流水线 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课 <code>TinyImageProcessor</code> 把原图变成张量，走的是下面四步。每一步只做一件事，
+     形状／dtype 的变化都用<strong>本模型的真实数字</strong>标出（<code>image_size=16</code>，<code>mean=std=0.5</code>）：</p>
+  <table>
+    <thead><tr><th>步骤</th><th>做什么</th><th>形状变化</th><th>dtype</th></tr></thead>
+    <tbody>
+      <tr><td>① 原图</td><td>用户输入，RGB 三通道</td><td><code>(H, W, 3)</code> 任意</td><td>uint8 整数 0..255</td></tr>
+      <tr><td>② resize</td><td>最近邻缩放到固定边长</td><td><code>(H, W, 3) → (16, 16, 3)</code></td><td>uint8 整数 0..255</td></tr>
+      <tr><td>③ normalize</td><td>逐通道 <code>(x/255 − mean)/std</code></td><td><code>(16, 16, 3)</code> 不变</td><td><strong>浮点</strong>，落在 [-1, 1]</td></tr>
+      <tr><td>④ layout</td><td>重排成 channel-first</td><td><code>(16,16,3) → (3, 16, 16)</code></td><td>浮点</td></tr>
+    </tbody>
+  </table>
+  <p><strong>normalize 公式逐符号拆解：</strong></p>
+  <math display="block" class="mathblock">
+    <msub><mi>x_norm</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>c</mi></mrow></msub>
+    <mo>=</mo>
+    <mfrac>
+      <mrow>
+        <mfrac>
+          <msub><mi>x</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>c</mi></mrow></msub>
+          <mn>255</mn>
+        </mfrac>
+        <mo>−</mo>
+        <msub><mi>mean</mi><mi>c</mi></msub>
+      </mrow>
+      <msub><mi>std</mi><mi>c</mi></msub>
+    </mfrac>
+  </math>
+  <ul>
+    <li><code>x[i][j][c]</code>：第 <code>i</code> 行、第 <code>j</code> 列、第 <code>c</code> 个通道（c=0/1/2 即 R/G/B）的原始像素，整数 0..255。</li>
+    <li><code>/ 255</code>：先把 0..255 压到 <strong>0..1</strong>（这一步就已经从整数变成浮点了）。</li>
+    <li><code>− mean[c]</code>：减去该通道的均值，把数据「挪到 0 附近」（本课 <code>mean=0.5</code>，即减 0.5）。</li>
+    <li><code>/ std[c]</code>：除以该通道的标准差，把数据「拉到统一尺度」（本课 <code>std=0.5</code>，即除 0.5，相当于 ×2）。</li>
+  </ul>
+  <div class="callout note"><div class="callout-title">本课的巧合：mean=std=0.5 恰好是「[0,255] → [-1,1]」的线性映射</div>
+    代入 <code>mean=std=0.5</code>：<code>x_norm = (x/255 − 0.5) / 0.5 = x/255·2 − 1</code>。
+    于是像素 <code>0 → −1</code>、<code>255 → +1</code>、正中间的 <code>127.5 → 0</code>。
+    整张图的数值被稳稳压进 <code>[-1, 1]</code>——第一层再乘权重也不会爆。</div>
+
+  <h2 id="worked">小规模手算：一张 2×2 小图走完全程 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>真实是 16×16 太大，这里用一张 <code>2×2</code> 的小图、并假设 <code>image_size=4</code>（放大）来把每一步算清楚。
+     原图（<code>(H,W,3)=(2,2,3)</code>，只写出来方便看）：</p>
+  <pre><code>原图 img (2×2)，每格是 (R,G,B)：
+  位置(0,0)=(  0,  0,  0)    位置(0,1)=(255,255,255)
+  位置(1,0)=(204,  0,  0)    位置(1,1)=(128,128,128)</code></pre>
+
+  <p><strong>第 ② 步 resize（最近邻，2×2 → 4×4）。</strong>代码里
+     <code>src_i = min(H−1, int(i·H/size))</code>。当 <code>H=2, size=4</code> 时，四个输出行分别取自源行：</p>
+  <table>
+    <thead><tr><th>输出行 i</th><th>i·H/size = i·2/4</th><th>int(...) = src_i</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>0.0</td><td>0</td></tr>
+      <tr><td>1</td><td>0.5</td><td>0</td></tr>
+      <tr><td>2</td><td>1.0</td><td>1</td></tr>
+      <tr><td>3</td><td>1.5</td><td>1</td></tr>
+    </tbody>
+  </table>
+  <p>所以行的取法是 <code>[0, 0, 1, 1]</code>，列同理。「最近邻」就是这么朴素：<strong>不做插值、不算平均，
+     直接抄最近那个源像素</strong>，于是放大时每个像素被<strong>复制成一块</strong>。缩小时则会<strong>丢弃</strong>没被选中的像素。</p>
+
+  <p><strong>第 ③ 步 normalize（<code>mean=std=0.5</code>）。</strong>只看 R 通道的几个代表值，套
+     <code>x_norm = x/255·2 − 1</code>：</p>
+  <table>
+    <thead><tr><th>原始像素 x</th><th>x/255</th><th>x/255 − 0.5</th><th>÷ 0.5 → x_norm</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>0.000</td><td>−0.500</td><td><strong>−1.00</strong></td></tr>
+      <tr><td>128</td><td>0.502</td><td>+0.002</td><td><strong>≈ 0.00</strong></td></tr>
+      <tr><td>204</td><td>0.800</td><td>+0.300</td><td><strong>+0.60</strong></td></tr>
+      <tr><td>255</td><td>1.000</td><td>+0.500</td><td><strong>+1.00</strong></td></tr>
+    </tbody>
+  </table>
+  <p>看到没：黑（0）变 −1、白（255）变 +1、中灰（128）变 0。整数被换成了对称、以 0 为中心的浮点——
+     这正是模型最喜欢的数值分布。</p>
+
+  <div class="callout note" style="border-left-color:var(--running)">
+    <div class="callout-title">整条流水线的执行图（形状 / dtype 一路怎么变）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem;margin-top:6px">
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 10px">原图<br>(H,W,3)<br><span style="color:var(--fg-dim)">uint8 0..255</span></div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px dashed var(--running);border-radius:6px;padding:6px 10px">resize<br>(16,16,3)<br><span style="color:var(--fg-dim)">uint8 0..255</span></div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px dashed var(--decode);border-radius:6px;padding:6px 10px">normalize<br>(16,16,3)<br><span style="color:var(--fg-dim)">float [-1,1]</span></div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px">layout<br>(3,16,16)<br><span style="color:var(--fg-dim)">float [-1,1]</span></div>
+    </div>
+    <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+      注意：<strong>只有 resize 改形状里的 H/W</strong>，<strong>只有 normalize 改 dtype 与数值范围</strong>，
+      <strong>只有 layout 改轴的顺序</strong>——每步职责单一，出错时好定位。</div>
+  </div>
+
+  <h2 id="layout">channel-last 与 channel-first：同样的数，不同的摆法 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>normalize 之后有 <code>16×16×3 = 768</code> 个浮点数，它们的<strong>值一个都不变</strong>，
+     变的只是「按什么顺序把它们排进张量的轴里」。两种主流约定：</p>
+  <ul>
+    <li><strong>channel-last <code>(H, W, 3)</code></strong>：先定位到一个像素 <code>(i,j)</code>，那个像素的 R/G/B 三个数<strong>挨在一起</strong>。图片文件、Pillow、多数图像库用这种。</li>
+    <li><strong>channel-first <code>(3, H, W)</code></strong>：先按通道分成 R 平面、G 平面、B 平面三张「单色图」<strong>叠起来</strong>。PyTorch 卷积和多数视觉模型用这种。</li>
+  </ul>
+  <p>用一张 <code>2×2</code> 图（4 个像素，记作 P00 P01 P10 P11，每个含 r/g/b）看两种摆法：</p>
+  <div style="display:flex;flex-wrap:wrap;gap:18px;margin:8px 0;font-family:var(--mono);font-size:.75rem">
+    <div>
+      <div style="font-weight:bold;margin-bottom:4px">channel-last (H,W,3)：按像素分组</div>
+      <div style="display:flex;gap:4px">
+        <div style="border:2px solid var(--running);border-radius:6px;padding:4px 6px">P00:[r,g,b]</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:4px 6px">P01:[r,g,b]</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:4px 6px">P10:[r,g,b]</div>
+        <div style="border:2px solid var(--running);border-radius:6px;padding:4px 6px">P11:[r,g,b]</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-weight:bold;margin-bottom:4px">channel-first (3,H,W)：按颜色分平面</div>
+      <div style="display:flex;gap:4px">
+        <div style="border:2px solid #d33;border-radius:6px;padding:4px 6px;background:color-mix(in srgb,#d33 12%,var(--bg))">R 平面<br>[r00 r01 r10 r11]</div>
+        <div style="border:2px solid #2a2;border-radius:6px;padding:4px 6px;background:color-mix(in srgb,#2a2 12%,var(--bg))">G 平面<br>[g00 g01 g10 g11]</div>
+        <div style="border:2px solid #36c;border-radius:6px;padding:4px 6px;background:color-mix(in srgb,#36c 12%,var(--bg))">B 平面<br>[b00 b01 b10 b11]</div>
+      </div>
+    </div>
+  </div>
+  <div class="callout tip"><div class="callout-title">怎么记轴的顺序</div>
+    形状元组从左到右 = 「先按哪个轴分大块，再按哪个轴分小块」。
+    <code>(3,16,16)</code> = 先分 3 个通道大块，每块里再是 16×16 的空间网格；
+    <code>(16,16,3)</code> = 先铺 16×16 的空间网格，每格里再放 3 个通道。同一批数，只是嵌套顺序不同。</div>
+
+  <h2 id="dtype">dtype：为什么必须从 uint8 变成浮点 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p><code>dtype</code>（数据类型）决定「一个数怎么存、能表示什么」。原图是 <code>uint8</code>：无符号 8 位整数，
+     只能表示 <code>0..255</code> 的整数，<strong>每个数占 1 字节</strong>。但模型的权重是浮点、梯度是小数，
+     算 <code>(x/255 − 0.5)/0.5</code> 得到的 <code>−1.0 / 0.6</code> 这类值，<strong>整数根本存不下</strong>。</p>
+  <table>
+    <thead><tr><th></th><th>uint8（原图）</th><th>浮点（预处理后）</th></tr></thead>
+    <tbody>
+      <tr><td>能表示的值</td><td>整数 0..255</td><td>带小数，如 −1.0、0.004、0.6</td></tr>
+      <tr><td>典型范围</td><td>0 .. 255</td><td>本课约 [-1, 1]</td></tr>
+      <tr><td>用途</td><td>紧凑存原始像素</td><td>参与矩阵乘法 / 反向传播</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn"><div class="callout-title">顺序不能反</div>
+    normalize 里的 <code>/255</code> 一定要在<strong>浮点</strong>下算。若先按整数除，<code>128 / 255</code> 会被截断成
+    <code>0</code>，整张图直接塌成常数——这是新手最常踩的坑。本课代码用 <code>/ 255.0</code>（带小数点）
+    强制走浮点除法，正是为了避开它。</div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「resize 会把图片变清晰／补出细节」</td><td>恰恰相反。最近邻 resize <strong>只会复制或丢弃</strong>已有像素：放大是复制成块（有锯齿），缩小是直接扔掉没选中的像素（丢信息），从不「凭空补细节」。</td></tr>
+      <tr><td>「normalize 只是把值缩小，可有可无」</td><td>它是把数据<strong>移到 0 附近、拉到统一尺度</strong>，让第一层输出不爆、梯度稳定。而且推理必须用<strong>和训练相同的 mean/std</strong>，否则相当于喂了没见过规格的图，结果明显变差。</td></tr>
+      <tr><td>「channel-first 和 channel-last 是两份不同的数据」</td><td>是<strong>同一批 768 个数</strong>，值一模一样，只是排进张量的<strong>轴顺序</strong>不同。喂给模型时必须匹配模型期望的那一种，否则通道会被当成空间维、算出乱码。</td></tr>
+      <tr><td>「保持 uint8 更省内存，没必要转浮点」</td><td>模型的乘加运算需要小数。若不转浮点，<code>x/255</code> 这类除法会被整数截断（<code>128/255→0</code>），整张图塌成常数——省的那点内存换来的是完全错误的输入。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>上面四步全部落在 <code>mini_vllm/multimodal/image_processor.py</code> 的
+     <code>TinyImageProcessor.preprocess()</code> 里，一一对应：</p>
+  <pre><code>def preprocess(self, img):
+    s = self.image_size                       # = 16，模型固定输入边长
+    resized = self._resize_nearest(img, s)    # ② resize：最近邻 (H,W,3) → (16,16,3)
+    # ③ normalize：逐通道 (x/255 − mean)/std，注意 /255.0 强制浮点
+    hwc = [[[ (resized[i][j][c] / 255.0 - self.mean[c]) / self.std[c]
+              for c in range(3)] for j in range(s)] for i in range(s)]   # channel-last (16,16,3)
+    # ④ layout：把最内层的通道轴提到最外层
+    chw = [[[hwc[i][j][c] for j in range(s)] for i in range(s)] for c in range(3)]  # (3,16,16)
+    return ProcessedImage(size=s, pixels_norm_hwc=hwc, pixels_norm_chw=chw, meta={...})</code></pre>
+  <ul>
+    <li><code>_resize_nearest</code> 里的 <code>src_i = min(h−1, int(i*h/size))</code> 就是手算表里那列取整——纯整数下标运算，无插值。</li>
+    <li>normalize 那行三重推导式对应公式 <code>(x/255 − mean[c])/std[c]</code>，<code>/ 255.0</code> 的小数点即上文「dtype 不能反」的关键。</li>
+    <li><code>hwc</code>／<code>chw</code> 两个变量就是本课两种布局；<code>preprocess</code> <strong>两种都返回</strong>，方便你在动画和 <code>run 20</code> 里对照同一批数的不同摆法。</li>
+  </ul>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a20">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>图片如何从像素变成模型能吃的 Tensor？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 20
+python3 course.py run 20 --trace
+python3 course.py check 20</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 20` 看 resize/normalize/layout。</details>
+    <details><summary>提示 Level 2 · 位置</summary>像素用嵌套 list 表示，无需 Pillow。</details>
+    <details><summary>提示 Level 3 · 机制</summary>channel-first=(3,S,S)，channel-last=(S,S,3)。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>normalize：(x/255−mean)/std。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>忘了 normalize</td><td>数值范围不稳</td><td>统一 (x/255−mean)/std</td></tr><tr><td>布局搞反</td><td>C 与 H/W 混淆</td><td>明确 (3,S,S) vs (S,S,3)</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 20 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>resize/crop/pad 各在什么场景下用？</li><li>为什么要 normalize？不做会怎样？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>TinyImageProcessor</td><td>HF ImageProcessor</td><td>resize/normalize/layout 一致</td><td>真实支持多分辨率、动态切分</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>RGB、resize/crop/pad、normalize、channel-last vs channel-first、dtype。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="20">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_21.html">下一步：Lesson 21 · 图片如何变成 Patch Token →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 20 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a20", {stages: [{title:"原图 (H,W,3) uint8", detail:"0..255 RGB"},{title:"resize 到正方形", detail:"最近邻到 image_size"},{title:"normalize", detail:"(x/255 − mean) / std"},{title:"布局", detail:"channel-last (H,W,3) / channel-first (3,H,W)"}]});
+</script>
+</body>
+</html>

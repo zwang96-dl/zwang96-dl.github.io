@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 29 · 完整 Tiny Multimodal Engine — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="端到端：text/单图/多图/视频/mixed batch/三层缓存/continuous batching/visual budget。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 29</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 29 · 完整 Tiny Multimodal Engine <span class="phase-badge phase-learn">Phase 6</span></h1>
+  <p>端到端引擎把多模态的一切串起来，是本课程的集大成。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>端到端：text/单图/多图/视频/mixed batch/三层缓存/continuous batching/visual budget。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/mm_engine.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/multimodal/mm_engine.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>MultiModalEngine</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 29</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 29</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 28</dd>
+        <dt>完成后下一步</dt><dd>Lesson 30</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>前面十几课把多模态拆成了一地零件：chat template、image processor、vision encoder + projector、
+     embedding 合并、三层缓存、以及上一课的 <a href="lesson_28.html">visual budget</a>。每一件单独都能跑，
+     但<strong>真实服务收到的从来不是单个请求</strong>，而是同一刻涌进来的一批：有的纯文本、有的带一张图、
+     有的带好几张图、有的带一段视频。本课就是把这些零件装进<strong>一个能同时喂多种请求、还不出错的引擎</strong>——
+     <code>MultiModalEngine</code>，这是整条多模态主线的集大成。</p>
+  <p>难点不在「能跑」，而在<strong>三条红线一条都不能踩</strong>：① 视觉编码器绝不能在 decode 阶段被重复调用；
+     ② 一个请求的视觉 embedding 绝不能串到另一个请求；③ 显存/算力绝不能被一个带视频的大请求吃光、饿死别人。
+     这一课就是把这三条红线焊死，并用一份端到端报告（encoder 运行数 / 缓存命中 / 视觉 token / TTFT）证明它们成立。</p>
+
+  <h2 id="problem">先看问题：mixed batch 朴素跑法会崩在哪 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>先用本课的真实视觉配置把「一批请求」量化。图片 <code>image_size=16</code>、<code>patch_size=8</code>，
+     切成 <code>2×2 = 4</code> 个 patch，所以<strong>一张图 = 4 个 visual token</strong>；视频默认抽 4 帧、每帧当一张图，
+     即 <code>4 帧 × 4 = 16 个 visual token</code>。每个 visual token 都是一条 <code>text_hidden=32</code> 维向量，
+     和文本 token 一样<strong>占一个序列位置、进一份 KV Cache</strong>。下表是四类请求的成本：</p>
+  <table>
+    <thead><tr><th>请求类型</th><th>序列里的 visual token</th><th>需要跑几次 vision encoder</th></tr></thead>
+    <tbody>
+      <tr><td>text-only（纯文本）</td><td>0</td><td>0</td></tr>
+      <tr><td>单图</td><td>4（2×2 grid）</td><td>1</td></tr>
+      <tr><td>多图（2 张）</td><td>8</td><td>2</td></tr>
+      <tr><td>视频（4 帧）</td><td>16</td><td>4（逐帧编码）</td></tr>
+    </tbody>
+  </table>
+  <p>如果不用引擎、拿单请求的思路硬套，三处会立刻崩：</p>
+  <ul>
+    <li><strong>重复编码</strong>：视觉编码是最贵的一步。若每个 decode step 都重跑 encoder，一个视频请求生成 20 个 token 就要
+        <code>4 帧 × 20 步 = 80</code> 次编码，而正确答案是<strong>只在 prefill 编码 4 次</strong>——足足 20 倍的浪费。</li>
+    <li><strong>跨请求串视觉 embedding</strong>：若几个请求共享同一份状态/KV，带图请求 B 的视觉向量会「漏」进纯文本请求 A，
+        A 会答出它根本没见过的图。这类 bug 极隐蔽，只有把每个请求隔离才能杜绝。</li>
+    <li><strong>大请求吃光资源</strong>：4 个视频请求一次全放进来就是 <code>4 × 16 = 64</code> 个 visual token 同时占 KV，
+        外加 <code>4 × 4 = 16</code> 次编码挤在一个迭代里，纯文本小请求被活活饿死、延迟爆炸。</li>
+  </ul>
+
+  <h2 id="intuition">一句话解释 + 直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    <code>MultiModalEngine</code> = 一个<strong>迭代级循环</strong>：每一步先推进正在跑的请求（纯文本 decode），
+    再按<strong>预算</strong>接纳新请求并做多模态 prefill（编码 + 合并 + 首 token），最后回收已完成的请求；
+    三层缓存让「一样的媒体」不必重复处理/编码。</div>
+  <p><strong>类比：一间忙碌餐厅的后厨。</strong>「三段式循环」就是主厨的节奏——先把<em>已经在灶上的菜</em>翻炒一下往前推
+     （decode），再看<em>还有没有余力接新单</em>（准入），接了单先做最费时的<em>备料</em>（prefill 里的视觉编码），
+     最后把<em>出好的菜端走清台</em>（回收）。三层缓存就是备料台：切好的同款配菜（ProcessorCache）、
+     炒好的同款浇头（EncoderOutputCache）不必重做。预算就是灶眼和砧板的数量，防止一张大桌子占满全部工位。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    后厨可以把两桌相同的菜合并成一锅炒；但引擎<strong>绝不能把两个请求的视觉 embedding 合并/共享</strong>——
+    缓存命中复用的只是「同一份媒体的编码结果」（只读、纯函数产物），每个请求仍各持<strong>独立的 KV Cache</strong>，
+    上下文互不相通。「复用编码结果」≠「共享上下文」，这正是红线②。</div>
+
+  <h2 id="def">精确定义：三段式主循环 + 预算门 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p><code>MultiModalEngine.run()</code> 是一个 while 循环，只要还有 <code>waiting</code> 或 <code>running</code> 就继续。
+     每一轮 <code>it</code> 严格按顺序做三件事：</p>
+  <table>
+    <thead><tr><th>阶段</th><th>做什么</th><th>受哪个预算约束</th><th>形状 / 数字</th></tr></thead>
+    <tbody>
+      <tr><td>① decode</td><td>对每个 <code>prefill_done</code> 且未完成的 running 请求，喂<strong>上一个输出 token</strong>前进一格
+        <code>forward([last],[cur],kv)</code>，各产 1 个新 token</td><td><code>text_token_budget=64</code>：每请求每轮 1 个文本 token</td>
+        <td>输入 1 个 token → logits <code>(1, vocab=259)</code></td></tr>
+      <tr><td>② 准入 + prefill</td><td>把到达的 waiting 按 <code>(arrival, id)</code> 排序，逐个用 <code>budget.fits(...)</code> 过门；
+        通过就 <code>_prefill</code>：跑 encoder（命中缓存则跳过）→ 合并 embedding → 整段 forward → 产<strong>首 token</strong></td>
+        <td><code>max_num_seqs=4</code>、<code>visual_token_budget=64</code>、<code>encoder_budget=4</code></td>
+        <td>merged embeds <code>(seq_len, 32)</code>；每图视觉块 <code>(4, 32)</code></td></tr>
+      <tr><td>③ 回收</td><td>把 <code>finished()</code>（已生成够 <code>max_new_tokens</code>）的请求移出 running、记 <code>finish_iter</code></td>
+        <td>—</td><td>释放该请求独立的 KV</td></tr>
+    </tbody>
+  </table>
+  <p>准入的门就是 <code>MultiModalBudget.fits</code>，逐符号看这三个不等式（<code>used_*</code> 是本轮已累计用量）：</p>
+  <pre><code>used_text    + text_tokens          &lt;= text_token_budget      # 文本 token 上限
+used_visual  + visual_tokens        &lt;= visual_token_budget    # 视觉 token 上限（占 KV 位置）
+used_encoder + num_media_to_encode  &lt;= encoder_budget         # 本轮编码的媒体段数上限</code></pre>
+  <div class="callout note"><div class="callout-title">两个容易忽略的工程细节</div>
+    <strong>(a)</strong> 准入调用是 <code>fits(0, visual, num_media, ...)</code>——<em>text_tokens 传 0</em>：prefill 自身的文本 token 不计入本预算，
+    <code>text_token_budget</code> 只用来限制①里 decode 的步数。<br>
+    <strong>(b)</strong> <code>num_media</code> 数的是<strong>媒体段数</strong>（一段视频算 1），而 <code>runner.encoder_runs</code> 数的是
+    真正逐帧/逐图的编码次数（一段 4 帧视频 = 4 次）。所以 encoder_budget 是个偏粗的算力代理。</div>
+
+  <h2 id="worked">小规模手算：2 个请求、2 次迭代 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>用最小的例子把循环走一遍。两个请求都在 <code>it=1</code> 到达：</p>
+  <ul>
+    <li><strong>A（纯文本）</strong>：prompt「你好」= 2 汉字 × 3 字节 = <strong>6 个文本 token</strong>（byte-level tokenizer），
+        visual=0，encoder=0，<code>max_new_tokens=2</code>。</li>
+    <li><strong>B（单图 + 文本）</strong>：一张图（4 visual token）+「看」（1 汉字 = 3 token），
+        序列 = <code>4 + 3 = 7</code> 个 token，encoder 要跑 1 次，<code>max_new_tokens=2</code>。</li>
+  </ul>
+  <table>
+    <thead><tr><th>迭代</th><th>① decode</th><th>② 准入 + prefill</th><th>③ 回收</th><th>累计 encoder_runs</th></tr></thead>
+    <tbody>
+      <tr><td><strong>it=1</strong></td><td>running 为空，无事</td>
+        <td>排序 [A,B]。A：fits(0,<b>0</b>,0,…)✓ → prefill（不跑 encoder）→ 产首 token，A.cur=6。
+            B：fits(0,<b>4</b>,<b>1</b>,…)✓（4≤64，1≤4）→ prefill 跑 encoder 1 次 → 产首 token，B.cur=7</td>
+        <td>A、B 都才 1 个输出（&lt;2），留在 running</td><td><strong>1</strong></td></tr>
+      <tr><td><strong>it=2</strong></td><td>A 前进 1 格（A.output=2 个），B 前进 1 格（B.output=2 个）；
+            <code>assert encoder_runs 不变</code> 守住红线①</td>
+        <td>waiting 已空</td><td>A、B 均达 <code>max_new_tokens=2</code> → 回收</td><td><strong>1</strong></td></tr>
+    </tbody>
+  </table>
+  <p>结果：<code>iterations=2</code>，<strong>encoder 全程只跑 1 次</strong>（都在 prefill，it=2 的 decode 一次都没碰它），
+     两个请求 <code>first_token_iter=1</code>（TTFT = 1 个迭代）。这就是引擎「对了」的样子。</p>
+
+  <div class="callout note"><div class="callout-title">一次迭代内部的执行图（decode → 准入/prefill → 回收）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;font-family:var(--mono);font-size:.8rem;margin-top:8px">
+      <div style="border:2px solid var(--decode);border-radius:8px;padding:8px 10px;flex:1;min-width:150px">
+        <b>① decode</b><br><span style="color:var(--fg-dim)">对每个 running：<br>forward([last],[cur],kv)<br>+1 token</span><br>
+        <span style="color:var(--decode)">encoder 不动 ✗</span></div>
+      <div style="align-self:center;font-size:1.3rem">→</div>
+      <div style="border:2px solid var(--running);border-radius:8px;padding:8px 10px;flex:1;min-width:170px;background:color-mix(in srgb,var(--running) 12%,var(--bg))">
+        <b>② 准入 + prefill</b><br><span style="color:var(--fg-dim)">budget.fits 过门<br>encoder（命中缓存则跳过）<br>合并 embedding → 整段 forward</span><br>
+        <span style="color:var(--running)">产首 token ✔</span></div>
+      <div style="align-self:center;font-size:1.3rem">→</div>
+      <div style="border:2px solid var(--finished);border-radius:8px;padding:8px 10px;flex:1;min-width:130px">
+        <b>③ 回收</b><br><span style="color:var(--fg-dim)">finished() 的请求<br>移出 running<br>释放其独立 KV</span></div>
+    </div>
+    <div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border,#8884);color:var(--fg-dim);font-size:.78rem">
+      左侧 mixed batch 扇入：
+      <span style="border:1px solid var(--border,#8886);border-radius:5px;padding:1px 6px">text</span>
+      <span style="border:1px solid var(--border,#8886);border-radius:5px;padding:1px 6px">单图·4</span>
+      <span style="border:1px solid var(--border,#8886);border-radius:5px;padding:1px 6px">多图·8</span>
+      <span style="border:1px solid var(--border,#8886);border-radius:5px;padding:1px 6px">视频·16</span>
+      → 由 ② 的预算门决定谁本轮进、谁排队。每个请求各持一份 KV，从不相通。
+    </div>
+  </div>
+
+  <h2 id="shape">形状与数字：visual token 与三层缓存 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>把一个单图请求 B 的数据流按形状走一遍（文本模型 <code>hidden=32</code>、<code>layers=2</code>、
+     <code>heads=4</code>、<code>kv_heads=2</code>、<code>head_dim=8</code>）：</p>
+  <table>
+    <thead><tr><th>步骤</th><th>输入形状</th><th>输出形状</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>vision encoder</td><td>像素 → <code>(4, 48)</code></td><td><code>(4, vision_hidden=48)</code></td><td>2×2=4 个 patch，各 48 维</td></tr>
+      <tr><td>projector</td><td><code>(4, 48)</code></td><td><code>(4, text_hidden=32)</code></td><td>把视觉维投影到文本维，才能和文本 embedding 拼接</td></tr>
+      <tr><td>合并 embedding</td><td>文本 <code>(7, 32)</code> + 视觉 <code>(4, 32)</code></td><td><code>(7, 32)</code></td><td>4 个占位位置被替换成视觉向量</td></tr>
+      <tr><td>prefill forward</td><td>merged <code>(7, 32)</code></td><td>logits <code>(7, 259)</code></td><td>取最后一行采样出首 token</td></tr>
+      <tr><td>该请求 KV</td><td>—</td><td>每 token <code>2·2·8·2 = 64</code> 数</td><td>7 token → <code>7×64 = 448</code> 数，<strong>B 私有</strong></td></tr>
+    </tbody>
+  </table>
+  <p>三层缓存各治一种重复，key 的粒度决定对错：</p>
+  <table>
+    <thead><tr><th>缓存</th><th>存什么</th><th>命中省掉什么</th><th>key 覆盖</th></tr></thead>
+    <tbody>
+      <tr><td>ProcessorCache</td><td>预处理后的像素/抽帧</td><td>resize/normalize</td><td>媒体内容 + processor 配置</td></tr>
+      <tr><td>EncoderOutputCache</td><td>投影后的视觉 embedding <code>(4,32)</code></td><td><strong>整段视觉编码</strong>（最贵）</td><td>再加 encoder/projector 身份 + dtype + schema 版本</td></tr>
+      <tr><td>LLM KV Cache</td><td>各层 K/V</td><td>历史 token 重算</td><td>每请求独立，不入上表两缓存</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn"><div class="callout-title">为什么 EncoderOutputCache 的 key 要那么细</div>
+    若换了 encoder/projector 或改了 dtype 却命中旧缓存，就会悄悄用<strong>错的</strong>视觉 embedding（stale cache bug）。
+    所以 key 必须把「一切会影响结果的因素」都算进去——这也是 <code>self.encoder_id</code> / <code>self.projector_id</code> 存在的原因。</div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「decode 时也要把图再编码一遍」</td><td>视觉信息在 prefill 已被 encoder 编码、合并进 KV。decode 是<strong>纯文本自回归</strong>，
+        代码里 <code>assert self.runner.encoder_runs == enc_before</code> 就是守这条红线①。重编码 = 20 倍浪费。</td></tr>
+      <tr><td>「缓存命中就相当于请求共享上下文」</td><td>命中的是<strong>同一份媒体的只读编码结果</strong>；每个请求仍有<strong>独立 KV</strong>，
+        上下文从不相通。复用编码 ≠ 共享上下文（红线②）。</td></tr>
+      <tr><td>「一个视频请求 = 1 个视觉 token」</td><td>视频按帧编码：4 帧 × 每帧 4 patch = <strong>16 个 visual token</strong>，每个都占序列位置、进 KV，
+        是纯文本请求成本的许多倍。</td></tr>
+      <tr><td>「visual token 只是算力开销，不占内存」</td><td>每个 visual token 和文本 token 一样占一个序列位置、进一份 KV Cache，
+        所以它同时进 <code>visual_token_budget</code> 与显存。</td></tr>
+      <tr><td>「encoder_budget=4 就是最多编码 4 帧」</td><td>它数的是<strong>媒体段数</strong>（一段视频算 1），不是帧数。真正逐帧的编码次数看 <code>encoder_runs</code>。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本节讲解全部对应 <code>mini_vllm/multimodal/mm_engine.py</code> 的 <code>MultiModalEngine</code>：</p>
+  <table>
+    <thead><tr><th>本节概念</th><th>代码位置</th></tr></thead>
+    <tbody>
+      <tr><td>三段式主循环</td><td><code>run()</code>：① decode 的 <code>for r in self.running</code>；② 准入的 <code>for r in sorted(...waiting...)</code>；③ 回收的 <code>still</code> 列表</td></tr>
+      <tr><td>红线①：decode 不跑 encoder</td><td><code>assert self.runner.encoder_runs == enc_before</code></td></tr>
+      <tr><td>红线②：每请求独立 KV</td><td><code>_prefill</code> 里 <code>r.kv = KVCache(self.model.cfg)</code>（每个 <code>MMRequest</code> 各持一份）</td></tr>
+      <tr><td>红线③：预算门</td><td><code>self.budget.fits(0, est["visual_tokens"], est["num_media"], used_text, used_visual, used_encoder)</code></td></tr>
+      <tr><td>多模态 prefill（编码+合并+首 token）</td><td><code>_prefill</code> → <code>self.runner.prefill(...)</code>（编码/合并在 runner，缓存命中在 <code>_encode_image</code>）</td></tr>
+      <tr><td>端到端报告</td><td><code>MMSnapshot</code> 逐迭代记录、<code>stats()</code> 汇总缓存命中、<code>first_token_iter</code> 即 TTFT</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a29">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>完整多模态引擎如何把这一切串起来？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 29
+python3 course.py run 29 --trace
+python3 course.py check 29</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 29` 端到端 + 报告。</details>
+    <details><summary>提示 Level 2 · 位置</summary>多模态 prefill + 文本 decode 的 continuous batching。</details>
+    <details><summary>提示 Level 3 · 机制</summary>相同媒体命中 encoder 缓存；encoder 不在 decode 重复运行。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>不跨请求串视觉 embedding。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>跨请求串用</td><td>共享了状态</td><td>每请求独立 KV；输出与单独生成对齐</td></tr><tr><td>decode 重编码</td><td>encoder 调用位置错</td><td>encoder 只在 prefill</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 29 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>mixed batch 里，text-only 请求和带视频的请求资源消耗差多少？</li><li>如何验证引擎没有跨请求串用视觉 embedding？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>MultiModalEngine</td><td>vLLM mm engine</td><td>组件与 loop 一致</td><td>真实分布式/异步/更强调度</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>端到端：text/单图/多图/视频/mixed batch/三层缓存/continuous batching/visual budget。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="29">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_30.html">下一步：Lesson 30 · Multimodal Final Incident Challenge →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 29 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a29", {stages: [{title:"mixed batch", detail:"text / 单图 / 多图 / 视频"},{title:"多模态 prefill", detail:"编码（命中缓存则跳过）+ 合并 + forward"},{title:"continuous batching", detail:"迭代级准入/推进/退出"},{title:"文本 decode", detail:"复用 KV Cache，encoder 不重复运行"},{title:"报告", detail:"encoder 运行数 / 缓存命中 / 视觉 token / TTFT"}]});
+</script>
+</body>
+</html>

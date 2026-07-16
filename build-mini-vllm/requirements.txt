@@ -1,0 +1,10 @@
+# 核心课程为纯 Python 标准库实现，无必需的第三方依赖。
+# 离线安装请用锁定文件（即使为空也会立即成功且绝不联网）：
+#
+#   python3 -m pip install \
+#     --no-index \
+#     --find-links offline/wheels/macos-arm64 \
+#     --require-hashes \
+#     -r offline/requirements-lock.txt
+#
+# 可选加速（轨道 B tiny model，非必需）：见 offline/INSTALL_OFFLINE.md 的「可选加速」章节。

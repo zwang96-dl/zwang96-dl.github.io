@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 28 · Multimodal Scheduler — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="把 visual token / encoder 工作量纳入调度预算；比较不同预算下的准入。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 28</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 28 · Multimodal Scheduler <span class="phase-badge phase-learn">Phase 6</span></h1>
+  <p>视觉工作量必须计入调度预算，否则多模态请求会压垮系统。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>把 visual token / encoder 工作量纳入调度预算；比较不同预算下的准入。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/budget.py</code>、<code>mini_vllm/multimodal/mm_engine.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/multimodal/budget.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>MultiModalBudget</code>、<code>MultiModalEngine.run()（准入）</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 28</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 28</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 27</dd>
+        <dt>完成后下一步</dt><dd>Lesson 29</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>到 <a href="lesson_27.html">Lesson 27</a> 为止，多模态数据流已经跑通：图片/视频经 vision encoder
+     变成视觉 embedding，插进文本序列里一起 prefill。但有一件事一直被忽略——<strong>视觉这部分有多贵，
+     调度器完全没算进去</strong>。前面所有的连续批处理（<a href="lesson_20.html">Lesson 20</a>）、
+     预算准入都只数「文本 token」。多模态一来，这套账本就漏了两大笔开销：
+     <em>visual token 占的序列/KV 位置</em>，和 <em>运行 vision encoder 本身的算力</em>。</p>
+  <p>这一课要做的，就是把这两笔开销补进调度预算，让引擎在「接纳一个新的多模态请求」之前，
+     先掂量清楚它到底要吃掉多少视觉资源。核心只有一个数据类 <code>MultiModalBudget</code>
+     和它的一个方法 <code>fits()</code>——但要真正理解它，得先看看「不这么做会怎样」。</p>
+
+  <h2 id="problem">先看问题：只数文本 token 的调度会怎样 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>先记住本课两组真实数字。<strong>文本侧</strong>用 byte-level tokenizer：一个 UTF-8 字节 = 1 个 token，
+     一个中文字 = 3 字节 = <strong>3 个 token</strong>。<strong>视觉侧</strong>（<code>VisionConfig</code>）：
+     <code>image_size=16</code>、<code>patch_size=8</code> → grid 2×2 → <strong>每张图 <code>num_patches=4</code> 个 visual token</strong>；
+     视频按帧编码，<code>n</code> 帧 = <code>n×4</code> 个 visual token。</p>
+  <p>现在设想一个请求：<code>"看这段视频"</code>（5 个中文字 = <code>5×3 = 15</code> 个文本 token）附带一段
+     <strong>8 帧</strong>的视频。它的真实 prefill 成本是：</p>
+  <table>
+    <thead><tr><th>成本项</th><th>数值</th><th>只数文本的调度看到的</th></tr></thead>
+    <tbody>
+      <tr><td>文本 token</td><td>15</td><td>15 ✓（唯一被算到的）</td></tr>
+      <tr><td>visual token（占序列位置、进 KV）</td><td>8 帧 × 4 = <strong>32</strong></td><td><strong>0（漏算！）</strong></td></tr>
+      <tr><td>prefill 一次要处理的序列长度</td><td>15 + 32 = <strong>47</strong></td><td>15</td></tr>
+      <tr><td>vision encoder 运行次数</td><td>逐帧编码 = <strong>8 次</strong></td><td>0（漏算！）</td></tr>
+    </tbody>
+  </table>
+  <p>模型 <code>max_seq_len=64</code>：这<strong>一条</strong>请求的视觉部分（32）就吃掉了半条序列。若调度器只看到「15 个文本 token，很便宜」，
+     一口气在同一次迭代里准入 3 条这样的请求，实际这一步要处理 <code>3×47 = 141</code> 个 token、
+     同时运行 <code>3×8 = 24</code> 次 vision encoder——延迟尖峰、编码器激活值 OOM，系统被压垮。
+     <strong>问题的根源</strong>：账本里没有「视觉」这一栏。</p>
+  <div class="callout note"><div class="callout-title">visual token 不是「虚」的——它和文本 token 一样进 KV</div>
+     沿用 <a href="lesson_07.html">Lesson 7</a> 的内存公式，本模型每个 token 每层的 KV =
+     <code>2·num_kv_heads·head_dim = 2·2·8 = 32</code> 个数，2 层共 <code>64</code> 个数。一张图 4 个 visual token
+     = <code>4×64 = 256</code> 个数的 KV，一段 8 帧视频 = <code>32×64 = 2048</code> 个数。visual token 是<strong>实打实</strong>的序列位置和显存开销，理应计入预算。</div>
+
+  <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    <code>MultiModalBudget</code> = 给调度器加一份<strong>更全的账本</strong>：除了文本 token，还单独记
+    「视觉 token」和「本次迭代已经运行了多少次 encoder」，任何一栏超支就让新请求<strong>再等一步</strong>。</div>
+  <p><strong>类比：餐厅的三口锅。</strong>后厨同时受三样东西限制：备菜台的面积（视觉 token 预算，摆不下就先不接单）、
+     烤箱的位置数（encoder 预算，一次只能烤这么多份）、以及服务员能同时盯的桌数（<code>max_num_seqs</code>）。
+     领班（调度器）收到新客人前，会逐一核对这几样有没有空位；缺任意一样，就请客人在门口<strong>稍等一轮</strong>，
+     绝不硬塞。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    「等一轮」只是<strong>推迟</strong>，不是拒绝，更不改变任何计算结果——预算只决定「<strong>何时</strong>算」，
+     不决定「算成什么」。同一批请求，无论预算松紧，最终每个请求生成的 token <strong>逐值一致</strong>；
+     松预算只是让它们更早、更并行地被处理完。此外，账本上的四栏是<strong>各自独立</strong>的闸门，
+     不是加权求和成一个总分——任一栏满了就挡住，这点下面精确定义里会看清。</div>
+
+  <h2 id="define">精确定义：四条预算与 fits() <span class="phase-badge phase-learn">Learn</span></h2>
+  <p><code>MultiModalBudget</code> 是一个只有四个上限字段的数据类（括号内是本课默认值）：</p>
+  <table>
+    <thead><tr><th>字段</th><th>约束什么</th><th>默认值</th><th>类比</th></tr></thead>
+    <tbody>
+      <tr><td><code>text_token_budget</code></td><td>一次迭代处理的<strong>文本</strong> token 上限</td><td>64</td><td>—</td></tr>
+      <tr><td><code>visual_token_budget</code></td><td>一次迭代处理的 <strong>visual</strong> token 上限</td><td>64</td><td>备菜台面积</td></tr>
+      <tr><td><code>encoder_budget</code></td><td>一次迭代运行 vision encoder 的<strong>媒体数</strong>上限</td><td>4</td><td>烤箱位置数</td></tr>
+      <tr><td><code>max_num_seqs</code></td><td>并发 running 请求数上限</td><td>4</td><td>能盯的桌数</td></tr>
+    </tbody>
+  </table>
+  <p>准入判断由 <code>fits()</code> 完成。它接收「这个请求要新增多少」和「本轮已经用掉多少」，逐项相加比上限，
+     全部通过才返回 <code>True</code>：</p>
+  <pre><code>fits(text_tokens, visual_tokens, num_media_to_encode,
+     used_text,   used_visual,   used_encoder)  →  bool
+
+  return (used_text    + text_tokens          &lt;= text_token_budget
+      and used_visual  + visual_tokens        &lt;= visual_token_budget
+      and used_encoder + num_media_to_encode  &lt;= encoder_budget)</code></pre>
+  <p>逐符号看清楚：</p>
+  <ul>
+    <li><code>text_tokens / visual_tokens</code>：<strong>这个候选请求</strong>要新增的文本 / 视觉 token 数。视觉数由
+        <code>runner.estimate()</code> 在<strong>不做真正编码</strong>的前提下算出——图 = <code>4</code>，视频 = <code>帧数×4</code>。</li>
+    <li><code>num_media_to_encode</code>：这个请求含几个媒体<strong>段</strong>（一张图算 1，一段视频也算 1）。</li>
+    <li><code>used_*</code>：本轮迭代到目前为止，前面已被准入 / 已 decode 的请求累计用掉的量。</li>
+  </ul>
+  <div class="callout note"><div class="callout-title">shape / 数值：一张图的候选参数</div>
+    请求 <code>"描述这张图"</code>（5 字 = 15 文本 token）+ 1 张图：
+    <code>estimate()</code> 返回 <code>{visual_tokens: 4, num_media: 1}</code>。
+    引擎在准入时调用的是 <code>fits(<strong>0</strong>, 4, 1, used_text, used_visual, used_encoder)</code>——
+    注意第一个参数（prefill 的文本 token）传的是 <code>0</code>：本课的简化是<strong>文本预算只在 decode 阶段计数</strong>
+    （每个 running 请求每步 +1），prefill 的文本 token 不占 <code>text_token_budget</code>；
+    真正 gate 多模态准入的是 <code>visual_token_budget</code> 与 <code>encoder_budget</code>。</div>
+  <div class="callout warn"><div class="callout-title">fits() 不管 max_num_seqs</div>
+    第四条上限 <code>max_num_seqs</code> <strong>不在</strong> <code>fits()</code> 里，而在引擎准入循环开头单独判断：
+    <code>if len(self.running) &gt;= self.budget.max_num_seqs: break</code>。所以「四条闸门」里三条在
+    <code>fits()</code>、一条在 <code>run()</code>——四条都是<strong>独立的与（AND）</strong>，任一挡住就不准入。</div>
+
+  <h2 id="worked">小规模手算：三条请求在松/紧预算下的准入 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>设第 1 次迭代开头有三条等待请求 R1、R2、R3，每条都含 <strong>1 张图</strong>，即
+     <code>estimate = {visual_tokens: 4, num_media: 1}</code>。此刻 <code>running</code> 为空，
+     <code>used_visual = used_encoder = 0</code>。引擎按到达顺序逐个尝试准入，每准入一个就<strong>累加</strong>已用量。
+     下表对比四种预算设置下，这一轮各自能接纳谁：</p>
+  <table>
+    <thead><tr><th>预算设置</th><th>R1</th><th>R2</th><th>R3</th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td>默认（visual 64 / encoder 4 / seqs 4）</td>
+          <td>visual 0+4=4✓ enc 0+1=1✓</td><td>4+4=8✓ 1+1=2✓</td><td>8+4=12✓ 2+1=3✓</td><td><strong>三条全准入</strong></td></tr>
+      <tr><td>紧 encoder = 2</td>
+          <td>enc 0+1=1✓</td><td>1+1=2✓</td><td>2+1=3<strong>&gt;2 ✗</strong></td><td>R1,R2 入；R3 等下一轮</td></tr>
+      <tr><td>紧 visual = 8</td>
+          <td>visual 0+4=4✓</td><td>4+4=8✓</td><td>8+4=12<strong>&gt;8 ✗</strong></td><td>R1,R2 入；R3 等下一轮</td></tr>
+      <tr><td>紧 max_num_seqs = 2</td>
+          <td>running 0&lt;2✓</td><td>running 1&lt;2✓</td><td>running 2<strong>不&lt;2 → break</strong></td><td>R1,R2 入；R3 等下一轮</td></tr>
+    </tbody>
+  </table>
+  <p>关键观察：<strong>同样三条请求，只因预算不同，一轮里被接纳的数量就不同</strong>。被挡下的 R3 不是被拒绝——
+     下一次迭代 <code>used_*</code> 归零、running 也可能腾出位置，它就会被准入。这正是本课要建立的直觉：
+     <em>预算决定「谁先、谁后」，不决定「结果」</em>。</p>
+
+  <div class="callout note"><div class="callout-title">一次准入尝试的执行图（estimate → 四闸门 → 准入 / 等待）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--mono);font-size:.8rem;margin-top:6px">
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 10px">候选请求<br>文本+媒体</div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px dashed var(--running);border-radius:6px;padding:6px 10px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">estimate()<br>不编码<br>→ {visual:4, media:1}</div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="border:2px solid var(--fg-dim);border-radius:6px;padding:4px 8px">① running &lt; max_num_seqs?</div>
+        <div style="border:2px solid var(--fg-dim);border-radius:6px;padding:4px 8px">② used_visual+4 ≤ visual_budget?</div>
+        <div style="border:2px solid var(--fg-dim);border-radius:6px;padding:4px 8px">③ used_encoder+1 ≤ encoder_budget?</div>
+      </div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px">全 ✓ → 准入并 prefill<br>累加 used_visual/encoder</div>
+        <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 10px">任一 ✗ → 留在 waiting<br>下一轮再试</div>
+      </div>
+    </div>
+    <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+      ① 在 <code>run()</code> 里（<code>break</code>）；②③（外加文本闸门）在 <code>fits()</code> 里。四闸门是独立的与，任一不过即等待。</div>
+  </div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「visual token 是编码出来的中间结果，不占序列，不用进预算」</td>
+          <td>visual token 插进文本序列后<strong>和文本 token 完全平权</strong>：占位置、进 KV、每层要存 <code>2·2·8=32</code> 个数。不计入预算，长视频（32 个 visual token）会悄悄撑爆序列。</td></tr>
+      <tr><td>「有了 visual token 预算，就不需要单独的 encoder 预算了」</td>
+          <td>两者约束的是<strong>两种不同资源</strong>：visual token 预算管「序列/KV 位置」，encoder 预算管「运行 vision encoder 的算力」。一张缓存命中的图 visual token 照占，但可能省掉编码；它们必须分开记账。</td></tr>
+      <tr><td>「预算调紧会改变模型输出 / 让某些请求被丢弃」</td>
+          <td>预算只影响<strong>准入时机</strong>：被挡下的请求下一轮重试，最终照常完成，输出<strong>逐值一致</strong>。紧预算只是更慢/更少并行，不丢请求、不改结果。</td></tr>
+      <tr><td>「四条上限会加权合成一个总分来判断」</td>
+          <td>没有加权、没有总分。<code>fits()</code> 是三条<strong>独立的 AND</strong>（再加 <code>run()</code> 里的 <code>max_num_seqs</code>），任意一条超限就整体不通过。</td></tr>
+      <tr><td>「encoder 预算按帧数算，8 帧视频占 8 份 encoder 额度」</td>
+          <td>本课 <code>estimate()</code> 按<strong>媒体段</strong>计数：一段视频 <code>num_media=1</code>（尽管它内部逐帧编码）。帧数的膨胀由 <code>visual_token_budget</code> 捕捉（8 帧 = 32 个 visual token），不是 encoder 预算。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="codemap">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>上面每一处讲解都能在两份源码里找到落点：</p>
+  <table>
+    <thead><tr><th>讲解</th><th>对应代码</th></tr></thead>
+    <tbody>
+      <tr><td>四条预算字段</td><td><code>multimodal/budget.py</code> 里 <code>MultiModalBudget</code> 的四个 dataclass 字段</td></tr>
+      <tr><td>三条 AND 闸门（②③＋文本）</td><td><code>MultiModalBudget.fits()</code> 的 <code>return (... and ... and ...)</code></td></tr>
+      <tr><td>估算视觉工作量（不编码）</td><td><code>runner.estimate()</code> → <code>{visual_tokens, num_media}</code>，在 <code>run()</code> 准入循环里被调用</td></tr>
+      <tr><td>①第四条闸门 max_num_seqs</td><td><code>MultiModalEngine.run()</code> 准入循环开头 <code>if len(self.running) &gt;= max_num_seqs: break</code></td></tr>
+      <tr><td>准入并累加 used_*</td><td><code>run()</code> 里 <code>fits(0, est["visual_tokens"], est["num_media"], ...)</code> 通过后 <code>_prefill()</code> 并 <code>used_visual += ...; used_encoder += ...</code></td></tr>
+      <tr><td>文本预算只在 decode 计数</td><td><code>run()</code> 的 decode 阶段 <code>if used_text + 1 &gt; text_token_budget: continue</code>；准入时文本参数传 <code>0</code></td></tr>
+      <tr><td>decode 不跑 encoder（视觉只在 prefill 编码一次）</td><td><code>run()</code> 里 <code>assert self.runner.encoder_runs == enc_before</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a28">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>多模态调度如何把视觉工作量纳入预算？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 28
+python3 course.py run 28 --trace
+python3 course.py check 28</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 28` 比较紧/松预算。</details>
+    <details><summary>提示 Level 2 · 位置</summary>visual token 也占序列位置、进 KV。</details>
+    <details><summary>提示 Level 3 · 机制</summary>encoder 预算限制一次编码多少媒体。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>预算只改「何时算」，不改输出。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>视觉 token 未入预算</td><td>调度只看文本</td><td>visual token 计入序列与预算</td></tr><tr><td>一次编码太多</td><td>encoder 过载</td><td>encoder 预算限制每步编码媒体数</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 28 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>为什么 visual token 也要占调度预算？</li><li>encoder 工作量预算和 KV 预算有何不同？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>MultiModalBudget</td><td>vLLM mm scheduler</td><td>视觉工作量入调度一致</td><td>真实含 encoder batch、显存估计</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>把 visual token / encoder 工作量纳入调度预算；比较不同预算下的准入。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="28">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_29.html">下一步：Lesson 29 · 完整 Tiny Multimodal Engine →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 28 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a28", {stages: [{title:"请求含 text + visual token", detail:"visual 也占序列位置、进 KV"},{title:"估算视觉工作量", detail:"visual token 数 + 待编码媒体数"},{title:"预算 gating", detail:"text/visual token 预算 + encoder 预算 + max_num_seqs"},{title:"准入并 prefill", detail:"在预算内接纳；超出则等待"}]});
+</script>
+</body>
+</html>

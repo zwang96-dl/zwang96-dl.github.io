@@ -1,0 +1,274 @@
+/* ==========================================================================
+   Build Your Own Mini-vLLM —— 共享样式
+   - 完全离线：无 CDN、无在线字体、无远程资源。
+   - 主题感知：默认跟随系统（prefers-color-scheme），可用右上角开关手动切换。
+   - 无障碍：状态区分同时用「文字 + 形状/图案 + 颜色」，尊重 prefers-reduced-motion。
+   ========================================================================== */
+
+:root {
+  --bg: #f7f8fa;
+  --bg-elev: #ffffff;
+  --bg-code: #f0f2f5;
+  --fg: #1c2530;
+  --fg-dim: #5a6675;
+  --border: #d8dde5;
+  --accent: #2b6cb0;
+  --accent-fg: #ffffff;
+  --ok: #1f7a4d;
+  --warn: #b45309;
+  --danger: #b02a2a;
+  --waiting: #6b7280;   /* 灰 */
+  --running: #2b6cb0;   /* 蓝 */
+  --finished: #1f7a4d;  /* 绿 */
+  --prefill: #7c3aed;   /* 紫 */
+  --decode: #0e7490;    /* 青 */
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.05);
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1420;
+    --bg-elev: #171e2e;
+    --bg-code: #0b0f18;
+    --fg: #e6ebf2;
+    --fg-dim: #9aa7b8;
+    --border: #2a3446;
+    --accent: #5b9bd5;
+    --accent-fg: #0b0f18;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --waiting: #9ca3af;
+    --running: #5b9bd5;
+    --finished: #4ade80;
+    --prefill: #c084fc;
+    --decode: #22d3ee;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+  }
+}
+
+/* 手动切换到 dark 时的显式覆盖（优先级最高） */
+:root[data-theme="dark"] {
+  --bg: #0f1420; --bg-elev: #171e2e; --bg-code: #0b0f18;
+  --fg: #e6ebf2; --fg-dim: #9aa7b8; --border: #2a3446;
+  --accent: #5b9bd5; --accent-fg: #0b0f18;
+  --ok: #4ade80; --warn: #fbbf24; --danger: #f87171;
+  --waiting: #9ca3af; --running: #5b9bd5; --finished: #4ade80;
+  --prefill: #c084fc; --decode: #22d3ee;
+  --shadow: 0 1px 3px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.3);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  line-height: 1.65;
+  font-size: 16px;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+code, kbd, pre { font-family: var(--mono); }
+code { background: var(--bg-code); padding: .1em .35em; border-radius: 5px; font-size: .9em; }
+kbd {
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-bottom-width: 2px; border-radius: 5px; padding: .05em .45em; font-size: .85em;
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 20px; background: var(--bg-elev);
+  border-bottom: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.topbar .brand { font-weight: 700; font-size: 1.05rem; }
+.topbar .brand small { color: var(--fg-dim); font-weight: 400; }
+.topbar .spacer { flex: 1; }
+.btn {
+  cursor: pointer; border: 1px solid var(--border); background: var(--bg);
+  color: var(--fg); padding: 6px 12px; border-radius: var(--radius);
+  font: inherit; font-size: .9rem;
+}
+.btn:hover { border-color: var(--accent); }
+.btn-accent { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+/* ---------- 布局 ---------- */
+.layout { display: grid; grid-template-columns: 260px 1fr; gap: 0; max-width: 1200px; margin: 0 auto; }
+.toc {
+  position: sticky; top: 57px; align-self: start; height: calc(100vh - 57px);
+  overflow-y: auto; padding: 20px 14px; border-right: 1px solid var(--border);
+}
+.toc h2 { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--fg-dim); }
+.toc a { display: block; padding: 5px 8px; border-radius: 6px; color: var(--fg-dim); font-size: .9rem; }
+.toc a:hover, .toc a.active { background: var(--bg-code); color: var(--fg); text-decoration: none; }
+.content { padding: 28px 36px 120px; min-width: 0; }
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+  .toc { display: none; }
+  .content { padding: 20px; }
+}
+
+h1 { font-size: 1.9rem; line-height: 1.25; margin: .2em 0 .4em; }
+h2 { font-size: 1.4rem; margin: 1.8em 0 .5em; padding-top: .3em; border-top: 1px solid var(--border); }
+h3 { font-size: 1.12rem; margin: 1.4em 0 .4em; }
+h2:first-of-type { border-top: none; }
+
+/* ---------- 段落分区徽章：Learn / Build / Challenge / Deep Dive ---------- */
+.phase-badge {
+  display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .05em;
+  padding: 2px 9px; border-radius: 999px; border: 1px solid var(--border);
+  vertical-align: middle; margin-left: 8px;
+}
+.phase-learn { color: var(--running); border-color: var(--running); }
+.phase-build { color: var(--prefill); border-color: var(--prefill); }
+.phase-challenge { color: var(--warn); border-color: var(--warn); }
+.phase-deep { color: var(--decode); border-color: var(--decode); }
+
+/* ---------- 固定头部卡片 ---------- */
+.lesson-header {
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); margin: 14px 0 8px;
+}
+.lesson-header dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; }
+.lesson-header dt { color: var(--fg-dim); font-weight: 600; white-space: nowrap; }
+.lesson-header dd { margin: 0; }
+.lesson-header code { white-space: pre-wrap; }
+
+/* ---------- 回调 callouts ---------- */
+.callout {
+  border-left: 4px solid var(--accent); background: var(--bg-elev);
+  border-radius: 8px; padding: 12px 16px; margin: 16px 0; box-shadow: var(--shadow);
+}
+.callout .callout-title { font-weight: 700; margin-bottom: 4px; }
+.callout.note { border-left-color: var(--running); }
+.callout.tip { border-left-color: var(--ok); }
+.callout.warn { border-left-color: var(--warn); }
+.callout.danger { border-left-color: var(--danger); }
+.callout.deep { border-left-color: var(--decode); }
+.callout.question { border-left-color: var(--prefill); background: color-mix(in srgb, var(--prefill) 8%, var(--bg-elev)); }
+
+/* ---------- 表格 ---------- */
+table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: .93rem; }
+th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: var(--bg-code); }
+tbody tr:nth-child(even) { background: color-mix(in srgb, var(--bg-code) 45%, transparent); }
+
+/* ---------- 命令块 ---------- */
+pre {
+  background: var(--bg-code); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 14px 16px; overflow-x: auto; font-size: .88rem; line-height: 1.5;
+}
+
+/* 数学公式：用浏览器原生 MathML 排版（无需任何库、离线可渲染）。
+   注意：绝对不要在这里写 display:block —— <math display="block"> 的正确内部布局是
+   `block math`，CSS 里的 display:block 会把 `math` 内联布局抹掉，导致整行公式竖着堆叠。
+   块级由 HTML 的 display="block" 属性负责；这里只做居中和外观。 */
+.mathblock {
+  width: fit-content; max-width: 100%; margin: 16px auto; padding: 12px 10px;
+  background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius);
+  overflow-x: auto; font-size: 1.2rem;
+}
+math { color: var(--fg); }               /* 跟随主题（深色/浅色） */
+.mathi { font-size: 1.05em; }            /* 行内公式 */
+/* 不支持 MathML 的老浏览器：至少不塌成一行乱码（现代 Mac 浏览器均支持）。 */
+@supports not (display: math) { .mathblock { font-family: var(--mono); } }
+.cmd { position: relative; }
+.cmd::before {
+  content: "终端"; position: absolute; top: 0; right: 0;
+  font-size: .68rem; color: var(--fg-dim); background: var(--bg-elev);
+  border: 1px solid var(--border); border-top: none; border-right: none;
+  border-radius: 0 var(--radius) 0 8px; padding: 2px 8px;
+}
+
+/* ---------- 可展开块 ---------- */
+details {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 8px 14px; margin: 14px 0; background: var(--bg-elev);
+}
+details > summary { cursor: pointer; font-weight: 600; }
+details[open] > summary { margin-bottom: 8px; }
+
+/* ---------- 动画面板 ---------- */
+.anim {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-elev); box-shadow: var(--shadow); margin: 18px 0; overflow: hidden;
+}
+.anim-head { padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--bg-code); }
+.anim-head .anim-q { font-weight: 700; }
+.anim-head .anim-q small { color: var(--fg-dim); font-weight: 400; }
+.anim-stage { padding: 16px; }
+.anim-controls {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 10px 14px; border-top: 1px solid var(--border); background: var(--bg-code);
+}
+.anim-controls .spacer { flex: 1; }
+.anim-controls label { font-size: .85rem; color: var(--fg-dim); }
+.anim-step-desc {
+  padding: 10px 14px; border-top: 1px dashed var(--border);
+  font-size: .92rem; min-height: 2.4em;
+}
+.anim-step-desc .step-no { color: var(--fg-dim); margin-right: 8px; }
+
+/* 图例：用形状 + 文字，不仅靠颜色 */
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: .82rem; padding: 8px 14px 12px; }
+.legend .item { display: inline-flex; align-items: center; gap: 6px; }
+.swatch { width: 16px; height: 16px; border: 2px solid var(--fg); display: inline-block; }
+.swatch.waiting  { background: var(--waiting);  border-style: dashed; }
+.swatch.running  { background: var(--running);  border-style: solid; }
+.swatch.finished { background: var(--finished); border-radius: 50%; }
+.swatch.prefill  { background: var(--prefill);  border-style: double; }
+.swatch.decode   { background: var(--decode);   border-style: dotted; }
+
+/* SVG 内文字 */
+.anim text { font-family: var(--sans); fill: var(--fg); }
+.anim .muted { fill: var(--fg-dim); }
+
+/* 状态面板 */
+.state-panel { font-family: var(--mono); font-size: .82rem; }
+.state-panel table td { padding: 4px 8px; }
+
+/* 进度条（首页） */
+.progress-wrap { background: var(--bg-code); border-radius: 999px; height: 10px; overflow: hidden; border: 1px solid var(--border); }
+.progress-bar { height: 100%; background: var(--accent); width: 0; transition: width .4s ease; }
+
+/* 卡片网格（首页课程列表） */
+.lesson-list { list-style: none; padding: 0; margin: 0; }
+.lesson-item {
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-elev);
+  margin: 8px 0; box-shadow: var(--shadow);
+}
+.lesson-item > summary { padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+.lesson-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 8px; background: var(--bg-code);
+  font-weight: 700; font-family: var(--mono); flex: none;
+}
+.lesson-title { font-weight: 600; }
+.badge { font-size: .7rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
+.badge.ready { color: var(--ok); border-color: var(--ok); }
+.badge.planned { color: var(--fg-dim); }
+.badge.text { color: var(--running); border-color: var(--running); }
+.badge.mm { color: var(--prefill); border-color: var(--prefill); }
+.lesson-body { padding: 0 16px 14px; color: var(--fg-dim); }
+
+.footer { text-align: center; color: var(--fg-dim); font-size: .85rem; padding: 30px 0; }
+
+/* 可访问：跳到主内容 */
+.skip-link { position: absolute; left: -999px; top: 0; background: var(--accent); color: var(--accent-fg); padding: 8px 14px; z-index: 100; }
+.skip-link:focus { left: 8px; top: 8px; }

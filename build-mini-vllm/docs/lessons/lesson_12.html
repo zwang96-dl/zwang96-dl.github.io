@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 12 · 连续 KV 分配为何浪费 — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="max-seq 预留导致 internal/external fragmentation；分页按需分配几乎消除浪费。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 12</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 12 · 连续 KV 分配为何浪费 <span class="phase-badge phase-build">Phase 3</span></h1>
+  <p>看清连续预留的浪费，才明白为什么必须引入分页 KV。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>max-seq 预留导致 internal/external fragmentation；分页按需分配几乎消除浪费。</dd>
+        <dt>需要阅读的文件</dt><dd><code>experiments/lesson_12_kv_waste.py</code></dd>
+        <dt>需要修改的文件</dt><dd>（本课重在运行与观察）</dd>
+        <dt>需要关注的类或函数</dt><dd><code>碎片计算</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 12</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 12</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 11</dd>
+        <dt>完成后下一步</dt><dd>Lesson 13</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p><a href="lesson_07.html">Lesson 7</a> 告诉我们：KV Cache 是<strong>花显存换速度</strong>，而且它随序列长度线性增长。
+     但那一课只回答了「一条序列要占多少内存」，没回答一个更要命的问题——
+     <strong>你在什么时候、按什么粒度把这块内存「分」给一条序列？</strong></p>
+  <p>这个「怎么分」的决策，直接决定一张卡能同时塞下几条请求。分得笨，显存明明还剩一大半，
+     却告诉你「装不下了」；分得巧，几乎每一格显存都用在刀刃上。这一课就是要用<strong>具体数字</strong>
+     看清「连续预留」这种笨办法到底浪费了多少，从而理解 vLLM 为什么非要发明<strong>分页 KV</strong>不可。
+     它是后面 <a href="lesson_13.html">Block Allocator</a>、<a href="lesson_14.html">分页 Attention</a> 一整条主线的动机。</p>
+
+  <h2 id="problem">先看问题：连续预留到底浪费了什么 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>矛盾出在一个残酷的事实：<strong>请求还没跑完，你根本不知道它最终会生成多长。</strong>
+     可 KV Cache 又要求「每一层每个 token 的 K/V 挨着放」（连续内存才能高效做 attention）。
+     朴素分配器只能采取最保守的策略：<strong>一上来就按上限 <code>max_seq_len=64</code> 给每条序列预留一整段连续空间</strong>，
+     免得中途长过头、需要「搬家」。</p>
+  <p>先统一度量单位：本课把<strong>一个 token 在所有层的 K/V</strong> 记作<strong>一个「格子 / slot」</strong>。
+     用 <a href="lesson_07.html">Lesson 7</a> 的公式，本模型每格 = <code>2 · num_kv_heads · head_dim · num_layers = 2·2·8·2 = 64</code> 个数
+     （2 是 K+V，kv_heads=2 是 GQA，head_dim=8，layers=2）。下面所有「浪费 N 格」都可乘以 64 换算成真实数字量。</p>
+  <p>现在来 5 条并发请求（<code>seq_lens = [5, 12, 3, 20, 7]</code>，一共只用到 <code>5+12+3+20+7 = 47</code> 格），
+     看看连续预留发生了什么：</p>
+  <table>
+    <thead><tr><th>请求</th><th>实际用到（格）</th><th>连续预留（格）</th><th>白占（格）</th></tr></thead>
+    <tbody>
+      <tr><td>s0</td><td>5</td><td>64</td><td>59</td></tr>
+      <tr><td>s1</td><td>12</td><td>64</td><td>52</td></tr>
+      <tr><td>s2</td><td>3</td><td>64</td><td>61</td></tr>
+      <tr><td>s3</td><td>20</td><td>64</td><td>44</td></tr>
+      <tr><td>s4</td><td>7</td><td>64</td><td>57</td></tr>
+      <tr><td><strong>合计</strong></td><td><strong>47</strong></td><td><strong>320</strong></td><td><strong>273</strong></td></tr>
+    </tbody>
+  </table>
+  <p>预留了 <code>64×5 = 320</code> 格，真正用到 <code>47</code> 格——<strong>273 格（85.3%）在空转</strong>。
+     换成真实数字量就是 <code>273×64 = 17472</code> 个数被白白占着。更糟的是：这 5 条请求本可以
+     只用 47 格就装下，现在却因为「每条都吃满 64 格的坑」而<strong>提前把显存占光</strong>，
+     第 6 条请求即使很短也进不来。这就是「显存还剩一大半，却报装不下」的由来。</p>
+
+  <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    连续预留 = 「怕客人临时加人，干脆给每桌都预定一整张 64 座的大圆桌」；
+    结果 5 桌客人（每桌才来 3~20 人）就把整个宴会厅订满，门口还排着队进不来。</div>
+  <p><strong>类比：餐厅订座。</strong>你不知道每桌最终来几个人（≈ 不知道序列最终多长），
+     为了保险，索性每桌都锁定一张最大的 64 座桌（≈ 按 max_seq 预留）。
+     大部分桌子空着一多半（≈ internal 碎片），而且这些空座<strong>还分散在不同桌子上，拼不到一起</strong>
+     给一个 30 人的团用（≈ external 碎片）。分页的思路则是：把大桌拆成一个个 8 座小桌（block），
+     来几个人就开几张，用完归还给公用桌池——几乎不浪费，还能灵活拼桌。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    餐桌是物理挪不动的，而分页 KV 的精髓恰恰是<strong>逻辑地址和物理地址解耦</strong>：
+    一条序列在「逻辑上」是连续的 0,1,2,…，但这些块在物理显存里可以东一块西一块。
+    真正让分页威力翻倍的是这层「查表映射」，餐桌类比表达不出这一点——那是 <a href="lesson_13.html">Lesson 13</a> 的主角。</div>
+
+  <h2 id="defs">精确定义：两种碎片与分页公式 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>把上面的直觉写成能计算的定义。记第 <code>i</code> 条序列实际用到 <code>s_i</code> 格，
+     并发 <code>N</code> 条，上限 <code>M = max_seq_len</code>，块大小 <code>B = block_size</code>。</p>
+  <div class="callout note"><div class="callout-title">① Internal fragmentation（内部碎片）：分到了却没用</div>
+    <strong>已经分配给某条序列、但它没用上的空间。</strong>连续预留下每条分 <code>M</code> 格：
+    <math display="block" class="mathblock">
+      <mi>internal_waste</mi><mo>=</mo>
+      <munder><mo>∑</mo><mi>i</mi></munder>
+      <mo stretchy="false">(</mo><mi>M</mi><mo>−</mo><msub><mi>s</mi><mi>i</mi></msub><mo stretchy="false">)</mo>
+      <mo>=</mo>
+      <mi>N</mi><mo>·</mo><mi>M</mi><mo>−</mo>
+      <munder><mo>∑</mo><mi>i</mi></munder><msub><mi>s</mi><mi>i</mi></msub>
+    </math>
+    逐符号：<code>N·M</code> = 总预留（reserved），<code>Σ s_i</code> = 总实际用量（used），两者之差就是内部碎片。
+    浪费率 = <code>internal_waste / (N·M)</code>。</div>
+  <div class="callout note"><div class="callout-title">② External fragmentation（外部碎片）：有空间却凑不出连续一段</div>
+    <strong>空闲总量足够，但被切成不连续的小洞，拼不出一段连续内存去满足新请求。</strong>
+    连续预留把显存切成一段段 <code>M</code> 大的坑，某条序列结束释放后留下一个洞；
+    下一条需要连续 <code>M</code> 格时，即使总空闲够，也可能因为「没有一整段连续的 <code>M</code>」而失败。
+    这一项难用单个数字概括，但它和 internal 一样，都是「连续 + 定长预留」逼出来的。</div>
+  <div class="callout note"><div class="callout-title">③ 分页分配：向上取整到块</div>
+    分页不再按 <code>M</code> 预留，而是<strong>用几格算几块</strong>，每块 <code>B</code> 格，按需取整：
+    <math display="block" class="mathblock">
+      <msub><mi>paged</mi><mi>i</mi></msub><mo>=</mo>
+      <mo>⌈</mo><mfrac><msub><mi>s</mi><mi>i</mi></msub><mi>B</mi></mfrac><mo>⌉</mo><mo>·</mo><mi>B</mi>
+      <mspace width="1.6em"></mspace>
+      <msub><mi>paged</mi><mi>total</mi></msub><mo>=</mo>
+      <munder><mo>∑</mo><mi>i</mi></munder>
+      <mo>⌈</mo><mfrac><msub><mi>s</mi><mi>i</mi></msub><mi>B</mi></mfrac><mo>⌉</mo><mo>·</mo><mi>B</mi>
+    </math>
+    <code>paged_waste = paged_total − used</code><br>
+    <code>⌈·⌉</code> 是向上取整。每条序列只可能浪费<strong>最后一块里没填满的零头</strong>，
+    最多 <code>B−1</code> 格。且因为块是定长的、物理可不连续，external 碎片也一并消失（块能自由复用）。</div>
+
+  <h2 id="worked">小规模手算：273 格 vs 17 格 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>还用 <code>seq_lens = [5,12,3,20,7]</code>、<code>M=64</code>、<code>B=8</code>，一步步算给分页看：</p>
+  <table>
+    <thead><tr><th>序列</th><th>用量 s</th><th>需要块数 ⌈s/8⌉</th><th>分页分到 ⌈s/8⌉·8</th><th>块内零头</th></tr></thead>
+    <tbody>
+      <tr><td>s0</td><td>5</td><td>1</td><td>8</td><td>3</td></tr>
+      <tr><td>s1</td><td>12</td><td>2</td><td>16</td><td>4</td></tr>
+      <tr><td>s2</td><td>3</td><td>1</td><td>8</td><td>5</td></tr>
+      <tr><td>s3</td><td>20</td><td>3</td><td>24</td><td>4</td></tr>
+      <tr><td>s4</td><td>7</td><td>1</td><td>8</td><td>1</td></tr>
+      <tr><td><strong>合计</strong></td><td><strong>47</strong></td><td><strong>8</strong></td><td><strong>64</strong></td><td><strong>17</strong></td></tr>
+    </tbody>
+  </table>
+  <p>分页只分了 <code>64</code> 格（用了 47，零头 17），浪费率 <code>17/64 = 26.6%</code>；
+     而连续预留浪费 <code>273</code> 格、<code>85.3%</code>。同样这 5 条请求：</p>
+  <table>
+    <thead><tr><th>策略</th><th>分配（格）</th><th>用到（格）</th><th>浪费（格）</th><th>浪费率</th></tr></thead>
+    <tbody>
+      <tr><td>连续（按 max_seq=64 预留）</td><td>320</td><td>47</td><td><strong>273</strong></td><td><strong>85.3%</strong></td></tr>
+      <tr><td>分页（block=8 向上取整）</td><td>64</td><td>47</td><td><strong>17</strong></td><td><strong>26.6%</strong></td></tr>
+    </tbody>
+  </table>
+  <p>浪费从 273 降到 17，<strong>缩水约 16 倍</strong>。而且分页的零头有上限（每条最多 <code>B−1=7</code> 格），
+     不随 <code>max_seq_len</code> 变大而膨胀；连续预留的浪费却随 <code>M</code> 和并发数 <code>N</code> 一起线性暴涨——
+     <code>M</code> 从 64 提到 4096，这 5 条请求的连续预留立刻多占 <code>5×(4096−64) = 20160</code> 格，分页几乎不受影响。</p>
+
+  <h2 id="figure">一图看懂：同一块显存，两种分法 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>下面每个小方块代表 8 格（= 1 个 block 的容量）。绿色=真正用到，灰色=被占着却空转的浪费。</p>
+  <div class="callout note"><div class="callout-title">连续预留：每条锁 64 格（8 个方块），大片灰</div>
+    <div style="font-family:var(--mono);font-size:.72rem;line-height:1.5">
+      <div style="margin:2px 0"><span style="display:inline-block;width:2.6em">s0</span>
+        <span style="display:inline-block;width:.9em;height:1em;background:var(--finished);border:1px solid var(--fg-dim)"></span>
+        <span style="display:inline-block;width:6.3em;height:1em;background:color-mix(in srgb,var(--fg-dim) 25%,var(--bg));border:1px solid var(--fg-dim)"></span>
+        用 5 / 预留 64 → 空 59</div>
+      <div style="margin:2px 0"><span style="display:inline-block;width:2.6em">s1</span>
+        <span style="display:inline-block;width:1.8em;height:1em;background:var(--finished);border:1px solid var(--fg-dim)"></span>
+        <span style="display:inline-block;width:5.4em;height:1em;background:color-mix(in srgb,var(--fg-dim) 25%,var(--bg));border:1px solid var(--fg-dim)"></span>
+        用 12 / 预留 64 → 空 52</div>
+      <div style="margin:2px 0"><span style="display:inline-block;width:2.6em">s3</span>
+        <span style="display:inline-block;width:3em;height:1em;background:var(--finished);border:1px solid var(--fg-dim)"></span>
+        <span style="display:inline-block;width:4.2em;height:1em;background:color-mix(in srgb,var(--fg-dim) 25%,var(--bg));border:1px solid var(--fg-dim)"></span>
+        用 20 / 预留 64 → 空 44</div>
+      <div style="color:var(--fg-dim);margin-top:4px">合计：预留 320，用 47，<strong style="color:var(--fg)">灰(浪费) 273（85.3%）</strong></div>
+    </div>
+  </div>
+  <div class="callout note" style="border-left-color:var(--finished)"><div class="callout-title">分页：来几格开几块，只剩最后一块的零头</div>
+    <div style="font-family:var(--mono);font-size:.72rem;line-height:1.5">
+      <div style="margin:2px 0"><span style="display:inline-block;width:2.6em">s0</span>
+        <span style="display:inline-block;width:.62em;height:1em;background:var(--finished);border:1px solid var(--fg-dim)"></span>
+        <span style="display:inline-block;width:.38em;height:1em;background:color-mix(in srgb,var(--fg-dim) 25%,var(--bg));border:1px solid var(--fg-dim)"></span>
+        1 块：用 5，零头 3</div>
+      <div style="margin:2px 0"><span style="display:inline-block;width:2.6em">s1</span>
+        <span style="display:inline-block;width:1.5em;height:1em;background:var(--finished);border:1px solid var(--fg-dim)"></span>
+        <span style="display:inline-block;width:.5em;height:1em;background:color-mix(in srgb,var(--fg-dim) 25%,var(--bg));border:1px solid var(--fg-dim)"></span>
+        2 块：用 12，零头 4</div>
+      <div style="margin:2px 0"><span style="display:inline-block;width:2.6em">s3</span>
+        <span style="display:inline-block;width:2.5em;height:1em;background:var(--finished);border:1px solid var(--fg-dim)"></span>
+        <span style="display:inline-block;width:.5em;height:1em;background:color-mix(in srgb,var(--fg-dim) 25%,var(--bg));border:1px solid var(--fg-dim)"></span>
+        3 块：用 20，零头 4</div>
+      <div style="color:var(--fg-dim);margin-top:4px">合计：分配 64，用 47，<strong style="color:var(--fg)">灰(浪费) 17（26.6%）</strong>——只剩块内零头</div>
+    </div>
+  </div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「按 max_seq 预留只是稍微多占一点，问题不大」</td>
+          <td>本例就浪费了 <strong>85.3%</strong>（273/320 格）。浪费随 <code>max_seq_len</code> 和并发数<strong>线性暴涨</strong>，
+              上限调大、请求变多时会吃掉大半张卡。</td></tr>
+      <tr><td>「分页零浪费」</td>
+          <td>分页仍有 <strong>internal 碎片</strong>——最后一块没填满的零头（本例 17 格，26.6%）。
+              它只是把浪费压到「每条最多 <code>B−1</code> 格」的常数级，且不再随 max_seq 增长。</td></tr>
+      <tr><td>「碎片是因为显存总量不够」</td>
+          <td>恰恰相反：本例显存<strong>够装 47 格的 6~7 倍</strong>，是「连续 + 定长预留」的<strong>分配策略</strong>
+              把它切成了浪费，不是量不够。</td></tr>
+      <tr><td>「block_size 越小越省内存，就该取 1」</td>
+          <td>块越小 internal 零头越小，但每条序列的块数变多，<strong>块表更长、管理开销更大</strong>，
+              attention 也更碎。这是 <a href="lesson_13.html">Lesson 13</a> 要权衡的取舍，不是越小越好。</td></tr>
+      <tr><td>「external 碎片靠多留点连续空间就能躲开」</td>
+          <td>只要「定长连续段 + 释放」的模式在，空洞就会不断产生；治本靠<strong>定长块 + 逻辑/物理解耦</strong>
+              （分页），让物理不连续也能拼给一条逻辑上连续的序列。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本节所有数字都出自 <code>experiments/lesson_12_kv_waste.py</code> 的 <code>run_experiment()</code>（即「碎片计算」）。
+     对照着看每一行算的就是上面的哪个量：</p>
+  <pre><code>reserved      = max_seq * len(seqs)              # N·M：连续预留总量 → 320
+used          = sum(seqs)                        # Σ s_i：实际用量 → 47
+internal_frag = reserved - used                  # ① 内部碎片 → 273（85.3%）
+paged  = sum(math.ceil(s / block_size) * block_size for s in seqs)  # ③ ⌈s/B⌉·B 逐条向上取整 → 64
+paged_waste   = paged - used                     # 分页浪费（块内零头）→ 17（26.6%）</code></pre>
+  <div class="callout tip"><div class="callout-title">对应关系</div>
+    <code>contiguous_waste / contiguous_waste_pct</code> 就是定义 ①（internal），
+    <code>paged_allocated / paged_waste_pct</code> 就是定义 ③（分页向上取整）。
+    external 碎片是「连续段释放后凑不出连续空间」的定性问题，代码不单独打数，但正是它和 internal 一起
+    构成了下一课 <a href="lesson_13.html">Block Allocator</a> 要解决的目标。</div>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a12">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>按 max_seq 连续预留 vs 分页按需分配，各浪费多少 KV？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 12
+python3 course.py run 12 --trace
+python3 course.py check 12</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 12` 对比连续预留与分页。</details>
+    <details><summary>提示 Level 2 · 位置</summary>连续按 max_seq 预留 → 巨大浪费。</details>
+    <details><summary>提示 Level 3 · 机制</summary>分页向上取整到块 → 只剩块内零头。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>引出 Block Allocator（Lesson 13）。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>按 max_seq 预留</td><td>internal 碎片巨大</td><td>改为分页按需分配</td></tr><tr><td>要求连续大段</td><td>external 碎片凑不出</td><td>分页允许物理不连续</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 12 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>并发请求数翻倍，连续预留的浪费如何变化？分页呢？</li><li>block_size 取大或取小分别有什么权衡？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>按需分页</td><td>PagedAttention</td><td>分页消除碎片</td><td>vLLM 用真实 kernel 直接在分页布局上算</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>连续预留造成大量碎片；分页把浪费压到「不足一块」的零头。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="12">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_13.html">下一步：Lesson 13 · Block Allocator →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 12 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/waste_anim.js"></script>
+<script>
+WasteAnim.mount("#a12", {items:[{label:"s0",a:8,b:64},{label:"s1",a:16,b:64},{label:"s2",a:8,b:64},{label:"s3",a:24,b:64},{label:"s4",a:8,b:64}],aName:"分页(向上取整到块)", bName:"连续(按max_seq=64预留)", insight:"连续预留浪费随 max_seq 与并发暴涨；分页只剩块内零头。"});
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "kind": "byte-level",
+  "byte_vocab": 256,
+  "bos_id": 256,
+  "eos_id": 257,
+  "pad_id": 258,
+  "vocab_size": 259
+}

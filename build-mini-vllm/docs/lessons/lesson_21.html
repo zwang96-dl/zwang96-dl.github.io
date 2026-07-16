@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 21 · 图片如何变成 Patch Token — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="patch size、grid、flatten、线性投影、visual token 数（=grid×grid）。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 21</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 21 · 图片如何变成 Patch Token <span class="phase-badge phase-learn">Phase 4</span></h1>
+  <p>patch 化决定一张图产生多少 visual token，直接影响序列长度与成本。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>patch size、grid、flatten、线性投影、visual token 数（=grid×grid）。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/patch_embed.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/multimodal/patch_embed.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>PatchEmbed.flatten_patches()</code>、<code>PatchEmbed.__call__()</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 21</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 21</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 20</dd>
+        <dt>完成后下一步</dt><dd>Lesson 22</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>到这里为止，模型只吃过<strong>文本 token</strong>：一段文字经 byte-level tokenizer 变成一串 id
+     （中文一字 = 3 字节 = 3 个 token），每个 id 查 embedding 表得到一个 <code>hidden=32</code> 维向量，
+     然后进 Transformer。现在我们想让它「看图」。问题是——<strong>Transformer 只认识「一串向量」，
+     不认识「二维像素网格」</strong>。所以第一步必须把图片<em>翻译</em>成和文本 token 同样形状的东西：
+     一串向量。这一步就叫 <strong>patch embedding</strong>，是整条多模态主线的入口。</p>
+  <p>更实际的原因是<strong>成本</strong>。图片产生多少个 visual token，就等于往序列里塞进多少个 token，
+     直接决定 <a href="lesson_07.html">KV Cache</a> 有多大、attention 要算多少。patch 化的方式（切多大的块）
+     直接控制这个数字——所以它不是细节，而是性能杠杆。</p>
+
+  <h2 id="problem">先看问题：能不能把像素直接喂进去？ <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课的图片是 <code>image_size=16</code>、3 通道（RGB）的彩色图，也就是一个
+     <code>(3, 16, 16)</code> 的数字方块，共 <code>3 × 16 × 16 = 768</code> 个像素值。
+     假如我们「偷懒」，有两种直觉但都行不通的做法：</p>
+  <table>
+    <thead><tr><th>偷懒做法</th><th>会发生什么</th><th>为什么不行</th></tr></thead>
+    <tbody>
+      <tr><td>把整张图 768 个数<strong>拉直成 1 个超长向量</strong>，当 1 个 token</td>
+          <td>得到 1 个 768 维 token</td>
+          <td>维度和文本 token（32 维）对不上；而且「1 个 token 装下整张图」，attention 无法分辨图里不同区域。</td></tr>
+      <tr><td>把<strong>每个像素当 1 个 token</strong></td>
+          <td>得到 768 个 token</td>
+          <td>序列瞬间爆炸——<code>max_seq_len</code> 才 64，768 个 token 直接超限；单张小图就吃光整条序列。</td></tr>
+    </tbody>
+  </table>
+  <p>我们要的是一个「不多不少」的中间粒度：既保留图里「哪块在哪」的空间结构，又不会让 token 数失控。
+     答案就是——把图切成若干<strong>不重叠的小块（patch）</strong>，每块当成一个 token。</p>
+
+  <h2 id="intuition">一句话解释 + 直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    Patch embedding = 把图片切成 <code>grid×grid</code> 个小方块，每块<strong>拉直成一个向量</strong>，
+    再用一个线性层投影成固定长度——于是每个小方块就变成了一个「visual token」，形状和文本 token 完全一样。</div>
+  <p><strong>类比：把一幅画剪成拼图。</strong>一幅 16×16 的画，用 8×8 的剪刀横竖各剪一刀，得到
+     <code>2×2 = 4</code> 块拼图。每块单独装进一个信封（展平成向量），再贴上统一规格的标签（线性投影到
+     <code>vision_hidden=48</code> 维）。模型拿到的不再是「一幅画」，而是「4 个规格一致的信封」——
+     它擅长处理这种「一串等长的东西」。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    拼图类比有两处要小心：<br>
+    ① 真拼图靠<strong>形状</strong>拼回原位，而 patch 之间<strong>不靠形状连接</strong>——它们回不回得到「谁挨着谁」
+       的信息，要靠后面（Lesson 22）加的<strong>位置编码</strong>，本课的 <code>PatchEmbed</code> 还<em>没有</em>位置信息。<br>
+    ② 「展平」会把二维小块<strong>压成一维</strong>：块内像素的上下左右关系在向量里变成了「第几个数」，
+       靠线性层去重新学。所以 patch 内部的空间结构是被「编号」保留的，不是被「保形」保留的。</div>
+
+  <h2 id="define">精确定义：四个动作，逐个 shape 说清 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课视觉配置（务必记住这几个真实数字）：<code>image_size=16</code>、<code>patch_size=8</code>、
+     3 通道、<code>vision_hidden=48</code>。整条流水线是四个动作，输入是 <code>(3, 16, 16)</code>：</p>
+  <ol>
+    <li><strong>算 grid（切几刀）</strong>：<code>grid = image_size / patch_size = 16 / 8 = 2</code>。
+        横竖各切成 2 段，得到 <code>grid × grid = 2 × 2 = 4</code> 个 patch。
+        <br><span style="color:var(--fg-dim)">→ visual token 数 = grid×grid = <strong>4</strong>。这就是本课最重要的一个数字。</span></li>
+    <li><strong>flatten（每块展平）</strong>：每个 patch 覆盖 3 个通道、<code>patch_size×patch_size = 8×8</code> 个像素，
+        展平成一个向量，长度 <code>patch_dim = 3 · patch_size · patch_size = 3 · 8 · 8 = 192</code>。
+        <br>把 4 个 patch 摞起来 → 一个 <code>(num_patches, patch_dim) = (4, 192)</code> 的矩阵。</li>
+    <li><strong>线性投影（贴统一标签）</strong>：用一个权重矩阵 <code>proj</code>，形状 <code>(patch_dim, vision_hidden) = (192, 48)</code>，
+        做矩阵乘：<code>(4, 192) × (192, 48) = (4, 48)</code>。</li>
+    <li><strong>得到 visual token</strong>：输出 <code>(num_patches, vision_hidden) = (4, 48)</code>——
+        4 行，每行是一个 48 维的 visual token。</li>
+  </ol>
+  <div class="callout note"><div class="callout-title">逐符号 + shape 一览</div>
+    <table>
+      <thead><tr><th>符号</th><th>含义</th><th>本课取值 / shape</th></tr></thead>
+      <tbody>
+        <tr><td><code>image_size (S)</code></td><td>图片边长（像素）</td><td>16</td></tr>
+        <tr><td><code>patch_size (P)</code></td><td>每个 patch 的边长</td><td>8</td></tr>
+        <tr><td><code>grid (g)</code></td><td>每边切成几块 = S/P</td><td>2</td></tr>
+        <tr><td><code>num_patches</code></td><td>visual token 数 = g·g</td><td>4</td></tr>
+        <tr><td><code>patch_dim</code></td><td>单块展平长度 = 3·P·P</td><td>192</td></tr>
+        <tr><td><code>proj</code></td><td>投影权重矩阵</td><td>(192, 48)</td></tr>
+        <tr><td>输入 <code>chw</code></td><td>channel-first 图片</td><td>(3, 16, 16)</td></tr>
+        <tr><td>输出</td><td>visual tokens</td><td>(4, 48)</td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:.82rem;color:var(--fg-dim);margin-top:6px">注意 <code>patch_dim</code> 里的 <strong>3</strong>
+      是 RGB 三通道——漏掉它是本课最常见的错。</div>
+  </div>
+
+  <h2 id="worked">小规模手算：一张 4×4 的图切成 patch <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>真图 16×16、192 维太大，手算看不清。我们用一张<strong>更小的玩具图</strong>把「切块 + 展平」的每一步走一遍：
+     设图是 <strong>4×4、单通道</strong>（先当灰度图，方便；下面再补通道），<code>patch_size=2</code>，
+     于是 <code>grid = 4/2 = 2</code>，切出 <code>2×2 = 4</code> 个 patch。像素值就用 1~16：</p>
+  <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;margin:10px 0">
+    <div>
+      <div style="font-size:.82rem;color:var(--fg-dim);margin-bottom:4px">原图 4×4（竖横各切一刀 → 4 块）</div>
+      <div style="display:grid;grid-template-columns:repeat(2,auto);gap:6px;font-family:var(--mono)">
+        <div style="display:grid;grid-template-columns:repeat(2,32px);gap:2px;border:2px solid var(--prefill);padding:3px;border-radius:6px">
+          <span style="text-align:center">1</span><span style="text-align:center">2</span>
+          <span style="text-align:center">5</span><span style="text-align:center">6</span></div>
+        <div style="display:grid;grid-template-columns:repeat(2,32px);gap:2px;border:2px solid var(--decode);padding:3px;border-radius:6px">
+          <span style="text-align:center">3</span><span style="text-align:center">4</span>
+          <span style="text-align:center">7</span><span style="text-align:center">8</span></div>
+        <div style="display:grid;grid-template-columns:repeat(2,32px);gap:2px;border:2px solid var(--finished);padding:3px;border-radius:6px">
+          <span style="text-align:center">9</span><span style="text-align:center">10</span>
+          <span style="text-align:center">13</span><span style="text-align:center">14</span></div>
+        <div style="display:grid;grid-template-columns:repeat(2,32px);gap:2px;border:2px solid var(--running);padding:3px;border-radius:6px">
+          <span style="text-align:center">11</span><span style="text-align:center">12</span>
+          <span style="text-align:center">15</span><span style="text-align:center">16</span></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:.82rem;color:var(--fg-dim);margin-bottom:4px">展平成 4 行（行内先行后列 row-major）</div>
+      <div style="font-family:var(--mono);font-size:.9rem;line-height:1.9">
+        <div><span style="color:var(--prefill)">patch(0,0)</span> → [ 1, 2, 5, 6 ]</div>
+        <div><span style="color:var(--decode)">patch(0,1)</span> → [ 3, 4, 7, 8 ]</div>
+        <div><span style="color:var(--finished)">patch(1,0)</span> → [ 9, 10, 13, 14 ]</div>
+        <div><span style="color:var(--running)">patch(1,1)</span> → [ 11, 12, 15, 16 ]</div>
+      </div>
+    </div>
+  </div>
+  <p>盯住 <code>patch(0,0) = [1, 2, 5, 6]</code>：块内是 <code>1 2 / 5 6</code>，展平时<strong>先走完第 0 行（1,2）再走第 1 行（5,6）</strong>——
+     这正是源码里 <code>for i in range(ps): for j in range(ps)</code> 的顺序（i 是行、j 是列）。
+     patch 的<strong>遍历顺序</strong>也一样：<code>for pi: for pj</code> 先左上、再右上、再左下、右下——
+     所以 4 行的排列是 (0,0)(0,1)(1,0)(1,1)。</p>
+  <div class="callout note"><div class="callout-title">补上「3 通道」这一层</div>
+    上面是单通道。真图有 RGB 3 通道，展平顺序是 <strong>channel-major</strong>：<code>for c in range(3)</code> 在最外层，
+    先铺完整个 R 通道（<code>P·P</code> 个数），再 G，再 B。所以本课真实的 <code>patch_dim = 3 · 8 · 8 = 192</code>，
+    向量结构是 <code>[R 的 64 个 … | G 的 64 个 … | B 的 64 个 …]</code>。玩具例子若也是 3 通道，
+    每行就从 4 维变成 <code>3·2·2 = 12</code> 维。</div>
+  <p>最后一步投影：把这个 <code>(4, 192)</code> 矩阵乘上 <code>proj (192, 48)</code>，得到
+     <code>(4, 48)</code>——4 个 visual token，每个 48 维，可以和文本 token 拼在一起进模型了。</p>
+
+  <h2 id="pipeline">内联执行图：从图片到 4 个 visual token <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout note" style="border-left-color:var(--decode)">
+    <div class="callout-title">完整流水线（本课真实数字 16×16 / patch 8 / 3 通道 / hidden 48）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-family:var(--mono);font-size:.8rem;margin-top:8px">
+      <div style="border:2px solid var(--prefill);border-radius:6px;padding:8px 12px;text-align:center">
+        图片<br>(3, 16, 16)<br><span style="color:var(--fg-dim)">768 个像素</span></div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="text-align:center">
+        <div style="display:grid;grid-template-columns:repeat(2,26px);grid-template-rows:repeat(2,26px);gap:3px">
+          <div style="border:2px solid var(--decode);border-radius:4px"></div>
+          <div style="border:2px solid var(--decode);border-radius:4px"></div>
+          <div style="border:2px solid var(--decode);border-radius:4px"></div>
+          <div style="border:2px solid var(--decode);border-radius:4px"></div></div>
+        <div style="color:var(--fg-dim);margin-top:4px">切 grid 2×2<br>= 4 个 patch</div></div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px solid var(--running);border-radius:6px;padding:8px 12px;text-align:center">
+        展平<br>(4, 192)<br><span style="color:var(--fg-dim)">每块 3·8·8</span></div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px dashed var(--running);border-radius:6px;padding:8px 12px;text-align:center">
+        × proj<br>(192, 48)</div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:8px 12px;text-align:center">
+        visual tokens<br>(4, 48)<br><span style="color:var(--fg-dim)">4 个 token</span></div>
+    </div>
+    <div style="font-size:.78rem;color:var(--fg-dim);margin-top:8px">
+      虚线框 = 可学习的权重（<code>proj</code>）；其余是纯数据变形。整条链没有位置编码、没有 CLS token——
+      那些留到 Lesson 22。</div>
+  </div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「visual token 数 = 像素数」</td>
+          <td>是 <strong>grid×grid = 4</strong>，不是 <code>16×16=256</code>，更不是 <code>768</code>。
+              一个 patch（一整块 8×8×3 像素）才对应<strong>一个</strong> token。</td></tr>
+      <tr><td>「patch_dim 就是 patch_size×patch_size」</td>
+          <td>漏了通道！应是 <code>3 × patch_size × patch_size = 192</code>。少乘 3，投影维度对不上，矩阵乘直接报错。</td></tr>
+      <tr><td>「patch 越小、token 越少、越省」</td>
+          <td>正好相反：patch <strong>越小</strong> → grid 越大 → token <strong>越多</strong>（更细但更贵）。
+              <code>patch=8</code>→4 个 token；若 <code>patch=4</code>→grid 4×4=<strong>16</strong> 个 token。</td></tr>
+      <tr><td>「投影只是改个维度、可有可无」</td>
+          <td>投影是<strong>唯一可学习</strong>的一步（<code>proj</code> 是权重），把「原始像素」变成模型能用的特征；
+              切块和展平只是搬数据，不含学习。</td></tr>
+      <tr><td>「patch 展平后模型就知道谁挨着谁」</td>
+          <td>不知道。展平丢掉了 patch 之间的相对位置，需要 Lesson 22 的<strong>位置编码</strong>补回来；
+              本课的 <code>PatchEmbed</code> 输出是「无序」的 4 个向量。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>上面讲的四个动作，精确对应 <code>mini_vllm/multimodal/patch_embed.py</code> 里的两个方法：</p>
+  <table>
+    <thead><tr><th>讲解里的步骤</th><th>源码位置</th><th>做了什么</th></tr></thead>
+    <tbody>
+      <tr><td>算 patch_dim（含通道 3）</td><td><code>__init__</code>：<code>self.patch_dim = 3*patch*patch</code></td><td>= 192；并建 <code>proj</code> 权重 (192, 48)</td></tr>
+      <tr><td>切块 + 展平</td><td><code>flatten_patches()</code></td><td>双层 <code>for pi/pj</code> 遍历 patch，内层 <code>for c/i/j</code> channel-major 展平，返回 <code>(4, 192)</code></td></tr>
+      <tr><td>visual token 数</td><td><code>num_patches()</code></td><td>返回 <code>grid*grid = 4</code></td></tr>
+      <tr><td>线性投影</td><td><code>__call__()</code>：<code>M.matmul(patches, self.proj)</code></td><td>(4,192)×(192,48) → <strong>(4, 48)</strong></td></tr>
+    </tbody>
+  </table>
+  <div class="callout tip"><div class="callout-title">读源码时盯这一处</div>
+    <code>flatten_patches</code> 的四层循环顺序就是本课的灵魂：<code>pi,pj</code>（哪一块）在外、
+    <code>c,i,j</code>（块内 RGB + 行 + 列）在内。搞清这个顺序，你就完全理解了「一个 patch 是怎么变成
+    192 个数、又怎么排成一行」的。</div>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a21">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>图片如何切成 patch 并变成 visual token？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 21
+python3 course.py run 21 --trace
+python3 course.py check 21</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 21` 看 patch 数与维度。</details>
+    <details><summary>提示 Level 2 · 位置</summary>visual token 数 = grid×grid。</details>
+    <details><summary>提示 Level 3 · 机制</summary>patch_dim = 3×patch×patch。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>线性投影到 vision_hidden。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>token 数算错</td><td>grid 算错</td><td>grid = image_size / patch_size</td></tr><tr><td>展平维度错</td><td>漏了通道</td><td>patch_dim = 3×patch×patch</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 21 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>更大分辨率的图会产生更多还是更少 visual token？</li><li>patch_size 变大/变小对 token 数与细节各有何影响？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>PatchEmbed</td><td>ViT patch embedding</td><td>切块+投影一致</td><td>真实含位置编码、CLS token、多分辨率</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>patch size、grid、flatten、线性投影、visual token 数（=grid×grid）。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="21">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_22.html">下一步：Lesson 22 · Tiny Vision Encoder 与 Projector →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 21 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a21", {stages: [{title:"(3,S,S) 图", detail:"channel-first"},{title:"切成 grid×grid 个 patch", detail:"每块 patch_size×patch_size"},{title:"每个 patch 展平", detail:"维度 = 3·patch·patch"},{title:"线性投影", detail:"→ vision_hidden（patch embedding）"},{title:"visual token 数", detail:"= grid×grid"}]});
+</script>
+</body>
+</html>

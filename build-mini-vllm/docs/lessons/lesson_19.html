@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 19 · 多模态请求是什么 — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="区分结构化消息 / chat template / token+占位 / processed media / 视觉 embedding 各阶段；明确图片路径不是 embedding、tokenizer 不处理像素。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 19</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 19 · 多模态请求是什么 <span class="phase-badge phase-learn">Phase 4</span></h1>
+  <p>搞清多模态请求的阶段边界，后面图片/视频处理才不会张冠李戴。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>区分结构化消息 / chat template / token+占位 / processed media / 视觉 embedding 各阶段；明确图片路径不是 embedding、tokenizer 不处理像素。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/messages.py</code>、<code>mini_vllm/multimodal/chat_template.py</code>、<code>mini_vllm/multimodal/inputs.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/multimodal/inputs.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>MultiModalInputParser.parse()</code>、<code>MultiModalChatTemplate.render()</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 19</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 19</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 18</dd>
+        <dt>完成后下一步</dt><dd>Lesson 20</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>从 Lesson 19 起进入<strong>多模态主线</strong>：请求里除了文字，还可能夹着图片、视频。
+     这条主线后面所有课（图片变 tensor、切 patch、视觉编码器、把视觉向量拼回文本序列）
+     都建立在一个前提上——<strong>你清楚地知道每个阶段在做什么、不做什么</strong>。</p>
+  <p>本课几乎不写新算法，只做一件事：<strong>把一条多模态请求拆成 5 个界限分明的阶段</strong>，
+     并牢牢记住每个阶段的输入 / 输出是什么类型。这听起来简单，却是多模态<strong>最容易张冠李戴</strong>
+     的地方——一旦把「图片路径」当成 embedding、把「像素」塞进 tokenizer，后面调试会毫无头绪。
+     所以这一课的目标不是「跑通」，而是<strong>把阶段边界刻进脑子</strong>。</p>
+
+  <h2 id="problem">先看问题：不分阶段会怎样 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>假设你收到这样一条请求（用本课的消息格式表示）：</p>
+  <pre><code>user(
+    text("图"),                 # 一段文字
+    image(&lt;16×16 的图片像素&gt;),  # 一张图片
+)</code></pre>
+  <p>模型的 Transformer（<a href="lesson_06.html">Lesson 6</a>）只吃一样东西：<strong>一串隐藏向量</strong>，
+     形状 <code>(seq_len, hidden=32)</code>。文字和图片<strong>最终都要变成这种向量</strong>才能进模型。
+     问题在于——它们变过去的<strong>路径完全不同</strong>。如果不分阶段，会踩到三个具体的坑：</p>
+  <table>
+    <thead><tr><th>错误做法</th><th>具体会发生什么（用真实数字）</th></tr></thead>
+    <tbody>
+      <tr><td>把图片当文本，直接塞进 tokenizer</td>
+          <td>本课 tokenizer 是 <strong>byte-level</strong>，词表就是 <code>0..255</code> 这 256 个字节值，外加 3 个特殊 token（BOS/EOS/PAD），共 <code>259</code> 个。
+              一张 <code>16×16×3</code> 的图片是 <code>768</code> 个<strong>浮点像素</strong>，根本不是字节序列——
+              喂进去要么崩，要么被当成乱码。</td></tr>
+      <tr><td>把图片<strong>路径字符串</strong>（如 <code>"cat.png"</code>）当输入</td>
+          <td>tokenizer 会老老实实把这 7 个字母编成 7 个字节 token。模型看到的是「c-a-t-.-p-n-g」这几个字母，
+              <strong>永远看不到像素</strong>。路径只是磁盘上的一个指针，不是内容。</td></tr>
+      <tr><td>直接把图片向量拼在文本 token 后面，不预留位置</td>
+          <td>这张图会被切成 <code>2×2 = 4</code> 个 patch → <strong>4 个 visual token</strong>。
+              但如果 token 序列里没有为它们<strong>预留 4 个槽位</strong>，视觉向量就无处安放、也无法与文本对齐
+              （谁在图前、谁在图后就乱了）。</td></tr>
+    </tbody>
+  </table>
+  <p>这三个坑的共同根源都是<strong>阶段混淆</strong>。正确做法是把请求拆成阶段，让文本走文本的路、
+     媒体走媒体的路，最后在<strong>约定好的位置</strong>合流。</p>
+
+  <h2 id="intuition">一句话解释 + 直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    多模态请求处理 = <strong>先给图片在 token 序列里「占好座位」（占位 token），
+    再由另一条流水线单独把图片算成视觉向量，稍后把向量「对号入座」填进那些座位</strong>。
+    本课只负责前半段：排座位 + 占座位。</div>
+  <p><strong>类比：宴会预留座位。</strong>chat template 是<strong>引座员</strong>：他按客人到场顺序
+     （文字、图片、文字……）在桌上摆好座位牌，图片那一桌先放一张写着「<code>&lt;image&gt;</code>」的<strong>占位牌</strong>，
+     但他<strong>不认识</strong>图片本人长什么样。tokenizer 负责把文字客人一个个安排入座（每个字节一个座位）。
+     真正的图片嘉宾（视觉 embedding）由<strong>另一支车队（vision encoder）</strong>接送，
+     稍后才到场——到了就<strong>对号入座</strong>，坐进之前预留好的那几个位子。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    座位牌上写什么不重要（本课用 PAD 这个「无语义」token 当占位），重要的是<strong>位置和数量</strong>：
+    预留的座位数<strong>必须精确等于</strong>图片嘉宾人数（visual token 数 = 4），多一个空着、少一个坐不下。
+    而且——引座员（template）<strong>绝不</strong>负责把嘉宾变出来；嘉宾是另一条流水线（encoder+projector）
+    算出来的。把这两件事混在一起，就是最常见的 bug。</div>
+
+  <h2 id="stages">五个阶段的精确边界 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>一条多模态请求从「人类可读的消息」到「可进模型的向量」，要穿过 5 个阶段。
+     本课（Lesson 19）只覆盖前 3 个（下图实线框），后 2 个（虚线框）是后续课程的内容，
+     这里只需知道它们<strong>是独立阶段</strong>：</p>
+  <div class="callout note"><div class="callout-title">执行流水线：文本与媒体分两条路，稍后合流</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;font-family:var(--mono);font-size:.78rem;margin-top:8px">
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px;min-width:120px">
+        <strong>① 结构化消息</strong><br><span style="color:var(--fg-dim)">role + content[]<br>text / image / video</span></div>
+      <div style="font-size:1.3rem;align-self:center">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px;min-width:120px">
+        <strong>② Chat Template</strong><br><span style="color:var(--fg-dim)">render()<br>加角色前缀<br>媒体处放占位标记</span></div>
+      <div style="font-size:1.3rem;align-self:center">→</div>
+      <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 10px;min-width:130px">
+        <strong>③ Tokenize+占位</strong><br><span style="color:var(--fg-dim)">parse()<br>文本→字节 token<br>媒体→PAD 占位 token<br>记录 PlaceholderRange</span></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;font-family:var(--mono);font-size:.78rem;margin-top:10px">
+      <div style="border:2px dashed var(--running);border-radius:6px;padding:6px 10px;min-width:120px;background:color-mix(in srgb,var(--running) 12%,var(--bg))">
+        <strong>④ 媒体单独处理</strong><br><span style="color:var(--fg-dim)">image processor<br>像素→patch tensor<br>（与 tokenizer 无关）</span></div>
+      <div style="font-size:1.3rem;align-self:center">→</div>
+      <div style="border:2px dashed var(--running);border-radius:6px;padding:6px 10px;min-width:130px;background:color-mix(in srgb,var(--running) 12%,var(--bg))">
+        <strong>⑤ 视觉 embedding</strong><br><span style="color:var(--fg-dim)">encoder+projector<br>vision_hidden 48→text_hidden 32<br>稍后填进③的占位槽</span></div>
+    </div>
+    <div style="font-size:.78rem;color:var(--fg-dim);margin-top:8px">
+      实线框（①②③）= 本课范围；虚线框（④⑤）= 后续课程，这里只需记住它们是<strong>独立分支</strong>。
+      注意 ③ 和 ④ <strong>并行、互不干涉</strong>：文本走 tokenizer，像素走 processor，最后靠
+      PlaceholderRange 记录的位置在 ⑤ 之后合流。</div>
+  </div>
+
+  <p>本课的两个核心函数，正对应阶段 ② 和 ③：</p>
+  <div class="callout deep"><div class="callout-title">阶段 ② · <code>MultiModalChatTemplate.render(messages)</code></div>
+    <strong>输入</strong>：结构化消息列表 <code>list[dict]</code>，每条形如 <code>{"role":..., "content":[{type,...}]}</code>。<br>
+    <strong>输出</strong>：<code>(segments, rendered)</code>。<code>segments</code> 是线性化的片段列表，每个是
+    <code>("text", str)</code> 或 <code>("media", {"modality","ref"})</code>；<code>rendered</code> 是调试用字符串
+    （媒体处显示 <code>&lt;image&gt;</code>）。<br>
+    <strong>关键</strong>：它只把内容项<strong>排成一条直线</strong>、加角色前缀、在媒体处放一个<strong>标记</strong>。
+    它<strong>一个像素都不碰</strong>，也<strong>不决定 visual token 数</strong>。</div>
+  <div class="callout deep"><div class="callout-title">阶段 ③ · <code>MultiModalInputParser.parse(segments, media_visual_lens)</code></div>
+    <strong>输入</strong>：② 产出的 <code>segments</code>，外加 <code>media_visual_lens</code>——一个 <code>list[int]</code>，
+    第 <code>i</code> 个数是第 <code>i</code> 段媒体<strong>已经算好</strong>的 visual token 数（本课一张 16×16 图 = <code>4</code>）。<br>
+    <strong>输出</strong>：<code>(input_ids, ranges)</code>。<code>input_ids</code> 是 <code>list[int]</code>（一维 token 序列）；
+    <code>ranges</code> 是每段媒体的 <code>PlaceholderRange(offset, length, media_index, modality)</code>。<br>
+    <strong>关键</strong>：文本段做 byte-level tokenize；媒体段插入 <code>length=n</code> 个 <code>PAD</code> 占位 token，
+    并记录这段占位的<strong>起点、长度、归属</strong>——供阶段 ⑤ 之后「对号入座」。</div>
+
+  <h2 id="worked">小规模手算：一句话 + 一张图 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>拿最开头那条请求走一遍。tokenizer 是 byte-level：<strong>每个 UTF-8 字节 = 1 个 token id（0..255）</strong>，
+     中文一字 = 3 字节 = 3 个 token；<code>BOS=256</code>、<code>PAD=258</code>（占位用）。图片切成 <code>2×2=4</code> 个 patch，
+     所以 <code>media_visual_lens = [4]</code>。</p>
+  <p><strong>阶段 ② render()</strong> 把消息线性化（角色前缀 <code>"User: "</code> + 文字 + 媒体标记 + 换行）：</p>
+  <pre><code>segments = [
+    ("text",  "User: "),                          # 角色前缀
+    ("text",  "图"),                               # 文字内容
+    ("media", {"modality":"image", "ref":&lt;像素&gt;}),  # 媒体标记（不碰像素！）
+    ("text",  "\n"),
+]
+rendered = "User: 图&lt;image&gt;\n"                      # 仅供调试</code></pre>
+  <p><strong>阶段 ③ parse(segments, [4])</strong> 逐段处理，边拼 <code>input_ids</code> 边记占位区间。
+     下表是每个 token 的来历（<code>"User: "</code> = U s e r : 空格 = 6 个 ASCII 字节；「图」= 229 155 190）：</p>
+  <table>
+    <thead><tr><th>位置</th><th>token id</th><th>来自哪一段</th><th>怎么来的</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>256</td><td>parser 起手</td><td><code>add_bos</code> → 加 BOS</td></tr>
+      <tr><td>1–6</td><td>85,115,101,114,58,32</td><td>("text","User: ")</td><td>6 个字节各 1 token</td></tr>
+      <tr><td>7–9</td><td>229,155,190</td><td>("text","图")</td><td>1 个中文 = 3 字节 = 3 token</td></tr>
+      <tr><td style="background:color-mix(in srgb,var(--decode) 15%,var(--bg))">10–13</td>
+          <td style="background:color-mix(in srgb,var(--decode) 15%,var(--bg))">258,258,258,258</td>
+          <td style="background:color-mix(in srgb,var(--decode) 15%,var(--bg))">("media",image)</td>
+          <td style="background:color-mix(in srgb,var(--decode) 15%,var(--bg))"><strong>4 个 PAD 占位</strong>（=visual token 数）</td></tr>
+      <tr><td>14</td><td>10</td><td>("text","\n")</td><td>换行 = 1 字节</td></tr>
+    </tbody>
+  </table>
+  <p>最终 <code>input_ids</code> 长度 = <code>1+6+3+4+1 = 15</code>，其中<strong>只有位置 10–13 这 4 个 PAD 是图片的占位</strong>。
+     parser 同时产出：</p>
+  <pre><code>ranges = [ PlaceholderRange(offset=10, length=4, media_index=0, modality="image") ]</code></pre>
+  <div class="callout note"><div class="callout-title">占位在序列里的样子（下划线段 = 图片预留的 4 个座位）</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;font-family:var(--mono);font-size:.78rem;margin-top:6px">
+      <div style="border:1px solid var(--finished);border-radius:4px;padding:4px 6px">BOS</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">U</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">s</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">e</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">r</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">:</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">␣</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">图·1</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">图·2</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">图·3</div>
+      <div style="border:2px solid var(--decode);border-radius:4px;padding:4px 6px;background:color-mix(in srgb,var(--decode) 15%,var(--bg))">PAD</div>
+      <div style="border:2px solid var(--decode);border-radius:4px;padding:4px 6px;background:color-mix(in srgb,var(--decode) 15%,var(--bg))">PAD</div>
+      <div style="border:2px solid var(--decode);border-radius:4px;padding:4px 6px;background:color-mix(in srgb,var(--decode) 15%,var(--bg))">PAD</div>
+      <div style="border:2px solid var(--decode);border-radius:4px;padding:4px 6px;background:color-mix(in srgb,var(--decode) 15%,var(--bg))">PAD</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">\n</div>
+    </div>
+    <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+      <code>offset=10, length=4</code> 精确指向这 4 个 PAD。阶段 ⑤ 算出图片的 <code>(4, 32)</code> 视觉向量后，
+      就把这 4 行 embedding 逐位替换进位置 10–13——这就是「对号入座」。本课到「排好座位」为止。</div>
+  </div>
+  <div class="callout warn"><div class="callout-title">守护对齐：parse() 会自查</div>
+    如果 <code>segments</code> 里的媒体段数量与 <code>media_visual_lens</code> 的长度<strong>对不上</strong>，
+    <code>parse()</code> 直接抛错（<code>媒体数量不一致</code>）。这是多模态最容易出错的地方，
+    Lesson 23 的 <code>validate_placeholders()</code> 还会进一步校验区间不越界、不重叠、顺序正确。</div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「图片路径 / 像素就是模型的 embedding」</td>
+          <td>路径是磁盘字符串、像素是原始数值，都<strong>不是</strong>隐藏向量。embedding 要到阶段 ⑤
+              经 encoder+projector（<code>48→32</code>）才生成。本课的 token 序列里图片只是 <strong>4 个 PAD 占位</strong>。</td></tr>
+      <tr><td>「chat template 会把图片编码进去」</td>
+          <td><code>render()</code> 只放一个 <code>("media",…)</code> 标记 / <code>&lt;image&gt;</code>，
+              <strong>一个像素都不碰</strong>，也不决定 visual token 数。编码是 processor / encoder 的活。</td></tr>
+      <tr><td>「tokenizer 能顺手处理像素」</td>
+          <td>byte-level tokenizer 只认 <code>0..255</code> 的字节。<code>16×16×3=768</code> 个浮点像素喂进去只会崩或乱码。
+              媒体必须走<strong>独立的 processor 分支</strong>（阶段 ④）。</td></tr>
+      <tr><td>「占位 token 数随便填」</td>
+          <td>必须<strong>精确等于</strong>该媒体的 visual token 数（本例 <code>4</code>）。多了会留空槽、少了坐不下，
+              <code>parse()</code> / <code>validate_placeholders()</code> 会直接报错。</td></tr>
+      <tr><td>「占位用什么 token 值很关键」</td>
+          <td>恰恰相反：占位值（这里用无语义的 PAD）<strong>稍后会被视觉向量整段覆盖</strong>，值本身不重要。
+              真正关键的是<strong>位置和数量</strong>（由 <code>PlaceholderRange</code> 记录）。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>本课概念</th><th>对应代码</th><th>做 / 不做什么</th></tr></thead>
+    <tbody>
+      <tr><td>结构化消息（阶段 ①）</td><td><code>multimodal/messages.py</code> 的 <code>user/text/image/video()</code></td>
+          <td>只构造 <code>{role, content[]}</code> dict，不做任何编码</td></tr>
+      <tr><td>Chat Template（阶段 ②）</td><td><code>chat_template.py</code> <code>MultiModalChatTemplate.render()</code></td>
+          <td>加角色前缀、线性化、媒体处放占位标记；不碰像素</td></tr>
+      <tr><td>Tokenize + 占位（阶段 ③）</td><td><code>inputs.py</code> <code>MultiModalInputParser.parse()</code></td>
+          <td>文本→字节 token；媒体→ <code>PAD</code> 占位；产出 <code>input_ids</code> + <code>PlaceholderRange</code></td></tr>
+      <tr><td>占位区间记录</td><td><code>placeholders.py</code> <code>PlaceholderRange</code> / <code>validate_placeholders()</code></td>
+          <td>记录 offset/length/media_index/modality，并守护对齐</td></tr>
+      <tr><td>媒体处理 / 视觉 embedding（阶段 ④⑤）</td><td>后续课程（processor / encoder / projector）</td>
+          <td>本课<strong>不实现</strong>，只需知道它们是独立分支</td></tr>
+    </tbody>
+  </table>
+  <div class="callout tip"><div class="callout-title">本课要修改的地方</div>
+    Build 阶段你要补全的是 <code>inputs.py</code> 的 <code>parse()</code>——即阶段 ③：正确地把文本 token 与
+    媒体占位拼成一条 <code>input_ids</code>，并为每段媒体记录准确的 <code>PlaceholderRange</code>。</div>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a19">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>一个多模态请求从消息到 token+占位，经历哪些阶段？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 19
+python3 course.py run 19 --trace
+python3 course.py check 19</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 19` 看各阶段。</details>
+    <details><summary>提示 Level 2 · 位置</summary>template 只放占位标记，不编码像素。</details>
+    <details><summary>提示 Level 3 · 机制</summary>占位 token 稍后被视觉 embedding 替换。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>placeholder 数必须与媒体数一致。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>占位数≠媒体数</td><td>解析错误</td><td>每段媒体恰好一段占位，长度=该媒体 visual token 数</td></tr><tr><td>把像素塞进 tokenizer</td><td>阶段混淆</td><td>媒体走 processor/encoder，文本走 tokenizer</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 19 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>为什么要用占位 token 而不是直接把像素编码进文本？</li><li>chat template、tokenizer、image processor 三者的职责边界是什么？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>结构化消息 + 占位</td><td>HF chat template + mm processor</td><td>阶段划分一致</td><td>真实模板/占位更复杂，含特殊 token</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>区分结构化消息 / chat template / token+占位 / processed media / 视觉 embedding 各阶段；明确图片路径不是 embedding、tokenizer 不处理像素。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="19">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_20.html">下一步：Lesson 20 · 图片如何变成 Tensor →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 19 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a19", {stages: [{title:"结构化消息", detail:"role + content[text|image|video]"},{title:"Chat Template", detail:"加角色标记、媒体处放占位标记"},{title:"Tokenize 文本 + 插入占位 token", detail:"PAD 作占位，记录 PlaceholderRange"},{title:"媒体单独处理", detail:"processor / sampler（与 tokenizer 分离）"},{title:"视觉 embedding", detail:"encoder + projector（稍后合并）"}]});
+</script>
+</body>
+</html>

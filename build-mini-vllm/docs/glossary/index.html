@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>术语表 · Build Your Own Mini-vLLM</title>
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· 术语表</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>术语表（Glossary）</h1>
+  <p style="color:var(--fg-dim)">首次出现的英文术语都保留英文并给出中文，这里汇总备查。随课程推进会持续补充。</p>
+  <table>
+    <thead><tr><th>术语</th><th>中文</th><th>一句话解释</th><th>首次出现</th></tr></thead>
+    <tbody>
+      <tr><td>Token</td><td>词元</td><td>模型能看懂的最小输入单位；本课用 byte-level（每个 UTF-8 字节即一个 token）。</td><td>Lesson 1</td></tr>
+      <tr><td>Prefill</td><td>预填充</td><td>一次性处理整段 prompt，产出首 token。</td><td>Lesson 0 / 8</td></tr>
+      <tr><td>Decode</td><td>解码</td><td>自回归生成阶段，每步只处理 1 个新 token。</td><td>Lesson 0 / 8</td></tr>
+      <tr><td>KV Cache</td><td>KV 缓存</td><td>缓存每层已算过的 Key/Value，避免 decode 时重算历史。</td><td>Lesson 7</td></tr>
+      <tr><td>Block / Paged KV</td><td>分页 KV</td><td>把 KV 内存切成固定大小的 block 管理，减少碎片。</td><td>Lesson 13 / 14</td></tr>
+      <tr><td>Continuous Batching</td><td>连续批处理</td><td>请求可随时加入/离开同一个运行 batch，迭代级调度。</td><td>Lesson 10</td></tr>
+      <tr><td>TTFT</td><td>首 Token 延迟</td><td>Time To First Token，从请求到产出第一个 token 的时间。</td><td>Lesson 8</td></tr>
+      <tr><td>TPOT / ITL</td><td>每 token 时延 / token 间隔</td><td>decode 阶段生成速度的度量。</td><td>Lesson 8</td></tr>
+      <tr><td>Placeholder</td><td>占位符</td><td>prompt 中代表一张图/一段视频的位置，稍后被视觉 embedding 替换。</td><td>Lesson 23</td></tr>
+      <tr><td>Visual Token</td><td>视觉 token</td><td>图片被切成 patch 后对应的 token 数量。</td><td>Lesson 21</td></tr>
+    </tbody>
+  </table>
+  <div class="footer">术语表随课程持续更新</div>
+</main>
+<script src="../js/course.js"></script>
+</body>
+</html>

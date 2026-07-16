@@ -1,0 +1,6 @@
+{"_comment":"Lesson 18：综合故障场景。有限 KV 块 + 共享前缀 + 长短混合 + 动态到达。",
+ "block_size":4,"num_blocks":48,"max_num_seqs":3,"max_num_batched_tokens":16,"policy":"balanced",
+ "requests":[{"id":"sys_a","prompt":"System: be concise. What is AI?","max_new_tokens":6,"arrival":0},
+             {"id":"sys_b","prompt":"System: be concise. What is ML?","max_new_tokens":8,"arrival":1},
+             {"id":"chat","prompt":"Hi","max_new_tokens":5,"arrival":2},
+             {"id":"long","prompt":"Summarize the quick brown fox story in detail please","max_new_tokens":4,"arrival":2}]}

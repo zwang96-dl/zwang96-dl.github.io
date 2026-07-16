@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 18 · Text Final Incident Challenge — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="综合场景：短聊天+长 prompt+不同输出+共享前缀+有限 KV 块+动态到达；正确、无泄漏、无 starvation、出报告并对比 naive。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 18</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 18 · Text Final Incident Challenge <span class="phase-badge phase-build">Phase 3</span></h1>
+  <p>综合场景检验系统在真实压力下是否仍然正确、稳定、公平。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>综合场景：短聊天+长 prompt+不同输出+共享前缀+有限 KV 块+动态到达；正确、无泄漏、无 starvation、出报告并对比 naive。</dd>
+        <dt>需要阅读的文件</dt><dd><code>experiments/lesson_18_final_challenge.py</code></dd>
+        <dt>需要修改的文件</dt><dd>（本课重在运行与观察）</dd>
+        <dt>需要关注的类或函数</dt><dd><code>整套引擎</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 18</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 18</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 17</dd>
+        <dt>完成后下一步</dt><dd>Lesson 19</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>前 17 课里，每个子系统都是<strong>单独</strong>验收的：Lesson 7 的 KV Cache 只测「cached==naive」；
+     Lesson 11 的调度器只测「谁先跑」；Lesson 14 的分页只测「块够不够」；Lesson 16 的前缀共享只测「命中率」。
+     可真实推理引擎里，这些机制是<strong>同时</strong>运转、互相牵制的——它们各自正确，<strong>合在一起未必正确</strong>。
+     本课就是把它们塞进同一个高压场景，检验「整机」是否仍然站得住。</p>
+  <p>先用一个数字说清「值不值得搭这套东西」。本课 4 条请求，如果用最朴素的「每步重算整段」做法（Lesson 6），
+     处理量会大到离谱；而组合了 KV Cache + 分页 + 前缀共享 + 连续批处理后，处理量骤降：</p>
+  <table>
+    <thead><tr><th>做法</th><th>累计处理 token 数</th><th>相对</th></tr></thead>
+    <tbody>
+      <tr><td>naive（每步重算整段，O(n²)）</td><td><strong>734</strong></td><td>1×（基线）</td></tr>
+      <tr><td>本课引擎（prefill 一次 + 每步 1 token，前缀还能省）</td><td><strong>≈139</strong></td><td>约 1/5.3</td></tr>
+    </tbody>
+  </table>
+  <p>（734 与 139 都是下面「基线对比」小节里逐条算出来的真实数字。）省下的 5 倍不是免费的——
+     它建立在「缓存无泄漏、调度不饿死、结果不出错」这三根柱子上。任何一根塌了，省下的算力就变成了废品。
+     本课要学的，正是<strong>如何同时守住这三根柱子</strong>。</p>
+
+  <h2 id="problem">先看问题：子系统单独都对，合起来会怎样翻车 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>为什么「综合场景」值得单独开一课？因为组合会催生<strong>单测照不出</strong>的新 bug。下面每一条都是真实引擎里踩过的坑，
+     用本课的具体配置（<code>num_blocks=48</code>、<code>block_size=4</code>、<code>max_num_batched_tokens=16</code>、
+     <code>max_num_seqs=3</code>、4 条动态到达的请求）说清「不做好会怎样」：</p>
+  <table>
+    <thead><tr><th>组合处</th><th>不做好会发生什么（具体数字）</th></tr></thead>
+    <tbody>
+      <tr><td>前缀共享 × 块回收</td>
+          <td><code>sys_a</code> 与 <code>sys_b</code> 共享前 29 个 token（<code>BOS + "System: be concise. What is "</code>）的物理块。
+              若 <code>sys_a</code> 完成时把<strong>共享块也当成自己的还掉</strong>，<code>sys_b</code> 读到的就是脏数据 → 结果错；
+              若谁都不敢还 → <strong>KV 泄漏</strong>，48 个块很快耗尽。</td></tr>
+      <tr><td>长 prompt × 有限 token 预算</td>
+          <td><code>long</code> 的 prompt 有 <strong>53 个 token</strong>，而一次迭代最多处理 16 个。不切块，它<strong>永远调度不出去</strong>
+              （53&gt;16 → 停滞报错）；切了块，又会把预算全占满，短请求 <code>chat</code> 迟迟拿不到首 token。</td></tr>
+      <tr><td>动态到达 × 并发上限</td>
+          <td>4 条请求但 <code>max_num_seqs=3</code>：任一时刻最多 3 条在跑，第 4 条得排队。若调度只顾推进老请求，
+              晚到的 <code>chat</code>/<code>long</code>（arrival=2）可能<strong>被无限期饿死</strong>（starvation）。</td></tr>
+      <tr><td>连续批处理 × 正确性</td>
+          <td>4 条请求的 K/V 在同一迭代里混批计算、共享同一物理块池。一旦 block table 串了行，
+              <code>sys_a</code> 的输出里就会混进 <code>long</code> 的信息（<strong>串请求</strong>）——单条跑永远测不出来。</td></tr>
+    </tbody>
+  </table>
+  <div class="callout note"><div class="callout-title">于是本课的验收标准，正好一一对应这四个坑</div>
+    正确性（cached==reference，不串请求）、无 KV 泄漏、无 starvation（全部完成）、性能不退化（对比 naive）。
+    这四条就是 <code>run_experiment</code> 里的四个自检，下面会逐条拆开。</div>
+
+  <h2 id="scenario">本课的综合场景：4 条请求的全貌 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>tokenizer 是 <strong>byte-level</strong>：每个 UTF-8 字节 = 1 个 token（0..255），再加句首 <code>BOS</code>。
+     所以 prompt 的 token 数 = <code>字节数 + 1</code>。下表是 <code>configs/lesson_18_quick.json</code> 里的真实 4 条请求：</p>
+  <table>
+    <thead><tr><th>id</th><th>prompt</th><th>prompt tokens</th><th>max_new</th><th>arrival<br>(迭代号)</th><th>特点</th></tr></thead>
+    <tbody>
+      <tr><td><code>sys_a</code></td><td>System: be concise. What is AI?</td><td>32</td><td>6</td><td>0</td><td>长 prompt，含共享前缀</td></tr>
+      <tr><td><code>sys_b</code></td><td>System: be concise. What is ML?</td><td>32</td><td>8</td><td>1</td><td>与 sys_a 共享前 29 token</td></tr>
+      <tr><td><code>chat</code></td><td>Hi</td><td>3</td><td>5</td><td>2</td><td>超短聊天，要求低 TTFT</td></tr>
+      <tr><td><code>long</code></td><td>Summarize the quick brown fox story in detail please</td><td>53</td><td>4</td><td>2</td><td>超长 prompt，必须切块</td></tr>
+    </tbody>
+  </table>
+  <p>三个关键约束一起收紧了系统：</p>
+  <ul>
+    <li><strong>token 预算 = 16</strong>：<code>long</code> 的 53 个 prompt token 装不下一次迭代，会被
+        <strong>chunked prefill</strong> 切成 <code>[16, 16, 16, 5]</code> 共 4 块，穿插在别的请求之间处理。</li>
+    <li><strong>并发上限 = 3</strong>：4 条请求 &gt; 3，任一时刻至少有 1 条在 <code>waiting</code>。</li>
+    <li><strong>动态到达</strong>：<code>chat</code>/<code>long</code> 在第 2 迭代才「出现」，调度器要能公平地把它们接进来。</li>
+  </ul>
+  <div class="callout tip"><div class="callout-title">共享前缀有多长</div>
+    <code>sys_a</code> 与 <code>sys_b</code> 只有结尾 <code>AI?</code> / <code>ML?</code> 不同，前面
+    <code>BOS + "System: be concise. What is "</code> 完全一致 = <strong>29 个 token</strong>。
+    按 <code>block_size=4</code>，前 7 个整块（28 token）可以被 <code>sys_b</code> 直接<strong>复用</strong>，
+    省去这 28 个 token 的重复 prefill——这正是 Lesson 16 前缀共享在综合场景里的收益。</div>
+
+  <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    这一课不是学新机制，而是当「指挥」：让 KV 缓存、分页、前缀共享、连续批处理这几件已经会的乐器
+    <strong>同时开响</strong>，且合奏出来的曲子仍然<strong>正确、不卡壳、每个声部都有机会发声</strong>。</div>
+  <p><strong>类比：医院急诊分诊台。</strong>病人（请求）陆续到达（动态 arrival），有的病情简单（<code>chat</code>），
+     有的需要长时间检查（<code>long</code>）；诊室数量有限（<code>max_num_seqs=3</code>），医生每小时的接诊量也有限
+     （<code>max_num_batched_tokens=16</code>）。好的分诊台要做到三件事：<strong>不误诊</strong>（正确性）、
+     <strong>不占着床位不放</strong>（无泄漏）、<strong>不让任何病人在走廊里等死</strong>（无 starvation）。
+     长检查还可以<strong>分几次做</strong>（chunked prefill），中间穿插看几个简单病人，谁都不必干等。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    急诊台可以「加人加床」，而推理引擎的物理块是<strong>硬上限</strong>（48 个）：块用完就真的没了。
+    真实 vLLM 此时会<strong>抢占</strong>（把某条请求的 KV 换出到内存腾地方）；本教学引擎<strong>不抢占</strong>，
+    所以一旦「有 RUNNING 却推不动」就直接报错停机——这是刻意的，为了让你看清「预算/块不足」的边界，
+    而不是被自动救场掩盖。</div>
+
+  <h2 id="checks">四条验收标准的精确定义 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>「整机正确」不是一句口号，而是四个可执行的断言（对应 <code>run_experiment</code> 里的四段自检）。逐条看它「测什么、怎么测」：</p>
+
+  <p><strong>① 正确性（cached == reference，不串请求）</strong><br>
+     对每条请求 <code>r</code>，把它<strong>单独</strong>用 <code>generate_cached</code> 跑一遍得到「参考答案」<code>ref</code>，
+     再取引擎在混批场景下给它的实际输出 <code>got</code>，要求<strong>逐 token 相等</strong>：</p>
+  <pre><code>for r in requests:
+    ref = generate_cached(model, encode(r.prompt), r.max_new).generated   # 单独、无干扰
+    got = 引擎在混批场景下给 r 的 output_token_ids
+    assert got == ref            # 逐 token 一致 → 没被别的请求"污染"</code></pre>
+  <p>它同时封杀两类 bug：<em>重复执行</em>（多算/漏算会让某个 token 变化）和 <em>串请求</em>（block table 串行会让 <code>got</code> 混入别人的信息）。
+     由于用的是贪心采样，参考答案是<strong>确定</strong>的，任何偏差都逃不掉。</p>
+
+  <p><strong>② 无 starvation（所有请求都完成）</strong><br>
+     断言每条请求都有一个「完成迭代号」：<code>all(r.finish_iter is not None)</code>。
+     只要有一条永远排不上队，它的 <code>finish_iter</code> 就是 <code>None</code>，断言失败。<code>balanced</code> 策略靠
+     <strong>给等待中的 prefill 预留 1/4 预算</strong>（<code>prefill_reserve = 16 // 4 = 4</code>）来防止 decode 长期霸占算力。</p>
+
+  <p><strong>③ 无 KV 泄漏</strong><br>
+     一条请求完成后必须归还它借的物理块。收尾时断言「已用块数 == 前缀缓存<strong>应当</strong>持有的块数」：</p>
+  <pre><code>eng.shutdown()                       # flush 前缀缓存 + check_no_leak()
+no_leak = (eng.allocator.num_used == 0)   # flush 之后，一个块都不该剩</code></pre>
+  <p>开着前缀缓存时，请求跑完只还「自己独占的块」，共享块留给缓存；直到 <code>shutdown()</code> 把缓存 <code>flush</code> 掉，
+     占用才应归零。这一条专治上面「前缀共享 × 块回收」那个坑。</p>
+
+  <p><strong>④ 性能不退化（对比 naive 基线）</strong><br>
+     把 4 条请求各自用 <code>generate_naive</code> 跑一遍，累加 <code>total_processed_tokens</code> 作为基线；
+     引擎的处理量应<strong>远小于</strong>它。这一条保证「为了正确/公平，没有把性能牺牲回朴素做法」。</p>
+
+  <h2 id="worked">小规模手算：迭代级调度走一遍 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>真实 4 条请求的完整时间线太长，手算容易出错。这里用一个<strong>缩小版</strong>把「连续批处理 + chunked prefill + 动态到达 + 并发上限」
+     四件事一次讲透（机制与真实场景完全一致，只是数字更小）：</p>
+  <ul>
+    <li>配置：<code>max_num_seqs=2</code>、<code>max_num_batched_tokens=6</code>、<code>policy=balanced</code>（chunked 开）。</li>
+    <li>请求：<code>A</code>(prompt 3, max_new 2, arrival 0)、<code>B</code>(prompt 8, max_new 1, arrival 0)、<code>C</code>(prompt 2, max_new 1, arrival 2)。</li>
+    <li><code>balanced</code> 的预留：<code>prefill_reserve = 6 // 4 = 1</code>（仅当还有等待请求时，给 decode 的预算扣掉 1，留给新 prefill）。</li>
+  </ul>
+  <table>
+    <thead><tr><th>迭代</th><th>预算 6→用量</th><th>调度决策（本步跑谁 / 多少 token）</th><th>本步之后的状态</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>6 → 6</td>
+          <td>准入 <code>A</code>：prefill 3；准入 <code>B</code>：prefill 3（8 里的第 1 块，chunked）。<code>C</code> 尚未到达。</td>
+          <td>A 已 prefill 完 → 出首 token；B 还差 5 个 prompt token</td></tr>
+      <tr><td>2</td><td>6 → 6</td>
+          <td>decode <code>A</code>：1 token（usable=6−reserve1=5）；prefill <code>B</code>：剩下 5 token（一次吃完）。</td>
+          <td>A 生成到第 2 个 → <strong>完成</strong>；B prefill 完 → 出唯一 token → <strong>完成</strong>；两者 KV 归还</td></tr>
+      <tr><td>3</td><td>6 → 2</td>
+          <td>并发已空出；<code>C</code> 已到达（arrival 2≤3），准入并 prefill 2 → 出唯一 token。</td>
+          <td>C <strong>完成</strong>；running/waiting 皆空 → 引擎退出</td></tr>
+    </tbody>
+  </table>
+  <p>三点值得盯住：<strong>(a)</strong> 第 1 迭代 <code>B</code> 的 8-token prompt 被<strong>切成 3+5</strong> 两块，没有一次占满预算堵死 <code>A</code>；
+     <strong>(b)</strong> 第 2 迭代 <code>A</code> 的 decode 与 <code>B</code> 的 prefill <strong>同框混批</strong>（这就是 continuous batching）；
+     <strong>(c)</strong> 晚到的 <code>C</code> 在诊位空出后<strong>被顺利接入</strong>，没有饿死。全部 3 条请求都拿到了 <code>finish_iter</code>，
+     每步用完的块下步就还——正好命中四条验收标准。</p>
+
+  <div class="callout note"><div class="callout-title">引擎主循环执行图（对应 <code>LLMEngine.run</code>）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;font-family:var(--mono);font-size:.78rem;margin-top:8px">
+      <div style="border:2px solid var(--running);border-radius:6px;padding:8px 10px;background:color-mix(in srgb,var(--running) 12%,var(--bg))">
+        <strong>schedule()</strong><br>选谁跑 / 各几 token<br><span style="color:var(--fg-dim)">受预算+块约束</span></div>
+      <div style="align-self:center;font-size:1.3rem">→</div>
+      <div style="border:2px solid var(--decode);border-radius:6px;padding:8px 10px">
+        <strong>_run_item()</strong><br>prefill 块 或 decode 1 token<br>→ 采样 → 追加输出</div>
+      <div style="align-self:center;font-size:1.3rem">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:8px 10px">
+        <strong>remove_finished()</strong><br>完成的移出<br>→ <code>kv.free()</code> 还块</div>
+      <div style="align-self:center;font-size:1.3rem">↺</div>
+    </div>
+    <div style="font-size:.76rem;color:var(--fg-dim);margin-top:6px">
+      每转一圈 = 一个「迭代」。循环直到 <code>waiting</code> 与 <code>running</code> 都空。「还块」这一步就是防泄漏的关键。</div>
+  </div>
+
+  <h2 id="baseline">基线对比：734 vs 139 是怎么算出来的 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>naive 每生成第 <code>t</code> 个 token 都重算整段，处理量是 <code>prompt + t</code>；一条请求生成 <code>M</code> 个 token 的累计处理量
+     = <code>Σ(P+t) = M·P + M(M−1)/2</code>（O(n²)）。引擎的 cached 路径只在 prefill 处理整段 <code>P</code>，之后每 token 只处理 1，
+     累计 = <code>P + (M−1)</code>。逐条代入本课真实数字：</p>
+  <table>
+    <thead><tr><th>请求</th><th>P</th><th>M</th><th>naive = M·P + M(M−1)/2</th><th>cached = P + (M−1)</th></tr></thead>
+    <tbody>
+      <tr><td><code>sys_a</code></td><td>32</td><td>6</td><td>6·32 + 15 = <strong>207</strong></td><td>32 + 5 = 37</td></tr>
+      <tr><td><code>sys_b</code></td><td>32</td><td>8</td><td>8·32 + 28 = <strong>284</strong></td><td>32 + 7 = 39</td></tr>
+      <tr><td><code>chat</code></td><td>3</td><td>5</td><td>5·3 + 10 = <strong>25</strong></td><td>3 + 4 = 7</td></tr>
+      <tr><td><code>long</code></td><td>53</td><td>4</td><td>4·53 + 6 = <strong>218</strong></td><td>53 + 3 = 56</td></tr>
+      <tr><td><strong>合计</strong></td><td>—</td><td>—</td><td><strong>734</strong></td><td><strong>139</strong></td></tr>
+    </tbody>
+  </table>
+  <p>734 就是 <code>run_experiment</code> 里 <code>baseline</code> 那一行（各请求 <code>generate_naive(...).total_processed_tokens</code> 之和）。
+     139 是不含前缀共享的 cached 处理量；<strong>再叠加前缀共享</strong>后，<code>sys_b</code> 能跳过与 <code>sys_a</code> 共享的 28 个 prompt token，
+     实际处理量还会更低。这就是「正确 + 公平」并没有以牺牲性能为代价的量化证据。</p>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「每个子系统的单测都过了，整机自然就对」</td>
+          <td>组合会产生新故障面：前缀块的<strong>共享所有权</strong>、混批时的<strong>block table 串行</strong>、长短请求争抢<strong>同一预算</strong>——
+              这些都只在多请求同时跑时才暴露。所以本课要用「整机四检」而非再堆单测。</td></tr>
+      <tr><td>「请求跑完，把它 KV 里的块全还掉就不泄漏」</td>
+          <td>开了前缀缓存后，请求的块里<strong>混着共享块</strong>。把共享块也还掉 → 后来的请求读到脏数据（正确性挂）；
+              正确做法是完成时只还独占块，共享块交给缓存，最后 <code>shutdown()</code> 统一 flush。</td></tr>
+      <tr><td>「长 prompt 就该一次算完，切块反而更慢」</td>
+          <td><code>long</code> 有 53 token 而预算只有 16，<strong>一次根本算不完</strong>（会触发调度停滞报错）。
+              chunked prefill 把它切成 <code>[16,16,16,5]</code> 穿插进去，既能推进，又不会让 <code>chat</code> 的首 token 被堵死。总算力不变，延迟更公平。</td></tr>
+      <tr><td>「no_leak 就是 <code>num_used == 0</code>」</td>
+          <td>只有在 <code>shutdown()</code>（flush 前缀缓存）<strong>之后</strong>才该归零。运行途中，共享块被缓存合法持有，
+              <code>num_used</code> 恰好等于「缓存持有的块数」——引擎 <code>run()</code> 收尾断言的就是这个等式，而非 0。</td></tr>
+      <tr><td>「调度器只要吞吐高就行」</td>
+          <td>只顾吞吐（如纯 decode-first）会饿死晚到的新请求。<code>balanced</code> 故意留 1/4 预算给等待中的 prefill，
+              用一点吞吐换<strong>无 starvation</strong>——公平也是验收标准之一。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课不写新机制，重点是读懂 <code>experiments/lesson_18_final_challenge.py</code> 里
+     <code>run_experiment()</code> 如何<strong>组装并自检</strong>整机。上面每一节都能落到具体代码：</p>
+  <table>
+    <thead><tr><th>讲解的概念</th><th>对应代码</th></tr></thead>
+    <tbody>
+      <tr><td>组装整机（引擎 + 分页 + 前缀 + chunked）</td>
+          <td><code>LLMEngine(model, tok, ec, SchedulerConfig(..., enable_chunked_prefill=True), enable_prefix_cache=True)</code></td></tr>
+      <tr><td>动态到达的 4 条请求</td><td><code>eng.add_request(id, prompt, max_new, arrival=...)</code>（循环 <code>cfg["requests"]</code>）</td></tr>
+      <tr><td>迭代级主循环（schedule→run→free）</td><td><code>eng.run(tracer)</code> → <code>LLMEngine.run</code>（<code>engine.py</code>）</td></tr>
+      <tr><td>① 正确性：cached==reference</td><td><code>generate_cached(...).generated</code> 与 <code>x.output_token_ids</code> 逐条比对</td></tr>
+      <tr><td>② 无 starvation：全部完成</td><td><code>all(x.finish_iter is not None ...)</code>；<code>balanced</code> 的 <code>prefill_reserve</code>（<code>scheduler.py</code>）</td></tr>
+      <tr><td>③ 无 KV 泄漏</td><td><code>eng.shutdown()</code> → <code>check_no_leak()</code>；<code>no_leak = allocator.num_used == 0</code></td></tr>
+      <tr><td>④ 对比 naive 基线</td><td><code>baseline = Σ generate_naive(...).total_processed_tokens</code></td></tr>
+      <tr><td>chunked prefill 切块 [16,16,16,5]</td><td><code>Scheduler.schedule</code> 里 <code>take = min(remaining, budget)</code>（<code>scheduler.py</code>）</td></tr>
+      <tr><td>汇总性能报告</td><td><code>build_report(eng, res, prefix_stats, baseline)</code>（<code>benchmarks/report.py</code>）</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a18">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>综合场景下，引擎能否同时做到正确、无泄漏、无饥饿？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 18
+python3 course.py run 18 --trace
+python3 course.py check 18</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 18` 跑综合场景。</details>
+    <details><summary>提示 Level 2 · 位置</summary>组合 continuous batching + 分页 + 前缀 + chunked。</details>
+    <details><summary>提示 Level 3 · 机制</summary>自检：正确/无泄漏/全部完成。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>与 naive 基线对比处理量。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>有请求饿死</td><td>策略不公平</td><td>用 balanced，给 prefill 留预算</td></tr><tr><td>KV 不够</td><td>块太少</td><td>分页 + 及时回收；真实系统会抢占换出</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 18 --trace
+python3 course.py benchmark 18 --mode quick</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>首次请求与命中前缀的请求，TTFT 差异来自哪里？</li><li>如果把 num_blocks 调到很小，会先触发什么？如何缓解？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>综合引擎自检</td><td>vLLM 生产引擎</td><td>正确性/无泄漏/公平的目标一致</td><td>vLLM 有抢占、优先级、SLA、可观测性</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>综合场景下引擎保持正确、无泄漏、无明显饥饿，并显著少于 naive 的重复计算。文本主线（0–18）到此完成。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="18">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_19.html">下一步：Lesson 19 · 多模态请求是什么 →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 18 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/request_lifecycle.js"></script>
+<script>
+RequestLifecycleAnim.mount("#a18", {blockSize:4,numBlocks:20,maxNumSeqs:3,tokenBudget:12,requests:[{id:"sysA",prompt:"System: What is AI",maxNew:5,arrival:0},{id:"sysB",prompt:"System: What is ML",maxNew:6,arrival:1},{id:"chat",prompt:"Hi",maxNew:4,arrival:2},{id:"long",prompt:"Summarize the fox story",maxNew:3,arrival:2}]});
+</script>
+</body>
+</html>

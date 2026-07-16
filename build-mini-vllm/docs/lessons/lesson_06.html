@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 6 · 重复计算侦探 — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="运行朴素生成循环，亲眼看到每步重算整段前缀的 O(n²) 浪费。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 6</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<div class="layout">
+  <nav class="toc" aria-label="本页目录">
+    <h2>本页目录</h2>
+    <a href="#goal">本节目标</a><a href="#why">为什么需要</a><a href="#problem">先看问题</a>
+    <a href="#intuition">直觉类比</a><a href="#predict">先预测</a><a href="#anim">交互式动画</a>
+    <a href="#define">精确定义与公式</a><a href="#worked">小规模手算</a><a href="#cost">哪些计算被重复</a>
+    <a href="#misconception">常见误解</a><a href="#code">代码映射</a><a href="#build">动手运行</a>
+    <a href="#hints">四级提示</a><a href="#trace">Trace & Inspector</a>
+    <a href="#challenge">因果理解</a><a href="#vllm">真实 vLLM 映射</a><a href="#summary">总结 & 下一步</a>
+  </nav>
+  <main class="content" id="main">
+    <h1>Lesson 6 · 重复计算侦探 <span class="phase-badge phase-learn">Learn</span></h1>
+    <p>朴素生成能跑出正确结果，但<strong>越生成越慢</strong>。这一课当侦探，找出浪费在哪——
+       为下一课的 KV Cache 立案。</p>
+
+    <section id="goal"><div class="lesson-header"><dl>
+      <dt>当前目标</dt><dd>运行朴素生成，逐步观察每步「处理的 token 数」，发现 O(n²) 重复计算。</dd>
+      <dt>需要阅读的文件</dt><dd><code>mini_vllm/engine/generate.py</code></dd>
+      <dt>需要修改的文件</dt><dd><code>mini_vllm/engine/generate.py</code></dd>
+      <dt>需要关注的类或函数</dt><dd><code>generate_naive()</code>、<code>processed_token_curves()</code></dd>
+      <dt>实验命令</dt><dd><code>python3 course.py run 6</code></dd>
+      <dt>测试命令</dt><dd><code>python3 course.py check 6</code></dd>
+      <dt>本课依赖</dt><dd>Lesson 5</dd>
+      <dt>完成后下一步</dt><dd>Lesson 7 · KV Cache</dd>
+    </dl></div></section>
+
+    <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>KV Cache（<a href="lesson_07.html">下一课</a>）是 vLLM 一切内存与速度魔法的<strong>起点</strong>，但如果没先亲眼看到
+       「不缓存有多亏」，它就只是一句口号。这一课的任务是当侦探：把朴素生成循环<strong>逐步拆开</strong>，
+       用具体数字量出每一步到底重算了多少、累计浪费了多少，给下一课的优化<strong>立案</strong>。
+       搞懂三件事就够了：<em>朴素循环每步做什么、浪费长成什么形状（为什么是 O(n²) 而不是线性）、
+       以及为什么优化后输出必须一字不差</em>。</p>
+
+    <h2 id="problem">先看问题：朴素解码到底在浪费什么 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>先把「一段文字」变成模型看得懂的 token。本课用的是 <strong>byte-level tokenizer（按字节切）</strong>：
+       一个 UTF-8 字节 = 一个 token id（0..255），再加 BOS/EOS/PAD 三个特殊符号，词表共 <code>vocab=259</code>。
+       所以英文 <code>"Hello"</code> = 5 个字节 = 5 个 token，前面补一个 BOS，<strong>整段 prompt 共 6 个 token</strong>
+       （中文更贵：一个汉字 = 3 字节 = 3 个 token）。</p>
+    <p>现在要在这 6 个 token 后面生成 8 个新 token。朴素做法（<code>generate_naive</code>）每生成一个 token，
+       都把「当前<strong>整段</strong>序列」从头 forward 一遍：</p>
+    <table>
+      <thead><tr><th>生成第几个</th><th>喂进 forward 的 token 数</th><th>其中「重复计算」的部分</th></tr></thead>
+      <tbody>
+        <tr><td>第 1 个</td><td>6（整段 prompt）</td><td>—（这一步不可避免）</td></tr>
+        <tr><td>第 2 个</td><td>7</td><td>前 6 个又算了一遍</td></tr>
+        <tr><td>第 3 个</td><td>8</td><td>前 7 个又算了一遍</td></tr>
+        <tr><td>…</td><td>…</td><td>…</td></tr>
+        <tr><td>第 8 个</td><td>13</td><td>前 12 个又算了一遍</td></tr>
+      </tbody>
+    </table>
+    <p>累计喂进模型 <code>6+7+8+…+13 = 76</code> 个 token，可其中真正「新」的只有那 8 个新 token 各自的第一次计算，
+       其余全是把历史又算一遍。更扎心的是：每一步 forward 都算出了 <code>(当前长度 × 259)</code> 个 logits，
+       采样却只用<strong>最后一行</strong>那 259 个——前面所有行的 logits 也是白算。这就是「案发现场」；
+       下一课的 KV Cache 会把累计从 76 压到 <code>6 + 7×1 = 13</code>。</p>
+
+    <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="callout tip"><div class="callout-title">一句话解释</div>
+      朴素生成 = 每写出一个新字，都先把「到目前为止的整段话」从头到尾重读一遍再动笔。
+      写得越长，这次「重读」就越长，累加起来是 <strong>O(n²)</strong>。</div>
+    <p><strong>类比：不做笔记的抄书人。</strong>你要接着一段话往下写。每写一个字之前，你都强迫自己
+       <strong>把前面所有字从头默读一遍</strong>——写第 1 个新字前读 6 个字，写第 2 个前读 7 个字……
+       其实你完全可以边读边把要点抄在便签上（这正是下一课的 KV Cache），可朴素抄书人偏不记，每次都从头来。</p>
+    <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+      别把「重读」理解成只是慢——它是<strong>逐层重算</strong>了每个历史 token 的 Query / Key / Value 向量和整套 attention，
+      是实打实的浮点运算。但要记住：这些重算出来的数值和第一次<strong>完全一样</strong>——
+      浪费在「算了多少次」，不在「算出什么」。所以优化的目标是<em>少算</em>，而<strong>不是</strong>算出不同的结果。</div>
+
+    <h2 id="predict">先预测 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>带着上面的直觉，先自己猜一猜（答案在下方动画与手算里揭晓）：</p>
+    <div class="callout question"><ol style="margin:.3em 0">
+      <li>生成第 10 个 token 时，朴素做法这一步要处理多少个 token？</li>
+      <li>累计处理量随生成长度增长，是线性、平方，还是指数？</li>
+      <li>朴素做法与「聪明」做法（KV Cache）的<em>输出序列</em>会不同吗？</li>
+    </ol></div>
+
+    <h2 id="anim">交互式动画：Recompute Timeline <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>单步对比 naive 与 cached 每步处理的 token 数。镜像 <code>generate.py</code> 的
+       <code>processed_token_curves()</code>。</p>
+    <div class="anim" id="anim-recompute">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：
+        <small>朴素生成为什么越来越慢？naive 与 cached 每步各处理多少 token？</small></div></div>
+      <div class="anim-stage" style="min-height:150px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+    <h2 id="define">精确定义与公式：O(n²) 是怎么来的 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>先把「一步」说清楚。朴素循环每一步调用一次 <code>model.forward(ids, positions)</code>：</p>
+    <ul>
+      <li><strong>输入</strong>：<code>ids</code> 形状 <code>(L,)</code> 的 token 序列、<code>positions</code> 形状 <code>(L,)</code>，其中 <code>L</code> = 当前整段长度。</li>
+      <li><strong>输出</strong>：<code>logits</code> 形状 <code>(L, 259)</code>——每个位置一行、每行 259 个词表分数；采样只取 <code>logits[-1]</code>（最后一行）。</li>
+      <li>我们把这一步「处理的 token 数」记作 <code>processed = L</code>。</li>
+    </ul>
+    <p>设 prompt 长 <code>p</code>、要生成 <code>n</code> 个新 token。第 <code>t</code> 步（<code>t = 0,1,…,n−1</code>）时整段长度是 <code>p + t</code>，于是累计处理量：</p>
+    <math display="block" class="mathblock">
+      <msub><mi>C</mi><mi>naive</mi></msub>
+      <mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo>
+      <mo>=</mo>
+      <munderover>
+        <mo>∑</mo>
+        <mrow><mi>t</mi><mo>=</mo><mn>0</mn></mrow>
+        <mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow>
+      </munderover>
+      <mo stretchy="false">(</mo><mi>p</mi><mo>+</mo><mi>t</mi><mo stretchy="false">)</mo>
+      <mo>=</mo>
+      <mi>n</mi><mo>·</mo><mi>p</mi>
+      <mo>+</mo>
+      <mfrac>
+        <mrow><mi>n</mi><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow>
+        <mn>2</mn>
+      </mfrac>
+    </math>
+    <p>逐符号看这个式子：</p>
+    <ul>
+      <li><code>n</code>：生成的 token 数；<code>p</code>：prompt 长度；<code>t</code>：第几步（从 0 数）。</li>
+      <li><code>n·p</code>：<strong>线性项</strong>——每一步至少要「照顾」到 prompt 那 <code>p</code> 个 token。</li>
+      <li><code>n(n−1)/2</code>：<strong>平方项</strong>，也就是<strong>纯重复</strong>。第 <code>t</code> 步重算了前面已经算过的 <code>t</code> 个 token，把这些 <code>0+1+2+…+(n−1)</code> 加起来就是它。它随 <code>n</code> 的平方增长，是 O(n²) 的元凶。</li>
+    </ul>
+    <p>对照聪明做法：prefill 处理整段 <code>p</code>，之后每步只处理 1 个新 token，累计 <code>C_cached(n) = p + (n−1)</code>，是<strong>线性</strong>的。
+       代入本课例子 <code>p=6, n=8</code>：<code>C_naive = 8·6 + 8·7/2 = 48 + 28 = 76</code>、<code>C_cached = 6 + 7 = 13</code>。
+       生成越长，两者差距越拉越大——这就是 O(n²) 对 O(n) 的碾压。</p>
+    <div class="callout deep"><div class="callout-title">为什么是「平方」而不是「指数」</div>
+      每一步只多算「一整段」，而段长是<strong>线性</strong>增长的（+1 一次）；把这些线性增长的量<strong>累加</strong>起来才得到平方
+      （<code>1+2+…+n ≈ n²/2</code>）。它不是指数（指数是每步<strong>翻倍</strong>）。分清这点很重要：O(n²) 已经很糟，
+      但还没到无法收拾，而它恰好能被 KV Cache 干净地降回 O(n)。</div>
+
+    <h2 id="worked">小规模手算：prompt=3、生成 3 个 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>用一个能一眼看完的小例子：prompt 有 3 个 token（位置 0/1/2），生成 3 个新 token（位置 3/4/5）。
+       逐步列出朴素做法每步喂了什么：</p>
+    <table>
+      <thead><tr><th>步 t</th><th>喂进 forward 的 token</th><th>processed</th><th>其中重复（浪费）</th><th>真正新增</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>[t0 t1 t2]</td><td>3</td><td>0（首次必算）</td><td>t0 t1 t2</td></tr>
+        <tr><td>1</td><td>[t0 t1 t2 n0]</td><td>4</td><td>3（t0 t1 t2）</td><td>n0</td></tr>
+        <tr><td>2</td><td>[t0 t1 t2 n0 n1]</td><td>5</td><td>4（t0 t1 t2 n0）</td><td>n1</td></tr>
+      </tbody>
+    </table>
+    <p>累计 <code>processed = 3+4+5 = 12</code>；其中浪费 <code>0+3+4 = 7</code>，真正必要的只有 <code>3+1+1 = 5</code>（= cached 的量）。
+       套公式验证：<code>C_naive = 3·3 + 3·2/2 = 9 + 3 = 12</code> ✓，<code>C_cached = 3 + 2 = 5</code> ✓。下面把这个「浪费三角形」画出来：</p>
+    <div class="callout note"><div class="callout-title">重复计算三角形（每一行 = 朴素做法的一步）</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:.78rem;margin-top:8px">
+        <div style="display:flex;gap:5px;align-items:center">
+          <span style="width:34px;color:var(--fg-dim)">步 0</span>
+          <span style="border:2px solid var(--finished);border-radius:5px;padding:3px 7px">t0</span>
+          <span style="border:2px solid var(--finished);border-radius:5px;padding:3px 7px">t1</span>
+          <span style="border:2px solid var(--finished);border-radius:5px;padding:3px 7px">t2</span>
+        </div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <span style="width:34px;color:var(--fg-dim)">步 1</span>
+          <span style="border:1.5px dashed var(--running);border-radius:5px;padding:3px 7px;background:color-mix(in srgb,var(--running) 12%,var(--bg));color:var(--fg-dim)">t0</span>
+          <span style="border:1.5px dashed var(--running);border-radius:5px;padding:3px 7px;background:color-mix(in srgb,var(--running) 12%,var(--bg));color:var(--fg-dim)">t1</span>
+          <span style="border:1.5px dashed var(--running);border-radius:5px;padding:3px 7px;background:color-mix(in srgb,var(--running) 12%,var(--bg));color:var(--fg-dim)">t2</span>
+          <span style="border:2px solid var(--decode);border-radius:5px;padding:3px 7px">n0</span>
+        </div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <span style="width:34px;color:var(--fg-dim)">步 2</span>
+          <span style="border:1.5px dashed var(--running);border-radius:5px;padding:3px 7px;background:color-mix(in srgb,var(--running) 12%,var(--bg));color:var(--fg-dim)">t0</span>
+          <span style="border:1.5px dashed var(--running);border-radius:5px;padding:3px 7px;background:color-mix(in srgb,var(--running) 12%,var(--bg));color:var(--fg-dim)">t1</span>
+          <span style="border:1.5px dashed var(--running);border-radius:5px;padding:3px 7px;background:color-mix(in srgb,var(--running) 12%,var(--bg));color:var(--fg-dim)">t2</span>
+          <span style="border:1.5px dashed var(--running);border-radius:5px;padding:3px 7px;background:color-mix(in srgb,var(--running) 12%,var(--bg));color:var(--fg-dim)">n0</span>
+          <span style="border:2px solid var(--decode);border-radius:5px;padding:3px 7px">n1</span>
+        </div>
+      </div>
+      <div style="font-size:.78rem;color:var(--fg-dim);margin-top:8px">
+        虚线灰框 = 这一步被<strong>重复重算</strong>的历史 token（纯浪费）；实线框 = 这一步真正新增的 token。
+        灰框越堆越多，堆成一个三角形——三角形的面积就是 <code>n(n−1)/2</code> 那部分 O(n²) 浪费。</div>
+    </div>
+
+    <h2 id="cost">到底哪些计算被重复了：用本模型的具体数字 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>「处理 1 个 token」在一次 forward 里并不便宜。本课 tiny model 配置：
+       <code>hidden=32</code>、<code>layers=2</code>、<code>heads=4</code>、<code>kv_heads=2</code>（GQA）、<code>head_dim=8</code>、<code>intermediate=64</code>。
+       每个 token 在<strong>每一层</strong>都要重新算出：</p>
+    <ul>
+      <li>Query：<code>heads × head_dim = 4 × 8 = 32</code> 个数</li>
+      <li>Key：<code>kv_heads × head_dim = 2 × 8 = 16</code> 个数</li>
+      <li>Value：同样 <code>16</code> 个数</li>
+      <li>再加 attention 加权求和、MLP（<code>32 → 64 → 32</code>）等。</li>
+    </ul>
+    <p>朴素做法在第 <code>t</code> 步，把前面 <code>p+t−1</code> 个历史 token 的这些量在 <strong>2 层</strong>里<strong>全部重算一遍</strong>——
+       而它们的数值和上一步算出的一模一样。下一课会发现：其中真正<strong>值得存下来复用</strong>的，只有 Key 和 Value
+       （因为它们会被未来每一步的新 Query 反复查询与加权），Query 算完即弃。这正是「KV Cache」名字的由来：缓存 K 和 V。</p>
+    <div class="callout note"><div class="callout-title">形状（shape）随步数怎么变</div>
+      朴素做法第 <code>t</code> 步：输入 <code>(p+t,)</code> → 每层的 attention 分数矩阵 <code>(p+t, p+t)</code> → 输出 logits <code>(p+t, 259)</code>，只用最后一行。
+      注意那个 attention 矩阵是<strong>边长随步数增长的方阵</strong>，所以每一步本身也越来越贵；本课用「processed token 数」这个更直观的指标来量化浪费，得到 O(n²)。</div>
+
+    <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+    <table>
+      <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+      <tbody>
+        <tr><td>「越生成越慢是天经地义，模型就这样」</td><td>慢的根源是<strong>重算历史</strong>，不是必然。KV Cache 能把每步压回「只算 1 个新 token」，每步耗时几乎恒定。</td></tr>
+        <tr><td>「累计处理量随长度线性增长」</td><td>是 <strong>O(n²)</strong>：公式里的 <code>n(n−1)/2</code> 项随平方增长。生成 8 个就已是 76 vs 13。</td></tr>
+        <tr><td>「优化后输出可能会变一点点」</td><td>朴素与 cached 在贪心解码下<strong>逐 token 完全一致</strong>。浪费只在「算了多少」，不在「算出什么」；输出不变是优化的正确性底线。</td></tr>
+        <tr><td>「被重复的是最后的 logits / 采样那一步」</td><td>被重复的是<strong>每一层、每个历史 token 的 Q/K/V 和整套 attention</strong>——重头戏。logits 反而是「每步只用最后一行、其余全白算」的另一种浪费。</td></tr>
+        <tr><td>「prompt 短就没这个问题」</td><td>prompt 短只把线性项 <code>n·p</code> 变小；平方项 <code>n(n−1)/2</code> 由<strong>生成长度</strong>决定，生成得长照样爆。</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>本课两个关注函数都在 <code>mini_vllm/engine/generate.py</code>。先看罪魁 <code>generate_naive()</code>：</p>
+    <pre><code># generate_naive()：每步都喂「当前整段」
+for step in range(max_new_tokens):
+    logits = model.forward(ids, list(range(len(ids))))  # ← len(ids) 越来越大
+    tok = smp(logits[-1])          # 只用最后一行 logits
+    processed = len(ids)           # 本步「处理」的 token 数 = 整段长度
+    res.total_processed_tokens += processed
+    ids.append(tok)                # 下一步又把它连同前缀全部重算</code></pre>
+    <p>关键就在 <code>range(len(ids))</code> 与 <code>processed = len(ids)</code>：<code>len(ids)</code> 每步 +1，
+       于是 <code>processed</code> 走出 6, 7, 8, … 的递增序列，累加即 O(n²)。对照 <code>generate_cached()</code>：prefill 之后
+       decode 每步只 <code>forward([tok], [cur])</code>——喂 1 个 token、<code>total_processed_tokens += 1</code>。</p>
+    <p><code>processed_token_curves()</code> 则把这两条曲线<strong>解析地</strong>算出来（动画与 <code>run 6</code> 都用它，不必真跑模型）：</p>
+    <pre><code>for t in range(n_new):
+    tot_n += prompt_len + t                  # naive：第 t 步处理整段 p+t
+    tot_c += (prompt_len if t == 0 else 1)   # cached：只 prefill 处理整段，其余每步 1</code></pre>
+    <p>这两行正是前面公式 <code>C_naive = n·p + n(n−1)/2</code> 与 <code>C_cached = p + (n−1)</code> 的逐步累加版；
+       上方动画就是把这两条曲线单步画出来。</p>
+
+    <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+    <pre class="cmd"><code>python3 course.py run 6            # naive vs cached 逐步处理量 + 累计对比
+python3 course.py check 6</code></pre>
+    <pre><code>  累计处理 token：naive=222  vs  cached=24  （naive 多做 9.2×）
+  两种方法生成结果一致：True</code></pre>
+
+    <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>Level 1 · 方向</summary><code>run 6</code> 看 naive 每步处理量的条形逐步变长。</details>
+    <details><summary>Level 2 · 位置</summary><code>generate_naive()</code> 每步 <code>forward(ids)</code>，<code>len(ids)</code> 随生成增长。</details>
+    <details><summary>Level 3 · 机制</summary>naive 第 t 步处理 prompt_len+t；cached 只在 prefill 处理整段，之后每步 1。</details>
+    <details><summary>Level 4 · 接近答案</summary>浪费只在「算了多少」，不在「算出什么」——两者 greedy 输出必须一致。</details>
+
+    <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <pre class="cmd"><code>python3 course.py run 6 --trace   # 打印 naive 每步 input_len / processed</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0">
+      <li>如果 prompt 很长（如 1000 token），朴素做法第一步就很贵——这属于 prefill 还是 decode 的问题？</li>
+      <li>哪些中间结果被反复重算？缓存哪一部分能消除浪费？（提示：attention 里谁被加权求和）</li>
+      <li>为什么「结果一致」是判断优化正确性的关键？</li>
+    </ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody>
+      <tr><td>naive 重算整段</td><td>（反例，不会这么做）</td><td>揭示 KV Cache 的动机</td><td>真实从不无缓存解码</td></tr>
+      <tr><td>processed_token 计数</td><td>FLOPs/带宽分析</td><td>都在量化「重复」</td><td>真实用 profiler 精确测量</td></tr>
+    </tbody></table>
+
+    <h2 id="summary">本节总结 & 下一步</h2>
+    <ul>
+      <li>朴素生成每步重算整段前缀 → 累计 O(n²)，越生成越慢。</li>
+      <li>浪费在于历史 token 的 K/V 被反复重算。</li>
+      <li>优化必须保持输出不变——这是正确性底线。</li>
+    </ul>
+    <p style="margin-top:1em">
+      <button class="btn btn-accent" type="button" data-mark-lesson="6">✅ 标记本课已学</button>
+      &nbsp; <a class="btn" href="lesson_07.html">下一步：Lesson 7 · KV Cache →</a></p>
+    <div class="footer">Build Your Own Mini-vLLM · Lesson 6 · 完全离线 · 无第三方依赖</div>
+  </main>
+</div>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/recompute_timeline.js"></script>
+<script>RecomputeTimeline.mount("#anim-recompute", { promptLen: 6, nNew: 10 });</script>
+</body>
+</html>

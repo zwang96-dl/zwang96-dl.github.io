@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 11 · Scheduler — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="实现并比较 FIFO / decode-first / SJF / balanced；理解 token 预算与 sequence 预算。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 11</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 11 · Scheduler <span class="phase-badge phase-build">Phase 3</span></h1>
+  <p>调度策略直接决定延迟与吞吐的权衡，是推理服务化最核心的旋钮之一。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>实现并比较 FIFO / decode-first / SJF / balanced；理解 token 预算与 sequence 预算。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/scheduler/scheduler.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/scheduler/scheduler.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>Scheduler.schedule()</code>、<code>_order_running / _order_waiting</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 11</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 11</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 10</dd>
+        <dt>完成后下一步</dt><dd>Lesson 12</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>到这一课为止，前面几课教会了模型「怎么算一个 token」：<a href="lesson_07.html">KV Cache</a> 让 decode 只喂 1 个 token，
+     <a href="lesson_08.html">Prefill/Decode</a> 分清了两种阶段。但真实的推理服务从来不是「一次只跑一个请求」——
+     它同时面对<strong>几十上百条并发请求</strong>，每条到达时间不同、prompt 长短不一、还要生成不同长度的输出。
+     谁先跑、谁后跑、一步里塞多少 token 一起算——这就是<strong>调度器（Scheduler）</strong>要回答的问题。</p>
+  <p>调度器不改变「算什么」（输出逐 token 完全一致），只决定「何时算」。可就是这个「何时」，
+     直接决定了两个用户能直接感受到的指标：<strong>TTFT</strong>（Time To First Token，从提交到看见第一个字）
+     和<strong>吞吐</strong>（每秒能服务多少 token）。这一课就是要把这个「最核心的旋钮」拆开看清楚。</p>
+
+  <h2 id="problem">先看问题：不调度会怎样 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>假设同一时刻来了 3 个请求（用本课的 byte-level tokenizer：每个 ASCII 字符 = 1 token，中文一字 = 3 字节 = 3 token）：</p>
+  <table>
+    <thead><tr><th>请求</th><th>prompt</th><th>prompt token 数</th><th>要生成</th><th>到达时刻</th></tr></thead>
+    <tbody>
+      <tr><td>A（长输出）</td><td><code>"Halt"</code></td><td>4</td><td>5 个 token</td><td>iter 0</td></tr>
+      <tr><td>B（短）</td><td><code>"Hi"</code></td><td>2</td><td>1 个 token</td><td>iter 0</td></tr>
+      <tr><td>C（短）</td><td><code>"Yo"</code></td><td>2</td><td>1 个 token</td><td>iter 0</td></tr>
+    </tbody>
+  </table>
+  <p><strong>最朴素的做法：一条一条串行跑。</strong>先把 A 从头跑到尾（1 步 prefill + 5 步 decode = 6 步），
+     再跑 B（2 步），再跑 C（2 步）。这有两个致命问题：</p>
+  <ul>
+    <li><strong>GPU 在浪费。</strong>decode 每步只喂 1 个 token（见 Lesson 7），矩阵乘法瘦得可怜，GPU 的算力大半闲着——
+        可与此同时，B 和 C 明明也想算，却只能干等。</li>
+    <li><strong>短请求被长请求「堵死」。</strong>B 只想要 1 个 token，却要排在 A 那 6 步后面。B 的 TTFT 从「本该 1 步」
+        被拖到 <code>6 + 1 = 7</code> 步。用户体验：明明问了句「你好」，却要等前面那个写长文的人写完。</li>
+  </ul>
+  <p>调度器的使命：<strong>把多条请求打包进同一步一起算</strong>（提升 GPU 利用率 = 吞吐），同时<strong>用排序决定谁优先</strong>
+     （控制 TTFT 与公平性）。但「一起算」不能无限塞，于是有了两个预算。</p>
+
+  <h2 id="budgets">两个预算：并发预算与 token 预算 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>调度器每一步（一次 <code>schedule()</code> 调用）的自由度，被 <code>SchedulerConfig</code> 里两个数字卡死：</p>
+  <table>
+    <thead><tr><th>预算</th><th>含义</th><th>单位</th><th>卡住的是</th></tr></thead>
+    <tbody>
+      <tr><td><code>max_num_seqs</code></td><td>同时处于 RUNNING 的请求数上限</td><td>「条」</td><td><strong>并发度</strong>：最多几条请求同时在跑</td></tr>
+      <tr><td><code>max_num_batched_tokens</code></td><td>一次迭代里所有请求处理的 token 总数上限</td><td>「个 token」</td><td><strong>单步算力</strong>：这一步总共能算多少 token</td></tr>
+    </tbody>
+  </table>
+  <p>两者是两个不同维度的闸门，缺一不可，看它们怎么记账：</p>
+  <ul>
+    <li>一个 <strong>prefill</strong> 请求，本步要算 <code>N</code> 个 prompt token，就从 token 预算里<strong>扣 N</strong>。</li>
+    <li>一个 <strong>decode</strong> 请求（prompt 已算完），本步只算 1 个新 token，从 token 预算里<strong>扣 1</strong>。</li>
+    <li>每准入一条新请求进入 RUNNING，就占掉一个 <code>max_num_seqs</code> 名额。</li>
+  </ul>
+  <div class="callout note"><div class="callout-title">举个具体的数字</div>
+    设 <code>max_num_batched_tokens = 12</code>、<code>max_num_seqs = 2</code>。这一步若有 2 条正在 decode 的请求，
+    各扣 1 token（共 2），预算还剩 <code>12 − 2 = 10</code>；这 10 可以拿去给一条新请求做 prefill（比如 prompt 8 个 token，扣 8，剩 2）。
+    但因为 <code>max_num_seqs = 2</code> 已经占满，这条新请求<strong>连准入的机会都没有</strong>——名额比 token 更早卡死它。</div>
+  <p>代码里，token 预算就是 <code>schedule()</code> 开头的局部变量 <code>budget = cfg.max_num_batched_tokens</code>，
+     每安排一个 item 就 <code>budget -= take</code>；并发预算体现在准入循环里的
+     <code>if len(self.running) &gt;= cfg.max_num_seqs: break</code>。</p>
+
+  <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    调度器 = 食堂的<strong>打饭窗口调度</strong>：<code>max_num_seqs</code> 是「同时能开几个窗口」，
+    <code>max_num_batched_tokens</code> 是「这一轮所有窗口加起来最多打多少份饭」，而<strong>策略</strong>决定「排队的人按什么顺序进窗口」。</div>
+  <p>FIFO 就是老实排队先到先打；SJF 是「只要一份的人先打，端着满满一盘的靠后」；decode-first 是「已经在打的人先打完手里这勺」；
+     balanced 则是「给新来的留一个窗口，别让老顾客一直占着不放」。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    食堂里「一个人只进一个窗口」，但推理里<strong>一步可以同时推进多条请求</strong>（批处理）——预算约束的是「这一轮总量」，
+    不是「一次只服务一个」。而且这里的「作业长度」在准入时只能<strong>估计</strong>（<code>remaining_work</code> 是粗略估算，
+    因为模型可能提前吐 EOS 停下），不像食堂能一眼看清盘子里有多少饭。</div>
+
+  <h2 id="policies">四种策略：精确定义 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>四种策略的差别，<strong>只体现在两个排序函数</strong>里：<code>_order_running</code>（决定 running 里谁先被推进）
+     和 <code>_order_waiting</code>（决定 waiting 里谁先被准入）。排序键（Python 元组，从左到右依次比较、升序）如下：</p>
+  <table>
+    <thead><tr><th>策略</th><th>_order_running 排序键</th><th>_order_waiting 排序键</th><th>效果</th></tr></thead>
+    <tbody>
+      <tr><td><strong>fifo</strong></td><td><code>(arrival, id)</code></td><td><code>(arrival, id)</code></td><td>先到先服务，最公平也最简单</td></tr>
+      <tr><td><strong>decode-first</strong></td><td><code>(prefill_done is False, arrival, id)</code></td><td><code>(arrival, id)</code></td><td>已在 decode 的排前面 → 尽快榨干在途请求，利于吞吐/TPOT</td></tr>
+      <tr><td><strong>sjf</strong></td><td><code>(remaining_work, arrival, id)</code></td><td><code>(remaining_work, arrival, id)</code></td><td>剩余工作量小的先跑 → 短请求首 token 更早</td></tr>
+      <tr><td><strong>balanced</strong></td><td><code>(prefill_done is False, arrival, id)</code></td><td><code>(arrival, id)</code></td><td>排序同 decode-first，但额外<strong>预留 1/4 token 预算</strong>给等待中的 prefill，防饥饿</td></tr>
+    </tbody>
+  </table>
+  <div class="callout note"><div class="callout-title">读懂 <code>prefill_done is False</code> 这个键</div>
+    Python 里 <code>False &lt; True</code>（当作 0 &lt; 1）。当一条请求已经做完 prefill（<code>prefill_done == True</code>），
+    <code>prefill_done is False</code> 求值为 <strong>False = 0</strong>，排在前面；还在 prefill 的请求求值为 <strong>True = 1</strong>，排在后面。
+    所以 decode-first / balanced 把「已在解码的请求」顶到最前。</div>
+  <p><code>remaining_work</code> 的定义（见 <code>request.py</code>）：<code>remaining_prompt + (max_new_tokens − num_generated)</code>，
+     即「还没算的 prompt token 数」加「还没生成的 token 数」，是对一条请求「还剩多少活」的粗略估算。SJF 就靠它给短请求让路。</p>
+
+  <h2 id="worked">小规模手算：同一批请求，FIFO vs SJF <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>用上面「先看问题」里的 A / B / C，配置 <code>max_num_batched_tokens = 12</code>，
+     并把 <code>max_num_seqs = 1</code>（相当于单窗口排队，为的是把<strong>排序的效果放到最大、看得最清楚</strong>）。
+     回忆每条请求的 <code>remaining_work</code>（此刻都还没开算）：</p>
+  <table>
+    <thead><tr><th>请求</th><th>remaining_prompt</th><th>max_new − generated</th><th>remaining_work</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td>4</td><td>5 − 0</td><td><strong>9</strong></td></tr>
+      <tr><td>B</td><td>2</td><td>1 − 0</td><td><strong>3</strong></td></tr>
+      <tr><td>C</td><td>2</td><td>1 − 0</td><td><strong>3</strong></td></tr>
+    </tbody>
+  </table>
+  <p>每条请求占用「单窗口」的步数 = 1 步 prefill（这一步就产出首 token）+ 之后每步 1 个 decode。
+     所以 A（max_new=5）= 1 prefill + 4 decode = <strong>5 步</strong>；B、C（max_new=1）各只需 <strong>1 步</strong>（prefill 即完成）。
+     首 token（TTFT）就出现在该请求的 prefill 那一步。</p>
+  <div class="callout tip"><div class="callout-title">这组数字 = <code>python3 course.py run 11</code> 的真实输出</div>
+     下面的手算配置就是 <code>configs/lesson_11_quick.json</code>（A=<code>"abc"</code>/max_new 5、B=<code>"x"</code>、C=<code>"y"</code>/max_new 1，单窗口）。
+     你亲手跑 <code>run 11</code>,打印的 <code>avg_TTFT</code> 会与这里逐一对上——不是编的示例。</div>
+
+  <p><strong>FIFO：</strong>准入顺序 A → B → C（按 arrival，同刻按 id）。单窗口，只能一条条来：</p>
+  <table>
+    <thead><tr><th>iter</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead>
+    <tbody>
+      <tr><td>在跑</td><td>A prefill✓</td><td>A dec</td><td>A dec</td><td>A dec</td><td>A dec✓</td><td>B prefill✓</td><td>C prefill✓</td></tr>
+    </tbody>
+  </table>
+  <p>TTFT：<code>A = 1</code>、<code>B = 6</code>、<code>C = 7</code>。平均 TTFT = <code>(1+6+7)/3 ≈ 4.67</code>。
+     B、C 明明各自只要 1 个 token，却被 A 那一长串输出堵在后面。</p>
+
+  <p><strong>SJF：</strong>准入按 <code>remaining_work</code> 升序 → B(3) → C(3) → A(9)：</p>
+  <table>
+    <thead><tr><th>iter</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead>
+    <tbody>
+      <tr><td>在跑</td><td>B prefill✓</td><td>C prefill✓</td><td>A prefill✓</td><td>A dec</td><td>A dec</td><td>A dec</td><td>A dec✓</td></tr>
+    </tbody>
+  </table>
+  <p>TTFT：<code>B = 1</code>、<code>C = 2</code>、<code>A = 3</code>。平均 TTFT = <code>(1+2+3)/3 = 2.0</code>。
+     两条短请求几乎立刻拿到首 token，代价是长请求 A 稍晚开始。<strong>总迭代数不变（都是 7 步、输出逐 token 一致），
+     变的只是先后——平均 TTFT 从 4.67 降到 2.0。</strong>这就是 SJF「短作业优先」的收益。</p>
+  <div class="callout warn"><div class="callout-title">SJF 的公平性风险</div>
+    如果短请求源源不断地来，长请求 A 的 <code>remaining_work</code> 永远排在最后，可能被<strong>无限期推迟（饥饿）</strong>。
+    这正是 <code>balanced</code> 想缓解的问题——见下一节。</div>
+
+  <h2 id="reserve">balanced 如何防饥饿：预留 1/4 预算 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>换个场景看 <code>balanced</code>：很多请求正在 decode，把 token 预算吃得死死的，此时一条新请求想进来做 prefill。
+     设 <code>max_num_batched_tokens = 8</code>，当前有 <strong>8 条</strong>请求都在 decode（各要 1 token），waiting 里有一条新请求 N（prompt 4 token）。</p>
+  <p>关键代码在 <code>schedule()</code> 里：<code>prefill_reserve = budget // 4 if policy=="balanced" else 0</code>；
+     推进 decode 时 <code>usable = budget − prefill_reserve</code>（仅当还有 waiting 请求时生效），<code>usable &lt; 1</code> 就跳过这条 decode。</p>
+  <table>
+    <thead><tr><th></th><th>预留给 prefill</th><th>可用于 decode</th><th>实际跑几条 decode</th><th>留给新请求 N</th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td><strong>decode-first</strong></td><td>0</td><td>全部 8</td><td>8（把预算吃光，budget→0）</td><td>0 token</td><td>N 的 <code>take = min(4, 0) = 0</code> → <strong>永远进不来（饥饿）</strong></td></tr>
+      <tr><td><strong>balanced</strong></td><td><code>8 // 4 = 2</code></td><td><code>8 − 2 = 6</code></td><td>6（budget 降到 2 就停止推进 decode）</td><td>2 token</td><td>N 做 chunked prefill，<code>take = min(4, 2) = 2</code> → <strong>每轮啃 2 个 prompt token，稳步进入</strong></td></tr>
+    </tbody>
+  </table>
+  <p>代价：balanced 每步少跑 2 条 decode（吞吐略降），换来的是新请求不会被无限期堵在门外。这就是「decode 优先<strong>但</strong>给 prefill 留一条活路」。</p>
+
+  <h2 id="diagram">一次 schedule() 的执行图 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>把上面所有细节收进一张图：每次 <code>schedule()</code> 分两步走，token 预算像一条水管从头流到尾，
+     两个排序函数分别决定两步内部的先后。</p>
+  <div class="callout note"><div class="callout-title">schedule(iteration, free_blocks, block_size) 内部数据流</div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-family:var(--mono);font-size:.8rem;margin-top:6px">
+      <div style="border:2px solid var(--border);border-radius:6px;padding:6px 10px;align-self:flex-start">
+        budget = max_num_batched_tokens　<span style="color:var(--fg-dim)">（例：12）</span>
+        &nbsp;|&nbsp; prefill_reserve = budget//4 <span style="color:var(--fg-dim)">（仅 balanced，否则 0）</span></div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+        <div style="border:2px solid var(--running);border-radius:6px;padding:6px 10px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">
+          <strong>① 推进 running</strong><br><span style="color:var(--fg-dim)">_order_running 排序</span><br>
+          prefill 扣 N / decode 扣 1<br>balanced：decode 只能用 budget−reserve</div>
+        <div style="font-size:1.3rem">→</div>
+        <div style="border:2px solid var(--prefill);border-radius:6px;padding:6px 10px;background:color-mix(in srgb,var(--prefill) 15%,var(--bg))">
+          <strong>② 准入 waiting</strong><br><span style="color:var(--fg-dim)">_order_waiting 排序</span><br>
+          len(running) ≥ max_num_seqs → 停<br>free_blocks &lt; 1 → 停<br>否则 prefill 扣 min(need, budget)</div>
+        <div style="font-size:1.3rem">→</div>
+        <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px">
+          <strong>SchedulerOutput</strong><br>items[]（每条 is_prefill / num_tokens）<br>admitted[]　budget_used</div>
+      </div>
+      <div style="color:var(--fg-dim);font-size:.78rem">
+        注意先后：<strong>先推进已在跑的（①），再准入新的（②）</strong>——在途请求优先用预算，剩下的才拿去接新客。</div>
+    </div>
+  </div>
+  <p>输入 <code>free_blocks</code>（当前空闲的 KV block 数）让调度器<strong>避免安排放不下的请求</strong>：准入循环里
+     <code>if free_blocks &lt; 1: break</code>，没有 KV 空间就先不接新请求（Lesson 12–14 会详解分页 KV）。</p>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「换个调度策略，生成结果会变」</td><td>策略只改「何时算、以什么顺序算」，<strong>不改「算什么」</strong>。四种策略跑出的 token 序列<strong>逐 token 完全一致</strong>，
+          变的只是 iterations 数和平均 TTFT。<code>run 11</code> 会验证这一点。</td></tr>
+      <tr><td>「SJF 一定让平均等待更短，没有代价」</td><td>SJF 降低平均 TTFT/等待，但可能<strong>饿死长请求</strong>：短请求不断插队，长请求的 <code>remaining_work</code> 永远排最后。公平性是代价。</td></tr>
+      <tr><td>「decode-first 对每个用户都更好」</td><td>它优先榨干在途请求 → 提升整体吞吐，但<strong>新到达请求的 TTFT 会变差</strong>（要等在途的先用预算）。对「刚提交的新用户」反而更慢。</td></tr>
+      <tr><td>「只要 token 预算够，请求就能被准入」</td><td>还要过 <code>max_num_seqs</code>（并发名额）和 <code>free_blocks</code>（KV 空间）两关。任一关不过都进不来——名额常常比 token 更早卡死请求。</td></tr>
+      <tr><td>「一步只能做 prefill 或只能做 decode」</td><td>调度器可以<strong>把 decode 和（chunked）prefill 混在同一步</strong>：先推进 running 的 decode，再用剩余预算给等待请求做部分 prefill。这正是 balanced/chunked prefill 的基础（Lesson 15）。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课所有讲解都落在 <code>mini_vllm/scheduler/scheduler.py</code> 的这几处：</p>
+  <table>
+    <thead><tr><th>讲到的概念</th><th>对应代码</th></tr></thead>
+    <tbody>
+      <tr><td>两个预算</td><td><code>SchedulerConfig.max_num_seqs / max_num_batched_tokens</code></td></tr>
+      <tr><td>四种策略的排序键</td><td><code>_order_running()</code> 与 <code>_order_waiting()</code>（按 <code>cfg.policy</code> 分支）</td></tr>
+      <tr><td>token 预算记账</td><td><code>schedule()</code> 里的 <code>budget</code> 变量与每处 <code>budget -= take</code></td></tr>
+      <tr><td>balanced 防饥饿</td><td><code>prefill_reserve = budget // 4</code>；decode 分支的 <code>usable = budget - prefill_reserve</code></td></tr>
+      <tr><td>并发/KV 约束</td><td>准入循环里的 <code>len(self.running) &gt;= cfg.max_num_seqs</code> 与 <code>free_blocks &lt; 1</code></td></tr>
+      <tr><td>chunked prefill</td><td><code>take = min(remaining, budget)</code>（长 prompt 切块，Lesson 15 详解）</td></tr>
+      <tr><td>输出结构</td><td><code>SchedulerOutput.items</code>（每项 <code>is_prefill</code> / <code>num_tokens</code>）、<code>admitted</code>、<code>budget_used</code></td></tr>
+    </tbody>
+  </table>
+  <p><code>python3 course.py run 11</code> 会打印四种策略的 iterations 与平均 TTFT，且四者输出的 token 序列完全一致。</p>
+  <div class="callout warn"><div class="callout-title">诚实提醒：本玩具引擎里，只有 SJF 会明显拉开差距</div>
+     你会发现 <code>run 11</code> 里 <strong>FIFO / decode-first / balanced 三者的数字往往相同</strong>，只有 <strong>SJF 不同</strong>。原因有二：
+     ① 本引擎每次迭代<strong>本来就先推进「正在运行」的请求（含 decode），再准入新请求</strong>——也就是说「decode 优先」已是默认行为，所以 decode-first 与 FIFO 常常一致；
+     ② decode 每步只花 1 个 token、几乎总能全部装下，balanced 预留的 1/4 预算在这个小 workload 里<strong>触发不了</strong>。
+     真正让 decode-first / balanced 拉开差距的场景（大量并发 decode 争抢紧张预算、新请求排队等 prefill），要在 GPU 上受批大小/显存约束时才明显。
+     这里我们能<strong>亲手看到</strong>的收益是 SJF（短作业优先）——这也是最直观的一个。</div>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a11">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>调度顺序如何影响各请求的首 token 延迟与完成时间？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 11
+python3 course.py run 11 --trace
+python3 course.py check 11</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 11` 比较四种策略。</details>
+    <details><summary>提示 Level 2 · 位置</summary>SJF 优先短作业 → 短请求首 token 更早。</details>
+    <details><summary>提示 Level 3 · 机制</summary>预算约束：max_num_seqs、max_num_batched_tokens。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>策略只改「何时算」，不改「算什么」。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>SJF 没生效</td><td>准入仍按 FIFO</td><td>准入顺序也要按策略排序（_order_waiting）</td></tr><tr><td>长请求饿死短请求</td><td>decode 一直优先</td><td>用 balanced 给 prefill 保留预算</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 11 --trace
+python3 course.py inspect scheduler</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>SJF 为什么能降低平均等待时间？它有什么公平性风险？</li><li>decode-first 对吞吐和对单个新请求的 TTFT 各有什么影响？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>policy 排序</td><td>vLLM Scheduler 策略</td><td>预算+优先级思路一致</td><td>vLLM 还含抢占、优先级、公平性</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>调度策略决定「何时算」而非「算什么」；SJF 利于短请求，balanced 防饥饿。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="11">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_12.html">下一步：Lesson 12 · 连续 KV 分配为何浪费 →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 11 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/request_lifecycle.js"></script>
+<script>
+RequestLifecycleAnim.mount("#a11", {blockSize:4,numBlocks:16,maxNumSeqs:2,tokenBudget:12,requests:[{id:"long",prompt:"The quick brown fox",maxNew:4,arrival:0},{id:"s1",prompt:"Hi",maxNew:3,arrival:0},{id:"s2",prompt:"Yo",maxNew:3,arrival:1}]});
+</script>
+</body>
+</html>

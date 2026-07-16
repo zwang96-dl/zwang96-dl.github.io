@@ -1,0 +1,17 @@
+{
+  "_comment": "Lesson 0 的玩具 workload：两个请求，长度不同、生成长度不同，用来演示 prefill/decode、continuous batching 与 KV block 分配。prompt 内容不重要——本课关注的是机制与数据流，不是文本质量。",
+  "requests": [
+    {
+      "request_id": "req_0",
+      "prompt": "Hello, mini-vLLM!",
+      "max_new_tokens": 6,
+      "arrival": 0
+    },
+    {
+      "request_id": "req_1",
+      "prompt": "你好，推理引擎",
+      "max_new_tokens": 4,
+      "arrival": 1
+    }
+  ]
+}

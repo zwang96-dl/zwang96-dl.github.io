@@ -1,0 +1,6 @@
+{
+  "_comment": "Lesson 6：重复计算侦探。对同一 prompt 比较 naive 与 cached 的逐步处理量。",
+  "checkpoint": "assets/checkpoints/tiny_text.json",
+  "prompt": "Hello, world",
+  "max_new_tokens": 12
+}

@@ -1,0 +1,23 @@
+[project]
+name = "build-mini-vllm"
+version = "0.1.0"
+description = "从零构建支持文本、图片和视频的大模型推理引擎 —— 完全离线的交互式中文课程"
+readme = "README.md"
+requires-python = ">=3.11"
+# 核心为纯标准库实现，无必需的第三方依赖。
+dependencies = []
+
+[project.optional-dependencies]
+# 可选：用真实 PyTorch 加速轨道 B 的 tiny model（核心课程不需要）。
+accel = ["torch"]
+
+[tool.mini_vllm]
+# 课程运行时严禁联网；所有资源随仓库离线交付。
+offline = true
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["mini_vllm"]

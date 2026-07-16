@@ -1,0 +1,9 @@
+{
+  "_comment": "Lesson 0 Quick 配置。字段解释：block_size=每个KV block容纳的token数; num_blocks=物理block总数; max_num_seqs=同时RUNNING的请求上限; token_budget=一次迭代最多调度的token数(对应vLLM的max_num_batched_tokens)。stagger_arrivals=放大规模时是否让请求错峰到达(演示continuous batching)。",
+  "block_size": 8,
+  "num_blocks": 16,
+  "max_num_seqs": 2,
+  "token_budget": 32,
+  "stagger_arrivals": true,
+  "workload": "assets/workloads/lesson_00.json"
+}

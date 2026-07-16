@@ -1,0 +1,65 @@
+{
+  "_comment": "离线运行必需的**数据资产**清单（tokenizer / workload / corpus / checkpoint / 图片 / 视频帧）。sha256 为空表示只检查存在性；非空则同时校验完整性。静态网页与 Python 源码分别由 offline_check 的其他检查覆盖。",
+  "assets": [
+    {
+      "path": "assets/tokenizer/byte_tokenizer.json",
+      "sha256": "f1eabb629ace1bdc46a81813bfd67cca5f6a6d806cd83989619c56eab700498c",
+      "note": "byte-level tokenizer 配置（词表 259）"
+    },
+    {
+      "path": "assets/workloads/lesson_00.json",
+      "sha256": "49ed96225bac2d97da019b288959a20d2a986440d23190baad2e670f211aaf5c",
+      "note": "Lesson 0 请求生命周期模拟 workload"
+    },
+    {
+      "path": "assets/images/demo_a.json",
+      "sha256": "",
+      "note": "多模态本地素材/checkpoint"
+    },
+    {
+      "path": "assets/images/demo_b.json",
+      "sha256": "",
+      "note": "多模态本地素材/checkpoint"
+    },
+    {
+      "path": "assets/videos/demo/manifest.json",
+      "sha256": "",
+      "note": "多模态本地素材/checkpoint"
+    },
+    {
+      "path": "assets/videos/demo/frame_000.json",
+      "sha256": "",
+      "note": "多模态本地素材/checkpoint"
+    },
+    {
+      "path": "assets/videos/demo/frame_001.json",
+      "sha256": "",
+      "note": "多模态本地素材/checkpoint"
+    },
+    {
+      "path": "assets/videos/demo/frame_002.json",
+      "sha256": "",
+      "note": "多模态本地素材/checkpoint"
+    },
+    {
+      "path": "assets/videos/demo/frame_003.json",
+      "sha256": "",
+      "note": "多模态本地素材/checkpoint"
+    },
+    {
+      "path": "assets/videos/demo/frame_004.json",
+      "sha256": "",
+      "note": "多模态本地素材/checkpoint"
+    },
+    {
+      "path": "assets/videos/demo/frame_005.json",
+      "sha256": "",
+      "note": "多模态本地素材/checkpoint"
+    },
+    {
+      "path": "assets/checkpoints/tiny_text.json",
+      "sha256": "",
+      "note": "多模态本地素材/checkpoint"
+    }
+  ]
+}

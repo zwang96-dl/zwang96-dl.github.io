@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 10 · Request 状态机与 Continuous Batching — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="请求状态机 WAITING/RUNNING/FINISHED/ABORTED 与迭代级调度：请求可随时加入/离开运行 batch。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 10</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 10 · Request 状态机与 Continuous Batching <span class="phase-badge phase-build">Phase 3</span></h1>
+  <p>迭代级调度是现代推理引擎吞吐的关键，也是后面所有调度/分页的运行框架。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>请求状态机 WAITING/RUNNING/FINISHED/ABORTED 与迭代级调度：请求可随时加入/离开运行 batch。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/scheduler/request.py</code>、<code>mini_vllm/engine/engine.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/scheduler/request.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>Request 状态机</code>、<code>LLMEngine.run 的迭代循环</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 10</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 10</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 8</dd>
+        <dt>完成后下一步</dt><dd>Lesson 11</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>前面几课我们已经能让<strong>一条</strong>请求高效地 prefill + decode（<a href="lesson_07.html">KV Cache</a>、
+     <a href="lesson_08.html">Prefill/Decode</a>）。可真实服务里请求是<strong>一条接一条、错峰到达</strong>的：
+     有的刚发来、有的还在解码、有的马上就要写完最后一个字。这一课要回答两个问题——</p>
+  <ul>
+    <li><strong>每条请求现在处于什么阶段？</strong> 这就是「请求状态机」：用 4 个状态
+        <code>WAITING / RUNNING / FINISHED / ABORTED</code> 精确描述一条请求的一生。</li>
+    <li><strong>引擎每一步该跑谁？</strong> 这就是「迭代级调度 / continuous batching」：
+        不等整批跑完，<strong>每一次前向都重新决定</strong>——放新请求进来、推进老请求、送走写完的请求。</li>
+  </ul>
+  <p>把这两件事搞清楚，你就拿到了后面所有课的<strong>运行框架</strong>：
+     <a href="lesson_11.html">调度策略</a>决定「先跑谁」，<a href="lesson_12.html">分页/块管理</a>决定「KV 放哪」，
+     它们全都挂在这一课的状态机与迭代循环上。</p>
+
+  <h2 id="problem">先看问题：static batching 到底浪费了什么 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>先看「不这么做会怎样」。设有三条错峰到达的请求（本课动画就用这三条；prompt 长度按
+     <strong>byte-level tokenizer</strong>算：每个 UTF-8 字节 = 1 个 token，句首再加 1 个 BOS）：</p>
+  <table>
+    <thead><tr><th>请求</th><th>prompt</th><th>prompt token 数</th><th>要生成</th><th>到达迭代</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A</strong></td><td><code>"Hello"</code></td><td>5 字节 + BOS = <strong>6</strong></td><td>4 个</td><td>第 0 步（最早）</td></tr>
+      <tr><td><strong>B</strong></td><td><code>"Hi"</code></td><td>2 字节 + BOS = <strong>3</strong></td><td>3 个</td><td>第 1 步</td></tr>
+      <tr><td><strong>C</strong></td><td><code>"GPU"</code></td><td>3 字节 + BOS = <strong>4</strong></td><td>3 个</td><td>第 3 步（最晚）</td></tr>
+    </tbody>
+  </table>
+  <p><strong>老办法 static batching（请求级批处理）</strong>：把当前能凑的请求打成一个「固定批」，
+     <strong>整批一起从头跑到尾</strong>，全批都写完了才开始下一批。代入上面的数字：</p>
+  <ul>
+    <li>第 1 步凑出批 <code>{A, B}</code>（C 还没到）。这一批要跑到 <strong>A、B 都写完</strong>才结束。</li>
+    <li>B 只要生成 3 个 token，在第 4 步就写完了——但它的「座位」<strong>被锁在批里空转</strong>，
+        一直陪 A 跑到第 5 步（A 要 4 个 token）。这 1 步是纯浪费的算力。</li>
+    <li>C 在第 3 步就到了，却因为「批还没跑完、不能中途加人」，只能<strong>干等</strong>到第 5 步，
+        第 6 步才轮到它 prefill，第 9 步才写完。</li>
+  </ul>
+  <div class="callout warn"><div class="callout-title">代价（用具体数字）</div>
+     static batching 跑完三条请求需要 <strong>9 个迭代</strong>；而下面的 continuous batching 只要
+     <strong>5 个迭代</strong>（后面手算给出逐步过程）。差距来自两处浪费：<strong>已写完的座位空转</strong>
+     （B 白占 1 步）＋<strong>后到的请求排长队</strong>（C 干等 3 步）。请求越错峰、长短越不齐，这种浪费越大。</div>
+
+  <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+     <strong>Request 状态机</strong> = 给每条请求贴一张「现在在哪个阶段」的标签；
+     <strong>continuous batching</strong> = 引擎<strong>每跑一步就重新点一次名</strong>，谁能上、谁下车，随时调整。</div>
+  <p><strong>类比：拼车（而不是包车）。</strong> static batching 像「包车」：一车人必须<strong>同时上、同时到</strong>，
+     哪怕你早就到站，也得陪全车绕到终点；后来的人只能等下一班空车。continuous batching 像「网约拼车」：
+     司机<strong>每到一个路口都看一眼</strong>——有空座就顺路捎上新乘客（准入），到站的随时下车（完成），
+     座位立刻让给别人。车（GPU）几乎不空跑，这就是吞吐更高的原因。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+     拼车里「上车/下车」发生在<strong>路口之间的任意时刻</strong>；而引擎里状态切换只发生在
+     <strong>迭代边界</strong>——一次前向（forward）跑完、下一次开始<strong>之前</strong>。所以叫「<strong>迭代</strong>级」调度，
+     不是「token 级」随时打断。一条请求在一次前向的中途，状态是不会变的。</div>
+
+  <h2 id="states">精确定义：Request 是一个状态机 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>一条请求的一生，就是在这 4 个状态之间转移。对应源码
+     <code>mini_vllm/scheduler/request.py</code> 里的 <code>RequestStatus</code> 枚举：</p>
+  <table>
+    <thead><tr><th>状态</th><th>含义</th><th>什么时候进入</th><th>引擎在做什么</th></tr></thead>
+    <tbody>
+      <tr><td><code style="color:var(--waiting)">WAITING</code></td><td>已提交、在排队</td><td><code>scheduler.add(r)</code> 一进来就是它</td><td>还没碰它，等被准入</td></tr>
+      <tr><td><code style="color:var(--running)">RUNNING</code></td><td>正在 prefill 或 decode</td><td>调度器准入（<code>admitted</code>）那一刻</td><td>每步为它算 token、采样</td></tr>
+      <tr><td><code style="color:var(--finished)">FINISHED</code></td><td>写完了，KV 已归还</td><td><code>is_finished()</code> 为真、被 <code>remove_finished()</code> 摘出</td><td>释放它的 KV 块，不再管它</td></tr>
+      <tr><td><code style="color:var(--danger)">ABORTED</code></td><td>被外部中止（超时/取消）</td><td>调用方主动中止时</td><td>同样释放资源，但结果作废</td></tr>
+    </tbody>
+  </table>
+  <div class="callout note"><div class="callout-title">状态转移图（唯一的合法路线）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-family:var(--mono);font-size:.82rem;margin-top:8px">
+      <div style="border:2px solid var(--waiting);border-radius:8px;padding:8px 12px;background:color-mix(in srgb,var(--waiting) 12%,var(--bg))">WAITING<br><span style="color:var(--fg-dim);font-size:.72rem">排队中</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;color:var(--fg-dim);font-size:.72rem">调度器准入<div style="font-size:1.3rem;line-height:1">→</div></div>
+      <div style="border:2px solid var(--running);border-radius:8px;padding:8px 12px;background:color-mix(in srgb,var(--running) 12%,var(--bg))">RUNNING<br><span style="color:var(--fg-dim);font-size:.72rem">prefill / decode</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;color:var(--fg-dim);font-size:.72rem">写完 / EOS<div style="font-size:1.3rem;line-height:1">→</div></div>
+      <div style="border:2px solid var(--finished);border-radius:8px;padding:8px 12px;background:color-mix(in srgb,var(--finished) 12%,var(--bg))">FINISHED<br><span style="color:var(--fg-dim);font-size:.72rem">归还 KV</span></div>
+      <div style="width:100%;height:0"></div>
+      <div style="color:var(--danger);font-size:.78rem;padding-left:2px">↑ RUNNING（或 WAITING）── 被中止 ──▶ <span style="border:1.5px dashed var(--danger);border-radius:6px;padding:2px 8px">ABORTED</span></div>
+    </div>
+    <div style="font-size:.76rem;color:var(--fg-dim);margin-top:8px">
+      注意箭头是<strong>单向</strong>的：不会从 FINISHED 退回 RUNNING，也不会跳过 RUNNING 直接 FINISHED。
+      这正是「状态机」的意义——非法转移不存在。</div>
+  </div>
+
+  <h2 id="fields">状态存在哪几个字段里 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p><code>RUNNING</code> 其实分成两个子阶段：<strong>还在算 prompt（prefill）</strong> 和
+     <strong>已在逐字生成（decode）</strong>。区分它们不靠状态枚举，而靠一个计数器
+     <code>num_computed_tokens</code>——已经算进 KV 的 prompt token 数。逐符号看：</p>
+  <table>
+    <thead><tr><th>字段 / 属性</th><th>含义</th><th>以请求 A（prompt=6，要生成 4）为例</th></tr></thead>
+    <tbody>
+      <tr><td><code>num_prompt_tokens</code></td><td>prompt 有多长</td><td>恒为 <strong>6</strong></td></tr>
+      <tr><td><code>num_computed_tokens</code></td><td>已算进 KV 的 prompt 数</td><td>从 0 涨到 6；到 6 就 prefill 完</td></tr>
+      <tr><td><code>prefill_done</code></td><td><code>num_computed_tokens ≥ num_prompt_tokens</code></td><td>算满 6 后变 <code>True</code></td></tr>
+      <tr><td><code>output_token_ids</code></td><td>已生成的 token（decode 产物）</td><td>长度从 0 涨到 4</td></tr>
+      <tr><td><code>num_generated</code></td><td><code>len(output_token_ids)</code></td><td>= 已生成个数</td></tr>
+      <tr><td><code>is_finished()</code></td><td>生成够数 <strong>或</strong> 末尾是 EOS</td><td><code>num_generated ≥ 4</code> 时为 <code>True</code></td></tr>
+    </tbody>
+  </table>
+  <div class="callout note"><div class="callout-title">是否结束怎么判定（<code>is_finished()</code> 逐行）</div>
+    <pre><code>if num_generated &gt;= max_new_tokens:   return True   # 写够了
+if stop_on_eos and output[-1] == EOS_ID: return True # 主动写出了结束符
+return False</code></pre>
+    两条任一成立即结束。本课的手算里没触发 EOS，所以每条请求都是「写够 max_new_tokens」才结束。</div>
+
+  <h2 id="worked">小规模手算：三条错峰请求的一次完整调度 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>现在用 continuous batching 把 <strong>A / B / C</strong> 跑一遍，看状态机如何逐迭代转移。
+     调度参数取本课动画的设置：<code>max_num_seqs = 3</code>（最多 3 条同时 RUNNING）、
+     <code>token 预算 = 16</code>（一步最多算 16 个 token）。每条 prompt（≤6）都<strong>能在一步内 prefill 完</strong>
+     （不用切块，chunked prefill 是 <a href="lesson_15.html">Lesson 15</a> 的话题）。decode 每步每条只算 <strong>1</strong> 个 token。</p>
+  <table>
+    <thead><tr><th>迭代</th><th>调度器这一步安排</th><th>本步 token 数</th>
+      <th>A</th><th>B</th><th>C</th><th>关键事件</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1</strong></td><td>准入 A、B → 各 <strong>prefill</strong>（A 6 个 + B 3 个）</td><td>6+3 = 9</td>
+        <td style="color:var(--running)">RUN·gen1</td><td style="color:var(--running)">RUN·gen1</td><td style="color:var(--waiting)">WAIT（未到）</td>
+        <td>A、B：WAITING→RUNNING</td></tr>
+      <tr><td><strong>2</strong></td><td>A、B 各 <strong>decode</strong> 1 个</td><td>1+1 = 2</td>
+        <td style="color:var(--running)">RUN·gen2</td><td style="color:var(--running)">RUN·gen2</td><td style="color:var(--waiting)">WAIT（未到）</td>
+        <td>C 第 3 步才到，仍在等</td></tr>
+      <tr><td><strong>3</strong></td><td>A、B 各 decode 1 个 <strong>＋ 准入 C prefill 4 个</strong></td><td>1+1+4 = 6</td>
+        <td style="color:var(--running)">RUN·gen3</td><td style="color:var(--finished)">FINISHED</td><td style="color:var(--running)">RUN·gen1</td>
+        <td><strong>C 中途加入</strong>；B 写满 3 个→完成，归还 KV</td></tr>
+      <tr><td><strong>4</strong></td><td>A、C 各 decode 1 个</td><td>1+1 = 2</td>
+        <td style="color:var(--finished)">FINISHED</td><td style="color:var(--finished)">—</td><td style="color:var(--running)">RUN·gen2</td>
+        <td>A 写满 4 个→完成，归还 KV</td></tr>
+      <tr><td><strong>5</strong></td><td>C decode 1 个</td><td>1</td>
+        <td style="color:var(--finished)">—</td><td style="color:var(--finished)">—</td><td style="color:var(--finished)">FINISHED</td>
+        <td>C 写满 3 个→完成；队列空，引擎退出</td></tr>
+    </tbody>
+  </table>
+  <p>盯住<strong>第 3 步</strong>：这正是 continuous batching 的灵魂——<strong>C 在 A、B 正 decode 的同一步里被准入并 prefill</strong>，
+     而 B 在同一步写完后立刻腾出座位与 KV。没有任何一步「等整批」。全程 <strong>5 个迭代</strong>，
+     对比 static batching 的 9 个——省下的正是前面那两处浪费。</p>
+  <div class="callout note" style="border-left-color:var(--running)">
+    <div class="callout-title">同一时刻，运行 batch 的构成在逐步变化（这就是「continuous」）</div>
+    <div style="display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:.78rem;margin-top:6px">
+      <div style="display:flex;align-items:center;gap:6px"><span style="width:52px;color:var(--fg-dim)">迭代1</span>
+        <span style="border:2px solid var(--prefill);border-radius:6px;padding:3px 8px">A prefill</span>
+        <span style="border:2px solid var(--prefill);border-radius:6px;padding:3px 8px">B prefill</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><span style="width:52px;color:var(--fg-dim)">迭代2</span>
+        <span style="border:2px solid var(--decode);border-radius:6px;padding:3px 8px">A decode</span>
+        <span style="border:2px solid var(--decode);border-radius:6px;padding:3px 8px">B decode</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><span style="width:52px;color:var(--fg-dim)">迭代3</span>
+        <span style="border:2px solid var(--decode);border-radius:6px;padding:3px 8px">A decode</span>
+        <span style="border:2px solid var(--decode);border-radius:6px;padding:3px 8px">B decode</span>
+        <span style="border:2px solid var(--prefill);border-radius:6px;padding:3px 8px;background:color-mix(in srgb,var(--prefill) 18%,var(--bg))">C prefill ⬅ 新加入</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><span style="width:52px;color:var(--fg-dim)">迭代4</span>
+        <span style="border:2px solid var(--decode);border-radius:6px;padding:3px 8px">A decode</span>
+        <span style="border:1.5px dashed var(--finished);border-radius:6px;padding:3px 8px;color:var(--finished)">B 已下车</span>
+        <span style="border:2px solid var(--decode);border-radius:6px;padding:3px 8px">C decode</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><span style="width:52px;color:var(--fg-dim)">迭代5</span>
+        <span style="border:1.5px dashed var(--finished);border-radius:6px;padding:3px 8px;color:var(--finished)">A 已下车</span>
+        <span style="border:2px solid var(--decode);border-radius:6px;padding:3px 8px">C decode</span></div>
+    </div>
+    <div style="font-size:.76rem;color:var(--fg-dim);margin-top:8px">
+      同一个 batch 里 prefill（紫）和 decode（青）<strong>混排</strong>在一起跑；每一步的成员都可能不同。
+      static batching 里，这五行会被强行凑成「同上同下」的固定方阵，中间的空位只能空转。</div>
+  </div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「新请求要等当前这批全跑完才能进」</td>
+          <td>那是 static batching。continuous batching <strong>每个迭代</strong>都尝试准入——手算里 C 就是在 A、B decode 的<strong>同一步</strong>加入的。</td></tr>
+      <tr><td>「continuous 是在一次前向的<strong>中途</strong>随时加人/踢人」</td>
+          <td>状态只在<strong>迭代边界</strong>切换。一次 forward 跑的过程中，batch 成员固定不变——所以叫「迭代级」而非「token 级」抢占。</td></tr>
+      <tr><td>「请求写完了留着无所谓」</td>
+          <td>不摘走它，它会一直占着 <code>max_num_seqs</code> 的座位和 KV 块，把并发度和显存活活堵死。必须 <code>remove_finished()</code> 并 <code>kv.free()</code>。</td></tr>
+      <tr><td>「用 <code>status == RUNNING</code> 就能判断该 prefill 还是 decode」</td>
+          <td>不能。prefill/decode 的区分靠 <code>prefill_done</code>（即 <code>num_computed_tokens ≥ num_prompt_tokens</code>），不是靠状态枚举。</td></tr>
+      <tr><td>「FINISHED 和 ABORTED 差不多」</td>
+          <td>都释放资源，但 FINISHED 的输出是<strong>有效结果</strong>，ABORTED 是<strong>被中止、结果作废</strong>——语义完全不同。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>上面讲的每一点都能在源码里找到落点：</p>
+  <table>
+    <thead><tr><th>讲解</th><th>代码位置</th></tr></thead>
+    <tbody>
+      <tr><td>4 个状态本身</td><td><code>request.py</code> · <code>class RequestStatus(enum.Enum)</code></td></tr>
+      <tr><td>prefill / decode 子阶段的区分</td><td><code>request.py</code> · <code>num_computed_tokens</code>、<code>prefill_done</code></td></tr>
+      <tr><td>「写完没有」的判定</td><td><code>request.py</code> · <code>is_finished()</code>（够数 或 EOS）</td></tr>
+      <tr><td>迭代循环（每步重新调度）</td><td><code>engine.py</code> · <code>LLMEngine.run()</code> 的 <code>while self.scheduler.has_unfinished:</code></td></tr>
+      <tr><td>准入新请求 / 推进老请求</td><td><code>run()</code> 里 <code>out = self.scheduler.schedule(...)</code> 后逐个 <code>_run_item(item, it)</code></td></tr>
+      <tr><td>WAITING→RUNNING 那一刻</td><td><code>_run_item</code>：prefill 块 vs decode 一个 token（<code>item.is_prefill</code>）</td></tr>
+      <tr><td>RUNNING→FINISHED + 归还 KV</td><td><code>run()</code> · <code>finished = self.scheduler.remove_finished()</code>，随后 <code>r.kv.free()</code></td></tr>
+    </tbody>
+  </table>
+  <div class="callout note"><div class="callout-title">对照 <code>LLMEngine.run</code> 的骨架</div>
+    <pre><code>while scheduler.has_unfinished:            # 还有 WAITING 或 RUNNING 就继续
+    out = scheduler.schedule(it, free, bs) # 这一步跑谁、各多少 token（含准入新请求）
+    for item in out.items:
+        _run_item(item, it)                # prefill 一块 或 decode 一个 token → 采样
+    finished = scheduler.remove_finished() # is_finished() 为真的摘出 → RUNNING→FINISHED
+    for r in finished: r.kv.free()         # 归还 KV 块，座位让给别人</code></pre>
+    这段 5 行循环，就是 continuous batching 的全部。手算表格里的每一行，都是它转一圈的结果。</div>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a10">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>请求经历哪些状态？如何在别人 decode 时动态加入运行 batch？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 10
+python3 course.py run 10 --trace
+python3 course.py check 10</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 10` 看逐迭代快照。</details>
+    <details><summary>提示 Level 2 · 位置</summary>每次迭代动态准入/推进/退出请求。</details>
+    <details><summary>提示 Level 3 · 机制</summary>错峰到达的请求在别人 decode 时加入。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>引擎输出必须与逐请求参考一致。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>新请求进不来</td><td>只在批空时才调度</td><td>改为每次迭代都尝试准入（iteration-level）</td></tr><tr><td>完成的请求还占资源</td><td>没及时回收</td><td>完成即移出 running 并 free KV</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 10 --trace
+python3 course.py inspect scheduler</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>为什么 continuous batching 比 static batching 吞吐更高？</li><li>一个请求完成后，它的 KV 块应该怎么处理？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>LLMEngine.run 迭代循环</td><td>vLLM engine loop</td><td>迭代级调度一致</td><td>vLLM 在 GPU 上真正并行整批</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>请求是状态机；continuous batching 在每次迭代动态准入/推进/退出请求。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="10">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_11.html">下一步：Lesson 11 · Scheduler →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 10 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/request_lifecycle.js"></script>
+<script>
+RequestLifecycleAnim.mount("#a10", {blockSize:4,numBlocks:12,maxNumSeqs:3,tokenBudget:16,requests:[{id:"A",prompt:"Hello",maxNew:4,arrival:0},{id:"B",prompt:"Hi",maxNew:3,arrival:1},{id:"C",prompt:"GPU",maxNew:3,arrival:3}]});
+</script>
+</body>
+</html>

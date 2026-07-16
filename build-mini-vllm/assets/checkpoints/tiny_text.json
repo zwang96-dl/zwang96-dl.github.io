@@ -1,0 +1,15 @@
+{
+  "config": {
+    "vocab_size": 259,
+    "hidden_size": 32,
+    "num_layers": 2,
+    "num_attention_heads": 4,
+    "num_kv_heads": 2,
+    "intermediate_size": 64,
+    "max_seq_len": 64,
+    "rope_theta": 10000.0,
+    "rms_norm_eps": 1e-05,
+    "seed": 1234
+  },
+  "format": "config+seed"
+}

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 15 · Token Budget 与 Chunked Prefill — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="max_num_batched_tokens 预算；长 prompt 切块与 decode 混排，避免长时间阻塞短请求。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 15</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 15 · Token Budget 与 Chunked Prefill <span class="phase-badge phase-build">Phase 3</span></h1>
+  <p>token 预算与 chunked prefill 决定长 prompt 会不会拖垮短请求的首 token 延迟。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>max_num_batched_tokens 预算；长 prompt 切块与 decode 混排，避免长时间阻塞短请求。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/scheduler/scheduler.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/scheduler/scheduler.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>Scheduler 的 chunked prefill 分支</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 15</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 15</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 14</dd>
+        <dt>完成后下一步</dt><dd>Lesson 16</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>到上一课为止，调度器（<a href="lesson_11.html">Lesson 11</a>）已经能决定「这一步跑哪些请求」，
+     分页 KV（<a href="lesson_14.html">Lesson 14</a>）也能放下它们的缓存。但还有一个现实约束没露面：
+     <strong>一次迭代到底能处理多少 token？</strong> GPU 一步能并行吃进的 token 是有限的——
+     喂太多会爆显存、也让这一步本身变慢。这条上限就是 <code>max_num_batched_tokens</code>
+     （本课默认 <code>64</code>，见 <code>SchedulerConfig</code>）。</p>
+  <p>一旦有了这条预算线，麻烦就来了：如果一个用户发来 <strong>很长的 prompt</strong>，
+     而另一个用户只打了个 <code>"Hi"</code>，朴素做法会把整段长 prompt 在<strong>一步里</strong>全部 prefill，
+     短请求只能干等——它的<strong>首 token 延迟（TTFT，time to first token）</strong>被这段长 prompt 整个拖住。
+     更糟的是：如果这段 prompt 比整条预算还长，它会<strong>一步都排不进去，永远卡住</strong>。</p>
+  <p><strong>Chunked prefill（切块预填）</strong>就是来治这两件事的：把长 prompt 切成若干小块、
+     分几步算完，中间穿插别的请求的 decode，让短请求不必苦等，也让超预算的长 prompt 至少能一点点推进。
+     这一课就把这条预算线和切块逻辑讲透。</p>
+
+    <h2 id="problem">先看问题：不切块，长 prompt 会怎样 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>用<strong>具体数字</strong>把问题摆出来。设一次迭代的预算 <code>max_num_batched_tokens = 8</code>，
+       两个请求同时到达：</p>
+    <ul>
+      <li><strong>long</strong>：prompt = <code>"你好世界"</code>。本课 tokenizer 是 byte-level，
+          一个汉字 = 3 个 UTF-8 字节 = 3 个 token，所以这段是 <code>4 × 3 = 12</code> 个 token。</li>
+      <li><strong>short</strong>：prompt = <code>"Hi"</code> = <strong>2</strong> 个 token（两个 ASCII 字节）。</li>
+    </ul>
+    <p>关掉 chunked prefill 时，prefill 必须<strong>一次算完整段</strong>。long 需要 12 个 token，
+       但预算只有 8：<code>12 &gt; 8</code>，这一步放不下它；下一步预算重置回 8，还是放不下……
+       于是 long <strong>每一步都被跳过，永远排不进去</strong>：</p>
+    <table>
+      <thead><tr><th>迭代</th><th>long 需要 prefill</th><th>预算</th><th>能否放下</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>12（整段）</td><td>8</td><td>否（12&gt;8）</td><td>跳过，long 仍等待</td></tr>
+        <tr><td>1</td><td>12（整段）</td><td>8</td><td>否</td><td>跳过</td></tr>
+        <tr><td>…</td><td>12</td><td>8</td><td>否</td><td>永远跳过 → <strong>调度停滞</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><div class="callout-title">核心痛点</div>
+      只要<strong>单条 prompt 长度 &gt; 整条 token 预算</strong>，且不切块，这个请求就<strong>一步都跑不了</strong>——
+      不是慢，是彻底卡死。<code>run 15</code> 在这种配置下会明确报「调度停滞」。这正是 chunked prefill 存在的第一个理由。</div>
+
+    <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="callout tip"><div class="callout-title">一句话解释</div>
+      <strong>token 预算</strong> = 一次迭代最多能端上桌的 token 总量；
+      <strong>chunked prefill</strong> = 把一大锅长 prompt 分成几托盘端，端的间隙还能顺手给别的桌上菜（decode）。</div>
+    <p><strong>类比：食堂打饭窗口。</strong>窗口一次只能端出一托盘（预算 8 份）。有个人点了一大锅（12 份）的菜——
+       如果规定「必须一托盘端完」，这锅菜永远端不出去，后面只想打二两饭（short 的 2 个 token）的人也跟着堵死。
+       改成<strong>分托盘端</strong>：第一托盘先端 8 份，第二托盘端剩下的 4 份，中间的空档还能给别人盛饭。
+       大家都能往前挪，没人被无限期堵在门口。</p>
+    <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+      分几托盘端，<strong>不会改变最终每个人碗里的菜</strong>。切块只改「每一步算多少 token」，
+      <strong>绝不改变模型算出的结果</strong>——因为每个 token 的位置（position）和它写进 KV 的内容都不变，
+      切在哪里都一样。这一点和 <a href="lesson_07.html">Lesson 7</a> 里「decode 只喂 1 个 token 仍与重算整段逐值一致」
+      是同一个道理，只是这里一次喂的是「一块」而非「一个」。</div>
+
+    <h2 id="budget">精确定义：两条预算线与一步的 token 账 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>调度器每次迭代受<strong>两条</strong>独立的预算线约束（都在 <code>SchedulerConfig</code> 里）：</p>
+    <table>
+      <thead><tr><th>符号</th><th>含义</th><th>本课默认</th><th>约束的是</th></tr></thead>
+      <tbody>
+        <tr><td><code>max_num_seqs</code></td><td>同时 RUNNING 的请求条数上限</td><td>4</td><td><strong>并发度</strong>（有几条在跑）</td></tr>
+        <tr><td><code>max_num_batched_tokens</code></td><td>一次迭代处理的 token 总数上限</td><td>64</td><td><strong>单步计算量</strong>（这步算多少 token）</td></tr>
+      </tbody>
+    </table>
+    <p>本课主角是第二条。一次迭代实际处理的 token 数，是所有被安排的请求各自 token 数之和，逐符号看：</p>
+    <math display="block" class="mathblock">
+      <mtext>本步&#xA0;token&#xA0;数</mtext>
+      <mo>=</mo>
+      <munder><mo>∑</mo><mtext>每个 prefill 请求</mtext></munder>
+      <mi>chunk</mi>
+      <mo>+</mo>
+      <munder><mo>∑</mo><mtext>每个 decode 请求</mtext></munder>
+      <mn>1</mn>
+      <mo>≤</mo>
+      <mtext>max_num_batched_tokens</mtext>
+    </math>
+    <ul>
+      <li><strong>decode 请求</strong>：每步永远只产生 <strong>1</strong> 个新 token，所以恰好花预算里的 <code>1</code>。</li>
+      <li><strong>prefill 请求</strong>：可花 <code>1 … remaining_prompt</code> 之间任意块大小。开启切块时块大小取
+          <code>min(剩余 prompt, 当前剩余预算)</code>；关闭切块时块大小 = 整段剩余 prompt（放不下就整步跳过）。</li>
+    </ul>
+    <div class="callout note"><div class="callout-title">形状（shape）</div>
+      被安排进这一步的所有 token 会<strong>拼成一条扁平序列</strong>喂给模型：输入形状
+      <code>(本步 token 数,)</code>，只要 <code>≤ 64</code> 即可。例如某步安排「long 的 8 个 prefill token + short 的 1 个 decode token」，
+      模型这步的输入就是长度 <code>9</code> 的一维张量；每个 token 各自带着自己的绝对位置（position）去查 KV。</div>
+
+    <h2 id="worked">小规模手算：一次完整调度过程 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>沿用上面的例子，但这次<strong>开启</strong> chunked prefill，看系统怎么一步步推进。
+       配置：预算 <code>8</code>、策略 <code>fifo</code>；long（prompt 12 token，生成 2 个）与 short（prompt 2 token，生成 2 个）同时到达。
+       注意：调度器只<strong>决定</strong>每步算多少，随后引擎执行并更新 <code>num_computed_tokens</code>（已算进 KV 的 prompt token 数）。</p>
+    <table>
+      <thead><tr><th>迭代</th><th>安排的动作</th><th>本步 token 账（≤8）</th><th>执行后状态</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>准入 long，prefill 块 = min(12, 8) = <strong>8</strong>；short 想进但预算已用光（min(2,0)=0）→ 继续等</td><td>8</td><td>long.num_computed 0→8（未完）</td></tr>
+        <tr><td>1</td><td>long 续 prefill 块 = min(剩 4, 8) = <strong>4</strong>（prefill 完成）；预算还剩 4，准入 short prefill <strong>2</strong></td><td>4 + 2 = 6</td><td>long 8→12（完）、short 0→2（完）—— <strong>两种 prefill 混排</strong></td></tr>
+        <tr><td>2</td><td>两者都进入 decode：long decode <strong>1</strong> + short decode <strong>1</strong></td><td>1 + 1 = 2</td><td>各生成第 1 个 token —— <strong>decode 混排</strong></td></tr>
+        <tr><td>3</td><td>long decode <strong>1</strong> + short decode <strong>1</strong></td><td>1 + 1 = 2</td><td>各生成第 2 个（达到 max_new）→ 完成</td></tr>
+      </tbody>
+    </table>
+    <p>对比「不切块」的永久停滞：切块后 long 用了 <code>8 + 4</code> 两块把 12 个 prompt token 算完，
+       而 short 在迭代 1 就挤进空出的预算、迭代 2 就吐出首 token——<strong>短请求不再苦等长 prompt</strong>。</p>
+    <div class="callout note" style="border-left-color:var(--decode)">
+      <div class="callout-title">四次迭代的执行图（每格 = 预算 8 的一步；色块宽度≈token 数）</div>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:.72rem;margin-top:8px">
+        <!-- iter 0 -->
+        <div>
+          <div style="color:var(--fg-dim);margin-bottom:3px">迭代 0（用 8/8）</div>
+          <div style="display:flex;border:1px solid var(--fg-dim);border-radius:5px;overflow:hidden;height:34px">
+            <div style="flex:8;background:color-mix(in srgb,var(--running) 30%,var(--bg));display:flex;align-items:center;justify-content:center;border-right:1px solid var(--fg-dim)">long prefill · 8</div>
+          </div>
+        </div>
+        <!-- iter 1 -->
+        <div>
+          <div style="color:var(--fg-dim);margin-bottom:3px">迭代 1（用 6/8）</div>
+          <div style="display:flex;border:1px solid var(--fg-dim);border-radius:5px;overflow:hidden;height:34px">
+            <div style="flex:4;background:color-mix(in srgb,var(--running) 30%,var(--bg));display:flex;align-items:center;justify-content:center;border-right:1px solid var(--fg-dim)">long · 4</div>
+            <div style="flex:2;background:color-mix(in srgb,var(--running) 55%,var(--bg));display:flex;align-items:center;justify-content:center;border-right:1px solid var(--fg-dim)">short · 2</div>
+            <div style="flex:2;background:transparent;display:flex;align-items:center;justify-content:center;color:var(--fg-dim)">空 2</div>
+          </div>
+        </div>
+        <!-- iter 2 -->
+        <div>
+          <div style="color:var(--fg-dim);margin-bottom:3px">迭代 2（用 2/8）</div>
+          <div style="display:flex;border:1px solid var(--fg-dim);border-radius:5px;overflow:hidden;height:34px">
+            <div style="flex:1;background:color-mix(in srgb,var(--decode) 40%,var(--bg));display:flex;align-items:center;justify-content:center;border-right:1px solid var(--fg-dim)">L·1</div>
+            <div style="flex:1;background:color-mix(in srgb,var(--decode) 40%,var(--bg));display:flex;align-items:center;justify-content:center;border-right:1px solid var(--fg-dim)">S·1</div>
+            <div style="flex:6;background:transparent;display:flex;align-items:center;justify-content:center;color:var(--fg-dim)">空 6</div>
+          </div>
+        </div>
+        <!-- iter 3 -->
+        <div>
+          <div style="color:var(--fg-dim);margin-bottom:3px">迭代 3（用 2/8）</div>
+          <div style="display:flex;border:1px solid var(--fg-dim);border-radius:5px;overflow:hidden;height:34px">
+            <div style="flex:1;background:color-mix(in srgb,var(--decode) 40%,var(--bg));display:flex;align-items:center;justify-content:center;border-right:1px solid var(--fg-dim)">L·1</div>
+            <div style="flex:1;background:color-mix(in srgb,var(--decode) 40%,var(--bg));display:flex;align-items:center;justify-content:center;border-right:1px solid var(--fg-dim)">S·1</div>
+            <div style="flex:6;background:transparent;display:flex;align-items:center;justify-content:center;color:var(--fg-dim)">空 6</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:var(--fg-dim);margin-top:8px">
+        深色 = prefill 块，亮色 = decode（各 1 个）。迭代 1 里 long 的第二块和 short 的 prefill
+        共享同一步预算——这就是「切块 + 混排」。</div>
+    </div>
+
+    <h2 id="mix">为什么切块与混排不改变输出 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>会不会「切一刀」就把结果切坏了？不会。关键是 <code>num_computed_tokens</code> 记着「这条 prompt 已经算到第几个 token」。
+       第二块从<strong>断点续算</strong>：迭代 0 算了位置 0..7，迭代 1 的这一块就从<strong>位置 8</strong> 开始，
+       算位置 8..11 的 q/k/v，把新的 k/v 追加进 KV，再让它们去查缓存里已有的位置 0..7。</p>
+    <p>这和 <a href="lesson_07.html">Lesson 7</a> 的 KV Cache 是同一套机制：历史 K/V 一旦算出就永久有效
+       （第 i 个位置的 K/V 只依赖前 i 个 token，与后面切没切、什么时候算无关）。
+       decode 是「每步续算 1 个」，chunked prefill 只是「每步续算一块（多个）」——本质完全一样，
+       所以无论切成 <code>12=8+4</code> 还是 <code>12=4+4+4</code>，甚至一次算完，
+       最终每个位置的 logits <strong>逐值相同</strong>。</p>
+    <div class="callout note"><div class="callout-title">形状（shape）在断点续算时怎么走</div>
+      迭代 0：输入 <code>(8,)</code>（位置 0..7），KV 长度 0 → 8。<br>
+      迭代 1：输入 <code>(4,)</code>（位置 8..11），新 q 去看「缓存 8 行 + 本块 4 行」= 全部 12 个位置，KV 长度 8 → 12。<br>
+      因果掩码保证每个位置只看到 <code>≤</code> 自己的位置，与「一次喂 12 个」得到的掩码完全一致。</div>
+
+    <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+    <table>
+      <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+      <tbody>
+        <tr><td>「chunked prefill 是为了省显存」</td><td>它省的是<strong>单步的计算峰值和排队延迟</strong>，不是显存。整段 prompt 的 KV 最终一样要全部存下；切块只是把「一步算完」摊成「几步算完」。</td></tr>
+        <tr><td>「切块会让长 prompt 更快出结果」</td><td>恰恰相反：切块通常让长 prompt 的 TTFT <strong>略微变慢</strong>（分几步才算完），代价是换来<strong>短请求的 TTFT 大幅变好</strong>。这是一次公平性权衡，不是纯加速。</td></tr>
+        <tr><td>「decode 也要按预算切块」</td><td>decode 每步<strong>天生只算 1 个</strong> token，没有可切的东西；预算里它恒定占 1。可切的只有 prefill。</td></tr>
+        <tr><td>「切块可能改变生成的 token」</td><td>不会。位置和 KV 内容与切点无关，<code>12=8+4</code> 和一次算 12 逐值一致——切块只影响<strong>什么时候算</strong>，不影响<strong>算出什么</strong>。</td></tr>
+        <tr><td>「只要预算够大就不用切块」</td><td>预算大确实能一次装下更多，但也意味着<strong>单步更慢、更容易让短请求等更久</strong>；且一旦出现比预算还长的 prompt，不切块仍会直接停滞。切块是结构性保障，不是预算不够时的补丁。</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>本课全部逻辑在 <code>mini_vllm/scheduler/scheduler.py</code> 的 <code>Scheduler.schedule()</code> 里，
+       配合 <code>Request.num_computed_tokens</code>（<code>request.py</code>）记录断点。对照上面的手算：</p>
+    <table>
+      <thead><tr><th>讲解里的概念</th><th>对应代码</th></tr></thead>
+      <tbody>
+        <tr><td>token 预算这条线</td><td><code>budget = cfg.max_num_batched_tokens</code>（每次迭代重置）</td></tr>
+        <tr><td>RUNNING 长 prompt 的续块大小</td><td><code>take = min(remaining, budget) if cfg.enable_chunked_prefill else remaining</code></td></tr>
+        <tr><td>不切块时「整段放不下 → 跳过 → 停滞」</td><td><code>if take &lt;= 0 or take &gt; budget: continue</code></td></tr>
+        <tr><td>新请求准入时的首块大小</td><td><code>take = min(need, budget) if cfg.enable_chunked_prefill else need</code></td></tr>
+        <tr><td>不切块时新请求超预算 → 跳过</td><td><code>if not cfg.enable_chunked_prefill and need &gt; budget: continue</code></td></tr>
+        <tr><td>decode 每步恒定占 1</td><td><code>budget -= 1</code>（else 分支，<code>num_tokens=1</code>）</td></tr>
+        <tr><td>「续块从断点开始」的位置来源</td><td><code>r.remaining_prompt = num_prompt_tokens - num_computed_tokens</code></td></tr>
+      </tbody>
+    </table>
+    <p><code>remaining_prompt</code> 会随引擎执行不断减小：这正是「断点续算」得以正确的关键——
+       调度器不重复安排已算过的 prompt token，切块与混排因此不改变最终输出。</p>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a15">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>token 预算小于长 prompt 时，chunked prefill 如何让系统继续推进？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 15
+python3 course.py run 15 --trace
+python3 course.py check 15</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 15` 对比开/关 chunked prefill。</details>
+    <details><summary>提示 Level 2 · 位置</summary>预算 < prompt 且未开 chunked → 停滞。</details>
+    <details><summary>提示 Level 3 · 机制</summary>切块让系统仍能推进。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>切块不改变输出。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>长 prompt 卡住</td><td>预算 < prompt 且未开 chunked</td><td>开启 chunked prefill 或增大预算</td></tr><tr><td>切块改变结果</td><td>positions/KV 写错</td><td>切块只改「每步算多少」，不改结果</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 15 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>chunked prefill 对长 prompt 的 TTFT 和对短请求的 TTFT 各有何影响？</li><li>chunk 太小或太大分别有什么代价？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>Scheduler chunked 分支</td><td>vLLM chunked prefill</td><td>切块 + 混排一致</td><td>vLLM 有更精细的预算与优先级</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>token 预算约束一次迭代的处理量；chunked prefill 把长 prompt 切块、与 decode 混排，保持推进且不改变输出。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="15">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_16.html">下一步：Lesson 16 · Prefix Caching →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 15 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/request_lifecycle.js"></script>
+<script>
+RequestLifecycleAnim.mount("#a15", {blockSize:4,numBlocks:24,maxNumSeqs:2,tokenBudget:8,requests:[{id:"long",prompt:"The quick brown fox jumps",maxNew:3,arrival:0},{id:"short",prompt:"Hi",maxNew:4,arrival:0}]});
+</script>
+</body>
+</html>

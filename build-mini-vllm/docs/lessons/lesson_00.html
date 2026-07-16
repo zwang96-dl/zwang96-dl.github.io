@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 0 · Airplane Mode — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="课程第一条主线：离线检查、启动网页、运行第一个请求生命周期模拟器，获得第一次成功反馈。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 0</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+
+<div class="layout">
+  <nav class="toc" aria-label="本页目录">
+    <h2>本页目录</h2>
+    <a href="#goal">本节目标</a>
+    <a href="#why">为什么需要</a>
+    <a href="#scenario">问题场景 & 预测</a>
+    <a href="#anim">交互式动画</a>
+    <a href="#define">精确定义</a>
+    <a href="#worked">跟真实 trace 手算</a>
+    <a href="#dataflow">数据流 & 调用图</a>
+    <a href="#misconception">常见误解</a>
+    <a href="#build">动手运行（Build）</a>
+    <a href="#test">测试与验证</a>
+    <a href="#hints">四级提示</a>
+    <a href="#errors">常见错误</a>
+    <a href="#trace">Trace & Inspector</a>
+    <a href="#challenge">因果理解（Challenge）</a>
+    <a href="#vllm">真实 vLLM 映射</a>
+    <a href="#summary">总结 & 下一步</a>
+  </nav>
+
+  <main class="content" id="main">
+    <h1>Lesson 0 · Airplane Mode <span class="phase-badge phase-learn">起飞前准备</span></h1>
+    <p>飞机上、没有网络、只有一台 8GB 的 MacBook Air —— 这正是本课程假设的场景。
+       这一课不讲神经网络，目标是让你<strong>跑通第一条主线</strong>，熟悉贯穿全课的三分工，
+       并第一次亲眼看到「一个请求在推理引擎里的完整生命周期」。</p>
+
+    <!-- ============ 固定头部 ============ -->
+    <section id="goal">
+      <div class="lesson-header">
+        <dl>
+          <dt>当前目标</dt><dd>离线跑通：环境自检 → 启动网页 → 运行第一个机制模拟器 → 看到真实命令与真实输出 → 获得第一次成功反馈。</dd>
+          <dt>需要阅读的文件</dt><dd><code>README.md</code>、<code>mini_vllm/simulator/text_pipeline.py</code>、<code>experiments/lesson_00_intro.py</code></dd>
+          <dt>需要修改的文件</dt><dd>本课<strong>无需修改代码</strong>，重在运行与观察。</dd>
+          <dt>需要关注的类或函数</dt><dd><code>LifecycleSimulator.run()</code>、<code>RequestState</code> 状态机、<code>_BlockPool</code></dd>
+          <dt>实验命令</dt><dd><code>python3 course.py run 0</code>（等价于 <code>python3 -m experiments.lesson_00_intro --config configs/lesson_00_quick.json</code>）</dd>
+          <dt>测试命令</dt><dd><code>python3 course.py check 0</code>（等价于 <code>python3 -m unittest tests.lesson_00.test_intro</code>）</dd>
+          <dt>本课依赖</dt><dd>无（只需 Python 3.11+ 与浏览器）</dd>
+          <dt>完成后下一步</dt><dd>Lesson 1 · 文本如何变成 Token</dd>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ============ 为什么 ============ -->
+    <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>在钻研 Attention、KV Cache、调度器之前，你需要三样东西：一套<strong>可信任</strong>的环境、
+       一条<strong>清晰</strong>的主线、以及对整个系统的<strong>鸟瞰</strong>。这一课把它们一次备齐。</p>
+    <div class="callout note">
+      <div class="callout-title">本课程的三分工（贯穿始终）</div>
+      <table>
+        <thead><tr><th>界面</th><th>负责</th></tr></thead>
+        <tbody>
+          <tr><td><strong>HTML 教程</strong></td><td>知识讲解、动画可视化、数学手算、Tensor shape、数据流、代码导读</td></tr>
+          <tr><td><strong>编辑器</strong></td><td>阅读 / 修改真实项目代码、查看模块关系、看 git diff</td></tr>
+          <tr><td><strong>终端</strong></td><td>运行真实实验、跑测试、看 Trace、跑 Benchmark、用 Inspector</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:.4em 0 0">网页帮助你<strong>理解</strong>代码，但不会替你运行、也绝不修改你的代码。</p>
+    </div>
+
+    <h3 style="margin-top:1.2em">先看问题：不这么做会付出什么代价</h3>
+    <p>为什么值得花一整课学「一个请求的生命周期」？因为推理引擎最核心的价值，
+       就藏在「同时来了多个请求时怎么办」里。用本课真实 workload 的两个请求做对比
+       （<code>req_0</code> 在第 0 迭代到达、要生成 6 个 token；<code>req_1</code> 在第 1 迭代到达、要生成 4 个 token）：</p>
+    <table>
+      <thead><tr><th>引擎做法</th><th>req_1 何时拿到首 token</th><th>两个请求全部完成</th></tr></thead>
+      <tbody>
+        <tr><td>朴素排队（FIFO：一次只跑完一个请求）</td><td>第 <strong>7</strong> 迭代（干等 req_0 跑完 6 步）</td><td>第 <strong>10</strong> 迭代</td></tr>
+        <tr><td>本课的生命周期 + 连续批处理</td><td>第 <strong>2</strong> 迭代</td><td>第 <strong>6</strong> 迭代</td></tr>
+      </tbody>
+    </table>
+    <p>同样的两个请求、同样的计算量，只是<strong>换了一种编排方式</strong>：总耗时从 10 步降到 6 步，
+       而后到的 req_1「等待首字」的时间从 6 步压缩到 1 步。差别不来自更快的硬件，而来自
+       <em>把请求拆成可调度的「状态 + 阶段」，让它们在同一个 batch 里穿插推进</em>——这正是本课要建立的心智模型，
+       也是 vLLM 高吞吐的根。所以在学 Attention/KV Cache 之前，先把「一个请求如何流过引擎」看透。</p>
+
+    <!-- ============ 场景 & 预测 ============ -->
+    <h2 id="scenario">系统问题场景 & 你的预测 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>设想推理服务器同时收到两个请求：一个长一点、一个短一点，还错峰到达。引擎必须决定
+       <em>先处理谁、每一步处理多少、内存放哪里、什么时候释放</em>。</p>
+    <div class="callout question">
+      <div class="callout-title">先预测，再看动画</div>
+      <ol style="margin:.3em 0">
+        <li>第一步应该把整段 prompt 一次算完，还是一个 token 一个 token 地算？</li>
+        <li>生成阶段，每一步的输入长度是「不断变长」还是「始终为 1」？</li>
+        <li>一个请求结束后，它占用的显存（KV block）会怎样？</li>
+      </ol>
+      <p style="margin:.3em 0 0">把你的答案记在心里，下面的动画会逐帧揭晓。</p>
+    </div>
+
+    <!-- ============ 动画 ============ -->
+    <h2 id="anim">交互式动画：请求生命周期 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>这是 <code>mini_vllm/simulator/text_pipeline.py</code> 里 <code>LifecycleSimulator</code> 的
+       <strong>忠实镜像</strong>。你在这里单步看到的每一步，都能在终端用
+       <code>python3 course.py run 0 --trace</code> 或 <code>course.py inspect scheduler</code> 复现。</p>
+
+    <!-- 静态骨架：即使没有 JS 也能看到控件；JS 会复用它并填充动态内容 -->
+    <div class="anim" id="anim-lifecycle">
+      <div class="anim-head">
+        <div class="anim-q">这个动画要回答的问题：
+          <small>一个请求经历哪些状态？prefill 与 decode 有何不同？KV block 何时分配/释放？</small></div>
+      </div>
+      <div class="anim-stage">
+        <div class="rl-scheduler" style="font-family:var(--mono);font-size:.85rem;margin-bottom:10px;">（加载中…）</div>
+        <div class="rl-reqs" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;"></div>
+        <div style="font-size:.8rem;color:var(--fg-dim);margin:6px 0 4px;">KV Block 池（物理 block）：</div>
+        <div class="rl-blocks" style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;max-width:520px;"></div>
+      </div>
+      <div class="legend">
+        <span class="item"><span class="swatch waiting"></span>WAITING（虚线）</span>
+        <span class="item"><span class="swatch running"></span>RUNNING（实线）</span>
+        <span class="item"><span class="swatch prefill"></span>PREFILL（双线）</span>
+        <span class="item"><span class="swatch decode"></span>DECODE（点线）</span>
+        <span class="item"><span class="swatch finished"></span>FINISHED（圆形）</span>
+      </div>
+      <div class="anim-step-desc">
+        <span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」开始。也可点一下面板后用键盘：空格播放/暂停，← → 单步，R 重置。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div>
+      </div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button" aria-label="上一步">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button" aria-label="播放">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" aria-label="暂停" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button" aria-label="下一步">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button" aria-label="重置">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-title">一句话解释</div>
+      推理引擎把每个请求当作一个<strong>状态机</strong>：等待（WAITING）→ 运行（RUNNING，先 prefill 一次吃完整段 prompt，
+      再逐 token decode）→ 结束（FINISHED）并归还它占用的 KV 内存。调度器则决定「每一步让哪些请求、各推进多少 token」。
+    </div>
+    <p><strong>直觉类比：批改流水线上的多份试卷。</strong>每份试卷（请求）先被「通读题干」一次（prefill 一次吃掉整段 prompt），
+       之后进入「一行一行写答案」的节奏（decode 每步只写 1 个 token）。监考老师（调度器）不必等一份卷子写完才发下一份——
+       他可以在同一轮里，让 A 卷写下一行的同时把刚到的 B 卷先通读一遍。这就是 continuous batching 的直觉。</p>
+    <div class="callout warn">
+      <div class="callout-title">类比的边界（别被带偏）</div>
+      写字的人凭记忆，而模型每写一个 token 都要<strong>重新「回看」前面所有内容</strong>；如果每步都把历史从头重算，
+      开销会随长度爆炸——这正是 KV Cache（Lesson 7）存在的理由：把每个历史 token 的中间结果缓存下来，decode 时直接取用。
+      另外，「通读题干」并非只发生一次就永远够用：每生成一个新 token，它也会变成后续步骤要「回看」的历史之一。
+    </div>
+
+    <!-- ============ 精确定义 ============ -->
+    <h2 id="define">精确工程定义：请求状态机 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>「状态机」不是比喻，而是代码里一个真实的枚举 <code>RequestState</code>（见
+       <code>text_pipeline.py</code>）。每个请求任一时刻<strong>恰好处于一个状态</strong>，
+       状态之间的跳转由<strong>明确的条件</strong>触发——把这些条件说清楚，你就读懂了 <code>LifecycleSimulator.run()</code>。</p>
+    <table>
+      <thead><tr><th>状态</th><th>含义</th><th>进入条件（对应代码）</th></tr></thead>
+      <tbody>
+        <tr><td><code>WAITING</code></td><td>已到达，尚未被调度</td><td>请求刚创建（<code>SimRequest</code> 默认 <code>state=WAITING</code>）</td></tr>
+        <tr><td><code>RUNNING</code></td><td>正在被处理，含子阶段 <code>phase = "prefill" | "decode"</code></td><td>被准入时置位：<code>arrival &lt; iteration</code> 且 <code>len(running) &lt; max_num_seqs</code></td></tr>
+        <tr><td><code>FINISHED</code></td><td>正常结束，KV block 已全部归还</td><td>满足 <code>len(generated) &gt;= max_new_tokens</code>（即 <code>req.done</code>）</td></tr>
+        <tr><td><code>ABORTED</code></td><td>被中止（本课不触发，占位）</td><td>超时 / 客户端取消等（Lesson 后续展开）</td></tr>
+      </tbody>
+    </table>
+    <p>关键在于：<code>RUNNING</code> 内部还有一个<strong>子状态 <code>phase</code></strong>。请求被准入时先进入
+       <code>prefill</code>；第一次 prefill 产出首 token 后，立刻翻转成 <code>decode</code> 并一直停在那里，直到写满而结束。
+       整个生命周期只有这几条合法边（其余跳转都不会发生）：</p>
+
+    <div class="callout note">
+      <div class="callout-title">状态转移图（本课唯一会走的几条边）</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-family:var(--mono);font-size:.82rem;margin-top:8px">
+        <div style="border:2px dashed var(--waiting);border-radius:6px;padding:8px 12px;background:color-mix(in srgb,var(--waiting) 12%,var(--bg))">WAITING<br><span style="color:var(--fg-dim);font-size:.75rem">刚到达</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;font-size:.7rem;color:var(--fg-dim)"><span>调度器准入</span><span style="font-size:1.3rem;color:var(--fg)">→</span></div>
+        <div style="border:2px solid var(--running);border-radius:8px;padding:8px 12px;background:color-mix(in srgb,var(--running) 10%,var(--bg))">
+          <div style="font-weight:600;margin-bottom:6px">RUNNING</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="border:2px double var(--prefill);border-radius:5px;padding:3px 7px">prefill<br><span style="color:var(--fg-dim);font-size:.7rem">吃整段 prompt</span></span>
+            <span style="font-size:1rem">→</span>
+            <span style="border:2px dotted var(--decode);border-radius:5px;padding:3px 7px">decode<br><span style="color:var(--fg-dim);font-size:.7rem">每步 1 token</span></span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;font-size:.7rem;color:var(--fg-dim)"><span>generated ≥ max_new</span><span style="font-size:1.3rem;color:var(--fg)">→</span></div>
+        <div style="border:2px solid var(--finished);border-radius:50px;padding:8px 14px;background:color-mix(in srgb,var(--finished) 12%,var(--bg))">FINISHED<br><span style="color:var(--fg-dim);font-size:.75rem">归还 block</span></div>
+      </div>
+      <div style="font-size:.78rem;color:var(--fg-dim);margin-top:8px">
+        <code>prefill → decode</code> 的翻转只发生一次（首 token 之后）；<code>decode</code> 会自我循环 N-1 次。
+        <code>ABORTED</code> 是一条本课不触发的旁路，故未画出。</div>
+    </div>
+
+    <p>这套状态机在 Lesson 10（Continuous Batching）会正式展开；这里先建立直觉：
+       <strong>请求可以随时加入或离开同一个正在运行的 batch</strong>——动画里 <code>req_1</code> 就是在
+       <code>req_0</code> 已经开始 decode 之后才被准入的。</p>
+    <div class="callout note">
+      <div class="callout-title">代码映射</div>
+      枚举定义在 <code>class RequestState(enum.Enum)</code>；准入逻辑在 <code>LifecycleSimulator.run()</code> 的
+      <code>while pending and len(running) &lt; self.max_num_seqs and pending[0].arrival &lt; iteration</code>；
+      <code>prefill → decode</code> 的翻转是 prefill 分支末尾的 <code>req.phase = "decode"</code>；
+      结束判定用 <code>SimRequest.done</code> 属性（<code>len(generated) &gt;= max_new_tokens</code>），随后 <code>pool.release()</code> 归还 block。
+    </div>
+
+    <!-- ============ 小规模手算 ============ -->
+    <h2 id="worked">小规模手算：跟着真实 trace 走完 6 步 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>光看状态图还不够，我们用本课<strong>真实 workload</strong> 亲手推一遍整轮调度，最后和
+       <code>python3 course.py run 0 --trace</code> 的输出逐行对上。配置来自
+       <code>configs/lesson_00_quick.json</code>：</p>
+    <ul style="margin:.3em 0">
+      <li><code>req_0</code>：prompt = <code>"Hello, mini-vLLM!"</code>，字节级 tokenize + BOS → <strong>prompt_len = 18</strong>（17 字节 + 1 个 BOS），要生成 6 个 token，第 0 迭代到达。</li>
+      <li><code>req_1</code>：prompt = <code>"你好，推理引擎"</code>，每个汉字 3 字节、全角逗号 3 字节 → 6+3+12 = 21 字节 + BOS = <strong>prompt_len = 22</strong>，要生成 4 个 token，第 1 迭代到达。</li>
+      <li>调度参数：<code>block_size = 8</code>、<code>num_blocks = 16</code>、<code>max_num_seqs = 2</code>、<code>token_budget = 32</code>。</li>
+    </ul>
+    <p>每一步的规则很简单：<strong>先准入</strong>（把已到达且还等待的请求塞进 running，上限 <code>max_num_seqs</code>）；
+       <strong>再调度</strong>（在 <code>token_budget</code> 内排 token，prefill 花 <code>prompt_len</code> 个、decode 只花 1 个）；
+       <strong>最后收尾</strong>（写满的请求置 FINISHED 并归还 block）。<code>需要的 block 数 = ⌈total_len / block_size⌉</code>。</p>
+    <table>
+      <thead><tr><th>迭代</th><th>准入</th><th>调度（阶段 / 花费 token）</th><th>本步产出</th><th>KV block 变化</th><th>占用</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>req_0</td><td>req_0 <em>prefill</em> / 18</td><td>req_0 首 token（gen=1）</td><td>req_0 分 3 块 <code>⌈18/8⌉=3</code>（物理 0,1,2）</td><td>3</td></tr>
+        <tr><td>2</td><td>req_1</td><td>req_0 <em>decode</em>/1 + req_1 <em>prefill</em>/22 = 23 ≤ 32</td><td>req_0 gen=2；req_1 首 token（gen=1）</td><td>req_1 分 3 块 <code>⌈22/8⌉=3</code>（物理 3,4,5）</td><td><strong>6</strong>（峰值）</td></tr>
+        <tr><td>3</td><td>—</td><td>req_0 decode/1 + req_1 decode/1 = 2</td><td>req_0 gen=3；req_1 gen=2</td><td>无（仍够用）</td><td>6</td></tr>
+        <tr><td>4</td><td>—</td><td>req_0 decode/1 + req_1 decode/1 = 2</td><td>req_0 gen=4；req_1 gen=3</td><td>无</td><td>6</td></tr>
+        <tr><td>5</td><td>—</td><td>req_0 decode/1 + req_1 decode/1 = 2</td><td>req_0 gen=5；req_1 gen=4 → <strong>done</strong></td><td>req_1 先加第 4 块 <code>⌈25/8⌉=4</code>（物理 6），随即结束<strong>归还 4 块</strong></td><td>3</td></tr>
+        <tr><td>6</td><td>—</td><td>req_0 decode/1 = 1</td><td>req_0 gen=6 → <strong>done</strong></td><td>req_0 结束<strong>归还 3 块</strong></td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p>手算结果与终端完全吻合：<strong>总迭代 6</strong>、<strong>调度 token 总数 = 18+23+2+2+2+1 = 48</strong>、
+       <strong>KV block 峰值 6 / 16</strong>、两个请求都走到 FINISHED、结束后占用归零（无泄漏）。
+       这几个数字就是 <code>run 0</code> 摘要里那几行的来历。</p>
+    <div class="callout tip">
+      <div class="callout-title">从这张表能读出的三件事</div>
+      <ul style="margin:.3em 0">
+        <li><strong>prefill 一次、decode 逐步</strong>：req_0 只在第 1 步花了 18 个 token（吃整段 prompt），之后每步固定花 1 个。</li>
+        <li><strong>连续批处理</strong>：第 2 步里 req_0 正在 decode，req_1 才刚 prefill——两个不同阶段的请求同处一个 batch。</li>
+        <li><strong>token_budget 是闸门</strong>：第 2 步 23 ≤ 32 所以两者同批；若把 <code>token_budget</code> 调到小于 22，req_1 的 prefill 就会被卡住（长 prompt 阻塞，正是 Lesson 15 chunked prefill 要解决的）。</li>
+      </ul>
+    </div>
+    <div class="callout note">
+      <div class="callout-title">代码映射</div>
+      这张表就是 <code>LifecycleSimulator.run()</code> 主 <code>while</code> 循环的逐行展开：准入段（步骤 1）→
+      调度段的 <code>cost = req.prompt_len</code>（prefill）/ <code>cost = 1</code>（decode）与 <code>budget</code> 检查（步骤 2）→
+      <code>_ensure_blocks()</code>（用 <code>_blocks_needed = ⌈length/block_size⌉</code> 调 <code>_BlockPool.allocate()</code>）→
+      收尾段对 <code>req.done</code> 的检查与 <code>pool.release()</code>（步骤 3）。
+    </div>
+
+    <!-- ============ 数据流 & 调用图 ============ -->
+    <h2 id="dataflow">Tensor Shape、数据流与代码调用图 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>虽然 Lesson 0 用的是「玩具下一个 token」而非真实模型，但<strong>数据流与 shape 是真实的</strong>——
+       <code>--trace</code> 打印的 <code>input_ids_shape</code> / <code>logits_shape</code> 就是真实 vLLM 里同名张量的形状。
+       每个 logits 张量都是 3 维 <code>[batch, seq, vocab]</code>，逐符号解释：</p>
+    <ul style="margin:.3em 0">
+      <li><code>batch</code>：这一次 forward 里塞了几条序列。本课把每个请求单独喂，故恒为 <strong>1</strong>。</li>
+      <li><code>seq</code>：这一次喂进去的 token 个数。<strong>prefill = 整段 prompt 长度</strong>；<strong>decode = 1</strong>（只喂刚生成的那 1 个新 token）。</li>
+      <li><code>vocab</code>：词表大小 <strong>259</strong>（= 256 个字节 + BOS/EOS/PAD 三个特殊 token，Lesson 1 讲来历）。它是「对每个可能的下一 token 打的分」的长度。</li>
+    </ul>
+    <table>
+      <thead><tr><th>阶段</th><th>输入 <code>input_ids</code></th><th>输出 <code>logits</code></th><th>代入 req_0 的具体数字</th></tr></thead>
+      <tbody>
+        <tr><td>Prefill</td><td><code>[1, prompt_len]</code></td><td><code>[1, prompt_len, 259]</code></td><td><code>[1, 18]</code> → <code>[1, 18, 259]</code></td></tr>
+        <tr><td>Decode</td><td><code>[1, 1]</code></td><td><code>[1, 1, 259]</code></td><td><code>[1, 1]</code> → <code>[1, 1, 259]</code></td></tr>
+      </tbody>
+    </table>
+    <p>注意一个反直觉点：prefill 明明喂了 18 个 token、也算出了 <code>[1, 18, 259]</code> 这么大一坨 logits，
+       但<strong>只有最后一个位置（第 18 个）的那 259 个分数被用来选首 token</strong>，前 17 个位置的 logits 在推理时并不需要。
+       decode 则天生只有 1 个位置，取它即可。这解释了为什么 decode 的输出永远是 <code>[1, 1, 259]</code>。</p>
+    <pre><code>请求到达 → tokenize → [调度器] → [KV block 分配] → [ModelRunner]
+   WAITING        encode()     schedule()      allocate()       forward()
+       └──────────────────────────► RUNNING(prefill→decode) ──► FINISHED(free)</code></pre>
+    <div class="callout note">
+      <div class="callout-title">动画动作 ⟶ 对应代码</div>
+      <ul style="margin:.3em 0">
+        <li>「为 req_0 分配 physical block 3」 ⟶ <code>_BlockPool.allocate()</code>（预览 <code>BlockAllocator.allocate()</code>）</li>
+        <li>「prefill 一次吃掉整段 prompt」 ⟶ <code>LifecycleSimulator.run()</code> 中 <code>phase == "prefill"</code> 分支</li>
+        <li>「结束并归还 block」 ⟶ <code>pool.release()</code> + 断言 <code>pool.in_use == 0</code>（无泄漏）</li>
+      </ul>
+    </div>
+
+    <!-- ============ 常见误解 ============ -->
+    <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>这几条是初学者对「请求生命周期」最容易形成的错误心智模型。每条都能用本课的 trace 直接证伪：</p>
+    <table>
+      <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>「decode 每步要把整段上下文重新喂进模型。」</td>
+          <td>trace 里 decode 的 <code>input_ids_shape</code> 恒为 <code>[1, 1]</code>——<strong>只喂 1 个新 token</strong>。
+              历史内容靠 KV Cache（Lesson 7）保留，<code>cache_len</code> 那个字段就是「已缓存的历史长度」，它逐步增长（18→19→20…），而输入长度不变。</td>
+        </tr>
+        <tr>
+          <td>「prefill 和 decode 是两段不同的模型 / 两份不同的前向代码。」</td>
+          <td>是<strong>同一个 forward</strong>，只是喂进去的 <code>seq</code> 长度不同（N vs 1）。所以它们的 logits shape 形状规律一致（<code>[1, seq, 259]</code>），走的是同一条代码路径。</td>
+        </tr>
+        <tr>
+          <td>「请求得像排队一样，前一个彻底结束后一个才能开始。」</td>
+          <td>连续批处理允许请求<strong>随时加入正在运行的 batch</strong>。trace 第 2 迭代里 req_0 正在 decode、req_1 才刚 prefill，两者同批推进——这正是把总耗时从 10 步压到 6 步的原因。</td>
+        </tr>
+        <tr>
+          <td>「KV block 只是逻辑概念，不会真的用完。」</td>
+          <td>物理 block 数量是有限的（本课 <code>num_blocks = 16</code>）。<code>_BlockPool.allocate()</code> 在 free list 空时会抛 <code>MemoryError</code>（模拟 OOM）——真实系统这时才需要抢占 / 换出。</td>
+        </tr>
+        <tr>
+          <td>「<code>block_size = 8</code> 意味着一个请求最多只能有 8 个 token。」</td>
+          <td>block_size 是<strong>每个 block 能装多少 token</strong>，不是请求上限。装不下就再要一个 block：trace 第 5 迭代里 req_1 上下文涨到 25，就临时申请了第 4 个 block（<code>⌈25/8⌉=4</code>）。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ============ Build ============ -->
+    <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+    <p>按顺序执行这 4 个透明的小步骤。每一步都有明确的成功标志。</p>
+
+    <h3>步骤 1/4 · 环境与离线自检</h3>
+    <pre class="cmd"><code>python3 course.py doctor --offline</code></pre>
+    <p>它做什么：检查 Python 版本、平台、核心模块可导入性、<code>outputs/</code> 可写，并运行离线自检。
+       <strong>成功标志：</strong>结尾出现 <code>结论：环境就绪 ✓</code>。它不修改任何文件。</p>
+
+    <h3>步骤 2/4 · 启动课程网页（可选，你现在可能正在用它）</h3>
+    <pre class="cmd"><code>python3 course.py serve</code></pre>
+    <p>它等价于 <code>python3 -m http.server 8000 --bind 127.0.0.1 --directory docs</code>，仅本机、无需网络。
+       <strong>成功标志：</strong>终端打印出 <code>http://127.0.0.1:8000/index.html</code>。按 <kbd>Ctrl</kbd>+<kbd>C</kbd> 停止。</p>
+
+    <h3>步骤 3/4 · 运行第一个机制模拟器</h3>
+    <pre class="cmd"><code>python3 course.py run 0</code></pre>
+    <p>运行前它会先打印<strong>等价的底层命令</strong>、输入、输出、以及「是否修改源代码（否）」。
+       预期输出（节选）：</p>
+    <pre><code>================================================================
+  Lesson 0 · 请求生命周期机制模拟器 —— 运行成功 ✓
+================================================================
+  请求数 (requests)       : 2
+  总迭代数 (iterations)   : 6
+  KV block 峰值占用       : 6 / 16  (block_size=8)
+----------------------------------------------------------------
+    req_0  state=FINISHED  prompt_len=18  generated=6  首token@iter=1
+    req_1  state=FINISHED  prompt_len=22  generated=4  首token@iter=2</code></pre>
+    <p>想看每一步的完整状态？加 <code>--trace</code>：</p>
+    <pre class="cmd"><code>python3 course.py run 0 --trace</code></pre>
+
+    <h3>步骤 4/4 · 跑通测试，获得第一次成功</h3>
+    <pre class="cmd"><code>python3 course.py check 0</code></pre>
+    <div class="callout tip">
+      <div class="callout-title">成功反馈应包含实际证据</div>
+      <ul style="margin:.3em 0">
+        <li>✓ 请求状态从 WAITING 走到 FINISHED</li>
+        <li>✓ prefill 一次处理整段 prompt，decode 每步只处理 1 个 token</li>
+        <li>✓ 结束后 KV block 全部归还（无泄漏）</li>
+      </ul>
+      通过后 <code>course.py</code> 会更新你的进度，并提示下一课。
+    </div>
+
+    <!-- ============ 测试 ============ -->
+    <h2 id="test">测试与验证 <span class="phase-badge phase-build">Build</span></h2>
+    <p>你可以随时绕过 <code>course.py</code> 直接运行底层命令：</p>
+    <pre class="cmd"><code>python3 -m unittest tests.lesson_00.test_intro -v
+python3 -m unittest discover -s tests        # 运行全部测试</code></pre>
+
+    <!-- ============ 提示 ============ -->
+    <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>
+      先 <code>python3 course.py doctor --offline</code> 确认环境，再 <code>python3 course.py run 0</code>。本课不需要改任何代码。</details>
+    <details><summary>提示 Level 2 · 具体位置</summary>
+      主循环在 <code>mini_vllm/simulator/text_pipeline.py</code> 的 <code>LifecycleSimulator.run()</code>：把每个请求从 WAITING 推进到 FINISHED，先 prefill 一次，再逐 token decode。</details>
+    <details><summary>提示 Level 3 · 机制</summary>
+      盯住三个数字：每步 <code>scheduled_tokens</code>（prefill=整段 prompt，decode=1）、请求 <code>state</code>、累计 <code>generated</code>。加 <code>--trace</code> 看完整状态。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>
+      本课只要求「跑通并读懂输出」。若 <code>check 0</code> 失败，多半是没在 <code>build-mini-vllm/</code> 目录下运行，或用了错误的 Python 解释器。</details>
+
+    <!-- ============ 常见错误 ============ -->
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table>
+      <thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead>
+      <tbody>
+        <tr><td><code>找不到配置文件</code></td><td>用 <code>--config</code> 传了相对路径,但 cwd 不对</td><td>用 <code>python3 course.py run 0</code>（它自动定位配置）,或传绝对路径</td></tr>
+        <tr><td><code>ModuleNotFoundError: mini_vllm</code></td><td>直接 <code>python3 xxx.py</code> 且未设 PYTHONPATH</td><td>优先用 <code>python3 course.py …</code> 或 <code>python3 -m experiments.…</code>（二者都已自动把项目根加入 sys.path,从任意目录都能跑）</td></tr>
+        <tr><td>网页动画不动</td><td>浏览器禁用了 JS</td><td>开启 JS；本站 JS 全部本地、无外链</td></tr>
+        <tr><td>端口被占用</td><td>8000 已被使用</td><td><code>python3 course.py serve --port 8001</code></td></tr>
+      </tbody>
+    </table>
+
+    <!-- ============ Trace & Inspector ============ -->
+    <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <p>可观测性是本课程的一等公民。除了 <code>--trace</code>，还有独立的 Inspector：</p>
+    <pre class="cmd"><code>python3 course.py inspect scheduler   # 每次迭代的调度决策
+python3 course.py inspect blocks      # 逐迭代 KV block 占用/空闲（含占用条）
+python3 course.py inspect kv-cache    # 每个请求的上下文长度增长与 block 需求</code></pre>
+    <p>它们直接读取同一个 <code>LifecycleSimulator</code> 的状态——网页动画、Trace、Inspector 三者一致。</p>
+
+    <!-- ============ Challenge ============ -->
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question">
+      <ol style="margin:.3em 0">
+        <li>如果把 <code>token_budget</code> 调到比某个 prompt 还小，会发生什么？（提示：想想「长 prompt 阻塞」，这正是 Lesson 15 chunked prefill 要解决的问题。）</li>
+        <li>如果 <code>num_blocks</code> 太小，运行会怎样？用 <code>python3 course.py run 0</code> 改配置试试，观察是否触发模拟 OOM。</li>
+        <li>为什么「结束后 <code>blocks_in_use</code> 必须归零」如此重要？如果不归零，长时间运行会发生什么？</li>
+      </ol>
+    </div>
+
+    <!-- ============ 真实 vLLM 映射 ============ -->
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table>
+      <thead><tr><th>教学实现</th><th>真实 vLLM 对应概念</th><th>相同点</th><th>简化点 / 为何生产更复杂</th></tr></thead>
+      <tbody>
+        <tr><td><code>SimRequest</code> / <code>RequestState</code></td><td><code>Request</code> / <code>SequenceStatus</code></td><td>状态机与迭代级调度思想一致</td><td>真实系统还有抢占、换出、优先级、超时</td></tr>
+        <tr><td><code>LifecycleSimulator.run()</code></td><td>engine loop + <code>Scheduler.schedule()</code></td><td>「先调度、再运行、再回收」的循环</td><td>真实调度考虑 KV 容量、chunked prefill、prefix cache 命中</td></tr>
+        <tr><td><code>_BlockPool</code></td><td><code>BlockSpaceManager</code> / block allocator</td><td>物理 block 复用、结束即释放</td><td>真实实现有 block table、copy-on-write、前缀共享、引用计数</td></tr>
+        <tr><td>玩具 <code>next_token_fn</code></td><td>真实 <code>ModelRunner.forward()</code> + 采样</td><td>数据流与 shape 一致</td><td>真实是神经网络前向 + KV Cache + attention kernel</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ============ 总结 ============ -->
+    <h2 id="summary">本节总结 & 唯一推荐的下一步</h2>
+    <ul>
+      <li>推理引擎把请求当作<strong>状态机</strong>：WAITING → RUNNING(prefill→decode) → FINISHED。</li>
+      <li><strong>prefill</strong> 一次处理整段 prompt；<strong>decode</strong> 每步只处理 1 个 token。</li>
+      <li>KV 内存以 <strong>block</strong> 为单位分配，<strong>结束即释放</strong>（无泄漏）。</li>
+      <li>三分工：网页理解、编辑器改码、终端运行——网页不替你运行、不改你的代码。</li>
+    </ul>
+    <p style="margin-top:1em">
+      <button class="btn btn-accent" type="button" data-mark-lesson="0">✅ 标记本课已学</button>
+      &nbsp; <a class="btn" href="lesson_01.html">下一步：Lesson 1 · 文本如何变成 Token →</a>
+    </p>
+    <div class="callout note" style="margin-top:1em">
+      <div class="callout-title">唯一推荐的下一步</div>
+      在终端运行 <code>python3 course.py check 0</code> 获得第一次成功反馈；然后
+      <code>python3 course.py where-am-i</code> 会带你进入 Lesson 1。
+    </div>
+
+    <div class="footer">Build Your Own Mini-vLLM · Lesson 0 · 完全离线 · 无第三方依赖</div>
+  </main>
+</div>
+
+<script src="../js/course.js"></script>
+<script src="../js/anim/request_lifecycle.js"></script>
+<script>
+  // 与 configs/lesson_00_quick.json + assets/workloads/lesson_00.json 保持一致，
+  // 这样动画、手算表、`course.py run 0 --trace`、`inspect scheduler` 四者完全对得上。
+  RequestLifecycleAnim.mount("#anim-lifecycle", {
+    blockSize: 8, numBlocks: 16, maxNumSeqs: 2, tokenBudget: 32,
+    requests: [
+      { id: "req_0", prompt: "Hello, mini-vLLM!", maxNew: 6, arrival: 0 },
+      { id: "req_1", prompt: "你好，推理引擎",     maxNew: 4, arrival: 1 }
+    ]
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+{"_comment":"Lesson 16：共享 system 前缀的多个请求，演示前缀命中。",
+ "block_size":4,"max_new_tokens":6,
+ "shared_prefix":"System: you are a helpful assistant. ",
+ "tails":["Question one?","Question two?","Question three?"]}

@@ -1,0 +1,7 @@
+{
+  "_comment": "Lesson 1 Quick 配置。add_bos/add_eos 控制是否加特殊 token；pad_side 控制 padding 在左还是右。",
+  "add_bos": true,
+  "add_eos": false,
+  "pad_side": "right",
+  "workload": "assets/workloads/lesson_01.json"
+}

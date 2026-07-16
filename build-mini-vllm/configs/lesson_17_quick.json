@@ -1,0 +1,5 @@
+{"_comment":"Lesson 17：混合 workload，端到端引擎 + 性能报告。",
+ "block_size":8,"num_blocks":128,"max_num_seqs":3,"max_num_batched_tokens":32,"policy":"balanced","prefix_cache":true,
+ "requests":[{"id":"chat1","prompt":"System: assistant. Hi","max_new_tokens":6,"arrival":0},
+             {"id":"chat2","prompt":"System: assistant. Hello","max_new_tokens":8,"arrival":1},
+             {"id":"long","prompt":"The quick brown fox jumps over the lazy dog","max_new_tokens":5,"arrival":2}]}

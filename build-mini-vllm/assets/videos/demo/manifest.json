@@ -1,0 +1,36 @@
+{
+  "fps": 2.0,
+  "num_frames": 6,
+  "frames": [
+    {
+      "file": "frame_000.json",
+      "frame_index": 0,
+      "timestamp": 0.0
+    },
+    {
+      "file": "frame_001.json",
+      "frame_index": 1,
+      "timestamp": 0.5
+    },
+    {
+      "file": "frame_002.json",
+      "frame_index": 2,
+      "timestamp": 1.0
+    },
+    {
+      "file": "frame_003.json",
+      "frame_index": 3,
+      "timestamp": 1.5
+    },
+    {
+      "file": "frame_004.json",
+      "frame_index": 4,
+      "timestamp": 2.0
+    },
+    {
+      "file": "frame_005.json",
+      "frame_index": 5,
+      "timestamp": 2.5
+    }
+  ]
+}

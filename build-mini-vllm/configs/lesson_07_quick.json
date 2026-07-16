@@ -1,0 +1,6 @@
+{
+  "_comment": "Lesson 07：KV Cache 正确性对齐与内存公式。max_new_tokens=8 与课文示例(生成8→14 token→896 个数)一致。",
+  "checkpoint": "assets/checkpoints/tiny_text.json",
+  "prompt": "Hello",
+  "max_new_tokens": 8
+}

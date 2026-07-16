@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 8 · Prefill 与 Decode — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="prefill/decode、TTFT/TPOT/ITL、compute-bound 与 memory-bound。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 8</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<div class="layout">
+  <nav class="toc" aria-label="本页目录">
+    <h2>本页目录</h2>
+    <a href="#goal">本节目标</a><a href="#why">为什么需要</a><a href="#problem">先看问题</a>
+    <a href="#anim">交互式动画</a><a href="#intuition">直觉类比</a><a href="#metrics">四个指标</a>
+    <a href="#worked">小规模手算</a><a href="#bound">两种瓶颈</a><a href="#misconception">常见误解</a>
+    <a href="#code">代码映射</a><a href="#build">动手运行</a><a href="#hints">四级提示</a>
+    <a href="#trace">Trace & Inspector</a><a href="#challenge">因果理解</a>
+    <a href="#vllm">真实 vLLM 映射</a><a href="#summary">总结 & 下一步</a>
+  </nav>
+  <main class="content" id="main">
+    <h1>Lesson 8 · Prefill 与 Decode <span class="phase-badge phase-learn">Learn</span></h1>
+    <p>一次生成分两段：<strong>prefill</strong>（一次吃完 prompt，产出首 token）与
+       <strong>decode</strong>（逐 token 生成）。它们的性能画像截然不同——这决定了后面怎么调度。</p>
+
+    <section id="goal"><div class="lesson-header"><dl>
+      <dt>当前目标</dt><dd>区分 prefill/decode，度量 TTFT/TPOT/ITL，理解 prompt-heavy 与 decode-heavy、compute-bound 与 memory-bound。</dd>
+      <dt>需要阅读的文件</dt><dd><code>mini_vllm/engine/generate.py</code></dd>
+      <dt>需要修改的文件</dt><dd><code>mini_vllm/engine/generate.py</code></dd>
+      <dt>需要关注的类或函数</dt><dd><code>GenResult.ttft</code>、<code>GenResult.tpot</code>、<code>generate_cached()</code></dd>
+      <dt>实验命令</dt><dd><code>python3 course.py run 8</code></dd>
+      <dt>测试命令</dt><dd><code>python3 course.py check 8</code></dd>
+      <dt>本课依赖</dt><dd>Lesson 7</dd>
+      <dt>完成后下一步</dt><dd>Lesson 9 · Static Batching（Phase 3 后续增量交付）</dd>
+    </dl></div></section>
+
+    <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>上一课（<a href="lesson_07.html">Lesson 7</a>）我们让 decode「只喂 1 个 token」。可这一步之前，
+       模型必须先把整段 prompt 读进去——这就是 <strong>prefill</strong>。一次生成因此天然分成两段：
+       <strong>先一口气吃完 prompt（prefill，产出第一个 token）</strong>，
+       <strong>再一个一个往外吐（decode）</strong>。这两段的「性格」完全不同，用一个「平均延迟」去描述它，
+       就像用「平均体温」描述一个上午发烧、下午退烧的人——数字对了，判断全错。</p>
+    <p>跑 <code>run 8</code>，会看到类似下表的输出（毫秒是<strong>墙钟时间，每次运行、每台机器都不同</strong>，
+       下面是某次的示例数量级，你的机器上会有出入）：</p>
+    <table>
+      <thead><tr><th>场景</th><th>prompt_len</th><th>TTFT（首 token，示例）</th><th>TPOT（每 decode token，示例）</th></tr></thead>
+      <tbody>
+        <tr><td>prompt-heavy（长 prompt）</td><td>56</td><td><strong>~40 ms</strong></td><td>~2.4 ms</td></tr>
+        <tr><td>decode-heavy（短 prompt）</td><td>3</td><td><strong>~3 ms</strong></td><td>~1.9 ms</td></tr>
+      </tbody>
+    </table>
+    <p>盯住两列：prompt 从 3 涨到 56（约 19 倍），<strong>TTFT 跟着大约从 3 ms 涨到 40 ms（同数量级的十几倍）</strong>；
+       而 TPOT 几乎没动。这说明——<em>prompt 的长短几乎只影响首 token，之后逐字吐的速度基本恒定</em>。
+       如果你不把这两段拆开看，就永远解释不了「为什么同样是慢，有的请求是开头卡、有的是全程慢」，
+       更谈不上后面的批处理、调度、chunked prefill——它们本质都是在 TTFT 与吞吐之间做权衡。
+       所以 TTFT / TPOT / ITL 是整个推理服务的<strong>通用语言</strong>，这一课就是把这门语言学扎实。</p>
+
+    <h2 id="problem">先看问题：一次生成的「工作量」长什么样 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>本课 tokenizer 是 <strong>byte-level</strong>：每个 UTF-8 字节 = 1 个 token id（0..255），
+       所以中文一个字 = 3 字节 = 3 个 token。取 prompt <code>"你好"</code>：
+       <code>2 字 × 3 字节 = 6</code> 个 token，再加句首 BOS 共 <strong>7 个 token</strong>。假设要生成 4 个新 token。
+       用 <a href="lesson_07.html">KV Cache</a> 路径，这次生成被拆成 5 次 <code>forward</code> 调用：</p>
+    <table>
+      <thead><tr><th>阶段</th><th>forward 次数</th><th>每次喂进的 token 数 <code>input_len</code></th><th>处理的 token 数</th><th>产出</th></tr></thead>
+      <tbody>
+        <tr><td><span style="color:var(--prefill);font-weight:600">prefill</span></td><td>1 次</td><td><strong>7</strong>（整段 prompt）</td><td>7</td><td>第 1 个 token</td></tr>
+        <tr><td><span style="color:var(--decode);font-weight:600">decode</span></td><td>3 次</td><td>1 / 次</td><td>1 / 次</td><td>第 2、3、4 个 token</td></tr>
+      </tbody>
+    </table>
+    <p>关键观察：<strong>第一次 forward 就处理了 7 个 token，占全部处理量（7+3=10）的 70%，而且它全部发生在用户看到任何输出<em>之前</em></strong>。
+       这块「又宽又重、只跑一次」的工作，就是 TTFT 的来源；后面「又窄又轻、跑很多次」的工作，决定逐字吐字的手感（TPOT/ITL）。
+       一次生成的工作量画像，天生就是「1 个胖块 + N 个瘦块」。</p>
+    <div class="callout note" style="border-left-color:var(--prefill)">
+      <div class="callout-title">工作量画像：1 个胖块 + N 个瘦块（prompt=7、生成 4）</div>
+      <div style="display:flex;align-items:flex-end;gap:6px;margin-top:8px;font-family:var(--mono);font-size:.72rem">
+        <div style="text-align:center">
+          <div style="width:140px;height:56px;background:color-mix(in srgb,var(--prefill) 30%,var(--bg));border:2px solid var(--prefill);border-radius:6px;display:flex;align-items:center;justify-content:center">prefill · 7 token</div>
+          <div style="color:var(--fg-dim);margin-top:3px">1 次 forward</div>
+        </div>
+        <div style="text-align:center">
+          <div style="width:26px;height:20px;background:color-mix(in srgb,var(--decode) 30%,var(--bg));border:2px solid var(--decode);border-radius:4px"></div>
+          <div style="color:var(--fg-dim);margin-top:3px">1</div>
+        </div>
+        <div style="text-align:center">
+          <div style="width:26px;height:20px;background:color-mix(in srgb,var(--decode) 30%,var(--bg));border:2px solid var(--decode);border-radius:4px"></div>
+          <div style="color:var(--fg-dim);margin-top:3px">1</div>
+        </div>
+        <div style="text-align:center">
+          <div style="width:26px;height:20px;background:color-mix(in srgb,var(--decode) 30%,var(--bg));border:2px solid var(--decode);border-radius:4px"></div>
+          <div style="color:var(--fg-dim);margin-top:3px">1</div>
+        </div>
+      </div>
+      <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+        盒子宽度 ≈ 该次 forward 的处理量。紫色胖块（prefill）一次干完 7 个 token 的活；青色瘦块（decode）每次只干 1 个。
+        prompt 越长，紫块越宽 → TTFT 越大；青块永远那么窄 → TPOT 基本不变。</div>
+    </div>
+
+    <h2 id="anim">交互式动画：Prefill / Decode Timeline <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>看一条请求的时间线：一个宽的 prefill 块 + 若干窄的 decode 块。
+       镜像 Lesson 8 实验（用处理的 token 数作为成本代理）。</p>
+    <div class="anim" id="anim-pd">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：
+        <small>一次请求的时间线什么样？prefill 与 decode 成本差别在哪？TTFT/TPOT 指什么？</small></div></div>
+      <div class="anim-stage" style="min-height:110px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+    <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="callout tip"><div class="callout-title">一句话解释</div>
+      <strong>prefill</strong> = 把整段 prompt 一次读进模型、算好所有历史 K/V 并产出第 1 个 token；
+      <strong>decode</strong> = 之后每次只算 1 个新 token。<strong>TTFT</strong> 量的是 prefill 有多快，
+      <strong>TPOT / ITL</strong> 量的是 decode 逐字吐得有多稳、多快。</div>
+    <p><strong>类比：餐厅上菜。</strong> 你落座点了一大桌菜——厨房要先<strong>备料、开火</strong>（prefill），
+       这段时间你干等着，直到<strong>第一道菜端上桌</strong>（TTFT）。之后菜就一道一道地上
+       （decode，每道之间的间隔就是 ITL），上菜的平均节奏就是 TPOT。点得越多（prompt 越长），
+       备料越久 → 第一道菜来得越慢；但一旦开始上菜，出菜节奏跟你点了多少关系不大。</p>
+    <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+      备料只做一次，之后端菜是「取现成的」——这点很像。但别忘了：decode 每上一道菜，
+      都要<strong>回头翻一遍前面所有菜的记录</strong>（读整块 KV 缓存），序列越长这一步读得越多。
+      所以「上菜节奏恒定」只在上下文不太长时成立；真正长文本里，后期 decode 会因 KV 越读越多而变慢——
+      这正是 <em>decode 是 memory-bound</em> 的根源（见下文「两种瓶颈」）。</div>
+
+    <h2 id="metrics">四个指标：精确定义 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>把一次生成的时间线记成一串时刻。设请求在 <code>t₀</code> 到达，第 <code>k</code> 个 token 在时刻
+       <code>t_k</code> 产出（<code>k = 1,2,…,N</code>，本例 <code>N</code> = prompt 后新生成的 token 总数）。四个指标逐符号如下：</p>
+    <table>
+      <thead><tr><th>指标</th><th>公式（逐符号）</th><th>符号含义</th><th>单位 / shape</th></tr></thead>
+      <tbody>
+        <tr><td><strong>TTFT</strong><br>Time To First Token</td><td><code>t₁ − t₀</code></td><td><code>t₁</code>=第 1 个 token 产出时刻，<code>t₀</code>=请求到达时刻。≈ prefill 一次 forward 的耗时。</td><td>1 个标量（ms）</td></tr>
+        <tr><td><strong>ITL</strong><br>Inter-Token Latency</td><td><code>ITL_k = t_k − t_{k−1}</code><br>（<code>k ≥ 2</code>）</td><td>相邻两个输出 token 的间隔，即每个 decode 步的耗时。</td><td>长度 <code>N−1</code> 的<strong>数组</strong></td></tr>
+        <tr><td><strong>TPOT</strong><br>Time Per Output Token</td><td><code>(1/(N−1)) · Σ ITL_k</code><br>= <code>(t_N − t₁)/(N−1)</code></td><td>所有 decode 步耗时的<strong>平均</strong>（ITL 数组的均值）。</td><td>1 个标量（ms）</td></tr>
+        <tr><td><strong>Throughput</strong></td><td><code>N / (t_N − t₀)</code></td><td>单位时间产出的 token 数（多请求时看总 token / 总时间）。</td><td>token/s</td></tr>
+      </tbody>
+    </table>
+    <p>三者的关系一步就能推出——<strong>端到端延迟 = TTFT + 所有 ITL 之和 = TTFT + (N−1)·TPOT</strong>。
+       所以「首 token 快不快」看 TTFT，「后面吐字顺不顺」看 TPOT，两者共同决定总时长。</p>
+    <div class="callout tip"><div class="callout-title">TTFT vs TPOT vs ITL：一句话分清</div>
+      <strong>ITL</strong> 是逐步的原始序列（数组），<strong>TPOT</strong> 是它的平均（标量），
+      <strong>TTFT</strong> 单指第一个（prefill 那一下）。三者量的是同一条时间线上的不同段落。</div>
+
+    <h2 id="worked">小规模手算：从时间线算出四个指标 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>沿用上面的例子：prompt <code>"你好"</code>（7 个 token）、生成 4 个新 token。假设我们用
+       <code>time.perf_counter()</code> 量到每一步的耗时 <code>dt</code> 如下（prefill 是 step 0）：</p>
+    <table>
+      <thead><tr><th>step</th><th>phase</th><th>input_len</th><th>dt（本步耗时）</th><th>这是什么指标</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td><span style="color:var(--prefill);font-weight:600">prefill</span></td><td>7</td><td><strong>6.0 ms</strong></td><td>→ <strong>TTFT = 6.0</strong></td></tr>
+        <tr><td>1</td><td><span style="color:var(--decode);font-weight:600">decode</span></td><td>1</td><td>2.1 ms</td><td>ITL₂ = 2.1</td></tr>
+        <tr><td>2</td><td><span style="color:var(--decode);font-weight:600">decode</span></td><td>1</td><td>1.9 ms</td><td>ITL₃ = 1.9</td></tr>
+        <tr><td>3</td><td><span style="color:var(--decode);font-weight:600">decode</span></td><td>1</td><td>2.0 ms</td><td>ITL₄ = 2.0</td></tr>
+      </tbody>
+    </table>
+    <p>一步步套公式：</p>
+    <ul>
+      <li><strong>TTFT</strong> = step 0 的 dt = <code>6.0 ms</code>。（就是 prefill 那一下）</li>
+      <li><strong>ITL 数组</strong> = decode 各步 dt = <code>[2.1, 1.9, 2.0]</code>，长度 <code>N−1 = 3</code>。</li>
+      <li><strong>TPOT</strong> = <code>(2.1 + 1.9 + 2.0) / 3 = 2.0 ms</code>。</li>
+      <li><strong>端到端延迟</strong> = <code>6.0 + 2.1 + 1.9 + 2.0 = 12.0 ms</code>，也等于 <code>TTFT + (N−1)·TPOT = 6.0 + 3×2.0</code>。</li>
+      <li><strong>Throughput</strong> = <code>4 token / 12.0 ms ≈ 333 token/s</code>。</li>
+    </ul>
+    <div class="callout note" style="border-left-color:var(--decode)">
+      <div class="callout-title">时间线执行图（把上表画成一条线）</div>
+      <div style="display:flex;align-items:flex-end;gap:4px;margin-top:8px;font-family:var(--mono);font-size:.72rem">
+        <div style="text-align:center">
+          <div style="width:120px;height:44px;background:color-mix(in srgb,var(--prefill) 30%,var(--bg));border:2px solid var(--prefill);border-radius:6px;display:flex;align-items:center;justify-content:center">prefill 6.0ms</div>
+        </div>
+        <div style="text-align:center"><div style="width:42px;height:44px;background:color-mix(in srgb,var(--decode) 30%,var(--bg));border:2px solid var(--decode);border-radius:6px;display:flex;align-items:center;justify-content:center">2.1</div></div>
+        <div style="text-align:center"><div style="width:38px;height:44px;background:color-mix(in srgb,var(--decode) 30%,var(--bg));border:2px solid var(--decode);border-radius:6px;display:flex;align-items:center;justify-content:center">1.9</div></div>
+        <div style="text-align:center"><div style="width:40px;height:44px;background:color-mix(in srgb,var(--decode) 30%,var(--bg));border:2px solid var(--decode);border-radius:6px;display:flex;align-items:center;justify-content:center">2.0</div></div>
+      </div>
+      <div style="display:flex;gap:4px;font-family:var(--mono);font-size:.68rem;color:var(--fg-dim);margin-top:4px">
+        <div style="width:120px;text-align:center">└ TTFT ┘</div>
+        <div style="width:128px;text-align:center">└──── ITL 序列（均值 = TPOT）────┘</div>
+      </div>
+      <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+        产出第 1 个 token 前的整段紫色 = TTFT；之后每个青块的宽度 = 一个 ITL；青块宽度的平均 = TPOT。</div>
+    </div>
+
+    <h2 id="bound">两种瓶颈：compute-bound 与 memory-bound <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>为什么 prefill 和 decode 快慢的「卡点」不一样？关键看每一步里
+       <strong>「搬进来多少数据」对「做了多少次乘加」</strong> 的比值（业界叫<em>算术强度</em>，arithmetic intensity）。
+       模型权重（比如本课 FFN 是 SwiGLU，含 gate/up/down <strong>三个</strong> <code>32×64 = 2048</code> 参数矩阵）无论处理几个 token，都得<strong>完整读一遍</strong>。
+       区别在于：读进来之后，这些权重被用来算了几个 token。</p>
+    <table>
+      <thead><tr><th></th><th>prefill（7 个 token）</th><th>decode（1 个 token）</th></tr></thead>
+      <tbody>
+        <tr><td>一次 forward 处理的 token</td><td><strong>7</strong></td><td><strong>1</strong></td></tr>
+        <tr><td>FFN 权重（2048 参数/矩阵）读入次数</td><td>1 次，被 <strong>7</strong> 个 token 复用</td><td>1 次，只服务 <strong>1</strong> 个 token</td></tr>
+        <tr><td>每读一遍权重摊到的算力</td><td>高（÷7 更划算）</td><td>低（只算 1 个，权重白读大半）</td></tr>
+        <tr><td>还要额外读的东西</td><td>—</td><td>整块 <strong>KV 缓存</strong>（每层每 token 32 个数，随上下文线性增长）</td></tr>
+        <tr><td>典型卡点</td><td><strong>算力</strong>（compute-bound）</td><td><strong>内存带宽</strong>（memory-bound）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout note"><div class="callout-title">一句话记住</div>
+      <strong>prefill</strong> 把一堆 token 塞进一次矩阵乘，芯片的乘加单元被喂得很饱 → 卡在<em>算力</em>（compute-bound）；
+      <strong>decode</strong> 每步只算 1 个 token，却要把整块 KV 缓存和全部权重从显存搬进来，
+      乘加单元大部分时间在<em>等数据</em> → 卡在<em>内存带宽</em>（memory-bound）。这就是为什么给 decode 堆更多算力几乎没用，
+      而<strong>把多条 decode 请求拼成一个 batch</strong>（让一次搬进来的权重同时服务多个 token）才是提升吞吐的正道——正是后续批处理课的动机。</div>
+    <div class="callout warn"><div class="callout-title">重要：本课的毫秒数是「玩具计时」，不代表 GPU 行为</div>
+      compute-bound / memory-bound 是<strong>真实世界的正确框架</strong>；但本课跑在<strong>纯 Python + CPU</strong> 上,
+      <code>run 8</code> 打印的那几毫秒只是 Python 循环的开销——它<strong>能证明的只是</strong>「prefill 处理的 token 比 decode 多得多,所以 TTFT 明显大于 TPOT」。
+      它<strong>无法体现</strong>真实 GPU 上「decode 受内存带宽约束」这件事(纯 Python 没有显存搬运、没有 kernel、没有带宽瓶颈)。
+      所以请把这些数字当作「token 数量差异的直观展示」,而不是「decode 是 memory-bound 的实测证据」——后者需要在真实 GPU 上用 profiler 才能看到。</div>
+
+    <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+    <table>
+      <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+      <tbody>
+        <tr><td>「TTFT 和 TPOT 都会随 prompt 变长」</td><td>只有 <strong>TTFT</strong> 随 prompt 变长（prefill 要处理更多 token）；<strong>TPOT</strong> 基本不变——decode 每步永远只处理 1 个 token。看 <code>run 8</code>：prompt 从 3→56，TTFT 3→40 ms，TPOT 却几乎不动。</td></tr>
+        <tr><td>「decode 慢是因为算力不够，加卡/加算力就好」</td><td>decode 是 <strong>memory-bound</strong>：乘加单元在等 KV 缓存和权重搬进来，算力大多闲着。堆算力无用，<strong>攒 batch 提高数据复用</strong>才有效。</td></tr>
+        <tr><td>「TPOT 就是 ITL」</td><td>ITL 是<strong>逐步的数组</strong>（每个 decode 步一个值），TPOT 是这个数组的<strong>平均标量</strong>。长上下文里 ITL 会随 KV 增大而缓慢上升，TPOT 只是把它们抹平成一个数。</td></tr>
+        <tr><td>「prompt 长只是自己多等会儿，不影响别人」</td><td>一个超长 prompt 的 prefill 会长时间占住计算，<strong>把排在后面的短请求的首 token 也拖慢</strong>（TTFT 被别人的 prefill 卡住）。这正是 chunked prefill（把长 prefill 切块、和 decode 交错）要解决的问题。</td></tr>
+        <tr><td>「吞吐高就等于延迟低」</td><td>两者常常<strong>相互拉扯</strong>：把更多请求塞进一个 batch 能拉高 throughput，但每条请求的 TTFT/TPOT 可能变差。服务端要在两者间按 SLA 取舍。</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>本课的指标全部落在 <code>mini_vllm/engine/generate.py</code> 里。每步都记一条
+       <code>StepRecord</code>（含 <code>phase</code> 和耗时 <code>dt</code>），指标只是对这些记录做聚合：</p>
+    <pre><code># generate_cached()：prefill 记为 step 0（phase="prefill"），耗时进 steps[0].dt
+t0 = time.perf_counter()
+logits = model.forward(list(prompt_ids), list(range(len(prompt_ids))), cache, tracer)
+...
+res.steps.append(StepRecord(0, "prefill", len(prompt_ids), ...))   # ← TTFT 的来源
+
+# 之后每个 decode 步只喂 1 个 token，各自计时
+for step in range(1, max_new_tokens):
+    t0 = time.perf_counter()
+    logits = model.forward([tok], [cur], cache)   # input_len = 1
+    ...
+    res.steps.append(StepRecord(step, "decode", 1, ...))          # ← 每条的 dt 就是一个 ITL</code></pre>
+    <ul>
+      <li><code>GenResult.ttft</code> → 直接返回 <code>steps[0].dt</code>，即 prefill 那一步的耗时。</li>
+      <li><code>GenResult.decode_times</code> → 挑出所有 <code>phase == "decode"</code> 的 <code>dt</code>，就是 <strong>ITL 数组</strong>。</li>
+      <li><code>GenResult.tpot</code> → <code>sum(decode_times)/len(decode_times)</code>，即 ITL 数组的均值。</li>
+      <li><code>generate_cached()</code> → 把「1 次 prefill + N−1 次 decode」的结构真正跑出来：
+          prefill 处理 <code>prompt_len</code> 个 token，decode 每步 <code>input_len=1</code>。这正是前面手算表格的代码版。</li>
+    </ul>
+    <div class="callout tip"><div class="callout-title">对照着看</div>
+      前面「小规模手算」表里的 step / phase / input_len / dt 四列，就是一条条 <code>StepRecord</code>；
+      <code>ttft</code> / <code>tpot</code> 两个 <code>@property</code> 就是把这张表按上面的公式聚合出来。读代码时对着表看，一一对应。</div>
+
+    <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+    <pre class="cmd"><code>python3 course.py run 8            # prompt-heavy vs decode-heavy 的 TTFT/TPOT
+python3 course.py check 8</code></pre>
+    <pre><code>  场景             prompt_len  TTFT(ms)  TPOT(ms) decode步
+  prompt-heavy           56     40.27      2.42      11
+  decode-heavy            3      3.01      1.90      11</code></pre>
+
+    <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>Level 1 · 方向</summary><code>run 8</code> 对比两种场景的 TTFT/TPOT。</details>
+    <details><summary>Level 2 · 位置</summary><code>GenResult.ttft</code>=第一步耗时；<code>tpot</code>=decode 步平均耗时。</details>
+    <details><summary>Level 3 · 机制</summary>prefill 处理量=prompt_len，decode=1/步；prompt 越长 TTFT 越大。</details>
+    <details><summary>Level 4 · 接近答案</summary>prefill=compute-bound，decode=memory-bound；这解释了为何要 chunked prefill（Lesson 15）。</details>
+
+    <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <pre class="cmd"><code>python3 course.py run 8 --trace
+python3 course.py inspect generate --text "The quick brown fox"</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0">
+      <li>一个很长的 prompt 会不会「卡住」后面短请求的首 token？这引出什么优化？（Lesson 15 chunked prefill）</li>
+      <li>要降低 TTFT 该优化 prefill 还是 decode？要提高吞吐呢？</li>
+      <li>为什么 decode 常被说成 memory-bound 而非 compute-bound？</li>
+    </ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody>
+      <tr><td>time.perf_counter 计时</td><td>细粒度 profiler / metrics</td><td>TTFT/TPOT/ITL 定义一致</td><td>真实按 batch 测、含排队时延、分位数</td></tr>
+      <tr><td>处理量作为成本代理</td><td>实际 FLOPs/带宽</td><td>compute/memory-bound 直觉一致</td><td>真实受 kernel、并发、硬件影响</td></tr>
+    </tbody></table>
+
+    <h2 id="summary">本节总结 & 下一步</h2>
+    <ul>
+      <li>prefill 一次处理整段 prompt（→ TTFT，compute-bound）；decode 每步 1 token（→ TPOT/ITL，memory-bound）。</li>
+      <li>prompt 越长 TTFT 越大；decode 速度相对稳定。</li>
+      <li>这些指标是后续批处理与调度的优化目标。</li>
+    </ul>
+    <div class="callout note"><div class="callout-title">Phase 3 后续（增量交付）</div>
+      Lesson 9–18（Static/Continuous Batching、Scheduler、Block Allocator、Paged KV、Chunked Prefill、
+      Prefix Caching、完整引擎与综合挑战）将在下一批次交付。当前引擎核心（模型→生成→KV Cache→prefill/decode）已完整可用、可测试。</div>
+    <p style="margin-top:1em">
+      <button class="btn btn-accent" type="button" data-mark-lesson="8">✅ 标记本课已学</button>
+      &nbsp; <a class="btn" href="../index.html">返回课程首页（Lesson 9 起后续交付）→</a></p>
+    <div class="footer">Build Your Own Mini-vLLM · Lesson 8 · 完全离线 · 无第三方依赖</div>
+  </main>
+</div>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/prefill_decode_timeline.js"></script>
+<script>PrefillDecodeTimeline.mount("#anim-pd", { promptLen: 8, nDecode: 8 });</script>
+</body>
+</html>

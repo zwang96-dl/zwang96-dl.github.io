@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>References · Build Your Own Mini-vLLM</title>
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· References</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>参考资料（References）</h1>
+  <div class="callout warn">
+    <div class="callout-title">重要：仅供延伸阅读，运行时不依赖网络</div>
+    下面是普通参考链接。课程的<strong>运行</strong>（网页、模拟器、tiny model、测试）<strong>完全不依赖</strong>它们，
+    也不会在运行时访问网络。这些链接只在你<em>想深入了解真实 vLLM</em> 时手动打开。
+  </div>
+
+  <h2>真实 vLLM</h2>
+  <ul>
+    <li>vLLM 官方文档：<a href="https://docs.vllm.ai/">https://docs.vllm.ai/</a></li>
+    <li>vLLM GitHub 仓库：<a href="https://github.com/vllm-project/vllm">https://github.com/vllm-project/vllm</a></li>
+    <li>建议阅读的源码路径（见每课末尾的「真实 vLLM 映射」）：
+      <code>vllm/inputs/</code>、<code>vllm/multimodal/</code>、<code>vllm/core/scheduler.py</code>、
+      <code>vllm/core/block_manager*</code>、<code>vllm/worker/model_runner.py</code>、<code>vllm/engine/</code>。</li>
+  </ul>
+
+  <h2>核心论文</h2>
+  <ul>
+    <li>PagedAttention / vLLM：《Efficient Memory Management for Large Language Model Serving with PagedAttention》(SOSP 2023)</li>
+    <li>Attention：《Attention Is All You Need》(2017)</li>
+    <li>RoPE：《RoFormer: Enhanced Transformer with Rotary Position Embedding》</li>
+    <li>RMSNorm：《Root Mean Square Layer Normalization》</li>
+  </ul>
+
+  <div class="callout note">
+    <div class="callout-title">引用记录</div>
+    每课末尾的「真实 vLLM 映射」会标注所参考的 vLLM 版本 / commit、文档日期与关键源码路径。
+    这些说明已整理进本地课程，运行时不需要联网。
+  </div>
+
+  <div class="footer">运行时零联网 · 参考链接仅供手动延伸阅读</div>
+</main>
+<script src="../js/course.js"></script>
+</body>
+</html>

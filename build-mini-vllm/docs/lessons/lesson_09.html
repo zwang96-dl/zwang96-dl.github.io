@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 9 · Static Batching — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="理解静态批处理：padding 到同一长度、一起跑到最长者结束，造成 padding/finished slot 的计算浪费。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 9</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 9 · Static Batching <span class="phase-badge phase-build">Phase 3</span></h1>
+  <p>静态批处理的浪费，是理解 continuous batching 价值的前提。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>理解静态批处理：padding 到同一长度、一起跑到最长者结束，造成 padding/finished slot 的计算浪费。</dd>
+        <dt>需要阅读的文件</dt><dd><code>experiments/lesson_09_static_batching.py</code>、<code>mini_vllm/tokenizer.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/tokenizer.py（pad）</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>padding 浪费计算</code>、<code>attention mask</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 9</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 9</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 8</dd>
+        <dt>完成后下一步</dt><dd>Lesson 10</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>到这里我们已经能<strong>单条</strong>地把一个请求跑完（<a href="lesson_08.html">Lesson 8</a> 的 prefill/decode）。
+     但真实服务里会<strong>同时来很多请求</strong>——要想让 GPU 一次算多条、把算力吃满，就得把它们凑成
+     一个「批」（batch）。凑批最朴素的办法叫<strong>静态批处理（static batching）</strong>：把这批请求
+     一次性打包、一起算、一起等到全部结束。它简单、够用，但会造成大量浪费。</p>
+  <p>这一课<strong>不写新模型代码</strong>，而是把静态批处理的浪费<strong>量化</strong>出来：它到底浪费在哪、
+     浪费多少、和什么因素成正比。想清楚这一点，你才会真正理解下一课 continuous batching（Lesson 10）
+     为什么值得——它正是为了消掉这里的浪费而生。所以本课的重点是<em>看懂一个数字：waste</em>。</p>
+
+  <h2 id="problem">先看问题：静态批处理到底浪费了什么 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>假设同一时刻来了 4 个请求，各自要处理的 token 总数（prompt + 要生成的 output）不一样。
+     用本课动画里的真实数字：</p>
+  <table>
+    <thead><tr><th>请求</th><th>真实长度（prompt+output）</th><th>什么时候本该结束</th></tr></thead>
+    <tbody>
+      <tr><td>r0</td><td>6</td><td>第 6 步就该完事</td></tr>
+      <tr><td>r1</td><td>20</td><td>第 20 步</td></tr>
+      <tr><td>r2</td><td>4</td><td>第 4 步（最短）</td></tr>
+      <tr><td>r3</td><td>24</td><td>第 24 步（最长）</td></tr>
+    </tbody>
+  </table>
+  <p>静态批处理要求「一批一起走」：为了塞进同一个规整的张量，所有请求都被
+     <strong>padding 到批内最长者的长度 24</strong>；然后这一批<strong>一起跑满 24 步</strong>，
+     直到最慢的 r3 结束才整批收工。</p>
+  <p>可是 r2 在第 4 步就该停了，之后的 <code>24 − 4 = 20</code> 步全在陪跑——它要么在算无意义的
+     padding token，要么已经生成完了却还占着 slot 空转。r0 陪跑 <code>24 − 6 = 18</code> 步，
+     r1 陪跑 <code>24 − 20 = 4</code> 步。把四条的陪跑加起来：<code>18 + 4 + 20 + 0 = 42</code> 步的计算
+     <strong>纯属浪费</strong>。这就是本课要盯住的东西。</p>
+
+  <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    静态批处理 = 把一批长短不一的请求<strong>补齐到最长</strong>、绑在一起跑，
+    <strong>等最慢的那个结束</strong>整批才放行；短请求多出来的时间全是浪费。</div>
+  <p><strong>类比：拼车必须等最后一个人下车。</strong>四个人拼一辆车，目的地远近不同。
+     最近的人（r2）本该第 4 站就下，可这辆车得开到最远乘客（r3）的第 24 站才算这趟结束、才能接下一批客。
+     近处的乘客只能<strong>坐在车上干等</strong>——车照样在开、油照样在烧，却没把他送到任何新地方。
+     乘客长短差越大，这种「陪坐空跑」就越多。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    拼车里「等最慢的人」浪费的是<strong>时间</strong>；这里浪费的是 GPU 的<strong>计算</strong>：
+    每一步都要把整批（含已完成 / padding 的 slot）过一遍模型的前向。另外别把它和
+    <a href="lesson_07.html">Lesson 7</a> 的 KV Cache 混了——KV Cache 省的是<strong>单条请求内部</strong>的重复计算，
+    而这里浪费的是<strong>请求之间</strong>「快的等慢的」。两者是不同维度的浪费。</div>
+
+  <h2 id="define">精确定义：浪费公式，逐符号拆开 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>把成本用「token-步」来记（处理一个 token 过一次前向 = 1 个单位）。设批里有 <code>bs</code> 个请求，
+     第 <code>i</code> 个的真实长度是 <code>Lᵢ</code>，批内最长为 <code>max_len = max(Lᵢ)</code>。三个关键量：</p>
+  <math display="block" class="mathblock">
+    <mi>static_cost</mi><mo>=</mo><mi>bs</mi><mo>×</mo><mi>max_len</mi>
+    <mspace width="1.5em"/><mtext># 静态：每个 slot 都被拉到 max_len，跑满</mtext>
+  </math>
+  <math display="block" class="mathblock">
+    <mi>continuous_cost</mi><mo>=</mo>
+    <mo>∑</mo><msub><mi>L</mi><mi>i</mi></msub>
+    <mspace width="1.5em"/><mtext># 理想：只为真实 token 付费</mtext>
+  </math>
+  <math display="block" class="mathblock">
+    <mi>waste</mi><mo>=</mo><mi>static_cost</mi><mo>−</mo><mi>continuous_cost</mi>
+  </math>
+  <math display="block" class="mathblock">
+    <mi>waste_pct</mi><mo>=</mo>
+    <mfrac><mi>waste</mi><mi>static_cost</mi></mfrac>
+    <mo>×</mo><mn>100</mn><mo>%</mo>
+  </math>
+  <ul>
+    <li><code>bs</code>：批大小（这一批打包了几个请求）。本例 <code>bs = 4</code>。</li>
+    <li><code>Lᵢ</code>：第 <code>i</code> 个请求的真实长度 = <code>prompt_len + output_len</code>。本例 <code>[6, 20, 4, 24]</code>。</li>
+    <li><code>max_len</code>：批内最长长度，也就是 padding 的目标。本例 <code>24</code>。</li>
+    <li><code>static_cost = bs × max_len</code>：把整批想成一个 <code>bs × max_len</code> 的规整方块，每个格子都要算。</li>
+    <li><code>continuous_cost = Σ Lᵢ</code>：只有真实 token 才是「必要」的计算。</li>
+    <li><code>waste</code>：方块里没被真实 token 填满的部分——就是 padding / 已完成 slot 的空算。</li>
+  </ul>
+  <div class="callout note"><div class="callout-title">输入 / 输出 shape（用具体数字）</div>
+    <code>tokenizer.pad(batch)</code> 把这批补齐后，返回的 <code>input_ids</code> 形状是
+    <code>(bs, max_len) = (4, 24)</code>，<code>attention_mask</code> 同形
+    <code>(4, 24)</code>。整批前向就是在这个 <code>4 × 24 = 96</code> 的方块上算，而真实内容只有
+    <code>Σ Lᵢ = 54</code> 格。</div>
+
+  <h2 id="worked">小规模手算：把这批的 waste 算出来 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>代入 <code>bs = 4</code>、<code>lens = [6, 20, 4, 24]</code>、<code>max_len = 24</code>：</p>
+  <table>
+    <thead><tr><th>请求</th><th>真实 Lᵢ</th><th>padding 到</th><th>浪费 = max_len − Lᵢ</th></tr></thead>
+    <tbody>
+      <tr><td>r0</td><td>6</td><td>24</td><td>18</td></tr>
+      <tr><td>r1</td><td>20</td><td>24</td><td>4</td></tr>
+      <tr><td>r2</td><td>4</td><td>24</td><td>20</td></tr>
+      <tr><td>r3</td><td>24</td><td>24</td><td>0</td></tr>
+      <tr><td><strong>合计</strong></td><td><strong>54</strong></td><td>—</td><td><strong>42</strong></td></tr>
+    </tbody>
+  </table>
+  <math display="block" class="mathblock">
+    <mi>static_cost</mi><mo>=</mo><mn>4</mn><mo>×</mo><mn>24</mn><mo>=</mo><mn>96</mn>
+  </math>
+  <math display="block" class="mathblock">
+    <mi>continuous_cost</mi><mo>=</mo><mn>6</mn><mo>+</mo><mn>20</mn><mo>+</mo><mn>4</mn><mo>+</mo><mn>24</mn><mo>=</mo><mn>54</mn>
+  </math>
+  <math display="block" class="mathblock">
+    <mi>waste</mi><mo>=</mo><mn>96</mn><mo>−</mo><mn>54</mn><mo>=</mo><mn>42</mn>
+  </math>
+  <math display="block" class="mathblock">
+    <mi>waste_pct</mi><mo>=</mo>
+    <mfrac><mn>42</mn><mn>96</mn></mfrac>
+    <mo>=</mo><mn>43.75</mn><mo>%</mo>
+    <mspace width="1.5em"/><mo>→</mo><mspace width="0.5em"/>
+    <mtext>运行时四舍五入显示 43.8%</mtext>
+  </math>
+  <p>也就是说，这一批里<strong>近一半</strong>的计算都花在了 padding / 空转上。这正是
+     <code>run 9</code> 会打印出来的数字，也正是上方动画在演示的东西。</p>
+
+  <div class="callout note"><div class="callout-title">内联执行图：方块里，哪些格子是真的、哪些在空算</div>
+    <p style="margin:.2em 0 .6em;font-size:.85rem;color:var(--fg-dim)">
+      每条 = 一个请求；整条宽度 = padding 后的 24 步。绿色 = 真实 token（必要计算）；
+      灰色斜纹 = padding / 已完成后的空转（浪费）。</p>
+    <div style="display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:.78rem">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="width:26px;text-align:right">r0</span>
+        <div style="flex:1;display:flex;height:20px;border:1px solid var(--border,#8886);border-radius:4px;overflow:hidden">
+          <div style="width:25%;background:var(--finished,#3aa76d)"></div>
+          <div style="width:75%;background:repeating-linear-gradient(45deg,#8882,#8882 4px,#8884 4px,#8884 8px)"></div>
+        </div>
+        <span style="width:96px">6 真实 · 18 浪费</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="width:26px;text-align:right">r1</span>
+        <div style="flex:1;display:flex;height:20px;border:1px solid var(--border,#8886);border-radius:4px;overflow:hidden">
+          <div style="width:83.3%;background:var(--finished,#3aa76d)"></div>
+          <div style="width:16.7%;background:repeating-linear-gradient(45deg,#8882,#8882 4px,#8884 4px,#8884 8px)"></div>
+        </div>
+        <span style="width:96px">20 真实 · 4 浪费</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="width:26px;text-align:right">r2</span>
+        <div style="flex:1;display:flex;height:20px;border:1px solid var(--border,#8886);border-radius:4px;overflow:hidden">
+          <div style="width:16.7%;background:var(--finished,#3aa76d)"></div>
+          <div style="width:83.3%;background:repeating-linear-gradient(45deg,#8882,#8882 4px,#8884 4px,#8884 8px)"></div>
+        </div>
+        <span style="width:96px">4 真实 · 20 浪费</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="width:26px;text-align:right">r3</span>
+        <div style="flex:1;display:flex;height:20px;border:1px solid var(--border,#8886);border-radius:4px;overflow:hidden">
+          <div style="width:100%;background:var(--finished,#3aa76d)"></div>
+        </div>
+        <span style="width:96px">24 真实 · 0 浪费</span>
+      </div>
+    </div>
+    <p style="margin:.6em 0 0;font-size:.8rem;color:var(--fg-dim)">
+      r3 是「拖后腿的最长者」——它一个人把整批的 max_len 撑到 24，别人全被迫陪它跑满。
+      去掉 r3，max_len 立刻降到 20，浪费大减。这就是「一个长请求毁掉一整批」的直观样子。</p>
+  </div>
+
+  <h2 id="mask">attention mask：padding 位置怎么被「屏蔽」 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>补齐用的是特殊 token <code>PAD</code>（本课词表里 <code>PAD_ID = 258</code>；词表共
+     <code>vocab_size = 259</code> = 256 个字节 + BOS/EOS/PAD）。但 padding 只是「占位凑长度」，
+     绝不能让模型把它当成真内容去注意——否则会污染真实 token 的输出。<strong>attention mask</strong>
+     就是那张「哪些位置是真的、哪些是填充」的标记表：<code>1 = 真实 token</code>，<code>0 = padding</code>，
+     下游 attention 用它把 <code>0</code> 的位置屏蔽掉（打到 <code>-inf</code>，softmax 后权重为 0）。</p>
+  <p>用本课 tokenizer 的真实字节来手算一批两条：</p>
+  <ul>
+    <li><code>"hi"</code> → UTF-8 字节 <code>[104, 105]</code>（h=104, i=105），长度 2。</li>
+    <li><code>"hello!"</code> → <code>[104, 101, 108, 108, 111, 33]</code>，长度 6。</li>
+  </ul>
+  <p>右侧 padding 到 <code>max_len = 6</code> 后，<code>pad()</code> 返回 shape 都为 <code>(2, 6)</code> 的两张表：</p>
+  <table>
+    <thead><tr><th></th><th>位0</th><th>位1</th><th>位2</th><th>位3</th><th>位4</th><th>位5</th></tr></thead>
+    <tbody>
+      <tr><td>ids · "hi"</td><td>104</td><td>105</td><td><code>258</code></td><td><code>258</code></td><td><code>258</code></td><td><code>258</code></td></tr>
+      <tr><td>mask · "hi"</td><td>1</td><td>1</td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+      <tr><td>ids · "hello!"</td><td>104</td><td>101</td><td>108</td><td>108</td><td>111</td><td>33</td></tr>
+      <tr><td>mask · "hello!"</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn"><div class="callout-title">别忘了 mask，否则结果是错的</div>
+    mask 保证「正确性」，但它<strong>不能省掉计算</strong>：被屏蔽的 padding 位置照样在张量里、照样过一遍前向，
+    只是结果被丢弃。所以 mask 解决的是「算对」，而本课的 <code>waste</code> 说的是「算了却没用」——
+    这两件事要分开理解。中文一个字 = 3 个 UTF-8 字节 = 3 个 token，所以中文请求更容易长短不齐，
+    padding 浪费也更明显。</div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「加了 attention mask，就不浪费计算了」</td><td>mask 只保证 padding <strong>不影响结果</strong>；那些位置<strong>照样被算</strong>，算力照花。mask 治的是「算错」，不是「浪费」。</td></tr>
+      <tr><td>「短请求早就生成完了，就不占算力了」</td><td>整批绑在一起跑满 <code>max_len</code> 步。已完成的 slot 只能<strong>空转陪跑</strong>到最慢者结束，不能中途下车。</td></tr>
+      <tr><td>「浪费只和批大小有关，批越大越浪费」</td><td>浪费的根源是<strong>长度差异</strong>：<code>waste = bs×max_len − ΣLᵢ</code>。若所有请求等长，<code>waste = 0</code>，再大的批也不浪费。</td></tr>
+      <tr><td>「把一个超长请求和一堆短请求凑一批更划算」</td><td>恰恰相反：一个长请求把 <code>max_len</code> 撑高，逼所有短请求陪它跑满，浪费飙升（见执行图里的 r3）。</td></tr>
+      <tr><td>「continuous_cost 是另一种真实的批处理模式」</td><td>本课的 <code>continuous_cost = ΣLᵢ</code> 只是「理想下限」，用来对比。真正做到它需要 Lesson 10 的 continuous batching。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课两处真实代码，正好对应上面两条主线：</p>
+  <ul>
+    <li><strong>浪费的量化</strong> → <code>experiments/lesson_09_static_batching.py</code> 的
+        <code>run_experiment()</code>：<code>lens = [prompt_len+output_len …]</code>、
+        <code>static_cost = bs × max_len</code>、<code>actual_cost = sum(lens)</code>、
+        <code>waste = static_cost − actual_cost</code>——和上面手算的公式一字不差。</li>
+    <li><strong>padding 与 mask</strong> → <code>mini_vllm/tokenizer.py</code> 的
+        <code>ByteTokenizer.pad(batch)</code>：把每条右侧补 <code>PAD_ID(258)</code> 到
+        <code>target = max(len)</code>，同时生成 <code>attention_mask</code>（真实位 <code>1</code>、
+        padding 位 <code>0</code>），返回 <code>(input_ids, attention_mask)</code>。实验里就是用
+        <code>tok.pad([encode("hi"), encode("hello!")])</code> 打印出上表那个 mask 示例的。</li>
+  </ul>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a9">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>长度不齐的一批请求，静态 padding 浪费了多少计算？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 9
+python3 course.py run 9 --trace
+python3 course.py check 9</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 9` 量化浪费。</details>
+    <details><summary>提示 Level 2 · 位置</summary>静态成本=批大小×最长长度；连续成本=Σ真实长度。</details>
+    <details><summary>提示 Level 3 · 机制</summary>长度差异越大浪费越多。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>引出 continuous batching（Lesson 10）。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>忘了 mask</td><td>attention 算进了 padding</td><td>用 attention_mask 屏蔽 padding 位置</td></tr><tr><td>批内长度差异大</td><td>静态批处理浪费高</td><td>改用 continuous batching（Lesson 10）</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 9 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>若一批里有一个特别长的请求，其余都很短，浪费会怎样？</li><li>为什么 continuous batching 能消除「等待最慢者」的浪费？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>静态成本=批×最长</td><td>早期静态批处理</td><td>padding 概念一致</td><td>vLLM 用 continuous batching 取代它</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>静态批处理因 padding 与「等待最慢者」而浪费；请求长度差异越大越明显。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="9">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_10.html">下一步：Lesson 10 · Request 状态机与 Continuous Batching →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 9 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/waste_anim.js"></script>
+<script>
+WasteAnim.mount("#a9", {items:[{label:"r0",a:6,b:24},{label:"r1",a:20,b:24},{label:"r2",a:4,b:24},{label:"r3",a:24,b:24}],aName:"真实长度", bName:"静态padding到最长", insight:"长度差异越大，浪费越多。"});
+</script>
+</body>
+</html>

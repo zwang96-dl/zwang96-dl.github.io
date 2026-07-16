@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build Your Own Mini-vLLM · 从零构建大模型推理引擎</title>
+  <meta name="description" content="离线、交互式的中文课程：从零构建支持文本、图片和视频的大模型推理引擎（mini-vLLM）。">
+  <link rel="stylesheet" href="css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+
+<div class="topbar">
+  <span class="brand">Build Your Own Mini-vLLM</span>
+  <span class="spacer"></span>
+  <input id="lesson-search" class="btn" type="search" placeholder="搜索课程…" aria-label="搜索课程" style="min-width:180px">
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+
+<main class="content" id="main" style="max-width:960px;margin:0 auto">
+  <h1>Build Your Own Mini-vLLM</h1>
+  <p style="font-size:1.1rem;color:var(--fg-dim)">从零构建支持<strong>文本、图片和视频</strong>的大模型推理引擎 —— 完全离线、可在 8GB MacBook Air 上运行。</p>
+
+  <!-- 进度 -->
+  <div class="callout note">
+    <div class="callout-title">你的进度</div>
+    <div class="progress-wrap" aria-hidden="true"><div class="progress-bar" id="progress-bar"></div></div>
+    <p id="progress-text" style="margin:.4em 0 0;font-size:.9rem;color:var(--fg-dim)">0 / 31 课已标记学习</p>
+    <p style="margin:.3em 0 0;font-size:.85rem;color:var(--fg-dim)">进度只保存在你的浏览器本地（localStorage）；终端进度用 <code>python3 course.py where-am-i</code> 查看，两者独立。</p>
+  </div>
+
+  <!-- 快速开始 -->
+  <h2>快速开始（新用户主线）</h2>
+  <div class="callout tip">
+    <div class="callout-title">支持环境</div>
+    macOS 14+ · Apple Silicon（arm64）· Python 3.11+ · 8GB 内存 · 仅 CPU 即可（MPS 可选）。核心为纯标准库，无需任何第三方包。
+  </div>
+  <pre class="cmd"><code># 1) 校验离线资源 & 环境自检
+python3 course.py verify-offline-bundle
+python3 course.py doctor --offline
+
+# 2) 启动本地网页（或直接双击 docs/index.html）
+python3 course.py serve
+
+# 3) 运行第一个模拟器，获得第一次成功
+python3 course.py run 0
+python3 course.py check 0
+
+# 随时问：我在哪、下一步做什么
+python3 course.py where-am-i</code></pre>
+
+  <!-- 主线（默认展开 Lesson 0 / 1） -->
+  <h2 id="main-track">当前主线</h2>
+  <ul class="lesson-list">
+    <li class="lesson-item" data-search="lesson 0 airplane mode 起飞 离线 生命周期">
+      <details open>
+        <summary>
+          <span class="lesson-num">0</span>
+          <span class="lesson-title">Airplane Mode — 起飞前的准备</span>
+          <span class="badge ready">已就绪</span>
+          <span class="badge text">文本</span>
+          <span class="spacer" style="flex:1"></span>
+          <span data-lesson-mark="0" style="color:var(--ok);font-size:.8rem"></span>
+        </summary>
+        <div class="lesson-body">
+          <p>离线检查、启动网页、运行第一个请求生命周期机制模拟器，看到真实命令与真实输出，获得第一次成功反馈。</p>
+          <p><a class="btn btn-accent" href="lessons/lesson_00.html">开始 Lesson 0 →</a></p>
+        </div>
+      </details>
+    </li>
+    <li class="lesson-item" data-search="lesson 1 token tokenizer 文本 byte encode decode">
+      <details open>
+        <summary>
+          <span class="lesson-num">1</span>
+          <span class="lesson-title">文本如何变成 Token</span>
+          <span class="badge ready">已就绪</span>
+          <span class="badge text">文本</span>
+          <span class="spacer" style="flex:1"></span>
+          <span data-lesson-mark="1" style="color:var(--ok);font-size:.8rem"></span>
+        </summary>
+        <div class="lesson-body">
+          <p>character / byte / token 的区别，byte-level tokenizer、BOS/EOS/PAD、encode/decode、padding。
+             含交互式 Tokenizer Explorer（可输入你自己的文本）。</p>
+          <p><a class="btn btn-accent" href="lessons/lesson_01.html">开始 Lesson 1 →</a></p>
+        </div>
+      </details>
+    </li>
+  </ul>
+
+  <!-- 完整路线图（折叠） -->
+  <h2>完整课程路线图</h2>
+  <p style="color:var(--fg-dim);font-size:.9rem">共 31 课，分文本主线（0–18）与多模态主线（19–30）。<span class="badge ready">已就绪</span> 表示可运行、可测试；<span class="badge planned">规划中</span> 表示已在大纲、将在后续 Phase 交付（课程遵循「不放占位空课」原则）。</p>
+
+  <h3>文本主线 · Phase 2–3</h3>
+  <ul class="lesson-list" id="text-track"></ul>
+
+  <h3>多模态主线 · Phase 4–6</h3>
+  <ul class="lesson-list" id="mm-track"></ul>
+
+  <div class="footer">
+    Build Your Own Mini-vLLM · 完全离线 · 无第三方依赖 · 参考资料见
+    <a href="references/index.html">References</a> 与 <a href="glossary/index.html">术语表</a>
+  </div>
+</main>
+
+<script src="js/course.js"></script>
+<script>
+  // 路线图数据（与 mini_vllm/course_meta.py 对应；此处为静态离线副本）。
+  var LESSONS = [
+    [2,"Tensor Shape 与矩阵乘法","text","ready"],
+    [3,"最小 Decoder-only Transformer","text","ready"],
+    [4,"Attention 手算","text","ready"],
+    [5,"生成第一个 Token","text","ready"],
+    [6,"重复计算侦探","text","ready"],
+    [7,"KV Cache","text","ready"],
+    [8,"Prefill 与 Decode","text","ready"],
+    [9,"Static Batching","text","ready"],
+    [10,"Request 状态机与 Continuous Batching","text","ready"],
+    [11,"Scheduler","text","ready"],
+    [12,"连续 KV 分配为何浪费","text","ready"],
+    [13,"Block Allocator","text","ready"],
+    [14,"Block Table 与 Paged KV Cache","text","ready"],
+    [15,"Token Budget 与 Chunked Prefill","text","ready"],
+    [16,"Prefix Caching","text","ready"],
+    [17,"完整 Text Mini-vLLM","text","ready"],
+    [18,"Text Final Incident Challenge","text","ready"],
+    [19,"多模态请求是什么","mm","ready"],
+    [20,"图片如何变成 Tensor","mm","ready"],
+    [21,"图片如何变成 Patch Token","mm","ready"],
+    [22,"Tiny Vision Encoder 与 Projector","mm","ready"],
+    [23,"Placeholder 与 Embedding Merge","mm","ready"],
+    [24,"Multimodal Prefill 与 Text Decode","mm","ready"],
+    [25,"多图片与动态 Visual Token","mm","ready"],
+    [26,"视频如何变成模型输入","mm","ready"],
+    [27,"多模态三层缓存","mm","ready"],
+    [28,"Multimodal Scheduler","mm","ready"],
+    [29,"完整 Tiny Multimodal Engine","mm","ready"],
+    [30,"Multimodal Final Incident Challenge","mm","ready"]
+  ];
+  function render(list, containerId) {
+    var c = document.getElementById(containerId);
+    list.forEach(function (l) {
+      var n = l[0], title = l[1], track = l[2], status = l[3];
+      var li = document.createElement("li");
+      li.className = "lesson-item";
+      li.setAttribute("data-search", "lesson " + n + " " + title.toLowerCase());
+      var trackBadge = track === "mm"
+        ? '<span class="badge mm">多模态</span>' : '<span class="badge text">文本</span>';
+      var statusBadge = status === "ready"
+        ? '<span class="badge ready">已就绪</span>' : '<span class="badge planned">规划中</span>';
+      li.innerHTML =
+        '<details><summary>' +
+        '<span class="lesson-num">' + n + '</span>' +
+        '<span class="lesson-title">' + title + '</span>' +
+        statusBadge + trackBadge +
+        '<span class="spacer" style="flex:1"></span>' +
+        '<span data-lesson-mark="' + n + '" style="color:var(--ok);font-size:.8rem"></span>' +
+        '</summary><div class="lesson-body">' +
+        (status === "ready"
+          ? '<p><a class="btn btn-accent" href="lessons/lesson_' + String(n).padStart(2, "0") + '.html">开始 →</a></p>'
+          : '<p>计划在后续 Phase 交付。可先在终端 <code>python3 course.py lesson ' + n + '</code> 查看该课的目标与文件。</p>') +
+        '</div></details>';
+      c.appendChild(li);
+    });
+  }
+  render(LESSONS.filter(function (l) { return l[2] === "text"; }), "text-track");
+  render(LESSONS.filter(function (l) { return l[2] === "mm"; }), "mm-track");
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "_comment": "Lesson 4 Quick 配置。causal=true 表示加因果掩码（自回归解码必须）。Q/K/V 放在 workload 里。",
+  "causal": true,
+  "workload": "assets/workloads/lesson_04.json"
+}

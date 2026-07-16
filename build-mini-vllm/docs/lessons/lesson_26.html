@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 26 · 视频如何变成模型输入 — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="抽帧（uniform/fixed_fps/head/tail）、FPS、frame index、timestamp、合成时间线。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 26</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 26 · 视频如何变成模型输入 <span class="phase-badge phase-learn">Phase 5</span></h1>
+  <p>视频是海量帧；抽帧策略与时间元数据决定模型看到什么、以及成本多大。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>抽帧（uniform/fixed_fps/head/tail）、FPS、frame index、timestamp、合成时间线。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/video_sampler.py</code>、<code>mini_vllm/multimodal/media.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/multimodal/video_sampler.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>VideoFrameSampler.sample()</code>、<code>VideoFrame</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 26</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 26</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 25</dd>
+        <dt>完成后下一步</dt><dd>Lesson 27</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>视频和图片最大的不同，是它<strong>多了一个时间维度</strong>：一张图就是一张图，一段视频却是
+     成百上千张图排成一队。上一课（Lesson 25）我们把<strong>一张</strong> 16×16 的图切成 2×2 = 4 个
+     patch，得到 <code>4</code> 个 visual token。视频只是把这件事重复很多遍——但「很多遍」正是问题所在。</p>
+  <p>先算一笔账。本课模型的关键限制是 <code>max_seq_len = 64</code>（一条序列最多 64 个 token），
+     而每一帧图片都要占 <code>grid² = 2×2 = 4</code> 个 visual token。于是「帧数」直接换算成「token 数」：</p>
+  <table>
+    <thead><tr><th>视频</th><th>总帧数</th><th>× 每帧 4 个 visual token</th><th>能塞进 max_seq_len=64 吗？</th></tr></thead>
+    <tbody>
+      <tr><td>一段 10 秒、30fps 的手机录像</td><td>300 帧</td><td>= <strong>1200</strong> 个 token</td><td>❌ 超了近 20 倍</td></tr>
+      <tr><td>本课示例：6.5 秒、2fps</td><td>13 帧</td><td>= <strong>52</strong> 个 token</td><td>⚠️ 勉强塞下，但没地方放文字了</td></tr>
+      <tr><td>抽 4 帧（uniform）</td><td>4 帧</td><td>= <strong>16</strong> 个 token</td><td>✅ 还剩 48 个 token 给文字</td></tr>
+    </tbody>
+  </table>
+  <p>结论很直接：<strong>把每一帧都喂给模型，几乎必然爆掉上下文</strong>。所以视频进模型前一定要先
+     <strong>抽帧（frame sampling）</strong>——从整段里挑出有代表性的几帧。<em>怎么挑</em>（抽帧策略）
+     决定了模型「看到什么」，<em>挑几帧</em>决定了「花多少成本」。这就是本课要彻底讲清的两件事。</p>
+
+  <h2 id="problem">先看问题：抽帧策略挑错会怎样 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>既然必须只挑几帧，那「挑哪几帧」就成了关键。用一个具体例子体会不同挑法的差别：
+     一段 <strong>6.5 秒、source_fps=2</strong> 的视频，共 <strong>13 帧</strong>（frame_index 0..12，
+     时间戳 0.0, 0.5, 1.0 … 6.0 秒）。假设它的内容是「前 2 秒静止 → 中间发生关键动作 → 最后 2 秒定格」。
+     现在只允许抽 4 帧：</p>
+  <table>
+    <thead><tr><th>策略</th><th>抽到的帧（frame_index）</th><th>对应时间戳</th><th>后果</th></tr></thead>
+    <tbody>
+      <tr><td><code>head</code>（取前 4 帧）</td><td>0,1,2,3</td><td>0.0–1.5 秒</td><td>❌ 只看到开头静止段，<strong>完全错过中间的关键动作</strong></td></tr>
+      <tr><td><code>tail</code>（取后 4 帧）</td><td>9,10,11,12</td><td>4.5–6.0 秒</td><td>❌ 只看到结尾，同样错过关键动作</td></tr>
+      <tr><td><code>uniform</code>（均匀 4 帧）</td><td>0,4,8,12</td><td>0.0, 2.0, 4.0, 6.0 秒</td><td>✅ 全片均匀覆盖，关键动作大概率被采到</td></tr>
+    </tbody>
+  </table>
+  <p>同样是抽 4 帧、同样的成本，<code>head/tail</code> 可能让模型对整段视频得出完全错误的理解。
+     这说明抽帧不是「随便挑几帧」——<strong>策略本身就是信息取舍</strong>。</p>
+
+  <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    抽帧 = 从一整段视频里，按某种规则<strong>挑出少量代表帧</strong>喂给模型；每个被挑中的帧
+    还随身带着两个「时间标签」——它是第几帧（frame_index）、它在第几秒（timestamp）。</div>
+  <p><strong>类比：把电影做成连环画。</strong>一部两小时的电影有十几万帧，你没法把每一格都画进连环画。
+     你会怎么挑？<em>均匀地</em>每隔几分钟挑一格（这就是 <code>uniform</code>），或者<em>每秒固定挑一格</em>
+     （这就是 <code>fixed_fps</code>）。挑完还要在每格下面标上「第 12 分钟」——不然读者不知道这几格之间隔了多久。
+     那行小字，就是 timestamp。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    连环画下面的「第 12 分钟」是<strong>画在图上、读者一眼能看到</strong>的；但在模型里，timestamp
+    <strong>并不会自动出现在模型眼前</strong>。模型只收到几帧图像变成的 visual token，时间戳被单独存在
+    metadata 里。除非你<strong>显式把「第 12 分钟」写进文字 prompt</strong>，否则模型根本不知道两帧之间隔了多久。
+    这是本课最容易踩的坑，后面会专门再讲一次。</div>
+
+  <h2 id="strategies">四种抽帧策略：精确定义 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>设输入是 <code>n</code> 帧（<code>n = len(frames)</code>），每帧 <code>pixels</code> 的形状是
+     <code>(16, 16, 3)</code>（image_size=16 的 RGB 图）。<code>sample()</code> 的输出是一个
+     <strong>更短的帧列表</strong>，形状 <code>(k, 16, 16, 3)</code>，<code>k</code> 就是抽到的帧数。
+     四种策略只是用不同规则决定「抽哪些下标」：</p>
+
+  <p><strong>1. uniform（均匀 N 帧）</strong>——把 <code>k</code> 个采样点均匀铺在 <code>[0, n-1]</code> 上。
+     其中 <code>k = min(num_frames, n)</code>（想抽的帧数，但不能超过总帧数）。第 <code>i</code> 个采样点的下标：</p>
+  <math display="block" class="mathblock">
+    <msub><mi>idx</mi><mi>i</mi></msub><mo>=</mo>
+    <mi>round</mi><mo stretchy="false">(</mo>
+    <mfrac>
+      <mrow><mi>i</mi><mo>·</mo><mo stretchy="false">(</mo><mi>n</mi><mo>-</mo><mn>1</mn><mo stretchy="false">)</mo></mrow>
+      <mrow><mi>k</mi><mo>-</mo><mn>1</mn></mrow>
+    </mfrac>
+    <mo stretchy="false">)</mo>
+    <mo>,</mo>
+    <mi>i</mi><mo>=</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mo>…</mo><mo>,</mo><mi>k</mi><mo>-</mo><mn>1</mn>
+  </math>
+  <ul>
+    <li><code>i</code>：第几个采样点（0 到 k-1）；</li>
+    <li><code>n-1</code>：最后一帧的下标（下标从 0 数）；</li>
+    <li><code>k-1</code>：把区间平均分成 k-1 段，所以每段跨度 <code>(n-1)/(k-1)</code> 帧；</li>
+    <li><code>round(...)</code>：帧下标必须是整数，四舍五入到最近的一帧；</li>
+    <li>特例：<code>k==1</code> 时只取 <code>[0]</code>；算出的下标去重并保序（避免同一帧被抽两次）。</li>
+  </ul>
+
+  <p><strong>2. fixed_fps（固定帧率抽帧）</strong>——不管总长多少，<strong>每隔固定时间抽一帧</strong>。
+     设视频原始帧率 <code>source_fps</code>、目标帧率 <code>target = fps</code>，则采样步长：</p>
+  <math display="block" class="mathblock">
+    <mi>step</mi><mo>=</mo>
+    <mi>max</mi><mo stretchy="false">(</mo><mn>1</mn><mo>,</mo>
+    <mi>round</mi><mo stretchy="false">(</mo>
+    <mfrac>
+      <mi>source_fps</mi>
+      <mi>target</mi>
+    </mfrac>
+    <mo stretchy="false">)</mo><mo stretchy="false">)</mo>
+    <mo>,</mo>
+    <mtext>抽取下标&#160;</mtext>
+    <mn>0</mn><mo>,</mo><mi>step</mi><mo>,</mo><mn>2</mn><mo>·</mo><mi>step</mi><mo>,</mo><mo>…</mo>
+  </math>
+  <ul>
+    <li><code>source_fps / target</code>：原视频每秒 source_fps 帧，只想留 target 帧，所以每 <code>source/target</code> 帧留 1 帧；</li>
+    <li><code>max(1, …)</code>：步长至少为 1（目标帧率高于原帧率时不可能「补帧」，只能全留）；</li>
+    <li>关键区别：uniform 的<strong>输出帧数固定</strong>（k 帧），fixed_fps 的<strong>输出帧数随视频时长变化</strong>——长视频抽得多，短视频抽得少。</li>
+  </ul>
+
+  <p><strong>3. head（取前 N 帧）</strong>：<code>frames[:min(num_frames, n)]</code>——直接切前 <code>k</code> 帧。<br>
+     <strong>4. tail（取后 N 帧）</strong>：<code>frames[max(0, n-num_frames):]</code>——直接切后 <code>k</code> 帧。</p>
+  <div class="callout note"><div class="callout-title">四种策略一眼对比</div>
+    <table>
+      <thead><tr><th>策略</th><th>规则</th><th>输出帧数</th><th>覆盖范围</th><th>适合</th></tr></thead>
+      <tbody>
+        <tr><td>uniform</td><td>均匀铺满全片</td><td>固定 k 帧</td><td>整片</td><td>不知道重点在哪、要总览</td></tr>
+        <tr><td>fixed_fps</td><td>每隔固定时间抽</td><td>随时长变（长→多）</td><td>整片</td><td>要保持「每秒信息密度」一致</td></tr>
+        <tr><td>head</td><td>取开头</td><td>固定 k 帧</td><td>片头</td><td>只关心开头（如封面/开场）</td></tr>
+        <tr><td>tail</td><td>取结尾</td><td>固定 k 帧</td><td>片尾</td><td>只关心结尾（如结果/字幕）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="worked">小规模手算：13 帧视频，四种策略各抽出什么 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>沿用前面那段 <strong>13 帧、source_fps=2</strong> 的视频（frame_index 0..12，时间戳 0.0…6.0 秒）。
+     一步步算给你看。</p>
+
+  <p><strong>uniform，num_frames=4：</strong>先定 <code>k = min(4, 13) = 4</code>，代入
+     <code>idx_i = round(i·(13-1)/(4-1)) = round(i·12/3) = round(4i)</code>：</p>
+  <table>
+    <thead><tr><th>i</th><th>算式 round(4·i)</th><th>抽到的 frame_index</th><th>时间戳</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>round(0)</td><td>0</td><td>0.0 s</td></tr>
+      <tr><td>1</td><td>round(4)</td><td>4</td><td>2.0 s</td></tr>
+      <tr><td>2</td><td>round(8)</td><td>8</td><td>4.0 s</td></tr>
+      <tr><td>3</td><td>round(12)</td><td>12</td><td>6.0 s</td></tr>
+    </tbody>
+  </table>
+  <p>得到 4 帧、时间上正好每 2 秒一帧，铺满全片。</p>
+
+  <p><strong>fixed_fps，target fps=1：</strong>步长 <code>step = max(1, round(source_fps/target)) = max(1, round(2/1)) = 2</code>。
+     从 0 开始每隔 2 帧抽一次：下标 <code>0, 2, 4, 6, 8, 10, 12</code>，共 <strong>7 帧</strong>，
+     时间戳 <code>0,1,2,3,4,5,6</code> 秒——正好「每秒 1 帧」。注意它抽出的是 <strong>7</strong> 帧而不是 4，
+     因为帧数由时长决定，不由 num_frames 决定。</p>
+
+  <p><strong>head / tail，num_frames=4：</strong><code>head → frames[:4]</code> 得 frame_index
+     <code>0,1,2,3</code>（0.0–1.5 秒）；<code>tail → frames[9:]</code> 得 frame_index
+     <code>9,10,11,12</code>（4.5–6.0 秒）。都只是简单切片。</p>
+
+  <div class="callout note"><div class="callout-title">执行图：13 帧的时间线上，uniform 抽走了哪 4 帧</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;font-family:var(--mono);font-size:.72rem;margin-top:8px;align-items:flex-end">
+      <div style="text-align:center"><div style="border:2px solid var(--decode);border-radius:5px;padding:8px 6px;background:color-mix(in srgb,var(--decode) 20%,var(--bg))">0</div><div style="color:var(--decode);margin-top:2px">✔0.0s</div></div>
+      <div style="text-align:center"><div style="border:1px dashed var(--fg-dim);border-radius:5px;padding:8px 6px;color:var(--fg-dim)">1</div></div>
+      <div style="text-align:center"><div style="border:1px dashed var(--fg-dim);border-radius:5px;padding:8px 6px;color:var(--fg-dim)">2</div></div>
+      <div style="text-align:center"><div style="border:1px dashed var(--fg-dim);border-radius:5px;padding:8px 6px;color:var(--fg-dim)">3</div></div>
+      <div style="text-align:center"><div style="border:2px solid var(--decode);border-radius:5px;padding:8px 6px;background:color-mix(in srgb,var(--decode) 20%,var(--bg))">4</div><div style="color:var(--decode);margin-top:2px">✔2.0s</div></div>
+      <div style="text-align:center"><div style="border:1px dashed var(--fg-dim);border-radius:5px;padding:8px 6px;color:var(--fg-dim)">5</div></div>
+      <div style="text-align:center"><div style="border:1px dashed var(--fg-dim);border-radius:5px;padding:8px 6px;color:var(--fg-dim)">6</div></div>
+      <div style="text-align:center"><div style="border:1px dashed var(--fg-dim);border-radius:5px;padding:8px 6px;color:var(--fg-dim)">7</div></div>
+      <div style="text-align:center"><div style="border:2px solid var(--decode);border-radius:5px;padding:8px 6px;background:color-mix(in srgb,var(--decode) 20%,var(--bg))">8</div><div style="color:var(--decode);margin-top:2px">✔4.0s</div></div>
+      <div style="text-align:center"><div style="border:1px dashed var(--fg-dim);border-radius:5px;padding:8px 6px;color:var(--fg-dim)">9</div></div>
+      <div style="text-align:center"><div style="border:1px dashed var(--fg-dim);border-radius:5px;padding:8px 6px;color:var(--fg-dim)">10</div></div>
+      <div style="text-align:center"><div style="border:1px dashed var(--fg-dim);border-radius:5px;padding:8px 6px;color:var(--fg-dim)">11</div></div>
+      <div style="text-align:center"><div style="border:2px solid var(--decode);border-radius:5px;padding:8px 6px;background:color-mix(in srgb,var(--decode) 20%,var(--bg))">12</div><div style="color:var(--decode);margin-top:2px">✔6.0s</div></div>
+    </div>
+    <div style="font-size:.78rem;color:var(--fg-dim);margin-top:8px">实线深色框 = 被 uniform 抽中的 4 帧；虚线灰框 = 丢弃的 9 帧。
+      抽完后<strong>保持原来的时间顺序</strong>（0→4→8→12），绝不能打乱。</div>
+  </div>
+
+  <h2 id="meta">三个时间元数据：fps、frame_index、timestamp <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>每个 <code>VideoFrame</code> 是一个很小的数据结构，只装三样东西（见 <code>media.py</code>）：</p>
+  <table>
+    <thead><tr><th>字段</th><th>含义</th><th>本例中的值</th></tr></thead>
+    <tbody>
+      <tr><td><code>pixels</code></td><td>这一帧的图像，形状 (16,16,3)</td><td>一张 16×16 RGB 图</td></tr>
+      <tr><td><code>frame_index</code></td><td>它是原视频里的<strong>第几帧</strong>（从 0 数，整数）</td><td>0, 1, 2, …, 12</td></tr>
+      <tr><td><code>timestamp_seconds</code></td><td>它出现在<strong>第几秒</strong>（presentation timestamp，浮点）</td><td>0.0, 0.5, …, 6.0</td></tr>
+    </tbody>
+  </table>
+  <p>三者的关系可以用一条公式串起来。<strong>fps（frames per second）</strong>是「每秒多少帧」，
+     那么第 <code>frame_index</code> 帧的时间戳就是：</p>
+  <math display="block" class="mathblock">
+    <mi>timestamp</mi><mo>≈</mo>
+    <mfrac>
+      <mi>frame_index</mi>
+      <mi>source_fps</mi>
+    </mfrac>
+  </math>
+  <p>本例 source_fps=2，所以 frame_index=4 的帧在 <code>4/2 = 2.0</code> 秒——和上面手算完全对上。
+     反过来说：<strong>光看 frame_index 不知道两帧隔了多久，必须结合 fps 才能换算成真实时间</strong>。
+     这就是为什么每帧要单独存一个 timestamp——尤其抽帧后帧号会变得不连续（0,4,8,12），
+     此时 timestamp 是唯一可靠的「它到底在第几秒」的依据。</p>
+  <div class="callout warn"><div class="callout-title">timestamp 是 metadata，LLM 不会自动理解它</div>
+    这是本课最关键、也最反直觉的一点。抽帧后每帧变成 4 个 visual token（图像 embedding），
+    <strong>时间戳并没有被编码进这些 token</strong>——它被单独放在 <code>timeline()</code> 返回的
+    metadata 里。模型看到的只是「一串图像 token 按顺序排列」，它<strong>能感知先后顺序，却不知道
+    间隔多久</strong>：它分不清相邻两帧是隔了 0.5 秒还是隔了 5 分钟。<br>
+    想让模型「懂时间」，唯一的办法是<strong>把时间显式写进文字 prompt</strong>，例如在每帧前插入文本
+    <code>"[t=2.0s]"</code>。不写，模型就永远不知道。</div>
+
+  <h2 id="cost">成本账：抽几帧 = 花多少 token <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>抽帧之后，每一帧都会走 Lesson 25 的图像 patch 流程：16×16 的图切成 2×2 = 4 个 patch，
+     每个 patch → 1 个 vision_hidden=48 的向量 → 投影到 text_hidden=32 → <strong>1 个 visual token</strong>。
+     所以总成本是一道乘法：</p>
+  <math display="block" class="mathblock">
+    <mtext>视频 visual token 数</mtext><mo>=</mo>
+    <mtext>抽到的帧数&#160;</mtext><mi>k</mi><mo>×</mo><msup><mi>grid</mi><mn>2</mn></msup>
+    <mo>=</mo><mi>k</mi><mo>×</mo><mn>4</mn>
+  </math>
+  <table>
+    <thead><tr><th>策略（13 帧视频）</th><th>抽到帧数 k</th><th>× 4 = visual token 数</th><th>占 max_seq_len=64 的比例</th></tr></thead>
+    <tbody>
+      <tr><td>不抽帧（全喂）</td><td>13</td><td>52</td><td>81%——几乎塞满，没空间放文字</td></tr>
+      <tr><td>fixed_fps（1fps）</td><td>7</td><td>28</td><td>44%</td></tr>
+      <tr><td>uniform / head / tail（4 帧）</td><td>4</td><td>16</td><td>25%——留下 48 个 token 给文字问题</td></tr>
+    </tbody>
+  </table>
+  <p>这张表把本课的两条主线合到了一起：<strong>抽帧策略决定「看到什么」，抽帧数量决定「花多少 token」</strong>。
+     两者都要在「覆盖度」和「上下文预算」之间权衡——这正是视频进多模态模型时最核心的工程取舍。</p>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「抽帧就是随便挑几帧，挑哪几帧无所谓」</td><td>大错。<code>head/tail</code> 只看片头/片尾，会<strong>整段错过</strong>发生在中间的关键内容；<code>uniform</code> 才铺满全片。策略本身就是信息取舍。</td></tr>
+      <tr><td>「fixed_fps 和 uniform 都抽固定数量的帧」</td><td>只有 uniform 是固定 k 帧。<code>fixed_fps</code> 的帧数<strong>随视频时长变化</strong>——长视频抽更多帧、更吃 token，短视频抽更少。</td></tr>
+      <tr><td>「模型能从帧的顺序里看出时间间隔」</td><td>模型只知道<strong>先后顺序</strong>，不知道<strong>间隔多久</strong>。抽帧后帧号变成 0,4,8,12，可这时间差没进 token，模型分不清是隔 2 秒还是隔 2 分钟。</td></tr>
+      <tr><td>「timestamp 是 metadata，所以模型自然会读到它」</td><td>metadata 是给 processor（数据处理）用的，不在模型输入里。<strong>不显式写进文字 prompt，LLM 永远看不到 timestamp。</strong></td></tr>
+      <tr><td>「抽帧后不用管顺序，反正都是同一段视频」</td><td>必须保序！<code>sample()</code> 里刻意「去重并保序」，打乱帧序等于打乱时间线，模型会误读事件的发生顺序。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="codemap">代码映射：讲解对应源码哪一处 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课全部讲解都能在两个文件里一一对上：</p>
+  <table>
+    <thead><tr><th>本课概念</th><th>对应代码</th></tr></thead>
+    <tbody>
+      <tr><td>四种抽帧策略的分支</td><td><code>VideoFrameSampler.sample(frames, strategy, num_frames, fps, source_fps)</code>——用 <code>strategy</code> 选择 uniform / fixed_fps / head / tail 四个分支</td></tr>
+      <tr><td>uniform 的下标公式 <code>round(i·(n-1)/(k-1))</code></td><td><code>sample()</code> 里的 <code>idxs = [min(n-1, round(i*(n-1)/max(1,k-1))) …]</code>，以及紧接着的「去重并保序」循环</td></tr>
+      <tr><td>fixed_fps 的步长 <code>max(1, round(source_fps/target))</code></td><td><code>sample()</code> 的 <code>fixed_fps</code> 分支：<code>step = max(1, int(round(source_fps/target)))</code></td></tr>
+      <tr><td>head / tail 切片</td><td><code>frames[:min(num_frames,n)]</code> 与 <code>frames[max(0,n-num_frames):]</code></td></tr>
+      <tr><td>frame_index / timestamp 两个时间标签</td><td><code>VideoFrame</code> 数据类（<code>media.py</code>）的 <code>frame_index</code>、<code>timestamp_seconds</code> 字段</td></tr>
+      <tr><td>timestamp 是单独的 metadata</td><td><code>VideoFrameSampler.timeline()</code>——把每帧的 <code>frame_index + timestamp</code> 单独抽成 dict 列表，说明它和 visual token 是<strong>分开</strong>的</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a26">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>视频如何抽帧、如何携带时间信息？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 26
+python3 course.py run 26 --trace
+python3 course.py check 26</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 26` 看四种抽帧策略。</details>
+    <details><summary>提示 Level 2 · 位置</summary>抽帧在覆盖度与成本间权衡。</details>
+    <details><summary>提示 Level 3 · 机制</summary>每帧带 frame_index 与 timestamp。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>timestamp 是 metadata，不会被 LLM 自动理解。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>帧序乱</td><td>抽帧未保序</td><td>抽帧后按时间顺序排列</td></tr><tr><td>以为模型懂时间</td><td>timestamp 未进 prompt</td><td>需显式把时间信息写进文本</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 26 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>uniform 与 fixed_fps 在长短视频上各有什么表现？</li><li>为什么说 timestamp 不会被 LLM 自动理解？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>VideoFrameSampler</td><td>vLLM 视频采样</td><td>抽帧策略一致</td><td>真实含关键帧、可变 fps、更多元数据</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>抽帧（uniform/fixed_fps/head/tail）、FPS、frame index、timestamp、合成时间线。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="26">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_27.html">下一步：Lesson 27 · 多模态三层缓存 →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 26 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a26", {stages: [{title:"视频/帧序列", detail:"含 fps"},{title:"抽帧", detail:"uniform / fixed_fps / head / tail"},{title:"每帧 metadata", detail:"frame_index + timestamp"},{title:"逐帧图像处理 + patch", detail:"帧数 × grid² 个 visual token"},{title:"按时间顺序拼接", detail:"→ 视频 embedding → prefill"}]});
+</script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 5 · 生成第一个 Token — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="从 logits 采样：greedy/temperature/top-k/top-p 与自回归生成循环。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 5</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<div class="layout">
+  <nav class="toc" aria-label="本页目录">
+    <h2>本页目录</h2>
+    <a href="#goal">本节目标</a><a href="#why">为什么需要</a><a href="#anim">交互式动画</a>
+    <a href="#problem">先看问题</a><a href="#intuition">直觉类比</a><a href="#methods">四种采样</a>
+    <a href="#worked">小规模手算</a><a href="#pipeline">执行图</a><a href="#loop">自回归循环</a>
+    <a href="#misconception">常见误解</a><a href="#code">代码映射</a><a href="#build">动手运行</a>
+    <a href="#hints">四级提示</a><a href="#errors">常见错误</a><a href="#trace">Trace & Inspector</a>
+    <a href="#challenge">因果理解</a><a href="#vllm">真实 vLLM 映射</a><a href="#summary">总结 & 下一步</a>
+  </nav>
+  <main class="content" id="main">
+    <h1>Lesson 5 · 生成第一个 Token <span class="phase-badge phase-build">Build</span></h1>
+    <p>模型给的是 logits（每个词的原始分数）。怎么从中挑一个 token，决定了生成的
+       <strong>确定性</strong>与<strong>多样性</strong>。本课不使用 <code>model.generate()</code>，采样全透明。</p>
+
+    <section id="goal"><div class="lesson-header"><dl>
+      <dt>当前目标</dt><dd>实现 greedy/temperature/top-k/top-p 采样与自回归生成循环、停止符。</dd>
+      <dt>需要阅读的文件</dt><dd><code>mini_vllm/sampling.py</code>、<code>mini_vllm/engine/generate.py</code></dd>
+      <dt>需要修改的文件</dt><dd><code>mini_vllm/sampling.py</code></dd>
+      <dt>需要关注的类或函数</dt><dd><code>Sampler.__call__()</code>、<code>top_k_filter()</code>、<code>top_p_filter()</code>、<code>generate_cached()</code></dd>
+      <dt>实验命令</dt><dd><code>python3 course.py run 5</code></dd>
+      <dt>测试命令</dt><dd><code>python3 course.py check 5</code></dd>
+      <dt>本课依赖</dt><dd>Lesson 3</dd>
+      <dt>完成后下一步</dt><dd>Lesson 6 · 重复计算侦探</dd>
+    </dl></div></section>
+
+    <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>模型每走一步 forward，吐出的是 <strong>259 个 logits</strong>（本模型 <code>vocab_size=259</code>：256 个字节值 + BOS/EOS/PAD 三个特殊符），
+       每个数是「这个 token 有多该被选中」的<strong>原始分数</strong>（可正可负、未归一）。但用户要的是<strong>一个</strong>确定的 token id。
+       把 259 个分数压成 1 个选择的这一步，就叫<strong>采样</strong>——它是整个推理引擎<strong>最内层、每生成一个 token 都要跑一次</strong>的操作。</p>
+    <p>为什么不能永远取最高分（argmax）？因为那样同一个 prompt <strong>每次输出一字不差</strong>，模型只会重复它「最有把握」的话，
+       写长了极易陷进「好的好的好的…」式的死循环。采样的价值就是给这一步<strong>可控的随机性</strong>：既不能太死板（永远最高分），
+       也不能太放飞（连明显不合理的乱码 token 都可能蹦出来）。搞懂它，才能解释「为什么同样的 prompt 每次不同」
+       「temperature 调高发生了什么」，也才能在 Lesson 6+ 把生成循环嵌进调度器。</p>
+    <div class="callout note"><div class="callout-title">本课的两条主线</div>
+      ① <strong>采样</strong>：如何从 259 个 logits 里挑 1 个 token（greedy / temperature / top-k / top-p）；
+      ② <strong>自回归循环</strong>：挑出的 token 接回输入，一步步往下生成，直到写够 <code>max_new_tokens</code> 或撞上停止符 EOS。
+      前者对应 <code>sampling.py</code>，后者对应 <code>engine/generate.py</code> 的 <code>generate_cached()</code>。</div>
+
+    <h2 id="anim">交互式动画：Sampling Explorer <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>用一个 6 类的小 logits 例子，单步看 temperature → softmax → top-k → top-p → 采样。
+       镜像 <code>mini_vllm/sampling.py</code>。</p>
+    <div class="anim" id="anim-sampling">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：
+        <small>logits 怎样变成「下一个 token」？temperature/top-k/top-p 各改变了什么？</small></div></div>
+      <div class="anim-stage" style="min-height:150px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+    <h2 id="problem">先看问题：只会挑最高分会怎样 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>拿一个具体的小例子。假设某一步模型给 4 个候选 token 的 logits 是
+       <code>A=2.0</code>、<code>B=1.9</code>、<code>C=0.1</code>、<code>D=-3.0</code>。
+       greedy（argmax）会<strong>百分之百选 A</strong>——哪怕 B 只低 0.1、几乎一样好，也永远没机会。后果：</p>
+    <ul>
+      <li><strong>零多样性</strong>：同一 prompt 跑 100 次，100 次输出完全相同。写故事、闲聊都会很僵。</li>
+      <li><strong>易复读</strong>：一旦进入某个高分小循环（如「好的，好的，好的」），argmax 会一路选下去停不了。</li>
+      <li><strong>丢掉几乎同样好的选项</strong>：A、B 只差 0.1，softmax 后概率约 <code>52% vs 48%</code>，本该五五开，argmax 却把 B 判了死刑。</li>
+    </ul>
+    <p>另一个极端是「完全随机」：259 个 token 等概率乱选 → 输出乱码。采样要解决的正是这条光谱上的<strong>取舍</strong>：
+       <strong>temperature</strong> 控制「随机到什么程度」，<strong>top-k / top-p</strong> 控制「允许哪些 token 参与随机」。</p>
+
+    <h2 id="intuition">直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="callout tip"><div class="callout-title">一句话解释</div>
+      采样 = 先用 <strong>softmax</strong> 把 259 个原始分数变成一套「概率」，再按概率<strong>掷骰子</strong>选一个 token；
+      temperature 决定骰子「有多偏心」，top-k / top-p 决定「骰子上刻哪几个面」。</div>
+    <p><strong>类比：一场加权抽奖。</strong>每个 token 是一张奖券，logits 越高 = 券越多、越容易被摸到。</p>
+    <ul>
+      <li><strong>temperature</strong> = 抽奖箱的「搅拌力度」。搅得越猛（T 大），冷门券也容易被摸到（更随机）；
+          几乎不搅（T→0），就总摸到券最多的那张（退化成 greedy）。</li>
+      <li><strong>top-k</strong> = 抽奖前先把「券最少的那些人」请出场，只留前 <code>k</code> 名一起抽。</li>
+      <li><strong>top-p</strong> = 不固定留几人，而是从券多到券少依次点名，直到被点到的人手里的券<strong>合计占了 p</strong>（比如 90%）就停。</li>
+    </ul>
+    <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+      「掷骰子」不代表结果不可复现。本课用<strong>确定性 RNG</strong>（splitmix64，见 <code>sampling.py</code> 的 <code>_Rng</code>）：
+      同一个 <code>seed</code> 掷出的「随机数」序列永远一样，所以 <em>同 seed + 同 logits → 同 token</em>。
+      这里的「随机」指的是概率分布的形状，<strong>不是「每次运行都变」</strong>——这对调试和复现结果至关重要。</div>
+
+    <h2 id="methods">四种采样：精确定义与形状 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>四种方法的输入统一是一条 <code>logits</code> 向量，长度 = <code>vocab_size = 259</code>；输出是一个 token id（<code>0 ≤ id &lt; 259</code>）。
+       它们只是在「logits → 概率 → 选择」这条流水线上，插入不同的过滤。</p>
+    <table><thead><tr><th>方法</th><th>做什么</th><th>特点</th></tr></thead><tbody>
+      <tr><td>greedy</td><td>取分数最高（argmax）</td><td>完全确定</td></tr>
+      <tr><td>temperature</td><td>logits/T 再 softmax</td><td>T↑ 更随机，T↓ 更保守</td></tr>
+      <tr><td>top-k</td><td>只在最高 k 个里采样</td><td>截断长尾</td></tr>
+      <tr><td>top-p (nucleus)</td><td>累计概率达 p 的最小集合</td><td>自适应候选数</td></tr>
+    </tbody></table>
+
+    <p><strong>① softmax —— 把分数变成概率。</strong>逐符号拆开：</p>
+    <math display="block" class="mathblock">
+      <msub><mi>p</mi><mi>i</mi></msub><mo>=</mo>
+      <mfrac>
+        <mrow><mi>exp</mi><mo stretchy="false">(</mo><msub><mi>logit</mi><mi>i</mi></msub><mo>−</mo><mi>m</mi><mo stretchy="false">)</mo></mrow>
+        <mrow><munder><mo>∑</mo><mi>j</mi></munder><mi>exp</mi><mo stretchy="false">(</mo><msub><mi>logit</mi><mi>j</mi></msub><mo>−</mo><mi>m</mi><mo stretchy="false">)</mo></mrow>
+      </mfrac>
+    </math>
+    <ul>
+      <li><code>logit_i</code>：第 i 个 token 的原始分数；<code>m</code>：全体 logits 的最大值——减去它<strong>不改变结果</strong>（分子分母同乘一个常数），只避免 <code>exp(大数)</code> 溢出。</li>
+      <li>输出 <code>p_i ∈ (0,1)</code> 且 <code>Σ p_i = 1</code>。输入 shape <code>(259,)</code> → 输出 shape <code>(259,)</code>。对应 <code>sampling.py::softmax()</code>。</li>
+    </ul>
+    <p><strong>② temperature —— 缩放再 softmax：</strong><code>logit_i / T</code>。</p>
+    <ul>
+      <li><code>T &gt; 1</code>：分数被<strong>压扁</strong> → 概率更平均 → 更随机；<code>T &lt; 1</code>：分数被<strong>拉开</strong> → 高分更突出 → 更保守。</li>
+      <li><code>T → 0</code>：最高分独占几乎全部概率 → 等价 greedy。代码里直接短路：<code>if p.temperature &lt;= 0: return argmax(logits)</code>（见 <code>apply_temperature()</code> 与 <code>Sampler.__call__</code>）。</li>
+    </ul>
+    <p><strong>③ top-k —— 只留最大的 k 个概率，其余置 0。</strong><code>k=0</code> 或 <code>k≥259</code> 时不生效（<code>top_k_filter()</code>）。
+       关键细节：置 0 后<strong>不立刻重新归一</strong>，把归一留到最后按剩余 sum 处理。</p>
+    <p><strong>④ top-p（nucleus）—— 按概率从高到低累加，累计首次 ≥ p 时停，只留这批。</strong>
+       候选个数<strong>随分布自适应</strong>：分布集中时可能只留 2 个，分布分散时可能留十几个（<code>top_p_filter()</code>）。</p>
+
+    <h2 id="worked">小规模手算：4 个候选走一遍全流程 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>用 <code>logits = [2.0, 1.0, 0.0, -1.0]</code>（token A/B/C/D）手算，看每一步到底改了什么。</p>
+    <p><strong>第 1 步：temperature 如何改变分布。</strong>对同一组 logits 取不同 T，softmax 后概率（保留 3 位）：</p>
+    <table>
+      <thead><tr><th>token</th><th>logit</th><th>T=0.5（更保守）</th><th>T=1.0（原样）</th><th>T=2.0（更随机）</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>2.0</td><td><strong>0.865</strong></td><td><strong>0.644</strong></td><td><strong>0.455</strong></td></tr>
+        <tr><td>B</td><td>1.0</td><td>0.117</td><td>0.237</td><td>0.276</td></tr>
+        <tr><td>C</td><td>0.0</td><td>0.016</td><td>0.087</td><td>0.167</td></tr>
+        <tr><td>D</td><td>-1.0</td><td>0.002</td><td>0.032</td><td>0.102</td></tr>
+      </tbody>
+    </table>
+    <p>看 A 这一行：T 越小越接近「独占」（0.865→greedy），T 越大越被摊平（0.455，冷门的 C/D 明显翻身）。这就是「搅拌力度」。</p>
+    <p><strong>第 2 步：在 T=1.0 的概率 <code>[0.644, 0.237, 0.087, 0.032]</code> 上做过滤。</strong></p>
+    <table>
+      <thead><tr><th>过滤</th><th>过程</th><th>结果（保留者概率，其余置 0）</th></tr></thead>
+      <tbody>
+        <tr><td>top-k, k=2</td><td>只留最大的 2 个：A、B</td><td><code>[0.644, 0.237, 0, 0]</code></td></tr>
+        <tr><td>top-p, p=0.9</td><td>累加：A=0.644 &lt;0.9 → +B=0.881 &lt;0.9 → +C=0.968 ≥0.9 停</td><td><code>[0.644, 0.237, 0.087, 0]</code>（留 A,B,C）</td></tr>
+      </tbody>
+    </table>
+    <p>注意 top-p 的<strong>自适应</strong>：这里它留了 3 个（因为 A+B 才 0.881 不够 0.9）；若 A 本身就有 0.95，则只留 A 一个。</p>
+    <p><strong>第 3 步：轮盘赌采样（roulette）。</strong>以 top-k 结果 <code>[0.644, 0.237, 0, 0]</code> 为例，<code>total = 0.644+0.237 = 0.881</code>
+       （注意<strong>没有先归一</strong>，直接按 total 采样）。掷出随机数 <code>r0 = rng.random()</code>，令 <code>r = r0 × total</code>，
+       从头累加 <code>acc</code>，第一个让 <code>r ≤ acc</code> 的 token 中选：</p>
+    <table>
+      <thead><tr><th>rng.random()</th><th>r = r0×0.881</th><th>累加判定</th><th>选中</th></tr></thead>
+      <tbody>
+        <tr><td>0.70</td><td>0.617</td><td>acc=0.644 ≥ 0.617</td><td><strong>A</strong>（id 0）</td></tr>
+        <tr><td>0.90</td><td>0.793</td><td>acc=0.644 &lt;0.793 → +0.237=0.881 ≥0.793</td><td><strong>B</strong>（id 1）</td></tr>
+      </tbody>
+    </table>
+    <p>券多的 A 覆盖了 <code>[0, 0.644]</code> 这段更长的区间，所以更容易被 r 落中——这正是「加权抽奖」。对应 <code>Sampler.__call__</code> 末尾的循环。</p>
+
+    <h2 id="pipeline">内联执行图：一次采样的流水线 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="callout note" style="border-left-color:var(--accent)">
+      <div class="callout-title">logits (259,) → 一个 token id</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-family:var(--mono);font-size:.78rem;margin-top:8px">
+        <div style="border:2px solid var(--fg-dim);border-radius:6px;padding:6px 10px">logits<br><span style="color:var(--fg-dim)">(259,) 原始分数</span></div>
+        <div style="font-size:1.2rem">→</div>
+        <div style="border:2px dashed var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 12%,var(--bg))">÷ T<br><span style="color:var(--fg-dim)">temperature</span></div>
+        <div style="font-size:1.2rem">→</div>
+        <div style="border:2px dashed var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 12%,var(--bg))">softmax<br><span style="color:var(--fg-dim)">→ 概率和=1</span></div>
+        <div style="font-size:1.2rem">→</div>
+        <div style="border:2px dashed var(--prefill);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--prefill) 12%,var(--bg))">top-k<br><span style="color:var(--fg-dim)">留最大 k 个</span></div>
+        <div style="font-size:1.2rem">→</div>
+        <div style="border:2px dashed var(--prefill);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--prefill) 12%,var(--bg))">top-p<br><span style="color:var(--fg-dim)">留累计 ≥p</span></div>
+        <div style="font-size:1.2rem">→</div>
+        <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 8px">轮盘赌<br><span style="color:var(--fg-dim)">按 sum 采样</span></div>
+        <div style="font-size:1.2rem">→</div>
+        <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px">token id</div>
+      </div>
+      <div style="font-size:.76rem;color:var(--fg-dim);margin-top:8px">
+        虚线框 = 可选/可关闭的过滤（<code>T=0</code> 走 greedy 短路直接到最右；<code>k=0</code>、<code>p=1.0</code> 时对应框不生效）；
+        实线框 = 必经步骤。<strong>顺序固定</strong>：temperature 先缩放，softmax 后才谈得上 top-k / top-p 的「概率」。</div>
+    </div>
+
+    <h2 id="loop">自回归循环与停止符 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>采样只产出<strong>一个</strong> token。要生成一整句，就得把它接回输入、再跑一步——这就是<strong>自回归</strong>。
+       本课看 <code>generate_cached()</code>（KV Cache 版，Lesson 7 细讲），它分两段：</p>
+    <ol>
+      <li><strong>prefill（一次）：</strong>把整段 prompt 喂进 <code>model.forward(prompt_ids, positions, cache)</code>，
+          得到 shape <code>(prompt_len, 259)</code> 的 logits；取<strong>最后一行</strong> <code>logits[-1]</code>（shape <code>(259,)</code>）交给 <code>Sampler</code>，产出<strong>第一个</strong>生成 token。</li>
+      <li><strong>decode（循环）：</strong>此后每步只喂<strong>刚生成的那 1 个</strong> token：<code>model.forward([tok], [cur], cache)</code>，
+          同样取 <code>logits[-1]</code> 采样，追加进结果，位置 <code>cur += 1</code>，直到两个停止条件之一命中。</li>
+    </ol>
+    <div class="callout note"><div class="callout-title">为什么每步都取 <code>logits[-1]</code>（最后一行）？</div>
+      forward 会为喂进去的<strong>每个位置</strong>都输出一行 logits，但我们只关心「下一个 token」——那只由<strong>序列最后一个位置</strong>预测。
+      prefill 喂了 <code>prompt_len</code> 个位置却只用最后一行；decode 只喂 1 个位置，那一行自然也是最后一行。</div>
+    <p><strong>两个停止条件：</strong></p>
+    <ul>
+      <li><strong>写够了：</strong>生成数量达到 <code>max_new_tokens</code>（循环上限）。</li>
+      <li><strong>撞上 EOS：</strong>采样结果 <code>== EOS_ID</code>。本模型 <code>EOS_ID = 257</code>（<code>BOS=256 / EOS=257 / PAD=258</code>）。命中即 <code>break</code>——
+          这就是 <code>run 5</code> 输出里 <code>top_k=5</code> 那行「遇到 257 就停」的原因。</li>
+    </ul>
+    <div class="callout warn"><div class="callout-title">忘了处理 EOS 会怎样</div>
+      若不判 <code>tok == EOS_ID</code>，模型不会「自己安静下来」——它会一直生成到 <code>max_new_tokens</code> 撑满，
+      输出末尾拖一串无意义的字节 token。停止符是让「句子有个句号」的关键。</div>
+    <div class="callout tip"><div class="callout-title">字节级 tokenizer 的小提醒</div>
+      本课 tokenizer 是 byte-level：一个 UTF-8 字节 = 一个 token id（0..255），所以中文一个字 = 3 字节 = <strong>3 个 token</strong>。
+      采样是逐 <em>字节 token</em> 进行的，不是逐「汉字」——生成中文时可能在一个字的 3 个字节中途停下。</div>
+
+    <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+    <table>
+      <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+      <tbody>
+        <tr><td>「temperature=0 也会有点随机」</td><td>代码直接短路成 <code>argmax</code>，根本不掷骰子。<code>T=0</code> = 完全确定的 greedy，同 prompt 永远同结果。</td></tr>
+        <tr><td>「top-k=1 和 greedy 不一样」</td><td>top-k=1 只留概率最高的一个、其余置 0，采样必然选它 —— 结果与 argmax 等价。区别只在实现路径（走没走 softmax）。</td></tr>
+        <tr><td>「top-p 固定留 p×vocab 个候选」</td><td>p 是<strong>累计概率</strong>阈值，不是个数比例。分布尖锐时可能只留 1~2 个，平坦时留很多个 —— 个数是自适应的。</td></tr>
+        <tr><td>「过滤后概率不归一，采样就错了」</td><td>本实现<strong>故意不重新归一</strong>，而是让轮盘赌按剩余 <code>total = sum(probs)</code> 采样（<code>r = rng()×total</code>），结果与先归一完全等价。</td></tr>
+        <tr><td>「temperature 和 top-k 顺序无所谓」</td><td>顺序固定：<strong>先 temperature 缩放 → softmax → 再 top-k/top-p</strong>。T 改变的是概率的形状，会直接影响哪些 token 落进 top-p 的核。</td></tr>
+        <tr><td>「随机采样 = 结果不可复现」</td><td>用带 <code>seed</code> 的确定性 <code>_Rng</code>，同 seed 必得同序列。不可复现只会发生在误用系统随机源时。</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>把上面的讲解对回真实源码的落点：</p>
+    <table>
+      <thead><tr><th>讲解概念</th><th>源码位置</th><th>要点</th></tr></thead>
+      <tbody>
+        <tr><td>greedy 短路</td><td><code>Sampler.__call__</code> 开头 <code>if p.temperature &lt;= 0: return argmax(logits)</code></td><td>T≤0 直接取最高分，不进 softmax</td></tr>
+        <tr><td>temperature + softmax</td><td><code>apply_temperature()</code> → <code>softmax()</code></td><td>先 <code>logits/T</code> 再归一成概率</td></tr>
+        <tr><td>top-k</td><td><code>top_k_filter(probs, k)</code></td><td>保留最大 k 个、其余置 0，<strong>不</strong>重新归一</td></tr>
+        <tr><td>top-p</td><td><code>top_p_filter(probs, p)</code></td><td>按降序累加到首次 ≥ p，其余置 0</td></tr>
+        <tr><td>轮盘赌 + 兜底</td><td><code>Sampler.__call__</code> 末尾：<code>total=sum(probs)</code>；<code>total&lt;=0</code> 退化 argmax；否则 <code>r=rng.random()×total</code> 累加选中</td><td>按剩余 sum 采样，等价于先归一</td></tr>
+        <tr><td>确定性 RNG</td><td><code>_Rng</code>（splitmix64），由 <code>SamplingParams.seed</code> 初始化</td><td>同 seed → 同随机序列 → 可复现</td></tr>
+        <tr><td>自回归 + 停止符</td><td><code>generate_cached()</code>：prefill 取 <code>logits[-1]</code> 采样；decode 循环每步喂 1 token；<code>tok == eos_id</code> 时 break</td><td>EOS_ID=257；上限 max_new_tokens</td></tr>
+      </tbody>
+    </table>
+    <pre><code># Sampler.__call__ 的骨架（sampling.py）
+if p.temperature &lt;= 0: return argmax(logits)     # greedy 短路
+probs = softmax(apply_temperature(logits, p.temperature))
+probs = top_k_filter(probs, p.top_k)
+probs = top_p_filter(probs, p.top_p)
+total = sum(probs)
+if total &lt;= 0: return argmax(logits)             # 全被过滤光的兜底
+r = self.rng.random() * total; acc = 0.0         # 轮盘赌（不先归一）
+for i, pr in enumerate(probs):
+    acc += pr
+    if r &lt;= acc: return i</code></pre>
+
+    <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+    <pre class="cmd"><code>python3 course.py run 5            # greedy/temperature/top-k/top-p 四种输出
+python3 course.py check 5</code></pre>
+    <pre><code>  [greedy          ] ids=[5, 72, 142, 76, ...]
+  [temperature=0.8 ] ids=[101, 4, 233, ...]      # 更随机
+  [top_k=5,T=1.0   ] ids=[118, 140, 257]         # 遇到 EOS(257) 停止</code></pre>
+
+    <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>Level 1 · 方向</summary><code>run 5</code> 看四种输出差别；网页 Sampling Explorer 逐步观察。</details>
+    <details><summary>Level 2 · 位置</summary><code>Sampler.__call__</code> 串起流程；<code>top_k_filter/top_p_filter</code> 是关键子步。</details>
+    <details><summary>Level 3 · 机制</summary>greedy=argmax；temperature 缩放；top-k 留最大 k；top-p 留累计达 p 的最小集合。</details>
+    <details><summary>Level 4 · 接近答案</summary>采样要可复现：给定 seed 结果一致（用确定性 splitmix64）。别忘了 EOS 停止。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody>
+      <tr><td>温度采样不可复现</td><td>用了系统随机源</td><td>用带 seed 的确定性 RNG</td></tr>
+      <tr><td>概率不归一</td><td>过滤后没重新归一</td><td>轮盘赌前对 sum 归一或按 sum 采样</td></tr>
+      <tr><td>永不停止</td><td>没处理 EOS</td><td>生成到 EOS(257) 即停</td></tr>
+    </tbody></table>
+
+    <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <pre class="cmd"><code>python3 course.py run 5 --trace
+python3 course.py inspect generate --text "Hello"</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0">
+      <li>temperature→0 与 temperature→∞ 分别退化成什么行为？</li>
+      <li>top-k=1 和 greedy 是一回事吗？为什么？</li>
+      <li>为什么生产系统更偏好 top-p 而非固定 top-k？</li>
+    </ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody>
+      <tr><td><code>SamplingParams</code>/<code>Sampler</code></td><td><code>vllm.SamplingParams</code> + sampler</td><td>参数与语义一致</td><td>真实还有 repetition/presence penalty、logprobs、beam、批量采样</td></tr>
+      <tr><td>Python 轮盘赌</td><td>GPU 上的并行采样 kernel</td><td>概率语义一致</td><td>真实按 batch 并行、可控随机种子</td></tr>
+    </tbody></table>
+
+    <h2 id="summary">本节总结 & 下一步</h2>
+    <ul>
+      <li>logits → (temperature) → softmax → (top-k/top-p) → 采样 → 下一个 token。</li>
+      <li>greedy 确定；temperature/top-k/top-p 提供可控随机；给定 seed 可复现。</li>
+      <li>自回归循环 + EOS 停止 = 完整生成。</li>
+    </ul>
+    <p style="margin-top:1em">
+      <button class="btn btn-accent" type="button" data-mark-lesson="5">✅ 标记本课已学</button>
+      &nbsp; <a class="btn" href="lesson_06.html">下一步：Lesson 6 · 重复计算侦探 →</a></p>
+    <div class="footer">Build Your Own Mini-vLLM · Lesson 5 · 完全离线 · 无第三方依赖</div>
+  </main>
+</div>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/sampling_explorer.js"></script>
+<script>SamplingExplorer.mount("#anim-sampling", { temperature: 0.8, topK: 3, topP: 0.9 });</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+{
+  "_comment": "Lesson 2 Quick 配置。矩阵与 bias 放在 workload 里，便于替换成你自己的例子。",
+  "workload": "assets/workloads/lesson_02.json"
+}

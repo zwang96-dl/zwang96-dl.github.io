@@ -1,0 +1,2 @@
+{"_comment":"Lesson 14：paged vs 连续 KV 对齐；preallocate_holes 制造非连续物理块。",
+ "prompt":"Hello paged world","block_size":4,"preallocate_holes":2}

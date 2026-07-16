@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 24 · Multimodal Prefill 与 Text Decode — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="媒体预处理→编码→投影→合并→多模态 prefill→文本 decode；vision encoder 只在 prefill 运行。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 24</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 24 · Multimodal Prefill 与 Text Decode <span class="phase-badge phase-learn">Phase 4</span></h1>
+  <p>理解「encoder 只在 prefill 跑一次、decode 是纯文本」，是多模态推理的性能关键。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>媒体预处理→编码→投影→合并→多模态 prefill→文本 decode；vision encoder 只在 prefill 运行。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/runner.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/multimodal/runner.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>MultiModalRunner.prefill()</code>、<code>MultiModalRunner.generate()</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 24</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 24</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 23</dd>
+        <dt>完成后下一步</dt><dd>Lesson 25</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>前面几课我们把图片变成了视觉 embedding（<a href="lesson_20.html">预处理</a>、
+     <a href="lesson_22.html">vision encoder</a>、<a href="lesson_23.html">合并进文本 embedding</a>）。
+     这一课要把它们<strong>串成一条能真正跑出文字的管线</strong>，并回答一个决定性能生死的问题：
+     <strong>vision encoder 到底该跑几次？</strong></p>
+  <p>答案是——<strong>只在 prefill 前跑一次</strong>。想清楚这一点，你就抓住了多模态推理最大的性能杠杆。
+     反过来，如果没想清楚，最容易犯的错就是「每 decode 一个字都重跑一遍 encoder」，
+     下一节我们用具体数字看看那有多亏。</p>
+
+  <h2 id="problem">先看问题：如果每步 decode 都重跑 encoder 会怎样 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>设一条消息是「1 张图 + 文字问题」，模型要回答 8 个 token。
+     一张 16×16 的图经过 patch 切分（<code>patch_size=8</code>，网格 2×2）得到
+     <strong>4 个 patch</strong>，vision encoder + projector 把它们变成 <strong>4 个视觉 token</strong>
+     （每个是 32 维向量）。关键事实：<strong>这 4 个视觉向量只由图片像素决定，和模型接下来吐什么字毫无关系</strong>。</p>
+  <table>
+    <thead><tr><th>做法</th><th>prefill 阶段</th><th>生成 8 个字期间</th><th>vision encoder 运行次数</th></tr></thead>
+    <tbody>
+      <tr><td>❌ 每步都重编码</td><td>编码 1 次</td><td>每 decode 一步再编码 1 次 × 8</td><td><strong>1 + 8 = 9 次</strong></td></tr>
+      <tr><td>✅ 本课做法</td><td>编码 1 次</td><td>decode 全程<strong>不碰</strong> encoder</td><td><strong>1 次</strong></td></tr>
+    </tbody>
+  </table>
+  <p>同一张图算 9 次，其中 8 次结果<strong>逐值完全一样</strong>——纯浪费。在我们的玩具模型里这只是慢一点；
+     但真实 vision encoder（如 CLIP ViT-L）有 <strong>三亿以上参数</strong>，比文本 decode 一步重得多，
+     每步重跑会让延迟直接翻几十倍。所以「encoder 只跑一次」不是小优化，而是多模态推理能不能用的分水岭。</p>
+  <div class="callout warn"><div class="callout-title">为什么可以只跑一次？（这是全课的题眼）</div>
+    视觉 token 一旦算出，就以<strong>普通向量</strong>的身份进入 prefill 序列，和文本 token 一起被写进
+    <strong>LLM 的 KV Cache</strong>。decode 时新字要「看图」，看的是缓存里那几行视觉 K/V——
+    不需要再回到 encoder。这和 <a href="lesson_07.html">Lesson 7</a> 的核心事实一脉相承：
+    <em>第 i 个位置的 K/V 只依赖前 i 个位置</em>，历史 K/V 算一次就永远有效。</div>
+
+  <h2 id="intuition">一句话解释 + 直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    多模态推理 = <strong>prefill 时把图「读懂」一次并记进 KV Cache</strong>，
+    之后 decode 就当作纯文本续写，边写边看缓存里的图，绝不回头再读图。</div>
+  <p><strong>类比：看图作文。</strong>你先花几分钟<strong>仔细看一遍图</strong>（vision encoder，跑一次），
+     在脑子里记下要点（视觉 token 进 KV Cache）。接下来动笔写作文，一个字一个字往下写（text decode），
+     每写一句都<strong>凭记忆瞄一眼图的要点</strong>，而不是每写一个字就把图重新盯着看一遍。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    「看图」和「记要点」在这里是同一步：encoder 的输出<strong>直接就是</strong>写进 KV 的内容，
+    中间没有「另外记笔记」的动作。另外——记忆（KV Cache）是<strong>逐层</strong>存的，
+    不是脑子里一张模糊印象；每一层 Transformer 都存了图对应的 K/V。</div>
+
+  <h2 id="pipeline">完整数据流：六步管线 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>把 <code>MultiModalRunner.generate()</code> 拆开，就是下面这条从「结构化消息」到「文字」的流水线。
+     注意竖虚线：<strong>线左边（含 prefill）只发生一次，线右边（decode）循环发生</strong>，而 encoder 稳稳待在左边。</p>
+  <div class="callout note"><div class="callout-title">generate() 的执行图（encoder 在虚线左侧，只跑一次）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;font-family:var(--mono);font-size:.76rem;margin-top:8px">
+      <div style="border:2px solid var(--prefill);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--prefill) 12%,var(--bg))">① 预处理<br><span style="color:var(--fg-dim)">图→(3,16,16)</span></div>
+      <div style="align-self:center">→</div>
+      <div style="border:2px solid var(--prefill);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--prefill) 12%,var(--bg))">② encoder+projector<br><span style="color:var(--fg-dim)">→ 视觉 emb (4,32)</span></div>
+      <div style="align-self:center">→</div>
+      <div style="border:2px solid var(--prefill);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--prefill) 12%,var(--bg))">③ 合并<br><span style="color:var(--fg-dim)">文本+视觉 emb</span></div>
+      <div style="align-self:center">→</div>
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 12%,var(--bg))">④ 多模态 prefill<br><span style="color:var(--fg-dim)">forward(inputs_embeds)<br>→ 首 token + KV</span></div>
+      <div style="align-self:center;font-size:1.4rem;color:var(--fg-dim);padding:0 2px">⋮</div>
+      <div style="border:2px dashed var(--decode);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--decode) 12%,var(--bg))">⑤ 文本 decode ×N<br><span style="color:var(--fg-dim)">forward([tok],[pos])<br>复用 KV，不碰 encoder</span></div>
+      <div style="align-self:center">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 8px">⑥ decode 出文字</div>
+    </div>
+    <div style="font-size:.76rem;color:var(--fg-dim);margin-top:6px">
+      蓝框①②③④＝prefill 一次性完成（⑤ 前的竖点 ⋮ 是分界）；红色虚线框⑤＝decode 循环，
+      每一步只喂 1 个 token，走 <a href="lesson_07.html">KV Cache</a>。encoder 只出现在 ②，永远不进 ⑤。</div>
+  </div>
+  <p>对照 <code>runner.py</code>：①②③在 <code>build_inputs()</code>／<code>prefill()</code> 里，
+     ④是 <code>prefill()</code> 最后的 <code>model.forward(..., inputs_embeds=merged)</code>，
+     ⑤⑥是 <code>generate()</code> 的 for 循环里 <code>model.forward([tok],[cur], kv_cache=cache)</code>。</p>
+
+  <h2 id="define">精确定义：视觉 embedding 不是 token id <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>纯文本模型里，输入是一串<strong>整数 token id</strong>，模型第一步用 <code>embed[id]</code> 查表变成向量。
+     但视觉信息<strong>没有对应的 id</strong>——图片不能塞进 259 大小的词表。多模态的做法是：
+     <strong>绕过查表，直接提供向量</strong>。这就是 <code>forward(inputs_embeds=...)</code> 这条路径的意义。</p>
+  <p>逐符号看每一步的输入/输出 shape（用本课真实数字）：</p>
+  <table>
+    <thead><tr><th>步骤</th><th>输入 shape</th><th>输出 shape</th><th>数字来源</th></tr></thead>
+    <tbody>
+      <tr><td>预处理</td><td>原图 (H,W,3)</td><td>(3, 16, 16)</td><td><code>image_size=16</code></td></tr>
+      <tr><td>patch embedding</td><td>(3, 16, 16)</td><td>(4, 48)</td><td>grid 2×2=<strong>4</strong> patch，<code>vision_hidden=48</code></td></tr>
+      <tr><td>vision encoder（1 层非因果）</td><td>(4, 48)</td><td>(4, 48)</td><td>patch 间互相可见，形状不变</td></tr>
+      <tr><td>projector（投影）</td><td>(4, 48)</td><td><strong>(4, 32)</strong></td><td>投到 <code>text_hidden=32</code></td></tr>
+    </tbody>
+  </table>
+  <div class="callout tip"><div class="callout-title">projector 为什么必不可少</div>
+    视觉空间是 <strong>48</strong> 维，文本空间是 <strong>32</strong> 维。要把视觉向量和文本向量拼在同一个序列里，
+    维度必须对齐——projector 就是那把「48→32」的尺子。若不对齐，
+    <code>merge_multimodal_embeddings</code> 会直接报「维度不一致」的错。</div>
+
+  <h2 id="worked">小规模手算：一条「图 + 你」消息如何变成 prefill 序列 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>取一条最小消息：<strong>1 张图 + 一个汉字「你」</strong>（为聚焦原理，略去 role 前缀）。
+     chat template 渲染出的 segments 是 <code>[("media", 图), ("text", "你")]</code>。
+     <code>MultiModalInputParser.parse()</code> 按下面的规则拼 token 序列：</p>
+  <ul>
+    <li>先放 <strong>BOS</strong>（id=256）；</li>
+    <li>遇到媒体：图有 4 个视觉 token，就插入 <strong>4 个占位 token</strong>（用 PAD，id=258），
+        并记下 <code>PlaceholderRange(offset=1, length=4)</code>；</li>
+    <li>遇到文本「你」：byte-level 分词，一个汉字＝3 个 UTF-8 字节＝<strong>3 个 token</strong>
+        （<code>你</code> = 228, 189, 160）。</li>
+  </ul>
+  <p>于是 <code>input_ids</code>（长度 <strong>1+4+3 = 8</strong>）与合并后的 embedding 如下。
+     注意占位 PAD 的 embedding 是<strong>废的</strong>——它在合并时被逐行换成视觉向量：</p>
+  <div class="callout note"><div class="callout-title">merge：把占位行换成视觉行（灰=文本，橙=视觉）</div>
+    <div style="overflow-x:auto"><table style="font-family:var(--mono);font-size:.8rem;margin-top:4px">
+      <thead><tr><th>position</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead>
+      <tbody>
+        <tr><td>input_ids</td><td>256<br><span style="color:var(--fg-dim)">BOS</span></td>
+          <td colspan="4" style="background:color-mix(in srgb,var(--decode) 12%,var(--bg))">258 258 258 258<br><span style="color:var(--fg-dim)">4×PAD 占位</span></td>
+          <td>228</td><td>189</td><td>160</td></tr>
+        <tr><td>merged 每行来自</td><td>文本 emb<br><span style="color:var(--fg-dim)">embed[256]</span></td>
+          <td style="background:color-mix(in srgb,var(--running) 18%,var(--bg))">视觉 V₀</td>
+          <td style="background:color-mix(in srgb,var(--running) 18%,var(--bg))">视觉 V₁</td>
+          <td style="background:color-mix(in srgb,var(--running) 18%,var(--bg))">视觉 V₂</td>
+          <td style="background:color-mix(in srgb,var(--running) 18%,var(--bg))">视觉 V₃</td>
+          <td>文本 emb<br><span style="color:var(--fg-dim)">embed[228]</span></td>
+          <td>文本 emb<br><span style="color:var(--fg-dim)">embed[189]</span></td>
+          <td>文本 emb<br><span style="color:var(--fg-dim)">embed[160]</span></td></tr>
+      </tbody>
+    </table></div>
+    <div style="font-size:.76rem;color:var(--fg-dim);margin-top:6px">
+      <code>merged</code> 形状 = <strong>(8, 32)</strong>；position 1–4 由 <code>PlaceholderRange(offset=1,length=4)</code>
+      定位，被 <code>visual_embeds_list[0]</code> 的 4 行逐行覆盖。</div>
+  </div>
+  <p>最后 <code>prefill()</code> 调用
+     <code>model.forward(None, positions=[0..7], inputs_embeds=merged, kv_cache=cache)</code>：
+     第一个参数是 <code>None</code>（不查表，因为我们直接给了 <code>inputs_embeds</code>），得到
+     <code>logits</code> 形状 <strong>(8, 259)</strong>，取最后一行 <code>logits[-1]</code> 采样出<strong>第一个生成 token</strong>，
+     同时这 8 个位置的 K/V（含 4 行视觉）已写进 <code>cache</code>。之后 <code>generate()</code> 从 position 8 起
+     逐 token decode，每步只喂 1 个 token、复用 <code>cache</code>——<code>encoder_runs</code> 停在 <strong>1</strong>，不再增长。</p>
+
+  <h2 id="threecache">encoder 只跑一次 & 三层缓存别混淆 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>多模态里有三个<strong>层级完全不同</strong>的缓存，初学者极易混为一谈。它们缓存的东西、命中的时机、
+     由谁管理都不一样：</p>
+  <table>
+    <thead><tr><th>缓存</th><th>缓存什么</th><th>命中省掉哪一步</th><th>本课代码</th></tr></thead>
+    <tbody>
+      <tr><td>ProcessorCache</td><td>预处理后的像素 (3,16,16)</td><td>省掉 resize/normalize</td><td><code>self.processor_cache</code>（<code>_encode_image</code>）</td></tr>
+      <tr><td>EncoderOutputCache</td><td><strong>投影后的视觉 emb (4,32)</strong></td><td>省掉整个 encoder+projector</td><td><code>self.encoder_cache</code>（<code>_encode_image</code>）</td></tr>
+      <tr><td>LLM KV Cache</td><td>每层每 token 的 K/V</td><td>省掉历史 token 的 attention 重算</td><td><code>KVCache</code>（<code>generate</code> 里 new 一个）</td></tr>
+    </tbody>
+  </table>
+  <p>要分清两件独立的事：</p>
+  <ul>
+    <li><strong>「encoder 只在 prefill 跑一次」</strong>——这是<strong>本课默认就成立</strong>的，靠的是
+        <code>generate()</code> 的结构：只有 <code>prefill()</code> 走 <code>build_inputs→_encode_image</code>，
+        decode 循环里完全没有 encoder。所以哪怕三个缓存都不开，同一次 <code>generate</code> 里 encoder 也只跑一次
+        （<code>encoder_runs == 1</code>）。</li>
+    <li><strong>ProcessorCache / EncoderOutputCache</strong>——这是<strong>跨请求</strong>的进阶优化：
+        下次<strong>另一个请求</strong>又发来<strong>同一张图</strong>时，直接命中缓存、连这一次编码都省了。
+        它们是可选的（默认 <code>None</code>）。</li>
+  </ul>
+  <div class="callout tip"><div class="callout-title">一句话记住区别</div>
+    LLM KV Cache 让 <strong>decode 便宜</strong>（不重算历史 attention）；
+    Encoder/Processor Cache 让 <strong>重复的图便宜</strong>（不重复编码同一张图）。
+    前者本课必用，后者本课可选。</div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「decode 每步都要重新看一遍图」</td><td>图的信息在 prefill 时已写进 <strong>LLM KV Cache</strong>，decode 只需读缓存里的视觉 K/V。重跑 encoder 是纯浪费（9 次 vs 1 次）。</td></tr>
+      <tr><td>「视觉 token 和文本 token 一样是整数 id」</td><td>视觉是<strong>连续向量</strong>，没有词表 id。它走 <code>inputs_embeds</code> 直接进 hidden 空间；input_ids 里那几个位置只是 <strong>PAD 占位</strong>，其 embedding 会被换掉。</td></tr>
+      <tr><td>「prefill 序列长度 = 文本 token 数」</td><td>视觉 token <strong>也占序列位置、也进 KV</strong>。本例 8 个位置里有 4 个是视觉。序列长度 = BOS + 视觉 token 数 + 文本 token 数。</td></tr>
+      <tr><td>「开了 KV Cache 就不用管 encoder 重复了」</td><td>两者层级不同：KV Cache 管的是<strong>同一次生成内</strong>的 decode 复用；同一张图<strong>跨请求</strong>不重复编码要靠 EncoderOutputCache。</td></tr>
+      <tr><td>「合并 embedding 时要把 PAD 的 embedding 也算进去」</td><td>PAD 占位行的 embedding 被 <code>merge_multimodal_embeddings</code> <strong>整行覆盖</strong>成视觉向量，原值根本不参与，算它无意义。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课讲解对应 <code>mini_vllm/multimodal/runner.py</code> 的两个焦点函数：</p>
+  <pre><code># prefill()：管线 ①②③④，encoder 在这里(且仅在这里)被触发
+input_ids, ranges, visual_embeds_list, _ = self.build_inputs(messages)  # ①②：_encode_image → encoder_runs += 1
+text_embeds = [list(self.model.embed[tid]) for tid in input_ids]         # 文本查表(PAD 行是废的)
+merged = merge_multimodal_embeddings(text_embeds, ranges, visual_embeds_list)  # ③：占位行换成视觉行
+logits = self.model.forward(None, positions, kv_cache=cache, inputs_embeds=merged)  # ④：多模态 prefill
+
+# generate()：④之后进入 decode 循环，⑤⑥——不再调用 build_inputs/encoder
+tok = smp(pre.logits[-1])                       # 首 token 来自 prefill 最后一行
+for _ in range(max_new_tokens - 1):
+    logits = self.model.forward([tok], [cur], kv_cache=cache)   # 纯文本 decode，只喂 1 个 token
+    tok = smp(logits[-1]); cur += 1              # encoder_runs 保持不变 → 验证「只跑一次」</code></pre>
+  <p><code>encoder_runs</code> 这个计数器（每次真正跑 encoder 就 +1）就是本课测试的抓手：
+     一次 <code>generate</code> 结束后它应等于媒体数（本例 1 张图 → 1），证明 decode 没重复编码。</p>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a24">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>多模态 prefill 与文本 decode 如何衔接？encoder 跑几次？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 24
+python3 course.py run 24 --trace
+python3 course.py check 24</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 24` 看 encoder 只跑一次。</details>
+    <details><summary>提示 Level 2 · 位置</summary>prefill 用 inputs_embeds 混入视觉 embedding。</details>
+    <details><summary>提示 Level 3 · 机制</summary>decode 是纯文本，复用 LLM KV Cache。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>三层缓存互不相同。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>decode 又跑 encoder</td><td>误在每步重编码</td><td>encoder 只在 prefill；decode 走 KV Cache</td></tr><tr><td>prefill 没含视觉 token</td><td>合并漏了</td><td>视觉 token 占序列位置、进 KV</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 24 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>为什么 decode 不需要重新运行 vision encoder？</li><li>多模态 prefill 的序列长度由什么决定？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>MultiModalRunner</td><td>vLLM mm model runner</td><td>prefill 编码/decode 纯文本一致</td><td>真实分布式、异步、批量编码</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>媒体预处理→编码→投影→合并→多模态 prefill→文本 decode；vision encoder 只在 prefill 运行。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="24">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_25.html">下一步：Lesson 25 · 多图片与动态 Visual Token →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 24 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a24", {stages: [{title:"媒体预处理", detail:"processor / sampler"},{title:"vision encoder + projector", detail:"视觉 embedding（仅 prefill 前运行一次）"},{title:"合并 embedding", detail:"文本 + 视觉"},{title:"多模态 prefill", detail:"forward(inputs_embeds=...) → 首 token + KV Cache"},{title:"文本 decode", detail:"逐 token，复用 KV Cache，不再跑 encoder"}]});
+</script>
+</body>
+</html>

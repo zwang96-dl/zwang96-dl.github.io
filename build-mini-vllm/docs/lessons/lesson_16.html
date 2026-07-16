@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 16 · Prefix Caching — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="相同前缀共享 KV 物理块：block hash、parent hash 链、引用计数、共享、逐出；命中不改变输出。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 16</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 16 · Prefix Caching <span class="phase-badge phase-build">Phase 3</span></h1>
+  <p>前缀缓存能省下重复 prefill 的大量算力，是多轮对话 / 共享 system prompt 的关键优化。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>相同前缀共享 KV 物理块：block hash、parent hash 链、引用计数、共享、逐出；命中不改变输出。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/cache/prefix_cache.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/cache/prefix_cache.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>PrefixCache.attach/on_finish</code>、<code>块链式哈希</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 16</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 16</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 15</dd>
+        <dt>完成后下一步</dt><dd>Lesson 17</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>前面几课我们学会了：<a href="lesson_07.html">缓存 K/V</a>（Lesson 7）、把缓存切成
+     <a href="lesson_13.html">物理块</a>（Lesson 13）、用<strong>引用计数</strong>让一块被多条序列共用。
+     这一课把这三样拼起来做一件很实际的事：<strong>两条请求如果开头一模一样，就让它们共用同一批物理 KV 块，
+     省掉重复的 prefill</strong>。这在真实服务里几乎无处不在——多轮对话每一轮都带着<em>整段历史</em>重新发来、
+     成千上万个请求共用<em>同一段 system prompt</em>、few-shot 提示里<em>同样的例子</em>被反复送进模型。
+     搞懂它，你就理解了 vLLM「为什么第二次请求快得多」的核心机制。</p>
+
+  <h2 id="problem">先看问题：重复 prefill 到底浪费了什么 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课的 tokenizer 是 <strong>byte-level</strong>：每个 UTF-8 字节 = 1 个 token，中文一字 = 3 字节 = 3 个 token，
+     句首还会加一个 BOS。设一段共享的 system prompt 是
+     <code>"System: you are a helpful assistant. "</code>，它 37 个字节，加 BOS 共 <strong>38 个 token</strong>。
+     现在有 100 条请求，每条都带着这段前缀、后面接一句不同的用户问题。</p>
+  <table>
+    <thead><tr><th>做法</th><th>每条请求 prefill 的前缀 token 数</th><th>100 条累计 prefill 前缀 token</th></tr></thead>
+    <tbody>
+      <tr><td>不开前缀缓存</td><td>38（每条都从头算一遍）</td><td><code>100 × 38 = 3800</code></td></tr>
+      <tr><td>开前缀缓存（block_size=4）</td><td>第 1 条 38；之后每条只算尾部 ≈ 2</td><td><code>38 + 99 × 2 ≈ 236</code></td></tr>
+    </tbody>
+  </table>
+  <p>前缀里那 <code>38 // 4 = 9</code> 个整块（36 个 token）的 K/V，其实<strong>每条请求算出来的结果一模一样</strong>——
+     却被重算了 100 遍。前缀缓存把它们算一次、存下来、后面 99 条直接复用，累计 prefill 从 3800 降到约 236，
+     <strong>省掉约 16×</strong>。而且 attention 的代价随长度是超线性的，前缀越长，省得越狠。</p>
+  <div class="callout note"><div class="callout-title">和 KV Cache（Lesson 7）的区别</div>
+    KV Cache 是<strong>一条请求内部</strong>省重复：decode 时不重算自己的历史。前缀缓存是<strong>跨请求</strong>省重复：
+    请求 A 和请求 B 之间共用同一段前缀的 K/V。前者在一条序列的时间轴上省，后者在多条序列之间省。</div>
+
+  <h2 id="intuition">一句话解释 + 直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    前缀缓存 = 把「多条请求共同的开头」那段 KV 物理块<strong>存进一个全局缓存</strong>，
+    后来的请求发现开头相同，就<strong>直接借用同一批物理块</strong>（引用计数 +1），跳过这段 prefill。</div>
+  <p><strong>类比：公司公用的「入职手册」。</strong>每个新人报到都要先读同一本手册（system prompt），
+     再谈自己的岗位（各自的问题）。与其给每个人重印一本，不如在前台<strong>放一本共享的</strong>：
+     谁来都先翻这本（借用 = incref），读完自己那部分再散去。手册只印一次，省下大量印刷（prefill）。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    共享的前提比「印手册」严格得多：手册可以从任意一页翻起，但 KV 块<strong>只能从第 0 个 token、按块对齐</strong>地共享。
+    因为第 i 个位置的 K/V 依赖<em>前面所有 token 以及它的绝对位置</em>——只要开头差一个 token，或者位置错开一格，
+    后面整段 K/V 就全变了，不能共用。下一节用公式说清这一点。</div>
+
+  <h2 id="correct">为什么命中不改变输出（精确定义） <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>回忆 attention（<a href="lesson_04.html">Lesson 4</a>）：位置 <code>i</code> 的输出是对它能看到的所有位置
+     <code>j ≤ i</code> 的 Value 加权求和，权重来自 Query 与 Key 的相似度：</p>
+  <math display="block" class="mathblock">
+    <msub><mi>out</mi><mi>i</mi></msub><mo>=</mo>
+    <munder><mo>∑</mo><mrow><mi>j</mi><mo>≤</mo><mi>i</mi></mrow></munder>
+    <msub><mi>softmax</mi><mi>j</mi></msub>
+    <mo stretchy="false">(</mo>
+    <mfrac>
+      <mrow><msub><mi>q</mi><mi>i</mi></msub><mo>·</mo><msub><mi>k</mi><mi>j</mi></msub></mrow>
+      <msqrt><mi>d</mi></msqrt>
+    </mfrac>
+    <mo stretchy="false">)</mo>
+    <mo>·</mo><msub><mi>v</mi><mi>j</mi></msub>
+  </math>
+  <ul>
+    <li><code>k_j, v_j</code>：位置 <code>j</code> 的 Key / Value。由于是 <strong>causal（因果）</strong>注意力，
+        它们只由 token <code>0..j</code> 算出，<strong>与 j 之后的 token 无关</strong>。</li>
+    <li>本课模型的位置编码是 <strong>RoPE，用绝对位置</strong>：位置 <code>j</code> 的旋转角只取决于 <code>j</code> 这个下标，
+        与「这条请求还有多长、后面接什么」都无关。</li>
+  </ul>
+  <p>把这两点合起来：<strong>只要两条请求的 token <code>0..L-1</code> 完全相同，它们在这 <code>L</code> 个位置上的
+     <code>k_j, v_j</code> 就逐值（bit 级）相同</strong>。所以直接复用同一批物理块存的 K/V，不是近似、不是「差不多」，
+     而是<strong>精确等价</strong>。后面的新 token 去 attend 这段 K/V 时，读到的数与自己重算一遍完全一样，
+     因此<strong>命中不改变任何一个输出 token</strong>——这就是 <code>check 16</code> 要验证的「与不开缓存逐 token 一致」。</p>
+  <div class="callout warn"><div class="callout-title">两个「必须」，缺一不可</div>
+    ① <strong>从位置 0 开始</strong>：位置 5 的 K/V 依赖 0..5，不能脱离前 5 个 token 单独共享。<br>
+    ② <strong>按块对齐</strong>：缓存以「整块」为单位登记与复用（见下一节的哈希），半块不参与共享。<br>
+    只要这两条满足，命中就是安全的；违反任何一条都可能读到「位置或前文不一致」的 K/V，输出就错了。</div>
+
+  <h2 id="hash">块级链式哈希：怎么给前缀发「身份证」 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>缓存要能快速判断「这段前缀我见过没有」，就得给每一整块前缀算一个<strong>指纹（哈希）</strong>当键。
+     难点在于：位置 <code>i</code> 的 K/V 依赖<em>它前面所有 token</em>，所以指纹也必须<strong>把前文一起编进去</strong>——
+     否则两段「本块相同、但前文不同」的块会撞成同一个键，导致错误共享。做法是<strong>链式哈希（chained hash）</strong>：
+     每一块的哈希都<strong>接着上一块的哈希继续算</strong>，于是第 <code>k</code> 块的指纹自然包含了第 <code>0..k</code> 块的所有 token。</p>
+  <p>本课用 <strong>FNV-1a</strong> 逐 token 更新（对应 <code>prefix_cache.py</code> 的 <code>_block_hashes</code>）：</p>
+  <pre><code>h = OFFSET                              # 起始常量（整段只初始化一次，不在块之间重置）
+对每个整块 block_k：
+    对块内每个 token t：
+        h = (h XOR (t + 1)) × PRIME     # 逐 token 折进哈希；(t+1) 避开 token id 0
+    hashes[k] = h                       # 此刻的 h 即 block_k 的链式指纹（含 0..k 全部 token）</code></pre>
+  <ul>
+    <li><code>h</code>：滚动哈希值，<strong>不在块之间清零</strong>——这正是「链式」的关键，让 <code>hashes[k]</code> 携带前文。</li>
+    <li><code>t + 1</code>：token id 加 1，避免 id=0 折进去时不改变哈希。</li>
+    <li>只对 <code>len(token_ids) // block_size</code> 个<strong>整块</strong>算哈希，末尾不满一块的零头<strong>不算</strong>
+        （不满块的前缀不参与共享，正对应「至少留 1 个 token 跑 prefill」的规则）。</li>
+    <li>输出：一个哈希列表，第 <code>k</code> 个就是「前 <code>(k+1)</code> 块前缀」的身份证；缓存用它做键
+        （<code>map: 哈希 → 物理块 id</code>）。</li>
+  </ul>
+
+  <h2 id="worked">小规模手算：链式哈希如何拦住「错误共享」 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>FNV 的真常量是 64 位大数（<code>OFFSET=1469598103934665603</code>、<code>PRIME=1099511628211</code>），手算不便。
+     我们换一个<strong>玩具哈希</strong>把链式结构算清楚——公式换了，但<em>「不在块之间重置、逐 token 折入」</em>的骨架和真代码完全一样。
+     取 <code>block_size = 2</code>，起始 <code>h = 17</code>，更新式 <code>h = h × 31 + (t + 1)</code>。请求 A 的前缀 token 是 <code>[5, 7, 9, 3]</code>（2 个整块）：</p>
+  <table>
+    <thead><tr><th>步骤</th><th>吃进的 token</th><th>计算</th><th>h</th><th>产出</th></tr></thead>
+    <tbody>
+      <tr><td>初始化</td><td>—</td><td>—</td><td>17</td><td></td></tr>
+      <tr><td>块0·第1个</td><td>5</td><td>17×31 + 6</td><td>533</td><td></td></tr>
+      <tr><td>块0·第2个</td><td>7</td><td>533×31 + 8</td><td>16531</td><td><strong>H0 = 16531</strong></td></tr>
+      <tr><td>块1·第1个</td><td>9</td><td>16531×31 + 10</td><td>512471</td><td></td></tr>
+      <tr><td>块1·第2个</td><td>3</td><td>512471×31 + 4</td><td>15886605</td><td><strong>H1 = 15886605</strong></td></tr>
+    </tbody>
+  </table>
+  <p>注意 <code>H1</code> 是从 <code>H0</code> 接着往下算的，所以它<strong>把块0的 token（5,7）也编了进去</strong>。
+     现在拿三条请求和 A 比，看链式哈希如何精准地只共享「真正相同的从头前缀」：</p>
+  <table>
+    <thead><tr><th>请求</th><th>前缀 token</th><th>H0</th><th>H1</th><th>能共享几块</th><th>为什么</th></tr></thead>
+    <tbody>
+      <tr><td>A（基准）</td><td>[5, 7, 9, 3]</td><td>16531</td><td>15886605</td><td>—</td><td>基准</td></tr>
+      <tr><td>B</td><td>[5, 7, 9, <strong>4</strong>]</td><td>16531 ✅</td><td>15886606 ❌</td><td><strong>1 块</strong></td><td>块0 全同 → H0 命中；块1 差一个 token → H1 不同</td></tr>
+      <tr><td>C</td><td>[<strong>4</strong>, 7, 9, 3]</td><td>16500 ❌</td><td>…❌</td><td><strong>0 块</strong></td><td>开头就不同，H0 立刻不同；后面即使相同也<strong>不看</strong>（遇到未命中就停）</td></tr>
+      <tr><td>D</td><td>[5, 7, 9, 3]</td><td>16531 ✅</td><td>15886605 ✅</td><td><strong>2 块</strong></td><td>逐 token 全同 → 两块都命中，整段前缀复用</td></tr>
+    </tbody>
+  </table>
+  <p>请求 C 最能说明问题：它和 A 只有第一个 token 不同，但因为链式哈希从头折入，<code>H0</code> 立刻就变了，
+     后面的块<strong>连比都不比</strong>（<code>attach</code> 里 <code>else: break</code>）。这就从机制上保证了
+     「只共享从位置 0 起、连续命中的整块」——正是上一节「两个必须」的代码化身。</p>
+
+  <h2 id="exec">内联执行图：两条请求如何共享物理块 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>沿用请求 A 与请求 D（前缀相同，尾部不同）。block_size=4，A 的 prompt 是「2 整块前缀 + 1 尾块」。</p>
+  <div class="callout note"><div class="callout-title">阶段 ① 请求 A：未命中 → 正常 prefill，结束时登记前缀块</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--mono);font-size:.8rem;margin-top:6px">
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">b0<br><span style="color:var(--fg-dim)">前缀块0<br>tok 0-3</span></div>
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">b1<br><span style="color:var(--fg-dim)">前缀块1<br>tok 4-7</span></div>
+      <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 8px">b2<br><span style="color:var(--fg-dim)">A 尾块<br>tok 8-</span></div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px dashed var(--finished);border-radius:6px;padding:6px 10px">on_finish：把 b0,b1 登记进缓存<br><span style="color:var(--fg-dim)">map[H0]=b0, map[H1]=b1；缓存 incref 各一次</span></div>
+    </div>
+  </div>
+  <div class="callout note" style="border-left-color:var(--decode)"><div class="callout-title">阶段 ② 请求 D：命中前缀 → 借用 b0,b1，只新分配尾块</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--mono);font-size:.8rem;margin-top:6px">
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">b0<br><span style="color:var(--fg-dim)">复用<br>incref→2</span></div>
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">b1<br><span style="color:var(--fg-dim)">复用<br>incref→2</span></div>
+      <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 8px">b3<br><span style="color:var(--fg-dim)">D 尾块<br>新分配</span></div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px">跳过 tok 0-7 的 prefill<br><span style="color:var(--fg-dim)">num_computed_tokens 前移到 8</span></div>
+    </div>
+    <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+      虚线/浅底块 = 从缓存借用的共享前缀块；实线块 = 各请求自己的尾部。b0、b1 是<strong>同一份物理内存</strong>，
+      被 A 的缓存登记和 D 的借用同时引用（refcount=2），谁都不会误删。</div>
+  </div>
+
+  <h2 id="refcount">引用计数：谁在「按住」共享块不让它被回收 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>共享块最怕两件事：<strong>用着用着被别人回收了</strong>，或者<strong>没人用了却一直不回收（泄漏）</strong>。
+     解决办法就是 <a href="lesson_13.html">Lesson 13</a> 的<strong>引用计数</strong>——一块被几个「主人」引用，refcount 就是几，归零才真正回收。前缀缓存里 refcount 的变化：</p>
+  <table>
+    <thead><tr><th>时刻</th><th>动作</th><th>b0 的 refcount</th></tr></thead>
+    <tbody>
+      <tr><td>A prefill</td><td>A 分配 b0</td><td>1（A 持有）</td></tr>
+      <tr><td>A 结束 <code>on_finish</code></td><td>缓存登记 b0：<code>incref</code>；随后 A <code>kv.free()</code></td><td>1（A 释放，但缓存按住了）</td></tr>
+      <tr><td>D <code>attach</code> 命中</td><td>D 借用 b0：<code>incref</code></td><td>2（缓存 + D）</td></tr>
+      <tr><td>D 结束</td><td>D <code>kv.free()</code></td><td>1（只剩缓存按住）</td></tr>
+      <tr><td>缓存被 LRU 逐出</td><td><code>_evict_if_needed</code> 对 b0 <code>free</code></td><td>0 → 真正回收</td></tr>
+    </tbody>
+  </table>
+  <p><strong>关键洞察</strong>：如果 <code>on_finish</code> 时缓存<strong>不</strong> incref，A 一 <code>free</code>，b0 的 refcount 就归零被回收，
+     后面 D 再想复用就扑空了——所以「缓存自己也算一个引用」是前缀共享能成立的必要条件。反过来，容量有限，
+     缓存用 <strong>LRU</strong> 逐出最久没被 touch 的键（<code>order</code> 列表越靠后越新），逐出时 decref，
+     让不再热门的前缀把物理块还回去。</p>
+
+  <h2 id="shape">省了多少：块数与内存 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课 tiny model：<code>hidden=32</code>、<code>layers=2</code>、<code>heads=4</code>、<code>kv_heads=2</code>（GQA）、<code>head_dim=8</code>。
+     一个 token 每层的 K/V = <code>2 · kv_heads · head_dim = 2·2·8 = 32</code> 个数，两层共 <code>64</code> 个数。
+     <code>block_size=4</code> 的一个物理块装 4 个 token 的 KV = <code>4 × 64 = 256</code> 个数。</p>
+  <table>
+    <thead><tr><th>场景（前缀 8 token = 2 块，100 条请求）</th><th>物理块占用</th><th>省下的前缀块</th></tr></thead>
+    <tbody>
+      <tr><td>不开前缀缓存</td><td>每条各自 2 块 → <code>100×2 = 200</code> 块</td><td>0</td></tr>
+      <tr><td>开前缀缓存</td><td>2 块共享给全部 100 条 → <strong>2</strong> 块</td><td><code>198</code> 块（≈ <code>198×256 = 50688</code> 个数）</td></tr>
+    </tbody>
+  </table>
+  <p>省的是<strong>两样东西</strong>：一是那 <code>99×2</code> 块前缀的<strong>物理显存</strong>（大家共用一份），
+     二是那 <code>99×8</code> 个前缀 token 的<strong>prefill 计算</strong>。前缀越长、请求越多，两样都省得越夸张——
+     这正是长 system prompt 高并发场景下前缀缓存不可或缺的原因。</p>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「只要中间某段 token 相同就能共享」</td><td>不行。位置 i 的 K/V 依赖 <strong>0..i 的全部 token 和绝对位置</strong>。共享必须<strong>从位置 0 起、连续命中</strong>；<code>attach</code> 一遇未命中就 <code>break</code>。</td></tr>
+      <tr><td>「共享块只是省内存」</td><td>更重要的是省<strong>计算</strong>：命中意味着跳过这段 prefill（<code>num_computed_tokens</code> 前移）。省显存是附带的，省算力才是主目标。</td></tr>
+      <tr><td>「命中可能让输出略有偏差」</td><td>命中是<strong>逐值精确等价</strong>，不是近似：因果 + 绝对位置保证相同前缀的 K/V bit 级相同。<code>check 16</code> 验证「与不开缓存逐 token 一致」。</td></tr>
+      <tr><td>「请求结束后缓存块就该释放」</td><td>恰恰要<strong>留着</strong>才有意义——缓存自己 <code>incref</code> 持有一份引用，请求 <code>free</code> 后块仍存活，供后续请求复用；容量满了才 LRU 逐出。</td></tr>
+      <tr><td>「整段 prompt 都命中最省」</td><td>会漏 bug：若把最后一块也命中，就没 token 去跑 prefill、拿不到首个输出 token 的 logits。所以 <code>attach</code> 里<strong>至少留 1 个 token</strong>（<code>shared*bs ≥ prompt_len</code> 时回退一块）。</td></tr>
+      <tr><td>「块哈希只 hash 本块 token 就够」</td><td>那样「本块同、前文不同」的两块会撞键 → 错误共享。必须用<strong>链式哈希</strong>把前文一起编入（<code>h</code> 不在块间重置）。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课讲解逐一对应 <code>mini_vllm/cache/prefix_cache.py</code>：</p>
+  <table>
+    <thead><tr><th>讲解</th><th>代码</th><th>做什么</th></tr></thead>
+    <tbody>
+      <tr><td>链式哈希发身份证</td><td><code>_block_hashes()</code></td><td>只对整块算 FNV-1a，<code>h</code> 跨块不重置 → 每块哈希含全部前文</td></tr>
+      <tr><td>命中即复用、跳过 prefill</td><td><code>attach()</code></td><td>顺序比对哈希，命中就 <code>incref</code> + 追加 block_table + 前移 <code>num_computed_tokens</code>；遇未命中 <code>break</code>；末块回退保 1 token</td></tr>
+      <tr><td>结束时登记前缀 + 释放自身</td><td><code>on_finish()</code></td><td>把没缓存过的整块前缀 <code>incref</code> 登记进 <code>map</code>，再 <code>kv.free()</code> 释放请求引用</td></tr>
+      <tr><td>引用计数让共享块存活</td><td><code>BlockAllocator.incref/free</code></td><td>refcount 归零才回收（<a href="lesson_13.html">Lesson 13</a>）</td></tr>
+      <tr><td>容量满 LRU 逐出</td><td><code>_evict_if_needed()</code> / <code>_touch()</code></td><td><code>order</code> 越靠后越新，超容量逐出最旧键并 <code>free</code></td></tr>
+    </tbody>
+  </table>
+  <div class="callout tip"><div class="callout-title">读代码的顺序建议</div>
+    先看 <code>_block_hashes</code>（身份证怎么发）→ 再看 <code>attach</code>（怎么命中复用）→ 最后 <code>on_finish</code> + <code>_evict_if_needed</code>（怎么登记、存活、逐出）。三步连起来就是一条前缀从「被算出」到「被复用」再到「被回收」的完整生命周期。</div>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a16">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>相同前缀的两个请求如何共享 KV 物理块？命中为何不改变输出？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 16
+python3 course.py run 16 --trace
+python3 course.py check 16</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 16` 看命中率与正确性。</details>
+    <details><summary>提示 Level 2 · 位置</summary>块级链式哈希标识前缀；命中即复用物理块。</details>
+    <details><summary>提示 Level 3 · 机制</summary>引用计数让缓存块在请求结束后存活。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>命中必须不改变输出。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>命中改变了输出</td><td>共享了位置不对齐的块</td><td>只共享从位置 0 起、块对齐的前缀</td></tr><tr><td>缓存块被误回收</td><td>没给缓存持有引用</td><td>登记时 incref，flush 时释放</td></tr><tr><td>整段命中无 token</td><td>把最后一块也命中了</td><td>至少留 1 个 token 跑 prefill 取首 token logits</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 16 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>为什么只有「从头开始、块对齐」的前缀才能共享？</li><li>system prompt 很长且被大量请求共享时，前缀缓存能省多少？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>块链式哈希 + 引用计数</td><td>vLLM Prefix Caching</td><td>块级共享一致</td><td>vLLM 有更强的 hash/eviction 与 CoW</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>相同前缀共享 KV 物理块（块哈希 + 引用计数）；因果注意力保证命中不改变输出。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="16">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_17.html">下一步：Lesson 17 · 完整 Text Mini-vLLM →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 16 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/blocks_anim.js"></script>
+<script>
+BlocksAnim.mount("#a16", {frames:[{owners:[null,null,null,null,null,null,null,null],desc:"两条共享同一段前缀的请求。",code:"PrefixCache"},{owners:[2,2,0,null,null,null,null,null],newly:[0,1,2],labels:{2:"共享前缀",0:"A尾部"},desc:"请求 A：前缀块 b0,b1 + 自己的尾部块 b2。A 完成后把前缀块登记进缓存。",code:"on_finish: 登记前缀块"},{owners:[2,2,0,1,null,null,null,null],newly:[3],labels:{2:"共享前缀",0:"A尾部",1:"B尾部"},desc:"请求 B 命中前缀 -> 复用 b0,b1（incref），只新分配尾部块 b3。",code:"attach: 命中，跳过前缀 prefill"},{owners:[2,2,0,1,null,null,null,null],labels:{2:"共享前缀",0:"A尾部",1:"B尾部"},desc:"命中不改变输出：因果注意力下前缀位置的 K/V 只依赖前缀本身，两请求逐值相同。",code:"输出与不开前缀缓存一致"}]});
+</script>
+</body>
+</html>

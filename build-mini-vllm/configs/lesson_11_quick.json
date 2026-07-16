@@ -1,0 +1,9 @@
+{
+  "_comment": "Lesson 11：与课文手算的 A/B/C 例子完全一致(A 长/B、C 短，单窗口 max_num_seqs=1)，跑 run 11 的数字应与手算对得上(FIFO 平均 TTFT≈5.67，SJF=3.0)。",
+  "block_size": 8, "num_blocks": 128, "max_num_seqs": 1, "max_num_batched_tokens": 12,
+  "requests": [
+    {"id": "A", "prompt": "abc", "max_new_tokens": 5, "arrival": 0},
+    {"id": "B", "prompt": "x",   "max_new_tokens": 1, "arrival": 0},
+    {"id": "C", "prompt": "y",   "max_new_tokens": 1, "arrival": 0}
+  ]
+}

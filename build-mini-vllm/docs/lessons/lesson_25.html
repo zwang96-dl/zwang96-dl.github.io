@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 25 · 多图片与动态 Visual Token — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="不同请求含不同数量媒体 → 视觉 token 数动态变化；媒体顺序与 placeholder 对齐。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 25</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 25 · 多图片与动态 Visual Token <span class="phase-badge phase-learn">Phase 5</span></h1>
+  <p>真实请求的媒体数量千变万化；动态 visual token 是多模态调度的基础。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>不同请求含不同数量媒体 → 视觉 token 数动态变化；媒体顺序与 placeholder 对齐。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/runner.py</code>、<code>mini_vllm/multimodal/inputs.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/multimodal/inputs.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>MultiModalRunner.build_inputs()</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 25</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 25</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 24</dd>
+        <dt>完成后下一步</dt><dd>Lesson 26</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>到 <a href="lesson_23.html">Lesson 23</a> 为止，我们已经能把<strong>一张</strong>图片塞进文本序列：
+     图片被编码成一小段视觉 embedding，在 token 序列里占一段<strong>占位 token</strong>，再被逐位替换。
+     但真实请求从来不是「永远一张图」——有的纯文本（0 张图）、有的一张图、有的两三张图交错在文字里、
+     还有的直接甩一段<strong>视频</strong>。每一种，塞进序列的<strong>视觉 token 数都不一样</strong>。</p>
+  <p>这一课要彻底搞清三件事：<em>①每种媒体贡献多少个 visual token（怎么算）；②同一批请求为什么序列长度各不相同（动态）；
+     ③多段媒体与它们的占位区间怎么<strong>一一对齐、不串位</strong>（顺序）。</em>
+     这三件事是后面<strong>多模态调度</strong>（按 visual token 数做预算 gating）和<strong>KV 预留</strong>的直接前提——
+     序列有多长、KV 要留多少，全由这里算出来的 visual token 数决定。</p>
+
+  <h2 id="problem">先看问题：把 visual token 数写死会怎样 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>先用本课的<strong>真实数字</strong>感受一下「动态」到底有多动态。本课视觉配置：
+     <code>image_size=16</code>、<code>patch_size=8</code> → grid <code>2×2</code> → 每张图
+     <code>num_patches = 4</code> 个 visual token；视频默认采 <code>num_frames=4</code> 帧，逐帧编码后拼接，
+     所以一段视频 = <code>帧数 × 每帧 patch 数 = 4 × 4 = 16</code> 个 visual token。文本用 byte-level tokenizer：
+     每个 UTF-8 字节 = 1 个 token，<strong>一个中文字 = 3 字节 = 3 个 token</strong>。</p>
+  <p>把这些代进「同一批」三个请求，序列长度立刻岔开（<code>len = 1(BOS) + 文本字节数 + Σ visual token</code>）：</p>
+  <table>
+    <thead><tr><th>请求</th><th>文本</th><th>媒体</th><th>visual token 数</th><th>序列总长</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td>「看图」= 6</td><td>1 张图</td><td>4</td><td>1 + 6 + 4 = <strong>11</strong></td></tr>
+      <tr><td>B</td><td>「看图」「还有」= 12</td><td>2 张图（交错）</td><td>4 + 4 = 8</td><td>1 + 12 + 8 = <strong>21</strong></td></tr>
+      <tr><td>C</td><td>「看视频」= 9</td><td>1 段视频（4 帧）</td><td>4 × 4 = 16</td><td>1 + 9 + 16 = <strong>26</strong></td></tr>
+    </tbody>
+  </table>
+  <p>如果偷懒把「每个请求 = 4 个 visual token」<strong>写死</strong>：请求 B 实际有 8 个视觉 embedding，
+     却只开了 4 个占位——多出来的 4 个 embedding 无处安放，合并时直接<strong>越界或错位</strong>；
+     请求 C 需要 16 个占位却只给 4 个，视频后 12 帧全丢。所以 visual token 数<strong>必须按媒体逐个动态算出</strong>，
+     不能是常数。这正是 <code>build_inputs()</code> 存在的理由。</p>
+
+  <h2 id="intuition">一句话解释 + 直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    「动态 visual token」= <strong>先按每段媒体各自的类型/大小算出它要占多少个 token，再照这个数在序列里挖出对应长度的占位坑</strong>，
+    最后把视觉 embedding 一格一格填进去。图片挖 4 格、4 帧视频挖 16 格，坑的大小随媒体而变。</div>
+  <p><strong>类比：给文章排版留图框。</strong>一篇图文混排的文章，每张配图尺寸不同——你得<strong>先量好每张图多大</strong>，
+     在正文里预留<strong>对应大小的空白框</strong>，再把图贴进去。图大就留大框，图小就留小框；
+     绝不能所有图都留同样大的框，否则要么图溢出、要么留一堆空白。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    「图框」是二维的空白区域，而这里的占位是一维序列上<strong>连续的一段 token</strong>（每格是一个 <code>text_hidden=32</code> 维向量位）。
+    更关键：文章排版可以先留框后填图、顺序随意调；而这里<strong>占位区间的顺序必须严格等于媒体的出现顺序</strong>——
+    第 0 段媒体对第 0 个占位区间，一旦串位，视觉 embedding 就填到别人的坑里，模型看到的图文关系全错。</div>
+
+  <h2 id="define">精确定义：visual token 数怎么算、shape 是多少 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>逐符号拆开每种媒体贡献的 visual token 数（<code>num_patches = grid² = 4</code>）：</p>
+  <math display="block" class="mathblock">
+    <mtext>image</mtext><mo>:</mo>
+    <msub><mi>n</mi><mi>visual</mi></msub><mo>=</mo>
+    <msub><mi>num</mi><mi>patches</mi></msub><mo>=</mo><mn>4</mn>
+  </math>
+  <math display="block" class="mathblock">
+    <mtext>video</mtext><mo>:</mo>
+    <msub><mi>n</mi><mi>visual</mi></msub><mo>=</mo>
+    <msub><mi>num</mi><mi>frames</mi></msub><mo>×</mo><msub><mi>num</mi><mi>patches</mi></msub>
+    <mo>=</mo><mn>4</mn><mo>×</mo><mn>4</mn><mo>=</mo><mn>16</mn>
+  </math>
+  <math display="block" class="mathblock">
+    <mtext>序列长</mtext><mo>:</mo>
+    <msub><mi>seq</mi><mi>len</mi></msub><mo>=</mo>
+    <mn>1</mn><mo stretchy="false">(</mo><mtext>BOS</mtext><mo stretchy="false">)</mo>
+    <mo>+</mo><mo>∑</mo><msub><mi>text</mi><mi>bytes</mi></msub>
+    <mo>+</mo><mo>∑</mo><msub><mi>n</mi><mi>visual</mi></msub>
+  </math>
+  <ul>
+    <li><code>num_patches</code>：一张图切成的 patch 数 = <code>(image_size / patch_size)² = (16/8)² = 4</code>。
+        每个 patch 经 vision encoder + projector 变成<strong>一个</strong> visual token。</li>
+    <li><code>num_frames</code>：视频采样帧数（默认 4）。视频 = 若干帧图片按<strong>时间顺序</strong>拼起来，所以乘上帧数。</li>
+    <li><code>text_bytes</code>：文本段的 UTF-8 字节数（中文字 = 3）。BOS 单独占 1 个 token。</li>
+  </ul>
+  <p><strong>输入 / 输出 shape（用真实数字）：</strong>一张图的像素经 <code>encoder.encode()</code> 得到
+     <code>(num_patches, vision_hidden) = (4, 48)</code>，再经 <code>projector</code> 投影到文本维得到
+     <code>(num_patches, text_hidden) = (4, 32)</code>。所以 <code>build_inputs()</code> 收集到的
+     <code>visual_embeds_list</code> 里，每个元素形状是 <code>(n_visual, 32)</code>：图片是 <code>(4, 32)</code>、
+     4 帧视频是 <code>(16, 32)</code>。对应的占位区间长度 <code>length</code> 就等于这个 <code>n_visual</code>。</p>
+  <div class="callout note"><div class="callout-title">estimate() vs build_inputs()：算数 vs 真编码</div>
+    <code>estimate()</code>（runner.py）<strong>不做任何编码</strong>，只按上面的公式把 visual token 数加出来——
+    供调度器<strong>提前做预算 gating</strong>（这条请求会不会撑爆 KV？）。<code>build_inputs()</code> 才真正跑
+    vision encoder 拿到 embedding。两者对同一请求算出的 visual token 数<strong>必须一致</strong>。</div>
+
+  <h2 id="worked">小规模手算：请求 B「看图[图]还有[图]」怎样变成序列 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>取上表请求 B：文本图交错的两张图。chat template 渲染出的 segments 依次是
+     <code>text「看图」→ media(图0) → text「还有」→ media(图1)</code>。
+     <code>build_inputs()</code> 先把两张图各编码成 <code>(4,32)</code>，得到 <code>lens = [4, 4]</code>，
+     再交给 <code>parser.parse(segments, lens)</code>。parse 从左到右逐段处理，<strong>逐 token</strong> 结果如下
+     （PAD_id = 258 作占位；「看/图/还/有」各 3 字节）：</p>
+  <table>
+    <thead><tr><th>位置</th><th>来源段</th><th>token</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>—</td><td>BOS(256)</td><td>序列起始，<code>add_bos</code></td></tr>
+      <tr><td>1–6</td><td>text「看图」</td><td>6 个字节 token</td><td>看=3字节 + 图=3字节</td></tr>
+      <tr><td>7–10</td><td>media 图0</td><td>PAD ×4</td><td>占位坑 → <code>range0</code></td></tr>
+      <tr><td>11–16</td><td>text「还有」</td><td>6 个字节 token</td><td>还=3字节 + 有=3字节</td></tr>
+      <tr><td>17–20</td><td>media 图1</td><td>PAD ×4</td><td>占位坑 → <code>range1</code></td></tr>
+    </tbody>
+  </table>
+  <p>于是 <code>input_ids</code> 长度 = <code>1+6+4+6+4 = 21</code>（对上了请求 B 的 21）。同时记录两个占位区间：</p>
+  <pre><code>range0 = PlaceholderRange(offset=7,  length=4, media_index=0, modality="image")
+range1 = PlaceholderRange(offset=17, length=4, media_index=1, modality="image")</code></pre>
+  <div class="callout note" style="border-left-color:var(--decode)">
+    <div class="callout-title">序列拼装执行图（灰=文本 token，实线框=图片占位坑）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;font-family:var(--mono);font-size:.78rem;margin-top:8px">
+      <div style="border:1px dashed var(--fg-dim);border-radius:6px;padding:6px 8px;text-align:center">0<br><span style="color:var(--fg-dim)">BOS</span></div>
+      <div style="border:1px solid var(--fg-dim);border-radius:6px;padding:6px 10px;background:color-mix(in srgb,var(--fg-dim) 12%,var(--bg));text-align:center">1–6<br>看图<br><span style="color:var(--fg-dim)">6 text</span></div>
+      <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 10px;text-align:center">7–10<br>PAD×4<br><span style="color:var(--decode)">图0 → range0</span></div>
+      <div style="border:1px solid var(--fg-dim);border-radius:6px;padding:6px 10px;background:color-mix(in srgb,var(--fg-dim) 12%,var(--bg));text-align:center">11–16<br>还有<br><span style="color:var(--fg-dim)">6 text</span></div>
+      <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 10px;text-align:center">17–20<br>PAD×4<br><span style="color:var(--decode)">图1 → range1</span></div>
+    </div>
+    <div style="margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem">
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">visual_embeds[0]<br>(4, 32)</div>
+      <div style="font-size:1.2rem">→ 填入 offset 7..10</div>
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 8px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">visual_embeds[1]<br>(4, 32)</div>
+      <div style="font-size:1.2rem">→ 填入 offset 17..20</div>
+    </div>
+    <div style="font-size:.76rem;color:var(--fg-dim);margin-top:6px">
+      合并阶段（Lesson 23 的 <code>merge_multimodal_embeddings</code>）把每个 <code>visual_embeds[k]</code> 逐格覆盖到
+      <code>range[k]</code> 的位置上，PAD 只是临时占位、其向量值无所谓。</div>
+  </div>
+
+  <h2 id="order">顺序与占位对齐：media_index 是关键 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>「动态数量」之外，本课第二个坑是<strong>顺序</strong>。parse() 用一个计数器 <code>media_i</code>：每遇到一段媒体，就取
+     <code>lens[media_i]</code> 个占位、记 <code>media_index=media_i</code>、然后 <code>media_i += 1</code>。
+     这保证了<strong>第 k 段媒体 ↔ 第 k 个占位区间 ↔ visual_embeds_list[k]</strong> 三者<strong>下标严格一致</strong>。</p>
+  <p>为什么必须一致？合并时是按下标 <code>k</code> 把 <code>visual_embeds[k]</code> 填进 <code>range[k]</code> 的。
+     若哪一环下标错位（比如先编码图片却按错误顺序记 range），图 0 的 embedding 就会被填到图 1 的坑里——
+     模型读到的图文对应关系整个错乱，但<strong>形状仍可能对得上、不报错</strong>，成为最难查的 bug。
+     所以 <code>validate_placeholders</code>（placeholders.py）会硬性检查 <code>media_index == k</code>、
+     区间不重叠不越界；parse() 结尾也检查 <code>media_i == len(lens)</code>，媒体数与占位数不符立刻抛错。</p>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「每个请求的 visual token 数是固定常数，可以写死」</td>
+          <td>随媒体<strong>数量和类型</strong>而变：0 图=0、1 图=4、2 图=8、4 帧视频=16。写死会让占位数与真实视觉 embedding 数不匹配 → 合并时越界或丢内容。</td></tr>
+      <tr><td>「visual token 就是像素，一个像素一个 token」</td>
+          <td>visual token 是 encoder+projector 产出的 <code>text_hidden=32</code> 维 embedding，数量 = <strong>patch 数（4）</strong>而非像素数（16×16）。一个 patch = 一个 visual token。</td></tr>
+      <tr><td>「占位用哪个 id、按什么顺序记都无所谓，反正会被替换」</td>
+          <td>id（PAD）确实会被覆盖，但<strong>顺序至关重要</strong>：<code>media_index</code> 必须等于媒体出现次序，否则视觉 embedding 填错坑，图文关系全乱，且常常不报错。</td></tr>
+      <tr><td>「视觉 token 只影响图那几个位置，别处不受影响」</td>
+          <td>它改变<strong>整条序列长度</strong> → 位置编号、KV Cache 行数、调度预算全都随之变。请求 B 比 A 多 4 个 visual token，就多占 4 行 KV。</td></tr>
+      <tr><td>「视频和图片一样，也只占 num_patches 个 token」</td>
+          <td>视频要<strong>逐帧</strong>编码再按时间拼接，是 <code>帧数 × num_patches</code>。4 帧视频 = 16，是单图的 4 倍。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课讲解全部对应下面两个文件里的真实逻辑：</p>
+  <ul>
+    <li><code>MultiModalRunner.build_inputs()</code>（<code>runner.py</code>）：遍历 <code>segments</code>，对每段媒体真编码——
+        图片走 <code>_encode_image</code> → <code>(4,32)</code>；视频走 <code>_encode_video</code>（逐帧拼接）→ <code>(帧数×4, 32)</code>；
+        收集 <code>lens = [len(e) for e in visual_embeds_list]</code>，这就是「动态 visual token 数」的落地。</li>
+    <li><code>MultiModalRunner.estimate()</code>（<code>runner.py</code>）：<strong>不编码</strong>，只按公式把 visual token 数加出来，供调度预算 gating。</li>
+    <li><code>MultiModalInputParser.parse()</code>（<code>inputs.py</code>）：BOS + 文本 tokenize + 媒体处 <code>[PAD_ID]*n</code> 占位，
+        用 <code>media_i</code> 计数器记录 <code>PlaceholderRange(offset, length=n, media_index, modality)</code>，
+        并在结尾校验媒体数与 <code>lens</code> 一致——本课「顺序与对齐」的核心就在这里。</li>
+    <li>下游 <code>validate_placeholders</code> / <code>merge_multimodal_embeddings</code>（Lesson 23）消费这些 range，把视觉 embedding 逐格填入。</li>
+  </ul>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a25">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>为什么不同请求的 visual token 数不同？如何保持对齐？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 25
+python3 course.py run 25 --trace
+python3 course.py check 25</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 25` 看不同请求的视觉 token 数。</details>
+    <details><summary>提示 Level 2 · 位置</summary>视觉 token 随媒体数变化。</details>
+    <details><summary>提示 Level 3 · 机制</summary>media_index 顺序须与出现顺序一致。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>真实 VLM 还随分辨率变 per-image token。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>多图顺序错</td><td>media_index 乱</td><td>按出现顺序记录 PlaceholderRange</td></tr><tr><td>视觉 token 数估错</td><td>影响预算</td><td>image=grid²，video=帧数×grid²</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 25 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>两张图的请求，KV 需求比一张图的大多少？</li><li>文本-图-文本-图 交错时，如何保证顺序？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>动态视觉 token</td><td>vLLM 动态 mm 输入</td><td>按媒体动态计数一致</td><td>真实随分辨率/宽高比变化</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>不同请求含不同数量媒体 → 视觉 token 数动态变化；媒体顺序与 placeholder 对齐。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="25">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_26.html">下一步：Lesson 26 · 视频如何变成模型输入 →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 25 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a25", {stages: [{title:"解析各请求媒体", detail:"0/1/2 图 或 视频"},{title:"每媒体算 visual token", detail:"image=grid²；video=帧数×grid²"},{title:"动态序列长度", detail:"视觉 token 数不同 → 序列/KV 不同"},{title:"媒体顺序与占位对齐", detail:"media_index 与出现顺序一致"}]});
+</script>
+</body>
+</html>

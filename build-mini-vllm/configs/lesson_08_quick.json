@@ -1,0 +1,9 @@
+{
+  "_comment": "Lesson 8：prefill/decode 指标。对比 prompt-heavy 与 decode-heavy 两种场景。",
+  "checkpoint": "assets/checkpoints/tiny_text.json",
+  "max_new_tokens": 12,
+  "scenarios": [
+    {"name": "prompt-heavy", "prompt": "The quick brown fox jumps over the lazy dog again today"},
+    {"name": "decode-heavy", "prompt": "Hi"}
+  ]
+}

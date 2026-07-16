@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 22 · Tiny Vision Encoder 与 Projector — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="patch embedding、tiny vision encoder（非因果）、projector 把 vision_hidden 投影到 text_hidden。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 22</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 22 · Tiny Vision Encoder 与 Projector <span class="phase-badge phase-learn">Phase 4</span></h1>
+  <p>vision encoder + projector 把像素变成能与文本并肩的向量，是「看懂图」的核心。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>patch embedding、tiny vision encoder（非因果）、projector 把 vision_hidden 投影到 text_hidden。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/vision_encoder.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/multimodal/vision_encoder.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>TinyVisionEncoder.encode()</code>、<code>MultimodalProjector.__call__()</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 22</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 22</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 21</dd>
+        <dt>完成后下一步</dt><dd>Lesson 23</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>到这一课为止，我们的文本模型只会一件事：拿到一串 <strong>token id</strong>（整数 0..258），
+     查 embedding 表，然后跑 transformer。可一张图片是<strong>像素</strong>——它根本不是 token id。
+     要让模型「看懂图」，必须先把像素<strong>翻译</strong>成模型能吃的东西：一批和文本 embedding
+     住在<strong>同一个向量空间</strong>（本模型是 32 维）的连续向量。这一课就是造这台翻译机，它由两块拼成：
+     <strong>vision encoder</strong>（读懂一张图内部各部分的关系）和 <strong>projector</strong>（把维度对齐到文本空间）。
+     后面 <a href="lesson_23.html">Lesson 23</a> 会把这批向量塞进文本序列里和文字并排，
+     所以这一课是整条多模态主线的<strong>入口</strong>——务必把「像素怎么一步步变成 4 个 32 维向量」彻底看清。</p>
+
+  <h2 id="problem">先看问题：文本模型压根不认识像素 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>用本课的真实数字把「不翻译会怎样」摆出来。一张图是 <code>(3, 16, 16)</code>——3 个颜色通道、
+     16×16 像素，一共 <code>3×16×16 = 768</code> 个浮点数。而文本模型的入口只接受<strong>整数 token id</strong>
+     （范围 0..258，因为 <code>vocab_size = 259</code>）。两者的类型和形状都对不上：</p>
+  <table>
+    <thead><tr><th>比较项</th><th>文本输入</th><th>图片（原始像素）</th></tr></thead>
+    <tbody>
+      <tr><td>数据类型</td><td>整数 token id</td><td>浮点像素值</td></tr>
+      <tr><td>取值范围</td><td>0..258（<code>vocab_size=259</code>）</td><td>连续实数（如 0..1）</td></tr>
+      <tr><td>一个单位是什么</td><td>1 个字节 = 1 个 token（中文一字 = 3 字节 = 3 token）</td><td>1 张图 = 768 个数，没有「id」可言</td></tr>
+      <tr><td>模型入口</td><td>查 embedding 表 <code>(259, 32)</code></td><td><strong>无表可查</strong>——像素不是索引</td></tr>
+    </tbody>
+  </table>
+  <p>硬把 768 个像素值当成「token id 去查表」是荒谬的：它们不是整数索引，即便强行取整，
+     768 也远超 259 的表长。<strong>唯一的出路</strong>是绕开 embedding 表，直接<strong>算出</strong>一批 32 维向量，
+     让它们「看起来就像文本 embedding」——这正是 vision encoder + projector 的职责。</p>
+
+  <h2 id="intuition">一句话解释 + 直觉类比 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+    <strong>vision encoder</strong> 把一张图切成小块（patch），让这些小块<strong>互相看一眼</strong>、
+    彼此融合信息，得到每块的「含义向量」；<strong>projector</strong> 再把这些向量的维度从视觉的 48
+    <strong>投影</strong>到文本的 32，使它们能和文字 embedding 并排站在同一个空间里。</div>
+  <p><strong>类比：把外文文件翻译成本国语言再归档。</strong>
+     图片好比一份外文文件。先把它拆成段落（patch embedding：切 4 块并向量化）；
+     再让一个精通该语言的读者<strong>通读全文、前后对照</strong>理解每段的意思
+     （vision encoder：patch 之间<strong>双向</strong>互看）；最后翻译成归档系统统一使用的语言
+     （projector：投影到 text_hidden=32）。翻译完的段落，就能和本国语写的文件放进<strong>同一个文件柜</strong>。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    翻译强调「换语言但保意思」；这里 projector 换的是<strong>向量维度</strong>（48→32），不是把图「变成文字」。
+    视觉 embedding 始终是<strong>连续向量</strong>，永远<strong>不会</strong>变回某个 token id，也不对应词表里任何一个词。
+    它只是被摆到了「和文本 embedding 同一个坐标系」里，好让下游的文本 transformer 能一视同仁地处理。</div>
+
+  <h2 id="pipeline">三步流水线：像素 → visual token → 文本空间 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>整条链路只有三步，每一步都改变形状。下面这张内联执行图把本课的真实数字标在每个箭头上
+     （<code>image=16</code>、<code>patch=8</code>、<code>grid=2×2</code>、<code>vision_hidden=48</code>、<code>text_hidden=32</code>）：</p>
+  <div class="callout note"><div class="callout-title">数据流执行图（形状随每步变化）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem;margin-top:6px">
+      <div style="border:2px solid var(--prefill);border-radius:6px;padding:6px 10px">原始图片<br>(3, 16, 16)<br><span style="color:var(--fg-dim)">768 个数</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 10px">切 patch + 线性投影<br><span style="color:var(--fg-dim)">PatchEmbed（L21）</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px dashed var(--running);border-radius:6px;padding:6px 10px;background:color-mix(in srgb,var(--running) 12%,var(--bg))">patch embedding<br>(4, 48)<br><span style="color:var(--fg-dim)">4 个 visual token</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 10px">vision encoder<br><span style="color:var(--fg-dim)">非因果自注意力+FFN</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px dashed var(--decode);border-radius:6px;padding:6px 10px;background:color-mix(in srgb,var(--decode) 12%,var(--bg))">编码后<br>(4, 48)<br><span style="color:var(--fg-dim)">形状不变，含义更丰富</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px">projector<br><span style="color:var(--fg-dim)">48 → 32</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px;background:color-mix(in srgb,var(--finished) 12%,var(--bg))">视觉 embedding<br>(4, 32)<br><span style="color:var(--fg-dim)">已在文本 hidden 空间</span></div>
+    </div>
+    <div style="font-size:.76rem;color:var(--fg-dim);margin-top:6px">
+      切 patch 属于上一课（PatchEmbed）；本课聚焦后两步：<strong>vision encoder</strong>（形状 <code>(4,48)</code> 进、
+      <code>(4,48)</code> 出）与 <strong>projector</strong>（<code>(4,48)</code> 进、<code>(4,32)</code> 出）。</div>
+  </div>
+
+  <h2 id="define">精确定义：三步各在算什么 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p><strong>① Patch embedding（回顾）。</strong>把 <code>(3,16,16)</code> 按 <code>patch_size=8</code> 切成
+     <code>grid=2×2=4</code> 个不重叠小块；每块展平成 <code>3·8·8 = 192</code> 维向量，得到 <code>(4, 192)</code>；
+     再乘一个投影矩阵 <code>proj: (192, 48)</code>，得到 <code>(4, 48)</code>。每一行就是一个 <strong>visual token</strong>。</p>
+  <p><strong>② Vision encoder（本课重点，1 层）。</strong>对 <code>h: (4, 48)</code> 做一层「双向」transformer block：</p>
+  <pre><code>hn  = rms_norm(h)                      # (4,48)  归一化
+q,k,v = hn·Wq, hn·Wk, hn·Wv            # 各 (4,48)，Wq/Wk/Wv 都是 (48,48)
+attn = 非因果多头注意力(q,k,v)          # (4,48)，4 个头，每头 head_dim=48/4=12
+h    = h + attn·Wo                      # (4,48)  残差①（Wo: 48×48）
+hn2  = rms_norm(h)                      # (4,48)
+h    = h + swiglu(hn2)                  # (4,48)  残差②（前馈，中间维 inter=96）</code></pre>
+  <p>逐符号看：<code>q,k,v</code> 是每个 patch 的查询/键/值；<strong>非因果</strong>指注意力
+     <em>不加</em>因果掩码——每个 patch 都能看到全部 4 个 patch（含它自己）。
+     <code>head_dim = vision_hidden / vision_heads = 48/4 = 12</code>；4 个头各自算 <code>(4,12)</code> 再拼回 <code>(4,48)</code>。
+     两处残差（<code>h = h + …</code>）和文本 transformer 完全同构，唯一区别就是<strong>那一个掩码开关</strong>。
+     输出形状仍是 <code>(4, 48)</code>——encoder 不改形状，只让每个 patch 的向量「吸收」了其它 patch 的信息。</p>
+  <p><strong>③ Projector（本课重点）。</strong>两层线性 + 中间 silu 激活，把 48 维压到 32 维：</p>
+  <pre><code>h = visual · W1        # (4,48)·(48,32) = (4,32)
+h = silu(h)            # 逐元素非线性
+out = h · W2           # (4,32)·(32,32) = (4,32)</code></pre>
+  <p>输入 <code>(4, 48)</code>，输出 <code>(4, 32)</code>。<code>W1: (48,32)</code> 负责真正的<strong>降维</strong>
+     （48→32），<code>silu</code> 提供非线性（否则两个线性层会塌成一个），<code>W2: (32,32)</code>
+     在 32 维空间里再做一次线性变换，让结果更贴合文本 embedding 的分布。输出的 32 正好等于
+     <code>text_hidden_size = 32</code>——这是能和文本合并的<strong>硬性前提</strong>。</p>
+
+  <h2 id="worked">小规模手算 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p><strong>手算 A：非因果注意力，patch 0 到底看到谁。</strong>为了能用手算，我们把「一个头、head_dim 缩到 1」，
+     只看 4 个 patch 的一维值。设 4 个 patch 的 value 是 <code>v = [10, 20, 30, 40]</code>，
+     且 patch 0 对四者的注意力权重（softmax 后）恰为 <code>[0.4, 0.3, 0.2, 0.1]</code>。
+     <strong>非因果</strong>下，patch 0 的输出是对<strong>全部 4 个</strong> value 加权求和：</p>
+  <math display="block" class="mathblock">
+    <msub><mi>out</mi><mn>0</mn></msub><mo>=</mo>
+    <mn>0.4</mn><mo>·</mo><mn>10</mn><mo>+</mo>
+    <mn>0.3</mn><mo>·</mo><mn>20</mn><mo>+</mo>
+    <mn>0.2</mn><mo>·</mo><mn>30</mn><mo>+</mo>
+    <mn>0.1</mn><mo>·</mo><mn>40</mn>
+  </math>
+  <math display="block" class="mathblock">
+    <mo>=</mo><mn>4</mn><mo>+</mo><mn>6</mn><mo>+</mo><mn>6</mn><mo>+</mo><mn>4</mn>
+    <mo>=</mo><mn>20</mn>
+  </math>
+  <p>对比：如果<strong>误加</strong>了文本那种 causal mask，patch 0 只能看自己（位置 ≤ 0），权重被迫变成
+     <code>[1, 0, 0, 0]</code>，则 <code>out0 = 10</code>——它就再也「看不到」patch 1/2/3 的内容了。
+     一张图的左上角块本该能参考右下角块（比如判断整体是猫还是狗），加了因果掩码就等于蒙住了它的眼睛。
+     下表把两种掩码的 <strong>4×4 可见性</strong>并排画出来（✓=可见，·=被屏蔽）：</p>
+  <table>
+    <thead><tr><th>非因果（视觉，本课）</th><th></th><th>因果（文本 decode，反例）</th></tr></thead>
+    <tbody>
+      <tr><td><code>✓ ✓ ✓ ✓</code>　patch0 看 0,1,2,3</td><td>　</td><td><code>✓ · · ·</code>　patch0 只看 0</td></tr>
+      <tr><td><code>✓ ✓ ✓ ✓</code>　patch1 看 0,1,2,3</td><td>　</td><td><code>✓ ✓ · ·</code>　patch1 看 0,1</td></tr>
+      <tr><td><code>✓ ✓ ✓ ✓</code>　patch2 看 0,1,2,3</td><td>　</td><td><code>✓ ✓ ✓ ·</code>　patch2 看 0,1,2</td></tr>
+      <tr><td><code>✓ ✓ ✓ ✓</code>　patch3 看 0,1,2,3</td><td>　</td><td><code>✓ ✓ ✓ ✓</code>　patch3 看全部</td></tr>
+    </tbody>
+  </table>
+  <div class="callout tip"><div class="callout-title">一句话</div>
+    因果掩码是<strong>下三角</strong>（只能看过去），因为文本是从左到右一个个生成的、不能偷看未来；
+    而一张图<strong>整幅同时到达</strong>，patch 之间没有先后顺序，掩码是<strong>全 1 方阵</strong>——人人可见。</div>
+  <p><strong>手算 B：projector 的 silu 为什么不能省。</strong>silu(x)=x·σ(x)（σ 是 sigmoid）。取几个点：
+     <code>silu(0)=0</code>、<code>silu(2)≈2×0.88=1.76</code>、<code>silu(-2)≈-2×0.12=-0.24</code>。
+     它对正数近似放行、对负数强烈压小——是一条<strong>弯曲</strong>的曲线。若把它去掉，projector 就变成
+     <code>out = (visual·W1)·W2 = visual·(W1·W2)</code>，两个线性层塌成<strong>单个</strong> <code>(48,32)</code> 矩阵，
+     表达能力退回一层线性映射。正是中间这一下非线性，让「48→32 的翻译」能学到更复杂的对应关系。</p>
+
+  <h2 id="shape">Shape 与内存一览 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>把整条流水线的形状钉死（<code>num_patches=4</code> 是每张图的 visual token 数）：</p>
+  <table>
+    <thead><tr><th>阶段</th><th>输入 shape</th><th>输出 shape</th><th>关键权重</th></tr></thead>
+    <tbody>
+      <tr><td>原始图片</td><td>—</td><td>(3, 16, 16)</td><td>—</td></tr>
+      <tr><td>展平 patch</td><td>(3,16,16)</td><td>(4, 192)</td><td>—（<code>192=3·8·8</code>）</td></tr>
+      <tr><td>patch embedding</td><td>(4, 192)</td><td>(4, 48)</td><td>proj (192, 48)</td></tr>
+      <tr><td>vision encoder（×1 层）</td><td>(4, 48)</td><td>(4, 48)</td><td>Wq/Wk/Wv/Wo 各 (48,48)；FFN (48,96),(48,96),(96,48)</td></tr>
+      <tr><td>projector</td><td>(4, 48)</td><td>(4, 32)</td><td>W1 (48,32)、W2 (32,32)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout note"><div class="callout-title">和文本侧的关键对齐</div>
+    最终 <code>(4, 32)</code> 的 <strong>32</strong> 必须等于文本模型的 <code>hidden_size = 32</code>。
+    对齐后，这 4 个 visual token 就能被 <a href="lesson_23.html">Lesson 23</a> 当作「4 个已经算好 embedding 的 token」
+    插进文本序列，和文字 token 一起喂进同一个 transformer——这也是为什么本课末尾一定要检查
+    <strong>projector 输出维 == text_hidden</strong>。</div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「视觉 embedding 也是某种 token id，先转成整数再喂模型」</td><td>它是<strong>连续向量</strong>，不查词表、不对应任何词。它绕过 embedding 表，直接就是 hidden 空间里的一行 32 维向量。</td></tr>
+      <tr><td>「视觉注意力也要加 causal mask，保持和文本一致」</td><td>恰恰相反。文本 decode 加因果掩码是因为不能偷看未来；一张图整幅同时到达，patch 无先后，必须<strong>双向</strong>互看（全 1 方阵）。加了掩码会让每个 patch 瞎掉一半视野（见手算 A）。</td></tr>
+      <tr><td>「projector 可有可无，vision_hidden 直接喂文本模型不就行了」</td><td>维度对不上：encoder 输出 48 维，文本 hidden 是 32 维，无法相加/拼接。projector 的<strong>本职</strong>就是 48→32 的对齐，缺了它下游直接报维度错。</td></tr>
+      <tr><td>「projector 用一个线性层就够，中间的 silu 是装饰」</td><td>去掉 silu，两个线性层会数学上塌成一个矩阵（见手算 B），表达力退化。中间的非线性是它比「单层投影」更强的原因。</td></tr>
+      <tr><td>「vision encoder 会改变 visual token 的数量或维度」</td><td>不会。encoder 进出都是 <code>(4, 48)</code>，形状不变；它只让每个 patch 的向量<strong>融合</strong>了其它 patch 的信息。改维度的是 projector，改数量的（切 patch）是上一课。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课讲解逐一对应 <code>mini_vllm/multimodal/vision_encoder.py</code> 里的两处：</p>
+  <ul>
+    <li><strong>非因果 encoder</strong> → <code>TinyVisionEncoder.encode()</code>。函数体正是「精确定义 ②」那段伪码：
+        <code>rms_norm → Wq/Wk/Wv → 非因果注意力 → +Wo（残差）→ rms_norm → +swiglu（残差）</code>。
+        「非因果」落在辅助函数 <code>_full_attention()</code> 里，它调用
+        <code>scaled_dot_product_attention(..., causal=False)</code>——<strong>这个 <code>causal=False</code>
+        就是本课全部「双向」的来源</strong>。<code>encode()</code> 进出都是 <code>(4, 48)</code>。</li>
+    <li><strong>维度对齐</strong> → <code>MultimodalProjector.__call__()</code>。正是「精确定义 ③」：
+        <code>M.matmul(visual, self.w1) → silu → M.matmul(., self.w2)</code>，把 <code>(4,48)</code> 投到 <code>(4,32)</code>。
+        <code>w1</code> 的形状 <code>(vision_hidden, text_hidden) = (48, 32)</code> 就写死了「48→32」这条对齐规则。</li>
+  </ul>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a22">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>vision encoder 与 projector 各做什么？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 22
+python3 course.py run 22 --trace
+python3 course.py check 22</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 22` 看编码与投影的 shape。</details>
+    <details><summary>提示 Level 2 · 位置</summary>视觉编码器不加 causal mask（patch 互相可见）。</details>
+    <details><summary>提示 Level 3 · 机制</summary>视觉 embedding 是连续向量，不是 token id。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>projector 让维度对齐 text_hidden。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>维度不对齐</td><td>projector 输出≠text_hidden</td><td>projector 必须映射到 text_hidden</td></tr><tr><td>给视觉加了 causal mask</td><td>误用文本的因果掩码</td><td>视觉自注意力是双向的</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 22 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>为什么视觉注意力不需要 causal mask，而文本 decode 需要？</li><li>projector 为什么必不可少？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>TinyVisionEncoder+Projector</td><td>ViT + MM projector(MLP)</td><td>编码+投影一致</td><td>真实 encoder 更深、projector 更复杂</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>patch embedding、tiny vision encoder（非因果）、projector 把 vision_hidden 投影到 text_hidden。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="22">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_23.html">下一步：Lesson 23 · Placeholder 与 Embedding Merge →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 22 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a22", {stages: [{title:"patch embedding", detail:"(num_patches, vision_hidden)"},{title:"vision encoder", detail:"非因果自注意力 + 前馈（patch 互相可见）"},{title:"projector", detail:"vision_hidden → text_hidden"},{title:"视觉 embedding", detail:"已在文本 hidden 空间，可与文本合并"}]});
+</script>
+</body>
+</html>

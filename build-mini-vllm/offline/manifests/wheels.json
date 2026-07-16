@@ -1,0 +1,18 @@
+{
+  "_comment": "锁定的 wheel 清单。required 为核心运行时**必需**的 wheel；optional 为可选加速（不影响 Level A 与机制模拟器）。本课程核心为纯标准库实现，因此 required 为空——这是有意的设计取舍，使零第三方依赖离线学习（Level A）天然成立。",
+  "python": "3.11",
+  "macos_min": "14.0",
+  "arch": "arm64",
+  "required": [],
+  "optional": [
+    {
+      "package": "torch",
+      "note": "可选：用真实 PyTorch 张量替换纯 Python 数学以获得加速。核心课程不需要它。",
+      "reason_more_complex": "wheel 体积大（数百 MB），不适合放进离线仓库；需要时由用户按 offline/INSTALL_OFFLINE.md 的说明单独下载到 offline/wheels/macos-arm64/ 并在此登记 filename+sha256。",
+      "filename": "",
+      "sha256": "",
+      "license": "BSD-3-Clause",
+      "source": "https://download.pytorch.org/whl/torch (仅下载时使用，运行时不联网)"
+    }
+  ]
+}

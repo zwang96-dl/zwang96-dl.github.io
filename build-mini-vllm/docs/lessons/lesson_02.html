@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 2 · Tensor Shape 与矩阵乘法 — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="从标量到 Tensor，batch/sequence/hidden 维度，row-column 乘法规则，shape 相容性与 broadcasting。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 2</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+
+<div class="layout">
+  <nav class="toc" aria-label="本页目录">
+    <h2>本页目录</h2>
+    <a href="#goal">本节目标</a>
+    <a href="#why">为什么需要</a>
+    <a href="#dims">从标量到 Tensor</a>
+    <a href="#anim">交互式动画</a>
+    <a href="#rule">row-column rule</a>
+    <a href="#transpose">转置 transpose</a>
+    <a href="#broadcast">广播</a>
+    <a href="#misread">常见误解</a>
+    <a href="#code">代码导读</a>
+    <a href="#build">动手运行</a>
+    <a href="#hints">四级提示</a>
+    <a href="#errors">常见错误</a>
+    <a href="#trace">Trace & Inspector</a>
+    <a href="#challenge">因果理解</a>
+    <a href="#vllm">真实 vLLM 映射</a>
+    <a href="#summary">总结 & 下一步</a>
+  </nav>
+
+  <main class="content" id="main">
+    <h1>Lesson 2 · Tensor Shape 与矩阵乘法 <span class="phase-badge phase-learn">Learn</span></h1>
+    <p>Transformer 的每一层，剥开来看都是矩阵乘法。看懂 shape 怎么流动、算力和显存花在哪，
+       从这一课的 <code>(m,k)@(k,n)→(m,n)</code> 开始。</p>
+
+    <section id="goal">
+      <div class="lesson-header">
+        <dl>
+          <dt>当前目标</dt><dd>掌握 batch/sequence/hidden 维度、row-column 乘法规则、shape 相容性与行广播。</dd>
+          <dt>需要阅读的文件</dt><dd><code>mini_vllm/model/matrix.py</code>、<code>experiments/lesson_02_tensor.py</code></dd>
+          <dt>需要修改的文件</dt><dd><code>mini_vllm/model/matrix.py</code></dd>
+          <dt>需要关注的类或函数</dt><dd><code>matmul()</code> / <code>transpose()</code> / <code>add_row_bias()</code></dd>
+          <dt>实验命令</dt><dd><code>python3 course.py run 2</code></dd>
+          <dt>测试命令</dt><dd><code>python3 course.py check 2</code>（等价 <code>python3 -m unittest tests.lesson_02.test_matrix</code>）</dd>
+          <dt>本课依赖</dt><dd>Lesson 1</dd>
+          <dt>完成后下一步</dt><dd>Lesson 4 · Attention 手算</dd>
+        </dl>
+      </div>
+    </section>
+
+    <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>先说结论：<strong>Transformer 里几乎没有别的运算，剥到底全是矩阵乘法（matmul）。</strong>
+       Attention 的打分 <code>Q·Kᵀ</code>、加权 <code>weights·V</code>，MLP 的升维降维，最后的 LM head……
+       没有一个例外。所以「张量的 shape 怎么流动、每一步花多少乘加」不是可有可无的背景知识，
+       而是你之后读懂、调通每一层的<strong>第一语言</strong>。</p>
+    <p>拿本课程的 tiny model 走一遍就明白了。它的配置是
+       <code>hidden=32、layers=2、heads=4、kv_heads=2（GQA）、head_dim=8、intermediate=64、vocab=259</code>。
+       一条长度为 <code>S</code> 的序列<strong>穿过一层</strong>，要连着做这一串 matmul（每个都是本课的
+       <code>(m,k)@(k,n)→(m,n)</code>）：</p>
+    <table>
+      <thead><tr><th>步骤</th><th>运算</th><th>输入 shape</th><th>输出 shape</th></tr></thead>
+      <tbody>
+        <tr><td>Q 投影</td><td><code>x @ Wq</code></td><td><code>(S,32)@(32,32)</code></td><td><code>(S,32)</code></td></tr>
+        <tr><td>K 投影（GQA 少一半头）</td><td><code>x @ Wk</code></td><td><code>(S,32)@(32,16)</code></td><td><code>(S,16)</code></td></tr>
+        <tr><td>V 投影</td><td><code>x @ Wv</code></td><td><code>(S,32)@(32,16)</code></td><td><code>(S,16)</code></td></tr>
+        <tr><td>注意力打分</td><td><code>Q·Kᵀ</code>（每个 head）</td><td><code>(S,8)@(8,S)</code></td><td><code>(S,S)</code></td></tr>
+        <tr><td>加权求和</td><td><code>scores · V</code></td><td><code>(S,S)@(S,8)</code></td><td><code>(S,8)</code></td></tr>
+        <tr><td>输出投影</td><td><code>@ Wo</code></td><td><code>(S,32)@(32,32)</code></td><td><code>(S,32)</code></td></tr>
+        <tr><td>MLP 升维</td><td><code>@ W1</code></td><td><code>(S,32)@(32,64)</code></td><td><code>(S,64)</code></td></tr>
+        <tr><td>MLP 降维</td><td><code>@ W2</code></td><td><code>(S,64)@(64,32)</code></td><td><code>(S,32)</code></td></tr>
+      </tbody>
+    </table>
+    <p>两层之后再接一次 LM head：<code>(S,32)@(32,259)→(S,259)</code>，把每个 token 变成 259 个词表分数（logits）。</p>
+    <div class="callout note"><div class="callout-title">不懂 shape 会怎样？一个具体后果</div>
+      光是「给一个 token 算出 259 个 logits」这一步，就要做 <code>32 × 259 = 8288</code> 次乘加
+      （每个输出 = 32 个数的点积，共 259 个输出）。只要你把某个矩阵的行列写反、或漏检一次
+      shape 相容，这 8288 个数里没有一个是对的——而且往往<strong>不报错</strong>，只是结果全错。
+      看懂 shape，就是把这类 bug 挡在第一道门外。</div>
+
+    <h2 id="dims">从标量到 Tensor：数据长什么样 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="callout tip"><div class="callout-title">一句话解释</div>
+      <strong>Tensor（张量）= 带 shape 的多维数组</strong>。shape 是一串数字，从<strong>最外层</strong>到
+      <strong>最内层</strong>依次记下每一维有多长；本课程干脆用「嵌套 list」直接表示它。</div>
+    <p><strong>类比：套娃 / 抽屉柜。</strong>标量是一颗糖；向量是一排糖（一个抽屉）；矩阵是一柜抽屉
+       （多排糖）；3D 张量是一排柜子。<code>shape=(2,2,4)</code> 就是「2 个柜子、每柜 2 个抽屉、每抽屉 4 颗糖」。</p>
+    <div class="callout warn"><div class="callout-title">类比的边界</div>
+      套娃只帮你记住「层层嵌套」这件事。但张量的每一层<strong>长度必须整齐</strong>（每个抽屉糖数一样多），
+      否则就是「锯齿数组」，本课程的 <code>shape()</code> 会当场抛 <code>ValueError</code>——真实框架同样不允许。</div>
+    <p>逐级往上，正好对应到 LLM 里的数据：</p>
+    <table>
+      <thead><tr><th>名称</th><th>shape 例</th><th>本模型里的具体含义</th></tr></thead>
+      <tbody>
+        <tr><td>标量 scalar</td><td><code>()</code></td><td>一个数，如 loss、一个注意力权重</td></tr>
+        <tr><td>向量 vector</td><td><code>(32,)</code></td><td><strong>一个 token</strong> 的表示（hidden=32）</td></tr>
+        <tr><td>矩阵 matrix</td><td><code>(S, 32)</code></td><td><strong>一条序列</strong>的全部 token（S 行，每行 32 维）</td></tr>
+        <tr><td>3D 张量</td><td><code>(B, S, 32)</code></td><td><strong>一个 batch</strong> 的 B 条序列</td></tr>
+      </tbody>
+    </table>
+    <p><strong>从文字到张量，走一遍。</strong>本课程的 tokenizer 是 byte-level：每个 UTF-8 字节就是一个
+       token id（0..255）。中文一个字占 3 个字节，所以「你好」= 6 个字节 = <strong>6 个 token</strong>。
+       每个 token id 查嵌入表得到一行长度 32 的向量，于是：</p>
+    <ul>
+      <li>「你好」→ 6 个 token → 嵌入后是一个 <code>(6, 32)</code> 的矩阵；</li>
+      <li>把「你好」和另一条同长序列一起批处理 → <code>(2, 6, 32)</code> 的 3D 张量。</li>
+    </ul>
+    <p>下面用 workload 里的真实小例子 <code>tensor3d</code>（<code>shape=(2,2,4)</code>，为了看得清把 hidden 缩到 4）
+       画出它的嵌套结构——<strong>读 shape 就是从最外层数到最内层</strong>：</p>
+    <div class="callout note"><div class="callout-title">(batch=2, seq=2, hidden=4) 的嵌套执行图</div>
+      <div style="display:flex;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:.8rem;margin-top:6px">
+        <div style="border:2px solid var(--prefill);border-radius:8px;padding:8px">
+          <div style="color:var(--prefill);margin-bottom:4px">batch[0]（序列 0）</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="border:2px solid var(--running);border-radius:6px;padding:4px 6px">seq0 → [1&nbsp;2&nbsp;3&nbsp;4] <span style="color:var(--fg-dim)">(hidden=4)</span></div>
+            <div style="border:2px solid var(--running);border-radius:6px;padding:4px 6px">seq1 → [5&nbsp;6&nbsp;7&nbsp;8]</div>
+          </div>
+        </div>
+        <div style="border:2px solid var(--prefill);border-radius:8px;padding:8px">
+          <div style="color:var(--prefill);margin-bottom:4px">batch[1]（序列 1）</div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="border:2px solid var(--running);border-radius:6px;padding:4px 6px">seq0 → [9&nbsp;10&nbsp;11&nbsp;12]</div>
+            <div style="border:2px solid var(--running);border-radius:6px;padding:4px 6px">seq1 → [13&nbsp;14&nbsp;15&nbsp;16]</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:.78rem;color:var(--fg-dim);margin-top:8px">
+        紫框 = batch 维（2 个）；蓝框 = seq 维（每条 2 个 token）；最内层方括号 = hidden 维（每 token 4 个数）。
+        <code>t[1][0][2] = 11</code>：第 1 条序列、第 0 个 token、第 2 个分量。</div>
+    </div>
+
+    <h2 id="anim">交互式动画：Matrix Multiplication Explorer <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>单步走过 <code>C = A @ B</code> 的<strong>每一个输出格子</strong>：高亮 A 的行、B 的列，展示乘加过程。
+       镜像 <code>mini_vllm/model/matrix.py</code> 的 <code>matmul()</code>。</p>
+
+    <div class="anim" id="anim-matmul">
+      <div class="anim-head">
+        <div class="anim-q">这个动画要回答的问题：
+          <small>C = A@B 的每个元素怎么算？为什么形状必须 (m,k)@(k,n)？</small></div>
+      </div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="legend">
+        <span class="item"><span class="swatch running"></span>当前高亮的行/列</span>
+        <span class="item"><span class="swatch finished" style="border-radius:4px"></span>正在计算的输出格子</span>
+      </div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」，逐格观察乘加。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button" aria-label="上一步">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button" aria-label="播放">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" aria-label="暂停" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button" aria-label="下一步">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button" aria-label="重置">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+    <h2 id="rule">row-column rule 与 shape 相容 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="callout tip"><div class="callout-title">一句话解释</div>
+      <code>out[i][j]</code> = A 的第 <code>i</code> <strong>行</strong> 与 B 的第 <code>j</code>
+      <strong>列</strong> 的点积 = <code>Σ_k A[i][k]·B[k][j]</code>。名字就来自这里：
+      <strong>row</strong>（A 的行）配 <strong>column</strong>（B 的列）。</div>
+    <math display="block" class="mathblock">
+      <mi>out</mi><mo>[</mo><mi>i</mi><mo>]</mo><mo>[</mo><mi>j</mi><mo>]</mo>
+      <mo>=</mo>
+      <munderover>
+        <mo>∑</mo>
+        <mrow><mi>k</mi><mo>=</mo><mn>0</mn></mrow>
+        <mrow><mi>K</mi><mo>−</mo><mn>1</mn></mrow>
+      </munderover>
+      <mi>A</mi><mo>[</mo><mi>i</mi><mo>]</mo><mo>[</mo><mi>k</mi><mo>]</mo>
+      <mo>·</mo>
+      <mi>B</mi><mo>[</mo><mi>k</mi><mo>]</mo><mo>[</mo><mi>j</mi><mo>]</mo>
+    </math>
+    <p><strong>逐符号拆开公式</strong>，把每个字母对上具体维度（记法 <code>(m,k)@(k,n)→(m,n)</code>）：</p>
+    <ul>
+      <li><code>i</code>：输出的第几行，取值 <code>0..m-1</code>（<code>m</code> = A 的行数）。</li>
+      <li><code>j</code>：输出的第几列，取值 <code>0..n-1</code>（<code>n</code> = B 的列数）。</li>
+      <li><code>k</code>：<strong>被求和消去</strong>的维度，取值 <code>0..K-1</code>——它同时是 A 的<strong>列数</strong>
+          和 B 的<strong>行数</strong>，两者必须相等，这就是「相容」。</li>
+      <li><code>Σ_k</code>：把 A 第 i 行、B 第 j 列对应的 K 对数相乘再全部加起来（一个点积）。</li>
+    </ul>
+    <p><strong>小规模手算</strong>（用动画里同一组数：<code>A=(2,3)</code>、<code>B=(3,2)</code>，
+       结果 <code>(2,2)</code>）。中间的 <code>3</code> 消去，外面 <code>2</code> 和 <code>2</code> 留下：</p>
+    <table>
+      <thead><tr><th>输出格子</th><th>行 · 列</th><th>展开成点积</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td><code>out[0][0]</code></td><td>A 第0行 · B 第0列</td><td>1·1 + 2·0 + 3·1</td><td><strong>4</strong></td></tr>
+        <tr><td><code>out[0][1]</code></td><td>A 第0行 · B 第1列</td><td>1·0 + 2·1 + 3·1</td><td><strong>5</strong></td></tr>
+        <tr><td><code>out[1][0]</code></td><td>A 第1行 · B 第0列</td><td>4·1 + 5·0 + 6·1</td><td><strong>10</strong></td></tr>
+        <tr><td><code>out[1][1]</code></td><td>A 第1行 · B 第1列</td><td>4·0 + 5·1 + 6·1</td><td><strong>11</strong></td></tr>
+      </tbody>
+    </table>
+    <p>所以 <code>A@B = [[4,5],[10,11]]</code>——这正是 <code>run 2</code> 打印出来的结果。下面把 <code>out[0][0]</code>
+       这一格「行遇上列」的过程画出来：</p>
+    <div class="callout note"><div class="callout-title">out[0][0] 的执行图：A 第 0 行 × B 第 0 列</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-family:var(--mono);font-size:.82rem;margin-top:6px">
+        <div style="border:2px solid var(--running);border-radius:6px;padding:6px 10px">
+          A 第0行<br>[ <strong>1&nbsp;2&nbsp;3</strong> ]</div>
+        <div style="font-size:1.2rem">×</div>
+        <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px">
+          B 第0列<br>[ <strong>1</strong><br>&nbsp;<strong>0</strong><br>&nbsp;<strong>1</strong> ]</div>
+        <div style="font-size:1.2rem">=</div>
+        <div style="border:2px dashed var(--fg-dim);border-radius:6px;padding:6px 10px">
+          1·1 + 2·0 + 3·1</div>
+        <div style="font-size:1.2rem">=</div>
+        <div style="border:2px solid var(--accent);border-radius:6px;padding:6px 12px;font-weight:700">4</div>
+      </div>
+      <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+        蓝框（横着的行）和绿框（竖着的列）都恰好有 <strong>3</strong> 个数——这就是「相容」的直观含义：
+        行要和列<strong>一样长</strong>才能逐个配对相乘。</div>
+    </div>
+    <p><strong>相容检查落到本模型</strong>：一层线性变换是 <code>(S,32)@(32,32)</code>——A 的列数 32 == B 的行数 32，
+       通过；输出 <code>(S,32)</code>。而 MLP 升维 <code>(S,32)@(32,64)</code> 通过、降维 <code>(S,64)@(64,32)</code> 通过。
+       一旦维度对不上（比如误把降维写成 <code>(S,64)@(32,32)</code>，<code>64≠32</code>），就该<strong>立刻报错</strong>。</p>
+    <div class="callout warn"><div class="callout-title">形状不相容要当场报错，别硬算</div>
+      <code>(2,3)@(2,2)</code> 无效，因为 A 的列数 <code>3 ≠</code> B 的行数 <code>2</code>。本课程的
+      <code>matmul()</code> 会抛出带<strong>具体数字</strong>的 <code>ValueError</code>（实验里就是用
+      <code>matmul(A, A)</code> 触发它）——把错误提前暴露在源头，比让错误 shape 一路传下去省几小时 debug。</div>
+
+    <h2 id="transpose">转置 transpose：为什么 Attention 要 Kᵀ <span class="phase-badge phase-learn">Learn</span></h2>
+    <p><strong>先看问题。</strong>Attention 要算「每个 token 的 Q 和每个 token 的 K 有多像」。本模型每个 head 的
+       <code>Q</code> 是 <code>(S, 8)</code>、<code>K</code> 也是 <code>(S, 8)</code>（head_dim=8）。可
+       <code>(S,8)@(S,8)</code> <strong>不相容</strong>（列数 8 ≠ 行数 S）——直接乘不了。</p>
+    <div class="callout tip"><div class="callout-title">一句话解释</div>
+      <strong>转置 = 行列互换</strong>：<code>(m,n) → (n,m)</code>，即 <code>aᵀ[j][i] = a[i][j]</code>。
+      把 <code>K</code> 转成 <code>Kᵀ</code> 是 <code>(8, S)</code>，于是 <code>Q·Kᵀ = (S,8)@(8,S) → (S,S)</code>——
+      正好是「每个 token 对每个 token」的相似度打分表。</div>
+    <p><strong>手算</strong>（用本课的 <code>A=(2,3)</code>）：转置后每个原来的行变成列。</p>
+    <div class="callout note"><div class="callout-title">A (2×3) 转置成 Aᵀ (3×2)</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;font-family:var(--mono);font-size:.82rem;margin-top:6px">
+        <div style="border:2px solid var(--running);border-radius:6px;padding:6px 10px">
+          A (2×3)<br>[1&nbsp;2&nbsp;3]<br>[4&nbsp;5&nbsp;6]</div>
+        <div style="font-size:1.3rem">→</div>
+        <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px">
+          Aᵀ (3×2)<br>[1&nbsp;4]<br>[2&nbsp;5]<br>[3&nbsp;6]</div>
+      </div>
+      <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+        原来的第 0 行 <code>[1 2 3]</code> 竖起来变成第 0 列；<code>aᵀ[j][i]=a[i][j]</code>，比如
+        <code>aᵀ[2][0]=a[0][2]=3</code>。</div>
+    </div>
+    <p>这就回答了因果题里那个「为什么要对 K 转置」——不是为了好看，而是<strong>只有转置后维度才相容</strong>，
+       乘出来的形状 <code>(S,S)</code> 才是我们想要的「token×token 打分表」。</p>
+
+    <h2 id="broadcast">广播（broadcasting） <span class="phase-badge phase-learn">Learn</span></h2>
+    <p><strong>先看问题。</strong>线性层是 <code>xW + b</code>：<code>x@W</code> 得到 <code>(S,32)</code>，可
+       bias <code>b</code> 只有 <code>(32,)</code> 一行。<strong>同一个 bias 要加到每一个 token 上</strong>。
+       怎么加？</p>
+    <ul>
+      <li>笨办法一：写一层 <code>for</code> 循环，对 S 行各加一遍——能算，但把广播这件事藏进了循环里。</li>
+      <li>笨办法二：先把 <code>b</code> 复制成完整的 <code>(S,32)</code> 再逐元素加——当 <code>S=64</code> 时，
+          白白造了 <code>64×32=2048</code> 个数，而 bias 本来只有 <code>32</code> 个。</li>
+    </ul>
+    <div class="callout tip"><div class="callout-title">一句话解释</div>
+      <strong>广播（broadcasting）</strong>= 让一个「小」张量自动沿某一维「重复对齐」到「大」张量的形状，
+      再逐元素运算，<strong>但不真的复制数据</strong>。本课最常见的一种是行广播：
+      <code>(m,n) + (n,) → (m,n)</code>，即 <code>add_row_bias()</code>。</div>
+    <p><strong>手算</strong>：拿上面算出的 <code>C=[[4,5],[10,11]]</code>，加 workload 里的 <code>bias=[10,20]</code>。
+       bias 被「广播」到两行，每行都加同一个 <code>[10,20]</code>：</p>
+    <div class="callout note"><div class="callout-title">(2,2) + (2,) 的行广播执行图</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-family:var(--mono);font-size:.82rem;margin-top:6px">
+        <div style="border:2px solid var(--running);border-radius:6px;padding:6px 10px">
+          C (2×2)<br>[&nbsp;4&nbsp;&nbsp;5]<br>[10&nbsp;11]</div>
+        <div style="font-size:1.2rem">+</div>
+        <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px">
+          bias (2,)<br>[10&nbsp;20]<br><span style="color:var(--fg-dim)">↑ 每行都加它 ↑</span></div>
+        <div style="font-size:1.2rem">=</div>
+        <div style="border:2px solid var(--accent);border-radius:6px;padding:6px 10px">
+          结果 (2×2)<br>[14&nbsp;25]<br>[20&nbsp;31]</div>
+      </div>
+      <div style="font-size:.78rem;color:var(--fg-dim);margin-top:6px">
+        <code>4+10=14</code>、<code>5+20=25</code>、<code>10+10=20</code>、<code>11+20=31</code>。
+        相容条件：<strong>bias 长度必须等于列数 n</strong>（这里都是 2），否则 <code>add_row_bias()</code> 报错。</div>
+    </div>
+
+    <h2 id="misread">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+    <table>
+      <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+      <tbody>
+        <tr><td>「矩阵乘法就是逐元素相乘」</td>
+            <td>逐元素相乘要求<strong>同形</strong>（那是 <code>add</code>/<code>scale</code>）。matmul 是「行·列点积」，
+                <code>(m,k)@(k,n)→(m,n)</code>，形状通常会变。</td></tr>
+        <tr><td>「<code>(m,k)@(k,n)</code> 里消去的是 <code>m</code> 或 <code>n</code>」</td>
+            <td>消去的永远是<strong>中间那个共享维 <code>k</code></strong>；外侧的 <code>m</code>、<code>n</code>
+                原样保留为输出的行数与列数。</td></tr>
+        <tr><td>「A@B 和 B@A 一样」</td>
+            <td>矩阵乘法<strong>不满足交换律</strong>。<code>(2,3)@(3,2)→(2,2)</code> 可算，反过来
+                <code>(3,2)@(2,3)→(3,3)</code> 形状就不同了；很多时候一个能算、另一个直接不相容。</td></tr>
+        <tr><td>「转置只是把矩阵旋转/翻转一下」</td>
+            <td>转置是严格的 <code>aᵀ[j][i]=a[i][j]</code> 行列互换。它改变 shape <code>(m,n)→(n,m)</code>，
+                目的是让相邻两个矩阵的维度<strong>相容</strong>（如 <code>Q·Kᵀ</code>）。</td></tr>
+        <tr><td>「读 shape 从里往外读」</td>
+            <td>shape 从<strong>最外层到最内层</strong>写：<code>(B,S,H)</code> 是「B 条序列、每条 S 个 token、
+                每 token H 维」。读反了维度含义全错。</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="code">代码导读 <span class="phase-badge phase-learn">Learn</span></h2>
+    <p>本课三个 Build 目标函数都在 <code>mini_vllm/model/matrix.py</code> 里，逐一对上前面的讲解：</p>
+    <table>
+      <thead><tr><th>函数</th><th>做的事</th><th>对应上文</th></tr></thead>
+      <tbody>
+        <tr><td><code>matmul(a,b)</code></td><td>三重循环实现 row-column rule，先查 shape 相容</td><td>「row-column rule」小节</td></tr>
+        <tr><td><code>transpose(a)</code></td><td><code>aᵀ[j][i]=a[i][j]</code>，行列互换</td><td>「转置 transpose」小节</td></tr>
+        <tr><td><code>add_row_bias(a,bias)</code></td><td>行广播 <code>(m,n)+(n,)</code>，检查 <code>len(bias)==n</code></td><td>「广播」小节</td></tr>
+      </tbody>
+    </table>
+    <p><code>matmul()</code> 的核心就是把公式摊成三重循环——每一行代码都能对回上面的手算：</p>
+    <pre><code>for i in range(m):            # out 的每一行（对应上文的 i）
+    for j in range(n):        # out 的每一列（对应上文的 j）
+        s = 0.0
+        for k in range(ka):   # 沿共享维 k 累加：Σ_k a[i][k]*b[k][j]
+            s += a[i][k] * b[k][j]
+        out[i][j] = s</code></pre>
+    <p><strong>动画动作 ⟶ 对应代码：</strong>动画里「高亮 A 第 i 行、B 第 j 列并逐个累加」这个动作，
+       就是上面最内层的 <code>for k</code> 循环；每点亮一个输出格子，就对应一次 <code>out[i][j]=s</code>。</p>
+
+    <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+    <pre class="cmd"><code>python3 course.py run 2            # 带 shape 检查的 matmul + 广播 + 一个手算元素
+python3 course.py run 2 --trace    # 打印每个输出行
+python3 course.py check 2          # 跑测试并推进进度</code></pre>
+    <pre><code>  A shape = (2, 3)   B shape = (3, 2)
+  A @ B =
+[    4.00     5.00]
+[   10.00    11.00]
+  手算校验 out[0][0] = 4.0（= A 第0行 · B 第0列）
+  ✓ 形状不相容的 matmul 被明确拒绝：True</code></pre>
+
+    <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary><code>python3 course.py run 2</code>；网页点格子看乘加。</details>
+    <details><summary>提示 Level 2 · 位置</summary><code>matmul()</code> 是三重循环；<code>transpose()</code> 交换行列；<code>add_row_bias()</code> 是行广播。</details>
+    <details><summary>提示 Level 3 · 机制</summary><code>out[i][j]=Σ_k A[i][k]·B[k][j]</code>；相容要求 A 列数=B 行数；结果形状 (m,n)。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>不相容时应抛出含具体维度数字的 ValueError；别静默返回错误结果。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table>
+      <thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead>
+      <tbody>
+        <tr><td>结果转置了</td><td>把 <code>B[k][j]</code> 写成 <code>B[j][k]</code></td><td>牢记「B 的第 j 列」是 <code>B[*][j]</code></td></tr>
+        <tr><td>IndexError</td><td>没检查 shape 相容</td><td>先校验 A 列数 == B 行数</td></tr>
+        <tr><td>广播加错</td><td>bias 长度 ≠ 列数</td><td><code>len(bias)==n</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <pre class="cmd"><code>python3 course.py run 2 --trace
+python3 course.py inspect matmul</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question">
+      <ol style="margin:.3em 0">
+        <li>一层线性变换把 <code>(seq, hidden)</code> 乘上 <code>(hidden, hidden)</code>，输出 shape 是多少？计算量随 hidden 如何增长？</li>
+        <li>为什么 Attention 里要对 K 做转置（<code>Kᵀ</code>）才能和 Q 相乘？（提前想想 Lesson 4）</li>
+        <li>把两个 <code>(seq, hidden)</code> 直接相乘为什么通常不相容？</li>
+      </ol>
+    </div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table>
+      <thead><tr><th>教学实现</th><th>真实系统</th><th>相同点</th><th>简化点</th></tr></thead>
+      <tbody>
+        <tr><td>纯 Python 三重循环 <code>matmul</code></td><td>BLAS / Metal(MPS) / CUDA kernel</td><td>row-column rule 完全一致</td><td>真实用分块、向量化、并行，快几个数量级</td></tr>
+        <tr><td>嵌套 list 张量</td><td>连续内存的 tensor（stride/dtype）</td><td>逻辑 shape 相同</td><td>真实关心内存布局、对齐、精度(fp16/bf16)</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="summary">本节总结 & 下一步</h2>
+    <ul>
+      <li>张量 = 带 shape 的数组；核心维度 <code>(batch, seq, hidden)</code>。</li>
+      <li>矩阵乘法 <code>(m,k)@(k,n)→(m,n)</code>，<code>out[i][j]=Σ_k A[i][k]·B[k][j]</code>。</li>
+      <li>形状不相容要立即报错；行广播给每行加 bias。</li>
+    </ul>
+    <p style="margin-top:1em">
+      <button class="btn btn-accent" type="button" data-mark-lesson="2">✅ 标记本课已学</button>
+      &nbsp; <a class="btn" href="lesson_03.html">下一步：Lesson 3 · 最小 Decoder-only Transformer →</a>
+    </p>
+
+    <div class="footer">Build Your Own Mini-vLLM · Lesson 2 · 完全离线 · 无第三方依赖</div>
+  </main>
+</div>
+
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/matrix_mul.js"></script>
+<script>
+  MatrixMulExplorer.mount("#anim-matmul", { A: [[1,2,3],[4,5,6]], B: [[1,0],[0,1],[1,1]] });
+</script>
+</body>
+</html>

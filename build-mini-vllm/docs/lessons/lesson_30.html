@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 30 · Multimodal Final Incident Challenge — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="综合故障场景 + 自检：对齐、无串用、无 stale cache、timestamp 保留、visual 预算、encoder 不重复。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 30</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 30 · Multimodal Final Incident Challenge <span class="phase-badge phase-learn">Phase 6</span></h1>
+  <p>综合场景检验多模态系统的对齐、隔离、缓存与时间语义是否都站得住。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>综合故障场景 + 自检：对齐、无串用、无 stale cache、timestamp 保留、visual 预算、encoder 不重复。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/multimodal/mm_engine.py</code></dd>
+        <dt>需要修改的文件</dt><dd>（本课重在运行与观察）</dd>
+        <dt>需要关注的类或函数</dt><dd><code>整套多模态引擎</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 30</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 30</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 29</dd>
+        <dt>完成后下一步</dt><dd>（已是最后一课）</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>前面 9 课（Lesson 21–29）我们把多模态引擎<strong>一块砖一块砖</strong>地砌起来：chat template、
+     image processor、vision encoder、embedding 合并、占位对齐、视频抽帧、三层缓存、调度预算……
+     每一课都单独验证过「这块砖是好的」。但生产系统的真正考验是——
+     <strong>把所有砖同时受力</strong>：多个请求并发、有图有视频、共享媒体、预算有限，
+     此时六条正确性必须<strong>同时</strong>成立，缺一条就是线上事故。</p>
+  <div class="callout warn"><div class="callout-title">不这么综合自检会怎样：一个真实的连环事故</div>
+    假设两个请求几乎同时到达：请求 A 带图 <code>cat.png</code>，请求 B 带图 <code>dog.png</code>。
+    如果 encoder 缓存的 key 只用了「图像内容」而漏了 encoder 身份，
+    某次热更新换了 encoder 权重后，B 会<strong>误命中</strong> A 遗留的旧视觉 embedding（stale cache）；
+    与此同时，如果两个请求共用了同一份 <code>visual_embeds_list</code>，B 的图还会<strong>串</strong>进 A 的序列；
+    再叠加占位符没对齐（图要 4 个 visual token，却只插了 3 个占位），
+    合并 embedding 时下标全部错位。<strong>单独测每块砖时这些都不会暴露</strong>——
+    只有把它们塞进同一个并发场景，才逼得出来。这就是 Lesson 30 存在的意义。</div>
+
+  <h2 id="six">六条不变量：一句话 + 直觉 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课的「知识」其实是一张<strong>验收清单</strong>：一个正确的多模态引擎，在任意 workload 下都必须
+     同时守住下面六条<strong>不变量</strong>（invariant，即「无论怎么跑都不能被破坏的性质」）。</p>
+  <table>
+    <thead><tr><th>#</th><th>不变量</th><th>一句话</th><th>被破坏时的症状</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>对齐</td><td>每段媒体的占位 token 数 = 它的 visual token 数，顺序/区间严格对应</td><td>视觉 embedding 插错位置，答非所问</td></tr>
+      <tr><td>2</td><td>无串用</td><td>每个请求各持一份 KV Cache 与视觉 embedding，互不共享可变状态</td><td>A 的图影响 B 的输出</td></tr>
+      <tr><td>3</td><td>无 stale cache</td><td>缓存 key 覆盖所有影响结果的因素（内容+身份+版本+dtype）</td><td>换了 encoder 却命中旧结果</td></tr>
+      <tr><td>4</td><td>timestamp 保留</td><td>视频抽帧的时间线 metadata 一路透传到请求上，不丢</td><td>模型说不出「第几秒发生了什么」</td></tr>
+      <tr><td>5</td><td>visual 预算</td><td>visual token 与 encoder 工作量都计入调度预算</td><td>一张大图撑爆一次迭代，别的请求饿死</td></tr>
+      <tr><td>6</td><td>encoder 不重复</td><td>vision encoder 只在 prefill 跑一次，decode 阶段绝不再跑</td><td>每个 decode step 重编码，TTFT/吞吐崩塌</td></tr>
+    </tbody>
+  </table>
+  <div class="callout tip"><div class="callout-title">直觉类比：机场的一次值机</div>
+    把一个请求想成一位带行李的旅客。<strong>对齐</strong>=每件行李都贴对了行李条（占位）；
+    <strong>无串用</strong>=你的行李不会被推到别人的推车上；
+    <strong>无 stale cache</strong>=安检机认「这件行李+这台机器的当前程序」，换了程序就重扫，不复用旧扫描图；
+    <strong>timestamp 保留</strong>=行李条上的时间戳一路跟到目的地；
+    <strong>预算</strong>=每条安检线每分钟能过的件数有限；
+    <strong>encoder 不重复</strong>=安检只在入口扫一次，登机口不再重扫。</div>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+    行李是「物理唯一」的，天然不会串；而视觉 embedding 只是内存里的一份 list，
+    <strong>只要代码不小心共享了同一个引用，就会真的串</strong>——所以「无串用」不是自动成立的，
+    是靠「每个请求 <code>build_inputs</code> 各自新建 list、各自 <code>KVCache(cfg)</code>」这些具体写法换来的。
+    另外，安检「扫一次」是硬件决定的，而「encoder 不重复」在我们这里是<strong>用一句 assert 主动守护</strong>的
+    （见下文代码映射），不是白来的。</div>
+
+  <h2 id="pipeline">数据流全景：一个请求从消息到 token <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>要看清六条不变量各守在哪里，先把一个多模态请求的完整数据流摆出来，并标出每一步的
+     <strong>具体 shape</strong>（用本课真实配置：文本 <code>hidden=32</code>、视觉 <code>image=16 / patch=8 →
+     grid 2×2 → num_patches=4</code>、<code>vision_hidden=48</code>、projector 投到 <code>text_hidden=32</code>）。</p>
+  <div class="callout note"><div class="callout-title">一个请求的执行图（prefill 一次编码，decode 纯文本）</div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem;margin-top:6px">
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 10px">结构化消息<br><span style="color:var(--fg-dim)">text + image×2</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px dashed var(--running);border-radius:6px;padding:6px 8px">chat template<br><span style="color:var(--fg-dim)">切成 text/media 段</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px dashed var(--running);border-radius:6px;padding:6px 8px">processor<br>+encoder+projector<br><span style="color:var(--fg-dim)">每图 (4,48)→(4,32)</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px dashed var(--running);border-radius:6px;padding:6px 8px">parser<br><span style="color:var(--fg-dim)">插 4 个 PAD 占位/图<br>记 PlaceholderRange</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 8px">merge embeds<br><span style="color:var(--fg-dim)">(19,32)</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px solid var(--decode);border-radius:6px;padding:6px 10px">prefill forward<br><span style="color:var(--fg-dim)">出首 token</span></div>
+      <div style="font-size:1.2rem">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px">decode 循环<br><span style="color:var(--fg-dim)">纯文本，走 KV<br>encoder 不再跑</span></div>
+    </div>
+    <div style="font-size:.76rem;color:var(--fg-dim);margin-top:6px">
+      虚线框 = 只在 prefill 前发生一次的「视觉准备」；实线框 = 进入文本模型后的自回归。
+      注意：encoder/projector 只出现在 prefill 一侧，decode 一侧完全没有它们。</div>
+  </div>
+  <p>逐步的「输入 → 输出 shape」如下（<code>P</code>=文本段 token 数，随 prompt 变化）：</p>
+  <table>
+    <thead><tr><th>步骤</th><th>输入</th><th>输出</th><th>关键点</th></tr></thead>
+    <tbody>
+      <tr><td>vision encoder（每张图）</td><td>预处理像素 <code>(3, 16, 16)</code></td><td><code>(num_patches, vision_hidden) = (4, 48)</code></td><td>4 个 patch = 4 个 visual token</td></tr>
+      <tr><td>projector（每张图）</td><td><code>(4, 48)</code></td><td><code>(4, text_hidden) = (4, 32)</code></td><td>必须投到 32，才能和文本对齐</td></tr>
+      <tr><td>parser 占位</td><td>文本段 + 每图 4 个 visual token</td><td><code>input_ids</code> 长度 = <code>P + 4×图数</code></td><td>每图插 4 个 PAD 占位</td></tr>
+      <tr><td>merge</td><td>文本 embed <code>(seq,32)</code> + 视觉 <code>(4,32)×图数</code></td><td>合并 <code>(seq, 32)</code></td><td>把占位行逐位换成视觉行</td></tr>
+      <tr><td>prefill forward</td><td>merged <code>(seq,32)</code> + positions</td><td>logits + 每层 KV 追加 seq 行</td><td>唯一一次「整段」forward</td></tr>
+      <tr><td>decode（每步）</td><td>上一个 token 1 个 <code>[tok],[cur]</code></td><td>1 个新 logits + 每层 KV +1 行</td><td>不含任何视觉运算</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="worked">小规模手算：一条「1 文本 + 2 图」请求走一遍 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>取一条具体请求：<code>messages = [{"role":"user", "content":[text:"图", image1, image2]}]</code>。
+     tokenizer 是 byte-level（1 字节 = 1 token，中文一字 = 3 字节 = 3 token）。
+     chat template 会加 <code>"User: "</code> 前缀、每条消息末尾补 <code>"\n"</code>，parser 开头加 BOS。
+     我们一步步拼出 <code>input_ids</code>：</p>
+  <table>
+    <thead><tr><th>段</th><th>内容</th><th>token 数</th><th>在 input_ids 的下标</th></tr></thead>
+    <tbody>
+      <tr><td>BOS</td><td>句首标记</td><td>1</td><td>0</td></tr>
+      <tr><td>text</td><td><code>"User: "</code>（6 个 ASCII 字节）</td><td>6</td><td>1–6</td></tr>
+      <tr><td>text</td><td><code>"图"</code>（1 个中文字 = 3 字节）</td><td>3</td><td>7–9</td></tr>
+      <tr><td>media 图1</td><td>4 个 PAD 占位 → <code>PlaceholderRange(offset=10, length=4, media_index=0)</code></td><td>4</td><td>10–13</td></tr>
+      <tr><td>media 图2</td><td>4 个 PAD 占位 → <code>PlaceholderRange(offset=14, length=4, media_index=1)</code></td><td>4</td><td>14–17</td></tr>
+      <tr><td>text</td><td><code>"\n"</code></td><td>1</td><td>18</td></tr>
+    </tbody>
+  </table>
+  <p>合计 <strong>input_ids 长度 = 19</strong>（文本 token 11 + visual token 8），远小于 <code>max_seq_len=64</code>。
+     两段占位区间 <code>[10,14)</code> 与 <code>[14,18)</code> 首尾相接、不重叠、不越界、
+     <code>media_index</code> 依次是 0、1——这正是<strong>对齐</strong>不变量要求的全部条件（下节代码映射）。</p>
+  <p>接着算各项资源账：</p>
+  <ul>
+    <li><strong>视觉预算</strong>：<code>estimate()</code> 不做编码就报 <code>visual_tokens = 2×4 = 8</code>、<code>num_media = 2</code>。
+        默认预算 <code>visual_token_budget=64</code>、<code>encoder_budget=4</code>，
+        <code>fits</code> 判断 <code>8≤64</code> 且 <code>2≤4</code> → <strong>准入通过</strong>。</li>
+    <li><strong>encoder 运行次数</strong>：冷缓存时 2 张图各编码一次 → <code>encoder_runs += 2</code>；
+        decode 阶段 encoder <strong>一次都不能再跑</strong>（下节 assert 守护）。</li>
+    <li><strong>KV Cache 增长</strong>：每 token 每层存 <code>K+V = 2·kv_heads·head_dim = 2·2·8 = 32</code> 个数，
+        2 层共 <code>64</code> 个数/token。prefill 一次性写入 <code>19×64 = 1216</code> 个数；之后每 decode 一步 <code>+64</code>。</li>
+    <li><strong>merge 维度校验</strong>：视觉 embedding 是 <code>(4, 32)</code>，文本 hidden 也是 32——一致才允许逐位替换；
+        若 projector 忘了投到 32，这里会直接抛错（stale/错配的第一道防线）。</li>
+  </ul>
+  <div class="callout note"><div class="callout-title">占位替换的逐位对齐（merge 在做什么）</div>
+    <div style="display:flex;flex-wrap:wrap;gap:3px;font-family:var(--mono);font-size:.72rem;margin-top:6px">
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">0<br>BOS</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">1–6<br>User:␣</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">7–9<br>图</div>
+      <div style="border:2px solid var(--decode);border-radius:4px;padding:4px 6px;background:color-mix(in srgb,var(--decode) 15%,var(--bg))">10–13<br>图1 视觉<br>(4,32)</div>
+      <div style="border:2px solid var(--running);border-radius:4px;padding:4px 6px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">14–17<br>图2 视觉<br>(4,32)</div>
+      <div style="border:1px solid var(--fg-dim);border-radius:4px;padding:4px 6px">18<br>\n</div>
+    </div>
+    <div style="font-size:.76rem;color:var(--fg-dim);margin-top:6px">
+      彩色框 = 原本是 PAD 占位、被对应图的 4 行视觉 embedding 逐位替换的位置。
+      长度必须严丝合缝：图1 占 4 位就必须换 4 行，多一行少一行都会错位或越界。</div>
+  </div>
+
+  <h2 id="invariants">逐条拆解：每条不变量守在代码哪里 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本课不写新代码，重在<strong>读懂已有引擎如何守住六条不变量</strong>。下表把每条不变量精确定位到
+     <code>mm_engine.py</code> 及其协作模块的具体位置：</p>
+  <table>
+    <thead><tr><th>不变量</th><th>守在哪里（类/函数）</th><th>怎么守的</th></tr></thead>
+    <tbody>
+      <tr><td>1 对齐</td><td><code>placeholders.validate_placeholders()</code>（被 <code>merge_multimodal_embeddings</code> 调用）</td><td>校验 <code>len(ranges)==媒体数</code>、每段 <code>length==visual token 数</code>、<code>media_index==k</code>、不越界、不重叠；任一不满足抛带定位信息的错。</td></tr>
+      <tr><td>2 无串用</td><td><code>MultiModalEngine._prefill()</code>（<code>r.kv = KVCache(cfg)</code>）+ <code>runner.build_inputs()</code></td><td>每个请求在 prefill 时新建<strong>自己的</strong> KV Cache；<code>visual_embeds_list</code> 每次调用都是新 list，不存在跨请求共享的可变引用。</td></tr>
+      <tr><td>3 无 stale cache</td><td><code>cache.EncoderOutputCache.key()</code></td><td>key = 内容哈希 + processor_cfg + <code>encoder_id</code> + <code>projector_id</code> + dtype + <code>SCHEMA_VERSION</code>；换任一因素都不会误命中。</td></tr>
+      <tr><td>4 timestamp 保留</td><td><code>runner._encode_video()</code>→<code>build_inputs()</code>→<code>_prefill()</code>（<code>r.media_meta</code>）</td><td>抽帧时 <code>VideoFrameSampler.timeline()</code> 产出 <code>{frame_index, timestamp}</code>，塞进 <code>media_meta[k]["timeline"]</code>，再随 prefill 结果挂到请求上，全程不丢。</td></tr>
+      <tr><td>5 visual 预算</td><td><code>budget.MultiModalBudget.fits()</code>（准入循环 <code>run()</code> 第 2 阶段）+ <code>runner.estimate()</code></td><td><code>estimate()</code> 不编码就算出 visual token 与媒体数；<code>fits()</code> 同时约束 <code>visual_token_budget</code> 与 <code>encoder_budget</code>，超预算的请求这一迭代不准入。</td></tr>
+      <tr><td>6 encoder 不重复</td><td><code>MultiModalEngine.run()</code> decode 阶段的 <code>assert encoder_runs == enc_before</code></td><td>decode 只调 <code>model.forward([tok],[cur])</code>（纯文本）；每步前后记录 <code>runner.encoder_runs</code>，若 decode 期间它变了立即 assert 失败。</td></tr>
+    </tbody>
+  </table>
+  <div class="callout tip"><div class="callout-title">为什么用「主动 assert」而不是「相信它不会跑」</div>
+    第 6 条尤其关键：encoder 是最贵的一步，一旦被 decode 循环误触发，性能会悄悄崩塌而
+    <strong>结果却依然正确</strong>（只是慢），普通功能测试根本发现不了。所以引擎在每步 decode 前后
+    对 <code>encoder_runs</code> 做快照对比（<code>enc_before → assert</code>），把「性能不变量」变成一个
+    <strong>会当场爆炸的断言</strong>——这是把隐性性能 bug 变成显性错误的经典手法。</div>
+
+  <h2 id="ttft">首次 vs 缓存命中：TTFT 差在哪 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>TTFT（Time To First Token，首 token 延迟）= 请求准入到吐出第一个 token 的时间。
+     多模态请求的 TTFT 大头在 <strong>prefill</strong>，而 prefill 里最贵的是 <strong>vision encoder</strong>。
+     用上面那条 2 图请求对比两种情形：</p>
+  <table>
+    <thead><tr><th>情形</th><th>encoder 运行</th><th>prefill 成本主要来自</th><th>TTFT</th></tr></thead>
+    <tbody>
+      <tr><td>首次请求（冷缓存）</td><td>2 次（2 张图各编码一次）</td><td>预处理 + 2×(encoder+projector) + 文本 prefill</td><td>高</td></tr>
+      <tr><td>相同媒体再来（<code>EncoderOutputCache</code> 命中）</td><td>0 次</td><td>只剩文本 prefill（视觉 embedding 直接取缓存）</td><td>明显更低</td></tr>
+    </tbody>
+  </table>
+  <p>注意命中的前提是 key <strong>完全一致</strong>（同一像素内容 + 同一 encoder/projector 身份 + 同 dtype/版本）。
+     这恰恰把第 3 条（无 stale cache）和 TTFT 联系起来：<strong>key 太粗会误命中（错但快），
+     key 太细会漏命中（对但慢）</strong>——正确的 key 粒度是「覆盖所有影响结果的因素、且仅覆盖这些」。</p>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「每块砖单独测过了，合起来自然没问题」</td><td>bug 往往出在<strong>交互</strong>处：并发下的共享状态、缓存 key 粒度、预算与编码的耦合——这些只有综合场景才暴露，正是本课存在的理由。</td></tr>
+      <tr><td>「decode 时也要重新看一眼图，才知道图里有什么」</td><td>图的信息在 prefill 已经<strong>编码进 KV Cache</strong> 了。decode 是纯文本自回归，重跑 encoder 既多余又昂贵——引擎用 assert 明令禁止。</td></tr>
+      <tr><td>「encoder 缓存 key 用图像内容哈希就够了」</td><td>换 encoder/projector 权重或改 dtype 后，同一张图的视觉 embedding 会变。key 不含身份/版本就会<strong>误命中旧结果</strong>（stale cache），静默出错。</td></tr>
+      <tr><td>「占位 token 数随便填，反正会被视觉 embedding 覆盖」</td><td>占位数必须<strong>精确等于</strong> visual token 数。少了则视觉行没处放/越界，多了则多余占位没被替换、混入垃圾 embedding。<code>validate_placeholders</code> 会当场拦下。</td></tr>
+      <tr><td>「视频抽了帧，模型自然知道每帧是第几秒」</td><td>timestamp 只是 processor 侧的 metadata，模型<strong>看不到</strong>它，除非显式喂进 prompt 或随 <code>media_meta</code> 保留下来供后续使用。抽帧≠保留时间线。</td></tr>
+      <tr><td>「visual token 不占序列位置，不用进预算」</td><td>visual token 会被 parser 插成真实占位、进入序列和 KV Cache，<strong>和文本 token 一样占位置</strong>。所以 <code>estimate()</code> 要把它们算进调度预算，否则一张大图能撑爆一次迭代。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射：读懂 run() 的一次迭代 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>把上面六条不变量落到 <code>MultiModalEngine.run()</code> 的主循环上——一次迭代做三件事，
+     每件事恰好对应几条不变量：</p>
+  <pre><code>while self.waiting or self.running:
+    # ① decode 阶段：推进已 prefill 的请求（纯文本）
+    enc_before = self.runner.encoder_runs
+    for r in self.running:
+        if r.prefill_done and not r.finished():
+            logits = self.model.forward([r.output_token_ids[-1]], [r.cur], kv_cache=r.kv)  # 各自的 kv → 无串用
+            ...
+    assert self.runner.encoder_runs == enc_before   # ⑥ encoder 不重复
+
+    # ② 准入 + prefill：按预算接纳新请求
+    for r in 到达且待处理的请求:
+        est = self.runner.estimate(r.messages)                     # ⑤ 不编码就估 visual/媒体数
+        if not self.budget.fits(0, est["visual_tokens"], est["num_media"], ...): continue
+        self._prefill(r, it)   # r.kv=KVCache(cfg) 各自一份；build_inputs→validate→merge  # ①对齐 ②无串用 ④timestamp
+
+    # ③ 回收完成的请求</code></pre>
+  <p>三层缓存的分工也在这条链上：<code>ProcessorCache</code>（预处理像素）与 <code>EncoderOutputCache</code>
+     （视觉 embedding）由 <code>runner._encode_image()</code> 内部命中，省的是 <strong>③ 无 stale cache</strong>
+     前提下的 encoder 算力（决定 TTFT）；而 <strong>LLM KV Cache</strong> 是每请求各持一份，
+     保证 <strong>②无串用</strong> 且 decode 不重算历史。至此，本课要「同时守住」的六条正确性，
+     在 <code>run()</code> 的一次迭代里全部能对号入座。</p>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a30">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>综合场景下多模态引擎能同时守住哪些正确性？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 30
+python3 course.py run 30 --trace
+python3 course.py check 30</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 30` 跑综合场景。</details>
+    <details><summary>提示 Level 2 · 位置</summary>组合多图/视频/共享媒体/有限预算。</details>
+    <details><summary>提示 Level 3 · 机制</summary>自检：对齐/无串用/timestamp/缓存命中。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>首次 vs 缓存命中的 TTFT 不同。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>placeholder bug</td><td>对齐错</td><td>validate 守护 + 测试</td></tr><tr><td>stale cache</td><td>key 太粗</td><td>key 含身份/版本</td></tr><tr><td>timestamp 丢失</td><td>metadata 未传递</td><td>media_meta 携带 timeline</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 30 --trace</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>首次请求与命中 encoder 缓存的请求，TTFT 差异来自哪里？</li><li>如果视觉预算过小，会先影响什么？如何缓解？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>多模态综合自检</td><td>vLLM 生产多模态</td><td>正确性目标一致</td><td>真实含 SLA、抢占、可观测性</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>综合故障场景 + 自检：对齐、无串用、无 stale cache、timestamp 保留、visual 预算、encoder 不重复。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="30">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="../index.html">返回课程首页 →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 30 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/mm_pipeline.js"></script>
+<script>
+MMPipeline.mount("#a30", {stages: [{title:"综合 workload", detail:"text/多图/视频/共享媒体/有限预算"},{title:"对齐自检", detail:"placeholder 与媒体严格对应"},{title:"无串用自检", detail:"输出与单独生成一致"},{title:"缓存自检", detail:"相同媒体命中、换身份不误命中"},{title:"时间/预算自检", detail:"timestamp 保留、visual token 入预算"}]});
+</script>
+</body>
+</html>

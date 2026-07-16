@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 17 · 完整 Text Mini-vLLM — Build Your Own Mini-vLLM</title>
+  <meta name="doc-description" content="组装 tokenizer/请求/调度/分配/分页 KV/model runner/采样/引擎/benchmark，端到端运行并出报告。">
+  <link rel="stylesheet" href="../css/course.css">
+</head>
+<body data-total-lessons="31">
+<a class="skip-link" href="#main">跳到主内容</a>
+<div class="topbar">
+  <span class="brand">Mini-vLLM <small>· Lesson 17</small></span>
+  <span class="spacer"></span>
+  <a class="btn" href="../index.html">← 课程首页</a>
+  <button class="btn" id="theme-toggle" type="button">主题：跟随系统</button>
+</div>
+<main class="content" id="main" style="max-width:900px;margin:0 auto">
+  <h1>Lesson 17 · 完整 Text Mini-vLLM <span class="phase-badge phase-build">Phase 3</span></h1>
+  <p>把所有部件组装成引擎，才算真正「造出一个 mini-vLLM」。</p>
+
+  <section id="goal"><div class="lesson-header">
+      <dl>
+        <dt>当前目标</dt><dd>组装 tokenizer/请求/调度/分配/分页 KV/model runner/采样/引擎/benchmark，端到端运行并出报告。</dd>
+        <dt>需要阅读的文件</dt><dd><code>mini_vllm/engine/engine.py</code>、<code>benchmarks/report.py</code></dd>
+        <dt>需要修改的文件</dt><dd><code>mini_vllm/engine/engine.py</code></dd>
+        <dt>需要关注的类或函数</dt><dd><code>LLMEngine</code>、<code>engine loop</code></dd>
+        <dt>实验命令</dt><dd><code>python3 course.py run 17</code></dd>
+        <dt>测试命令</dt><dd><code>python3 course.py check 17</code></dd>
+        <dt>本课依赖</dt><dd>Lesson 16</dd>
+        <dt>完成后下一步</dt><dd>Lesson 18</dd>
+      </dl>
+  </div></section>
+
+  <h2 id="why">为什么需要这个知识 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>前面 16 课，我们一件件造好了零件：tokenizer（把文本切成字节 token）、Request 状态机、
+     Scheduler（决定这一步跑谁）、BlockAllocator + 分页 KV（管显存）、TinyTextModel（跑 forward）、
+     Sampler（挑下一个 token）。但零件散着放，<strong>并不会自己动</strong>——没有一个「主循环」
+     把它们按正确顺序串起来，你连一句话都生成不出来。这一课就是造那台<strong>发动机</strong>。</p>
+  <div class="callout question"><div class="callout-title">先看问题：不组装引擎会怎样？</div>
+     假设同时来 3 条请求（下方动画里的 <code>chat1 / chat2 / long</code>）。最朴素的做法是
+     <strong>一条跑完再跑下一条</strong>：chat1 生成 5 个 token 期间，模型每步只处理 1 个 token，
+     可 GPU 明明还能同时处理好几条——<strong>算力大量闲置</strong>；与此同时 chat2、long 只能干等，
+     它们的「首字延迟」被硬生生拖长。真实 vLLM 的核心价值，就是把这 3 条请求<strong>在同一步里一起推进</strong>
+     （continuous batching），让算力吃满、让每条请求都尽早出字。这台发动机怎么转，就是本课要讲透的。</div>
+
+  <h2 id="parts">引擎要组装哪些零件 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>看 <code>LLMEngine.__init__</code>：它把前面每一课的成果<strong>持有</strong>成自己的字段。可以把整台引擎
+     想成一张零件清单——每个零件对应一课，缺一个引擎就转不起来：</p>
+  <table>
+    <thead><tr><th>零件（引擎字段）</th><th>来自哪课</th><th>在 loop 里干什么</th></tr></thead>
+    <tbody>
+      <tr><td><code>self.tok</code> ByteTokenizer</td><td>L2</td><td>把 prompt 字符串编码成字节 token（一字节=1 token，中文一字=3 token）</td></tr>
+      <tr><td><code>self.scheduler</code> Scheduler</td><td>L11 / L15</td><td>每步决定「跑谁、各处理多少 token」，受两个预算约束</td></tr>
+      <tr><td><code>self.allocator</code> BlockAllocator</td><td>L13</td><td>按物理块借/还显存，全局共享一份</td></tr>
+      <tr><td><code>r.kv</code> PagedKVCache（每请求一份）</td><td>L7 / L14</td><td>缓存该请求每层的 K/V，按块寻址</td></tr>
+      <tr><td><code>self.model</code> TinyTextModel</td><td>L6</td><td>跑 forward，输入 token+位置+KV，输出 logits</td></tr>
+      <tr><td><code>self._samplers</code> Sampler（每请求一份）</td><td>L9</td><td>从 logits 里挑出下一个 token id</td></tr>
+      <tr><td><code>self.prefix_cache</code>（可选）PrefixCache</td><td>L16</td><td>相同 prompt 前缀的请求共享物理块</td></tr>
+    </tbody>
+  </table>
+  <div class="callout note"><div class="callout-title">一个关键的组装细节：全局共享的 <code>kv_store</code></div>
+     <code>self.kv_store = {"k": {}, "v": {}}</code> 是<strong>所有</strong>请求共用的一份 KV 行存储，
+     而每条请求的 <code>PagedKVCache</code> 只持有「块号 → 行」的映射。正因为底层存储是共享的，
+     两条请求命中同一个前缀块时，才能真正<strong>指向同一份物理数据</strong>（Lesson 16 前缀共享的地基）。</div>
+
+  <h2 id="intuition">直觉类比：引擎就是餐厅的「出餐循环」 <span class="phase-badge phase-learn">Learn</span></h2>
+  <div class="callout tip"><div class="callout-title">一句话解释</div>
+     engine loop = 一个反复执行「<strong>排班 → 开火 → 装盘 → 送走已完成的桌</strong>」的循环，
+     直到所有客人都吃完离店。</div>
+  <p><strong>类比：一间只有几个灶眼的厨房。</strong>灶眼数 = <code>max_num_seqs</code>（最多同时几桌在做菜），
+     每轮能切的食材总量 = <code>max_num_batched_tokens</code>（token 预算）。新客人进门先在<strong>候位区</strong>（WAITING），
+     厨师长（Scheduler）每一轮看现有灶眼和食材预算，决定<strong>这一轮给哪几桌做、各做多少</strong>：
+     有的桌在<strong>备料</strong>（prefill，一次切一大批），有的桌只差<strong>最后一道</strong>（decode，一次一个）。
+     哪桌上齐了（生成完），就<strong>收台、把餐具还回去</strong>（free KV block），腾出资源给下一桌。</p>
+  <div class="callout warn"><div class="callout-title">类比的边界（别被带偏）</div>
+     餐厅里不同桌的菜是各做各的；而引擎里 continuous batching 是在<strong>同一次 forward</strong> 里
+     把多条请求的 token 一起送进模型——它们共享一次矩阵运算，但每条请求的 <strong>KV 完全独立</strong>
+     （各自的 block table），所以结果<strong>逐 token 等于「单独生成」</strong>。共享的是<em>算力批次</em>，
+     不是<em>上下文</em>——这条边界是本课正确性的命根子（见下方常见误解）。</div>
+
+  <h2 id="loop">engine loop 精确定义：一轮迭代做四件事 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>看 <code>LLMEngine.run()</code>：外层是 <code>while self.scheduler.has_unfinished</code>，
+     只要还有 WAITING 或 RUNNING 的请求就继续。每一轮迭代（iteration）严格做四件事：</p>
+  <table>
+    <thead><tr><th>#</th><th>步骤</th><th>调用</th><th>输入 / 输出（含具体 shape）</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>排班</td><td><code>scheduler.schedule(it, num_free, block_size)</code></td>
+          <td>输出 <code>out.items</code>：一串 <code>ScheduledItem(request, is_prefill, num_tokens)</code>；decode 的 <code>num_tokens</code> 恒为 1</td></tr>
+      <tr><td>2</td><td>开火+装盘</td><td><code>for item: _run_item(item, it)</code></td>
+          <td>对每个 item 跑 <code>model.forward(toks, positions, kv)</code> → <code>logits</code>，再 <code>sampler(logits[-1])</code> → 1 个 token id</td></tr>
+      <tr><td>3</td><td>收台</td><td><code>scheduler.remove_finished()</code></td>
+          <td>返回本轮完成的请求（<code>num_generated ≥ max_new</code> 或末尾是 EOS）</td></tr>
+      <tr><td>4</td><td>还餐具</td><td><code>r.kv.free()</code>（或 <code>prefix_cache.on_finish(r)</code>）</td>
+          <td>把该请求占的物理块还给 allocator——<strong>无泄漏</strong></td></tr>
+    </tbody>
+  </table>
+  <p>盯住第 2 步里 prefill 与 decode 的<strong>形状差别</strong>，这是整台引擎最核心的一处：</p>
+  <table>
+    <thead><tr><th>阶段</th><th>喂进 forward 的 token 数</th><th>positions</th><th>logits shape</th><th>采样从哪取</th></tr></thead>
+    <tbody>
+      <tr><td><strong>prefill</strong>（备料）</td><td><code>n</code> 个（prompt 的一块，可 &gt;1）</td>
+          <td><code>[start, …, start+n-1]</code></td><td><code>(n, 259)</code></td>
+          <td>只在 prompt 全部算完（<code>prefill_done</code>）后，从 <code>logits[-1]</code>（形状 <code>(259,)</code>）采第 1 个输出 token</td></tr>
+      <tr><td><strong>decode</strong>（收尾）</td><td><strong>恰好 1 个</strong>（上一步生成的 token）</td>
+          <td><code>[num_prompt + num_generated − 1]</code></td><td><code>(1, 259)</code></td>
+          <td>每步都从 <code>logits[-1]</code> 采 1 个 token</td></tr>
+    </tbody>
+  </table>
+  <p>这里的 <code>259</code> 正是本模型的 <code>vocab_size</code>（256 个字节 + BOS/EOS/PAD）。decode 之所以每步只喂
+     1 个 token 还能得到正确结果，靠的正是 Lesson 7 的 KV Cache：历史 K/V 都在 <code>r.kv</code> 里，
+     不必重算。</p>
+  <div class="callout note"><div class="callout-title">为什么第 1 个输出 token 在 prefill 阶段产生，而不是 decode？</div>
+     一个新 token 需要「它前面所有 token 的信息」。prompt 的最后一个位置，在 prefill 跑完时其 logits
+     <strong>已经包含了整段 prompt 的上下文</strong>，从它直接采样就是「续写的第 1 个字」。所以代码在
+     <code>_run_item</code> 里：<code>if r.prefill_done: tok = sampler(logits[-1]); r.first_token_iter = it</code>——
+     首 token 的诞生迭代号被记下来，正是后面算 TTFT 的原料。</div>
+
+  <h2 id="worked">小规模手算：3 条请求走一遍 loop <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>用下方动画里那 3 条真实请求，byte-level tokenizer + <code>add_bos</code>，先数清 prompt 长度：</p>
+  <table>
+    <thead><tr><th>请求</th><th>prompt</th><th>token 数（含 BOS）</th><th>到达迭代</th><th>max_new</th></tr></thead>
+    <tbody>
+      <tr><td><code>chat1</code></td><td>"Hi"</td><td>1+2 = <strong>3</strong></td><td>0</td><td>5</td></tr>
+      <tr><td><code>chat2</code></td><td>"Hello"</td><td>1+5 = <strong>6</strong></td><td>1</td><td>6</td></tr>
+      <tr><td><code>long</code></td><td>"The quick brown fox"</td><td>1+19 = <strong>20</strong></td><td>2</td><td>4</td></tr>
+    </tbody>
+  </table>
+  <p>取 <code>max_num_seqs=3</code>、token 预算 <code>max_num_batched_tokens=16</code>（与动画一致）、fifo、开启 chunked prefill。
+     引擎迭代从 1 开始，请求在 <code>arrival ≤ it</code> 时才可被准入。下面是一次可能的调度轨迹：</p>
+  <table>
+    <thead><tr><th>迭代</th><th>本轮 items（谁·阶段·token 数）</th><th>预算用量</th><th>各请求进展</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>chat1 · prefill · 3；chat2 · prefill · 6</td><td>9 / 16</td>
+          <td>两条都算完 prompt → 各出<strong>第 1 个</strong>输出 token（<code>first_token_iter=1</code>）。long 未到达。</td></tr>
+      <tr><td>2</td><td>chat1 · decode · 1；chat2 · decode · 1；long · prefill · 14</td><td>16 / 16</td>
+          <td>chat1/chat2 各 +1 token；long 到达并<strong>切块</strong>：20 个 prompt 先算 14 个（预算封顶）。</td></tr>
+      <tr><td>3</td><td>chat1 · decode · 1；chat2 · decode · 1；long · prefill · 6</td><td>8 / 16</td>
+          <td>long 补算剩下的 6 个 prompt → prefill_done → 出第 1 个输出 token（<code>first_token_iter=3</code>）。</td></tr>
+      <tr><td>4</td><td>三条全 decode · 各 1</td><td>3 / 16</td>
+          <td>chat1 已有 3 个输出、chat2 有 3、long 有 1，继续各 +1。</td></tr>
+      <tr><td>…</td><td>…</td><td>…</td>
+          <td>chat1 满 5 个输出 → 完成、<code>free()</code> 归还块；随后 chat2 满 6、long 满 4 依次收台。</td></tr>
+    </tbody>
+  </table>
+  <p>注意第 2、3 轮：<strong>chat1/chat2 的 decode 和 long 的 prefill 混在同一轮里</strong>跑——这就是
+     continuous batching 与 chunked prefill（L15）联手的效果：长 prompt 不会一次霸占引擎，短请求的
+     decode 也不被堵住。由此可直接读出两个延迟指标：</p>
+  <ul>
+    <li><strong>TTFT</strong>（首字延迟，迭代级）= <code>first_token_iter − arrival</code>：
+        chat1 = 1−0 = <strong>1</strong>；chat2 = 1−1 = <strong>0</strong>；long = 3−2 = <strong>1</strong>。</li>
+    <li><strong>完成迭代</strong> = <code>finish_iter − arrival</code>，同理由收台那一轮的迭代号算出。</li>
+  </ul>
+
+  <h2 id="diagram">一轮迭代的执行图 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>把上表第 2 轮画出来：Scheduler 把 3 条请求排成一批（两条 decode + 一条 prefill 块），
+     一起过模型、各自采样、各自写回自己的 KV，最后检查有没有完成的要收台：</p>
+  <div class="callout note">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem;margin-top:4px">
+      <div style="border:2px solid var(--accent);border-radius:6px;padding:6px 10px">Scheduler<br>schedule()<br><span style="color:var(--fg-dim)">预算 16 / 灶眼 3</span></div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="border:2px solid var(--decode);border-radius:6px;padding:4px 8px">chat1 · decode · 1 tok</div>
+        <div style="border:2px solid var(--decode);border-radius:6px;padding:4px 8px">chat2 · decode · 1 tok</div>
+        <div style="border:2px dashed var(--running);border-radius:6px;padding:4px 8px;background:color-mix(in srgb,var(--running) 15%,var(--bg))">long · prefill · 14 tok</div>
+      </div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px solid var(--running);border-radius:6px;padding:6px 10px">model<br>forward()<br><span style="color:var(--fg-dim)">各写各的 r.kv</span></div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px solid var(--accent);border-radius:6px;padding:6px 10px">Sampler ×3<br>logits[-1]<br><span style="color:var(--fg-dim)">→ token id</span></div>
+      <div style="font-size:1.3rem">→</div>
+      <div style="border:2px solid var(--finished);border-radius:6px;padding:6px 10px">remove_finished<br>→ free 块</div>
+    </div>
+    <div style="font-size:.76rem;color:var(--fg-dim);margin-top:6px">
+      虚线 = prefill（一次多 token）；实线 decode = 一次 1 token。三条请求共享<strong>一次批处理</strong>，
+      但 KV 各自独立。此图对应 <code>run()</code> 里 <code>schedule → for item: _run_item → remove_finished → free</code> 四步。</div>
+  </div>
+
+  <h2 id="report">性能报告：四类指标各回答什么问题 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p><code>run 17</code> 会调 <code>benchmarks/report.py</code> 的 <code>build_report()</code>，把引擎跑完的
+     <code>EngineResult</code> 换算成一份报告。指标分两大阵营——<strong>延迟</strong>（单条请求的体感快慢）
+     与<strong>吞吐</strong>（系统整体的产能）——它们常常此消彼长：</p>
+  <table>
+    <thead><tr><th>指标</th><th>公式（代码里怎么算）</th><th>关注</th><th>本例数值</th></tr></thead>
+    <tbody>
+      <tr><td><code>avg/max_ttft_iters</code></td><td><code>first_token_iter − arrival</code> 求平均/最大</td><td>延迟</td>
+          <td>平均 (1+0+1)/3 ≈ <strong>0.67</strong>，最大 1</td></tr>
+      <tr><td><code>avg_completion_iters</code></td><td><code>finish_iter − arrival</code> 求平均</td><td>延迟</td><td>由各请求收台迭代算出</td></tr>
+      <tr><td><code>token_throughput_per_s</code></td><td><code>total_output / wall_time_s</code></td><td>吞吐</td>
+          <td>输出总数 = 5+6+4 = <strong>15</strong> token ÷ 墙钟秒</td></tr>
+      <tr><td><code>kv_utilization</code></td><td><code>peak_blocks_used / num_blocks</code></td><td>资源</td>
+          <td>峰值占块 ÷ <strong>24</strong>（block_size=4）</td></tr>
+      <tr><td><code>prefix_cache.hit_rate</code>（可选）</td><td>命中前缀块 / 总请求</td><td>资源/延迟</td><td>仅开启前缀缓存时出现</td></tr>
+    </tbody>
+  </table>
+  <div class="callout tip"><div class="callout-title">为什么 TTFT 用「迭代号之差」而不是墙钟毫秒？</div>
+     <code>report.py</code> 特意用<strong>迭代级代理</strong>（<code>first_token_iter − arrival</code>）：它
+     <strong>确定、可复现</strong>，同一份输入每次跑都一样，适合教学与回归测试；墙钟版本受机器负载抖动影响，
+     只作参考。真实 vLLM 报的是毫秒级 TTFT/TPOT，但「首 token 何时产生」这个语义是完全一致的。</div>
+  <div class="callout note"><div class="callout-title">与 naive 基线对比</div>
+     报告里的 <code>baseline_naive_processed_tokens</code> 记录「若每条请求都像 Lesson 6 那样每步重算整段」
+     会处理多少 token。引擎靠 KV Cache + 批处理把这个数字大幅压下来——这就是把前 16 课的优化<strong>量化</strong>成一个数。</div>
+
+  <h2 id="misconception">常见误解 <span class="phase-badge phase-learn">Learn</span></h2>
+  <table>
+    <thead><tr><th>误解</th><th>为什么错</th></tr></thead>
+    <tbody>
+      <tr><td>「多条请求一起 batch，输出会互相污染，和单独跑不一样」</td>
+          <td>共享的只是<strong>一次算力批次</strong>；每条请求有<strong>独立的 KV（独立 block table）</strong>，
+              attention 只看自己的上下文。所以 <code>check 17</code> 的验收标准正是：引擎输出与「逐请求单独生成」<strong>逐 token 一致</strong>。</td></tr>
+      <tr><td>「decode 每步要把整段序列重新喂进模型」</td>
+          <td>只喂<strong>1 个</strong>新 token（<code>forward([last], [pos], r.kv)</code>），历史全在 KV 里。喂整段就退回朴素做法、白费算力。</td></tr>
+      <tr><td>「请求完成后不用管 KV，反正会自动回收」</td>
+          <td>不会。必须在 <code>remove_finished()</code> 后显式 <code>r.kv.free()</code>；否则块<strong>泄漏</strong>，
+              后续请求借不到块、引擎抛「调度停滞」。<code>run()</code> 收尾用 <code>check_no_leak()</code> 专门自检。</td></tr>
+      <tr><td>「第 1 个输出 token 是 decode 阶段产生的」</td>
+          <td>它在 <strong>prefill 跑完那一刻</strong>就从 prompt 最后一个位置的 logits 采出（<code>if r.prefill_done</code>）。
+              decode 从<strong>第 2 个</strong>输出 token 起才开始。搞反会把 TTFT 算晚一轮。</td></tr>
+      <tr><td>「TTFT 越低、吞吐就越高，是一回事」</td>
+          <td>常常相反：为压 TTFT 要优先给新请求做 prefill，可能挤占正在 decode 的请求，拉低整体吞吐。
+              延迟与吞吐是<strong>需要权衡</strong>的两类目标（调度策略 L11 就在调这个平衡）。</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="code">代码映射 <span class="phase-badge phase-learn">Learn</span></h2>
+  <p>本节讲的每一块，都能在源码里定位到：</p>
+  <table>
+    <thead><tr><th>讲解</th><th>对应代码（<code>engine/engine.py</code> / <code>benchmarks/report.py</code>）</th></tr></thead>
+    <tbody>
+      <tr><td>零件组装 + 共享 kv_store</td><td><code>LLMEngine.__init__</code>（allocator / scheduler / kv_store / 可选 prefix_cache）</td></tr>
+      <tr><td>建请求、立刻建 KV 并试前缀复用</td><td><code>add_request()</code>：<code>r.kv = PagedKVCache(...)</code> → <code>prefix_cache.attach(r)</code> → <code>scheduler.add(r)</code></td></tr>
+      <tr><td>四步 loop</td><td><code>run()</code>：<code>while has_unfinished</code> → <code>schedule</code> → <code>for item: _run_item</code> → <code>remove_finished</code> → <code>free</code></td></tr>
+      <tr><td>prefill / decode 的 forward 与采样</td><td><code>_run_item()</code>：<code>is_prefill</code> 分支决定喂 n 个还是 1 个；<code>prefill_done</code> 时记 <code>first_token_iter</code></td></tr>
+      <tr><td>无泄漏自检</td><td><code>run()</code> 收尾的 <code>allocator.check_no_leak()</code>；开前缀缓存时校验「已用块 == 缓存持有块」；<code>shutdown()</code> flush 缓存</td></tr>
+      <tr><td>报告指标</td><td><code>build_report()</code>（TTFT / throughput / kv_utilization / prefix_cache）与 <code>format_report()</code></td></tr>
+    </tbody>
+  </table>
+  <div class="callout deep"><div class="callout-title">彩蛋：引擎里那些「防呆」异常</div>
+     <code>run()</code> 里若出现「有 RUNNING 却排不出工作」，会直接抛错并提示<strong>增大 token 预算 / 块数或开抢占</strong>；
+     若某条 prompt 单独就超过 token 预算且没开 chunked prefill，会抛错点名——这正是 Lesson 15 chunked prefill
+     要解决的问题。教学引擎宁可<strong>响亮报错</strong>，也不悄悄卡死，方便你定位到底是哪一课的机制没接上。</div>
+
+  <h2 id="anim">交互式动画 <span class="phase-badge phase-learn">Learn</span></h2>
+    <div class="anim" id="a17">
+      <div class="anim-head"><div class="anim-q">这个动画要回答的问题：<small>完整引擎如何把调度、分页 KV、模型、采样串成一个 loop？</small></div></div>
+      <div class="anim-stage" style="min-height:120px"></div>
+      <div class="anim-step-desc"><span class="step-no"></span><span class="step-text">按「▶ 播放」或「下一步」。</span>
+        <div class="step-code" style="font-family:var(--mono);font-size:.82rem;color:var(--fg-dim);margin-top:4px;"></div></div>
+      <div class="anim-controls">
+        <button class="btn" data-anim-control="prev" type="button">⏮ 上一步</button>
+        <button class="btn btn-accent" data-anim-control="play" type="button">▶ 播放</button>
+        <button class="btn" data-anim-control="pause" type="button" hidden>⏸ 暂停</button>
+        <button class="btn" data-anim-control="next" type="button">下一步 ⏭</button>
+        <button class="btn" data-anim-control="reset" type="button">↺ 重置</button>
+        <span class="spacer"></span>
+        <label>速度 <input type="range" data-anim-control="speed" min="0.5" max="3" step="0.5" value="1"></label>
+        <span class="rl-progress" style="font-family:var(--mono);font-size:.8rem;color:var(--fg-dim);"></span>
+      </div>
+    </div>
+
+  <h2 id="build">动手运行（Build） <span class="phase-badge phase-build">Build</span></h2>
+  <pre class="cmd"><code>python3 course.py run 17
+python3 course.py run 17 --trace
+python3 course.py check 17</code></pre>
+
+  <h2 id="hints">四级提示 <span class="phase-badge phase-build">Build</span></h2>
+    <details><summary>提示 Level 1 · 方向</summary>`run 17` 端到端 + 报告。</details>
+    <details><summary>提示 Level 2 · 位置</summary>engine loop：调度→运行→采样→回收。</details>
+    <details><summary>提示 Level 3 · 机制</summary>输出与逐请求参考一致、无泄漏。</details>
+    <details><summary>提示 Level 4 · 接近答案</summary>报告含 TTFT/吞吐/KV 利用率/前缀命中。</details>
+
+    <h2 id="errors">常见错误 <span class="phase-badge phase-build">Build</span></h2>
+    <table><thead><tr><th>现象</th><th>原因</th><th>解决</th></tr></thead><tbody><tr><td>串请求</td><td>共享了不该共享的状态</td><td>每请求独立 KV；测试用逐请求参考对齐</td></tr><tr><td>KV 泄漏</td><td>完成未 free</td><td>remove_finished 后 free（前缀缓存在 shutdown flush）</td></tr></tbody></table>
+
+  <h2 id="trace">Trace 与 Inspector <span class="phase-badge phase-deep">Deep Dive</span></h2>
+  <pre class="cmd"><code>python3 course.py run 17 --trace
+python3 course.py benchmark 17 --mode quick</code></pre>
+
+    <h2 id="challenge">因果理解题 <span class="phase-badge phase-challenge">Challenge</span></h2>
+    <div class="callout question"><ol style="margin:.3em 0"><li>引擎输出为何必须与「逐请求单独生成」逐 token 一致？</li><li>报告里哪些指标关注延迟、哪些关注吞吐？</li></ol></div>
+
+    <h2 id="vllm">真实 vLLM 映射 <span class="phase-badge phase-deep">Deep Dive</span></h2>
+    <table><thead><tr><th>教学实现</th><th>真实 vLLM</th><th>相同点</th><th>简化点</th></tr></thead><tbody><tr><td>LLMEngine</td><td>vLLM LLMEngine</td><td>组件与 loop 一致</td><td>vLLM 有 worker/分布式/异步 API</td></tr></tbody></table>
+
+  <h2 id="summary">本节总结 & 下一步</h2>
+  <p>完整引擎 = 调度 + 分页 KV + 模型 + 采样的迭代 loop；输出正确、无泄漏，并可出性能报告。</p>
+  <p style="margin-top:1em">
+    <button class="btn btn-accent" type="button" data-mark-lesson="17">✅ 标记本课已学</button>
+    &nbsp; <a class="btn" href="lesson_18.html">下一步：Lesson 18 · Text Final Incident Challenge →</a></p>
+  <div class="footer">Build Your Own Mini-vLLM · Lesson 17 · 完全离线 · 无第三方依赖</div>
+</main>
+<script src="../js/course.js"></script>
+<script src="../js/anim/stepper_core.js"></script>
+<script src="../js/anim/request_lifecycle.js"></script>
+<script>
+RequestLifecycleAnim.mount("#a17", {blockSize:4,numBlocks:24,maxNumSeqs:3,tokenBudget:16,requests:[{id:"chat1",prompt:"Hi",maxNew:5,arrival:0},{id:"chat2",prompt:"Hello",maxNew:6,arrival:1},{id:"long",prompt:"The quick brown fox",maxNew:4,arrival:2}]});
+</script>
+</body>
+</html>
