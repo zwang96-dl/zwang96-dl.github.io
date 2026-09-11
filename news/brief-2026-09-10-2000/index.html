@@ -2,7 +2,7 @@
 <meta name="doc-title" content="多模态推理简报 · 9月10日 20:00"/>
 <meta name="doc-description" content="闲置的 GPU 也能拿来赚钱了"/>
 <meta name="doc-date" content="2026-09-10"/>
-<meta name="doc-ts" content="2026-09-11T01:39:56"/>
+<meta name="doc-ts" content="2026-09-11T01:40:03"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>多模态大模型推理服务简报 · 2026-09-10（2000 档）</title><style>
@@ -66,7 +66,7 @@ img{border-color:#30363d}
 <ol><li><strong>DeepSeek V4.1-Flash 扒完了</strong></li></ol>
 <p>0800 档报了发布，今晚把技术细节扒完。这是个&quot;看着胖、用着瘦&quot;的模型。</p>
 <p>552B 参数，听着吓人。但推理时只激活 8B（读输入）/16B（生成）。就像 500 人的公司，干活的永远是那十几个人。</p>
-<p>最狠的是 KV cache：只有 890 字节/token，上一代的 1/4。怎么做到的？解码器不自己记笔记，直接&quot;复印&quot;编码器的压缩版。这叫 CED 架构（20+20 层）。</p>
+<p>最狠的是 KV cache。只有 890 字节/token，上一代的 1/4。怎么做到的？解码器不自己记笔记，直接&quot;复印&quot;编码器的压缩版。这叫 CED 架构（20+20 层）。</p>
 <p>原生多模态，MIT 开源。API 已经降价。V4 Pro 从 9 月 14 日起下线，并入它。</p>
 <p>对你意味着什么？KV cache 是 serving 成本的第一性原理。同样显存，能塞 4 倍并发。</p>
 <p>还有个有意思的对照。CED 让编码器只跑 prefill，解码器只跑 decode。这跟 P/D 解耦是同一套分工哲学，可以当参照系看。</p>
