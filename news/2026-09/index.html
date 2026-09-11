@@ -15,17 +15,17 @@ h1{font-size:22px;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .card{display:flex;flex-direction:column;border:1px solid #eee;border-radius:14px;overflow:hidden;background:#fff;text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s}
 .card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.10)}
-.pic{aspect-ratio:16/9;background:#f2f4f7;overflow:hidden;flex:0 0 auto}
+.pic{aspect-ratio:16/9;background:#f2f4f7;overflow:hidden;flex:0 0 auto;position:relative}
 .pic img{width:100%;height:100%;object-fit:cover;display:block}
+.flag{position:absolute;top:10px;left:10px;z-index:1;font-size:12px;font-weight:800;color:#fff;padding:4px 12px;border-radius:8px;letter-spacing:2px;text-indent:2px;box-shadow:0 2px 10px rgba(0,0,0,.30)}
+.flag.brief{background:#2563eb}
+.flag.deep{background:#9333ea}
 .pic.ph{display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:rgba(255,255,255,.9);letter-spacing:6px;text-indent:6px}
 .pic.ph-brief{background:linear-gradient(135deg,#60a5fa,#1d4ed8)}
 .pic.ph-deep{background:linear-gradient(135deg,#c084fc,#7c3aed)}
 .cbody{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
 .cmeta{display:flex;align-items:center;gap:8px;font-size:12px;color:#999}
-.badge{display:inline-block;font-size:11px;padding:1px 8px;border-radius:20px}
-.badge.brief{background:#e8f0fe;color:#1a56db}
-.badge.deep{background:#fef3e2;color:#b45309}
-.card .t{font-size:14.5px;font-weight:700;line-height:1.45;color:#1c1c1e;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .t{font-size:15px;font-weight:700;line-height:1.45;color:#1c1c1e;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card .desc{font-size:12.5px;color:#777;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .pagenav{text-align:center;margin:30px 0 10px;font-size:14px;color:#888}
 .pagenav a{color:#0a58ca;text-decoration:none;margin:0 12px}
@@ -56,8 +56,6 @@ h1{border-color:#21262d}
 .pic{background:#21262d}
 .monthrow{background:#161b22;border-color:#30363d}
 .arch a,.pagenav a,.monthrow a,.backlink a{color:#79c0ff}
-.badge.brief{background:#1c2b4a;color:#79c0ff}
-.badge.deep{background:#4a3418;color:#f0b35c}
 }
 </style></head>
 <body>
@@ -67,16 +65,16 @@ h1{border-color:#21262d}
 <div class="arch"><a href="../">← 最新资讯</a> <a href="../2026/">📅 2026 年归档</a></div>
 <div class="grid">
 <div class="day">2026-09-10</div>
-<a class="card" href="../brief-2026-09-10-2000/"><div class="pic"><img src="../brief-2026-09-10-2000/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span class="badge brief">简报</span><span>09-10 20:05</span></div><div class="t">多模态推理简报 · 9月10日 20:00</div><div class="desc">连续批处理之父的新平台：把闲置 GPU 变成&quot;推理提款机&quot;。</div></div></a>
-<a class="card" href="../deep-20260910-mtp-3/"><div class="pic"><img src="../deep-20260910-mtp-3/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span class="badge deep">深读</span><span>09-10 20:04</span></div><div class="t">深读 · MTP 自蒸馏：把 3 倍加速&quot;烤&quot;进模型权重，不用投机解码</div><div class="desc">&gt; 原文：Multi-Token Prediction via Self-Distillation（arXiv:2602.06019；John Kirchenbauer 等，UMD</div></div></a>
-<a class="card" href="../deep-20260910-deepseek-v4-1-flash-kv/"><div class="pic"><img src="../deep-20260910-deepseek-v4-1-flash-kv/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span class="badge deep">深读</span><span>09-10 20:01</span></div><div class="t">深读 · DeepSeek-V4.1-Flash：把 KV Cache 压到 890 字节/token 的&quot;瘦身架构&quot;</div><div class="desc">&gt; 原文：deepseek-ai/DeepSeek-V4.1-Flash · Hugging Face（DeepSeek-AI model card，2026-09-10）</div></div></a>
-<a class="card" href="../deep-20260910-70b-38pct/"><div class="pic"><img src="../deep-20260910-70b-38pct/thumb.svg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span class="badge deep">深读</span><span>09-10 16:06</span></div><div class="t">深读 · 投机解码实战：给 70B 模型配个&quot;小跟班&quot;，推理成本降 38%</div><div class="desc">&gt; 原文：Speculative Decoding: Cutting LLM Inference Costs by 40% with Early Token Prediction（</div></div></a>
-<a class="card" href="../brief-2026-09-10-1600/"><div class="pic"><img src="../brief-2026-09-10-1600/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span class="badge brief">简报</span><span>09-10 16:05</span></div><div class="t">多模态推理简报 · 9月10日 16:00</div><div class="desc">微软计划 2032 年数据中心容量做到 38GW，约三分之一配 AI 芯片。</div></div></a>
-<a class="card" href="../brief-2026-09-10-1200/"><div class="pic"><img src="../brief-2026-09-10-1200/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span class="badge brief">简报</span><span>09-10 12:01</span></div><div class="t">多模态推理简报 · 9月10日 12:00</div><div class="desc">推理芯片创业公司 Positron 融资 8.75 亿美元，估值 50 亿美元。</div></div></a>
-<a class="card" href="../deep-20260910-temperature0/"><div class="pic"><img src="../deep-20260910-temperature0/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span class="badge deep">深读</span><span>09-10 12:00</span></div><div class="t">深读 · 为什么 temperature=0 的推理还是不可复现？——&quot;What Makes Inference Nondeterministic?&quot;</div><div class="desc">- 原文：Paolo Perrone, The AI Engineer (Substack), 2026-09-09</div></div></a>
-<a class="card" href="../brief-2026-09-10-0800/"><div class="pic"><img src="../brief-2026-09-10-0800/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span class="badge brief">简报</span><span>09-10 08:02</span></div><div class="t">多模态推理简报 · 9月10日 08:00</div><div class="desc">DeepSeek 今天发布 V4.1-Flash：新架构家族里最小的模型，主打更快推理。</div></div></a>
-<a class="card" href="../deep-20260910-vllm-vs-sglang-h100/"><div class="pic"><img src="../deep-20260910-vllm-vs-sglang-h100/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span class="badge deep">深读</span><span>09-10 08:02</span></div><div class="t">深读 · H100 上 vLLM vs SGLang 实测：没有永远的赢家，只有跟负载走的瓶颈</div><div class="desc">&gt; 文章：vLLM vs SGLang on H100: The Winner Depends on the Workload</div></div></a>
-<a class="card" href="../deep-20260910-vllm-v0-29-0/"><div class="pic ph ph-deep">深读</div><div class="cbody"><div class="cmeta"><span class="badge deep">深读</span><span>09-10 03:18</span></div><div class="t">深读 · vLLM v0.29.0：Model Runner V2 全量默认 + 多模态性能专区 + 多模态 LoRA</div><div class="desc">&gt; 原文：Release v0.29.0 · vllm-project/vllm（594 commits，277 位贡献者，其中 91 位新贡献者；2026-09-09 发布）</div></div></a>
+<a class="card" href="../brief-2026-09-10-2000/"><div class="pic"><span class="flag brief">简报</span><img src="../brief-2026-09-10-2000/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span>09-10 20:05</span></div><div class="t">多模态推理简报 · 9月10日 20:00</div><div class="desc">连续批处理之父的新平台：把闲置 GPU 变成&quot;推理提款机&quot;。</div></div></a>
+<a class="card" href="../deep-20260910-mtp-3/"><div class="pic"><span class="flag deep">深读</span><img src="../deep-20260910-mtp-3/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span>09-10 20:04</span></div><div class="t">深读 · MTP 自蒸馏：把 3 倍加速&quot;烤&quot;进模型权重，不用投机解码</div><div class="desc">&gt; 原文：Multi-Token Prediction via Self-Distillation（arXiv:2602.06019；John Kirchenbauer 等，UMD</div></div></a>
+<a class="card" href="../deep-20260910-deepseek-v4-1-flash-kv/"><div class="pic"><span class="flag deep">深读</span><img src="../deep-20260910-deepseek-v4-1-flash-kv/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span>09-10 20:01</span></div><div class="t">深读 · DeepSeek-V4.1-Flash：把 KV Cache 压到 890 字节/token 的&quot;瘦身架构&quot;</div><div class="desc">&gt; 原文：deepseek-ai/DeepSeek-V4.1-Flash · Hugging Face（DeepSeek-AI model card，2026-09-10）</div></div></a>
+<a class="card" href="../deep-20260910-70b-38pct/"><div class="pic"><span class="flag deep">深读</span><img src="../deep-20260910-70b-38pct/thumb.svg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span>09-10 16:06</span></div><div class="t">深读 · 投机解码实战：给 70B 模型配个&quot;小跟班&quot;，推理成本降 38%</div><div class="desc">&gt; 原文：Speculative Decoding: Cutting LLM Inference Costs by 40% with Early Token Prediction（</div></div></a>
+<a class="card" href="../brief-2026-09-10-1600/"><div class="pic"><span class="flag brief">简报</span><img src="../brief-2026-09-10-1600/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span>09-10 16:05</span></div><div class="t">多模态推理简报 · 9月10日 16:00</div><div class="desc">微软计划 2032 年数据中心容量做到 38GW，约三分之一配 AI 芯片。</div></div></a>
+<a class="card" href="../brief-2026-09-10-1200/"><div class="pic"><span class="flag brief">简报</span><img src="../brief-2026-09-10-1200/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span>09-10 12:01</span></div><div class="t">多模态推理简报 · 9月10日 12:00</div><div class="desc">推理芯片创业公司 Positron 融资 8.75 亿美元，估值 50 亿美元。</div></div></a>
+<a class="card" href="../deep-20260910-temperature0/"><div class="pic"><span class="flag deep">深读</span><img src="../deep-20260910-temperature0/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span>09-10 12:00</span></div><div class="t">深读 · 为什么 temperature=0 的推理还是不可复现？——&quot;What Makes Inference Nondeterministic?&quot;</div><div class="desc">- 原文：Paolo Perrone, The AI Engineer (Substack), 2026-09-09</div></div></a>
+<a class="card" href="../brief-2026-09-10-0800/"><div class="pic"><span class="flag brief">简报</span><img src="../brief-2026-09-10-0800/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span>09-10 08:02</span></div><div class="t">多模态推理简报 · 9月10日 08:00</div><div class="desc">DeepSeek 今天发布 V4.1-Flash：新架构家族里最小的模型，主打更快推理。</div></div></a>
+<a class="card" href="../deep-20260910-vllm-vs-sglang-h100/"><div class="pic"><span class="flag deep">深读</span><img src="../deep-20260910-vllm-vs-sglang-h100/thumb.jpg" alt="" loading="lazy"/></div><div class="cbody"><div class="cmeta"><span>09-10 08:02</span></div><div class="t">深读 · H100 上 vLLM vs SGLang 实测：没有永远的赢家，只有跟负载走的瓶颈</div><div class="desc">&gt; 文章：vLLM vs SGLang on H100: The Winner Depends on the Workload</div></div></a>
+<a class="card" href="../deep-20260910-vllm-v0-29-0/"><div class="pic ph ph-deep">深读</div><div class="cbody"><div class="cmeta"><span>09-10 03:18</span></div><div class="t">深读 · vLLM v0.29.0：Model Runner V2 全量默认 + 多模态性能专区 + 多模态 LoRA</div><div class="desc">&gt; 原文：Release v0.29.0 · vllm-project/vllm（594 commits，277 位贡献者，其中 91 位新贡献者；2026-09-09 发布）</div></div></a>
 </div>
 
 </body></html>
