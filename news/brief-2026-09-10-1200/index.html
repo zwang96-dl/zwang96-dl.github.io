@@ -1,8 +1,8 @@
 <!DOCTYPE html><html lang="zh-CN"><head>
 <meta name="doc-title" content="多模态推理简报 · 9月10日 12:00"/>
-<meta name="doc-description" content="推理芯片创业公司 Positron 融资 8.75 亿美元，估值 50 亿美元。"/>
+<meta name="doc-description" content="推理芯片公司 Positron 融 8.75 亿美元，估值 50 亿"/>
 <meta name="doc-date" content="2026-09-10"/>
-<meta name="doc-ts" content="2026-09-10T12:01:22"/>
+<meta name="doc-ts" content="2026-09-11T08:43:03"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>多模态大模型推理服务简报 · 2026-09-10（1200 档）</title><style>
@@ -43,15 +43,36 @@ img{border-color:#30363d}
 <div class="backlink"><a href="..">← 全部资讯</a></div>
 <h1>多模态大模型推理服务简报 · 2026-09-10（1200 档）</h1>
 <h2>业内新闻</h2>
-<ol><li><strong>推理芯片创业公司 Positron 融资 8.75 亿美元，估值 50 亿美元。</strong></li></ol>
-<p>人话版：这家专门做&quot;跑模型&quot;芯片的公司今天宣布了新一轮 8.75 亿美元融资，7 个月估值翻了近 5 倍；新一代 Asimov 芯片 4–8 颗组一个系统，能单节点跑超 16 万亿参数、1000 万 token 上下文的模型——推理芯片正在成为挑战 NVIDIA 的正面战场。 对你的意义：它的打法是&quot;内存优先&quot;（memory-first）架构——decode 阶段本质就是拼显存带宽，跟你研究的 KV cache 优化、PD 解耦是同一套经济学；Titan 系统瞄准超长上下文推理，值得记进&quot;异构加速器观察清单&quot;。 🔗 <a href="https://www.reuters.com/business/ai-chip-startup-positrons-valuation-skyrockets-latest-funding-round-2026-09-10/">https://www.reuters.com/business/ai-chip-startup-positrons-valuation-skyrockets-latest-funding-round-2026-09-10/</a></p>
-<ol><li><strong>d-Matrix 的推理芯片 Raptor 要直接插进 NVIDIA 机架，拥抱 NVLink Fusion。</strong></li></ol>
-<p>人话版：这家推理专用芯片公司宣布新芯片 Raptor 用上 NVIDIA 的 NVLink Fusion 互联技术，直接插进 NVIDIA 服务器机架——相当于&quot;寄生&quot;进 NVIDIA 的生态卖推理算力，目标是代码助手、聊天机器人、语音助手这类对延迟敏感的服务； racks 预计 2027 年出货。 对你的意义：Rubin CPX（NVIDIA 自己的 prefill 专用卡）之后，又一家押注&quot;P/D 解耦需要专用硬件&quot;的玩家——硬件路线图正在从&quot;通用 GPU&quot;转向&quot;prefill 用计算卡、decode 用带宽卡&quot;的分工，这正是你评估解耦部署时要押的硬件趋势。 🔗 <a href="https://www.reuters.com/business/media-telecom/chip-startup-d-matrix-use-nvidia-chip-linking-tech-ai-servers-2026-09-10/">https://www.reuters.com/business/media-telecom/chip-startup-d-matrix-use-nvidia-chip-linking-tech-ai-servers-2026-09-10/</a></p>
-<ol><li><strong>HBM（高带宽显存）缺货，中国 AI 芯片集体涨价。</strong></li></ol>
-<p>人话版：Reuters 披露，受出口管制影响中国芯片厂只能走灰色渠道买 HBM（价格是正常渠道的数倍），华为 Ascend 950PR 单卡从年初约 6 万涨到 8 万+（+30%）、910C 涨到 11 万+；字节跳动今年从寒武纪旗下沐曦（Iluvatar CoreX）拿了 10 万张卡补缺口——显存正在成为推理算力的硬瓶颈。 对你的意义：KV cache 就是&quot;显存换延迟&quot;的生意，HBM 涨价直接推高 serving 成本；这也解释了为什么业界在拼命做 KV cache 压缩/量化——降显存占用 = 降成本，逻辑闭环了。 🔗 <a href="https://www.reuters.com/world/asia-pacific/chinas-ai-chipmakers-raise-prices-high-bandwidth-memory-shortage-bites-2026-09-10/">https://www.reuters.com/world/asia-pacific/chinas-ai-chipmakers-raise-prices-high-bandwidth-memory-shortage-bites-2026-09-10/</a></p>
-<ol><li><strong>Gimlet Labs 融资 3 亿美元：做&quot;跨芯片的推理任务路由器&quot;。</strong></li></ol>
-<p>人话版：上周融资速报里的一家新公司，做的是把 AI 推理任务智能路由到不同芯片上跑，号称能有 5–10 倍速度提升——&quot;推理调度&quot;本身正在变成一门生意。 🔗 <a href="https://www.instagram.com/reel/DdDBPMYojeX/（@mts_now">https://www.instagram.com/reel/DdDBPMYojeX/（@mts_now</a> 9 月 8 日当周融资速报视频）</p>
+<ol><li><strong>推理芯片公司 Positron 融 8.75 亿美元，估值 50 亿</strong></li></ol>
+<p>这家专门做&quot;跑模型&quot;芯片的公司，今天宣布新一轮 8.75 亿美元融资。7 个月估值翻了近 5 倍，来到 50 亿美元。</p>
+<p>新一代 Asimov 芯片：4–8 颗组一个系统。单节点能跑超 16 万亿参数、1000 万 token 上下文的模型。推理芯片正在成为挑战 NVIDIA 的正面战场。</p>
+<p>对你意味着什么？它的打法是&quot;内存优先&quot;架构。decode 阶段本质就是拼显存带宽。跟你研究的 KV cache 优化、P/D 解耦是同一套经济学。</p>
+<p>Titan 系统瞄准超长上下文推理，值得记进&quot;异构加速器观察清单&quot;。</p>
+<p>🔗 <a href="https://www.reuters.com/business/ai-chip-startup-positrons-valuation-skyrockets-latest-funding-round-2026-09-10/">https://www.reuters.com/business/ai-chip-startup-positrons-valuation-skyrockets-latest-funding-round-2026-09-10/</a></p>
+<ol><li><strong>d-Matrix 新芯片直接&quot;寄生&quot;进 NVIDIA 机架</strong></li></ol>
+<p>这家推理专用芯片公司宣布了新芯片 Raptor。它用上 NVIDIA 的 NVLink Fusion 互联技术。直接插进 NVIDIA 服务器机架。</p>
+<p>相当于&quot;寄生&quot;进 NVIDIA 的生态卖推理算力。目标是代码助手、聊天机器人、语音助手这类对延迟敏感的服务。racks 预计 2027 年出货。</p>
+<p>对你意味着什么？NVIDIA 有 Rubin CPX，自己的 prefill 专用卡。现在 d-Matrix 也押注&quot;P/D 解耦需要专用硬件&quot;。</p>
+<p>硬件路线图正在转向硬件分工。prefill 用计算卡，decode 用带宽卡，不再是通用 GPU 一把梭。这正是你评估解耦部署时要押的硬件趋势。</p>
+<p>🔗 <a href="https://www.reuters.com/business/media-telecom/chip-startup-d-matrix-use-nvidia-chip-linking-tech-ai-servers-2026-09-10/">https://www.reuters.com/business/media-telecom/chip-startup-d-matrix-use-nvidia-chip-linking-tech-ai-servers-2026-09-10/</a></p>
+<ol><li><strong>HBM 缺货，中国 AI 芯片集体涨价</strong></li></ol>
+<p>Reuters 披露了一件事。受出口管制影响，中国芯片厂只能走灰色渠道买 HBM。价格是正常渠道的数倍。</p>
+<p>华为 Ascend 950PR 单卡从年初约 6 万涨到 8 万+，涨了 30%。910C 涨到 11 万+。字节跳动今年从沐曦拿了 10 万张卡补缺口。沐曦是寒武纪旗下的 Iluvatar CoreX。</p>
+<p>对你意味着什么？KV cache 就是&quot;显存换延迟&quot;的生意。HBM 涨价直接推高 serving 成本。</p>
+<p>这也解释了为什么业界在拼命做 KV cache 压缩和量化。降显存占用就等于降成本，逻辑闭环了。</p>
+<p>🔗 <a href="https://www.reuters.com/world/asia-pacific/chinas-ai-chipmakers-raise-prices-high-bandwidth-memory-shortage-bites-2026-09-10/">https://www.reuters.com/world/asia-pacific/chinas-ai-chipmakers-raise-prices-high-bandwidth-memory-shortage-bites-2026-09-10/</a></p>
+<ol><li><strong>Gimlet Labs 融 3 亿美元：做&quot;跨芯片任务路由器&quot;</strong></li></ol>
+<p>上周融资速报里的一家新公司。做的是把 AI 推理任务智能路由到不同芯片上跑。号称能有 5–10 倍速度提升。</p>
+<p>一句话：&quot;推理调度&quot;本身正在变成一门生意。</p>
+<p>🔗 <a href="https://www.instagram.com/reel/DdDBPMYojeX/（@mts_now">https://www.instagram.com/reel/DdDBPMYojeX/（@mts_now</a> 9 月 8 日当周融资速报视频）</p>
 <h2>访谈与深度</h2>
-<ol><li><strong>为什么 temperature=0 的推理还是不可复现？（The AI Engineer，9 月 9 日）</strong></li></ol>
-<p>人话版：Thinking Machines Lab 的实验：同一个 prompt、同一个模型、temperature 设 0，发 1000 个请求得到了 80 种不同的回答——元凶不是模型，是 GPU 做加法的&quot;切块方式&quot;跟着服务器忙闲变化，浮点加法顺序一变，末尾小数就变，排第一的候选词就可能翻转。修法是开 vLLM/SGLang 的&quot;批次无关内核&quot;开关，但要付出约 38% 吞吐的代价。 <strong>为什么值得深读：你刚做完 vLLM vs SGLang 的 H100 实测——这篇文章解释了 benchmark 漂移的另一半来源（并发/batch 变化本身就是噪声），做 A/B 对比必须固定并发配置或开确定性开关；而且 vLLM v0.29.0（昨天发布）的 release notes 里正好新增了 Determinism 一整节（确定性 decode 回放、逐架构调优的 batch-invariant matmul、Blackwell 上 33.6% 端到端延迟降低），评估 P/D 解耦时顺手就能用上。</strong> 精读笔记已存 → 深度阅读/推理可复现性-temperature0也不可复现.html 🔗 <a href="https://theaiengineer.substack.com/p/what-makes-inference-nondeterministic">https://theaiengineer.substack.com/p/what-makes-inference-nondeterministic</a></p>
-<p>*去重：未重复 0800 档已报的 DeepSeek V4.1-Flash、NVIDIA 澳洲 AI 工厂、Zankore、vLLM vs SGLang H100 实测、SGLang-Omni 架构拆解，以及 9/9 的 vLLM v0.29.0、SLOWeave、CONDUIT、DeepSeek-V3.2-Exp 等。渠道覆盖：Reuters（新闻）、Substack（技术博客）、social（IG/Threads/FB：Positron 融资 IG 帖、Gimlet Labs 融资速报）。X 大V（lmsysorg/vLLM/karpathy/jimfan/swyx）、Reddit、HN、YouTube、中文 AI 媒体、Spotify（Latent Space 自 8/26 无新集）本轮无实质新料。框架更新（vLLM/SGLang/TensorRT-LLM 等 GitHub releases）、arXiv 新论文本轮无新增。*</p></body></html>
+<ol><li><strong>temperature=0，为什么推理还是不可复现？</strong></li></ol>
+<p>Thinking Machines Lab 做了个实验。同一个 prompt、同一个模型，temperature 设成 0。发 1000 个请求，得到了 80 种不同的回答。</p>
+<p>元凶不是模型，是 GPU。GPU 做加法的&quot;切块方式&quot;跟着服务器忙闲变化。浮点加法顺序一变，末尾小数就变，排第一的候选词就可能翻转。</p>
+<p>修法是开 vLLM/SGLang 的&quot;批次无关内核&quot;开关。但要付出约 38% 吞吐的代价。</p>
+<p>为什么值得深读？你刚做完 vLLM vs SGLang 的 H100 实测。这篇文章解释了 benchmark 漂移的另一半来源。并发和 batch 的变化，本身就是噪声。</p>
+<p>做 A/B 对比，必须固定并发配置或开确定性开关。</p>
+<p>vLLM v0.29.0 昨天刚发布。它的 release notes 里新增了 Determinism 一整节。内容包括：确定性 decode 回放。逐架构调优的 batch-invariant matmul。Blackwell 上端到端延迟降低 33.6%。评估 P/D 解耦时顺手就能用上。</p>
+<p>精读笔记已存 → 深度阅读/推理可复现性-temperature0也不可复现.html</p>
+<p>🔗 <a href="https://theaiengineer.substack.com/p/what-makes-inference-nondeterministic">https://theaiengineer.substack.com/p/what-makes-inference-nondeterministic</a></p>
+<p>*去重：未重复 0800 档已报的 DeepSeek V4.1-Flash、NVIDIA 澳洲 AI 工厂、Zankore、vLLM vs SGLang H100 实测、SGLang-Omni 架构拆解，以及 9/9 的 vLLM v0.29.0、SLOWeave、CONDUIT、DeepSeek-V3.2-Exp 等。渠道覆盖：Reuters（新闻）、Substack（技术博客）、IG/Threads/FB。X 大V（lmsysorg/vLLM/karpathy/jimfan/swyx）、Reddit、HN、YouTube、中文 AI 媒体、Spotify（Latent Space 自 8/26 无新集）本轮无实质新料。框架更新、arXiv 新论文本轮无新增。*</p></body></html>
