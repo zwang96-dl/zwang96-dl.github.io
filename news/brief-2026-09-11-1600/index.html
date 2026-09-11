@@ -1,0 +1,69 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月11日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-11"/>
+<meta name="doc-ts" content="2026-09-11T23:05:22"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-11（下午版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-11（下午版）</h1>
+<h2>框架更新</h2>
+<p>这轮没有新版本。vLLM 停在 v0.29.0（9/9 发的，报过）。SGLang 停在 v0.5.19（9/4 发的，报过）。TensorRT-LLM 没新版本。LMDeploy、llama.cpp 也没动静。</p>
+<h2>新技术与论文</h2>
+<p>这轮没有新论文。arXiv 那边安静。</p>
+<h2>业内新闻</h2>
+<p><strong>1. SGLang 爆高危漏洞，今天刚披露，还没补丁</strong></p>
+<p>你正在评估 SGLang，这条必须看。</p>
+<p>漏洞编号 CVE-2026-86793。不用登录，就能远程执行任意代码。相当于大门没锁，陌生人直接进厨房开火。</p>
+<p>问题出在 SafeUnpickler 上。它是管反序列化的安检门。安检名单写得太宽，黑名单又漏了两个关键函数。攻击者拿 __import__ 加 getattr 打组合拳。绕过检查后，直接调系统命令。</p>
+<p>/update_weights_from_tensor 接口中招了。默认没配 API key 的话，谁来都接待。</p>
+<p>时间线有点扎心。7 月 2 日研究员就上报了，官方也认了。但到今天公开，补丁还没影。</p>
+<p>自查三件事。第一，SGLang 别直接暴露在公网。第二，配上 API key。第三，盯紧官方补丁。</p>
+<p>顺带一提，SGLang 今年 4 月也曝过 9.8 分的漏洞。这已经是 18 天里第四个 AI 基础设施高危漏洞。推理服务正在变成攻击者的主战场。</p>
+<p>🔗 报道 <a href="https://cvj.ai/briefing/crypto-news/ai-stack-under-siege-four-critical-cves-in-18-days-expose-inference-server-flaws/">https://cvj.ai/briefing/crypto-news/ai-stack-under-siege-four-critical-cves-in-18-days-expose-inference-server-flaws/</a></p>
+<p><strong>2. 俄罗斯 Sber 发了个 432B 推理模型，KV cache 省了 4 倍</strong></p>
+<p>Sber 是俄罗斯最大的银行，也在搞大模型。今天发了 GigaChat 3.5 Reasoning。</p>
+<p>432B 参数的 MoE（混合专家模型），每次只激活 28B。看着胖，用着瘦。</p>
+<p>省显存的招数值得看。注意力机制混用了两种技术。MLA 是 DeepSeek 那套压缩注意力。GatedDeltaNet 是线性注意力。KV cache 直接砍到 1/4，上下文干到 262K。</p>
+<p>全程用 FP8（8 位浮点精度）训练。MIT 协议开源，已经上 Hugging Face。</p>
+<p>对你意味着什么？混合注意力这条路，能降 KV cache。跟你深读过的 DeepSeek V4.1-Flash 思路相通。KV cache 优化这块，又多一个参照系。</p>
+<p>🔗 报道 <a href="https://www.alextech.ai/en/news/sber-releases-gigachat-35-reasoning-with-432-billion-parameters/">https://www.alextech.ai/en/news/sber-releases-gigachat-35-reasoning-with-432-billion-parameters/</a></p>
+<h2>访谈与深度</h2>
+<p>这轮没有。Latent Space 最新一期还是 8/26 的，没更新。</p>
+<hr/>
+<p>*去重：今日午间版的 PD 解耦省电论文、9/10 晚间版的 MTP 自蒸馏与 DeepSeek-V4.1-Flash 深扒及之前各期内容均未重复。渠道：arXiv、GitHub releases（vLLM/SGLang/TensorRT-LLM/LMDeploy/llama.cpp）、NVIDIA 新闻中心、Hacker News、Reddit、X、机器之心/量子位、Spotify 播客、中文 AI 媒体。本轮两条均为今日（9/11）新内容。*</p></body></html>
