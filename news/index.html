@@ -11,9 +11,12 @@
 body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;line-height:1.7;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
 h1{font-size:22px;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
 .day{font-size:15px;font-weight:700;color:#666;margin:28px 0 10px}
-.item{border:1px solid #eee;border-radius:10px;padding:12px 14px;margin:10px 0}
-.item a{color:#0a58ca;text-decoration:none;font-weight:600}
-.item a:hover{text-decoration:underline}
+.item{display:flex;gap:12px;align-items:flex-start;border:1px solid #eee;border-radius:10px;padding:12px 14px;margin:10px 0}
+.thumb{flex:0 0 auto}
+.thumb img{width:132px;height:99px;object-fit:cover;border-radius:8px;border:1px solid #eee;display:block}
+.txt{flex:1;min-width:0}
+.item a.t{color:#0a58ca;text-decoration:none;font-weight:600}
+.item a.t:hover{text-decoration:underline}
 .badge{display:inline-block;font-size:12px;padding:1px 8px;border-radius:20px;margin-right:8px;vertical-align:2px}
 .badge.brief{background:#e8f0fe;color:#1a56db}
 .badge.deep{background:#fef3e2;color:#b45309}
@@ -26,7 +29,8 @@ body{background:#0d1117;color:#e6edf3}
 h1{border-color:#21262d}
 .day{color:#9aa4b2}
 .item{border-color:#30363d}
-.item a,.backlink a{color:#79c0ff}
+.thumb img{border-color:#30363d}
+.item a.t,.backlink a{color:#79c0ff}
 .desc{color:#9aa4b2}
 .meta{color:#6e7681}
 .badge.brief{background:#1c2b4a;color:#79c0ff}
@@ -39,8 +43,8 @@ h1{border-color:#21262d}
 <h1>AI 推理资讯</h1>
 <p style="font-size:14px;color:#888">多模态大模型推理服务 · 每日 08:00 / 12:00 / 16:00 / 20:00 简报 ＋ 中文深读笔记</p>
 <div class="day">2026-09-10</div>
-<div class="item"><span class="badge deep">深读</span><a href="./deep-20260910-mtp-3/">深读 · MTP 自蒸馏：把 3 倍加速&quot;烤&quot;进模型权重，不用投机解码</a><div class="desc">&gt; 原文：Multi-Token Prediction via Self-Distillation（arXiv:2602.06019；John Kirchenbauer 等，UMD</div></div>
-<div class="item"><span class="badge deep">深读</span><a href="./deep-20260910-deepseek-v4-1-flash-kv/">深读 · DeepSeek-V4.1-Flash：把 KV Cache 压到 890 字节/token 的&quot;瘦身架构&quot;</a><div class="desc">&gt; 原文：deepseek-ai/DeepSeek-V4.1-Flash · Hugging Face（DeepSeek-AI model card，2026-09-10）</div></div>
-<div class="item"><span class="badge brief">简报</span><a href="./brief-2026-09-10-2000/">多模态推理简报 · 9月10日 20:00</a><div class="desc">连续批处理之父的新平台：把闲置 GPU 变成&quot;推理提款机&quot;。</div></div>
+<div class="item"><a class="thumb" href="./deep-20260910-mtp-3/"><img src="./deep-20260910-mtp-3/thumb.jpg" alt="" loading="lazy"/></a><div class="txt"><span class="badge deep">深读</span><a class="t" href="./deep-20260910-mtp-3/">深读 · MTP 自蒸馏：把 3 倍加速&quot;烤&quot;进模型权重，不用投机解码</a><div class="desc">&gt; 原文：Multi-Token Prediction via Self-Distillation（arXiv:2602.06019；John Kirchenbauer 等，UMD</div></div></div>
+<div class="item"><a class="thumb" href="./deep-20260910-deepseek-v4-1-flash-kv/"><img src="./deep-20260910-deepseek-v4-1-flash-kv/thumb.jpg" alt="" loading="lazy"/></a><div class="txt"><span class="badge deep">深读</span><a class="t" href="./deep-20260910-deepseek-v4-1-flash-kv/">深读 · DeepSeek-V4.1-Flash：把 KV Cache 压到 890 字节/token 的&quot;瘦身架构&quot;</a><div class="desc">&gt; 原文：deepseek-ai/DeepSeek-V4.1-Flash · Hugging Face（DeepSeek-AI model card，2026-09-10）</div></div></div>
+<div class="item"><a class="thumb" href="./brief-2026-09-10-2000/"><img src="./brief-2026-09-10-2000/thumb.jpg" alt="" loading="lazy"/></a><div class="txt"><span class="badge brief">简报</span><a class="t" href="./brief-2026-09-10-2000/">多模态推理简报 · 9月10日 20:00</a><div class="desc">连续批处理之父的新平台：把闲置 GPU 变成&quot;推理提款机&quot;。</div></div></div>
 </body>
 </html>
