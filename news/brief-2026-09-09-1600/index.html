@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月9日 16:00"/>
+<meta name="doc-description" content="vLLM v0.29.0 发布（今天早上）：Model Runner V2 转正成默认引擎。"/>
+<meta name="doc-date" content="2026-09-09"/>
+<meta name="doc-ts" content="2026-09-09T16:02:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-09（1600 档）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-09（1600 档）</h1>
+<h2>框架更新</h2>
+<ol><li><strong>vLLM v0.29.0 发布（今天早上）：Model Runner V2 转正成默认引擎。</strong></li></ol>
+<p>人话版：vLLM 把更快的那套执行引擎（MRV2，以前要手动开 <code>--enable-v2</code>）直接设为默认，等于全员免费提速；还顺手修了不少 P/D 解耦（prefill/decode 分离部署：把&quot;读题&quot;和&quot;答题&quot;拆到不同机器上，像分工流水线）场景里的工程痛点。 细节：CUDA graph 显存分析自动给 KV cache（推理时的&quot;草稿纸&quot;，存着已算好的注意力状态）定大小；decode 做上下文并行（DCP）时 Kimi-K3 能直接跑 DSpark 推测解码；Mamba 的 prefix caching（前缀缓存：相同开头的请求复用已算结果）带来 9%–25% 的 TTFT（首字延迟：发请求到看到第一个字的时间）提升。 🔗 https://github.com/vllm-project/vllm/releases</p>
+<h2>新技术与论文</h2>
+<ol><li><strong>SLOWeave：给 chunked prefill 装上&quot;自适应油门&quot;</strong>（arXiv 2609.07883，9/7 提交）</li></ol>
+<p>人话版：chunked prefill（把长输入切成小块喂模型，避免&quot;读题&quot;太久堵住&quot;答题&quot;）的块大小一直是个玄学参数，这篇给出了数学上最优的在线控制器——每次选最大的、能在最早 decode 截止时间前跑完的块。 细节：25ms TPOT（每 token 延迟）目标下 goodput（有效吞吐）比最强固定分块基线提升 39%，严格到 10ms 时提升到 3.3×，且不用按负载调参。<strong>为什么值得读：跟你评估 SGLang P/D 解耦直接相关，这是 prefill 池调度那块最核心的原语。</strong> 🔗 http://arxiv.org/abs/2609.07883v1</p>
+<ol><li><strong>CONDUIT：视觉语言模型的统一 KV cache 复用框架</strong>（arXiv 2609.05821，9/5 提交，已被 EMNLP 2026 Findings 接收）</li></ol>
+<p>人话版：多模态推理里&quot;同一张图被问不同问题&quot;是最常见的浪费——前缀稍有变化，传统 prefix 复用就失效。CONDUIT 只刷新 10% 的视觉 token，效果却达到完整重算的 97%–99.5%。 细节：训练无关，只需一次 query-conditioned 的打分前向；只用 13.5% 的 full-prefill FLOPs 就带来 2.99× TTFT 加速。<strong>为什么值得读：把&quot;视觉前缀缓存&quot;从系统工程问题变成了可定量打分的算法问题，跟你研究的多模态 encoder/prefill/decode 资源分离直接相关。</strong> 🔗 http://arxiv.org/abs/2609.05821v1</p>
+<ol><li><strong>RouteRelay：动态稀疏注意力的跨层路由复用</strong>（arXiv 2609.07306，9/7 提交）</li></ol>
+<p>人话版：动态稀疏注意力每一层都要重建&quot;哪个 query 该看哪块&quot;的路由矩阵，这篇发现层与层之间选出的路由几乎不变——于是只重算变化大的行，相当于给预检流程做了&quot;增量更新&quot;。 细节：路由召回率 ≥99.99%，打分计算量降到原来的 38%–51.6%。 🔗 http://arxiv.org/abs/2609.07306v1</p>
+<ol><li><strong>CEDAR：带误差界的残差路由长上下文注意力</strong>（arXiv 2609.07237，9/7 提交）</li></ol>
+<p>人话版：稀疏注意力的老毛病是&quot;选错块就彻底丢信息&quot;。CEDAR 让每个 chunk 先留一个廉价&quot;摘要&quot;进残差通路，误差估计大的块才展开精确计算——好比先看缩略图再决定要不要放大看原图。 细节：冻结模型、无需训练，128K 上下文保持约 3× kernel 加速，同时捡回了硬稀疏路由丢掉的大部分精度。 🔗 http://arxiv.org/abs/2609.07237v1</p>
+<h2>业内新闻</h2>
+<ol><li><strong>DeepSeek-V3.2-Exp：稀疏注意力把长上下文推理成本砍掉 6–7 倍。</strong></li></ol>
+<p>人话版：DeepSeek 开源了新版本（MIT 协议），核心是&quot;闪电索引器&quot;做动态稀疏注意力——推理时每个 token 只挑评分最高的 2048 个 token 做 attention（不再逐字全看），相当于给模型装了&quot;只看重点&quot;的速读眼镜。 细节：128k 上下文约 $0.30 vs $2.30/百万 token；<strong>SGLang 已 Day-0 支持，是研究多模态长上下文推理成本的现成实验靶。</strong> 🔗 https://info.deeplearning.ai/deepseek-cuts-inference-costs-openai-tightens-ties-with-amd-thinking-machines-simplifies-fine-tuning-robots-improve-spatial-awareness</p>
+<ol><li><strong>AWS 6 名工程师、76 天重写了 Bedrock 推理引擎。</strong></li></ol>
+<p>人话版：原来计划 30–40 人干一年多，靠内部 AI 编程工具 Kiro 六个人两个半月搞定——云大厂正在把&quot;推理引擎&quot;本身当核心竞争力卷，延迟和吞吐是第一优先级。 🔗 https://techdefused.com/a/Q0jDz17/six-engineers-rebuilt-awss-bedrock-engine-in-76-days</p>
+<ol><li><strong>OpenAI 与 AMD 数百亿美元交易：Instinct MI450 要做推理。</strong></li></ol>
+<p>人话版：OpenAI 大规模押注推理侧算力，论点是&quot;算力需求正在从训练转向推理&quot;（inference is the whole game）；AMD 大显存 GPU 在推理场景可能有优势。 对你的意义：硬件格局从&quot;NVIDIA 独大&quot;走向多硬件并存，框架的多后端适配能力（SGLang/vLLM 的 AMD 支持）会越来越值钱。 🔗 https://info.deeplearning.ai/deepseek-cuts-inference-costs-openai-tightens-ties-with-amd-thinking-machines-simplifies-fine-tuning-robots-improve-spatial-awareness</p>
+<ol><li><strong>Google Ironwood TPU 推理成本曝光：FP8 下 $0.181/百万 token，比 B200（$0.222）便宜。</strong></li></ol>
+<p>人话版：第三方实测显示 Google 自家 TPU 在 FP8 推理下单位 token 成本已经干过 NVIDIA B200——&quot;推理拼能效&quot;的硬证据；顺带 Google 宣布 TorchTPU（TPU 上的 PyTorch 软件栈）10 月开源，非 Google 系团队也能在 TPU 上调优推理了。 🔗 https://404kresearch.substack.com/p/404k-semi-ai-evening-brief-2026-09-c8f</p>
+<ol><li><strong>OpenAI GPT-6 Astra 在 Amazon Bedrock 上 GA，还有 2 倍速的 Fast 档。</strong></li></ol>
+<p>人话版：标准价 $10/$50（输入/输出每百万 token），Fast 模式 2 倍速、2 倍价——云推理服务开始像 CDN 一样玩&quot;加速档&quot;分级定价，对关注&quot;延迟-成本&quot;权衡的 serving 研究是现成的参照系。 🔗 https://www.unite.ai/openais-gpt-6-astra-reaches-general-availability-on-amazon-bedrock/</p>
+<ol><li><strong>AWS 把 Anthropic Claude Fable 5.1 上架 Bedrock，顺带推了套&quot;数据保留 30 天可人工审查&quot;的合规模式。</strong></li></ol>
+<p>人话版：模型新闻本身不算硬技术，但说明云推理平台的竞争已经卷到&quot;谁家模型多、合规选项细&quot;。 🔗 https://itbrief.co.nz/story/aws-adds-claude-fable-5-1-to-bedrock-aws-platform</p>
+<ol><li><strong>Apple A20 Pro 的 Neural Engine 翻倍到 32 核（iPhone 18 Pro）。</strong></li></ol>
+<p>人话版：端侧 AI 算力直接翻倍——和你研究的云端 serving 是两条并行线，但&quot;推理下沉到端&quot;的趋势值得留意。 🔗 https://www.barrons.com/livecoverage/apple-event-iphone-stock-john-ternus/card/apple-s-ai-neural-engine-doubles-in-size-0y5pFiTcm7KWjg7Qciek</p>
+<ol><li><strong>澳大利亚数据中心商 NEXTDC 融资 7.95 亿美元加码 AI 基建。</strong></li></ol>
+<p>人话版：纯基建资金面新闻，2027 财年资本开支暴涨 55–70%——&quot;推理算力荒&quot;还在推着数据中心拼命扩容。 🔗 https://www.reuters.com/world/asia-pacific/australian-data-centre-operator-nextdc-raise-795-mln-ai-infrastructure-2026-09-09/</p>
+<h2>访谈与深度</h2>
+<ol><li><strong>SemiAnalysis：Google TPU 推理外部化全速推进，&quot;InferenceX&quot; 实战调优笔记。</strong></li></ol>
+<p>人话版：Google 正在把自家 TPU 推理技术从&quot;只服务内部&quot;转向&quot;卖给外部客户&quot;，SemiAnalysis 披露了大量实测细节：低并发时调度开销是大头、混合架构模型的前缀缓存要同时保留 KV 和循环状态。 <strong>为什么值得读：第一手的&quot;别人是怎么调的&quot;实战笔记，跟你研究的 prefill/decode 资源分离和 KV cache 优化直接相关，里面有具体数字和取舍逻辑。</strong>（约 2 天前，未被播报过，特收录） 🔗 https://newsletter.semianalysis.com/p/tpu-inferencex-full-steam</p>
+<ol><li><strong>社区：一张图看懂 vLLM vs SGLang 的选型心智模型</strong>（Instagram 信息图）</li></ol>
+<p>人话版：vLLM（高吞吐、PagedAttention、生产级稳定）vs SGLang（灵活可编程、KV 复用更好、适合多模态与工具调用工作流）——结论是&quot;没有谁 universally 更好，看你建什么&quot;。偏入门，但刚好呼应你的多模态推理优化方向，可做团队对齐认知的资料。 🔗 https://www.instagram.com/p/DdB1BthTCsh/</p>
+<p>*去重：未重复 0800 档已报的 OpenAI-三星/高通-亚马逊/谷歌芬兰/Firmus 算力协议、Barron&#x27;s 分析、SGLang-Omni v0.1.4，以及第一期的 SGLang v0.5.19、vLLM v0.27.0 P/D、Prefill-as-a-Service、EAGLE-3、llm-d、RTX 5090 横评。渠道覆盖：GitHub releases、arXiv、The Information、Reuters、SemiAnalysis、404K Research、The Batch、Unite.AI、Barron&#x27;s、Instagram。X 大V（lmsysorg/vLLM/karpathy/jimfan/swyx）、Reddit、HN、YouTube、中文 AI 媒体本轮无实质新料。*</p></body></html>
