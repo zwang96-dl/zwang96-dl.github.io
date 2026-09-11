@@ -2,7 +2,7 @@
 <meta name="doc-title" content="深读 · vLLM v0.29.0：Model Runner V2 全量默认 + 多模态性能专区 + 多模态 LoRA"/>
 <meta name="doc-description" content="&gt; 原文：Release v0.29.0 · vllm-project/vllm（594 commits，277 位贡献者，其中 91 位新贡献者；2026-09-09 发布）"/>
 <meta name="doc-date" content="2026-09-10"/>
-<meta name="doc-ts" content="2026-09-10T03:18:22"/>
+<meta name="doc-ts" content="2026-09-10T03:18:00"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>vLLM v0.29.0：Model Runner V2 全量默认 + 多模态性能专区 + 多模态 LoRA</title><style>
@@ -44,48 +44,52 @@ img{border-color:#30363d}
 <h1>vLLM v0.29.0：Model Runner V2 全量默认 + 多模态性能专区 + 多模态 LoRA</h1>
 <blockquote><p>原文：Release v0.29.0 · vllm-project/vllm（594 commits，277 位贡献者，其中 91 位新贡献者；2026-09-09 发布）<br/>原文：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.29.0">https://github.com/vllm-project/vllm/releases/tag/v0.29.0</a><br/>说明：GitHub release 页是纯文本，没有配图；本篇为要点精读，无原文图表。</p></blockquote>
 <h2>一句话人话版</h2>
-<p>vLLM 这版是&quot;多模态推理优化专场&quot;：<strong>Model Runner V2 正式成为所有模型的默认执行器</strong>（三年重构收官），同时单独开了一个 <strong>Multimodal performance</strong> 专区——ViT 全量 CUDA graph、Pixtral 打包 encoder attention、Kimi vision 融合 RoPE 核、跨模态异步媒体解析、H2D pinned 拷贝，全是冲着<strong>多模态 TTFT</strong>去的。再加上 Qwen3-Omni / LLaVA-NeXT / LFM2-VL 的<strong>多模态 LoRA</strong>、Mamba prefix caching（TTFT -9%~-25%），正好跟你最近在看的 EPD 解耦方向咬合。</p>
+<p>vLLM 这版是&quot;多模态推理优化专场&quot;。<strong>Model Runner V2 正式成为所有模型的默认执行器</strong>。三年重构收官。同时单独开了一个 <strong>Multimodal performance</strong> 专区。ViT 全量 CUDA graph。Pixtral 打包 encoder attention。Kimi vision 融合 RoPE 核。跨模态异步媒体解析、H2D pinned 拷贝。全是冲着<strong>多模态 TTFT</strong>去的。再加上多模态 LoRA。Qwen3-Omni / LLaVA-NeXT / LFM2-VL 都支持。Mamba prefix caching（TTFT -9%~-25%）。正好跟你最近在看的 EPD 解耦方向咬合。</p>
 <h2>跟你最相关的六个变化</h2>
 <h3>1. Model Runner V2 全量默认（最值得关注的架构变化）</h3>
-<p><code>Model Runner V2 is now the default for all models</code>（#53183）——从 pooling 模型开始的分批 rollout 完成收官。MRV1 只保留给少数 ROCm 模型和 MRV2 暂不支持的特性。</p>
+<blockquote><p><code>Model Runner V2 is now the default for all models</code>（#53183）</p></blockquote>
+<p>从 pooling 模型开始的分批 rollout 完成收官。MRV1 只保留给少数 ROCm 模型和 MRV2 暂不支持的特性。</p>
+<p>Model Runner 就是 vLLM 内部&quot;真正跑模型&quot;的那套引擎。V2 是重写的新版。以后新功能只在 V2 上加。</p>
 <p>这版 MRV2 顺带拿到的增强：</p>
-<ul><li><strong>CUDA graph 显存 profiling 做 KV cache 自动 sizing</strong>（#53306）：cudagraph 预留多少显存不再拍脑袋，KV cache 大小自动算准；</li><li><strong>batch-sharded sampling</strong>（#50465）：每步 logits 显存除以 TP 数，大 batch / 大词表（如多模态模型的长 prompt）更省显存；</li><li>spec decode 下 <strong>padded FULL cudagraph dispatch</strong>（#53407）：投机解码时 decode 侧统一走全量 cudagraph，batch 形状更规整；</li><li>EAGLE/MTP draft prefill 前<strong>跳过 DP 同步</strong>（#53694）。</li></ul>
-<p>人话：升级后你跑的所有 benchmark 基线都会变——执行器换了，KV cache 分配策略也换了。老版本上用 MRV1 的 workaround 可以删了。</p>
+<ul><li><strong>CUDA graph 显存 profiling</strong>（#53306）。KV cache 自动 sizing。cudagraph 预留多少显存不再拍脑袋。KV cache 大小自动算准；</li><li><strong>batch-sharded sampling</strong>（#50465）。每步 logits 显存除以 TP 数。大 batch / 大词表更省显存。如多模态模型的长 prompt；</li><li><strong>padded FULL cudagraph dispatch</strong>（#53407）。spec decode 下统一走全量 cudagraph。batch 形状更规整；</li><li>EAGLE/MTP draft prefill 前。<strong>跳过 DP 同步</strong>（#53694）。</li></ul>
+<p>人话：升级后你跑的所有 benchmark 基线都会变。执行器换了，KV cache 分配策略也换了。老版本上用 MRV1 的 workaround 可以删了。</p>
 <h3>2. 多模态性能专区（本版核心，逐项拆解）</h3>
-<p>release 专门单列了 <strong>Multimodal performance</strong>，每一项都是 TTFT 路径上的硬骨头：</p>
-<ul><li><strong>ViT 全量 CUDA graph：Idefics3、SmolVLM</strong>（#47625；Kimi-K2.5 #50929、Ernie-4.5-VL #45254/#51461 也在做）</li></ul>
-<p>原理：vision encoder 的 prefill 全程跑在 CUDA graph 里，消掉逐个 kernel launch 的 CPU 开销。 收益/场景：多图请求里 encoder 时间占 TTFT 大头时效果最明显；图越多、batch 越大，省得越多。</p>
+<p>release 专门单列了 <strong>Multimodal performance</strong>。每一项都是 TTFT 路径上的硬骨头：</p>
+<ul><li><strong>ViT 全量 CUDA graph</strong>（#47625）。支持 Idefics3、SmolVLM。Kimi-K2.5（#50929）也在做。Ernie-4.5-VL（#45254/#51461）也在做。</li></ul>
+<p>原理：encoder 的 prefill 全跑在 CUDA graph 里。消掉逐个 kernel launch 的 CPU 开销。 收益/场景：多图请求里 encoder 时间占 TTFT 大头时效果最明显。图越多、batch 越大，省得越多。</p>
 <ul><li><strong>Pixtral packed encoder attention</strong>（#52185）</li></ul>
-<p>原理：encoder attention 里把变长 image patch 序列打包（packed）处理，类比文本 prefill 的 packed prefill，消掉 padding 浪费。 场景：多分辨率/多图混合 batch，patch 数参差不齐时。</p>
+<p>原理：encoder attention 里变长 patch 打包处理。类比文本 prefill 的 packed prefill。消掉 padding 浪费。 场景：多分辨率/多图混合 batch，patch 数参差不齐时。</p>
 <ul><li><strong>Kimi vision 融合 Q/K RoPE 核</strong>（#50400）</li></ul>
-<p>原理：把 RoPE 融进 vision tower 的 Q/K 投影 kernel，一次 launch 干完，减少 kernel 次数和显存搬运。 场景：Kimi 系 VLM（K2.5/K3）的 vision 部分。</p>
+<p>原理：RoPE 融进 vision tower 的 Q/K 投影 kernel。一次 launch 干完。减少 kernel 次数和显存搬运。 场景：Kimi 系 VLM（K2.5/K3）的 vision 部分。</p>
 <ul><li><strong>跨模态异步媒体解析</strong>（#54537）</li></ul>
-<p>原理：image/audio/video 的解码+预处理并发执行，不再串行排队。 场景：图文音视频混合输入的请求，预处理阶段不再被最慢的那个模态拖住。</p>
+<p>原理：image/audio/video 的解码+预处理并发执行。不再串行排队。 场景：图文音视频混合输入的请求。预处理阶段不再被最慢的那个模态拖住。</p>
 <ul><li><strong>H2D 拷贝走 pinned memory</strong>（#53412、#54292、#54299）</li></ul>
-<p>原理：host 侧用 page-locked 内存做 H2D 拷贝，避免额外的 staging 拷贝和 stream  stall。 场景：大图/多图输入时 host→device 传 embedding 的卡顿。</p>
+<p>原理：host 侧用 page-locked 内存做 H2D 拷贝。避免额外的 staging 拷贝和 stream stall。 场景：大图/多图输入时 host→device 传 embedding 的卡顿。</p>
 <ul><li><strong>分布式下的通信减负</strong>（#52041、#52697）</li></ul>
-<p>prefix-cache 已覆盖的多模态 tensor 不再广播给所有 worker；E/P/D 场景里 KV consumer 可以直接省略 multimodal embeddings。跟 EPD 解耦的&quot;传什么、不传什么&quot;直接相关。</p>
+<p>prefix-cache 已覆盖的多模态 tensor。不再广播给所有 worker。E/P/D 场景里。KV consumer 可以直接省略 multimodal embeddings。跟 EPD 解耦的&quot;传什么、不传什么&quot;直接相关。</p>
 <ul><li><strong>CPU 侧开销清理</strong>（#52925、#53560、#50411）</li></ul>
-<p>跳过冗余的 placeholder 扫描、缓存公共 token 序列、多模态预处理归一化在 device 上融合。多模态请求量大时，这些 CPU 小开销会积成 TTFT 长尾。</p>
-<p>一句话总结：这套组合拳 = <strong>SGLang PaddleOCR-VL 那套&quot;预处理重叠 + ViT 打包 + prefill CUDA graph&quot;三板斧的 vLLM 版本</strong>，而且跟 EPD 解耦正交，可以叠加。建议：等你搭 EPD 实验时，把这几个开关的效果单独测一遍，看看在你这边 encoder 阶段到底占多少。</p>
+<p>跳过冗余的 placeholder 扫描。缓存公共 token 序列。多模态预处理归一化在 device 上融合。多模态请求量大时，这些 CPU 小开销会积成 TTFT 长尾。</p>
+<p>一句话总结。这套组合拳是 SGLang 三板斧的 vLLM 版本。三板斧是预处理重叠、ViT 打包、prefill CUDA graph。而且跟 EPD 解耦正交，可以叠加。建议：等你搭 EPD 实验时，把这几个开关的效果单独测一遍。看看在你这边 encoder 阶段到底占多少。</p>
 <h3>3. 多模态 LoRA 落地</h3>
-<ul><li><strong>Qwen3-Omni 多模态 LoRA</strong>（#52786、#53557）；</li><li><strong>LLaVA-NeXT 的 tower/connector LoRA</strong>（#49788）、<strong>LFM2-VL</strong>（#51498）；</li><li>还有 Gemma4 的 vision tower LoRA（#42662）、Keye（#51780）、Ultravox（#48215）。</li></ul>
-<p>人话：以前多模态微调基本只能全量，这版开始可以在 vLLM 里直接 serve <strong>只训了 vision tower / connector 的 LoRA</strong>，多模态微调→部署的链路打通了。跟你&quot;想试 LLM 微调（HF PEFT/TRL）&quot;的计划也对得上——以后可以玩&quot;VLM 的 connector 只做 LoRA&quot;的轻量实验。</p>
+<ul><li><strong>Qwen3-Omni 多模态 LoRA</strong>（#52786、#53557）；</li><li><strong>LLaVA-NeXT LoRA</strong>（#49788）。tower/connector 都支持。<strong>LFM2-VL</strong>（#51498）；</li><li>还有 Gemma4 的 vision tower LoRA（#42662）。Keye（#51780）、Ultravox（#48215）。</li></ul>
+<p>人话：以前多模态微调基本只能全量。这版开始可以在 vLLM 里直接 serve。<strong>只训了 vision tower / connector 的 LoRA</strong>。多模态微调→部署的链路打通了。跟你&quot;想试 LLM 微调（HF PEFT/TRL）&quot;的计划也对得上。以后可以玩&quot;VLM 的 connector 只做 LoRA&quot;的轻量实验。</p>
 <h3>4. Mamba prefix caching：TTFT -9%~-25%</h3>
-<p>Mamba 模型的 prefill 内部 checkpoint（#52789），<strong>TTFT 提升 9%~25%</strong>。同时 <code>prefix_cache_retention_interval</code> 变成 CLI 参数（默认 0，#52216），hybrid 模型用 EAGLE/MTP 时自动恢复 dense retention。</p>
-<p>人话：hybrid 架构（Mamba + Attention，如 NemotronH、Qwen3-Next 系）的 prefix caching 这版才算真正可用。你之前看的 hybrid 模型 benchmark，如果开了 prefix cache，建议用这版重跑。</p>
+<p>Mamba 模型的 prefill 内部 checkpoint（#52789）。<strong>TTFT 提升 9%~25%</strong>。同时新增 CLI 参数。名字叫 <code>prefix_cache_retention_interval</code>。默认 0（#52216）。hybrid 模型用 EAGLE/MTP 时。自动恢复 dense retention。</p>
+<p>人话：hybrid 架构的 prefix caching。这版才算真正可用。比如 Mamba + Attention 的模型。像 NemotronH、Qwen3-Next 系。你之前看的 hybrid 模型 benchmark。如果开了 prefix cache，建议用这版重跑。</p>
 <h3>5. 新默认值（升级必看）</h3>
-<ul><li><strong>FlashInfer all-reduce 默认开启</strong>（TP CUDA groups，#52998）：想关用 <code>VLLM_ALLREDUCE_USE_FLASHINFER=0</code>；</li><li><strong>prefix-cache 的 NONE_HASH 默认确定性</strong>（#51875）：分布式 KV cache 用户不用再手动 pin <code>PYTHONHASHSEED</code>；</li><li>新增准入控制参数 <code>--max-num-queued-reqs</code> / <code>--max-num-queued-tokens</code>（#49445）：排队请求数/ token 数上限，防爆内存。</li></ul>
+<ul><li><strong>FlashInfer all-reduce</strong>（#52998）。TP CUDA groups 默认开启。想关用 <code>VLLM_ALLREDUCE_USE_FLASHINFER=0</code>；</li><li><strong>prefix-cache 的 NONE_HASH 默认确定性</strong>（#51875）。分布式 KV cache 用户。不用再手动 pin <code>PYTHONHASHSEED</code>；</li><li>新增准入控制参数（#49445）。排队请求数上限：<code>--max-num-queued-reqs</code>。排队 token 数上限：<code>--max-num-queued-tokens</code>。防爆内存。</li></ul>
 <h3>6. Kimi K3 / DeepSeek V4 性能继续加码</h3>
 <p>跟你直接相关的主要是思路，数字供参考：</p>
-<ul><li>K3 latent tail 融合 MXFP4 top-k finalization：端到端延迟约 -5%（#53152）；</li><li>K3 Mamba metadata 准备合并成一次 Triton launch：kernel 加速 6.6~7.6×（#52388）；</li><li>Hopper 低延迟 GEMM 下放到 SM100，<code>eh_proj</code> kernel 加速 12.9%~25.2%（#53534、#53942）；</li><li>DeepSeek V4：shared experts 融进 MegaMoE（#53040）、FlashInfer <code>moe_ep</code> expert backend 可选（#49636）；</li><li>Kimi K3 NVFP4 checkpoint 官方支持（#53132）。</li></ul>
+<ul><li>K3 latent tail。融合 MXFP4 top-k finalization。端到端延迟约 -5%（#53152）；</li><li>K3 Mamba metadata 准备合并成一次 Triton launch。kernel 加速 6.6~7.6×（#52388）；</li><li>Hopper 低延迟 GEMM 下放到 SM100。<code>eh_proj</code> kernel 加速。12.9%~25.2%（#53534、#53942）；</li><li>DeepSeek V4 这边。shared experts 融进 MegaMoE（#53040）。FlashInfer <code>moe_ep</code>。expert backend 可选（#49636）；</li><li>Kimi K3 NVFP4 checkpoint 官方支持（#53132）。</li></ul>
 <h2>迁移注意事项（Breaking Changes）</h2>
-<ol><li><strong>删了 10 个 deprecated 模型架构</strong>（#53608）：如果你的 serving 清单里有老模型，先查还在不在支持列表；</li><li><strong>FlexOlmo、Olmo3、Hunyuan V1/VL 迁到 Transformers modeling backend</strong>（#53615）：native 实现删了，行为可能有细微差，benchmark 重跑；</li><li><strong>PyAV 视频解码后端被删</strong>（#54231）：视频输入走 PyAV 的 pipeline 要迁移；</li><li><strong>启动命令</strong>：<code>python -m vllm.entrypoints.openai.api_server</code> 废弃，改用 <code>vllm serve</code>（#52131）；</li><li>环境变量 <code>VLLM_TEST_FORCE_FP8_MARLIN</code>、<code>VLLM_ROCM_USE_AITER_FP4_ASM_GEMM</code> 被删；</li><li>安装：默认 wheel 切到 <strong>CUDA 13.0</strong>（<code>pip install vllm</code>），Docker 镜像 <code>vllm/vllm-openai:v0.29.0</code>。</li></ol>
+<ol><li><strong>删了 10 个 deprecated 模型架构</strong>（#53608）。如果你的 serving 清单里有老模型。先查还在不在支持列表；</li><li>三个模型系列迁出（#53615）。FlexOlmo、Olmo3、Hunyuan V1/VL。迁到 Transformers modeling backend。native 实现删了。行为可能有细微差。benchmark 重跑；</li><li><strong>PyAV 视频解码后端被删</strong>（#54231）。视频输入走 PyAV 的 pipeline 要迁移；</li><li>旧启动命令废弃。换成 <code>vllm serve</code>（#52131）。</li></ol>
+<p>原命令：<code>python -m vllm.entrypoints.openai.api_server</code></p>
+<ol><li>环境变量 <code>VLLM_TEST_FORCE_FP8_MARLIN</code> 被删。<code>VLLM_ROCM_USE_AITER_FP4_ASM_GEMM</code> 也被删；</li><li>安装：默认 wheel 切到 <strong>CUDA 13.0</strong>。<code>pip install vllm</code>。Docker 镜像 <code>vllm/vllm-openai:v0.29.0</code>。</li></ol>
 <h2>其他值得扫一眼的</h2>
-<ul><li><strong>投机解码</strong>：OpenAI API 响应里可带 per-request 接受率统计（<code>--per-request-spec-decode-metrics</code>，#48915）；自适应验证扩展到 logprobs（#52242）；Qwen3-Omni DSpark drafts（#52560）；</li><li><strong>RL 权重同步</strong>：新的 <code>sharded_rdt</code> P2P 后端，worker 只拉自己的 TP/EP 切片，走 <strong>NIXL</strong> 或 Ray Direct Transport（#43375）——NIXL 从 KV 传输延伸到权重同步了；</li><li><strong>新模型</strong>：腾讯 Hy4-preview（770B MoE，Gated DeepSeek Sparse Attention + 原生 MTP，#54160）、Qwen3.8-Flash-Next（BF16/FP8/NVFP4 + MTP，#53896）、NemotronH_Omni_Reasoning_V3（#52929）；</li><li><strong>多模态输入侧修复</strong>：Python frontend 接受 video embeds（#54242）、Qwen3-VL profiling 遵守 <code>cap_pixels_per_frame</code>（#54380）、超大 item 跳过 MM processor cache 不再崩（#53016）；</li><li><strong>前置版本背景</strong>（不在本版，但相关）：NIXL P/D for hybrid MLA+SSM 模型（#49762）和 <code>sm_107</code>（Rubin）支持（#49387）是 v0.27.0 落地的，本版是吃红利。</li></ul>
+<ul><li><strong>投机解码</strong>：OpenAI API 响应。可带 per-request 接受率统计。对应开关（#48915）。<code>--per-request-spec-decode-metrics</code>。自适应验证扩展到 logprobs（#52242）。Qwen3-Omni DSpark drafts（#52560）；</li><li><strong>RL 权重同步</strong>：新的 <code>sharded_rdt</code> P2P 后端。worker 只拉自己的 TP/EP 切片。走 <strong>NIXL</strong>（#43375）。或 Ray Direct Transport。NIXL 从 KV 传输延伸到权重同步了；</li><li><strong>新模型</strong>：腾讯 Hy4-preview（770B MoE）。Gated DeepSeek Sparse Attention。原生 MTP（#54160）。Qwen3.8-Flash-Next（#53896）。BF16/FP8/NVFP4 + MTP。NemotronH_Omni_Reasoning_V3（#52929）；</li><li><strong>多模态输入侧修复</strong>（#54242）。Python frontend 接受 video embeds。Qwen3-VL profiling 遵守参数。<code>cap_pixels_per_frame</code>（#54380）。超大 item 跳过 MM processor cache。不再崩（#53016）；</li><li><strong>前置版本背景</strong>（不在本版，但相关）。NIXL P/D for hybrid MLA+SSM 模型（#49762）。<code>sm_107</code>（Rubin）支持（#49387）。这两个是 v0.27.0 落地的。本版是吃红利。</li></ul>
 <h2>跟你研究方向的关联</h2>
-<ul><li><strong>EPD 解耦的 vLLM 对应物</strong>：这版 E/P/D 相关（#50390 去掉重复图像预处理、#52697 KV consumer 省略 MM embeddings、#50275 encoder 实例保活）正是 NVIDIA EPD 博客里&quot;embedding 走 NIXL 传、encoder 独立部署&quot;的工程落地。建议对照博客的四维决策表（图像量/OSL/模型大小精度/混合流量），在 vLLM 这边复测 E/P/D vs 聚合部署的 TTFT；</li><li><strong>多模态 TTFT 优化配方</strong>：ViT CUDA graph + 跨模态异步解析 + pinned H2D，跟 SGLang PaddleOCR-VL 的三板斧思路一致但实现不同，两边都测一遍才知道哪个在你 workload 上更赚；</li><li><strong>量化线</strong>：Kimi K3 NVFP4 checkpoint + MXFP4 融合核，继续验证&quot;量化放大解耦/加速收益&quot;的思路；</li><li><strong>升级建议</strong>：MRV2 默认化 + FlashInfer all-reduce 默认开 + 10 个老架构删除——升 v0.29.0 后<strong>所有历史 benchmark 基线都要重跑</strong>，别直接拿旧数字对比。</li></ul>
+<ul><li><strong>EPD 解耦的 vLLM 对应物</strong>：这版 E/P/D 相关。#50390 去掉重复图像预处理。#52697 KV consumer 省略 MM embeddings。#50275 encoder 实例保活。正是 NVIDIA EPD 博客里那套的工程落地。&quot;embedding 走 NIXL 传、encoder 独立部署&quot;。建议对照博客的四维决策表（图像量/OSL/模型大小精度/混合流量）。在 vLLM 这边复测 E/P/D vs 聚合部署的 TTFT；</li><li><strong>多模态 TTFT 优化配方</strong>：ViT CUDA graph。跨模态异步解析。pinned H2D。跟 SGLang PaddleOCR-VL 的三板斧思路一致但实现不同。两边都测一遍才知道哪个在你 workload 上更赚；</li><li><strong>量化线</strong>：Kimi K3 NVFP4 checkpoint。MXFP4 融合核。继续验证&quot;量化放大解耦/加速收益&quot;的思路；</li><li><strong>升级建议</strong>：MRV2 默认化。FlashInfer all-reduce 默认开。10 个老架构删除。升 v0.29.0 后<strong>所有历史 benchmark 基线都要重跑</strong>。别直接拿旧数字对比。</li></ul>
 <h2>术语表</h2>
-<ul><li><strong>Model Runner V2 (MRV2)</strong>：vLLM 新一代模型执行器，重写了执行/调度/显存管理路径，本版起成为所有模型的默认执行器。</li><li><strong>CUDA graph</strong>：把一串 GPU kernel launch 录制成图，一次提交，减少 CPU 端 launch 开销；对 encoder 这种固定 shape 的计算特别有效。</li><li><strong>Packed attention</strong>：把变长序列打包成连续 batch 处理，消掉 padding 造成的算力浪费。</li><li><strong>Pinned memory</strong>：page-locked 的 host 内存，GPU DMA 可以直接访问，H2D 拷贝更快且不阻塞 stream。</li><li><strong>Prefix caching</strong>：前缀缓存，相同 prompt 前缀的 KV 直接复用；Mamba 这版通过 prefill 内部 checkpoint 实现。</li><li><strong>LoRA (tower/connector)</strong>：只训练 vision tower 或 modality connector 的轻量微调，部署时以 LoRA 形式加载。</li><li><strong>NVFP4 / MXFP4</strong>：NVIDIA 的 4-bit microscaling 浮点格式，Kimi K3 官方 checkpoint 格式。</li><li><strong>NIXL</strong>：NVIDIA 的集合通信/传输库，用于 P/D 解耦的 KV 传输和权重同步。</li><li><strong>E/P/D disaggregation</strong>：encode-prefill-decode 解耦，vision encoder / prefill / decode 跑在不同实例上。</li><li><strong>TTFT</strong>：time to first token，首 token 延迟；多模态场景里 encoder + 预处理占大头。</li></ul>
+<ul><li><strong>Model Runner V2 (MRV2)</strong>：vLLM 新一代模型执行器。重写了执行/调度/显存管理路径。本版起成为所有模型的默认执行器。</li><li><strong>CUDA graph</strong>：把一串 GPU kernel launch 录制成图。一次提交。减少 CPU 端 launch 开销。对 encoder 这种固定 shape 的计算特别有效。</li><li><strong>Packed attention</strong>：把变长序列打包成连续 batch 处理。消掉 padding 造成的算力浪费。</li><li><strong>Pinned memory</strong>：page-locked 的 host 内存。GPU DMA 可以直接访问。H2D 拷贝更快且不阻塞 stream。</li><li><strong>Prefix caching</strong>：前缀缓存。相同 prompt 前缀的 KV 直接复用。Mamba 这版通过 prefill 内部 checkpoint 实现。</li><li><strong>LoRA</strong>（tower/connector）：只训练 vision tower。或 modality connector。轻量微调。部署时以 LoRA 形式加载。</li><li><strong>NVFP4 / MXFP4</strong>：4-bit microscaling 浮点格式。NVIDIA 出的。Kimi K3 官方 checkpoint 格式。</li><li><strong>NIXL</strong>：NVIDIA 的集合通信/传输库。用于 P/D 解耦的 KV 传输和权重同步。</li><li><strong>E/P/D 解耦</strong>：encode、prefill、decode 分开部署。跑在不同实例上。</li><li><strong>TTFT</strong>：time to first token，首 token 延迟。多模态场景里 encoder + 预处理占大头。</li></ul>
 <hr/>
 <p>原文：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.29.0">https://github.com/vllm-project/vllm/releases/tag/v0.29.0</a></p></body></html>
