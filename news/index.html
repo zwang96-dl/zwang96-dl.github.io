@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8"/>
+<html lang="zh-CN"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>AI 推理资讯</title>
 <meta name="doc-title" content="AI 推理资讯"/>
 <meta name="doc-description" content="多模态大模型推理服务：每日四档行业简报 + 中文深读笔记"/>
-<meta name="doc-date" content="2026-09-10"/>
+<meta name="doc-date" content="2026-09-11"/>
 <style>
 body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;line-height:1.7;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
 h1{font-size:22px;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+.sub{font-size:14px;color:#888;margin:6px 0 4px}
+.arch{font-size:13px;margin:8px 0 4px}
+.arch a{color:#0a58ca;text-decoration:none;margin-right:12px}
 .day{font-size:15px;font-weight:700;color:#666;margin:28px 0 10px}
 .item{display:flex;gap:12px;align-items:flex-start;border:1px solid #eee;border-radius:10px;padding:12px 14px;margin:10px 0}
 .thumb{flex:0 0 auto}
@@ -20,28 +21,32 @@ h1{font-size:22px;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
 .badge{display:inline-block;font-size:12px;padding:1px 8px;border-radius:20px;margin-right:8px;vertical-align:2px}
 .badge.brief{background:#e8f0fe;color:#1a56db}
 .badge.deep{background:#fef3e2;color:#b45309}
-.meta{font-size:13px;color:#888;margin-top:4px}
 .desc{font-size:14px;color:#444;margin-top:6px}
+.pagenav{text-align:center;margin:30px 0 10px;font-size:14px;color:#888}
+.pagenav a{color:#0a58ca;text-decoration:none;margin:0 12px}
+.monthrow{display:flex;justify-content:space-between;align-items:center;border:1px solid #eee;border-radius:10px;padding:12px 14px;margin:10px 0}
+.monthrow a{color:#0a58ca;text-decoration:none;font-weight:600}
+.monthrow .cnt{color:#888;font-size:13px}
 .backlink{font-size:14px;margin-bottom:8px}
 .backlink a{color:#0a58ca;text-decoration:none}
 @media (prefers-color-scheme: dark){
 body{background:#0d1117;color:#e6edf3}
 h1{border-color:#21262d}
+.sub{color:#9aa4b2}
 .day{color:#9aa4b2}
-.item{border-color:#30363d}
+.item,.monthrow{border-color:#30363d}
 .thumb img{border-color:#30363d}
-.item a.t,.backlink a{color:#79c0ff}
+.item a.t,.arch a,.pagenav a,.monthrow a,.backlink a{color:#79c0ff}
 .desc{color:#9aa4b2}
-.meta{color:#6e7681}
 .badge.brief{background:#1c2b4a;color:#79c0ff}
 .badge.deep{background:#4a3418;color:#f0b35c}
 }
-</style>
-</head>
+</style></head>
 <body>
 <div class="backlink"><a href="..">← 首页</a></div>
 <h1>AI 推理资讯</h1>
-<p style="font-size:14px;color:#888">多模态大模型推理服务 · 每日 08:00 / 12:00 / 16:00 / 20:00 简报 ＋ 中文深读笔记</p>
+<div class="sub">多模态大模型推理服务 · 每日 08:00 / 12:00 / 16:00 / 20:00 简报 ＋ 中文深读笔记</div>
+<div class="arch"><a href="./2026/">📅 2026 年归档</a></div>
 <div class="day">2026-09-10</div>
 <div class="item"><a class="thumb" href="./brief-2026-09-10-2000/"><img src="./brief-2026-09-10-2000/thumb.jpg" alt="" loading="lazy"/></a><div class="txt"><span class="badge brief">简报</span><a class="t" href="./brief-2026-09-10-2000/">多模态推理简报 · 9月10日 20:00</a><div class="desc">连续批处理之父的新平台：把闲置 GPU 变成&quot;推理提款机&quot;。</div></div></div>
 <div class="item"><a class="thumb" href="./deep-20260910-mtp-3/"><img src="./deep-20260910-mtp-3/thumb.jpg" alt="" loading="lazy"/></a><div class="txt"><span class="badge deep">深读</span><a class="t" href="./deep-20260910-mtp-3/">深读 · MTP 自蒸馏：把 3 倍加速&quot;烤&quot;进模型权重，不用投机解码</a><div class="desc">&gt; 原文：Multi-Token Prediction via Self-Distillation（arXiv:2602.06019；John Kirchenbauer 等，UMD</div></div></div>
@@ -53,5 +58,5 @@ h1{border-color:#21262d}
 <div class="item"><a class="thumb" href="./brief-2026-09-10-0800/"><img src="./brief-2026-09-10-0800/thumb.jpg" alt="" loading="lazy"/></a><div class="txt"><span class="badge brief">简报</span><a class="t" href="./brief-2026-09-10-0800/">多模态推理简报 · 9月10日 08:00</a><div class="desc">DeepSeek 今天发布 V4.1-Flash：新架构家族里最小的模型，主打更快推理。</div></div></div>
 <div class="item"><a class="thumb" href="./deep-20260910-vllm-vs-sglang-h100/"><img src="./deep-20260910-vllm-vs-sglang-h100/thumb.jpg" alt="" loading="lazy"/></a><div class="txt"><span class="badge deep">深读</span><a class="t" href="./deep-20260910-vllm-vs-sglang-h100/">深读 · H100 上 vLLM vs SGLang 实测：没有永远的赢家，只有跟负载走的瓶颈</a><div class="desc">&gt; 文章：vLLM vs SGLang on H100: The Winner Depends on the Workload</div></div></div>
 <div class="item"><div class="txt"><span class="badge deep">深读</span><a class="t" href="./deep-20260910-vllm-v0-29-0/">深读 · vLLM v0.29.0：Model Runner V2 全量默认 + 多模态性能专区 + 多模态 LoRA</a><div class="desc">&gt; 原文：Release v0.29.0 · vllm-project/vllm（594 commits，277 位贡献者，其中 91 位新贡献者；2026-09-09 发布）</div></div></div>
-</body>
-</html>
+
+</body></html>
