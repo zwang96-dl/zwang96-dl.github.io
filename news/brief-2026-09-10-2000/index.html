@@ -1,8 +1,8 @@
 <!DOCTYPE html><html lang="zh-CN"><head>
 <meta name="doc-title" content="多模态推理简报 · 9月10日 20:00"/>
-<meta name="doc-description" content="连续批处理之父的新平台：把闲置 GPU 变成&quot;推理提款机&quot;。"/>
+<meta name="doc-description" content="闲置的 GPU 也能拿来赚钱了"/>
 <meta name="doc-date" content="2026-09-10"/>
-<meta name="doc-ts" content="2026-09-10T20:05:58"/>
+<meta name="doc-ts" content="2026-09-11T01:39:56"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>多模态大模型推理服务简报 · 2026-09-10（2000 档）</title><style>
@@ -43,12 +43,33 @@ img{border-color:#30363d}
 <div class="backlink"><a href="..">← 全部资讯</a></div>
 <h1>多模态大模型推理服务简报 · 2026-09-10（2000 档）</h1>
 <h2>业内新闻</h2>
-<ol><li><strong>连续批处理之父的新平台：把闲置 GPU 变成&quot;推理提款机&quot;。</strong></li></ol>
-<p>人话版：FriendliAI（创始人 Byung-Gon Chun 就是写出 continuous batching 那篇 Orca 论文的人，vLLM 的核心机制就来自他）本周发布 InferenceSense——neocloud 机房里闲置的 GPU 不用再&quot;空转烧电&quot;，直接跑付费推理任务，收益跟机房分成。 细节：自研 C++ 推理引擎（不用 Python 框架那套），自称吞吐是标准 vLLM 的 2-3 倍，自带投机解码（speculative decoding：小模型先猜、大模型验证的加速法）、量化、KV cache 管理；跑在 Kubernetes 上，机房自己的任务一回来就秒级让出 GPU。需求侧接 OpenRouter 等聚合器。对你的意义：如果 neocloud 能把闲置算力变现，推理 API 价格长期有下行压力。 🔗 <a href="https://venturebeat.com/infrastructure/the-team-behind-continuous-batching-says-your-idle-gpus-should-be-running">https://venturebeat.com/infrastructure/the-team-behind-continuous-batching-says-your-idle-gpus-should-be-running</a></p>
+<ol><li><strong>闲置的 GPU 也能拿来赚钱了</strong></li></ol>
+<p>还记得 continuous batching 吗？就是 vLLM 里那个&quot;GPU 别空等&quot;的核心机制。它的发明人叫 Byung-Gon Chun。这次他带着新公司 FriendliAI 回来了。</p>
+<p>这次他们发布了 InferenceSense。说白了，就是把机房里闲着的 GPU 拿出来跑推理。按单收钱，再跟机房分成。</p>
+<p>技术上也有料：自研 C++ 推理引擎，不套 Python 框架那一套。自称吞吐是标准 vLLM 的 2 到 3 倍。投机解码、量化、KV cache 管理全自带。</p>
+<p>多说一句：KV cache 就是推理时的&quot;草稿纸&quot;。投机解码呢，是让小模型先猜、大模型只管点头摇头，猜对了就省时间。</p>
+<p>部署在 Kubernetes 上。机房自己的任务一回来，GPU 秒级让位。需求侧已经接上了 OpenRouter 这类聚合器。</p>
+<p>对你意味着什么？这条路要是跑通，推理 API 的价格长期看跌。</p>
+<p>🔗 <a href="https://venturebeat.com/infrastructure/the-team-behind-continuous-batching-says-your-idle-gpus-should-be-running">https://venturebeat.com/infrastructure/the-team-behind-continuous-batching-says-your-idle-gpus-should-be-running</a></p>
 <h2>新技术与论文</h2>
-<ol><li><strong>把 3 倍加速&quot;烤&quot;进权重：不用投机解码的另一条路</strong>（论文 2026-02，今日 VentureBeat 深度报道）</li></ol>
-<p>人话版：投机解码要配个&quot;小跟班&quot;草稿模型，又多一套系统要养；UMD/TogetherAI 这篇直接训练模型&quot;一次说好几个词&quot;（多 token 预测 MTP），GSM8K 上 3 倍提速、精度只掉不到 3%——加速能力长在权重里，部署时零额外组件。 细节：核心 trick 是&quot;换判卷老师&quot;——学生一次吐一整段词，老师模型只打&quot;整段通不通顺&quot;的分（student-forced 在线自蒸馏），外加 ConfAdapt 策略：置信度超 90% 的大段直出、没把握的逐词慢吐。SGLang 实测里跟 EAGLE-3 投机解码在吞吐-延迟曲线上打平。作者建议先拿&quot;数数、复读&quot;这类玩具 prompt 验证，再用自己业务域数据适配一次效果最好。 <strong>为什么值得深读：这是投机解码的&quot;无辅助模型&quot;替代路线，跟你评估的 P/D 解耦、decode 侧加速直接相关——MTP 权重 + P/D 解耦理论上可以叠加；精读笔记已存 → 深度阅读/MTP自蒸馏-3倍加速免投机解码.html</strong> 🔗 报道 <a href="https://venturebeat.com/orchestration/researchers-baked-3x-inference-speedups-directly-into-llm-weights-without">https://venturebeat.com/orchestration/researchers-baked-3x-inference-speedups-directly-into-llm-weights-without</a> ｜ 论文 <a href="https://arxiv.org/abs/2602.06019">https://arxiv.org/abs/2602.06019</a> ｜ 代码 <a href="https://github.com/jwkirchenbauer/mtp-lm">https://github.com/jwkirchenbauer/mtp-lm</a></p>
+<ol><li><strong>3 倍加速，直接&quot;烤&quot;进权重里</strong></li></ol>
+<p>投机解码有个麻烦：得配个&quot;小跟班&quot;草稿模型。多一套系统要养，挺累。</p>
+<p>UMD 和 TogetherAI 换了条路。训练时就让模型&quot;一次说好几个词&quot;。这叫多 token 预测（MTP）。GSM8K 上快了 3 倍，精度只掉了不到 3%。</p>
+<p>加速能力长在权重里。部署时零额外组件，省心。</p>
+<p>核心 trick 挺有意思：换了个&quot;判卷老师&quot;。学生一次吐一整段，老师只打&quot;整段通不通顺&quot;的分。这叫在线自蒸馏。</p>
+<p>还有个 ConfAdapt 策略。置信度超 90% 的算有把握，直接出。没把握的逐词慢吐。SGLang 实测里，跟 EAGLE-3 投机解码打了个平手。</p>
+<p>作者给了个上手建议：先拿&quot;数数、复读&quot;这类玩具 prompt 验证。再用自己业务的数据适配一次，效果最好。</p>
+<p>为什么值得深读？这是投机解码的&quot;无辅助模型&quot;替代路线。跟你研究的 P/D 解耦、decode 加速直接相关。MTP 权重叠上 P/D 解耦，理论上效果还能再上一层。</p>
+<p>精读笔记已存 → 深度阅读/MTP自蒸馏-3倍加速免投机解码.html</p>
+<p>🔗 报道 <a href="https://venturebeat.com/orchestration/researchers-baked-3x-inference-speedups-directly-into-llm-weights-without">https://venturebeat.com/orchestration/researchers-baked-3x-inference-speedups-directly-into-llm-weights-without</a> ｜ 论文 <a href="https://arxiv.org/abs/2602.06019">https://arxiv.org/abs/2602.06019</a> ｜ 代码 <a href="https://github.com/jwkirchenbauer/mtp-lm">https://github.com/jwkirchenbauer/mtp-lm</a></p>
 <h2>技术深扒（跟进）</h2>
-<ol><li><strong>DeepSeek V4.1-Flash 架构扒完了：KV cache 压到 890 字节/token，精读笔记已存。</strong></li></ol>
-<p>人话版：0800 档报了发布，今晚把技术细节扒完——这是个&quot;看着胖、用着瘦&quot;的模型：552B 参数但推理时只激活 8B（读输入）/16B（生成）；解码器不自己记 KV 笔记，直接&quot;复印&quot;编码器的压缩版（Causal Encoder-Decoder，20+20 层）；KV cache 降到上一代的 1/4、初代的 1/437；原生多模态、MIT 开源、API 已降价，V4 Pro 9 月 14 日起下线并入它。 对你的意义：KV cache 压缩是 serving 成本的第一性原理——同样显存能塞 4 倍并发；CED 的&quot;编码器只跑 prefill、解码器只跑 decode&quot;跟 P/D 解耦是同一套分工哲学，可当参照系。<strong>精读笔记 → 深度阅读/DeepSeek-V4.1-Flash-KV压缩极限.html</strong>（含原文两张关键图：agent 基准对比、历代 KV cache 体积对比） 🔗 模型卡 <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash">https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash</a> ｜ 中文报道 <a href="https://k.sina.cn/article_5953740931_162dee08306703y92q.html?from=tech">https://k.sina.cn/article_5953740931_162dee08306703y92q.html?from=tech</a></p>
-<p>*去重：未重复今日 0800/1200/1600 档及 9/9 已报内容（DeepSeek V4.1-Flash 发布见于 0800 档，本轮为技术深扒跟进；d-Matrix、HBM 涨价、NVIDIA 澳洲 AI 工厂见于 0800/1200 档，不重复）。渠道覆盖：VentureBeat（新闻+深度）、arXiv（论文）、Hugging Face（模型卡）、新浪/澎湃（中文细节）。GitHub releases（vLLM/SGLang/TensorRT-LLM/LMDeploy/llama.cpp/TGI）本轮无确认的新发布；arXiv 过去 24h 无推理 serving 新论文；X 大V（lmsysorg/vLLM/karpathy/jimfan/swyx）、Reddit、HN、中文 AI 媒体（机器之心/量子位）、Simon Willison/Latent Space/The Batch、Spotify（Latent Space 自 8/26 无新集）本轮无实质新料。*</p></body></html>
+<ol><li><strong>DeepSeek V4.1-Flash 扒完了</strong></li></ol>
+<p>0800 档报了发布，今晚把技术细节扒完。这是个&quot;看着胖、用着瘦&quot;的模型。</p>
+<p>552B 参数，听着吓人。但推理时只激活 8B（读输入）/16B（生成）。就像 500 人的公司，干活的永远是那十几个人。</p>
+<p>最狠的是 KV cache：只有 890 字节/token，上一代的 1/4。怎么做到的？解码器不自己记笔记，直接&quot;复印&quot;编码器的压缩版。这叫 CED 架构（20+20 层）。</p>
+<p>原生多模态，MIT 开源。API 已经降价。V4 Pro 从 9 月 14 日起下线，并入它。</p>
+<p>对你意味着什么？KV cache 是 serving 成本的第一性原理。同样显存，能塞 4 倍并发。</p>
+<p>还有个有意思的对照。CED 让编码器只跑 prefill，解码器只跑 decode。这跟 P/D 解耦是同一套分工哲学，可以当参照系看。</p>
+<p>精读笔记 → 深度阅读/DeepSeek-V4.1-Flash-KV压缩极限.html（含原文两张关键图）</p>
+<p>🔗 模型卡 <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash">https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash</a> ｜ 中文报道 <a href="https://k.sina.cn/article_5953740931_162dee08306703y92q.html?from=tech">https://k.sina.cn/article_5953740931_162dee08306703y92q.html?from=tech</a></p>
+<p>*去重：今日 0800/1200/1600 档及 9/9 内容未重复（DeepSeek V4.1-Flash 发布见于 0800 档，本轮为技术深扒跟进；d-Matrix、HBM 涨价、NVIDIA 澳洲 AI 工厂见于早几档，不重复）。渠道：VentureBeat、arXiv、Hugging Face、新浪。GitHub releases（vLLM/SGLang/TensorRT-LLM/LMDeploy/llama.cpp/TGI）本轮无新发布；X 大V、Reddit、HN、中文 AI 媒体、播客本轮无实质新料。*</p></body></html>
