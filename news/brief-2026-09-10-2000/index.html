@@ -2,10 +2,10 @@
 <meta name="doc-title" content="多模态推理简报 · 9月10日 20:00"/>
 <meta name="doc-description" content="闲置的 GPU 也能拿来赚钱了"/>
 <meta name="doc-date" content="2026-09-10"/>
-<meta name="doc-ts" content="2026-09-10T20:05:00"/>
+<meta name="doc-ts" content="2026-09-11T01:51:36"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>多模态大模型推理服务简报 · 2026-09-10（2000 档）</title><style>
+<title>多模态大模型推理服务简报 · 2026-09-10（晚间版）</title><style>
 body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
 line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
 h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
@@ -41,7 +41,7 @@ img{border-color:#30363d}
 </style>
 </head><body>
 <div class="backlink"><a href="..">← 全部资讯</a></div>
-<h1>多模态大模型推理服务简报 · 2026-09-10（2000 档）</h1>
+<h1>多模态大模型推理服务简报 · 2026-09-10（晚间版）</h1>
 <h2>业内新闻</h2>
 <ol><li><strong>闲置的 GPU 也能拿来赚钱了</strong></li></ol>
 <p>还记得 continuous batching 吗？就是 vLLM 里那个&quot;GPU 别空等&quot;的核心机制。它的发明人叫 Byung-Gon Chun。这次他带着新公司 FriendliAI 回来了。</p>
@@ -64,7 +64,7 @@ img{border-color:#30363d}
 <p>🔗 报道 <a href="https://venturebeat.com/orchestration/researchers-baked-3x-inference-speedups-directly-into-llm-weights-without">https://venturebeat.com/orchestration/researchers-baked-3x-inference-speedups-directly-into-llm-weights-without</a> ｜ 论文 <a href="https://arxiv.org/abs/2602.06019">https://arxiv.org/abs/2602.06019</a> ｜ 代码 <a href="https://github.com/jwkirchenbauer/mtp-lm">https://github.com/jwkirchenbauer/mtp-lm</a></p>
 <h2>技术深扒（跟进）</h2>
 <ol><li><strong>DeepSeek V4.1-Flash 扒完了</strong></li></ol>
-<p>0800 档报了发布，今晚把技术细节扒完。这是个&quot;看着胖、用着瘦&quot;的模型。</p>
+<p>早间版报了发布，今晚把技术细节扒完。这是个&quot;看着胖、用着瘦&quot;的模型。</p>
 <p>552B 参数，听着吓人。但推理时只激活 8B（读输入）/16B（生成）。就像 500 人的公司，干活的永远是那十几个人。</p>
 <p>最狠的是 KV cache。只有 890 字节/token，上一代的 1/4。怎么做到的？解码器不自己记笔记，直接&quot;复印&quot;编码器的压缩版。这叫 CED 架构（20+20 层）。</p>
 <p>原生多模态，MIT 开源。API 已经降价。V4 Pro 从 9 月 14 日起下线，并入它。</p>
@@ -72,4 +72,4 @@ img{border-color:#30363d}
 <p>还有个有意思的对照。CED 让编码器只跑 prefill，解码器只跑 decode。这跟 P/D 解耦是同一套分工哲学，可以当参照系看。</p>
 <p>精读笔记 → 深度阅读/DeepSeek-V4.1-Flash-KV压缩极限.html（含原文两张关键图）</p>
 <p>🔗 模型卡 <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash">https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash</a> ｜ 中文报道 <a href="https://k.sina.cn/article_5953740931_162dee08306703y92q.html?from=tech">https://k.sina.cn/article_5953740931_162dee08306703y92q.html?from=tech</a></p>
-<p>*去重：今日 0800/1200/1600 档及 9/9 内容未重复（DeepSeek V4.1-Flash 发布见于 0800 档，本轮为技术深扒跟进；d-Matrix、HBM 涨价、NVIDIA 澳洲 AI 工厂见于早几档，不重复）。渠道：VentureBeat、arXiv、Hugging Face、新浪。GitHub releases（vLLM/SGLang/TensorRT-LLM/LMDeploy/llama.cpp/TGI）本轮无新发布；X 大V、Reddit、HN、中文 AI 媒体、播客本轮无实质新料。*</p></body></html>
+<p>*去重：今日早间版/午间版/下午版及 9/9 内容未重复（DeepSeek V4.1-Flash 发布见于早间版，本轮为技术深扒跟进；d-Matrix、HBM 涨价、NVIDIA 澳洲 AI 工厂见于早些时候的版本，不重复）。渠道：VentureBeat、arXiv、Hugging Face、新浪。GitHub releases（vLLM/SGLang/TensorRT-LLM/LMDeploy/llama.cpp/TGI）本轮无新发布；X 大V、Reddit、HN、中文 AI 媒体、播客本轮无实质新料。*</p></body></html>
