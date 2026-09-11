@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月11日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-11"/>
+<meta name="doc-ts" content="2026-09-11T19:04:39"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-11（午间版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-11（午间版）</h1>
+<h2>框架更新</h2>
+<p>这轮没有新版本。vLLM 停在 v0.29.0（9/9 发的，早报过）。SGLang 停在 v0.5.19（9/4 发的，早报过）。TensorRT-LLM、LMDeploy、llama.cpp 这边也没动静。</p>
+<h2>新技术与论文</h2>
+<p><strong>1. PD 解耦服务的&quot;省电秘籍&quot;：给 prefill 和 decode 各配一套功耗档</strong>「值得深读」</p>
+<p>机房现在缺的不是卡，是电。</p>
+<p>这篇今天刚挂上 arXiv 的论文，给 P/D 解耦的 serving 加了个&quot;省电外挂&quot;。</p>
+<p>思路很直白。prefill 是计算狂魔，decode 是显存搬运工。两种活儿用同一种省电法，注定两头不讨好。</p>
+<p>作者的做法：prefill lane 控 SM 时钟窗口（给计算核心设频率区间）。decode lane 直接上功耗上限（硬性限电）。</p>
+<p>先离线扫一遍找&quot;悬崖&quot;。decode 功耗压到 430W 之前，吞吐几乎不掉。再往下压，直接崩盘 36%。三档模式就钉在悬崖附近。</p>
+<p>8×B200 跑 Qwen3-Coder-480B，平衡档能效 +20.4%（每焦耳多产 20% 的 token）。NVIDIA 官方的 Max-Q 省电档只做到 +8.6%，延迟还多了 5.2%。</p>
+<p>两个轴同时赢，这叫帕累托改进。</p>
+<p>连跑三天验证：省下整对 lane 32.3% 的电。换算成机房语言，每兆瓦多吐 22%–39% 的合规 token。</p>
+<p>诚实声明：只在 MoE 模型上验证过。稠密模型收益只剩约 1/5，别直接套。</p>
+<p>为什么值得深读？你在评估 SGLang 的 P/D 解耦。这套&quot;分 lane 执行器&quot;不改 serving 栈，直接外挂。能效（tokens/J）是你记分牌上缺的第三个轴。</p>
+<p>精读笔记 → 深度阅读/PD解耦-分lane功耗调优省电32pct.html</p>
+<p>🔗 论文 <a href="https://arxiv.org/abs/2609.11133">https://arxiv.org/abs/2609.11133</a></p>
+<h2>业内新闻</h2>
+<p>这轮没抓到值得报的。大厂和云厂商那边安静。</p>
+<h2>访谈与深度</h2>
+<p>这轮没有。Latent Space 最新一期还是 8/26 的，没更新。</p>
+<hr/>
+<p>*去重：今日早间版无实质新内容（未发）；9/10 晚间版的 MTP 自蒸馏、DeepSeek-V4.1-Flash 深扒及之前各期内容均未重复。渠道：arXiv、GitHub releases（vLLM/SGLang/TensorRT-LLM/LMDeploy/llama.cpp）、NVIDIA 技术博客、Hacker News、Reddit、X、机器之心/量子位、Spotify 播客、Instagram/Threads/Facebook。本轮实质新内容仅此一篇。*</p></body></html>
