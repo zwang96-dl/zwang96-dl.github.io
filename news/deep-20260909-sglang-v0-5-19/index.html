@@ -42,7 +42,7 @@ img{border-color:#30363d}
 </head><body>
 <div class="backlink"><a href="..">← 全部资讯</a></div>
 <h1>SGLang v0.5.19：统一 Radix Tree 转正 + EPD 重构 + mxfp8 KV 传输</h1>
-<blockquote><p>原文：Release v0.5.19 · sgl-project/sglang（786 个 PR，214 位贡献者）<br/>原文：https://github.com/sgl-project/sglang/releases/tag/v0.5.19<br/>说明：GitHub release 页是纯文本，没有配图；本篇为要点精读，无原文图表。</p></blockquote>
+<blockquote><p>原文：Release v0.5.19 · sgl-project/sglang（786 个 PR，214 位贡献者）<br/>原文：<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.19">https://github.com/sgl-project/sglang/releases/tag/v0.5.19</a><br/>说明：GitHub release 页是纯文本，没有配图；本篇为要点精读，无原文图表。</p></blockquote>
 <h2>一句话人话版</h2>
 <p>SGLang 这版把缓存和解耦两条线都推了一大步：<strong>unified radix tree 成为所有模型的默认缓存</strong>，PD 解耦的 KV 传输开始支持 <strong>mxfp8</strong>，外加一次 <strong>EPD 架构重构</strong>——正好跟 NVIDIA 那篇&quot;什么时候该拆 EPD&quot;博客前后脚，SGLang 这是在把解耦的路铺好。</p>
 <h2>跟你最相关的四个变化</h2>
@@ -65,4 +65,4 @@ img{border-color:#30363d}
 <h2>术语表</h2>
 <ul><li><strong>Radix tree / prefix caching</strong>：前缀缓存。把已算过的 prompt 前缀的 KV 存成树结构，相同前缀的请求直接复用，不用重算。</li><li><strong>Unified radix tree</strong>：统一基数树，SGLang 新一代缓存结构，统一管理多种模型的 KV。</li><li><strong>PD disaggregation</strong>：prefill/decode 解耦，prefill 和 decode 跑在不同 worker 上。</li><li><strong>EPD</strong>：encode-prefill-decode 解耦，再往前多拆了一个 vision encoder 阶段。</li><li><strong>mxfp8</strong>：8-bit microscaling 浮点格式，比 FP8 精度更好。</li><li><strong>DCP</strong>：decode context parallelism，decode 阶段的上下文并行。</li><li><strong>DeepEP</strong>：DeepSeek 开源的 MoE expert 并行通信库。</li><li><strong>HiCache</strong>：SGLang 的分层 KV 缓存（GPU→CPU→存储）。</li></ul>
 <hr/>
-<p>原文：https://github.com/sgl-project/sglang/releases/tag/v0.5.19</p></body></html>
+<p>原文：<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.19">https://github.com/sgl-project/sglang/releases/tag/v0.5.19</a></p></body></html>

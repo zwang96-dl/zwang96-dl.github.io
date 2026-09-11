@@ -42,7 +42,7 @@ img{border-color:#30363d}
 </head><body>
 <div class="backlink"><a href="..">← 全部资讯</a></div>
 <h1>vLLM v0.29.0：Model Runner V2 全量默认 + 多模态性能专区 + 多模态 LoRA</h1>
-<blockquote><p>原文：Release v0.29.0 · vllm-project/vllm（594 commits，277 位贡献者，其中 91 位新贡献者；2026-09-09 发布）<br/>原文：https://github.com/vllm-project/vllm/releases/tag/v0.29.0<br/>说明：GitHub release 页是纯文本，没有配图；本篇为要点精读，无原文图表。</p></blockquote>
+<blockquote><p>原文：Release v0.29.0 · vllm-project/vllm（594 commits，277 位贡献者，其中 91 位新贡献者；2026-09-09 发布）<br/>原文：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.29.0">https://github.com/vllm-project/vllm/releases/tag/v0.29.0</a><br/>说明：GitHub release 页是纯文本，没有配图；本篇为要点精读，无原文图表。</p></blockquote>
 <h2>一句话人话版</h2>
 <p>vLLM 这版是&quot;多模态推理优化专场&quot;：<strong>Model Runner V2 正式成为所有模型的默认执行器</strong>（三年重构收官），同时单独开了一个 <strong>Multimodal performance</strong> 专区——ViT 全量 CUDA graph、Pixtral 打包 encoder attention、Kimi vision 融合 RoPE 核、跨模态异步媒体解析、H2D pinned 拷贝，全是冲着<strong>多模态 TTFT</strong>去的。再加上 Qwen3-Omni / LLaVA-NeXT / LFM2-VL 的<strong>多模态 LoRA</strong>、Mamba prefix caching（TTFT -9%~-25%），正好跟你最近在看的 EPD 解耦方向咬合。</p>
 <h2>跟你最相关的六个变化</h2>
@@ -88,4 +88,4 @@ img{border-color:#30363d}
 <h2>术语表</h2>
 <ul><li><strong>Model Runner V2 (MRV2)</strong>：vLLM 新一代模型执行器，重写了执行/调度/显存管理路径，本版起成为所有模型的默认执行器。</li><li><strong>CUDA graph</strong>：把一串 GPU kernel launch 录制成图，一次提交，减少 CPU 端 launch 开销；对 encoder 这种固定 shape 的计算特别有效。</li><li><strong>Packed attention</strong>：把变长序列打包成连续 batch 处理，消掉 padding 造成的算力浪费。</li><li><strong>Pinned memory</strong>：page-locked 的 host 内存，GPU DMA 可以直接访问，H2D 拷贝更快且不阻塞 stream。</li><li><strong>Prefix caching</strong>：前缀缓存，相同 prompt 前缀的 KV 直接复用；Mamba 这版通过 prefill 内部 checkpoint 实现。</li><li><strong>LoRA (tower/connector)</strong>：只训练 vision tower 或 modality connector 的轻量微调，部署时以 LoRA 形式加载。</li><li><strong>NVFP4 / MXFP4</strong>：NVIDIA 的 4-bit microscaling 浮点格式，Kimi K3 官方 checkpoint 格式。</li><li><strong>NIXL</strong>：NVIDIA 的集合通信/传输库，用于 P/D 解耦的 KV 传输和权重同步。</li><li><strong>E/P/D disaggregation</strong>：encode-prefill-decode 解耦，vision encoder / prefill / decode 跑在不同实例上。</li><li><strong>TTFT</strong>：time to first token，首 token 延迟；多模态场景里 encoder + 预处理占大头。</li></ul>
 <hr/>
-<p>原文：https://github.com/vllm-project/vllm/releases/tag/v0.29.0</p></body></html>
+<p>原文：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.29.0">https://github.com/vllm-project/vllm/releases/tag/v0.29.0</a></p></body></html>

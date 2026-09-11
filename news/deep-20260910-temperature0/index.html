@@ -42,7 +42,7 @@ img{border-color:#30363d}
 </head><body>
 <div class="backlink"><a href="..">← 全部资讯</a></div>
 <h1>为什么 temperature=0 的推理还是不可复现？——&quot;What Makes Inference Nondeterministic?&quot;</h1>
-<ul><li>原文：Paolo Perrone, The AI Engineer (Substack), 2026-09-09</li><li>原文链接：https://theaiengineer.substack.com/p/what-makes-inference-nondeterministic</li><li>阅读方式：全文已读；3 张原文图已下载配中文图注</li></ul>
+<ul><li>原文：Paolo Perrone, The AI Engineer (Substack), 2026-09-09</li><li>原文链接：<a href="https://theaiengineer.substack.com/p/what-makes-inference-nondeterministic">https://theaiengineer.substack.com/p/what-makes-inference-nondeterministic</a></li><li>阅读方式：全文已读；3 张原文图已下载配中文图注</li></ul>
 <h2>一句话人话版</h2>
 <p><strong>temperature 设成 0 也保证不了&quot;同样的输入得到同样的输出&quot;——因为你请求到来的那一刻，服务器上还有多少别人家的请求在排队，会悄悄改变 GPU 做加法的&quot;分组方式&quot;，加法顺序一变，结果的末尾小数就变了，模型选出的词就可能跟着变。</strong></p>
 <h2>核心机制：为什么&quot;温度 0 + 固定 seed&quot;都不管用</h2>
@@ -61,4 +61,4 @@ img{border-color:#30363d}
 <h2>术语表</h2>
 <ul><li><strong>temperature（温度）</strong>：控制采样随机性的参数。temperature=0 表示&quot;永远取打分最高的词&quot;，而不是&quot;输出完全确定&quot;。</li><li><strong>seed（随机种子）</strong>：随机数生成器的起点，管的是&quot;抽签&quot;环节的随机数；温度 0 时没有抽签环节，seed 无能为力。</li><li><strong>batch（批次）</strong>：serving 引擎把同一时刻到达的多个请求拼在一起，一次读权重、并行算，省显存带宽。batch size = 一批里几个请求。</li><li><strong>batch-invariant kernel（批次无关内核）</strong>：不管 batch 里有几个请求都按固定切块方式做加法的 GPU 内核；固定了加法顺序 → 结果可复现。</li><li><strong>continuous batching（连续批处理）</strong>：请求做完一个就出、新的立刻补进来，batch 大小动态变化——这也是&quot;条件&quot;永远不一样的原因。</li><li><strong>eval / 回归测试</strong>：用固定测试集衡量模型表现的流程；不可复现的 serving 会让&quot;case 41 挂了一次又过了&quot;这种灵异事件成常态。</li></ul>
 <h2>来源</h2>
-<ul><li>原文：https://theaiengineer.substack.com/p/what-makes-inference-nondeterministic</li><li>Thinking Machines Lab 实验引用、vLLM issue #9567（原文内引）</li><li>vLLM v0.29.0 release notes（Determinism 小节）：https://github.com/vllm-project/vllm/releases/</li></ul></body></html>
+<ul><li>原文：<a href="https://theaiengineer.substack.com/p/what-makes-inference-nondeterministic">https://theaiengineer.substack.com/p/what-makes-inference-nondeterministic</a></li><li>Thinking Machines Lab 实验引用、vLLM issue #9567（原文内引）</li><li>vLLM v0.29.0 release notes（Determinism 小节）：<a href="https://github.com/vllm-project/vllm/releases/">https://github.com/vllm-project/vllm/releases/</a></li></ul></body></html>

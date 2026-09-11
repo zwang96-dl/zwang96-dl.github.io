@@ -42,7 +42,7 @@ img{border-color:#30363d}
 </head><body>
 <div class="backlink"><a href="..">← 全部资讯</a></div>
 <h1>H100 上 vLLM vs SGLang 实测：没有永远的赢家，只有跟负载走的瓶颈</h1>
-<blockquote><p>文章：vLLM vs SGLang on H100: The Winner Depends on the Workload<br/>作者：Oluwatosin O. Ayeni（2026 年 9 月，Medium）<br/>原文：https://medium.com/@ayenioluwatosinolawale/vllm-vs-sglang-on-h100-the-winner-depends-on-the-workload-9a11d8646adf<br/>（Benchmark A；作者预告了 Benchmark B——20 轮 agent 多轮对话、Benchmark C——持续流式数据注入，后续值得跟）</p></blockquote>
+<blockquote><p>文章：vLLM vs SGLang on H100: The Winner Depends on the Workload<br/>作者：Oluwatosin O. Ayeni（2026 年 9 月，Medium）<br/>原文：<a href="https://medium.com/@ayenioluwatosinolawale/vllm-vs-sglang-on-h100-the-winner-depends-on-the-workload-9a11d8646adf">https://medium.com/@ayenioluwatosinolawale/vllm-vs-sglang-on-h100-the-winner-depends-on-the-workload-9a11d8646adf</a><br/>（Benchmark A；作者预告了 Benchmark B——20 轮 agent 多轮对话、Benchmark C——持续流式数据注入，后续值得跟）</p></blockquote>
 <h2>一句话人话版</h2>
 <p>同一块 H100、同样的 Qwen2.5-7B：<strong>低并发时 SGLang 延迟更低，高并发时 vLLM 吞吐更高</strong>——两者的性能曲线在中间交叉了。所以&quot;vLLM 和 SGLang 谁更快&quot;是个伪问题，真问题是&quot;你的负载长什么样&quot;。</p>
 <h2>它解决什么问题</h2>
