@@ -6,38 +6,56 @@
 <meta name="doc-description" content="多模态大模型推理服务：每日四档行业简报 + 中文深读笔记"/>
 <meta name="doc-date" content="2026-09-11"/>
 <style>
-body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;line-height:1.7;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;line-height:1.6;color:#1c1c1e;background:#fff;max-width:980px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
 h1{font-size:22px;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
 .sub{font-size:14px;color:#888;margin:6px 0 4px}
 .arch{font-size:13px;margin:8px 0 4px}
 .arch a{color:#0a58ca;text-decoration:none;margin-right:12px}
-.day{font-size:15px;font-weight:700;color:#666;margin:28px 0 10px}
-.item{display:flex;gap:12px;align-items:flex-start;border:1px solid #eee;border-radius:10px;padding:12px 14px;margin:10px 0}
-.thumb{flex:0 0 auto}
-.thumb img{width:132px;height:99px;object-fit:cover;border-radius:8px;border:1px solid #eee;display:block}
-.txt{flex:1;min-width:0}
-.item a.t{color:#0a58ca;text-decoration:none;font-weight:600}
-.item a.t:hover{text-decoration:underline}
-.badge{display:inline-block;font-size:12px;padding:1px 8px;border-radius:20px;margin-right:8px;vertical-align:2px}
+.day{font-size:15px;font-weight:700;color:#666;margin:28px 0 14px;grid-column:1/-1}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{display:flex;flex-direction:column;border:1px solid #eee;border-radius:14px;overflow:hidden;background:#fff;text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.10)}
+.pic{aspect-ratio:16/9;background:#f2f4f7;overflow:hidden;flex:0 0 auto}
+.pic img{width:100%;height:100%;object-fit:cover;display:block}
+.pic.ph{display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:rgba(255,255,255,.9);letter-spacing:6px;text-indent:6px}
+.pic.ph-brief{background:linear-gradient(135deg,#60a5fa,#1d4ed8)}
+.pic.ph-deep{background:linear-gradient(135deg,#c084fc,#7c3aed)}
+.cbody{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.cmeta{display:flex;align-items:center;gap:8px;font-size:12px;color:#999}
+.badge{display:inline-block;font-size:11px;padding:1px 8px;border-radius:20px}
 .badge.brief{background:#e8f0fe;color:#1a56db}
 .badge.deep{background:#fef3e2;color:#b45309}
-.desc{font-size:14px;color:#444;margin-top:6px}
+.card .t{font-size:14.5px;font-weight:700;line-height:1.45;color:#1c1c1e;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .desc{font-size:12.5px;color:#777;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .pagenav{text-align:center;margin:30px 0 10px;font-size:14px;color:#888}
 .pagenav a{color:#0a58ca;text-decoration:none;margin:0 12px}
-.monthrow{display:flex;justify-content:space-between;align-items:center;border:1px solid #eee;border-radius:10px;padding:12px 14px;margin:10px 0}
+.monthrow{display:flex;justify-content:space-between;align-items:center;border:1px solid #eee;border-radius:10px;padding:12px 14px;margin:10px 0;background:#fff}
 .monthrow a{color:#0a58ca;text-decoration:none;font-weight:600}
 .monthrow .cnt{color:#888;font-size:13px}
 .backlink{font-size:14px;margin-bottom:8px}
 .backlink a{color:#0a58ca;text-decoration:none}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){
+body{padding:16px 12px 48px}
+.grid{gap:10px}
+.cbody{padding:10px 10px 12px}
+.card .t{font-size:13px}
+.card .desc{font-size:11.5px}
+.pic.ph{font-size:22px}
+}
 @media (prefers-color-scheme: dark){
 body{background:#0d1117;color:#e6edf3}
 h1{border-color:#21262d}
 .sub{color:#9aa4b2}
 .day{color:#9aa4b2}
-.item,.monthrow{border-color:#30363d}
-.thumb img{border-color:#30363d}
-.item a.t,.arch a,.pagenav a,.monthrow a,.backlink a{color:#79c0ff}
-.desc{color:#9aa4b2}
+.card{background:#161b22;border-color:#30363d}
+.card:hover{box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.card .t{color:#e6edf3}
+.card .desc{color:#9aa4b2}
+.cmeta{color:#6e7681}
+.pic{background:#21262d}
+.monthrow{background:#161b22;border-color:#30363d}
+.arch a,.pagenav a,.monthrow a,.backlink a{color:#79c0ff}
 .badge.brief{background:#1c2b4a;color:#79c0ff}
 .badge.deep{background:#4a3418;color:#f0b35c}
 }
