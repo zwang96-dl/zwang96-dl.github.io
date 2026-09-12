@@ -1,0 +1,111 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月12日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-12"/>
+<meta name="doc-ts" content="2026-09-12T19:12:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-12（午间版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-12（午间版）</h1>
+<h2>框架更新</h2>
+<p><strong>1. TensorRT-LLM v1.3.0rc26：KV 缓存升级</strong></p>
+<p>英伟达的推理引擎出了预发布版。新版 KV cache manager V2 是管 KV 缓存的调度器。</p>
+<p>它在十几款模型上默认开启。DSA（稀疏注意力）模型能用 NVFP4 格式存 KV。</p>
+<p>缓存变小了，批量可以开更大。还加了 Rubin SM107 新硬件支持。</p>
+<p>DeepSeek-V4 也能上 Hopper 卡跑了。</p>
+<p>🔗 <a href="https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.3.0rc26">https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.3.0rc26</a></p>
+<p><strong>2. llama.cpp 今晨更新：高通芯片也能组团干活</strong></p>
+<p>今晨 07:48（PDT）发布了 b10931。最大亮点：高通 Hexagon 支持多设备切分。Hexagon 是手机芯片里的 AI 加速器。</p>
+<p>说白了，一个模型可以拆开跑在好几块 Hexagon 上。row-split（按行切分）把矩阵按行分给不同设备。</p>
+<p>端侧多芯片推理又往前迈了一步。</p>
+<p>🔗 <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10931">https://github.com/ggml-org/llama.cpp/releases/tag/b10931</a></p>
+<h2>新技术与论文</h2>
+<p><strong>3. Uno：给自回归模型装了个&quot;并行外挂&quot;（值得深读）</strong></p>
+<p>这次不是推测解码的老套路。作者把模型参数拆成两套。</p>
+<p>原 AR 权重（自回归的权重）照常，另加一套轻量扩散权重。一次训练，就能一次吐多个 token。</p>
+<p>不用像推测解码那样再配个小模型打草稿。8B 的 Uno 实测超过 26B 的 DiffusionGemma。</p>
+<p>agent 工具调用、代码、长上下文都赢了。代码和权重全开源了。</p>
+<p>值得深读理由：这篇是另一条加速路线。帮你判断它和推测解码谁更适合你的 workload。</p>
+<p>🔗 <a href="https://arxiv.org/abs/2609.04010v1（9/3">https://arxiv.org/abs/2609.04010v1（9/3</a> 发布）</p>
+<p><strong>4. vLLM 调优实录：MiniMax M3 上 MI355X（值得深读）</strong></p>
+<p>vLLM 官方博客 9/10 连发两篇之一。这篇是&quot;跟着瓶颈走&quot;调 MiniMax M3。卡是 AMD MI355X。</p>
+<p>按本地形状逐个揪 serving 瓶颈。哪个算子慢、哪块内存爆，一步一步查。</p>
+<p>调优成果很硬。并发 32 时，输出吞吐从 109 涨到 342 token/s/卡。翻了 3.14 倍。</p>
+<p>这跟你 MI350 上跑 vLLM 的工作直接相关。调 batch、KV 池的思路都能借鉴。</p>
+<p>值得深读理由：同一家 AMD 卡、同样的 vLLM。官方把踩坑过程全写出来了，等于替你提前探路。</p>
+<p>🔗 <a href="https://blog.vllm.ai/blog/2026-09-10-minimax-m3-mi355x">https://blog.vllm.ai/blog/2026-09-10-minimax-m3-mi355x</a></p>
+<p><strong>5. llm-d 综述：省电推理是个&quot;调度&quot;问题</strong></p>
+<p>一篇系统综述论文。观点很干脆：可持续推理不靠一颗绿色芯片，靠控制平面。</p>
+<p>七个维度一起看：模型、KV cache、硬件、副本。再加上 prefill/decode 阶段、地域和时间。</p>
+<p>这跟你正在评估的 SGLang P/D 解耦是同一个世界观。解耦只是其中一招。</p>
+<p>🔗 <a href="https://arxiv.org/abs/2609.05565v1（9/3">https://arxiv.org/abs/2609.05565v1（9/3</a> 发布）</p>
+<h2>业内新闻</h2>
+<p><strong>6. AWS 推理上线&quot;前缀感知路由&quot;</strong></p>
+<p>AWS SageMaker Inference 加了个新路由策略。prefill 里开头相同的请求，打到同一台机器。</p>
+<p>同一台机器的 KV 缓存（草稿纸）就能热起来、反复复用。Llama 3.1 70B 实测。P50 首 token 延迟最高降 77%。</p>
+<p>吞吐还涨了 16%。KV 缓存命中率从 25% 干到 80% 以上。</p>
+<p>这就是 prefix caching（前缀缓存）思想的工程版。连路由层都来帮忙复用缓存了。</p>
+<p>🔗 <a href="https://aws.amazon.com/blogs/machine-learning/reduce-llm-latency-with-prefix-aware-routing-on-amazon-sagemaker-inference/">https://aws.amazon.com/blogs/machine-learning/reduce-llm-latency-with-prefix-aware-routing-on-amazon-sagemaker-inference/</a></p>
+<p><strong>7. 推理芯片创企 Positron 融了 8.75 亿美元</strong></p>
+<p>Positron 做&quot;内存优先&quot;的推理芯片。单颗芯片带 2.3TB 内存，专治大模型吃内存。</p>
+<p>新一轮融资后估值 50 亿美元。七个月翻了 4.7 倍。</p>
+<p>新一代 Asimov 瞄准 2027 年下半年量产。推理芯片这条赛道越来越挤了。</p>
+<p>🔗 <a href="https://www.reuters.com/business/ai-chip-startup-positrons-valuation-skyrockets-latest-funding-round-2026-09-10/">https://www.reuters.com/business/ai-chip-startup-positrons-valuation-skyrockets-latest-funding-round-2026-09-10/</a></p>
+<p><strong>8. 英国 Lumai：光学芯片专啃 prefill</strong></p>
+<p>Lumai（牛津孵化的光学计算公司）发了 Iris Nova。定位很刁钻：只做 prefill。</p>
+<p>prefill 是算力密集型，decode 是访存密集型。P/D 解耦之后，下一步就是给每个阶段配专用硬件。</p>
+<p>自测 prefill 能效是 GPU 的约 10 倍。光学计算玩的就是并行度。</p>
+<p>软件 P/D 解耦你正在评估，硬件厂商已经跟进了。路线对了。</p>
+<p>🔗 <a href="https://dailyguardian.ca/the-next-ai-infrastructure-challenge-is-before-the-first-token/（9/10">https://dailyguardian.ca/the-next-ai-infrastructure-challenge-is-before-the-first-token/（9/10</a> GlobeNewswire 通稿）</p>
+<p><strong>9. 中国云集体降价：推理成本狂砍 99.7%</strong></p>
+<p>阿里云、腾讯、智谱三家一起降。Qwen3-VL-Rerank 多模态输入大降价。</p>
+<p>从 1.8 元降到 0.5 元/百万 token。腾讯混元 Hy4 把 1.5TB 模型压到 214GB。</p>
+<p>智谱单 token 推理成本比年初降 80%。国内推理价格战打到这份上，出海做 serving 的可以抄作业了。</p>
+<p>🔗 <a href="https://k.sina.cn/article_7879995960_1d5af323806801n42q.html?from=tech（9/11">https://k.sina.cn/article_7879995960_1d5af323806801n42q.html?from=tech（9/11</a>）</p>
+<p><strong>10. 美国司法部盯上英伟达&quot;许可&quot;Groq 的交易</strong></p>
+<p>传司法部调查英伟达 170 亿美元&quot;许可&quot;Groq 的交易。疑点：用&quot;先挖人再许可&quot;绕开反垄断审查。</p>
+<p>Groq 是推理芯片圈最出圈的创企。罚不一定会拆，但信号很清楚：监管开始盯英伟达的收购玩法。</p>
+<p>🔗 <a href="https://www.reuters.com/legal/litigation/us-doj-probes-nvidias-licensing-deal-with-ai-startup-groq-nyt-reports-2026-09-10/">https://www.reuters.com/legal/litigation/us-doj-probes-nvidias-licensing-deal-with-ai-startup-groq-nyt-reports-2026-09-10/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>11. Simon Willison：OpenRouter 翻车实录</strong></p>
+<p>同一模型名，背后各家 serving 软件不同，行为会打架。有的缺 vision 能力。reasoning effort 处理也不同。</p>
+<p>作者建议用 provider.only 锁死 provider。别让路由层替你&quot;聪明&quot;。</p>
+<p>做网关/路由的同学可以直接抄结论。</p>
+<p>🔗 <a href="https://simonwillison.net/（9/11">https://simonwillison.net/（9/11</a>）</p>
+<hr/>
+<p>*去重：早间版的 SpecGuard、d-Matrix Raptor 芯片、Rinit Jain 长文，均未重复。本轮剔除两条旧闻：vLLM v0.29.0 发布（9/9 已出过深读）、Anthropic 租卡（9/1）。渠道：GitHub、arXiv、AWS 博客、Reuters、GlobeNewswire、新浪、vLLM 博客、simonwillison.net。*</p></body></html>
