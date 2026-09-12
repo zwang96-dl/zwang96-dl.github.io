@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月12日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-12"/>
+<meta name="doc-ts" content="2026-09-12T23:08:11"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-12（下午版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-12（下午版）</h1>
+<h2>框架更新</h2>
+<p>这轮六家都没新版本。vLLM 停在 v0.29.0，SGLang 停在 v0.5.19，其余四家也都没动静。</p>
+<h2>新技术与论文</h2>
+<p><strong>1. Composable CXL：给 KV 缓存修了个&quot;跨节点共享网盘&quot;（值得深读）</strong></p>
+<p>跨节点复用 KV 缓存，最怕的是搬数据太慢。这篇论文的思路很野：把可组合的 CXL 内存（一种能跨机器共享的高速内存）做成 K8s 可调度的资源。vLLM 和 llm-d 接上后，KV 缓存就能直接存在这块共享内存里。</p>
+<p>两节点、Qwen2.5-7B-Instruct 的实测：跨节点前缀复用，首 token 延迟（TTFT）降了 5.5–36.6 倍。更狠的是，跨节点复用跟同节点复用只差 1–4%。说白了，数据搬去隔壁机器，几乎感觉不到慢。</p>
+<p>值得深读理由：你上午刚看了 AWS 的前缀感知路由（路由层帮复用）和 vLLM 的分级 KV 仓库（缓存搬去下层）。这篇是从内存硬件层面解决同一个问题——跨节点共享 KV cache，正好补上拼图。注意作者自己说了，这只是可行性研究，不是正式性能评测。</p>
+<p>🔗 <a href="https://arxiv.org/abs/2609.10790（9/11">https://arxiv.org/abs/2609.10790（9/11</a> 发布）</p>
+<p><strong>2. FlexComp：一个压缩模型，想压多少倍都行（值得深读）</strong></p>
+<p>软上下文压缩是把长文本压成几个&quot;记忆 token&quot;。以前的毛病：压缩比训练时就焊死了，换个比例得重新训一个。</p>
+<p>FlexComp 一次训练，就能部署时按输入动态选压缩比。说白了，压缩比从&quot;出厂设置&quot;变成了&quot;现场旋钮&quot;。</p>
+<p>关键数据：级联路由平均压缩最高 266 倍，精度几乎不掉。单遍压缩做到 158–236 倍。在 serving 规模的 batch 下，上下文 KV cache 砍掉一半，decode 吞吐提升 47%。</p>
+<p>值得深读理由：长上下文 serving 的显存救星候选，跟你关心的 KV cache 优化是同一个赛道。&quot;一个模型适配任意压缩比&quot;这个训练技巧本身也值得偷师。</p>
+<p>🔗 <a href="https://arxiv.org/abs/2609.11192（9/11">https://arxiv.org/abs/2609.11192（9/11</a> 发布）</p>
+<p><strong>3. EMMI：手机端的多模态&quot;瘦身快递&quot;</strong></p>
+<p>多模态模型放手机上太重。EMMI 的做法：边缘设备先做多模态编码和融合压缩，只传一份固定大小的隐表示（可以理解为&quot;信息摘要&quot;）给服务器做推理。</p>
+<p>通信量缩小 32 倍。带宽受限的场景下，端到端延迟最高降 3.4 倍。精准度基本不掉。</p>
+<p>跟多模态 encoder 和推理拆开部署的思路呼应。做端侧多模态 serving 的人值得看一眼这个压缩传输方案。</p>
+<p>🔗 <a href="https://arxiv.org/abs/2609.11058（9/11">https://arxiv.org/abs/2609.11058（9/11</a> 发布）</p>
+<p><strong>4. ExaServe：把 vLLM 铺到 256 个节点</strong></p>
+<p>一键部署到超算 ALCF Aurora。扩展到 3072 个 vLLM 副本，每秒 2.71 万请求。</p>
+<p>最有价值的不是规模，是踩坑：顺手定位了 Ray Serve（vLLM 常用的调度控制层）控制平面的 O(N²) 瓶颈。想把 vLLM 推到极大规模的人，可以直接看它怎么爬的坑。</p>
+<p>🔗 <a href="https://arxiv.org/abs/2609.10812（9/11">https://arxiv.org/abs/2609.10812（9/11</a> 发布）</p>
+<p><strong>5. REVA：RAG 的 prefill 开销&quot;吃剩饭&quot;</strong></p>
+<p>RAG serving 里，每个 query 都要压缩一次上下文，prefill 开销大。REVA 把历史 query-文档-模型的交互挖成可复用的&quot;证据视图&quot;，后面的 query 直接吃剩饭，不用每次单独压缩。</p>
+<p>质量升 1–5.8 分，压缩开销降 5.3–15.6 倍，只多不到 40ms 延迟。跟 prefix caching 是一个家族的新思路。</p>
+<p>🔗 <a href="https://arxiv.org/abs/2609.11209（9/11">https://arxiv.org/abs/2609.11209（9/11</a> 发布）</p>
+<p><strong>6. PATTON：把 KV cache 的&quot;仓库管理&quot;搬到 PIM 上</strong></p>
+<p>PIM 是存算一体芯片（内存里直接算，不用把数据搬来搬去）。这篇把生产级 serving 的 KV cache 生命周期管理搬到商用 PIM 上。</p>
+<p>attention 平均加速 1.95 倍，能效提升 4.83 倍，而且不用改 PIM 硬件。路线比较小众，看个热闹就行。</p>
+<p>🔗 <a href="https://arxiv.org/abs/2609.11392（9/11">https://arxiv.org/abs/2609.11392（9/11</a> 发布）</p>
+<h2>业内新闻</h2>
+<p><strong>7. 安全速报：SGLang 新 RCE 漏洞 CVE-2026-86793</strong></p>
+<p>你在评估 SGLang，这条必须看。9/11 披露的远程代码执行漏洞。</p>
+<p>SafeUnpickler（SGLang 用来防反序列化攻击的&quot;白名单检查器&quot;）被绕过了。白名单把 builtins 放得太宽，黑名单又漏了 <code>__import__</code> 和 <code>getattr</code>，攻击者组合一下就能执行任意代码。</p>
+<p>入口是 <code>/update_weights_from_tensor</code> 端点。没配 API key 时可以匿名访问。披露时官方还没补丁。</p>
+<p>对策就两句：别把 SGLang 暴露到公网，管理端点赶紧配上 API key。</p>
+<p>🔗 <a href="https://cvj.ai/briefing/crypto-news/ai-stack-under-siege-four-critical-cves-in-18-days-expose-inference-server-flaws/（9/11">https://cvj.ai/briefing/crypto-news/ai-stack-under-siege-four-critical-cves-in-18-days-expose-inference-server-flaws/（9/11</a>）</p>
+<p><strong>8. The Batch 9/11：GPT-6 Astra&quot;花小钱办大事&quot;</strong></p>
+<p>OpenAI 新模型登顶榜单的同时，token 用量和成本是&quot;零头级&quot;。还原生支持隐式和显式 prompt caching（提示词缓存，第二次问相同开头就不用重算）。</p>
+<p>对做 serving 的人意味着：同等质量下推理账单能大降。代码扫描这类大 prompt 工作流，prefill 成本有优化空间。</p>
+<p>🔗 <a href="https://www.deeplearning.ai/the-batch/tag/sep-11-2026">https://www.deeplearning.ai/the-batch/tag/sep-11-2026</a></p>
+<hr/>
+<p>*去重：午间版的 PD 解耦功耗论文、AWS 前缀感知路由、vLLM 分级 KV 仓库；早间版的 SpecGuard、d-Matrix、Rinit Jain 长文，均未重复。本轮剔除 2 条旧闻：PD 解耦分功耗控制论文（arXiv 2609.11133，午间版已报）、Positron 875M 美元融资（9/10 午间版已报）。渠道：arXiv、CVJ.AI 安全简报、The Batch / DeepLearning.AI。*</p></body></html>
