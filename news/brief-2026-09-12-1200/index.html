@@ -2,7 +2,7 @@
 <meta name="doc-title" content="多模态推理简报 · 9月12日 12:00"/>
 <meta name="doc-description" content=""/>
 <meta name="doc-date" content="2026-09-12"/>
-<meta name="doc-ts" content="2026-09-12T19:12:53"/>
+<meta name="doc-ts" content="2026-09-12T19:18:33"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>多模态大模型推理服务简报 · 2026-09-12（午间版）</title><style>
@@ -81,11 +81,10 @@ img{border-color:#30363d}
 <p>吞吐还涨了 16%。KV 缓存命中率从 25% 干到 80% 以上。</p>
 <p>这就是 prefix caching（前缀缓存）思想的工程版。连路由层都来帮忙复用缓存了。</p>
 <p>🔗 <a href="https://aws.amazon.com/blogs/machine-learning/reduce-llm-latency-with-prefix-aware-routing-on-amazon-sagemaker-inference/">https://aws.amazon.com/blogs/machine-learning/reduce-llm-latency-with-prefix-aware-routing-on-amazon-sagemaker-inference/</a></p>
-<p><strong>7. 推理芯片创企 Positron 融了 8.75 亿美元</strong></p>
-<p>Positron 做&quot;内存优先&quot;的推理芯片。单颗芯片带 2.3TB 内存，专治大模型吃内存。</p>
-<p>新一轮融资后估值 50 亿美元。七个月翻了 4.7 倍。</p>
-<p>新一代 Asimov 瞄准 2027 年下半年量产。推理芯片这条赛道越来越挤了。</p>
-<p>🔗 <a href="https://www.reuters.com/business/ai-chip-startup-positrons-valuation-skyrockets-latest-funding-round-2026-09-10/">https://www.reuters.com/business/ai-chip-startup-positrons-valuation-skyrockets-latest-funding-round-2026-09-10/</a></p>
+<p><strong>7. 软银 10 月要在日本上线 GPU 云了</strong></p>
+<p>底层是自家 GB200 NVL72 机群。系统层用自研的 Infrinia AI Cloud OS。</p>
+<p>对外直接卖推理 API。卖推理，正在成为云厂商的标配能力。</p>
+<p>🔗 <a href="https://www.datacenterdynamics.com/en/news/softbank-corp-to-launch-ai-data-center-gpu-cloud-offering-in-japan/（9/11">https://www.datacenterdynamics.com/en/news/softbank-corp-to-launch-ai-data-center-gpu-cloud-offering-in-japan/（9/11</a>）</p>
 <p><strong>8. 英国 Lumai：光学芯片专啃 prefill</strong></p>
 <p>Lumai（牛津孵化的光学计算公司）发了 Iris Nova。定位很刁钻：只做 prefill。</p>
 <p>prefill 是算力密集型，decode 是访存密集型。P/D 解耦之后，下一步就是给每个阶段配专用硬件。</p>
@@ -97,15 +96,17 @@ img{border-color:#30363d}
 <p>从 1.8 元降到 0.5 元/百万 token。腾讯混元 Hy4 把 1.5TB 模型压到 214GB。</p>
 <p>智谱单 token 推理成本比年初降 80%。国内推理价格战打到这份上，出海做 serving 的可以抄作业了。</p>
 <p>🔗 <a href="https://k.sina.cn/article_7879995960_1d5af323806801n42q.html?from=tech（9/11">https://k.sina.cn/article_7879995960_1d5af323806801n42q.html?from=tech（9/11</a>）</p>
-<p><strong>10. 美国司法部盯上英伟达&quot;许可&quot;Groq 的交易</strong></p>
-<p>传司法部调查英伟达 170 亿美元&quot;许可&quot;Groq 的交易。疑点：用&quot;先挖人再许可&quot;绕开反垄断审查。</p>
-<p>Groq 是推理芯片圈最出圈的创企。罚不一定会拆，但信号很清楚：监管开始盯英伟达的收购玩法。</p>
-<p>🔗 <a href="https://www.reuters.com/legal/litigation/us-doj-probes-nvidias-licensing-deal-with-ai-startup-groq-nyt-reports-2026-09-10/">https://www.reuters.com/legal/litigation/us-doj-probes-nvidias-licensing-deal-with-ai-startup-groq-nyt-reports-2026-09-10/</a></p>
 <h2>访谈与深度</h2>
+<p><strong>10. vLLM 官方：KV 缓存的&quot;分级仓库&quot;</strong></p>
+<p>vLLM 官方博客同日第二篇。KV 缓存放不下就删？这篇说：别删，搬到下层仓库。</p>
+<p>主机内存、文件系统、对象存储、对端节点，四层逐级存。核心设计：所有数据都经主机内存中转。</p>
+<p>好处是跨节点共享。P/D 解耦时，prefill 算好的 KV 能直接给 decode 用。</p>
+<p>实测：128 个会话之后，存储层卸载的吞吐是无卸载的两倍多。跟你研究的 P/D 解耦和 prefix caching 都相关。</p>
+<p>🔗 <a href="https://blog.vllm.ai/blog/2026-09-10-tiered-kv-offloading">https://blog.vllm.ai/blog/2026-09-10-tiered-kv-offloading</a></p>
 <p><strong>11. Simon Willison：OpenRouter 翻车实录</strong></p>
 <p>同一模型名，背后各家 serving 软件不同，行为会打架。有的缺 vision 能力。reasoning effort 处理也不同。</p>
 <p>作者建议用 provider.only 锁死 provider。别让路由层替你&quot;聪明&quot;。</p>
 <p>做网关/路由的同学可以直接抄结论。</p>
 <p>🔗 <a href="https://simonwillison.net/（9/11">https://simonwillison.net/（9/11</a>）</p>
 <hr/>
-<p>*去重：早间版的 SpecGuard、d-Matrix Raptor 芯片、Rinit Jain 长文，均未重复。本轮剔除两条旧闻：vLLM v0.29.0 发布（9/9 已出过深读）、Anthropic 租卡（9/1）。渠道：GitHub、arXiv、AWS 博客、Reuters、GlobeNewswire、新浪、vLLM 博客、simonwillison.net。*</p></body></html>
+<p>*去重：早间版的 SpecGuard、d-Matrix Raptor 芯片、Rinit Jain 长文，均未重复。本轮剔除 4 条旧闻：Positron 融资（9/10 午间版已报）、司法部查 NVIDIA-Groq 交易（9/10 下午版已报）、vLLM v0.29.0 发布（9/9，已出过版本要点深读）、Anthropic 租卡（9/1）。渠道：GitHub、arXiv、AWS 官方博客、vLLM 官方博客、Reuters、GlobeNewswire、新浪新闻、Data Center Dynamics、simonwillison.net。*</p></body></html>
