@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月11日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-11"/>
+<meta name="doc-ts" content="2026-09-12T03:05:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-11（晚间版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-11（晚间版）</h1>
+<h2>框架更新</h2>
+<p>这轮没有新版本。vLLM 停在 v0.29.0（9/9 发的，报过）。SGLang 停在 v0.5.19（9/4 发的，报过）。TensorRT-LLM、LMDeploy、llama.cpp 也没动静。</p>
+<h2>新技术与论文</h2>
+<p>这轮没有新论文。arXiv 那边安静。</p>
+<h2>业内新闻</h2>
+<p><strong>1. 推理芯片和训练芯片，开始用不同的&quot;封装胶水&quot;了</strong></p>
+<p>芯片封装，就是把小芯片粘成大芯片的手艺。</p>
+<p>今天有分析指出，AI 芯片的封装路线正在分叉。Nvidia 的训练卡继续用台积电的 CoWoS。Google、Amazon、特斯拉们的推理芯片，转投 Intel 的 EMIB。</p>
+<p>为啥分家？训练卡要喂 HBM，需要 CoWoS 这种&quot;大盘子&quot;。推理芯片个头小、带宽要求低，EMIB 更便宜、交期更短。</p>
+<p>CoWoS 现在排队 52–78 周，产能卖到 2027 年。等不起的人，自然去找 Intel。</p>
+<p>对你意味着什么？推理和训练正在变成两种生意。以后买推理算力，Intel 封装的 ASIC 会越来越多，价格可能更香。</p>
+<p>🔗 报道 <a href="https://www.techtimes.com/articles/327312/20260911/emib-vs-cowos-google-amazon-back-intel-inference-nvidia-keeps-training-tsmc.htm">https://www.techtimes.com/articles/327312/20260911/emib-vs-cowos-google-amazon-back-intel-inference-nvidia-keeps-training-tsmc.htm</a></p>
+<p><strong>2. 国产 GPU&quot;四小龙&quot;最后一家，燧原科技今天上市了</strong></p>
+<p>燧原科技（688801）今天在科创板敲钟。开盘暴涨 188%，市值 1764 亿。</p>
+<p>&quot;四小龙&quot;指摩尔线程、沐曦、壁仞、燧原四家国产 GPU 公司。现在四家全部上市，国产算力正式进入&quot;财报见真章&quot;阶段。</p>
+<p>燧原的路线有点特别。别人对标英伟达做 GPGPU，它走 DSA 专用架构。创始人出自 AMD，腾讯是第一大外部股东兼第一大客户。</p>
+<p>DSA 是啥？就是&quot;专用芯片&quot;。不追求通用，只为 AI 推理这一种活儿优化。好比瑞士军刀 vs 专用菜刀。</p>
+<p>推理芯片这条赛道，国产选手正在加速，值得持续盯。</p>
+<p>🔗 报道 <a href="https://finance.sina.cn/2026-09-11/detail-inirmmmy7020418.d.html">https://finance.sina.cn/2026-09-11/detail-inirmmmy7020418.d.html</a></p>
+<h2>访谈与深度</h2>
+<p>这轮没有。Latent Space 最新一期还是 8/26 的，没更新。</p>
+<hr/>
+<p>*去重：今日下午版的 SGLang CVE-2026-86793、GigaChat 3.5 Reasoning，午间版的 PD 解耦省电论文，均未重复。渠道：arXiv、GitHub releases（vLLM/SGLang/TensorRT-LLM/LMDeploy/llama.cpp）、NVIDIA 新闻中心、Hacker News、Reddit、X、机器之心/量子位、Spotify 播客、中文 AI 媒体。*</p></body></html>
