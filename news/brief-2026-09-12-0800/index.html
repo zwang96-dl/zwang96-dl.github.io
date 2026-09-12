@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月12日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-12"/>
+<meta name="doc-ts" content="2026-09-12T15:17:07"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-12（早间版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-12（早间版）</h1>
+<h2>框架更新</h2>
+<p>这轮六家都没新版本。vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。其余四家也没动静。</p>
+<h2>新技术与论文</h2>
+<p><strong>1. 推测解码顺手抓后门：SpecGuard</strong></p>
+<p>这篇论文脑洞很妙。推测解码（speculative decoding）本来是加速手段。小模型先打草稿，大模型再改稿。</p>
+<p>作者发现改稿环节自带免费信号。正常时小模型和大模型&quot;英雄所见略同&quot;。草稿接受率高。</p>
+<p>后门一旦触发，大模型倒向攻击者。干净的小模型跟不上，接受率就变了。</p>
+<p>说白了，就是让实习生和专家互相监督。两人意见突然分歧，大概率是专家被&quot;策反&quot;了。</p>
+<p>关键数据：零额外计算开销。以前的运行时检测要么多跑一遍模型，要么做输入扰动，都贵。SpecGuard 直接复用推测解码已有的验证信号。</p>
+<p>跟你研究方向的关联很直接。你在用推测解码做 serving 优化。这篇等于说：同一套机制还能白嫖一个安全监控。EAGLE、MTP 这类 draft 方案都能套这个思路。</p>
+<p>🔗 论文 <a href="https://arxiv.org/abs/2609.11799（9/11">https://arxiv.org/abs/2609.11799（9/11</a> 发布，作者含微软 Azure 的 Mark Russinovich）</p>
+<h2>业内新闻</h2>
+<p><strong>2. 推理芯片新玩家 d-Matrix：直接插进英伟达的机架</strong></p>
+<p>d-Matrix 是家专做推理芯片的创业公司。它宣布 Raptor 芯片将通过 NVLink Fusion。直接插进英伟达的数据中心机架。</p>
+<p>NVLink Fusion 是啥？英伟达开放的&quot;芯片拼插标准&quot;。以前第三方芯片只能在旁边自己玩。现在能直接连进英伟达机架，共享高速互联。</p>
+<p>这事有意思的地方：英伟达一边卖自己的推理卡，一边给竞争对手开门。说明推理这块蛋糕太大，一家吃不完，只能做平台收&quot;过路费&quot;。</p>
+<p>Raptor 主打低延迟场景：代码助手、聊天机器人、语音 agent。量产机架 2027 年上线，芯片今年底定型。</p>
+<p>🔗 报道 <a href="https://www.reuters.com/business/media-telecom/chip-startup-d-matrix-use-nvidia-chip-linking-tech-ai-servers-2026-09-10/">https://www.reuters.com/business/media-telecom/chip-startup-d-matrix-use-nvidia-chip-linking-tech-ai-servers-2026-09-10/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>3. 万字长文讲透现代推理平台：Rinit Jain 的连载收官篇</strong></p>
+<p>这是一篇写给工程师的&quot;推理平台全栈指南&quot;。作者连载 9 篇讲透 serving，今天这篇是收官，把前面全串起来了。</p>
+<p>划几个重点：</p>
+<p>别再盯 GPU 利用率了。真正要看的是 goodput（有效吞吐）。用户 8 秒才拿到首 token，吞吐再高也是虚的。</p>
+<p>并发上限不是算力决定的，是 KV cache 内存决定的。100 个用户、每人 8K 上下文，cache 可能比模型权重还大。</p>
+<p>prefill 吃算力，decode 吃带宽。这是 P/D 解耦的全部动机，一句话就讲明白了。</p>
+<p>调参就三个旋钮。batch size、KV 池、chunked prefill。没有银弹配置，全看你的 workload。</p>
+<p>这篇跟你正在评估的 SGLang P/D 解耦直接相关，建议精读。前面 8 篇也值得按需回看。讲 KV cache、prefix caching、LLM-D 等。</p>
+<p>🔗 全文 <a href="https://pub.towardsai.net/inside-a-modern-ai-inference-platform-8846434bb14b">https://pub.towardsai.net/inside-a-modern-ai-inference-platform-8846434bb14b</a></p>
+<hr/>
+<p>*去重：昨日晚间版的 EMIB/CoWoS 封装分流、燧原科技上市，均未重复。午间版的 PD 解耦功耗论文，也未重复。本轮剔除两条旧闻：AMD×Cerebras 合作（7 月旧闻）、Anthropic 350 亿美元租卡（9 月 1 日旧闻）。渠道：arXiv、GitHub、Reuters、Hacker News。还有中文 AI 媒体。*</p></body></html>
