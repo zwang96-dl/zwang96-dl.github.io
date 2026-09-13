@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月13日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-13"/>
+<meta name="doc-ts" content="2026-09-13T19:11:15"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-13（午间版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-13（午间版）</h1>
+<p>周日上午是行业低谷，六家框架都没发新版，arXiv 也没上新。 但翻到了两条之前漏掉的干货，补上。</p>
+<h2>框架更新</h2>
+<ul><li>llama.cpp 冒了三个例行构建。</li><li>构建号：b10944、b10946、b10947。</li><li>都是修复向：SYCL 内存检测、s390x 指令保护。</li><li>b10947 修了个除零崩溃。</li><li>Nemotron-H 的 NextN/MTP 元数据异常。</li><li>加载这种模型会直接 SIGFPE。</li><li>以前加载这种模型会直接崩掉，现在改成明确报错。</li><li>vLLM 还是 v0.29.0，SGLang 还是 v0.5.19。</li><li>TensorRT-LLM、LMDeploy 也都没动。</li><li>TGI 早就归档了。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 周末没上新批次。</li></ul>
+<h2>补报 · 干货（之前简报没报过）</h2>
+<p><strong>1. SGLang 官方：给 CUDA 图装&quot;断路器&quot;，prefill 图构建快 5 倍（值得深读）</strong></p>
+<ul><li>CUDA 图好比把 GPU 操作录成&quot;一键回放&quot;。</li><li>录一次之后直接回放，省掉 CPU 逐个启动 kernel 的开销。</li><li>但 forward 里总有些算子不兼容，录不进去。</li><li>以前靠 torch.compile 切分：慢，还得伺候编译器。</li><li>BCG（可断开的 CUDA 图）在捕获时直接&quot;掐断&quot;重连。</li><li>开发者用 @eager_on_graph 标记不兼容的函数。</li><li>捕获跑到标记处就收口，函数正常跑完再开新图段。</li><li>同样的分段执行，代码从 1771 行砍到 521 行。</li><li>这是冷启动数据：GLM-5.2 从 183.1 秒干到 35.2 秒。</li><li>Qwen3-235B-A22B 从 106.6 秒干到 27.7 秒。</li><li>prefill 单独测速：BCG 是 eager 的 1.70 倍。</li><li>eager 就是 PyTorch 默认的逐个执行模式。</li><li>完整 capture（实验性）能到 1.93 倍。</li><li>GLM-5.2 的稀疏注意力只有 BCG 能 capture。</li><li>文生图也沾光：Qwen-Image 从 6.48 秒到 2.45 秒。</li><li>新开关 --debug-cuda-graph。</li><li>一键回到 eager 模式，方便排查。</li><li>显存变成捕获时定死的数，容量规划可以直接算账。</li><li>链接：<a href="https://www.sglang.io/blog/breakable-cuda-graph">https://www.sglang.io/blog/breakable-cuda-graph</a></li><li>中文精读已生成：《SGLang-BCG-可断开CUDA图》。</li></ul>
+<p><strong>2. 13 分钟讲透推测解码：为什么&quot;猜&quot;了还能保分布</strong></p>
+<ul><li>推测解码：先让小模型打草稿，大模型只负责改。</li><li>averagedevs 的新视频，9 月 9 日发的，教学向。</li><li>讲接受/拒绝采样（猜中就留、猜错就扔）的原理。</li><li>还把 HF 的辅助生成跟 vLLM 的配置项对上了。</li><li>草稿模型太弱或太贵，都是典型错误用法。</li><li>刚接触推测解码的人，13 分钟入门正好。</li><li>链接：<a href="https://www.youtube.com/watch?v=gR48o1dlpjs">https://www.youtube.com/watch?v=gR48o1dlpjs</a></li></ul>
+<h2>业内新闻 / 访谈与深度</h2>
+<ul><li>这轮都没实质新内容。</li><li>X 上几个大V都没新动态。</li><li>lmsysorg、karpathy、jimfan、swyx 都安静。</li><li>中文媒体、播客、YouTube 也都没新的。</li></ul>
+<hr/>
+<p><strong>去重说明</strong>：本轮窗口（9/13 08:00–12:00 PDT）无新版本、无新论文、无大V动态。以上第 1 条为 9 月 10 日左右的 SGLang 官方博客，此前简报从未收录，属补报；第 2 条为 9 月 9 日 YouTube 教学视频，此前未报过。已报过的不重复：DeepSeek V4.1-Flash 发布与内核优化（9/10 起多期）、SGLang CVE-2026-86793（9/11 下午版起）、SpecGuard（9/12 早间版）、AWS Prefix-Aware Routing 与 Simon Willison 的 OpenRouter 路由问题（9/12 午间版）、Uno/Ψ-Spec 与 vLLM MI355X MiniMax M3 调优（9/12 午间版）、Composable CXL / FlexComp / EMMI / ExaServe / REVA / PATTON / The Batch GPT-6 Astra（9/12 下午版）、SGLang V4.1-Flash 内核优化 35→873（9/12 晚间版）、NVIDIA KVTC 与 WEKA NIXL 插件（9/13 早间版）、llama.cpp b10941（9/13 早间版）。</p></body></html>
