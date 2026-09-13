@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月13日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-13"/>
+<meta name="doc-ts" content="2026-09-13T23:08:48"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-13（下午版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-13（下午版）</h1>
+<p>划重点先：这轮有两条干货。一条是外部 KV 缓存的&quot;存 vs 重算&quot;权衡论文。另一条是国内首个 GPU+类脑芯片异构推理落地。</p>
+<h2>新技术与论文</h2>
+<p><strong>1. py-kvcache：外部 KV 缓存何时不该存</strong> 报告什么：arXiv 2609.11744。给 vLLM 外接 KV 缓存做了系统剖析。<a href="https://arxiv.org/abs/2609.11744">链接</a> 大白话：KV cache 就是模型的草稿纸。短前缀或快卡上，重算比读盘更快。 关键数据：80k tokens 下比 LMCache 快 2.0x。三层缓存全开比 LMCache 快 1.23x。 对你意味着什么：做 prefix caching 时先判题。太短就别缓存，省得 IO 拖后腿。 值得深读：它给了&quot;何时用外部缓存&quot;的决策方法论。<a href="./files/深度阅读/py-kvcache-外部KV缓存剖析.md">笔记</a></p>
+<h2>业内新闻</h2>
+<p><strong>2. 国内首个 GPU+类脑芯片异构推理上线</strong> 报告什么：9/13 廊坊算力大会发布。移动云联合灵汐科技等做的系统。<a href="https://finance.sina.cn/stock/jdts/2026-09-13/detail-inirskha4596980.d.html">来源</a> 大白话：拆分思路像分工流水线。Attention 放 GPU，FFN 放类脑芯片。 关键数据：DeepSeek-V4 实测性价比提升 1 倍以上。运营成本降 40%。 对你意味着什么：PD 拆分和 AF 拆分可以组合用。国产异构推理开始从论文走到产线了。</p>
+<hr/>
+<p>去重说明：筛过简报库和深度阅读索引。NVIDIA EPD 博客 9/9 已报过，这次剔除。</p></body></html>
