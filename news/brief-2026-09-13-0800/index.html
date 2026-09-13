@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月13日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-13"/>
+<meta name="doc-ts" content="2026-09-13T15:05:54"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-13（早间版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-13（早间版）</h1>
+<p>周日凌晨是行业低谷，这轮没大新闻。 两条凌晨情报补上，之前简报里没报过。</p>
+<h2>框架更新</h2>
+<ul><li>六家框架都没实质新版本。</li><li>llama.cpp 多了个 b10941 构建。</li><li>这是 CI 自动打的预编译包。</li><li>没有版本说明，也没有功能变化。</li><li>vLLM 还是 v0.29.0。</li><li>SGLang 还是 v0.5.19。</li><li>TensorRT-LLM 还是 v1.3.0rc26。</li><li>LMDeploy 还是 v0.17.0。</li><li>TGI 还是 v3.3.7。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 周末没上新批次。</li></ul>
+<h2>补报 · 凌晨情报（03:13 轮次发现，简报里没报过）</h2>
+<p><strong>1. NVIDIA 的 KVTC：给 KV 缓存做&quot;无损压缩&quot;，压 20 倍精度几乎不掉（值得深读）</strong></p>
+<ul><li>KV 缓存就是推理时存上下文的草稿纸。</li><li>NVIDIA 研究员用 KVTC（KV 缓存变换编码）把它压了 20 倍。</li><li>思路抄的是多媒体压缩的老办法。</li><li>第一步 PCA 解相关（主成分分析，把重复信息摊平）。</li><li>PCA 基矩阵只在校准集上算一次，之后一直复用。</li><li>第二步动态规划分配比特。</li><li>重要的特征多给比特，不重要的少给。</li><li>第三步 DEFLATE 熵编码打包。</li><li>好处：模型权重一个字都不用改。</li><li>8 倍压缩下，Qwen2.5-1.5B 每 token 从 29KB 压到 3.2KB。</li><li>代码任务精度只掉 0.3 个百分点。</li><li>8000 token 的 prompt，首字延迟从 3 秒干到 380 毫秒。</li><li>最前 4 个 token 和最近 128 个不压。</li><li>压了这两类，精度会崩。</li><li>短对话别用：新 token 本来就占大头，压不出效果。</li><li>长上下文多轮对话、Agent 反复推理最合适。</li><li>优化版会进 Dynamo 的 KVBM（KV 块管理器）。</li><li>KVBM 是 Dynamo 里管 KV 缓存的模块。</li><li>之后兼容 vLLM，开箱即用。</li><li>链接：<a href="https://venturebeat.com/orchestration/nvidia-shrinks-llm-memory-20x-without-changing-model-weights">https://venturebeat.com/orchestration/nvidia-shrinks-llm-memory-20x-without-changing-model-weights</a></li><li>论文：<a href="https://arxiv.org/abs/2511.01815">https://arxiv.org/abs/2511.01815</a></li><li>中文精读已生成：《KVTC：NVIDIA 的 KV 缓存 20 倍压缩》。</li></ul>
+<p><strong>2. WEKA 给 NIXL 开源了个 GPUDirect Storage 插件</strong></p>
+<ul><li>NIXL 是 NVIDIA 的推理传输库。</li><li>WEKA 给它写了个存储插件，开源了。</li><li>插件走 GPUDirect Storage + RDMA（网卡直连显卡，不经过 CPU）。</li><li>数据搬运零拷贝，延迟抖动小了。</li><li>8 张 H100 实测读 260 GB/s。</li><li>它的 Augmented Memory Grid（增强内存网格）当 Dynamo 的 token 仓库。</li><li>延迟接近 DRAM（内存条）。</li><li>说白了：KV 缓存 offload（搬出显存）这条路更快了。</li><li>链接：<a href="https://www.weka.io/article/weka-accelerates-ai-inference-with-nvidia-dynamo-and-nvidia-nixl">https://www.weka.io/article/weka-accelerates-ai-inference-with-nvidia-dynamo-and-nvidia-nixl</a></li></ul>
+<h2>业内新闻 / 访谈与深度 / 社区讨论</h2>
+<ul><li>这轮都没实质新内容。</li><li>X 上 lmsysorg、karpathy、jimfan、swyx 都没新动态。</li><li>Reddit、HN、中文媒体、播客也都没新的。</li></ul>
+<hr/>
+<p><strong>去重说明</strong>：本轮窗口（9/13 03:00–08:00 PDT）实质新内容只有 llama.cpp b10941 例行构建；arXiv 周末无新批次。以上第 1、2 条为凌晨 03:13 情报轮次发现、此前简报未报过的内容，属补报。已报过的不重复：DeepSeek V4.1-Flash 发布与内核优化（9/10 起多期）、SGLang CVE-2026-86793（9/11 下午版起）、SpecGuard（9/12 早间版）、AWS Prefix-Aware Routing 与 Simon Willison 的 OpenRouter 路由问题（9/12 午间版）、Uno/Ψ-Spec 与 vLLM MI355X MiniMax M3 调优（9/12 午间版）、Composable CXL / FlexComp / EMMI / ExaServe / REVA / PATTON / The Batch GPT-6 Astra（9/12 下午版）、SGLang V4.1-Flash 内核优化 35→873（9/12 晚间版）。</p></body></html>
