@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月14日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-14"/>
+<meta name="doc-ts" content="2026-09-14T21:03:22"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-14（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-14（14点版）</h1>
+<p>划重点先：12→14 点这个窗口里没新事。顺手补了两条前两天漏掉的：vLLM 的下一个小版本在路上了；有人做了个&quot;模型快照&quot;换模工具。</p>
+<h2>框架更新</h2>
+<p><strong>1. vLLM 下一个小版本已经在测试了（9/12 补收）</strong> 出了 v0.29.1rc0。rc 就是&quot;候选版&quot;：正式发之前先放出来给大家测。 12点版说 vLLM 停在 v0.29.0。其实 9/12 那天 rc 版已经出来了。 说明正式版 v0.29.1 不远了。这轮修的主要是 bug，升级等正式版就行。 跟你研究的 P/D 解耦（prefill/decode 分开部署）没直接关系。 <a href="https://github.com/vllm-project/vllm/releases">release 页</a></p>
+<p><strong>2. 其余几家还是老样子</strong> SGLang 还是 v0.5.19。TensorRT-LLM 还是 v1.3.0rc26。LMDeploy 还是 v0.17.0。 TGI 去年底就停了。llama.cpp 的 v0.4.1 今天中午报过。 这轮谁都不用升级。</p>
+<h2>新技术与论文</h2>
+<p>这轮没有。arXiv 今天还是静悄悄的。</p>
+<h2>业内新闻</h2>
+<p><strong>1. 有人想让两块卡同时伺候 50 多个模型（9/11 补收）</strong> HN 上的自荐帖：InferX，核心是&quot;快照&quot;技术。 说白了：模型权重加载好先拍张&quot;快照&quot;存盘。换模型时不从头读权重，直接恢复，号称 2 秒拉起。 就像饭店提前把菜切好配好，来单直接下锅，换菜自然快。 但数据是作者自己报的，还没人第三方验证。看个思路就行。 <a href="https://news.ycombinator.com/item?id=44007190">HN 帖</a></p>
+<h2>访谈与深度</h2>
+<p>这轮没有。Latent Space 今天有新单集，但聊的是 AI for science，跟推理 serving 不沾边。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/14 12:00→14:00 PDT）六家框架无新 release、arXiv 无新论文、中文媒体/播客/社区无新内容；v0.29.1rc0（9/12 预发布）与 InferX Show HN（9/11）为此前漏报，本轮补收并注明日期。渠道：GitHub releases、arXiv、网页搜索、HN、Spotify。*</p></body></html>
