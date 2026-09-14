@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月13日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-13"/>
+<meta name="doc-ts" content="2026-09-14T03:05:56"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-13（晚间版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-13（晚间版）</h1>
+<p>划重点先：这轮有一篇 KV 压缩新论文值得深读。另外推理成本的话题今晚很热，两条讨论都指向同一件事：压缩 KV 就是省钱。</p>
+<h2>框架更新</h2>
+<p><strong>1. 这轮六家框架都没新版本，附一个实用部署方案</strong> 想自己搭 V4.1 Flash？有人开源了一键部署方案。4 张 RTX PRO 6000，SGLang 跑张量并行加专家并行。还叠了推测解码（先让小模型猜、大模型验），KV 往 NVMe 卸载。Docker Compose 开源，想抄作业直接点。<a href="https://github.com/0xSero/deepseek-v4.1-flash-4x-rtx-pro-6000">仓库</a></p>
+<h2>新技术与论文</h2>
+<p><strong>2. BeaconKV：猜到模型会&quot;回头看&quot;哪页草稿，只压不重要的（值得深读）</strong> 大白话：推理模型想得越长，草稿纸（KV cache）越占显存。旧方法靠最近几步猜重要性，经常猜错。这篇发现：长思考里有些 token 会回头看早期的解题计划。它们扎堆成几类查询，用几个&quot;信标&quot;当代表就能预测谁会被重访。关键数据：显存压 5.8 倍，精度几乎不掉，吞吐提 4.3 倍。不用训练，即插即用。对你意味着什么：跟你的 KV 缓存优化方向直接相关。&quot;回访预测&quot;这个思路，值得借到你的评估里。<a href="https://arxiv.org/abs/2609.04971v1">论文</a> <a href="./files/深度阅读/BeaconKV-长推理KV压缩.md">笔记</a></p>
+<p><strong>3. 机器之心PRO：模型&quot;想太多&quot;，烧的是你的钱</strong> 大白话：8000 个思考 token 的成本，是 500 个的 16 倍以上。长思考就是烧钱，账单面前都得算细账。还有个&quot;定价倒挂&quot;研究：32% 名义便宜的模型，实际账单反而更贵。挑推理服务别只看单价，得看真实账单。<a href="https://finance.sina.cn/tech/2026-09-13/detail-inirrtkh7995472.d.html?vt=4">文章</a></p>
+<h2>业内新闻 / 访谈与深度</h2>
+<p><strong>4. 讨论：通用 GPU 集群为啥拼不过 DeepSeek 的推理价格</strong> 大白话：市面上的集群都是为通用负载设计的。定制集群加 MLA（一种 KV 压缩注意力），才能吃到成本红利。说白了：省钱靠专机专用，不是堆卡。<a href="https://www.threads.com/@thdxr/post/DdOrW1XlfUc">讨论</a></p>
+<p><strong>5. llm-d Router 架构图：按理解和生成两拨机器分发请求</strong> 大白话：生产级路由器，专门给请求指路。理解输入的请求去一拨机器，逐字生成的去另一拨。路由器还看负载和 KV 状态。PD 拆分就是把理解和生成分两拨机器跑，这张架构图可以直接参考。<a href="https://www.facebook.com/joyatrestech/posts/pfbid02d8vQvCQMckFEh182JzWziQHsCeUtEzE2Ek47tZoDVwH3c64RB6D8gBU9SUooKTFbzcUqYX1qMNrwl">帖子</a></p>
+<p><strong>6. 量化选型决策图：先看瓶颈，再决定压什么</strong> 大白话：一张流程图，教你怎么选量化格式。W4A16 是只压权重，W8A8 是权重激活都压。经验法则：权重占大头，就先做 weight-only 量化。贴墙上备查。<a href="https://www.threads.com/@damienbenveniste/post/DdNLH2rmugp">帖子</a></p>
+<hr/>
+<p>*去重说明：筛过简报库和深度阅读索引。V4.1 Flash 发布与定价（9/10 起多期已报）、vLLM v0.29.0 / SGLang v0.5.19（深读已存）、py-kvcache 论文和廊坊算力大会异构推理（下午版），这轮都没重复。渠道：GitHub、arXiv、机器之心、Threads、Facebook。*</p></body></html>
