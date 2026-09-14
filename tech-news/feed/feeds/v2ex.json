@@ -1,7 +1,103 @@
 {
   "source": "v2ex",
-  "updatedAt": "2026-09-14T08:45:19.429Z",
+  "updatedAt": "2026-09-14T08:47:10.881Z",
   "items": [
+    {
+      "id": "1d872731db6e",
+      "url": "https://www.v2ex.com/t/1241920#reply0",
+      "title": "[职场话题] 现在的就业市场，更多的是对人自信心的摧残",
+      "titleZh": null,
+      "summary": "",
+      "publishedAt": "2026-09-14T08:45:48Z",
+      "images": [
+        "https://www.v2ex.com/static/img/ellipse_light.png"
+      ],
+      "translation": null
+    },
+    {
+      "id": "bfe46f3d07c2",
+      "url": "https://www.v2ex.com/t/1241918#reply3",
+      "title": "[程序员] Fable 5.1 和 Astra 都画不出一个 SVG？",
+      "titleZh": null,
+      "summary": "",
+      "publishedAt": "2026-09-14T08:32:42Z",
+      "images": [
+        "https://www.v2ex.com/static/img/ellipse_light.png"
+      ],
+      "translation": null
+    },
+    {
+      "id": "70a466b407a3",
+      "url": "https://www.v2ex.com/t/1241907#reply2",
+      "title": "[Claude] claude desktop 一直弹 tip claude is not available in your region，危险吗？",
+      "titleZh": null,
+      "summary": "",
+      "publishedAt": "2026-09-14T08:07:18Z",
+      "images": [
+        "https://www.v2ex.com/static/img/ellipse_light.png"
+      ],
+      "translation": null
+    },
+    {
+      "id": "d0c6f519e35e",
+      "url": "https://www.v2ex.com/t/1241905#reply7",
+      "title": "[程序员] jetbrains 全家桶续费没有折扣码了吗",
+      "titleZh": null,
+      "summary": "",
+      "publishedAt": "2026-09-14T08:04:39Z",
+      "images": [
+        "https://www.v2ex.com/static/img/ellipse_light.png"
+      ],
+      "translation": null
+    },
+    {
+      "id": "ad891e51899f",
+      "url": "https://www.v2ex.com/t/1241901#reply21",
+      "title": "[程序员] 论 AI 恐惧症——对莱顿宣言的驳斥",
+      "titleZh": null,
+      "summary": "",
+      "publishedAt": "2026-09-14T07:46:30Z",
+      "images": [
+        "https://www.v2ex.com/static/img/ellipse_light.png"
+      ],
+      "translation": null
+    },
+    {
+      "id": "104ff960f91e",
+      "url": "https://www.v2ex.com/t/1241890#reply1",
+      "title": "[问与答] 现在 ChatGPT 还用 CC-Switch 么",
+      "titleZh": null,
+      "summary": "",
+      "publishedAt": "2026-09-14T07:12:50Z",
+      "images": [
+        "https://www.v2ex.com/static/img/ellipse_light.png"
+      ],
+      "translation": null
+    },
+    {
+      "id": "317f9f21fb99",
+      "url": "https://www.v2ex.com/t/1241886#reply14",
+      "title": "[问与答] 国内微信有没有替代品？",
+      "titleZh": null,
+      "summary": "",
+      "publishedAt": "2026-09-14T07:06:24Z",
+      "images": [
+        "https://www.v2ex.com/static/img/ellipse_light.png"
+      ],
+      "translation": null
+    },
+    {
+      "id": "209563f92b0f",
+      "url": "https://www.v2ex.com/t/1241876#reply29",
+      "title": "[推广] [V8AIX] 自建中转上线，超多福利等你来领 [10 刀]",
+      "titleZh": null,
+      "summary": "",
+      "publishedAt": "2026-09-14T06:36:45Z",
+      "images": [
+        "https://www.v2ex.com/static/img/ellipse_light.png"
+      ],
+      "translation": null
+    },
     {
       "id": "73b8ee42df31",
       "url": "https://www.v2ex.com/t/1241918#reply0",
