@@ -1,0 +1,54 @@
+{
+  "id": "2e88014063fe",
+  "url": "https://simonwillison.net/2026/Sep/14/commit-rewriter/",
+  "titleZh": "Simon Willison 做了个小工具 commit-rewriter：专治 AI 写的烂 commit message",
+  "blocks": [
+    {
+      "caption": "",
+      "src": "https://static.simonwillison.net/static/2026/commit-rewriter.webp",
+      "type": "image"
+    },
+    {
+      "text": "前两天我捣鼓了个小网页应用，专门用来改 Datasette 发安全版本时的 commit message。最初那批 commit 里全是 AI 编程助手留下的套话，还夹着我们私有仓库的 issue 编号——这玩意儿根本没法公开发。",
+      "type": "text"
+    },
+    {
+      "text": "想给某个仓库批量改 commit message，跑这一行就行：",
+      "type": "text"
+    },
+    {
+      "text": "uvx commit-rewriter path/to/repo",
+      "type": "text"
+    },
+    {
+      "text": "说白了，你人要已经在那个仓库目录里，路径都能省了不写。",
+      "type": "text"
+    },
+    {
+      "caption": "commit-rewriter 网页界面截图，标题栏写着 commit-rewriter",
+      "src": "https://static.simonwillison.net/static/2026/commit-rewriter.webp",
+      "type": "image"
+    },
+    {
+      "text": "点提交之后，工具会先给仓库当前状态打一个带时间戳的分支——好家伙，改劈叉了还能一键回滚——然后把从你改的第一条 commit 到最新那条，挨个重写一遍。",
+      "type": "text"
+    }
+  ],
+  "translatedAt": "2026-09-14T08:45:19.429Z",
+  "digest": {
+    "facts": [
+      "工具名 commit-rewriter 0.1",
+      "作者 Simon Willison",
+      "用途：批量改写 commit message",
+      "提交前自动创建带时间戳的分支用于回滚",
+      "重写范围：从修改的第一条 commit 到最新一条"
+    ],
+    "points": [
+      "起因很真实：Datasette 发安全版本，commit message 里全是 AI 助手的残留话术，还混着私有仓库的 issue 号，没法公开",
+      "用法极简：一行命令 uvx commit-rewriter path/to/repo，人已经在仓库里的话连路径都省了",
+      "最贴心的是先打带时间戳的分支再动手，改废了能回滚——被 AI 坑过的人都懂这有多重要"
+    ],
+    "tldr": "AI 写的 commit message 太丢人？这个小工具帮你批量重写",
+    "why": "AI 编程助手写 commit 的时代，这种\"先备份再动手\"的小工具人人都用得上"
+  }
+}

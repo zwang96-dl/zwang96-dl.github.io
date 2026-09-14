@@ -1,19 +1,18 @@
 {
   "source": "simon",
-  "updatedAt": "2026-09-14T08:42:26.851Z",
+  "updatedAt": "2026-09-14T08:45:19.429Z",
   "items": [
     {
       "id": "2e88014063fe",
       "url": "https://simonwillison.net/2026/Sep/14/commit-rewriter/",
-      "title": "commit-rewriter 0.1",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-14T00:28:10+00:00",
+      "title": "Release: commit-rewriter 0.1",
+      "titleZh": "Simon Willison 做了个小工具 commit-rewriter：专治 AI 写的烂 commit message",
+      "summary": "A web app to help edit commit messages",
+      "publishedAt": "2026-09-14",
       "images": [
-        "https://static.simonwillison/static/2026/commit-rewriter.webp",
-        "https://static.simonwillison.net/static/2026/commit-rewriter.webp"
+        "https://static.simonwillison/static/2026/commit-rewriter.webp"
       ],
-      "digest": null
+      "translation": "translations/2e88014063fe.json"
     },
     {
       "id": "39d900722912",
