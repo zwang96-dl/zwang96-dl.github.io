@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月14日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-14"/>
+<meta name="doc-ts" content="2026-09-14T13:04:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-14（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-14（6点版）</h1>
+<p>划重点先：这轮 2 小时窗口里没新东西，六个框架都没动静、大 V 也没吭声。不过捡回两个被之前几轮漏掉的：AMD 官方亲自下场开了个推理编排项目，16 倍上下文压缩的 LCLM 也有新报道。都值得看。</p>
+<h2>框架更新</h2>
+<p><strong>1. AMD Infera 开源：给推理集群当&quot;乐队指挥&quot;</strong> 大白话：AMD 亲自开源了一个推理编排层，管的是多实例协同，不是单个引擎。三招：路由按 KV 缓存命中率选实例（请求去手里有&quot;旧账本&quot;的机器）；P/D 解耦（理解和生成分两拨机器跑，KV 走 Mooncake 或 MoRI-IO 传）；KV 缓存分层（显存满了往 NVMe/NFS 沉，不经过 CPU 内存）。底层跑 vLLM、SGLang 或 ATOM，对外一个 OpenAI 兼容接口。关键数据：在 MI355X 上验证过；扩缩容零失败（260 个请求全活）；Kimi-K2.6-MXFP4 的 agent 负载实测了 P/D 解耦对单节点 TP8。对你意味着什么：你正在单块 MI350 上测 vLLM 的 P/D 解耦，这套是 AMD 官方给的同源调优思路，直接抄。<a href="https://github.com/amd-agi/infera">仓库</a></p>
+<h2>新技术与论文</h2>
+<p><strong>2. LCLM：上下文先&quot;缩写&quot;再交卷，16 倍压缩还够用（值得深读）</strong> 大白话：老办法是 KV 缓存建好了再删（先写满草稿纸再撕）。这篇反着来：0.6B 的小编码器先把输入压成一小撮&quot;潜 token&quot;（压缩后的隐向量块），4B 解码器直接读这些，prefill 干脆少干很多活。关键数据：16 倍压缩下 RULER 长上下文精度 75.06%，同压缩比下所有 KV 缓存方法都更差；4 倍压缩 91.76%，只比不压低不到 3 个点；输出快 8.8 倍。训练砸了 350B token，模型已开源。对你意味着什么：prefill 侧压缩=更短的 prefill+更少的 KV 搬运，跟你的 P/D 解耦 prefill 降本是一条路。还有个轻量同路人 LatentPress（arXiv:2609.01507），只训 0.1% 参数也能压 4-16 倍。<a href="https://arxiv.org/pdf/2606.09659">论文</a> <a href="https://venturebeat.com/data/context-compression-finally-works-in-production-new-research-cuts-llm-input-16x-without-the-accuracy-hit">报道</a> <a href="./files/深度阅读/LCLM-端到端上下文压缩16倍.md">笔记</a></p>
+<hr/>
+<p>*去重说明：筛过简报库和深度阅读索引。本轮窗口（9/14 04:00→06:00 PDT）六个框架无新 release、arXiv/X/Reddit/HN/Spotify 均无新推理 serving 内容；LCLM 深读笔记已生成（含原文 Figure 1/3/5）。渠道：GitHub、VentureBeat、arXiv。*</p></body></html>
