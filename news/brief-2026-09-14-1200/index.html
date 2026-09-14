@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月14日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-14"/>
+<meta name="doc-ts" content="2026-09-14T18:58:06"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-14（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-14（12点版）</h1>
+<p>划重点先：这轮就一件实事。本地推理的老工具 llama.cpp，今天上午 11:27 发了 v0.4.1。其余五家框架都没动静。</p>
+<h2>框架更新</h2>
+<p><strong>1. llama.cpp 出新正式版了</strong> 新版本 v0.4.1，正式 release，不是 nightly 构建。第一批正式版间隔了将近三个月。 新支持三个模型。Maple 20B-A1B（三元 MoE，只激活部分神经元的稀疏架构）。Tencent Hy 4 预览版。Spark2.5 也进来了。 转模型时多了 <code>--fuse-qkv</code>。能把 Q/K/V 三个矩阵合并存。GGUF 转档更快，加载也省一步。 日志这回更顺手。加了 JSONL 结构化日志。排查线上问题不用再 grep 爬大文本了。 修了两个跟你研究直接相关的 bug。MTP 多步预测的 KV 缓存分配错乱。图片输入后投机解码会崩。 换句话说：多模态输入 + 投机解码这条链路，稳定了一点。 对你意味着什么：主力还是 vLLM/SGLang。但想在本地或端侧搭多模态 demo，llama.cpp 依然最顺手。<a href="https://github.com/ggml-org/llama.cpp/releases/tag/v0.4.1">release notes</a></p>
+<p><strong>2. 其余五家没动静</strong> vLLM 还停在 v0.29.0，9 月 9 日发的。SGLang 还停在 v0.5.19，9 月 5 日发的。TensorRT-LLM 还是 v1.3.0rc26。LMDeploy 还是 v0.17.0。TGI 去年底就停了。这轮谁都不用升级。</p>
+<h2>新技术与论文</h2>
+<p>这轮没有。今天上午版那篇 SQD（次二次注意力解耦）还是最新的。</p>
+<h2>业内新闻</h2>
+<p>这轮没有。</p>
+<h2>访谈与深度</h2>
+<p>这轮没有。Latent Space 本轮没有推理 serving 相关的新单集。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/14 08:00→12:00 PDT）llama.cpp 发 v0.4.1（9/14 11:27 PDT），其余五家框架无新 release；arXiv、X 大 V（lmsysorg/karpathy/jimfan）、Reddit、HN、中文 AI 媒体、Spotify 本轮无新的推理 serving 内容。渠道：GitHub releases、arXiv、网页搜索。*</p></body></html>
