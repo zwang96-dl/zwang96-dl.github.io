@@ -1,0 +1,32 @@
+{
+  "id": "987cffb01d72",
+  "url": "https://sspai.com/post/114453",
+  "tldr": "苹果想给照片发\"出生证明\"，但有个 bug：实拍的不一定是真的",
+  "points": [
+    "Apple 推出了 Apple Reference Image（ARI），想证明一张照片确实是手机实拍、没被 AI 动过手脚",
+    "原理是作者的推测（苹果还没官宣细节）：快门按下的瞬间给传感器（sensor）数据做数字签名，再经 Private Cloud Compute（PCC，私有云计算）处理，生成一张 Reference Image，苹果管它叫\"数字底片\"",
+    "你想啊，数字签名就跟 HTTPS 证书一个意思：验两件事——这数据真是这台设备签的，签完之后没被改过",
+    "但作者泼了盆冷水：实拍不等于真实。你拿手机去拍一块高清屏幕，流程全合规，签出来的\"真照片\"拍的却是假东西",
+    "说白了，签名只能证明\"这照片确实经过了可信的相机\"，证明不了镜头前那枚徽章不是打印纸",
+    "作者的脑洞是再加一道深度数据验证：真徽章有厚度、有立体结构，屏幕和打印纸基本是平的",
+    "作者自己也在做同类相机应用 TAPCam，而且他还没拿到 iPhone 18 Pro，这篇关于 ARI 实现的分析全是基于公开信息的推测"
+  ],
+  "facts": [
+    "Apple Reference Image（ARI），与 iPhone 18 Pro 相关",
+    "经 Private Cloud Compute（PCC）处理生成 Reference Image",
+    "关键技术：数字签名（digital signature）",
+    "C2PA 标准也在做数字内容来源验证",
+    "作者自研相机应用 TAPCam",
+    "文中 ARI 实现细节为作者推测，非苹果官方确认"
+  ],
+  "why": "AI 生成图片满天飞的年代，\"这张照片是真的吗\"正在变成一道硬通货问题",
+  "images": [
+    "https://rssfile.sspai.com/2026/09/11/623052a8f6d6a5d3354c9151079fc560.jpg?imageMogr2/auto-orient/ignore-error/1",
+    "https://cdn-static.sspai.com/ui/img-placeholder.png",
+    "https://cdnfile.sspai.com/2026/09/11/f0f4fb2f42cc0fa46766afef03cdb04b.jpg?imageMogr2/auto-orient/thumbnail/!72x72r/gravity/center/crop/72x72/ignore-error/1",
+    "https://cdnfile.sspai.com/2026/09/11/f0f4fb2f42cc0fa46766afef03cdb04b.jpg?imageMogr2/auto-orient/thumbnail/!100x100r/gravity/center/crop/100x100/ignore-error/1",
+    "https://cdnfile.sspai.com/2026/09/11/623052a8f6d6a5d3354c9151079fc560.jpg?imageMogr2/auto-orient/thumbnail/!1374x/gravity/center/crop/1374x/ignore-error/1",
+    "https://cdnfile.sspai.com/2026/09/11/ca0d60ec5a428b27e28d30edc8649407.png?imageView2/2/w/1120/q/90/interlace/1/ignore-error/1"
+  ],
+  "generatedAt": "2026-09-14T08:42:26.851Z"
+}

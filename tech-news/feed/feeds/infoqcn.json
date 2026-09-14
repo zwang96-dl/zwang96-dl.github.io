@@ -1,0 +1,270 @@
+{
+  "source": "infoqcn",
+  "updatedAt": "2026-09-14T08:42:26.851Z",
+  "items": [
+    {
+      "id": "488655f7f0b9",
+      "url": "https://www.infoq.cn/article/LoKvL75PL8g48hD3UNCE?utm_source=rss&utm_medium=article",
+      "title": "不下班的经营者：把 LLM-as-Judge 做成会自我校准的评估闭环｜QCon上海",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Mon, 14 Sep 2026 16:26:10 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/98/5e/9878855011b6752823798d2yy3c3ff5e.jpg",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/98/5e/9878855011b6752823798d2yy3c3ff5e.jpg?x-oss-process=image/resize,w_726",
+        "https://static001.geekbang.org/infoq/82/82edc8a7cbc8d29e81d9cde42ab1ef72.png",
+        "https://static001.geekbang.org/infoq/0d/0d265dbccf5370b8fcaeedea4a7b6d84.jpeg"
+      ],
+      "digest": null
+    },
+    {
+      "id": "e3b5ec48cffe",
+      "url": "https://www.infoq.cn/article/DlKsq4vFFkUV9Xl7Fxls?utm_source=rss&utm_medium=article",
+      "title": "ICANN 取消第三级 .name 域名注册，是否为身份盗用敞开了大门？",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Mon, 14 Sep 2026 15:41:00 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/08/3f/087e4e4935ab5cb4e9ccde338cd6213f.jpg",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/08/3f/087e4e4935ab5cb4e9ccde338cd6213f.jpg?x-oss-process=image/resize,w_726",
+        "https://static001.geekbang.org/infoq/86/86026619b69ba8e9b6bdef73c67d8310.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "c113a7c69c0f",
+      "url": "https://www.infoq.cn/article/JghIFNXBNVSAfbgbR4S9?utm_source=rss&utm_medium=article",
+      "title": "openJiuwen 首发双维度 RSI 框架，AI 自修改，落地办公智能体，算力亲和助力又快又省",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Mon, 14 Sep 2026 13:40:36 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/79/y3/794495dcefc73d90fb4d322d49bf7yy3.png",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/79/y3/794495dcefc73d90fb4d322d49bf7yy3.png?x-oss-process=image/resize,w_726",
+        "https://static001.geekbang.org/infoq/8d/8db2c90c27235c6b27decae7a57847ab.webp",
+        "https://static001.geekbang.org/infoq/9e/9e0c78a9d2c4c28214ac17388d670c58.webp",
+        "https://static001.geekbang.org/infoq/9e/9e5a85bf97c95987d4cc1e330bcb8f19.webp"
+      ],
+      "digest": null
+    },
+    {
+      "id": "2e904ead135a",
+      "url": "https://www.infoq.cn/article/XLzpR2brCNW2VgYuuYJk?utm_source=rss&utm_medium=article",
+      "title": "GitLab 警告称，AI 代理的沙箱安全性取决于其网络访问的安全性",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Mon, 14 Sep 2026 13:09:00 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/03/7b/03f92de2490d07dbe68c524c6c40417b.jpg",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/03/7b/03f92de2490d07dbe68c524c6c40417b.jpg?x-oss-process=image/resize,w_726"
+      ],
+      "digest": null
+    },
+    {
+      "id": "5a8d0c043928",
+      "url": "https://www.infoq.cn/article/KJRoBoUcE4L6bOPKOHco?utm_source=rss&utm_medium=article",
+      "title": "欧洲核子研究组织（CERN）放弃RHEL，转而采用 Debian 作为其加速器控制基础设施",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Mon, 14 Sep 2026 11:11:00 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/07/58/07dc6f5e86629d8783d69f88cc189258.jpg",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/07/58/07dc6f5e86629d8783d69f88cc189258.jpg?x-oss-process=image/resize,w_726"
+      ],
+      "digest": null
+    },
+    {
+      "id": "f84df3b6d520",
+      "url": "https://www.infoq.cn/article/VIjBCuNElpg2H4bLywVc?utm_source=rss&utm_medium=article",
+      "title": "Java 近期新闻：TornadoVM 6、JReleaser、LangChain4j、Java Operator SDK、JHipster、Yupiik Fusion",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Mon, 14 Sep 2026 09:00:00 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/99/1d/993720a1f5c2587b8de16ebe0226041d.jpg",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/99/1d/993720a1f5c2587b8de16ebe0226041d.jpg?x-oss-process=image/resize,w_726"
+      ],
+      "digest": null
+    },
+    {
+      "id": "9123f8fccb2c",
+      "url": "https://www.infoq.cn/article/TDav5ojS854dZKyfJmhI?utm_source=rss&utm_medium=article",
+      "title": "‌FreeCORE：TrueNAS 衍生分支，在 FreeBSD 系统上维护与之深度整合的虚拟化、Jails 容器与 OpenZFS 文件系统‌",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Sun, 13 Sep 2026 16:00:00 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/79/09/792f5243a3de1789529bdea79519a209.jpg",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/79/09/792f5243a3de1789529bdea79519a209.jpg?x-oss-process=image/resize,w_726",
+        "https://static001.geekbang.org/infoq/5b/5b5902e1758c79e3fa39008b4af9dcc2.png",
+        "https://static001.geekbang.org/infoq/1b/1b13eca277289d19d4ca8daa597e4e81.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "e758f09f8bbe",
+      "url": "https://www.infoq.cn/article/eS4M9XEPmLbkxksCyAye?utm_source=rss&utm_medium=article",
+      "title": "Figma 如何利用 AI 代理提升安全性",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Sun, 13 Sep 2026 10:00:00 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/3a/25/3a583f683e67b39c0da07f968c3ff025.jpg",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/3a/25/3a583f683e67b39c0da07f968c3ff025.jpg?x-oss-process=image/resize,w_726",
+        "https://static001.geekbang.org/infoq/74/74b89e0c9c1b245ab20a5917dbab570a.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "29b156f39507",
+      "url": "https://www.infoq.cn/article/0kYhxXxhOXhxGATe64ec?utm_source=rss&utm_medium=article",
+      "title": "Read, Don't Write: 重塑大模型评价体系，构建全自动、可进化的“探测式”评测管线｜QCon上海",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Sun, 13 Sep 2026 10:00:00 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/e6/39/e6b32c512168d5ea82b21aa3881e0f39.jpg",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/e6/39/e6b32c512168d5ea82b21aa3881e0f39.jpg?x-oss-process=image/resize,w_726",
+        "https://static001.geekbang.org/infoq/2e/2eb336f9652356abf70ce67366adc093.png",
+        "https://static001.geekbang.org/infoq/76/76df3a64dd3e1a97ecb2b7c35a6952be.jpeg"
+      ],
+      "digest": null
+    },
+    {
+      "id": "df4e4abb3ad7",
+      "url": "https://www.infoq.cn/article/i1FJsYNhNM4wwV78ANhL?utm_source=rss&utm_medium=article",
+      "title": "AI的新用法，被这群 Builder 带到了外滩大会开发者日",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Sat, 12 Sep 2026 20:35:26 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/5c/9c/5c6e4c72a67e622b4bddce88c818f79c.png",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/5c/9c/5c6e4c72a67e622b4bddce88c818f79c.png?x-oss-process=image/resize,w_726",
+        "https://static001.geekbang.org/infoq/bf/bf20e15da09e40eefe1bf26b8025e41e.png",
+        "https://static001.geekbang.org/infoq/a7/a76d3bbee40e0549baced8474a4062a7.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "a40c1c4c6d10",
+      "url": "https://www.infoq.cn/article/mF8WwkbQRUS7ZKprE3Ku?utm_source=rss&utm_medium=article",
+      "title": "Google Mantis：一款旨在减少误报的基于智能代理的漏洞扫描框架",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Sat, 12 Sep 2026 16:06:00 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/54/80/54cd4fd521888yy47c38589efe475a80.jpg",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/54/80/54cd4fd521888yy47c38589efe475a80.jpg?x-oss-process=image/resize,w_726"
+      ],
+      "digest": null
+    },
+    {
+      "id": "b171425b2442",
+      "url": "https://www.infoq.cn/article/GhA2VWxo6JTGyKIb7KdT?utm_source=rss&utm_medium=article",
+      "title": "两个 Token 就让 Kimi“变成”Claude？前Google DeepMind研究员意外撞上大模型的蒸馏疑云",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Sat, 12 Sep 2026 10:19:25 GMT",
+      "images": [
+        "https://static001.infoq.cn/resource/image/b0/56/b0c1cbe46242e640695147e034895356.png",
+        "https://static001.geekbang.org/static/web/nuxt/www.infoq.cn/logo.BJF4WFeC.png",
+        "https://static001.infoq.cn/resource/image/b0/56/b0c1cbe46242e640695147e034895356.png?x-oss-process=image/resize,w_726",
+        "https://static001.geekbang.org/infoq/10/103c0deb620f45d83434be9035e35731.png",
+        "https://static001.geekbang.org/infoq/d8/d88e30be686607429b23b49c85bc2ffb.png",
+        "https://static001.geekbang.org/infoq/b8/b826620ad58e83b6c771e950e89b1892.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "2cbfaf7d6775",
+      "url": "https://www.infoq.cn/article/oPSaLpULlAxGxTbYXlXO?utm_source=rss&utm_medium=article",
+      "title": "模型一模一样，Token 却相差 70 倍？三项实测揭开 AI 编程工具的成本黑洞",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Sat, 12 Sep 2026 10:13:44 GMT",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "041e7b82e9ba",
+      "url": "https://www.infoq.cn/article/G7cublzVyXFOUX3vpz1t?utm_source=rss&utm_medium=article",
+      "title": "V4.1 Flash全面超越，开发者为何还在喷 DeepSeek：缺的不是能力，是软件工程思维",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Sat, 12 Sep 2026 10:08:50 GMT",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "305879677222",
+      "url": "https://www.infoq.cn/article/hk3WB50fAOMDg55YVaaW?utm_source=rss&utm_medium=article",
+      "title": "从沙箱到执行边界：蚂蚁 AI Agent 的大规模企业级实践｜QCon上海",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Sat, 12 Sep 2026 10:00:00 GMT",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "185741668ed2",
+      "url": "https://www.infoq.cn/article/exwZJvLsHKXrPyeKaANC?utm_source=rss&utm_medium=article",
+      "title": "Neovim 加入 vim.async：告别回调地狱",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Sat, 12 Sep 2026 10:00:00 GMT",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "64ec20b2661a",
+      "url": "https://www.infoq.cn/article/rlXYaPUjVR0fffbQK3Iz?utm_source=rss&utm_medium=article",
+      "title": "AI Coding 提速之后，如何补上稳定性“最后一公里”？快手柯南 AI 实践",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Fri, 11 Sep 2026 21:06:08 GMT",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "904c709bb3df",
+      "url": "https://www.infoq.cn/article/QPRcUdPGic5r8Ws8R1gM?utm_source=rss&utm_medium=article",
+      "title": "怒斥加密货币是旁氏骗局、放弃80%就业机会也不用 AI 写代码！Kotlin“J神”：AI 会让工程师变成可替换的齿轮",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Fri, 11 Sep 2026 21:00:00 GMT",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "a2e792596110",
+      "url": "https://www.infoq.cn/article/FA80wgNMOwCRrXsSIAwX?utm_source=rss&utm_medium=article",
+      "title": "“我们在拿生命做赌注”：造AI的人为何开始密集预警？",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Fri, 11 Sep 2026 19:08:42 GMT",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "1292e56e4bca",
+      "url": "https://www.infoq.cn/article/A2IFuW8yiYhRqXizT5Uu?utm_source=rss&utm_medium=article",
+      "title": "AI Coding 的下一步不是写得更快，而是可验收：蚂蚁数科 Harness 工程实践",
+      "titleZh": null,
+      "summary": "点击查看原文>",
+      "publishedAt": "Fri, 11 Sep 2026 18:15:19 GMT",
+      "images": [],
+      "digest": null
+    }
+  ]
+}

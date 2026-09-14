@@ -1,0 +1,131 @@
+{
+  "updatedAt": "2026-09-14T08:42:26.851Z",
+  "sources": [
+    {
+      "id": "hn",
+      "name": "Hacker News",
+      "lang": "en",
+      "feed": "feeds/hn.json"
+    },
+    {
+      "id": "tc",
+      "name": "TechCrunch",
+      "lang": "en",
+      "feed": "feeds/tc.json"
+    },
+    {
+      "id": "verge",
+      "name": "The Verge",
+      "lang": "en",
+      "feed": "feeds/verge.json"
+    },
+    {
+      "id": "sspai",
+      "name": "少数派",
+      "lang": "zh",
+      "feed": "feeds/sspai.json"
+    },
+    {
+      "id": "v2ex",
+      "name": "V2EX",
+      "lang": "zh",
+      "feed": "feeds/v2ex.json"
+    },
+    {
+      "id": "ars",
+      "name": "Ars Technica",
+      "lang": "en",
+      "feed": "feeds/ars.json"
+    },
+    {
+      "id": "lobsters",
+      "name": "Lobsters",
+      "lang": "en",
+      "feed": "feeds/lobsters.json"
+    },
+    {
+      "id": "mittr",
+      "name": "MIT Tech Review",
+      "lang": "en",
+      "feed": "feeds/mittr.json"
+    },
+    {
+      "id": "register",
+      "name": "The Register",
+      "lang": "en",
+      "feed": "feeds/register.json"
+    },
+    {
+      "id": "wired",
+      "name": "Wired",
+      "lang": "en",
+      "feed": "feeds/wired.json"
+    },
+    {
+      "id": "simon",
+      "name": "Simon Willison",
+      "lang": "en",
+      "feed": "feeds/simon.json"
+    },
+    {
+      "id": "githubblog",
+      "name": "GitHub Blog",
+      "lang": "en",
+      "feed": "feeds/githubblog.json"
+    },
+    {
+      "id": "hfblog",
+      "name": "Hugging Face",
+      "lang": "en",
+      "feed": "feeds/hfblog.json"
+    },
+    {
+      "id": "tldrai",
+      "name": "TLDR AI",
+      "lang": "en",
+      "feed": "feeds/tldrai.json"
+    },
+    {
+      "id": "ifanr",
+      "name": "爱范儿",
+      "lang": "zh",
+      "feed": "feeds/ifanr.json"
+    },
+    {
+      "id": "qbitai",
+      "name": "量子位",
+      "lang": "zh",
+      "feed": "feeds/qbitai.json"
+    },
+    {
+      "id": "kr36",
+      "name": "36氪",
+      "lang": "zh",
+      "feed": "feeds/kr36.json"
+    },
+    {
+      "id": "geekpark",
+      "name": "极客公园",
+      "lang": "zh",
+      "feed": "feeds/geekpark.json"
+    },
+    {
+      "id": "ruanyifeng",
+      "name": "阮一峰周刊",
+      "lang": "zh",
+      "feed": "feeds/ruanyifeng.json"
+    },
+    {
+      "id": "infoqcn",
+      "name": "InfoQ 中文",
+      "lang": "zh",
+      "feed": "feeds/infoqcn.json"
+    },
+    {
+      "id": "arxiv",
+      "name": "arXiv AI",
+      "lang": "en",
+      "feed": "feeds/arxiv.json"
+    }
+  ]
+}

@@ -1,0 +1,490 @@
+{
+  "source": "arxiv",
+  "updatedAt": "2026-09-14T08:42:26.851Z",
+  "items": [
+    {
+      "id": "2f691af892f9",
+      "url": "https://arxiv.org/abs/2609.11977",
+      "title": "Occamy-1.0: Open Pareto-frontier 35B Intelligence for Co-work",
+      "titleZh": null,
+      "summary": "arXiv:2609.11977v1 Announce Type: new Abstract: Co-work agents execute complex workflows that combine information gathering, tool use, codin",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation-international.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "befa5752b167",
+      "url": "https://arxiv.org/abs/2609.11987",
+      "title": "Harness or Model? Isolating the Harness Effect in Agentic Coding with a Contamination-Controlled Private Suite",
+      "titleZh": null,
+      "summary": "arXiv:2609.11987v1 Announce Type: new Abstract: An agentic coding system couples a language model to a harness: the tools, prompts and contr",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation-international.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "c9629f3bc2c5",
+      "url": "https://arxiv.org/abs/2609.12035",
+      "title": "Reading the Whole Heart: Latent-Attention Masked Autoencoders for Multimodal Cardiac Representation Learning",
+      "titleZh": null,
+      "summary": "arXiv:2609.12035v1 Announce Type: new Abstract: Cardiovascular diagnosis rests on integrating complementary modalities, like ECG, echocardio",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/icons/licenses/by-4.0.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "f41bf7aa1157",
+      "url": "https://arxiv.org/abs/2609.12101",
+      "title": "Competence-Gated Pooling of Language Models and Priors for Event Forecasting",
+      "titleZh": null,
+      "summary": "arXiv:2609.12101v1 Announce Type: new Abstract: In hybrid forecasting, a language model is often one of several available signals. A system ",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/icons/licenses/by-4.0.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "90fab2532471",
+      "url": "https://arxiv.org/abs/2609.12105",
+      "title": "Language Is an Insufficient Substrate for Quantitative Reasoning, and Consequential Domains Need Large Quantitative Models",
+      "titleZh": null,
+      "summary": "arXiv:2609.12105v1 Announce Type: new Abstract: The prevailing assumption in applied machine learning is that progress on consequential quan",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/icons/licenses/by-4.0.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "08b641d2e971",
+      "url": "https://arxiv.org/abs/2609.12115",
+      "title": "DU-NO: A Parameter-Efficient Double U-Shaped Neural Operator for Phase-Resolving Wave Modeling",
+      "titleZh": null,
+      "summary": "arXiv:2609.12115v1 Announce Type: new Abstract: Phase-resolving wave models such as FUNWAVE-TVD are the accuracy standard for nearshore dyna",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/icons/licenses/by-4.0.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "cf4c8d639b4e",
+      "url": "https://arxiv.org/abs/2609.12116",
+      "title": "When Successful Knowledge Graph Edits Displace Correct Answers: Rank-Level Locality beyond Parameter Support",
+      "titleZh": null,
+      "summary": "arXiv:2609.12116v1 Announce Type: new Abstract: Editing a knowledge graph embedding (KGE) model to promote a desired answer can displace cor",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/icons/licenses/by-4.0.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "8304a0e99e5e",
+      "url": "https://arxiv.org/abs/2609.12139",
+      "title": "Mined from Scientific Literature: Process Schemas for Atomic Layer Deposition and Etching in Materials Science",
+      "titleZh": null,
+      "summary": "arXiv:2609.12139v1 Announce Type: new Abstract: Atomic layer deposition (ALD) and atomic layer etching (ALE) are reported heterogeneously ac",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/icons/licenses/by-4.0.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "265bd4f6841e",
+      "url": "https://arxiv.org/abs/2609.12162",
+      "title": "Can LLMs in Draft-Verify-Revise Pipelines Resolve Deictic Ambiguity?",
+      "titleZh": null,
+      "summary": "arXiv:2609.12162v1 Announce Type: new Abstract: Draft-verify-revise is a common LLM orchestration pattern for scaling inference-time compute",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation-international.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "fa00d3cba9f9",
+      "url": "https://arxiv.org/abs/2609.12165",
+      "title": "GLARE: Generative Learning via Adversarial Reward Estimation For Social Dynamics Forecasting",
+      "titleZh": null,
+      "summary": "arXiv:2609.12165v1 Announce Type: new Abstract: Meeting continuation requires tracking the agenda, speaker roles, participant intentions, an",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/icons/licenses/by-4.0.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "fdcf7881e616",
+      "url": "https://arxiv.org/abs/2609.12171",
+      "title": "WinSyn: An Automated Pipeline for Realistic Enterprise Question-Answering Evaluation",
+      "titleZh": null,
+      "summary": "arXiv:2609.12171v1 Announce Type: new Abstract: Enterprise settings provide a challenging environment for question-answering agents, which o",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/icons/licenses/by-4.0.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "d8f518e98af9",
+      "url": "https://arxiv.org/abs/2609.12247",
+      "title": "Soft Symbol Grounding for Prototypical Concepts",
+      "titleZh": null,
+      "summary": "arXiv:2609.12247v1 Announce Type: new Abstract: Neuro-symbolic models are usually trained with supervision only on final labels, leaving the",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [
+        "https://arxiv.org/static/browse/0.3.4/images/arxiv-logo-fb.png",
+        "https://arxiv.org/static/base/1.0.1/images/arxiv-logo-primary-light.svg",
+        "https://arxiv.org/icons/licenses/by-4.0.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/bibsonomy.png",
+        "https://arxiv.org/static/browse/0.3.4/images/icons/social/reddit.png",
+        "https://arxiv.org/static/base/1.0.1/images/funders/simons-foundation.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "aac6b2dc737d",
+      "url": "https://arxiv.org/abs/2609.12265",
+      "title": "GTA: Graph Theory Agent and Benchmark for Algorithmic Graph Reasoning with LLMs",
+      "titleZh": null,
+      "summary": "arXiv:2609.12265v1 Announce Type: new Abstract: Large Language Models (LLMs) are increasingly asked to reason over structured data such as g",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "fff00e9a001e",
+      "url": "https://arxiv.org/abs/2609.12267",
+      "title": "Learning Symbolic Constraint Representations from Examples: A Neuro-Symbolic Approach",
+      "titleZh": null,
+      "summary": "arXiv:2609.12267v1 Announce Type: new Abstract: Learning user-defined concepts as constraint networks has been extensively studied in the co",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "331b9473a3dd",
+      "url": "https://arxiv.org/abs/2609.12286",
+      "title": "T-GADE: Thermodynamical Generative-AI-Driven Evolution of LLM Artifacts",
+      "titleZh": null,
+      "summary": "arXiv:2609.12286v1 Announce Type: new Abstract: Integrating evolutionary computation and large language models (LLMs) requires control of po",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "17d03dbf98db",
+      "url": "https://arxiv.org/abs/2609.12287",
+      "title": "Robust Prototypical Networks for Few-Shot Sensor Fault Diagnosis",
+      "titleZh": null,
+      "summary": "arXiv:2609.12287v1 Announce Type: new Abstract: Industrial fault diagnosis often operates with only a handful of labeled fault examples, mak",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "b8e96b7739e3",
+      "url": "https://arxiv.org/abs/2609.12304",
+      "title": "Hybrid Physics-AI Framework of Body Center of Mass Dynamics from Wrist-Worn Sensors",
+      "titleZh": null,
+      "summary": "arXiv:2609.12304v1 Announce Type: new Abstract: Wrist-worn IMU has been widely used for daily-life health monitoring. Yet, it does not fully",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "c84b8cb900c2",
+      "url": "https://arxiv.org/abs/2609.12313",
+      "title": "Do Influence-Derived Data Perturbations Enable Machine Unlearning? A Controlled Study of Three Plausible Roles",
+      "titleZh": null,
+      "summary": "arXiv:2609.12313v1 Announce Type: new Abstract: We evaluate Deep Perturbation Learning (DPL), which perturbs training images and labels alon",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "aa450824d83d",
+      "url": "https://arxiv.org/abs/2609.12320",
+      "title": "AIM: A Privacy-Aware Interoperable Memory Framework for Multi-Agent Multi-User LLM Systems",
+      "titleZh": null,
+      "summary": "arXiv:2609.12320v1 Announce Type: new Abstract: Traditional large language models (LLMs) are scoped to individual user sessions, limiting th",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "0cb50be366d9",
+      "url": "https://arxiv.org/abs/2609.12322",
+      "title": "Affective Agent: On-Device Personalized Intervention Reasoning for Wearable Systems",
+      "titleZh": null,
+      "summary": "arXiv:2609.12322v1 Announce Type: new Abstract: Affective computing has advanced wearable state inference, but on-device reasoning about whe",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "6e57b4f95b73",
+      "url": "https://arxiv.org/abs/2609.12327",
+      "title": "LoRA-RC: Reservoir Computing with Low-Rank Adaptation",
+      "titleZh": null,
+      "summary": "arXiv:2609.12327v1 Announce Type: new Abstract: Reservoir computing (RC) trains only a linear readout over a fixed recurrent layer, making i",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "a477ff0445c9",
+      "url": "https://arxiv.org/abs/2609.12373",
+      "title": "Toward Robust Personalized Alignment for LLMs: Mitigating Persona Drift in Multi-Turn Dialogue",
+      "titleZh": null,
+      "summary": "arXiv:2609.12373v1 Announce Type: new Abstract: Persona drift remains a central challenge for personalized language models, as user profiles",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "1b39e625552d",
+      "url": "https://arxiv.org/abs/2609.12394",
+      "title": "BlueLM-GUI Technical Report: A Real-Device-Centric Flywheel for Self-Improving Mobile GUI Agents",
+      "titleZh": null,
+      "summary": "arXiv:2609.12394v1 Announce Type: new Abstract: Mobile GUI agents are shifting from multi-module frameworks to native models trained end-to-",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "ca6e70b81bb4",
+      "url": "https://arxiv.org/abs/2609.12395",
+      "title": "Is Gaussian Splatting Becoming Neural Again? A Taxonomy and Controlled Study of Learned Parameterization",
+      "titleZh": null,
+      "summary": "arXiv:2609.12395v1 Announce Type: new Abstract: Three-dimensional Gaussian Splatting (3DGS) combines explicit primitives with efficient rast",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "33b9bb139b97",
+      "url": "https://arxiv.org/abs/2609.12398",
+      "title": "Niching Agents in The Core",
+      "titleZh": null,
+      "summary": "arXiv:2609.12398v1 Announce Type: new Abstract: The Core is a unique competitive co-evolution algorithm that allows agents to evolve autonom",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "f2621de0e3e4",
+      "url": "https://arxiv.org/abs/2609.12399",
+      "title": "OneLA: Scaling Linear-Attention Decoding to Large Beams in Generative Recommendation",
+      "titleZh": null,
+      "summary": "arXiv:2609.12399v1 Announce Type: new Abstract: Generative recommendation (GR) relies on large-beam decoding to generate hundreds of candida",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "e61f070642d5",
+      "url": "https://arxiv.org/abs/2609.12400",
+      "title": "Decentralized Evolution of Hexapod Gaits with Independent Leg Controllers",
+      "titleZh": null,
+      "summary": "arXiv:2609.12400v1 Announce Type: new Abstract: This paper presents a novel approach to hexapod locomotion by evolving each leg's gait indep",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "656787274aec",
+      "url": "https://arxiv.org/abs/2609.12403",
+      "title": "Beyond ID Embeddings: Process-Grounded Language Modeling for Cognitive Diagnosis",
+      "titleZh": null,
+      "summary": "arXiv:2609.12403v1 Announce Type: new Abstract: Cognitive Diagnosis Models (CDMs) play a pivotal role in personalized online learning. Tradi",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "dcc4932e35e6",
+      "url": "https://arxiv.org/abs/2609.12404",
+      "title": "VRL-Bench: Benchmarking agents on computer control tasks under finite trial budgets",
+      "titleZh": null,
+      "summary": "arXiv:2609.12404v1 Announce Type: new Abstract: Learning from trial and error is a promising way to improve language agents on complex tasks",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "8024f0432514",
+      "url": "https://arxiv.org/abs/2609.12413",
+      "title": "SoK: Rethinking Jailbreaking in the Era of Agentic AI: Attacks, Defenses, and Practical Consideration",
+      "titleZh": null,
+      "summary": "arXiv:2609.12413v1 Announce Type: new Abstract: Large language models (LLMs) are rapidly evolving from conversational assistants into agenti",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "0d0127ca5128",
+      "url": "https://arxiv.org/abs/2609.12422",
+      "title": "Hierarchical Belief Modeling for Zero-Shot Opponent Adaptation in Partially Observable Multi-Agent Navigation",
+      "titleZh": null,
+      "summary": "arXiv:2609.12422v1 Announce Type: new Abstract: Lux AI Season 3 requires agents to act under partial observability, randomized episode level",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "4ac604e15f6a",
+      "url": "https://arxiv.org/abs/2609.12436",
+      "title": "LifeFuse-Mem: Lifecycle-Aware State Fusion Against Temporary Overwriting for Long-Term Memory",
+      "titleZh": null,
+      "summary": "arXiv:2609.12436v1 Announce Type: new Abstract: Long-running LLM agents require memory mechanisms that maintain coherent internal states acr",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "2a264f01f206",
+      "url": "https://arxiv.org/abs/2609.12446",
+      "title": "Do LLMs Trust the Accuser or the Accusation? Measuring Belief Shifts in Werewolf",
+      "titleZh": null,
+      "summary": "arXiv:2609.12446v1 Announce Type: new Abstract: Social-deduction games such as Werewolf are increasingly used to evaluate LLM agents, but ex",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "7643d4dabd16",
+      "url": "https://arxiv.org/abs/2609.12459",
+      "title": "EvoRS: On-Policy Self-Evolution of Reward Systems for Open-Ended Reinforcement Learning",
+      "titleZh": null,
+      "summary": "arXiv:2609.12459v1 Announce Type: new Abstract: Open-ended reinforcement learning often relies on rubric-based rewards for tasks without dir",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "9c5bc6820b42",
+      "url": "https://arxiv.org/abs/2609.12464",
+      "title": "Beyond Vector Similarity: Hierarchical Context-Aware Graph RAG vs Standard RAG in Enterprise Code Migration",
+      "titleZh": null,
+      "summary": "arXiv:2609.12464v1 Announce Type: new Abstract: As enterprises modernize legacy monolithic systems to microservices, Large Language Models (",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "170be389b78a",
+      "url": "https://arxiv.org/abs/2609.12472",
+      "title": "TripPattern: A Pattern-based Text Watermarking Method for Large Language Models",
+      "titleZh": null,
+      "summary": "arXiv:2609.12472v1 Announce Type: new Abstract: Text watermarking techniques have gained significant attention for identifying machine-gener",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "3c4844f78894",
+      "url": "https://arxiv.org/abs/2609.12482",
+      "title": "When Does AI Augment Work? A Workflow-Level Framework for Human-Agent Collaboration",
+      "titleZh": null,
+      "summary": "arXiv:2609.12482v1 Announce Type: new Abstract: We aim to characterise the value of artificial intelligence in the workplace. Current studie",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "3eb623a0293c",
+      "url": "https://arxiv.org/abs/2609.12489",
+      "title": "Confidence-Gated Transductive Test Generation for Code Reranking",
+      "titleZh": null,
+      "summary": "arXiv:2609.12489v1 Announce Type: new Abstract: Test case synthesis is crucial for evaluating and ranking programs generated by large langua",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "a4020dabbdb4",
+      "url": "https://arxiv.org/abs/2609.12495",
+      "title": "Information Specialization and Constrained Synthesis in Multi-Agent LLM Forecasting: A Prospective Live-Study of the 2026 FIFA World Cup",
+      "titleZh": null,
+      "summary": "arXiv:2609.12495v1 Announce Type: new Abstract: Large language models are being organized into multi-agent systems with specialized roles, b",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "80a88ceeeb98",
+      "url": "https://arxiv.org/abs/2609.12578",
+      "title": "From Collaboration to Capability: Internalizing Routed LLM Experts into Compact Reasoners",
+      "titleZh": null,
+      "summary": "arXiv:2609.12578v1 Announce Type: new Abstract: A compact controller can coordinate stronger experts by selecting whom to consult, formulati",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 -0400",
+      "images": [],
+      "digest": null
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "source": "githubblog",
+  "updatedAt": "2026-09-14T08:42:26.851Z",
+  "items": [
+    {
+      "id": "c44b2451dba4",
+      "url": "https://github.blog/ai-and-ml/github-copilot/marketing-ops-as-code-automating-events-from-planning-to-follow-up-on-github/",
+      "title": "Marketing ops as code: Automating events from planning to follow-up on GitHub",
+      "titleZh": null,
+      "summary": "If you can write down how you do your work, you can automate it. Here's what I did to support GitHub's APAC marketing team. The post Marketi",
+      "publishedAt": "Fri, 11 Sep 2026 18:26:10 +0000",
+      "images": [
+        "https://github.blog/wp-content/uploads/2026/01/generic-mona-copilot-logo.png",
+        "https://github.blog/wp-content/uploads/2024/06/AI-DarkMode-4.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/05/Enterprise-DarkMode-3.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.42.45%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.43.47%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.44.23%E2%80%AFAM.png?resize=800%2C425"
+      ],
+      "digest": null
+    },
+    {
+      "id": "aa97fe2ce391",
+      "url": "https://github.blog/ai-and-ml/github-copilot/github-copilot-app-for-beginners-using-the-diff-terminal-and-browser/",
+      "title": "GitHub Copilot app for Beginners: Using the diff, terminal, and browser",
+      "titleZh": null,
+      "summary": "Checking agent-generated code usually means hopping between tabs. Learn how to view diffs, run terminal commands, and preview web apps side ",
+      "publishedAt": "Thu, 10 Sep 2026 21:31:19 +0000",
+      "images": [
+        "https://github.blog/wp-content/uploads/2026/09/Screenshot-2026-09-09-at-3.23.34-PM.png",
+        "https://github.blog/wp-content/uploads/2024/06/AI-DarkMode-4.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/05/Enterprise-DarkMode-3.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.42.45%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.43.47%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.44.23%E2%80%AFAM.png?resize=800%2C425"
+      ],
+      "digest": null
+    },
+    {
+      "id": "a105b3ce5041",
+      "url": "https://github.blog/news-insights/company-news/github-availability-report-august-2026/",
+      "title": "GitHub availability report: August 2026",
+      "titleZh": null,
+      "summary": "In August, we experienced five incidents that resulted in degraded performance across GitHub services. The post GitHub availability report: ",
+      "publishedAt": "Thu, 10 Sep 2026 02:05:17 +0000",
+      "images": [
+        "https://github.blog/wp-content/uploads/2025/09/wallpaper-generic-blog-header.png",
+        "https://github.blog/wp-content/uploads/2024/06/AI-DarkMode-4.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/05/Enterprise-DarkMode-3.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.42.45%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.43.47%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.44.23%E2%80%AFAM.png?resize=800%2C425"
+      ],
+      "digest": null
+    },
+    {
+      "id": "87ef5c15d39b",
+      "url": "https://github.blog/ai-and-ml/github-copilot/project-hydrafusion-frontier-quality-via-multi-model-orchestration/",
+      "title": "Project HydraFusion: Frontier quality via multi-model orchestration",
+      "titleZh": null,
+      "summary": "In controlled offline evaluations, HydraFusion’s selective coding workflows matched or exceeded the evaluated Opus 5 baseline while reducing",
+      "publishedAt": "Fri, 04 Sep 2026 16:04:14 +0000",
+      "images": [
+        "https://github.blog/wp-content/uploads/2026/09/OptA_UI.jpg",
+        "https://github.blog/wp-content/uploads/2024/06/AI-DarkMode-4.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/05/Enterprise-DarkMode-3.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.42.45%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.43.47%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.44.23%E2%80%AFAM.png?resize=800%2C425"
+      ],
+      "digest": null
+    },
+    {
+      "id": "c18b3bb292c9",
+      "url": "https://github.blog/ai-and-ml/github-copilot/github-copilot-app-for-beginners-run-several-agents-at-once/",
+      "title": "GitHub Copilot app for Beginners: Run several agents at once",
+      "titleZh": null,
+      "summary": "Learn how to run parallel agents in the GitHub Copilot app, and experience the moment it stops feeling scary and starts feeling powerful. Th",
+      "publishedAt": "Thu, 03 Sep 2026 16:00:00 +0000",
+      "images": [
+        "https://github.blog/wp-content/uploads/2026/09/Screenshot-2026-09-02-at-12.28.34-PM.png?fit=1242%2C698",
+        "https://github.blog/wp-content/uploads/2024/06/AI-DarkMode-4.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/05/Enterprise-DarkMode-3.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.42.45%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.43.47%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.44.23%E2%80%AFAM.png?resize=800%2C425"
+      ],
+      "digest": null
+    },
+    {
+      "id": "271f803af092",
+      "url": "https://github.blog/ai-and-ml/decoding-the-new-ai-lingo-loops-harnesses-squads-hill-climbing-oh-my/",
+      "title": "Decoding the new AI lingo: Loops, harnesses, squads, hill climbing&#8230; oh my!",
+      "titleZh": null,
+      "summary": "From loop engineering to harnesses, squads, and open weights, the GitHub Podcast breaks down the AI terms showing up in developer conversati",
+      "publishedAt": "Wed, 02 Sep 2026 21:00:00 +0000",
+      "images": [
+        "https://github.blog/wp-content/uploads/2025/07/LinkedIn-Light-Mode-16x9-1.png?fit=1920%2C1080",
+        "https://github.blog/wp-content/uploads/2024/06/AI-DarkMode-4.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/05/Enterprise-DarkMode-3.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.42.45%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.43.47%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.44.23%E2%80%AFAM.png?resize=800%2C425"
+      ],
+      "digest": null
+    },
+    {
+      "id": "0461be447f8d",
+      "url": "https://github.blog/ai-and-ml/github-copilot/how-we-make-ai-coding-more-cost-efficient-without-sacrificing-task-quality/",
+      "title": "How we make AI coding more cost efficient without sacrificing task quality",
+      "titleZh": null,
+      "summary": "Why shorter outputs can cost more, and how GitHub Copilot reduces wasted work across the complete coding task. The post How we make AI codin",
+      "publishedAt": "Wed, 02 Sep 2026 18:00:00 +0000",
+      "images": [
+        "https://github.blog/wp-content/uploads/2026/01/generic-github-copilot-commit-logo.png?fit=1920%2C1080",
+        "https://github.blog/wp-content/uploads/2024/06/AI-DarkMode-4.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/05/Enterprise-DarkMode-3.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.42.45%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.43.47%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.44.23%E2%80%AFAM.png?resize=800%2C425"
+      ],
+      "digest": null
+    },
+    {
+      "id": "471ea8bf94e6",
+      "url": "https://github.blog/open-source/maintainers/openclaw-went-viral-meet-the-maintainers-building-and-securing-it/",
+      "title": "OpenClaw went viral. Meet the maintainers building and securing it.",
+      "titleZh": null,
+      "summary": "OpenClaw is the fastest-growing project in GitHub history. Peter Steinberger and several maintainers share what they learned in the project'",
+      "publishedAt": "Thu, 27 Aug 2026 16:00:00 +0000",
+      "images": [
+        "https://github.blog/wp-content/uploads/2026/08/OpenClaw-1.png",
+        "https://github.blog/wp-content/uploads/2024/06/AI-DarkMode-4.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/05/Enterprise-DarkMode-3.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.42.45%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.43.47%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.44.23%E2%80%AFAM.png?resize=800%2C425"
+      ],
+      "digest": null
+    },
+    {
+      "id": "7cef2b0b38a0",
+      "url": "https://github.blog/ai-and-ml/github-copilot/github-copilot-app-for-beginners-automate-dependabot-pull-request-triage/",
+      "title": "GitHub Copilot app for Beginners: Automate Dependabot pull request triage",
+      "titleZh": null,
+      "summary": "Managing library updates can be tedious at times. Learn how the GitHub Copilot app can handle this type of repetitive task. The post GitHub ",
+      "publishedAt": "Wed, 26 Aug 2026 20:12:53 +0000",
+      "images": [
+        "https://github.blog/wp-content/uploads/2026/08/Screenshot-2026-08-26-at-12.57.57-PM.png",
+        "https://github.blog/wp-content/uploads/2024/06/AI-DarkMode-4.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/05/Enterprise-DarkMode-3.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.42.45%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.43.47%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.44.23%E2%80%AFAM.png?resize=800%2C425"
+      ],
+      "digest": null
+    },
+    {
+      "id": "7414ec688271",
+      "url": "https://github.blog/ai-and-ml/llms/how-to-evaluate-llms-before-production/",
+      "title": "How to evaluate LLMs before production",
+      "titleZh": null,
+      "summary": "These are the lessons we learned evaluating LLMs for real-world secret scanning. The post How to evaluate LLMs before production appeared fi",
+      "publishedAt": "Tue, 25 Aug 2026 21:35:11 +0000",
+      "images": [
+        "https://github.blog/wp-content/uploads/2026/01/4ba0cd42388a255e04c78e5143548f22e577d68e0f15f68e6a3c76c18b927981-1920x1080-1.png",
+        "https://github.blog/wp-content/uploads/2024/06/AI-DarkMode-4.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/05/Enterprise-DarkMode-3.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.42.45%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.43.47%E2%80%AFAM.png?resize=800%2C425",
+        "https://github.blog/wp-content/uploads/2024/07/Screenshot-2024-07-23-at-8.44.23%E2%80%AFAM.png?resize=800%2C425"
+      ],
+      "digest": null
+    }
+  ]
+}

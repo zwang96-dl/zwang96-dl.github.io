@@ -1,0 +1,57 @@
+{
+  "source": "ruanyifeng",
+  "updatedAt": "2026-09-14T08:42:26.851Z",
+  "items": [
+    {
+      "id": "40214ceb7752",
+      "url": "http://www.ruanyifeng.com/blog/2026/09/weekly-issue-412.html",
+      "title": "科技爱好者周刊（第 412 期）：禁止 issue，只用 PR",
+      "titleZh": null,
+      "summary": "这里记录每周值得分享的科技内容，周五发布。...",
+      "publishedAt": "2026-09-11T00:11:50Z",
+      "images": [
+        "https://cdn.beekka.com/blogimg/asset/202107/bg2021072117.png",
+        "https://cdn.beekka.com/blogimg/asset/202609/bg2026090901.webp",
+        "https://cdn.beekka.com/blogimg/asset/202609/bg2026091017.webp",
+        "https://cdn.beekka.com/blogimg/asset/202609/bg2026090502.webp",
+        "https://cdn.beekka.com/blogimg/asset/202609/bg2026090503.webp",
+        "https://cdn.beekka.com/blogimg/asset/202609/bg2026090504.webp"
+      ],
+      "digest": null
+    },
+    {
+      "id": "cdbe936e3a4c",
+      "url": "http://www.ruanyifeng.com/blog/2026/09/weekly-issue-411.html",
+      "title": "科技爱好者周刊（第 411 期）：OpenClaw 2.0 是一个缩影",
+      "titleZh": null,
+      "summary": "这里记录每周值得分享的科技内容，周五发布。...",
+      "publishedAt": "2026-09-03T23:59:05Z",
+      "images": [
+        "https://cdn.beekka.com/blogimg/asset/202107/bg2021072117.png",
+        "https://cdn.beekka.com/blogimg/asset/202608/bg2026082702.webp",
+        "https://cdn.beekka.com/blogimg/asset/202608/bg2026083101.webp",
+        "https://cdn.beekka.com/blogimg/asset/202608/bg2026083102.webp",
+        "https://cdn.beekka.com/blogimg/asset/202608/bg2026082902.webp",
+        "https://cdn.beekka.com/blogimg/asset/202608/bg2026083001.webp"
+      ],
+      "digest": null
+    },
+    {
+      "id": "29bdcfe3209a",
+      "url": "http://www.ruanyifeng.com/blog/2026/08/weekly-issue-410.html",
+      "title": "科技爱好者周刊（第 410 期）：你需要知道的 AI 三种机制",
+      "titleZh": null,
+      "summary": "这里记录每周值得分享的科技内容，周五发布。...",
+      "publishedAt": "2026-08-27T23:56:43Z",
+      "images": [
+        "https://cdn.beekka.com/blogimg/asset/202107/bg2021072117.png",
+        "https://cdn.beekka.com/blogimg/asset/202608/bg2026082701.webp",
+        "https://cdn.beekka.com/blogimg/asset/202608/bg2026082703.webp",
+        "https://cdn.beekka.com/blogimg/asset/202608/bg2026082404.webp",
+        "https://cdn.beekka.com/blogimg/asset/202608/bg2026082405.webp",
+        "https://cdn.beekka.com/blogimg/asset/202608/bg2026082406.webp"
+      ],
+      "digest": null
+    }
+  ]
+}

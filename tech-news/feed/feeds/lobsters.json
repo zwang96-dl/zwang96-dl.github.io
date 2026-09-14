@@ -1,0 +1,300 @@
+{
+  "source": "lobsters",
+  "updatedAt": "2026-09-14T08:42:26.851Z",
+  "items": [
+    {
+      "id": "8e8a7d061046",
+      "url": "https://evanhahn.com/posts/2026-09-13-programmers-dislike-reduce/",
+      "title": "Anecdotally, programmers dislike \"reduce\"",
+      "titleZh": null,
+      "summary": "33 分 · 33 评论",
+      "publishedAt": "2026-09-13T18:59:05.562-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "2f61b197bc53",
+      "url": "https://giannirosato.com/blog/post/case-against-jxl",
+      "title": "The case against JPEG XL",
+      "titleZh": null,
+      "summary": "15 分 · 5 评论",
+      "publishedAt": "2026-09-13T20:18:11.130-05:00",
+      "images": [
+        "https://giannirosato.com/static/img/caustics-hdr.avif",
+        "https://giannirosato.com/static/img/libjxl_cvvdp.svg",
+        "https://giannirosato.com/static/img/libjxl_ms_ssim.svg",
+        "https://giannirosato.com/static/img/libjxl_ssimu2.svg",
+        "https://giannirosato.com/static/img/progressive_avif.avif",
+        "https://giannirosato.com/static/img/dec_time.svg"
+      ],
+      "digest": null
+    },
+    {
+      "id": "4044507048f7",
+      "url": "https://this.weekinsecurity.com/watch-what-you-say-apple-opens-the-door-to-a-nightmare-world-of-always-listening-tech/",
+      "title": "Watch what you say: Apple opens the door to a nightmare world of always-listening tech",
+      "titleZh": null,
+      "summary": "82 分 · 52 评论",
+      "publishedAt": "2026-09-13T07:10:30.087-05:00",
+      "images": [
+        "https://storage.ghost.io/c/ed/a2/eda2c6f7-faef-48b4-9ed4-86a4fa4dca68/content/images/size/w1200/2026/09/twis-social-apple-watch-zw-1.jpeg",
+        "https://storage.ghost.io/c/ed/a2/eda2c6f7-faef-48b4-9ed4-86a4fa4dca68/content/images/size/w960/2026/09/apple-rewind-watch.jpg",
+        "https://storage.ghost.io/c/ed/a2/eda2c6f7-faef-48b4-9ed4-86a4fa4dca68/content/images/size/w150/2025/07/whittaker_headshot_disrupt2024-1.webp",
+        "https://storage.ghost.io/c/ed/a2/eda2c6f7-faef-48b4-9ed4-86a4fa4dca68/content/images/size/w400/2026/09/flock-camera-twis-hero.jpeg",
+        "https://storage.ghost.io/c/ed/a2/eda2c6f7-faef-48b4-9ed4-86a4fa4dca68/content/images/size/w400/2026/08/twis-router-resproxy-mosh-kEOLkJksbc8.jpg",
+        "https://storage.ghost.io/c/ed/a2/eda2c6f7-faef-48b4-9ed4-86a4fa4dca68/content/images/size/w400/2026/08/dont-hire-a-spy-zw-1.jpg"
+      ],
+      "digest": null
+    },
+    {
+      "id": "d92d5e5b1725",
+      "url": "https://aloysberger.com/posts/writing-a-guix-service-from-scratch-as-a-beginner.html",
+      "title": "Writing a Guix service from scratch, as a beginner",
+      "titleZh": null,
+      "summary": "17 分 · 8 评论",
+      "publishedAt": "2026-09-13T18:24:10.765-05:00",
+      "images": [
+        "https://mirrors.creativecommons.org/presskit/icons/cc.svg",
+        "https://mirrors.creativecommons.org/presskit/icons/by.svg",
+        "https://mirrors.creativecommons.org/presskit/icons/sa.svg"
+      ],
+      "digest": null
+    },
+    {
+      "id": "189a212fe8df",
+      "url": "https://char.lt/blog/2026/09/sorcery-repo-viewer/",
+      "title": "what if my git host were a static site generator?",
+      "titleZh": null,
+      "summary": "49 分 · 20 评论",
+      "publishedAt": "2026-09-13T11:10:06.327-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "00eec4f48071",
+      "url": "https://whhone.com/posts/switching-to-gnu-guix/",
+      "title": "Switching to GNU Guix: A Beginner's Perspective",
+      "titleZh": null,
+      "summary": "39 分 · 18 评论",
+      "publishedAt": "2026-09-13T11:19:47.288-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "a46b2e3bd172",
+      "url": "https://devblogs.microsoft.com/oldnewthing/20260910-00/?p=112689",
+      "title": "Why is the x86 undefined instruction called ud2? Why 2?",
+      "titleZh": null,
+      "summary": "13 分 · 0 评论",
+      "publishedAt": "2026-09-13T22:34:33.147-05:00",
+      "images": [
+        "https://devblogs.microsoft.com/oldnewthing/wp-content/uploads/sites/38/2019/02/ShowCover.jpg",
+        "https://uhf.microsoft.com/images/microsoft/RE1Mu3b.png",
+        "https://devblogs.microsoft.com/oldnewthing/wp-content/themes/devblogs-evo/images/emojis/mind-blown.svg",
+        "https://devblogs.microsoft.com/oldnewthing/wp-content/themes/devblogs-evo/images/emojis/like.svg",
+        "https://devblogs.microsoft.com/oldnewthing/wp-content/themes/devblogs-evo/images/emojis/heart.svg",
+        "https://devblogs.microsoft.com/oldnewthing/wp-content/uploads/sites/38/2019/02/RaymondChen_5in-150x150.jpg"
+      ],
+      "digest": null
+    },
+    {
+      "id": "e88511fd02ea",
+      "url": "https://brew.sh/2026/09/13/homebrew-7.0.0/",
+      "title": "Homebrew 7.0.0",
+      "titleZh": null,
+      "summary": "46 分 · 5 评论",
+      "publishedAt": "2026-09-13T07:22:47.716-05:00",
+      "images": [
+        "https://brew.sh/assets/img/homebrew-social-card.png",
+        "https://brew.sh/assets/img/homebrew.svg",
+        "https://github.com/MikeMcQuaid.png?size=80",
+        "https://brew.sh/assets/img/blog/homebrew-7.0.0-brewui.png",
+        "https://brew.sh/assets/img/forkme_right_gray_6d6d6d.svg"
+      ],
+      "digest": null
+    },
+    {
+      "id": "f4d357ca6adc",
+      "url": "https://rm4n0s.github.io/posts/2-go-devs-should-learn-odin/",
+      "title": "Golang developers should try Odin",
+      "titleZh": null,
+      "summary": "19 分 · 26 评论",
+      "publishedAt": "2026-09-13T10:23:41.394-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "e58d93dd5c72",
+      "url": "https://eighty-twenty.org/2022/06/23/henderson-functional-operating-systems-1982",
+      "title": "Purely Functional Operating Systems",
+      "titleZh": null,
+      "summary": "12 分 · 0 评论",
+      "publishedAt": "2026-09-13T19:03:38.791-05:00",
+      "images": [
+        "https://eighty-twenty.org/images/ponsonby-statue-headerbg.jpg",
+        "https://eighty-twenty.org/images/feed-icon-14x14.png",
+        "https://gravatar.com/avatar/42b16d07d26467b3b1c06affe16413a2?d=mm&s=96"
+      ],
+      "digest": null
+    },
+    {
+      "id": "4460c246310a",
+      "url": "https://lalitm.com/post/buildprof/",
+      "title": "I made a build visualizer to understand Bun’s compile times",
+      "titleZh": null,
+      "summary": "107 分 · 28 评论",
+      "publishedAt": "2026-09-12T09:48:24.716-05:00",
+      "images": [
+        "https://lalitm.com/social-cards/buildprof.png"
+      ],
+      "digest": null
+    },
+    {
+      "id": "b57f108bbb1a",
+      "url": "https://lucio.albenga.es/web-en/posts/2025/from-git-to-fossil.html",
+      "title": "From Git to Fossil (2025)",
+      "titleZh": null,
+      "summary": "29 分 · 22 评论",
+      "publishedAt": "2026-09-13T02:51:19.345-05:00",
+      "images": [
+        "https://lucio.albenga.es/web-en/theme/images/Emacs-logo.png",
+        "https://lucio.albenga.es/web-en/theme/images/org-mode-unicorn.png",
+        "https://lucio.albenga.es/web-en/theme/images/pelican-logo.png",
+        "https://lucio.albenga.es/web-en/theme/images/250kbclub.gif",
+        "https://lucio.albenga.es/web-en/theme/images/librecan_badge.png",
+        "https://lucio.albenga.es/web-en/theme/images/green-team.gif"
+      ],
+      "digest": null
+    },
+    {
+      "id": "fb711c0d210e",
+      "url": "https://wiki.xxiivv.com/site/heol.html",
+      "title": "heol",
+      "titleZh": null,
+      "summary": "65 分 · 1 评论",
+      "publishedAt": "2026-09-13T00:59:41.454-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "1c0e0af7ed85",
+      "url": "https://abstractnonsense.xyz/blog/2025-08-31-can-a-regex-match-valid-card-numbers/",
+      "title": "Can a regex match valid card numbers?",
+      "titleZh": null,
+      "summary": "18 分 · 6 评论",
+      "publishedAt": "2026-09-13T08:39:15.845-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "f9d41f0f7828",
+      "url": "https://a6mzero.com/posts/this-pcb-is-brought-to-you-by-fable-5/",
+      "title": "This PCB is brought to you by Fable 5",
+      "titleZh": null,
+      "summary": "8 分 · 7 评论",
+      "publishedAt": "2026-09-13T13:00:25.852-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "b9eb6ec08900",
+      "url": "https://lobste.rs/s/0inlyw",
+      "title": "What are you doing this week?",
+      "titleZh": null,
+      "summary": "What are you doing this week? Feel free to share!\r\n\r\nKeep in mind it’s OK to do nothing at all, too.",
+      "publishedAt": "2026-09-14T02:47:47.767-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "17c1a95ff5ac",
+      "url": "https://terrytao.wordpress.com/2026/09/12/after-math/",
+      "title": "After Math",
+      "titleZh": null,
+      "summary": "15 分 · 6 评论",
+      "publishedAt": "2026-09-13T07:59:09.092-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "0086c2e83547",
+      "url": "https://lwn.net/SubscriberLink/1091015/d9e48318ed242b41/",
+      "title": "Stabilizing Rust's never type",
+      "titleZh": null,
+      "summary": "19 分 · 1 评论",
+      "publishedAt": "2026-09-13T09:00:18.804-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "adea3395e703",
+      "url": "https://github.com/mlochbaum/Singeli",
+      "title": "Singeli: High-level interface for low-level programming",
+      "titleZh": null,
+      "summary": "> Singeli is a domain-specific language for building high-performance algorithms (including SIMD) with flexible abstractions over code that ",
+      "publishedAt": "2026-09-13T21:26:52.276-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "658c52f7fa11",
+      "url": "https://www.youtube.com/watch?v=DjhRRj6WYcs",
+      "title": "The Edsac Film (1951, 1976)",
+      "titleZh": null,
+      "summary": "8 分 · 4 评论",
+      "publishedAt": "2026-09-13T08:20:01.874-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "562b1be36a47",
+      "url": "http://oldvcr.blogspot.com/2026/09/a-dick-smith-vz200-without-dick-smith.html",
+      "title": "A Dick Smith VZ200 without the Dick Smith",
+      "titleZh": null,
+      "summary": "15 分 · 8 评论",
+      "publishedAt": "2026-09-12T21:31:35.781-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "5ea45b741a1f",
+      "url": "https://exquisite.tube/w/3QQimMdswWJxrsPaJtak2u",
+      "title": "GEFS: The File Shredder of the Future",
+      "titleZh": null,
+      "summary": "10 分 · 0 评论",
+      "publishedAt": "2026-09-13T11:30:23.964-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "4e818cec2320",
+      "url": "https://cpp-rendering.io/being-lazy-in-c/",
+      "title": "Being lazy in C++",
+      "titleZh": null,
+      "summary": "9 分 · 4 评论",
+      "publishedAt": "2026-09-13T07:50:15.787-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "b7b2464983f9",
+      "url": "https://blog.jchw.dev/wrong-number/",
+      "title": "Sorry, Wrong Number: Debugging a Crash under Wine (2022)",
+      "titleZh": null,
+      "summary": "6 分 · 0 评论",
+      "publishedAt": "2026-09-13T15:31:16.592-05:00",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "2c709244f8f9",
+      "url": "https://sessioncontext.org",
+      "title": "Session Context — what a web page knows about you",
+      "titleZh": null,
+      "summary": "5 分 · 3 评论",
+      "publishedAt": "2026-09-13T08:36:10.899-05:00",
+      "images": [],
+      "digest": null
+    }
+  ]
+}

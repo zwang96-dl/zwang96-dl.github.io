@@ -1,0 +1,490 @@
+{
+  "source": "register",
+  "updatedAt": "2026-09-14T08:42:26.851Z",
+  "items": [
+    {
+      "id": "74872c4a4a7d",
+      "url": "https://www.theregister.com/systems/2026/09/14/who-me-tech-team-stood-and-laughed-at-colleague-who-pressed-the-wrong-off-button/5295749",
+      "title": "Who, Me? Tech team stood and laughed at colleague who pressed the wrong off button",
+      "titleZh": null,
+      "summary": "Ticklish situation solved with a lie about emergency maintenance",
+      "publishedAt": "Mon, 14 Sep 2026 08:30:00 +0200",
+      "images": [
+        "https://image.theregister.com/5295754.jpg?imageId=5295754&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/5271547.webp?imageId=5271547&width=360&height=360",
+        "https://image.theregister.com/213223.jpg?imageId=213223&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/5219893.jpg?imageId=5219893&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/4093968.jpg?imageId=4093968&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60"
+      ],
+      "digest": null
+    },
+    {
+      "id": "8b45c2c420d5",
+      "url": "https://www.theregister.com/ai-and-ml/2026/09/14/ai-and-its-main-promoters-are-not-enterprise-ready-says-gartner/5296074",
+      "title": "AI and its main promoters are not enterprise-ready, says Gartner",
+      "titleZh": null,
+      "summary": "Model-makers move too fast and don’t care when they break things",
+      "publishedAt": "Mon, 14 Sep 2026 07:11:19 +0200",
+      "images": [
+        "https://image.theregister.com/256908.jpg?imageId=256908&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/5271547.webp?imageId=5271547&x=0.00&y=11.33&cropw=100.00&croph=66.67&width=360&height=360",
+        "https://image.theregister.com/213223.jpg?imageId=213223&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/5219893.jpg?imageId=5219893&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/4093968.jpg?imageId=4093968&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60"
+      ],
+      "digest": null
+    },
+    {
+      "id": "4ae9bf02b2b4",
+      "url": "https://www.theregister.com/ai-and-ml/2026/09/14/big-ai-sets-out-its-terms-for-regulatory-capture-and-calls-it-pace-the-frontier/5296067",
+      "title": "Big AI sets out its terms for regulatory capture and calls it ‘Pace the frontier’",
+      "titleZh": null,
+      "summary": "Amodei, Altman, Nadella and Musk agree on how government can tame the monster they created",
+      "publishedAt": "Mon, 14 Sep 2026 03:15:16 +0200",
+      "images": [
+        "https://image.theregister.com/262625.jpg?imageId=262625&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/5271547.webp?imageId=5271547&x=0.00&y=11.33&cropw=100.00&croph=66.67&width=360&height=360",
+        "https://image.theregister.com/213223.jpg?imageId=213223&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/5219893.jpg?imageId=5219893&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/4093968.jpg?imageId=4093968&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60"
+      ],
+      "digest": null
+    },
+    {
+      "id": "6ee771b91e76",
+      "url": "https://www.theregister.com/offbeat/2026/09/13/the-improbable-music-of-the-zx-spectrums-one-bit-speaker/5295862",
+      "title": "The improbable music of the ZX Spectrum's one-bit speaker",
+      "titleZh": null,
+      "summary": "Ingenious coders coaxed multichannel chiptunes from the humblest of sound hardware",
+      "publishedAt": "Sun, 13 Sep 2026 15:00:00 +0200",
+      "images": [
+        "https://image.theregister.com/236851.jpg?imageId=236851&x=0&y=24.17&cropw=100&croph=71.67&panox=0&panoy=24.17&panow=100&panoh=71.67&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/213223.jpg?imageId=213223&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/5219893.jpg?imageId=5219893&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/4093968.jpg?imageId=4093968&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60",
+        "https://image.theregister.com/1681267.jpg?imageId=1681267&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60"
+      ],
+      "digest": null
+    },
+    {
+      "id": "a51cde05e603",
+      "url": "https://www.theregister.com/security/2026/09/13/security-through-obscurity-is-dead-and-ai-delivered-the-fatal-blow/5296000",
+      "title": "Security through obscurity is dead, and AI delivered the fatal blow",
+      "titleZh": null,
+      "summary": "RIP, you won't be mourned",
+      "publishedAt": "Sun, 13 Sep 2026 13:21:00 +0200",
+      "images": [
+        "https://image.theregister.com/5296004.jpg?imageId=5296004&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/213223.jpg?imageId=213223&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/5219893.jpg?imageId=5219893&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/4093968.jpg?imageId=4093968&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60",
+        "https://image.theregister.com/1681267.jpg?imageId=1681267&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60"
+      ],
+      "digest": null
+    },
+    {
+      "id": "379b971b4459",
+      "url": "https://www.theregister.com/software/2026/09/13/how-to-make-xfce-look-like-almost-any-desktop-you-want/5295775",
+      "title": "How to make Xfce look like almost any desktop you want",
+      "titleZh": null,
+      "summary": "Panel Profiles handles the heavy lifting, once you've installed the plugins it expects",
+      "publishedAt": "Sun, 13 Sep 2026 11:09:00 +0200",
+      "images": [
+        "https://image.theregister.com/5295794.jpg?imageId=5295794&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/5295786.webp?imageId=5295786&x=0.00&y=0.00&cropw=100.00&croph=100.00&width=960&height=606&format=jpg",
+        "https://image.theregister.com/5295782.webp?imageId=5295782&x=0.00&y=0.00&cropw=100.00&croph=100.00&width=960&height=720&format=jpg",
+        "https://image.theregister.com/5295784.webp?imageId=5295784&x=0.00&y=0.00&cropw=100.00&croph=100.00&width=960&height=720&format=jpg",
+        "https://image.theregister.com/5295788.webp?imageId=5295788&x=0.00&y=0.00&cropw=99.10&croph=100.00&width=960&height=606&format=jpg"
+      ],
+      "digest": null
+    },
+    {
+      "id": "0da66d04cce4",
+      "url": "https://www.theregister.com/systems/2026/09/12/nvidias-groq-acquihire-is-on-the-dojs-radar-but-its-already-too-late/5295986",
+      "title": "Nvidia's Groq acquihire is on the DOJ's radar, but it's already too late",
+      "titleZh": null,
+      "summary": "Even if regulators did somehow unwind the $20B deal, there's a growing list of alternatives ready to take Groq's place, no merger required",
+      "publishedAt": "Sat, 12 Sep 2026 15:26:00 +0200",
+      "images": [
+        "https://image.theregister.com/262815.jpg?imageId=262815&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/2917960.webp?imageId=2917960&width=360&height=360",
+        "https://image.theregister.com/213223.jpg?imageId=213223&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/5219893.jpg?imageId=5219893&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/4093968.jpg?imageId=4093968&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60"
+      ],
+      "digest": null
+    },
+    {
+      "id": "10133cf32ba6",
+      "url": "https://www.theregister.com/personal-tech/2026/09/12/dells-52-inch-enormo-monitor-is-a-tsunami-of-impractical-fun/5290753",
+      "title": "Dell's 52-inch enormo-monitor is a tsunami of impractical fun",
+      "titleZh": null,
+      "summary": "You probably don't need it, but as an example of the possible it impresses",
+      "publishedAt": "Sat, 12 Sep 2026 13:20:00 +0200",
+      "images": [
+        "https://image.theregister.com/4093826.jpg?imageId=4093826&x=0&y=0&cropw=100&croph=84.87&panox=0&panoy=0&panow=100&panoh=84.87&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/5271547.webp?imageId=5271547&width=360&height=360",
+        "https://image.theregister.com/5290766.webp?imageId=5290766&x=0.00&y=0.00&cropw=100.00&croph=100.00&width=960&height=404&format=jpg",
+        "https://image.theregister.com/5290769.webp?imageId=5290769&x=0.00&y=0.00&cropw=100.00&croph=100.00&width=960&height=404&format=jpg",
+        "https://image.theregister.com/4093826.webp?imageId=4093826&width=960&height=548&format=jpg"
+      ],
+      "digest": null
+    },
+    {
+      "id": "fa03b3bd3d65",
+      "url": "https://www.theregister.com/offbeat/2026/09/12/the-aircraft-might-not-be-flying-but-the-certificate-has-gone-on-vacation/5295622",
+      "title": "The aircraft might not be flying, but the certificate has gone on vacation",
+      "titleZh": null,
+      "summary": "Information is not forthcoming from this screen",
+      "publishedAt": "Sat, 12 Sep 2026 11:00:00 +0200",
+      "images": [
+        "https://image.theregister.com/5295625.jpg?imageId=5295625&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/5295625.webp?imageId=5295625&x=0.00&y=0.00&cropw=100.00&croph=100.00&width=960&height=826&format=jpg",
+        "https://image.theregister.com/213223.jpg?imageId=213223&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/5219893.jpg?imageId=5219893&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/4093968.jpg?imageId=4093968&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60"
+      ],
+      "digest": null
+    },
+    {
+      "id": "9d35db9c6f7d",
+      "url": "https://www.theregister.com/ai-and-ml/2026/09/11/ai-more-likely-to-kill-animals-if-it-saves-fuel-or-money/5295993",
+      "title": "AI more likely to kill animals if it saves fuel or money",
+      "titleZh": null,
+      "summary": "Machine learning models still have a lot to learn about the value of life",
+      "publishedAt": "Fri, 11 Sep 2026 23:49:59 +0200",
+      "images": [
+        "https://image.theregister.com/5296007.jpg?imageId=5296007&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/213223.jpg?imageId=213223&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/5219893.jpg?imageId=5219893&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/4093968.jpg?imageId=4093968&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60",
+        "https://image.theregister.com/1681267.jpg?imageId=1681267&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60"
+      ],
+      "digest": null
+    },
+    {
+      "id": "a8477b7cb231",
+      "url": "https://www.theregister.com/security/2026/09/11/more-jfrog-artifactory-bugs-under-attack-and-all-3-have-patches/5295943",
+      "title": "More JFrog Artifactory bugs under attack, and all 3 have patches",
+      "titleZh": null,
+      "summary": "If you're waiting for a sign to upgrade to a fixed version: this is it",
+      "publishedAt": "Fri, 11 Sep 2026 19:43:30 +0200",
+      "images": [
+        "https://image.theregister.com/5295963.jpg?imageId=5295963&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/213223.jpg?imageId=213223&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/5219893.jpg?imageId=5219893&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/4093968.jpg?imageId=4093968&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60",
+        "https://image.theregister.com/1681267.jpg?imageId=1681267&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60"
+      ],
+      "digest": null
+    },
+    {
+      "id": "ee892b843ed5",
+      "url": "https://www.theregister.com/offbeat/2026/09/11/mars-astronauts-could-live-in-houses-made-of-yeast-and-jello-say-scientists/5295931",
+      "title": "Mars astronauts could live in houses made of yeast and jello, say scientists",
+      "titleZh": null,
+      "summary": "Low-energy 3D printing could turn Martian dirt into sturdy structures",
+      "publishedAt": "Fri, 11 Sep 2026 18:50:01 +0200",
+      "images": [
+        "https://image.theregister.com/5295940.jpg?imageId=5295940&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=1200&height=683",
+        "https://www.theregister.com/view-resources/dachser2/public/theregister/logo-mobile.svg",
+        "https://image.theregister.com/213223.jpg?imageId=213223&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/5219893.jpg?imageId=5219893&panox=0.00&panoy=0.00&panow=100.00&panoh=100.00&heightx=0.00&heighty=0.00&heightw=100.00&heighth=100.00&width=960&height=432&format=webp&format=jpg",
+        "https://image.theregister.com/4093968.jpg?imageId=4093968&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60",
+        "https://image.theregister.com/1681267.jpg?imageId=1681267&x=0&y=0&cropw=100&croph=100&panox=0&panoy=0&panow=100&panoh=100&width=70&height=60"
+      ],
+      "digest": null
+    },
+    {
+      "id": "404870ac099e",
+      "url": "https://www.theregister.com/offbeat/2026/09/11/disembodied-fruit-fly-brain-joins-the-crypto-speculation-swarm/5295914",
+      "title": "Disembodied fruit fly brain joins the crypto speculation swarm",
+      "titleZh": null,
+      "summary": "Coinbase engineer gives simulated insect $100 and lets its neurons make the trades",
+      "publishedAt": "Fri, 11 Sep 2026 18:03:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "9264e4f534b2",
+      "url": "https://www.theregister.com/cyber-crime/2026/09/11/att-store-worker-gets-16-months-inside-for-sim-swap-side-hustle/5295898",
+      "title": "AT&T store worker gets 16 months inside for SIM-swap side hustle",
+      "titleZh": null,
+      "summary": "Phone shop staffer claimed he was paid less than $4k for in his part attacks leading to combined intended losses of $600,000",
+      "publishedAt": "Fri, 11 Sep 2026 17:16:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "979ce5cbd96f",
+      "url": "https://www.theregister.com/systems/2026/09/11/higher-prices-cant-crimp-server-sales-as-ai-drives-demand/5295827",
+      "title": "Higher prices can't crimp server sales as AI drives demand",
+      "titleZh": null,
+      "summary": "Shipments rise with enterprise and government buyers joining the hyperscaler spending spree",
+      "publishedAt": "Fri, 11 Sep 2026 16:27:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "75bf002e1d22",
+      "url": "https://www.theregister.com/public-sector/2026/09/11/britains-technology-brief-is-now-everyones-job-and-nobodys-responsibility/5295849",
+      "title": "Britain's technology brief is now everyone's job and nobody's responsibility",
+      "titleZh": null,
+      "summary": "Whitehall has scattered science, AI, and digital government across a thicket of competing ministerial portfolios",
+      "publishedAt": "Fri, 11 Sep 2026 15:12:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "a561a2631ea3",
+      "url": "https://www.theregister.com/cyber-crime/2026/09/11/ukrainian-lawyers-second-career-as-a-conti-coder-earns-him-4-years-behind-bars/5295841",
+      "title": "Ukrainian lawyer's second career as a Conti coder earns him 4 years behind bars",
+      "titleZh": null,
+      "summary": "Swapping legal work for malware development ended in extradition and a guilty plea",
+      "publishedAt": "Fri, 11 Sep 2026 14:15:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "ed5f2a8dac30",
+      "url": "https://www.theregister.com/security/2026/09/11/eus-cyber-resilience-act-starts-the-24-hour-vulnerability-clock/5295821",
+      "title": "EU's Cyber Resilience Act starts the 24-hour vulnerability clock",
+      "titleZh": null,
+      "summary": "Manufacturers must now disclose actively exploited flaws and severe security incidents through ENISA's new reporting platform",
+      "publishedAt": "Fri, 11 Sep 2026 13:34:41 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "521d886a3b37",
+      "url": "https://www.theregister.com/public-sector/2026/09/11/union-body-tells-uk-government-workers-must-get-a-say-before-ai-clocks-in/5295806",
+      "title": "Union body tells UK government workers must get a say before AI clocks in",
+      "titleZh": null,
+      "summary": "TUC warns against letting algorithms call the shots in the workplace",
+      "publishedAt": "Fri, 11 Sep 2026 12:35:22 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "c39423d010e7",
+      "url": "https://www.theregister.com/software/2026/09/11/digital-researchs-gem-opens-a-new-window-on-linux/5295546",
+      "title": "Digital Research's GEM opens a new window on Linux",
+      "titleZh": null,
+      "summary": "A radical new way to resolve the Gordian knot of X11 versus Wayland",
+      "publishedAt": "Fri, 11 Sep 2026 11:16:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "451afcd20bc4",
+      "url": "https://www.theregister.com/bofh/2026/09/11/bofh-oh-no-the-cms-ate-500-pages-of-corporate-documentation/5295201",
+      "title": "BOFH: Oh no! The CMS ate 500 pages of corporate documentation",
+      "titleZh": null,
+      "summary": "How could such a terrible tragedy have occurred?",
+      "publishedAt": "Fri, 11 Sep 2026 10:31:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "5a5af2bf3dcf",
+      "url": "https://www.theregister.com/ai-and-ml/2026/09/11/deepseeks-new-model-sets-a-template-for-powerful-llms-that-run-lean/5295715",
+      "title": "DeepSeek's new model sets a template for powerful LLMs that run lean",
+      "titleZh": null,
+      "summary": "DeepSeek V4.1 Flash proves that just because you build a bigger model doesn't mean you need more GPUs to serve it",
+      "publishedAt": "Fri, 11 Sep 2026 09:15:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "dc1d934db039",
+      "url": "https://www.theregister.com/personal-tech/2026/09/11/on-call-boss-wrongly-claimed-it-deleted-his-files-refused-to-learn-the-one-click-fix/5295448",
+      "title": "On Call: Boss wrongly claimed IT deleted his files, refused to learn the one-click fix",
+      "titleZh": null,
+      "summary": "There's no place like the Home directory, but the Documents folder is sometimes nicer",
+      "publishedAt": "Fri, 11 Sep 2026 08:30:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "b545c838a24d",
+      "url": "https://www.theregister.com/devops/2026/09/11/microsoft-anoints-rust-as-a-tier-1-internal-language/5295732",
+      "title": "Microsoft anoints Rust as a 'Tier 1' internal language",
+      "titleZh": null,
+      "summary": "Redmond's coders get the tool to help them scrub memory bugs off Windows",
+      "publishedAt": "Fri, 11 Sep 2026 08:26:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "a7de9cdcd1b7",
+      "url": "https://www.theregister.com/software/2026/09/11/oracle-says-ai-will-save-it-from-the-saaspocalypse-not-bring-it-on/5295736",
+      "title": "Oracle says AI will save it from the SaaSpocalypse, not bring it on",
+      "titleZh": null,
+      "summary": "It’s a better interface, can speed installations, and drives IaaS sales too",
+      "publishedAt": "Fri, 11 Sep 2026 04:43:10 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "05c33e084564",
+      "url": "https://www.theregister.com/ai-and-ml/2026/09/10/openai-arms-devs-with-ai-conversation-tool-that-can-talk-and-listen-at-the-same-time/5295708",
+      "title": "OpenAI arms devs with AI conversation tool that can talk and listen at the same time",
+      "titleZh": null,
+      "summary": "GPT-Live-1 makes speaking to AI models more fluid",
+      "publishedAt": "Fri, 11 Sep 2026 00:59:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "8ec91f265842",
+      "url": "https://www.theregister.com/ai-and-ml/2026/09/10/latest-anthropic-horror-story-chills-with-tales-of-kamikaze-drone-swarms-and-bioweapons-research/5295702",
+      "title": "Latest Anthropic horror story chills with tales of kamikaze drone swarms and bioweapons research",
+      "titleZh": null,
+      "summary": "Everyone from ShinyHunters to Russian freelancers is in on the illicit model fun",
+      "publishedAt": "Fri, 11 Sep 2026 00:38:35 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "496419006017",
+      "url": "https://www.theregister.com/security/2026/09/10/watch-out-apple-timepiece-can-grab-snippets-of-conversation-without-both-speakers-consent/5295666",
+      "title": "Watch out: Apple timepiece can grab snippets of conversation without both speakers' consent",
+      "titleZh": null,
+      "summary": "War is peace. Freedom is slavery. Privacy is surveillance",
+      "publishedAt": "Thu, 10 Sep 2026 21:50:24 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "d0211dbc0219",
+      "url": "https://www.theregister.com/devops/2026/09/10/shopify-extends-lifeline-to-tailwind-as-vibe-coding-erodes-web-dev-platforms-bottom-line/5295672",
+      "title": "Shopify extends lifeline to Tailwind as vibe coding erodes web dev platform's bottom line",
+      "titleZh": null,
+      "summary": "Acquisition gives open source CSS framework 'a stable long-term home'",
+      "publishedAt": "Thu, 10 Sep 2026 21:43:55 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "3fcc5a757d9e",
+      "url": "https://www.theregister.com/security/2026/09/10/hundreds-of-ai-agents-helped-papercut-attacker-hit-395-orgs-and-some-went-off-script/5295650",
+      "title": "Hundreds of AI agents helped PaperCut attacker hit 395+ orgs, and some went off script",
+      "titleZh": null,
+      "summary": "Human operator: don't touch CIS orgs. AI agents: look a squirrel!",
+      "publishedAt": "Thu, 10 Sep 2026 20:49:43 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "36240fae7101",
+      "url": "https://www.theregister.com/ai-and-ml/2026/09/10/openais-website-hijacking-swarm-reached-far-further-than-we-thought/5295644",
+      "title": "OpenAI's website-hijacking swarm reached far further than we thought",
+      "titleZh": null,
+      "summary": "New report points finger at OpenAI bots that hijacked a German wiki for improper use of an additional 20 websites, and 14 fetching services",
+      "publishedAt": "Thu, 10 Sep 2026 20:15:10 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "56ef123e779e",
+      "url": "https://www.theregister.com/ai-and-ml/2026/09/10/ai-job-cuts-could-come-with-a-costly-undo-button/5295605",
+      "title": "AI job cuts could come with a costly undo button",
+      "titleZh": null,
+      "summary": "Gartner reckons nearly a third of displaced employees may be rehired by 2029 – at a premium",
+      "publishedAt": "Thu, 10 Sep 2026 18:21:22 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "85ae5cd9b488",
+      "url": "https://www.theregister.com/ai-and-ml/2026/09/10/nasa-and-ibm-open-source-lunar-mapping-tools/5295633",
+      "title": "NASA and IBM open source lunar mapping tools",
+      "titleZh": null,
+      "summary": "Can help you pick the perfect spot for your future evil lair, or boffins make discoveries about Earth's satellite",
+      "publishedAt": "Thu, 10 Sep 2026 18:09:12 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "2ccad6187b05",
+      "url": "https://www.theregister.com/databases/2026/09/10/azure-sql-data-sync-stops-taking-newcomers-before-2027-execution/5295579",
+      "title": "Azure SQL Data Sync stops taking newcomers before 2027 execution",
+      "titleZh": null,
+      "summary": "Existing customers can carry on for now, but Microsoft offers no like-for-like successor",
+      "publishedAt": "Thu, 10 Sep 2026 16:47:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "8c34dc20071e",
+      "url": "https://www.theregister.com/on-prem/2026/09/10/nscale-swallows-lions-share-of-uk-datacenter-investment/5295541",
+      "title": "Nscale swallows lion's share of UK datacenter investment",
+      "titleZh": null,
+      "summary": "Tracxn credits one AI infrastructure outfit with $3.7B of sector's $5.7B haul",
+      "publishedAt": "Thu, 10 Sep 2026 16:08:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "c2d0634a2182",
+      "url": "https://www.theregister.com/security/2026/09/10/shinyhunters-expose-64m-in-attack-on-medical-supplier-mckesson/5295550",
+      "title": "ShinyHunters expose 6.4M in attack on medical supplier McKesson",
+      "titleZh": null,
+      "summary": "Have I Been Pwned logs leaked records spanning patients, staff, and providers",
+      "publishedAt": "Thu, 10 Sep 2026 15:13:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "4d32bc7b4230",
+      "url": "https://www.theregister.com/systems/2026/09/10/d-matrix-drinks-the-nvidia-kool-aid-with-nvlink-fusion-and-mgx-rack-designs/5295403",
+      "title": "d-Matrix drinks the Nvidia Kool-Aid with NVLink Fusion and MGX rack designs",
+      "titleZh": null,
+      "summary": "AI infrastructure startup joins Qualcomm, Arm, Marvell, Amazon, Fujitsu, and MediaTek as NVLink true believers",
+      "publishedAt": "Thu, 10 Sep 2026 15:00:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "471aecd3a819",
+      "url": "https://www.theregister.com/public-sector/2026/09/10/ministers-rejected-nats-reimbursement-plan-before-2000-uk-flights-were-cancelled/5295529",
+      "title": "Ministers rejected NATS reimbursement plan before 2,000 UK flights were cancelled",
+      "titleZh": null,
+      "summary": "Government orders independent review as carriers demand boss's resignation",
+      "publishedAt": "Thu, 10 Sep 2026 14:28:32 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "c2e72343223a",
+      "url": "https://www.theregister.com/cyber-crime/2026/09/10/trezor-bitbox-users-targeted-in-newsletter-phishing-spree/5295496",
+      "title": "Trezor, BitBox users targeted in newsletter phishing spree",
+      "titleZh": null,
+      "summary": "Attackers exploit legitimate mailing channels to demand crypto wallet backups",
+      "publishedAt": "Thu, 10 Sep 2026 13:30:00 +0200",
+      "images": [],
+      "digest": null
+    },
+    {
+      "id": "3bae5a79ef28",
+      "url": "https://www.theregister.com/ai-and-ml/2026/09/10/ai-uprising-postponed-after-copilot-falls-off-the-web/5295475",
+      "title": "AI uprising postponed after Copilot falls off the web",
+      "titleZh": null,
+      "summary": "Error 1016 kept the chatbot quiet for 100 minutes while a separate resilience drill swallowed suggestion pills",
+      "publishedAt": "Thu, 10 Sep 2026 12:30:50 +0200",
+      "images": [],
+      "digest": null
+    }
+  ]
+}

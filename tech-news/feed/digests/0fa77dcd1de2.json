@@ -1,0 +1,29 @@
+{
+  "id": "0fa77dcd1de2",
+  "url": "https://www.vals.ai/blogs/fable-solves-cyphral-distich",
+  "tldr": "好家伙，370 年没人搞定的古密码，Claude 一天就给破了",
+  "points": [
+    "这密码叫 Cyphral Distich，是 1653 年 Sir Thomas Urquhart 藏在书里的 64 个数字，两行各 32 个",
+    "370 年里无数人试过，频率分析、替换密码全都折戟，1899 年还被当成公开难题，还进了 Klaus Schmeh 的 Top 50 未解名单",
+    "说白了，之前所有人都想复杂了：密钥根本不在外面，就在书里——第 i 个数字，去第 i 段 Proquiritation（32 段祷文）里找第 n 个词，取首字母",
+    "Fable 5.1 只花了 44 分钟、17.6 万 token 就搞定了，解出来是一句给查理二世的祈祷：O GOD UPHOLD KING CHARLS THE SECOND……",
+    "顺手还把另一组 285 个数字的 Cyphral Octastich 也解了——Urquhart 是个保王党，藏的全是给国王祈祷的话",
+    "作者自己都说，这答案事后看简直打脸人类：线索就印在密码前面那一页，370 年愣是没人往那儿想"
+  ],
+  "facts": [
+    "密码名 Cyphral Distich，两行各 32 个数字，共 64 个",
+    "出自 Sir Thomas Urquhart 的 Logopandecteision（1653）",
+    "1899 年 Notes and Queries 将其列为公开难题",
+    "Klaus Schmeh Top 50 未解加密信息",
+    "Claude Fable 5.1 耗时 44 分钟、176k tokens",
+    "解法：第 i 个数字 → 第 i 段 Proquiritation → 取第 n 个词的首字母",
+    "明文：O GOD UPHOLD KING CHARLS THE SECOND AND MAKE HIM THE SUPREME RULER OF THIS LAND",
+    "第二组密码 Cyphral Octastich 出自 The Jewel（1652），共 285 个数字"
+  ],
+  "why": "看看 AI 是怎么把人类 370 年没想明白的事，用最直白的办法想明白的",
+  "images": [
+    "https://www.vals.ai/og.jpg",
+    "https://www.vals.ai/blogs/2026-08-31-fable-solves-cyphral-distich/hero.png"
+  ],
+  "generatedAt": "2026-09-14T08:42:26.851Z"
+}
