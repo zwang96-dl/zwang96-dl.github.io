@@ -1,252 +1,252 @@
 {
-  "source": "hn",
-  "updatedAt": "2026-09-14T08:47:10.881Z",
-  "items": [
-    {
-      "id": "0fa77dcd1de2",
-      "url": "https://www.vals.ai/blogs/fable-solves-cyphral-distich",
-      "title": "Fable 5.1 Solves the Cyphral Distich, a 370-year-old cipher",
-      "titleZh": "Fable 5.1 破解了 370 年无人能解的 Cyphral Distich 古密码",
-      "summary": "873 分 · 358 评论 · u1hcw9nx",
-      "publishedAt": "2026-09-13T21:06:13Z",
-      "images": [
-        "https://www.vals.ai/og.jpg",
-        "https://www.vals.ai/blogs/2026-08-31-fable-solves-cyphral-distich/hero.png"
-      ],
-      "digest": "digests/0fa77dcd1de2.json"
-    },
-    {
-      "id": "ef9f4296e998",
-      "url": "https://www.atomic14.com/2026/09/13/why-is-google-still-serving-dodgy-ads",
-      "title": "Why is Google still serving dodgy ads?",
-      "titleZh": null,
-      "summary": "790 分 · 351 评论 · iamflimflam1",
-      "publishedAt": "2026-09-13T17:37:44Z",
-      "images": [
-        "https://www.atomic14.com/assets/article_images/2026-09-13/dodgy.webp",
-        "https://www.atomic14.com/assets/article_images/2026-09-13/hopeless.webp"
-      ],
-      "digest": null
-    },
-    {
-      "id": "ed4dc19a3249",
-      "url": "https://www.lesswrong.com/posts/munJKF7iWMsWJLAH2/astra-and-fable-still-hack-on-simple-variants-of-alignment",
-      "title": "Astra and Fable still hack on simple variants of alignment evals from 2025",
-      "titleZh": null,
-      "summary": "431 分 · 201 评论 · Levitating",
-      "publishedAt": "2026-09-13T14:28:36Z",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "ed60bc70cf72",
-      "url": "https://www.theverge.com/column/994172/your-car-is-selling-your-data",
-      "title": "Data collected by cars and sold to third parties",
-      "titleZh": null,
-      "summary": "416 分 · 207 评论 · bookofjoe",
-      "publishedAt": "2026-09-13T13:45:08Z",
-      "images": [
-        "https://platform.theverge.com/wp-content/uploads/sites/2/2026/09/gettyimages-144097019.jpg?quality=90&amp;strip=all&amp;crop=0%2C10.678370919471%2C100%2C78.643258161058&amp;w=1200",
-        "https://www.google-analytics.com/g/collect?v=2&amp;tid=G-C3QZPB4GVE&amp;cid=555&amp;en=noscript_page_view",
-        "https://platform.theverge.com/wp-content/uploads/sites/2/2026/09/gettyimages-144097019.jpg?quality=90&amp;strip=all&amp;crop=0.06944444444445%2C0%2C99.861111111111%2C100&amp;w=2400",
-        "https://platform.theverge.com/wp-content/uploads/sites/2/2026/09/gettyimages-144097019.jpg?quality=90&amp;strip=all&amp;crop=16.712962962963%2C0%2C66.574074074074%2C100&amp;w=2400",
-        "https://platform.theverge.com/wp-content/uploads/sites/2/2026/09/a1818657383_10.jpg?quality=90&amp;strip=all&amp;crop=0%2C16.666666666667%2C100%2C66.666666666667&amp;w=2400",
-        "https://platform.theverge.com/wp-content/uploads/sites/2/2026/09/gettyimages-151060900.jpg?quality=90&amp;strip=all&amp;crop=0%2C0%2C100%2C100&amp;w=2400"
-      ],
-      "digest": null
-    },
-    {
-      "id": "4827a6903f84",
-      "url": "https://community.signalusers.org/t/registration-without-a-phone-number/2222?page=10",
-      "title": "Registration without a phone number on Signal will use zero-knowledge proofs",
-      "titleZh": null,
-      "summary": "236 分 · 115 评论 · Cider9986",
-      "publishedAt": "2026-09-13T21:47:04Z",
-      "images": [
-        "https://community.signalusers.org/uploads/db3609/original/3X/2/a/2aae74b9e7c4af45dfcd09cfa6e9c90fb3b7534c.png"
-      ],
-      "digest": null
-    },
-    {
-      "id": "748e2bdde0a1",
-      "url": "https://julialang.org/blog/2026/09/julia-1.13-highlights/",
-      "title": "Julia 1.13 highlights",
-      "titleZh": null,
-      "summary": "222 分 · 20 评论 · eigenspace",
-      "publishedAt": "2026-09-10T12:27:25Z",
-      "images": [
-        "https://julialang.org/assets/images/julia-open-graph.png",
-        "https://julialang.org/assets/blog/2026-1.13-highlights/repl_highlight.png",
-        "https://julialang.org/assets/blog/2026-1.13-highlights/repl_highlight_monokai.png",
-        "https://julialang.org/assets/blog/2026-1.13-highlights/fzf.png",
-        "https://julialang.org/assets/blog/2026-1.13-highlights/fzf_LA.png",
-        "https://julialang.org/assets/blog/2026-1.13-highlights/enable-debug-logging.png"
-      ],
-      "digest": null
-    },
-    {
-      "id": "f8e3bc763d75",
-      "url": "https://spaceships.treybastian.com/",
-      "title": "Spaceships (Reverse Asteroid)",
-      "titleZh": null,
-      "summary": "214 分 · 37 评论 · zdw",
-      "publishedAt": "2026-09-10T04:44:32Z",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "9041bf0073b1",
-      "url": "https://developer.apple.com/accessories/dimensional-drawings/",
-      "title": "Apple's Dimensional Drawings",
-      "titleZh": null,
-      "summary": "168 分 · 57 评论 · herbertl",
-      "publishedAt": "2026-09-14T00:11:21Z",
-      "images": [
-        "https://developer.apple.com/news/images/og/accessories-og.jpg"
-      ],
-      "digest": null
-    },
-    {
-      "id": "15d32d01aaec",
-      "url": "https://github.com/Speedstu/CUDA-for-AMD-Windows",
-      "title": "CUDA for AMD on Windows",
-      "titleZh": null,
-      "summary": "161 分 · 85 评论 · chiassedu80",
-      "publishedAt": "2026-09-13T14:25:13Z",
-      "images": [
-        "https://opengraph.githubassets.com/01d2e576ccd141b28f01dccb7694d0994e847926e1f87306a434a196a604c684/Speedstu/CUDA-for-AMD-Windows",
-        "https://img.shields.io/badge/platform-Windows%20x64-555555",
-        "https://img.shields.io/badge/GPU-AMD%20Radeon-555555",
-        "https://github.com/Speedstu/CUDA-for-AMD-Windows/actions/workflows/verify.yml/badge.svg"
-      ],
-      "digest": null
-    },
-    {
-      "id": "97e14b967a5d",
-      "url": "https://news.ycombinator.com/item?id=49686380",
-      "title": "Ask HN: What are you working on? (September 2026)",
-      "titleZh": null,
-      "summary": "159 分 · 488 评论 · david927",
-      "publishedAt": "2026-09-13T17:31:38Z",
-      "images": [
-        "https://news.ycombinator.com/y18.svg",
-        "https://news.ycombinator.com/s.gif"
-      ],
-      "digest": null
-    },
-    {
-      "id": "014b0fffb815",
-      "url": "https://techcrunch.com/2026/09/12/automattic-confirms-mullenweg-has-returned-as-ceo-after-attempted-ouster-by-board/",
-      "title": "Mullenweg has returned as CEO after attempted board ouster",
-      "titleZh": null,
-      "summary": "140 分 · 189 评论 · ilamont",
-      "publishedAt": "2026-09-13T20:19:06Z",
-      "images": [
-        "https://techcrunch.com/wp-content/uploads/2024/10/matt-mullenweg.jpg?resize=1200,799",
-        "https://techcrunch.com/wp-content/uploads/2026/05/tc-lockup-hp.svg",
-        "https://techcrunch.com/wp-content/uploads/2024/09/tc-logo-mobile.svg",
-        "https://techcrunch.com/wp-content/uploads/2024/10/matt-mullenweg.jpg?w=1024",
-        "https://techcrunch.com/wp-content/uploads/2021/01/lwzxxnshgj71bonwbik3.jpg.jpg?w=150",
-        "https://techcrunch.com/wp-content/uploads/2025/04/Disrupt2026-Color.png"
-      ],
-      "digest": null
-    },
-    {
-      "id": "3e71e291d6f6",
-      "url": "https://giannirosato.com/blog/post/case-against-jxl/",
-      "title": "The case against JPEG XL",
-      "titleZh": null,
-      "summary": "140 分 · 188 评论 · contact9879",
-      "publishedAt": "2026-09-14T01:02:37Z",
-      "images": [
-        "https://giannirosato.com/static/img/caustics-hdr.avif",
-        "https://giannirosato.com/static/img/libjxl_cvvdp.svg",
-        "https://giannirosato.com/static/img/libjxl_ms_ssim.svg",
-        "https://giannirosato.com/static/img/libjxl_ssimu2.svg",
-        "https://giannirosato.com/static/img/progressive_avif.avif",
-        "https://giannirosato.com/static/img/dec_time.svg"
-      ],
-      "digest": null
-    },
-    {
-      "id": "a3853644c8ab",
-      "url": "https://fortune.com/2026/09/08/nike-stock-plummets-sp500-market-cap-index/",
-      "title": "Nike exits the S&P 100 after 18 years and a $200B market-cap wipeout",
-      "titleZh": null,
-      "summary": "105 分 · 126 评论 · andsoitis",
-      "publishedAt": "2026-09-14T02:50:40Z",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "3149e64f7f8b",
-      "url": "https://www.interconnects.ai/p/open-source-ai-reading-list",
-      "title": "Open-source AI and open models reading list",
-      "titleZh": null,
-      "summary": "104 分 · 16 评论 · simonpure",
-      "publishedAt": "2026-09-14T00:22:51Z",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "660b8db4e472",
-      "url": "https://aprilnea.me/en/blog/reverse-engineering-claude-code-antspace",
-      "title": "Reverse-Engineering Claude Web's MicroVM: Uncovering Anthropic's Hidden Antspace",
-      "titleZh": null,
-      "summary": "85 分 · 20 评论 · rzk",
-      "publishedAt": "2026-09-11T03:45:42Z",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "2273702842f5",
-      "url": "https://pages.cs.wisc.edu/~plonka/netgear-sntp/",
-      "title": "Flawed routers flood University of Wisconsin internet time server (2003)",
-      "titleZh": null,
-      "summary": "80 分 · 9 评论 · walrus01",
-      "publishedAt": "2026-09-13T20:33:18Z",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "b206c3e11140",
-      "url": "https://www.katjahoyer.uk/p/the-gdr-and-vietnam-from-fake-coffee",
-      "title": "The GDR and Vietnam: From Fake Coffee to Coffee Empire",
-      "titleZh": null,
-      "summary": "75 分 · 25 评论 · NaOH",
-      "publishedAt": "2026-09-10T19:39:13Z",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "e5ce11066a8a",
-      "url": "https://arxiv.org/abs/1802.07228",
-      "title": "The Malicious Use of Artificial Intelligence",
-      "titleZh": null,
-      "summary": "61 分 · 12 评论 · rasengan0",
-      "publishedAt": "2026-09-14T01:22:35Z",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "ec58d3601956",
-      "url": "https://knowablemagazine.org/content/article/society/2026/prehistory-lost-threads",
-      "title": "Rope, twine and thread: Invisible technologies of the Stone Age",
-      "titleZh": null,
-      "summary": "57 分 · 13 评论 · knowablemag",
-      "publishedAt": "2026-09-11T17:38:11Z",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "3f0311b55ec8",
-      "url": "https://calif.io/research/oempocalypse",
-      "title": "OEMpocalypse: Unprivileged Android app to root on Samsung, Xiaomi, others",
-      "titleZh": null,
-      "summary": "47 分 · 12 评论 · negura",
-      "publishedAt": "2026-09-14T02:25:44Z",
-      "images": [],
-      "digest": null
-    }
-  ]
+ "source": "hn",
+ "updatedAt": "2026-09-14T08:47:10.881Z",
+ "items": [
+  {
+   "id": "0fa77dcd1de2",
+   "url": "https://www.vals.ai/blogs/fable-solves-cyphral-distich",
+   "title": "Fable 5.1 Solves the Cyphral Distich, a 370-year-old cipher",
+   "titleZh": "Fable 5.1 破解了 370 年无人能解的 Cyphral Distich 古密码",
+   "summary": "873 分 · 358 评论 · u1hcw9nx",
+   "publishedAt": "2026-09-13T21:06:13Z",
+   "images": [
+    "https://www.vals.ai/og.jpg",
+    "https://www.vals.ai/blogs/2026-08-31-fable-solves-cyphral-distich/hero.png"
+   ],
+   "digest": "digests/0fa77dcd1de2.json"
+  },
+  {
+   "id": "ef9f4296e998",
+   "url": "https://www.atomic14.com/2026/09/13/why-is-google-still-serving-dodgy-ads",
+   "title": "Why is Google still serving dodgy ads?",
+   "titleZh": "谷歌为啥还在投这种不靠谱广告？",
+   "summary": "790 分 · 351 评论 · iamflimflam1",
+   "publishedAt": "2026-09-13T17:37:44Z",
+   "images": [
+    "https://www.atomic14.com/assets/article_images/2026-09-13/dodgy.webp",
+    "https://www.atomic14.com/assets/article_images/2026-09-13/hopeless.webp"
+   ],
+   "digest": null
+  },
+  {
+   "id": "ed4dc19a3249",
+   "url": "https://www.lesswrong.com/posts/munJKF7iWMsWJLAH2/astra-and-fable-still-hack-on-simple-variants-of-alignment",
+   "title": "Astra and Fable still hack on simple variants of alignment evals from 2025",
+   "titleZh": "Astra 和 Fable 在 2025 年对齐评测的简单变体上依然能作弊过关",
+   "summary": "431 分 · 201 评论 · Levitating",
+   "publishedAt": "2026-09-13T14:28:36Z",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "ed60bc70cf72",
+   "url": "https://www.theverge.com/column/994172/your-car-is-selling-your-data",
+   "title": "Data collected by cars and sold to third parties",
+   "titleZh": "汽车收集的数据被卖给了第三方",
+   "summary": "416 分 · 207 评论 · bookofjoe",
+   "publishedAt": "2026-09-13T13:45:08Z",
+   "images": [
+    "https://platform.theverge.com/wp-content/uploads/sites/2/2026/09/gettyimages-144097019.jpg?quality=90&amp;strip=all&amp;crop=0%2C10.678370919471%2C100%2C78.643258161058&amp;w=1200",
+    "https://www.google-analytics.com/g/collect?v=2&amp;tid=G-C3QZPB4GVE&amp;cid=555&amp;en=noscript_page_view",
+    "https://platform.theverge.com/wp-content/uploads/sites/2/2026/09/gettyimages-144097019.jpg?quality=90&amp;strip=all&amp;crop=0.06944444444445%2C0%2C99.861111111111%2C100&amp;w=2400",
+    "https://platform.theverge.com/wp-content/uploads/sites/2/2026/09/gettyimages-144097019.jpg?quality=90&amp;strip=all&amp;crop=16.712962962963%2C0%2C66.574074074074%2C100&amp;w=2400",
+    "https://platform.theverge.com/wp-content/uploads/sites/2/2026/09/a1818657383_10.jpg?quality=90&amp;strip=all&amp;crop=0%2C16.666666666667%2C100%2C66.666666666667&amp;w=2400",
+    "https://platform.theverge.com/wp-content/uploads/sites/2/2026/09/gettyimages-151060900.jpg?quality=90&amp;strip=all&amp;crop=0%2C0%2C100%2C100&amp;w=2400"
+   ],
+   "digest": null
+  },
+  {
+   "id": "4827a6903f84",
+   "url": "https://community.signalusers.org/t/registration-without-a-phone-number/2222?page=10",
+   "title": "Registration without a phone number on Signal will use zero-knowledge proofs",
+   "titleZh": "Signal 无手机号注册将用零知识证明",
+   "summary": "236 分 · 115 评论 · Cider9986",
+   "publishedAt": "2026-09-13T21:47:04Z",
+   "images": [
+    "https://community.signalusers.org/uploads/db3609/original/3X/2/a/2aae74b9e7c4af45dfcd09cfa6e9c90fb3b7534c.png"
+   ],
+   "digest": null
+  },
+  {
+   "id": "748e2bdde0a1",
+   "url": "https://julialang.org/blog/2026/09/julia-1.13-highlights/",
+   "title": "Julia 1.13 highlights",
+   "titleZh": null,
+   "summary": "222 分 · 20 评论 · eigenspace",
+   "publishedAt": "2026-09-10T12:27:25Z",
+   "images": [
+    "https://julialang.org/assets/images/julia-open-graph.png",
+    "https://julialang.org/assets/blog/2026-1.13-highlights/repl_highlight.png",
+    "https://julialang.org/assets/blog/2026-1.13-highlights/repl_highlight_monokai.png",
+    "https://julialang.org/assets/blog/2026-1.13-highlights/fzf.png",
+    "https://julialang.org/assets/blog/2026-1.13-highlights/fzf_LA.png",
+    "https://julialang.org/assets/blog/2026-1.13-highlights/enable-debug-logging.png"
+   ],
+   "digest": null
+  },
+  {
+   "id": "f8e3bc763d75",
+   "url": "https://spaceships.treybastian.com/",
+   "title": "Spaceships (Reverse Asteroid)",
+   "titleZh": "飞船（逆行小行星）",
+   "summary": "214 分 · 37 评论 · zdw",
+   "publishedAt": "2026-09-10T04:44:32Z",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "9041bf0073b1",
+   "url": "https://developer.apple.com/accessories/dimensional-drawings/",
+   "title": "Apple's Dimensional Drawings",
+   "titleZh": null,
+   "summary": "168 分 · 57 评论 · herbertl",
+   "publishedAt": "2026-09-14T00:11:21Z",
+   "images": [
+    "https://developer.apple.com/news/images/og/accessories-og.jpg"
+   ],
+   "digest": null
+  },
+  {
+   "id": "15d32d01aaec",
+   "url": "https://github.com/Speedstu/CUDA-for-AMD-Windows",
+   "title": "CUDA for AMD on Windows",
+   "titleZh": "Windows 上的 AMD 版 CUDA",
+   "summary": "161 分 · 85 评论 · chiassedu80",
+   "publishedAt": "2026-09-13T14:25:13Z",
+   "images": [
+    "https://opengraph.githubassets.com/01d2e576ccd141b28f01dccb7694d0994e847926e1f87306a434a196a604c684/Speedstu/CUDA-for-AMD-Windows",
+    "https://img.shields.io/badge/platform-Windows%20x64-555555",
+    "https://img.shields.io/badge/GPU-AMD%20Radeon-555555",
+    "https://github.com/Speedstu/CUDA-for-AMD-Windows/actions/workflows/verify.yml/badge.svg"
+   ],
+   "digest": null
+  },
+  {
+   "id": "97e14b967a5d",
+   "url": "https://news.ycombinator.com/item?id=49686380",
+   "title": "Ask HN: What are you working on? (September 2026)",
+   "titleZh": "Ask HN：你们最近在做啥？（2026 年 9 月）",
+   "summary": "159 分 · 488 评论 · david927",
+   "publishedAt": "2026-09-13T17:31:38Z",
+   "images": [
+    "https://news.ycombinator.com/y18.svg",
+    "https://news.ycombinator.com/s.gif"
+   ],
+   "digest": null
+  },
+  {
+   "id": "014b0fffb815",
+   "url": "https://techcrunch.com/2026/09/12/automattic-confirms-mullenweg-has-returned-as-ceo-after-attempted-ouster-by-board/",
+   "title": "Mullenweg has returned as CEO after attempted board ouster",
+   "titleZh": "董事会逼宫未遂，Mullenweg 重返 CEO",
+   "summary": "140 分 · 189 评论 · ilamont",
+   "publishedAt": "2026-09-13T20:19:06Z",
+   "images": [
+    "https://techcrunch.com/wp-content/uploads/2024/10/matt-mullenweg.jpg?resize=1200,799",
+    "https://techcrunch.com/wp-content/uploads/2026/05/tc-lockup-hp.svg",
+    "https://techcrunch.com/wp-content/uploads/2024/09/tc-logo-mobile.svg",
+    "https://techcrunch.com/wp-content/uploads/2024/10/matt-mullenweg.jpg?w=1024",
+    "https://techcrunch.com/wp-content/uploads/2021/01/lwzxxnshgj71bonwbik3.jpg.jpg?w=150",
+    "https://techcrunch.com/wp-content/uploads/2025/04/Disrupt2026-Color.png"
+   ],
+   "digest": null
+  },
+  {
+   "id": "3e71e291d6f6",
+   "url": "https://giannirosato.com/blog/post/case-against-jxl/",
+   "title": "The case against JPEG XL",
+   "titleZh": "为啥不看好 JPEG XL",
+   "summary": "140 分 · 188 评论 · contact9879",
+   "publishedAt": "2026-09-14T01:02:37Z",
+   "images": [
+    "https://giannirosato.com/static/img/caustics-hdr.avif",
+    "https://giannirosato.com/static/img/libjxl_cvvdp.svg",
+    "https://giannirosato.com/static/img/libjxl_ms_ssim.svg",
+    "https://giannirosato.com/static/img/libjxl_ssimu2.svg",
+    "https://giannirosato.com/static/img/progressive_avif.avif",
+    "https://giannirosato.com/static/img/dec_time.svg"
+   ],
+   "digest": null
+  },
+  {
+   "id": "a3853644c8ab",
+   "url": "https://fortune.com/2026/09/08/nike-stock-plummets-sp500-market-cap-index/",
+   "title": "Nike exits the S&P 100 after 18 years and a $200B market-cap wipeout",
+   "titleZh": "耐克在标普 100 待了 18 年后被踢出局，市值蒸发 2000 亿美元",
+   "summary": "105 分 · 126 评论 · andsoitis",
+   "publishedAt": "2026-09-14T02:50:40Z",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "3149e64f7f8b",
+   "url": "https://www.interconnects.ai/p/open-source-ai-reading-list",
+   "title": "Open-source AI and open models reading list",
+   "titleZh": "开源 AI 与开放模型书单",
+   "summary": "104 分 · 16 评论 · simonpure",
+   "publishedAt": "2026-09-14T00:22:51Z",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "660b8db4e472",
+   "url": "https://aprilnea.me/en/blog/reverse-engineering-claude-code-antspace",
+   "title": "Reverse-Engineering Claude Web's MicroVM: Uncovering Anthropic's Hidden Antspace",
+   "titleZh": "逆向 Claude Web 的 MicroVM：揭开 Anthropic 隐藏的东西",
+   "summary": "85 分 · 20 评论 · rzk",
+   "publishedAt": "2026-09-11T03:45:42Z",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "2273702842f5",
+   "url": "https://pages.cs.wisc.edu/~plonka/netgear-sntp/",
+   "title": "Flawed routers flood University of Wisconsin internet time server (2003)",
+   "titleZh": "有缺陷的路由器曾淹没威斯康星大学的时间服务器",
+   "summary": "80 分 · 9 评论 · walrus01",
+   "publishedAt": "2026-09-13T20:33:18Z",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "b206c3e11140",
+   "url": "https://www.katjahoyer.uk/p/the-gdr-and-vietnam-from-fake-coffee",
+   "title": "The GDR and Vietnam: From Fake Coffee to Coffee Empire",
+   "titleZh": "东德与越南：从假咖啡到咖啡帝国",
+   "summary": "75 分 · 25 评论 · NaOH",
+   "publishedAt": "2026-09-10T19:39:13Z",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "e5ce11066a8a",
+   "url": "https://arxiv.org/abs/1802.07228",
+   "title": "The Malicious Use of Artificial Intelligence",
+   "titleZh": "人工智能的恶意使用",
+   "summary": "61 分 · 12 评论 · rasengan0",
+   "publishedAt": "2026-09-14T01:22:35Z",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "ec58d3601956",
+   "url": "https://knowablemagazine.org/content/article/society/2026/prehistory-lost-threads",
+   "title": "Rope, twine and thread: Invisible technologies of the Stone Age",
+   "titleZh": "绳、线与丝：石器时代的隐形科技",
+   "summary": "57 分 · 13 评论 · knowablemag",
+   "publishedAt": "2026-09-11T17:38:11Z",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "3f0311b55ec8",
+   "url": "https://calif.io/research/oempocalypse",
+   "title": "OEMpocalypse: Unprivileged Android app to root on Samsung, Xiaomi, others",
+   "titleZh": "OEMpocalypse：无权限安卓 App 就能 root 三星、小米等手机",
+   "summary": "47 分 · 12 评论 · negura",
+   "publishedAt": "2026-09-14T02:25:44Z",
+   "images": [],
+   "digest": null
+  }
+ ]
 }

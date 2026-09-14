@@ -1,313 +1,313 @@
 {
-  "source": "simon",
-  "updatedAt": "2026-09-14T08:47:10.881Z",
-  "items": [
-    {
-      "id": "2e88014063fe",
-      "url": "https://simonwillison.net/2026/Sep/14/commit-rewriter/",
-      "title": "Release: commit-rewriter 0.1",
-      "titleZh": "Simon Willison 做了个小工具 commit-rewriter：专治 AI 写的烂 commit message",
-      "summary": "A web app to help edit commit messages",
-      "publishedAt": "2026-09-14",
-      "images": [
-        "https://static.simonwillison/static/2026/commit-rewriter.webp"
-      ],
-      "translation": "translations/2e88014063fe.json"
-    },
-    {
-      "id": "39d900722912",
-      "url": "https://simonwillison.net/2026/Sep/13/shot-scraper/",
-      "title": "shot-scraper 1.12",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-13T23:58:14+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "3f37b0a02f79",
-      "url": "https://simonwillison.net/2026/Sep/12/astra-running-routes/",
-      "title": "Generating running routes with GPT-6 Astra and ChatGPT Work",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-12T23:56:42+00:00",
-      "images": [
-        "https://static.simonwillison.net/static/2026/5k-route.webp"
-      ],
-      "digest": null
-    },
-    {
-      "id": "86c07f5a7551",
-      "url": "https://simonwillison.net/2026/Sep/12/sighting-399708714/",
-      "title": "California Brown Pelican",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-12T21:16:09+00:00",
-      "images": [
-        "https://static.inaturalist.org/photos/733368932/large.jpg",
-        "https://static.inaturalist.org/photos/733368989/large.jpg"
-      ],
-      "digest": null
-    },
-    {
-      "id": "db19087c5b70",
-      "url": "https://simonwillison.net/2026/Sep/12/paul-ford/",
-      "title": "Quoting Paul Ford",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-12T18:00:21+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "2ed54a20b866",
-      "url": "https://simonwillison.net/2026/Sep/12/openai-agents-rubygems/",
-      "title": "OpenAI agents attacked RubyGems back in May",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-12T00:42:25+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "7e6aa646d847",
-      "url": "https://simonwillison.net/2026/Sep/11/so-you-want-to-use-openrouter/",
-      "title": "So you want to use OpenRouter?",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-11T22:49:18+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "3369a7745ac2",
-      "url": "https://simonwillison.net/2026/Sep/11/boris-cherny/",
-      "title": "Quoting Boris Cherny",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-11T17:47:11+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "6f95f2bec509",
-      "url": "https://simonwillison.net/2026/Sep/11/feeling-sad-about-ai/",
-      "title": "Feeling sad about AI",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-11T17:28:37+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "b8e61897c6ce",
-      "url": "https://simonwillison.net/2026/Sep/11/hugging-face-security/",
-      "title": "Quoting huggingface.co/security.txt",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-11T16:04:53+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "68c9d57c259d",
-      "url": "https://simonwillison.net/2026/Sep/11/soft-deprecating-re-match/",
-      "title": "Soft-deprecating re.match()",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-11T14:47:57+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "aea27ded894b",
-      "url": "https://simonwillison.net/2026/Sep/11/wrapture/",
-      "title": "Don't sleep on wrapture",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-11T13:51:32+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "0bea6aa8e9e7",
-      "url": "https://simonwillison.net/2026/Sep/11/datasette-security/",
-      "title": "Datasette 1.0a39 and 0.65.4 security releases",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-11T03:27:16+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "0fdcd7296626",
-      "url": "https://simonwillison.net/2026/Sep/11/datasette-publish-fly/",
-      "title": "datasette-publish-fly 1.4",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-11T02:58:52+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "77a4b9491da9",
-      "url": "https://simonwillison.net/2026/Sep/11/github-to-sqlite/",
-      "title": "github-to-sqlite 2.9.1",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-11T00:28:39+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "7943eebc90e3",
-      "url": "https://simonwillison.net/2026/Sep/11/datasette/",
-      "title": "datasette 0.65.4",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-11T00:06:55+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "80c207384661",
-      "url": "https://simonwillison.net/2026/Sep/11/datasette-2/",
-      "title": "datasette 1.0a39",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-11T00:05:54+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "346c4c630b23",
-      "url": "https://simonwillison.net/2026/Sep/10/trynix/",
-      "title": "Any Nix package, live in your browser",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-10T23:44:15+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "8548ae32b0a6",
-      "url": "https://simonwillison.net/2026/Sep/10/shopify-react-native/",
-      "title": "Native is now the future of mobile at Shopify",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-10T21:11:15+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "c4865e8c92f1",
-      "url": "https://simonwillison.net/2026/Sep/10/calif-research/",
-      "title": "Quoting Calif Research",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-10T00:56:41+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "2f963b15bf85",
-      "url": "https://simonwillison.net/2026/Sep/9/blender-viewer/",
-      "title": ".blend URL Viewer",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-09T23:58:32+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "e4e4ee3b55ca",
-      "url": "https://simonwillison.net/2026/Sep/9/terence-tao/",
-      "title": "Quoting Terence Tao",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-09T00:20:17+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "5a4baff754f8",
-      "url": "https://simonwillison.net/2026/Sep/8/on-navier-stokes/",
-      "title": "Some thoughts on the Navier–Stokes Millennium Prize Problem",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-08T23:55:12+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "756e8711be7c",
-      "url": "https://simonwillison.net/2026/Sep/8/introducing-chatgpt-images-25/",
-      "title": "Introducing ChatGPT Images 2.5",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-08T22:46:33+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "276c6225db64",
-      "url": "https://simonwillison.net/2026/Sep/7/llm/",
-      "title": "llm 0.35",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-07T23:54:54+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "315af994e13a",
-      "url": "https://simonwillison.net/2026/Sep/7/creepy-crawlies/",
-      "title": "Creepy crawlies",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-07T23:08:58+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "b392e0204486",
-      "url": "https://simonwillison.net/2026/Sep/7/jakub-pachocki/",
-      "title": "Quoting Jakub Pachocki",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-07T22:26:25+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "394fcc6daf9e",
-      "url": "https://simonwillison.net/2026/Sep/7/video-compressor/",
-      "title": "Video compressor",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-07T18:29:07+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "edfb48bd8fe5",
-      "url": "https://simonwillison.net/2026/Sep/7/equal-earth/",
-      "title": "Mercator ↔ Equal Earth",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-07T16:24:16+00:00",
-      "images": [],
-      "digest": null
-    },
-    {
-      "id": "4f8847a86005",
-      "url": "https://simonwillison.net/2026/Sep/6/research-acceleration-the-view-inside-openai/",
-      "title": "Research acceleration: The view inside OpenAI",
-      "titleZh": null,
-      "summary": "[object Object]",
-      "publishedAt": "2026-09-06T23:57:40+00:00",
-      "images": [],
-      "digest": null
-    }
-  ]
+ "source": "simon",
+ "updatedAt": "2026-09-14T08:47:10.881Z",
+ "items": [
+  {
+   "id": "2e88014063fe",
+   "url": "https://simonwillison.net/2026/Sep/14/commit-rewriter/",
+   "title": "Release: commit-rewriter 0.1",
+   "titleZh": "Simon Willison 做了个小工具 commit-rewriter：专治 AI 写的烂 commit message",
+   "summary": "A web app to help edit commit messages",
+   "publishedAt": "2026-09-14",
+   "images": [
+    "https://static.simonwillison/static/2026/commit-rewriter.webp"
+   ],
+   "translation": "translations/2e88014063fe.json"
+  },
+  {
+   "id": "39d900722912",
+   "url": "https://simonwillison.net/2026/Sep/13/shot-scraper/",
+   "title": "shot-scraper 1.12",
+   "titleZh": "shot-scraper 1.12",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-13T23:58:14+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "3f37b0a02f79",
+   "url": "https://simonwillison.net/2026/Sep/12/astra-running-routes/",
+   "title": "Generating running routes with GPT-6 Astra and ChatGPT Work",
+   "titleZh": "用 GPT-6 Astra 和 ChatGPT Work 生成跑步路线",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-12T23:56:42+00:00",
+   "images": [
+    "https://static.simonwillison.net/static/2026/5k-route.webp"
+   ],
+   "digest": null
+  },
+  {
+   "id": "86c07f5a7551",
+   "url": "https://simonwillison.net/2026/Sep/12/sighting-399708714/",
+   "title": "California Brown Pelican",
+   "titleZh": "加州褐鹈鹕",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-12T21:16:09+00:00",
+   "images": [
+    "https://static.inaturalist.org/photos/733368932/large.jpg",
+    "https://static.inaturalist.org/photos/733368989/large.jpg"
+   ],
+   "digest": null
+  },
+  {
+   "id": "db19087c5b70",
+   "url": "https://simonwillison.net/2026/Sep/12/paul-ford/",
+   "title": "Quoting Paul Ford",
+   "titleZh": "引用 Paul Ford",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-12T18:00:21+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "2ed54a20b866",
+   "url": "https://simonwillison.net/2026/Sep/12/openai-agents-rubygems/",
+   "title": "OpenAI agents attacked RubyGems back in May",
+   "titleZh": "OpenAI 的智能体五月份攻击了 RubyGems",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-12T00:42:25+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "7e6aa646d847",
+   "url": "https://simonwillison.net/2026/Sep/11/so-you-want-to-use-openrouter/",
+   "title": "So you want to use OpenRouter?",
+   "titleZh": "所以你想用 OpenRouter？",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-11T22:49:18+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "3369a7745ac2",
+   "url": "https://simonwillison.net/2026/Sep/11/boris-cherny/",
+   "title": "Quoting Boris Cherny",
+   "titleZh": "引用 Boris Cherny",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-11T17:47:11+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "6f95f2bec509",
+   "url": "https://simonwillison.net/2026/Sep/11/feeling-sad-about-ai/",
+   "title": "Feeling sad about AI",
+   "titleZh": "为 AI 感到难过",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-11T17:28:37+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "b8e61897c6ce",
+   "url": "https://simonwillison.net/2026/Sep/11/hugging-face-security/",
+   "title": "Quoting huggingface.co/security.txt",
+   "titleZh": "引用 huggingface.co/security.txt",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-11T16:04:53+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "68c9d57c259d",
+   "url": "https://simonwillison.net/2026/Sep/11/soft-deprecating-re-match/",
+   "title": "Soft-deprecating re.match()",
+   "titleZh": "软废弃 re.match()",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-11T14:47:57+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "aea27ded894b",
+   "url": "https://simonwillison.net/2026/Sep/11/wrapture/",
+   "title": "Don't sleep on wrapture",
+   "titleZh": "别错过 wrapture",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-11T13:51:32+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "0bea6aa8e9e7",
+   "url": "https://simonwillison.net/2026/Sep/11/datasette-security/",
+   "title": "Datasette 1.0a39 and 0.65.4 security releases",
+   "titleZh": "Datasette 1.0a39 与 0.65.4 安全更新",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-11T03:27:16+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "0fdcd7296626",
+   "url": "https://simonwillison.net/2026/Sep/11/datasette-publish-fly/",
+   "title": "datasette-publish-fly 1.4",
+   "titleZh": "datasette-publish-fly 1.4",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-11T02:58:52+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "77a4b9491da9",
+   "url": "https://simonwillison.net/2026/Sep/11/github-to-sqlite/",
+   "title": "github-to-sqlite 2.9.1",
+   "titleZh": "github-to-sqlite 2.9.1",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-11T00:28:39+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "7943eebc90e3",
+   "url": "https://simonwillison.net/2026/Sep/11/datasette/",
+   "title": "datasette 0.65.4",
+   "titleZh": "datasette 0.65.4",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-11T00:06:55+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "80c207384661",
+   "url": "https://simonwillison.net/2026/Sep/11/datasette-2/",
+   "title": "datasette 1.0a39",
+   "titleZh": "datasette 1.0a39",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-11T00:05:54+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "346c4c630b23",
+   "url": "https://simonwillison.net/2026/Sep/10/trynix/",
+   "title": "Any Nix package, live in your browser",
+   "titleZh": "任意 Nix 包，直接在浏览器里跑",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-10T23:44:15+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "8548ae32b0a6",
+   "url": "https://simonwillison.net/2026/Sep/10/shopify-react-native/",
+   "title": "Native is now the future of mobile at Shopify",
+   "titleZh": "Shopify：原生开发才是移动端的未来",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-10T21:11:15+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "c4865e8c92f1",
+   "url": "https://simonwillison.net/2026/Sep/10/calif-research/",
+   "title": "Quoting Calif Research",
+   "titleZh": "引用 Calif Research",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-10T00:56:41+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "2f963b15bf85",
+   "url": "https://simonwillison.net/2026/Sep/9/blender-viewer/",
+   "title": ".blend URL Viewer",
+   "titleZh": ".blend URL 查看器",
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-09T23:58:32+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "e4e4ee3b55ca",
+   "url": "https://simonwillison.net/2026/Sep/9/terence-tao/",
+   "title": "Quoting Terence Tao",
+   "titleZh": null,
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-09T00:20:17+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "5a4baff754f8",
+   "url": "https://simonwillison.net/2026/Sep/8/on-navier-stokes/",
+   "title": "Some thoughts on the Navier–Stokes Millennium Prize Problem",
+   "titleZh": null,
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-08T23:55:12+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "756e8711be7c",
+   "url": "https://simonwillison.net/2026/Sep/8/introducing-chatgpt-images-25/",
+   "title": "Introducing ChatGPT Images 2.5",
+   "titleZh": null,
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-08T22:46:33+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "276c6225db64",
+   "url": "https://simonwillison.net/2026/Sep/7/llm/",
+   "title": "llm 0.35",
+   "titleZh": null,
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-07T23:54:54+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "315af994e13a",
+   "url": "https://simonwillison.net/2026/Sep/7/creepy-crawlies/",
+   "title": "Creepy crawlies",
+   "titleZh": null,
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-07T23:08:58+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "b392e0204486",
+   "url": "https://simonwillison.net/2026/Sep/7/jakub-pachocki/",
+   "title": "Quoting Jakub Pachocki",
+   "titleZh": null,
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-07T22:26:25+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "394fcc6daf9e",
+   "url": "https://simonwillison.net/2026/Sep/7/video-compressor/",
+   "title": "Video compressor",
+   "titleZh": null,
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-07T18:29:07+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "edfb48bd8fe5",
+   "url": "https://simonwillison.net/2026/Sep/7/equal-earth/",
+   "title": "Mercator ↔ Equal Earth",
+   "titleZh": null,
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-07T16:24:16+00:00",
+   "images": [],
+   "digest": null
+  },
+  {
+   "id": "4f8847a86005",
+   "url": "https://simonwillison.net/2026/Sep/6/research-acceleration-the-view-inside-openai/",
+   "title": "Research acceleration: The view inside OpenAI",
+   "titleZh": null,
+   "summary": "[object Object]",
+   "publishedAt": "2026-09-06T23:57:40+00:00",
+   "images": [],
+   "digest": null
+  }
+ ]
 }
