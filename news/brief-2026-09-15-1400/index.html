@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月15日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-15"/>
+<meta name="doc-ts" content="2026-09-15T21:03:46"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-15（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-15（14点版）</h1>
+<h2>业内新闻</h2>
+<p><strong>Cirrascale 推理平台生产版发布（约 9/14 晚间 PDT）</strong></p>
+<ul><li>一句话：又一家云厂商把&quot;一站式推理栈&quot;做成产品了。</li><li>它自动把请求路由到最合适的模型和加速器。</li><li>NVIDIA、AMD 的卡都支持。</li><li>Tenstorrent、Qualcomm 的也能接，换卡不用改代码。</li><li>合规拉满：HIPAA、SOC 2、FedRAMP。</li><li>瞄准的是金融、医疗这类强监管行业。</li><li>🔗 <a href="https://www.morningstar.com/news/business-wire/20260915468586/cirrascale-cloud-services-launches-production-release-of-the-cirrascale-inference-platform-delivering-a-complete-enterprise-ai-inference-stack">https://www.morningstar.com/news/business-wire/20260915468586/cirrascale-cloud-services-launches-production-release-of-the-cirrascale-inference-platform-delivering-a-complete-enterprise-ai-inference-stack</a></li></ul>
+<h2>框架更新</h2>
+<ul><li>本轮六个框架都没新版本。</li><li>vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。</li><li>TensorRT-LLM、LMDeploy、llama.cpp 也没动。</li><li>TGI 仓库已归档，不再更新。</li></ul>
+<h2>新技术与实操</h2>
+<p><strong>Red Hat：给 vLLM 配投机解码的 FastMTP 实战配方（9/8）</strong>「值得深读」</p>
+<ul><li>一句话：模型自带的&quot;多猜头&quot;，调一调就能当投机解码的草稿手。</li><li>投机解码（小模型打草稿、大模型批改）。</li><li>MTP 头（一次能猜好几个 token 的小模块）。</li><li>直接拿来用会水土不服：训练只学一步，上线要连打好几步。</li><li>FastMTP 就是微调配方，把它调成连发神枪手。</li><li>Qwen3-Next-80B 上，第三个 token 接受率 0.476 提到 0.616。</li><li>延迟最高降 25%，2×H200 上微调只花 443 秒。</li><li>划重点：这是 vLLM 官方生态的配方，你评估 vLLM 时能直接用。</li><li><a href="./files/深度阅读/FastMTP-vLLM投机解码原生MTP头微调.md">笔记</a> <a href="https://developers.redhat.com/articles/2026/09/08/optimize-vllm-speculative-decoding-fastmtp-heads">原文</a></li></ul>
+<p><strong>TowardsAI：开权重模型延迟优化，下篇（约 2 天前）</strong></p>
+<ul><li>一句话：手把手教你把共享前缀的等待时间砍掉近四成。</li><li>用 xPyD 做多节点部署，再开自动前缀缓存。</li><li>前缀缓存（以前算过的前缀不用重算）。</li><li>共享前缀的 TTFT（首 token 延迟）降了约 37%。</li><li>跟你研究的 P/D 解耦和 KV 复用都对得上。</li><li>🔗 <a href="https://pub.towardsai.net/latency-optimization-levers-for-open-weight-llm-inference-part-2-9926ea5eb0d2?gi=a63e993cf2c6">https://pub.towardsai.net/latency-optimization-levers-for-open-weight-llm-inference-part-2-9926ea5eb0d2?gi=a63e993cf2c6</a></li></ul>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：推理工程大师课（8/3，补漏）</strong></p>
+<ul><li>一句话：Baseten 两位工程师聊推理服务的实战坑。</li><li>嘉宾是 Philip Kiely 和 Ali Taha。</li><li>之前几期简报漏了这期，补上。</li><li>想听一线怎么搭推理栈的，可以当背景音。</li><li>🔗 <a href="https://open.spotify.com/episode/5XAjdK2whOcRKIdRJCg30X?si=XhySSLwtRMGrBCylvPZBwg">https://open.spotify.com/episode/5XAjdK2whOcRKIdRJCg30X?si=XhySSLwtRMGrBCylvPZBwg</a></li></ul>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/15 12:00→14:00 PDT）vLLM/SGLang/TensorRT-LLM/LMDeploy/llama.cpp/TGI 无新 release；X 大 V 名单（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）、Simon Willison、Latent Space newsletter、The Batch、机器之心/量子位均无近 24h 新动态；arXiv 近 24h 无 PD 解耦 serving 新提交。Cirrascale 生产版（9/14 晚间）为本轮唯一窗口内新事件；FastMTP（9/8）、TowardsAI 下篇（约 2 天前）、Latent Space Baseten 期（8/3）为补漏收录，之前简报均未报过。渠道：GitHub releases + 官方博客、网页新闻搜索（since 9/14、9/15）、arXiv、HN/Reddit/X 话题搜索、中文 AI 媒体搜索、Spotify。*</p></body></html>
