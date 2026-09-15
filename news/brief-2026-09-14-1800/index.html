@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月14日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-14"/>
+<meta name="doc-ts" content="2026-09-15T01:14:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-14（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-14（18点版）</h1>
+<p>划重点先：这轮最有料的一条来自 HN。有人给语音模型专门写了个推理引擎，公开说 vLLM/SGLang 不适合多模态推理，还甩出了 benchmark 数据。</p>
+<h2>框架更新</h2>
+<p><strong>1. llama.cpp 今天白天连发三个滚动构建（9/14）</strong> b10956、b10969、b10970，都是 nightly 构建 tag，不是正式 release。 跟你关系最近的一条在 b10970：AMD CDNA 卡上的 fattn-mma 改成 fp32 累加。fattn-mma 是一种矩阵乘法加速，fp32 累加就是精度更稳。你在 MI350 上跑 vLLM benchmark，同架构的话题可以留意。 b10956 把 SYCL 后端的 top_k 换成 GPU 并行算法。top_k 就是采样时挑概率最高的 k 个 token。思路跟 vLLM 新版的 batch-sharded sampling 是一路的。 其余五家没动静：vLLM 停在 v0.29.0/v0.29.1rc0，SGLang 停在 v0.5.19，TensorRT-LLM 停在 v1.3.0rc26，LMDeploy 停在 v0.17.0，TGI 去年底就停了。这轮谁都不用升级。</p>
+<h2>新技术与论文</h2>
+<p><strong>1. RoofLang：用&quot;屋顶线模型&quot;给推理系统做架构设计（HN 9/14 14:06 PDT）</strong> 屋顶线模型是性能分析的老工具。它只回答一个问题：这个算子卡在算力，还是卡在带宽。 有篇新论文（arXiv 2609.12551）想用它来指导 LLM 推理系统的架构设计。 跟你研究的 P/D 解耦哪里相关：解耦方案选型时，吞吐建模是绕不开的一步，这篇的思路可以参考。 帖子刚发，还没什么讨论。看个思路就行。 <a href="https://news.ycombinator.com/item?id=49704018">HN 帖</a></p>
+<h2>业内新闻</h2>
+<p><strong>1. Nari Labs 为 Qwen3-TTS 自研推理引擎，直接叫板 vLLM/SGLang（9/14 09:07 PDT）</strong>「值得深读」 事情是这样：Nari Labs 说现有系统不适合多模态推理。于是自己写了个专跑 Qwen3-TTS 的引擎，还开源了。 数据很硬。单块 H100，10 RPS 并发。首音频延迟 p95 不到 50 毫秒。首音频延迟就是：从发请求到听到第一声，要多久。 在 Coval 语音基准上：TTS 延迟排第 2、准确率排第 1、价格还最低。ASR 延迟最低、准确率排第 2。 划重点：这是通用框架 vs 定制引擎的正面交锋。他们到底在 vLLM/SGLang 上踩了什么坑，正好踩在你的研究点上。深读笔记里细拆。 <a href="https://news.ycombinator.com/item?id=49699267">HN 帖</a> <a href="https://github.com/nari-labs/nari-qwen3-tts">GitHub 仓库</a></p>
+<p><strong>2. Ollama 0.33.3 改了个指标的口径，benchmark 对比时注意（HN 9/14 14:14 PDT）</strong> llmxray 作者发现：新版 prompt_eval_duration（提示词评估耗时）的含义变了。 说白了：0.33.3 前后测出来的数字不能直接比。你以后做本地 benchmark 对比，记得对齐版本。 <a href="https://news.ycombinator.com/item?id=49704131">HN 帖</a></p>
+<h2>访谈与深度</h2>
+<p>这轮没有单独的访谈或播客。Nari 帖子底下 19 条评论是本轮唯一的深度讨论，有技术细节也有社区质疑，已经并入深读笔记。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/14 14:00→18:00 PDT）vLLM/SGLang/TensorRT-LLM/LMDeploy 无新 release；arXiv 周末无新 listing；Reddit、X 大 V、中文 AI 媒体、Spotify 播客无新的推理 serving 内容。Nari Show HN（9/14 09:07 PDT）为今日漏报、本轮补收并注明日期；llama.cpp 三个 nightly tag（9/14 白天）为滚动构建、非正式版。渠道：GitHub releases、HN、网页搜索、Spotify。*</p></body></html>
