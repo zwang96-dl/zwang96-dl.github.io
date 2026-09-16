@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月15日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-15"/>
+<meta name="doc-ts" content="2026-09-16T01:00:47"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-15（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-15（18点版）</h1>
+<h2>框架更新</h2>
+<p><strong>llama.cpp 本轮连发两版：b10990（16:15）、b10991（16:42），都在修高通 Hexagon 后端</strong></p>
+<ul><li>一句话：今天下午两版全是高通 DSP 后端的小修小补。</li><li>b10990（#28906）：连续内存的拷贝改走 DMA。DMA（不经过 CPU 的硬件直拷）。</li><li>b10991（#28886）：补回之前漏掉的连续内存快路径。</li><li>Hexagon（高通骁龙芯片里的 AI 加速器）。</li><li>跟你关系不大。这两版都是端侧 DSP 的小 patch，你评估的是 MI350。</li><li>上周的 b10931（Hexagon 多设备切分）是同条线的大更新，那版更有料。</li><li>🔗 <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10990">https://github.com/ggml-org/llama.cpp/releases/tag/b10990</a></li><li>🔗 <a href="https://github.com/ggml-org/llama.cpp/releases/tag/b10991">https://github.com/ggml-org/llama.cpp/releases/tag/b10991</a></li><li>vLLM（v0.29.0）、SGLang（v0.5.19）、TensorRT-LLM（v1.3.0rc26）、LMDeploy（v0.17.0）本轮均无新版。</li></ul>
+<h2>访谈与深度</h2>
+<p><strong>补漏：TDS 长文《Disaggregation Is a Thousand-GPU Problem》，给 P/D 解耦泼冷水</strong>（约 9/4 发布）</p>
+<ul><li>一句话：这篇专门给正在评估 P/D 解耦的你看的。</li><li>核心观点：千块 GPU 以下，P/D 解耦大概率不划算。</li><li>P/D 解耦（prefill 和 decode 拆到不同 GPU 池跑）。</li><li>规模不够时，P/D 配比凑不成整数。拆开后利用率反而跌 20-30%。</li><li>三个条件缺一不可：卡多到配比凑整；网带宽跟得上 KV 搬运；能按流量动态调配比。</li><li>划重点：先上 chunked prefill。chunked prefill（把长 prefill 切小块插进 decode 间隙跑）。</li><li>TNG 实测 vLLM 开 chunked prefill，吞吐涨 50%，零网络开销。</li><li>DistServe 的 7.4 倍收益是超大规模下的数，别直接对标。</li><li>🔗 <a href="https://towardsdatascience.com/disaggregation-is-a-thousand-gpu-problem/">https://towardsdatascience.com/disaggregation-is-a-thousand-gpu-problem/</a></li></ul>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/15 16:00→18:00 PDT）：llama.cpp b10990（16:15 PDT）、b10991（16:42 PDT）为窗口内新版本；vLLM（v0.29.0）、SGLang（v0.5.19）、TensorRT-LLM（v1.3.0rc26）、LMDeploy（v0.17.0）均无新版。网页新闻、arXiv、HN、Reddit、X 话题、中文 AI 媒体（机器之心/量子位）无近 2h 新动态；KOL 名单（lmsysorg、vLLM 官方、karpathy、jimfan、swyx、Simon Willison、Latent Space、The Batch）近 24h 无实质更新（16点版已扫过）。TDS 的 P/D 解耦分析（约 9/4 发布）为补漏收录，此前各期未报过；ZSE 的 HN 帖为约 42 天前旧闻，不收录。渠道：GitHub releases API、网页新闻搜索（since 9/14、9/15）、arXiv 搜索、HN 搜索、中文媒体搜索。*</p></body></html>
