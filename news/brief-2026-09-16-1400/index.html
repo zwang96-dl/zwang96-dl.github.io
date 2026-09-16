@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月16日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-16"/>
+<meta name="doc-ts" content="2026-09-16T21:03:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-16（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-16（14点版）</h1>
+<p>14点版来了，这轮有 4 条新东西。</p>
+<h2>业内新闻</h2>
+<p>Anthropic 在澳洲租了个超大&quot;推理厨房&quot;。 跟布里斯班附近的数据中心签了首个澳洲协议。 规划容量 2.16GW，是全球最大的那一档。 关键是：这地方明确用来跑推理、服务 Claude 用户。 不是训练，是推理，2027 年起上线。 对你意味着：推理容量开始往亚太前置了。 亚太用户的延迟以后会更低。 来源：Reuters 9/16 <a href="https://www.reuters.com/world/asia-pacific/anthropic-signs-first-australia-data-centre-agreement-2026-09-16/">https://www.reuters.com/world/asia-pacific/anthropic-signs-first-australia-data-centre-agreement-2026-09-16/</a></p>
+<p>Cohere 跟 Aleph Alpha 正式合并了。 两家加起来约 200 亿美元的组合。 合并后还叫 Cohere，多伦多加柏林双总部。 主攻企业级 AI 部署市场。 Aleph Alpha 是德国主权 AI 的旗手。 对你意味着：欧洲推理部署市场要变天了。 来源：Reuters 9/16 <a href="https://www.reuters.com/legal/transactional/cohere-aleph-alpha-combine-target-enterprise-ai-market-2026-09-16/">https://www.reuters.com/legal/transactional/cohere-aleph-alpha-combine-target-enterprise-ai-market-2026-09-16/</a></p>
+<h2>框架更新</h2>
+<p>六个框架都没发新版。 vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TensorRT-LLM 还是 v1.3.0rc26 预览版。 LMDeploy 停在 v0.17.0。 TGI 归档不动。 llama.cpp 出了 b11009 快照，落在窗口内。 但那是常规滚动构建，不算发版。</p>
+<h2>新技术与论文</h2>
+<p>本轮无。 arXiv 上没见到确证的新稿。</p>
+<h2>访谈与深度</h2>
+<p>SGLang 创始人盛颖有个长访谈，值得一看。 是硅谷101 做的，原发 8 月初，界面财经号昨日重发。 她亲口讲了 RadixAttention 是怎么回事。 RadixAttention 是 SGLang 的前缀缓存技术。 用人话说：请求有公共前缀就不用重算。 好比大家点同一道菜，厨房只做一次。 她还解释了 Day-0 兼容为啥重要。 Day-0 就是新模型发布当天就能用上。 说白了是市场逼的：用户第一天就想尝鲜。 DeepSeek v4 那次是第一次带 RL 的 Day-0。 RL 是强化学习，Miles 是 SGLang 的 RL 框架。 那次架构变化大，团队重写了一大片代码。 她还聊了 SGLang 和 vLLM 的分工。 SGLang 更早搞大规模 serving，千卡万卡那种。 vLLM 更早覆盖社区和长尾模型。 现在两边互相学，越来越像。 行业格局她说得很妙：推理公司雨后春笋。 但神奇的是没人被淘汰，所有人同步增长。 「值得深读」：你是 SGLang 用户，创始人亲口讲设计哲学。 行业判断跟你的 P/D 解耦研究直接相关。 来源：界面 <a href="https://m.jiemian.com/article/14878116.html（原发">https://m.jiemian.com/article/14878116.html（原发</a> 2026-08-05，补漏收录）</p>
+<p>Glad Labs 写了篇引擎选型实战帖。 对比了 llama.cpp、vLLM、SGLang。 核心观点：选引擎看你的流量形状。 别光看 tokens/s 榜单，那玩意儿会骗人。 他们自己的流量是低并发。 vLLM 的 batching（批量打包）在这种流量下是纯开销。 所以他们没从 Ollama 换到 vLLM。 换句话说：小水管别租大货车，油钱都浪费在空跑上。 来源：<a href="https://www.gladlabs.io/posts/llamacpp-vs-vllm-vs-sglang-38cba265">https://www.gladlabs.io/posts/llamacpp-vs-vllm-vs-sglang-38cba265</a></p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/16 12:00→14:00 PDT）六大框架无新版（GitHub API 实时核验：vLLM v0.29.0、SGLang v0.5.19、TRT-LLM v1.3.0rc26、LMDeploy v0.17.0、TGI v3.3.7 归档；llama.cpp b11009 为窗口内常规滚动快照，不算发版）；arXiv 无确证新稿；X 大 V 名单（lmsysorg/vLLM 官方/karpathy/jimfan/swyx）今日无新的 serving 实质帖子；Reddit/HN 9/16 无推理 serving 实质新讨论；中文 AI 媒体（机器之心/量子位/InfoQ）今日无相关新文；Spotify Latent Space 9/16 新集为 agent 保险主题，与 serving 无关；Simon Willison/The Batch/YouTube（SGLang 官方/Latent Space/MLOps World）近两天无 serving 新内容；MLCommons 官方今日发布 MLPerf v6.1 完整成绩，与 12 点版已报的 Lambda 成绩博客同源，无新增量，不重复；IG 两条 9/16 帖子（SageMaker 前缀路由图解、vision_macro_ai 多 agent 轮播）为二次图解或小账号营销数字，无新增信源，未收录；盛颖专访为 8/5 旧文（界面财经号昨日重发），简报库从未报过，补漏收录，已是中文访谈故不生成深读笔记。渠道：GitHub releases（GitHub API 实时核验）、Reuters、界面/虎嗅、Glad Labs 博客、arXiv、X/Reddit/HN 话题搜索、中文媒体搜索、Spotify、social.search。*</p></body></html>
