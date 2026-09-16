@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月15日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-15"/>
+<meta name="doc-ts" content="2026-09-16T05:07:02"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-15（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-15（22点版）</h1>
+<h2>框架更新</h2>
+<p><strong>这俩小时框架圈很安静</strong></p>
+<ul><li>一句话：六个框架全都没新版。</li><li>vLLM 还是 v0.29.0。</li><li>SGLang 还是 v0.5.19。</li><li>TensorRT-LLM 无新版。</li><li>LMDeploy 还是 v0.17.0。</li><li>llama.cpp 官方版还是 v0.4.1。</li><li>TGI 已归档，无动态。</li></ul>
+<h2>业内新闻</h2>
+<p><strong>1. Crusoe 牵手 Perplexity：多年大单，推理走集群级 KV 缓存</strong></p>
+<ul><li>一句话：Perplexity 把训练和推理都交给了 Crusoe。</li><li>训练跑 GB300 NVL72 集群。</li><li>生产推理走 Crusoe 的托管推理服务。</li><li>看点是它的推理引擎 MemoryAlloy。</li><li>MemoryAlloy（跨节点的集群级 KV cache）。</li><li>KV cache（推理时的&quot;草稿纸&quot;）。</li><li>任意节点都能读到共享的前缀缓存。</li><li>不用再重复算一遍 prefill。</li><li>官方数据：在 Llama-3.3-70B 上。</li><li>四节点对 vLLM 打出 9.9 倍 TTFT、5 倍吞吐。</li><li>TTFT（首 token 延迟）。</li><li>跟你直接相关：P/D 解耦最头疼的是 KV 搬运。</li><li>P/D 解耦（预填充与解码分开跑）。</li><li>MemoryAlloy 是另一条路：不搬，让大家都共享。</li><li>🔗 <a href="https://www.unite.ai/crusoe-signs-multi-year-deal-to-power-perplexity-training-and-inference/">https://www.unite.ai/crusoe-signs-multi-year-deal-to-power-perplexity-training-and-inference/</a></li></ul>
+<p><strong>2. NVIDIA 开 Summit：Rubin NVL72 自报&quot;每兆瓦吞吐是 GB300 的 30 倍&quot;</strong></p>
+<ul><li>一句话：英伟达今天开了 AI Infra Summit。</li><li>首日 keynote 放了 Vera Rubin NVL72 的实测。</li><li>推理栈是 TensorRT-LLM 加 NVIDIA Dynamo。</li><li>Dynamo（英伟达的分布式推理调度框架）。</li><li>测的是 AgentX（模拟真实 agent 会话的基准）。</li><li>跑 DeepSeek V4 Pro。</li><li>英伟达自报：每兆瓦吞吐比 GB300 NVL72 高 30 倍。</li><li>每百万 token 成本低 45 倍。</li><li>这是厂商自己的数字，看看就好。</li><li>但 benchmark 换道了，值得注意。</li><li>不再比单请求跑分，比 agent 级的真实负载。</li><li>推理栈选型上，TRT-LLM 和 Dynamo 是另一条路线。</li><li>跟昨天 16 点版的 SemiAnalysis 分析是同一张卡。</li><li>那篇是第三方测的能效，这篇是官方放的。</li><li>🔗 <a href="https://blogs.nvidia.com/blog/ai-infra-summit-vera-rubin-dsx-energy-efficiencies-tokens-per-watt-ai-factories/">https://blogs.nvidia.com/blog/ai-infra-summit-vera-rubin-dsx-energy-efficiencies-tokens-per-watt-ai-factories/</a></li></ul>
+<p><strong>3. 同一场 Summit：NVIDIA DSX 生产实测，&quot;不加电白捡算力&quot;</strong></p>
+<ul><li>一句话：Lambda 在 DSX 上跑出了生产数据。</li><li>DSX（英伟达的 AI 工厂整机平台）。</li><li>5 机架 19 节点 HGX B200 集群。</li><li>跑 DSX 的 MaxLPS 功率优化软件。</li><li>MaxLPS（按功率预算调度负载的软件）。</li><li>同样电费，多开了 3 个节点。</li><li>全集群吞吐 400 万涨到 500 万 token/s。</li><li>涨 24%，每瓦性能涨 23%。</li><li>说白了：不加电，白捡算力。</li><li>推理成本优化跟你评估引擎的指标是同一套语言。</li><li>🔗 <a href="https://www.unite.ai/nvidia-reports-early-production-results-for-dsx-ai-factory-platform/">https://www.unite.ai/nvidia-reports-early-production-results-for-dsx-ai-factory-platform/</a></li></ul>
+<p><strong>4. 韩国推理芯片 Rebellions 牵手日本 ai&amp;</strong></p>
+<ul><li>一句话：韩国推理芯片要在日本落地了。</li><li>Rebellions（韩国能效型推理芯片公司）。</li><li>刚融了 4 亿美元。</li><li>芯片将在 ai&amp; 的数据中心商业化部署。</li><li>主打推理经济性。</li><li>跟你 MI350 评估是横向参考。</li><li>🔗 <a href="http://finance.minyanville.com/minyanville/article/bizwire-2026-9-15-rebellions-and-ai-and-partner-to-bring-energy-efficient-ai-inference-infrastructure-to-japan">http://finance.minyanville.com/minyanville/article/bizwire-2026-9-15-rebellions-and-ai-and-partner-to-bring-energy-efficient-ai-inference-infrastructure-to-japan</a></li></ul>
+<p><strong>5. Credo：OmniConnect 要给 GPU 外接内存</strong></p>
+<ul><li>一句话：推理太吃显存，Credo 想卖&quot;外接内存&quot;的方案。</li><li>OmniConnect（Credo 的高速互连方案）。</li><li>让 GPU 能接 LPDDR5/6 外扩内存。</li><li>推理对显存容量和带宽的需求暴涨。</li><li>偏上游供应链新闻，预计 2028 财年见收入。</li><li>🔗 <a href="https://www.zacks.com/stock/news/2989968/can-credos-omniconnect-unlock-a-new-ai-inference-growth-engine">https://www.zacks.com/stock/news/2989968/can-credos-omniconnect-unlock-a-new-ai-inference-growth-engine</a></li></ul>
+<h2>新技术</h2>
+<p><strong>6. Lightbits 发布 Inferra：专治 KV cache 爆炸</strong></p>
+<ul><li>一句话：长上下文下 KV cache 爆炸，有人做了个编排引擎。</li><li>Lightbits（做 NVMe over TCP 存储起家的公司）。</li><li>今天在 AI Infra Summit 上发布 Inferra。</li><li>把显存、内存、存储打通成一层。</li><li>KV cache 变成持久化的数据层。</li><li>目标：同卡数多跑用户、少花钱。</li><li>跟你研究的 KV cache 优化是同一个方向。</li><li>思路是把跨层 KV 复用做成产品。</li><li>🔗 <a href="https://www.hpcwire.com/bigdatawire/this-just-in/lightbits-inferra-targets-kv-cache-bottlenecks-in-long-context-ai/">https://www.hpcwire.com/bigdatawire/this-just-in/lightbits-inferra-targets-kv-cache-bottlenecks-in-long-context-ai/</a></li></ul>
+<h2>访谈与深度</h2>
+<p><strong>7. 硅谷101 专访 SGLang 创始人盛颖：SGLang 为什么押注 scale-up</strong></p>
+<ul><li>一句话：SGLang 掌门人亲自复盘路线差异。</li><li>盛颖是 xAI 前推理团队负责人。</li><li>干货一：SGLang 当初想做一个&quot;部署就绪&quot;的推理引擎。</li><li>不是只发论文，所以做成了开源项目。</li><li>干货二：SGLang 更早押注大规模 scale-up。</li><li>就是千卡、万卡级别的推理服务。</li><li>vLLM 则更早铺开社区和长尾模型支持。</li><li>两边现在互相学。</li><li>她还聊了在 xAI 搭生产级推理栈的经历。</li><li>以及为什么离开 xAI 创立 RadixArk。</li><li>RadixArk 聚焦推理加 RL 基础设施。</li><li>跟你直接相关：你在评估 SGLang 的 P/D 解耦。</li><li>这篇能帮你理解 SGLang 的设计取向。</li><li>🔗 <a href="https://m.jiemian.com/article/14878116.html">https://m.jiemian.com/article/14878116.html</a></li></ul>
+<p><strong>8. 61 亿请求生产 trace 解读：前缀缓存的&quot;生产级答案&quot;</strong></p>
+<ul><li>一句话：有人拿了一整年的真实流量，结论全是干货。</li><li>某 serverless 推理平台，61.2 亿请求。</li><li>没采样、请求级，2025 年 4 月到 2026 年 4 月。</li><li>干货一：前缀缓存命中率是双峰。</li><li>请求要么几乎全命中上轮前缀，要么从零开始。</li><li>干货二：99% 的复用发生在 15 分钟内。</li><li>TTL 不用太长，KV 没必要囤几小时。</li><li>TTL（缓存条目的存活时间）。</li><li>干货三：简单的淘汰算法赢了。</li><li>LRU/FIFO（最久没用先踢/先进先出）。</li><li>打平甚至击败 ARC 这类花哨算法。</li><li>干货四：缓存亲和路由只付了 5–7% 的负载不均。</li><li>干货五：反对到处搬 KV。</li><li>10 万 token 上下文约 27GB KV。</li><li>10GB/s 链路单向搬要 2.7 秒。</li><li>复用窗口短时，不如留在本地显存。</li><li>跟你直接相关：这就是 P/D 解耦的核心问题。</li><li>KV 到底值不值得搬、搬多大划算。</li><li>这篇给了生产级答案。</li><li>⭐ 值得深读：精读笔记已生成（见深度阅读目录）。</li><li>🔗 <a href="https://medium.com/@xyttu/six-billion-requests-later-what-a-full-year-of-llm-serving-actually-looks-like-16be3101e173">https://medium.com/@xyttu/six-billion-requests-later-what-a-full-year-of-llm-serving-actually-looks-like-16be3101e173</a></li><li>论文：<a href="https://arxiv.org/abs/2608.13573">https://arxiv.org/abs/2608.13573</a></li></ul>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/15 20:00→22:00 PDT）：六个框架无新版（vLLM v0.29.0、SGLang v0.5.19、TRT-LLM 无新 rc、LMDeploy v0.17.0、llama.cpp 官方 v0.4.1、TGI 归档）；HN/Reddit 近 2h 无 inference serving 新帖；X 大V 名单无实质更新；arXiv 近 24h PD 解耦/KV cache/投机解码/多模态推理 serving 方向无新提交；机器之心/量子位/InfoQ 中文站无新推理 serving 报道；Spotify Latent Space 最新仍是 9/14 Richard Socher 访谈；云厂商推理服务近 2 天无实质进展；IG/Threads/FB 只有营销向内容。本轮 8 条均为 9/14–9/15 发布、此前各期未报。渠道：GitHub releases 页面、网页新闻搜索、HN、Reddit、X、arXiv、中文媒体搜索、Spotify、social.search。*</p></body></html>
