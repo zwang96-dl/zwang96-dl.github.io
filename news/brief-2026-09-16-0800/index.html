@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月16日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-16"/>
+<meta name="doc-ts" content="2026-09-16T15:08:43"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-16（8点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-16（8点版）</h1>
+<p>这轮 2 小时（06:00→08:00）框架和社区都没新动静。 下面 3 条是 SGLang 官方近两天放的，之前都没报过。</p>
+<h2>框架更新</h2>
+<p>六个框架都没发新版。 vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TensorRT-LLM 停在 v1.3.0rc26。 LMDeploy 停在 v0.17.0。 TGI 已归档，llama.cpp 只有夜间滚动构建。</p>
+<h2>业内新闻</h2>
+<p>SGLang 今天在 AI Infra Summit 有场联合宣讲。 搭档是三星半导体，主题是&quot;打破 LLM 推理的 KV cache 墙&quot;。 KV cache 是推理时的草稿纸，越长越占显存。 墙的意思就是草稿纸不够用了，请求只能排队。 宣讲在 729 号展台，还带一份白皮书。 SGLang 这边是 Alex Nails。 三星那边是 Vasanthi Jagatha。 来源：<a href="https://twstalker.com/lmsysorg（白皮书：https://tinyurl.com/SamsungSGLang">https://twstalker.com/lmsysorg（白皮书：https://tinyurl.com/SamsungSGLang</a>）</p>
+<p>SGLang 官推还宣布了 day-0 支持 GLM-5.3。 同一套 runtime 同一套参数，直接生产就绪。 覆盖 NVIDIA 的 Blackwell 和 Hopper。 AMD 的 MI300X/325X/355X 也在列。 其中 GLM-5.3-Flash 是系列里第一个原生多模态。 官方实测：NVFP4 下多轮 agentic 负载， 跑到 537.6 tok/s/user。 来源：<a href="https://twstalker.com/lmsysorg">https://twstalker.com/lmsysorg</a></p>
+<p>Intel 今天下午也在 AI Infra Summit 有场炉边谈话。 聊的是异构计算和解耦式推理，2:20–2:40 PT 主舞台。 对面是 SambaNova，议程性质，听完有干货再补。 来源：<a href="https://www.intel.com/content/www/us/en/newsroom/news/artificial-intelligence/intel-at-ai-infra-summit-2026.html">https://www.intel.com/content/www/us/en/newsroom/news/artificial-intelligence/intel-at-ai-infra-summit-2026.html</a></p>
+<h2>新技术与论文</h2>
+<p>本轮无。arXiv 近两天没有确证的推理 serving 新稿。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/16 06:00→08:00 PDT）六大框架无新版（vLLM v0.29.0、SGLang v0.5.19、TensorRT-LLM v1.3.0rc26、LMDeploy v0.17.0、TGI 归档、llama.cpp 夜间滚动）；HN/Reddit/中文媒体/Spotify/arXiv 均无新的推理 serving 内容；social.search 只有两条 9/15 的低质量营销帖，未收录。3 条新闻均来自 SGLang 官方 X 账号（经 twstalker 9/16 快照核验，三星联合宣讲为当日议程）与 Intel 官方议程页，简报库此前未报过。NVIDIA 9/9 的 EPD 官方博客已有 9/9 深读笔记（NVIDIA-EPD多模态推理解耦.html），LMSYS 官推转发的 Fast Engine Recovery（7/28）、DeepSeek-V4-Pro（8/19）博客均为旧文转发，不再重复。渠道：GitHub releases 页面、arXiv、HN/Reddit/X 话题搜索、中文媒体搜索、Spotify 播客、social.search。*</p></body></html>
