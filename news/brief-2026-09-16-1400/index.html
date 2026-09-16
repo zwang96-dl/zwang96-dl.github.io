@@ -2,7 +2,7 @@
 <meta name="doc-title" content="多模态推理简报 · 9月16日 14:00"/>
 <meta name="doc-description" content=""/>
 <meta name="doc-date" content="2026-09-16"/>
-<meta name="doc-ts" content="2026-09-16T21:03:13"/>
+<meta name="doc-ts" content="2026-09-16T21:04:05"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>多模态大模型推理服务简报 · 2026-09-16（14点版）</title><style>
@@ -51,7 +51,7 @@ img{border-color:#30363d}
 <h2>新技术与论文</h2>
 <p>本轮无。 arXiv 上没见到确证的新稿。</p>
 <h2>访谈与深度</h2>
-<p>SGLang 创始人盛颖有个长访谈，值得一看。 是硅谷101 做的，原发 8 月初，界面财经号昨日重发。 她亲口讲了 RadixAttention 是怎么回事。 RadixAttention 是 SGLang 的前缀缓存技术。 用人话说：请求有公共前缀就不用重算。 好比大家点同一道菜，厨房只做一次。 她还解释了 Day-0 兼容为啥重要。 Day-0 就是新模型发布当天就能用上。 说白了是市场逼的：用户第一天就想尝鲜。 DeepSeek v4 那次是第一次带 RL 的 Day-0。 RL 是强化学习，Miles 是 SGLang 的 RL 框架。 那次架构变化大，团队重写了一大片代码。 她还聊了 SGLang 和 vLLM 的分工。 SGLang 更早搞大规模 serving，千卡万卡那种。 vLLM 更早覆盖社区和长尾模型。 现在两边互相学，越来越像。 行业格局她说得很妙：推理公司雨后春笋。 但神奇的是没人被淘汰，所有人同步增长。 「值得深读」：你是 SGLang 用户，创始人亲口讲设计哲学。 行业判断跟你的 P/D 解耦研究直接相关。 来源：界面 <a href="https://m.jiemian.com/article/14878116.html（原发">https://m.jiemian.com/article/14878116.html（原发</a> 2026-08-05，补漏收录）</p>
+<p>SGLang 创始人盛颖有个长访谈，值得一看。 是硅谷101 做的，原发 8 月初，界面财经号昨日重发。 她亲口讲了 RadixAttention 是怎么回事。 RadixAttention 是 SGLang 的前缀缓存技术。 用人话说：请求有公共前缀就不用重算。 好比大家点同一道菜，厨房只做一次。 她还解释了 Day-0 兼容为啥重要。 Day-0 就是新模型发布当天就能用上。 说白了是市场逼的：用户第一天就想尝鲜。 DeepSeek v4 那次是第一次带 RL 的 Day-0。 RL 是强化学习，Miles 是 SGLang 的 RL 框架。 那次架构变化大，团队重写了一大片代码。 她还聊了 SGLang 和 vLLM 的分工。 SGLang 更早搞大规模 serving，千卡万卡那种。 vLLM 更早覆盖社区和长尾模型。 现在两边互相学，越来越像。 行业格局她说得很妙：推理公司雨后春笋。 但神奇的是没人被淘汰，所有人同步增长。 「值得深读」：你是 SGLang 用户，创始人亲口讲设计哲学。 行业判断跟你的 P/D 解耦研究直接相关。 来源：界面 <a href="https://m.jiemian.com/article/14878116.html">https://m.jiemian.com/article/14878116.html</a> （原发 2026-08-05，补漏收录）</p>
 <p>Glad Labs 写了篇引擎选型实战帖。 对比了 llama.cpp、vLLM、SGLang。 核心观点：选引擎看你的流量形状。 别光看 tokens/s 榜单，那玩意儿会骗人。 他们自己的流量是低并发。 vLLM 的 batching（批量打包）在这种流量下是纯开销。 所以他们没从 Ollama 换到 vLLM。 换句话说：小水管别租大货车，油钱都浪费在空跑上。 来源：<a href="https://www.gladlabs.io/posts/llamacpp-vs-vllm-vs-sglang-38cba265">https://www.gladlabs.io/posts/llamacpp-vs-vllm-vs-sglang-38cba265</a></p>
 <hr/>
 <p>*去重说明：筛过简报库。本轮窗口（9/16 12:00→14:00 PDT）六大框架无新版（GitHub API 实时核验：vLLM v0.29.0、SGLang v0.5.19、TRT-LLM v1.3.0rc26、LMDeploy v0.17.0、TGI v3.3.7 归档；llama.cpp b11009 为窗口内常规滚动快照，不算发版）；arXiv 无确证新稿；X 大 V 名单（lmsysorg/vLLM 官方/karpathy/jimfan/swyx）今日无新的 serving 实质帖子；Reddit/HN 9/16 无推理 serving 实质新讨论；中文 AI 媒体（机器之心/量子位/InfoQ）今日无相关新文；Spotify Latent Space 9/16 新集为 agent 保险主题，与 serving 无关；Simon Willison/The Batch/YouTube（SGLang 官方/Latent Space/MLOps World）近两天无 serving 新内容；MLCommons 官方今日发布 MLPerf v6.1 完整成绩，与 12 点版已报的 Lambda 成绩博客同源，无新增量，不重复；IG 两条 9/16 帖子（SageMaker 前缀路由图解、vision_macro_ai 多 agent 轮播）为二次图解或小账号营销数字，无新增信源，未收录；盛颖专访为 8/5 旧文（界面财经号昨日重发），简报库从未报过，补漏收录，已是中文访谈故不生成深读笔记。渠道：GitHub releases（GitHub API 实时核验）、Reuters、界面/虎嗅、Glad Labs 博客、arXiv、X/Reddit/HN 话题搜索、中文媒体搜索、Spotify、social.search。*</p></body></html>
