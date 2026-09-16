@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月16日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-16"/>
+<meta name="doc-ts" content="2026-09-16T07:00:04"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-16（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-16（00点版）</h1>
+<h2>框架更新</h2>
+<p><strong>这俩小时框架圈无新版</strong></p>
+<ul><li>一句话：六个框架都没新动作。</li><li>vLLM 还是 v0.29.0。</li><li>SGLang 还是 v0.5.19。</li><li>TensorRT-LLM 还是 v1.3.0rc26。</li><li>LMDeploy 还是 v0.17.0。</li><li>llama.cpp 只有夜间滚动构建。</li><li>改动是 CI 和 bench 小参数，不算更新。</li><li>TGI 已归档，无动态。</li></ul>
+<h2>新技术（今日漏网补报）</h2>
+<p>这两条不是 2 小时内新发的。 是 9/14–9/15 发的、今天各期都没报过，补上。</p>
+<p><strong>1. 量子位：无问芯穹联合清华/上交开源具身端侧推理引擎 APXInf</strong></p>
+<ul><li>一句话：端侧推理也有新引擎了。</li><li>无问芯穹（上海推理优化公司）。</li><li>联合清华、上交开源，首打具身机器人。</li><li>PI 0.5 FP8 在 Jetson Thor 上。</li><li>端到端延迟从 278ms 降到 26ms 以内。</li><li>频率 38.46Hz，号称端侧 SOTA。</li><li>Rust 运行时配 Python 接口。</li><li>首批支持 PI 0.5、WALL-OSS 模型。</li><li>硬件覆盖 Jetson Orin/Thor、RTX 4090。</li><li>Roadmap 提到 nvfp4 极致优化和国产芯片后端。</li><li>跟你相关：推理优化不只在云端。</li><li>端侧低延迟的工程打法可以对照看。</li><li>昨天白天发的，今天没报过，补上。</li><li>🔗 <a href="https://www.qbitai.com/2026/09/489460.html">https://www.qbitai.com/2026/09/489460.html</a></li></ul>
+<p><strong>2. Threads 实测：vLLM 0.29 nightly + 多模态补丁，DeepSeek V4 Flash 吞吐涨一截</strong></p>
+<ul><li>一句话：vLLM 多模态路子有人实测了。</li><li>博主 Merck Hung，双 RTX Pro 6000 Blackwell。</li><li>RTX Pro 6000（英伟达新一代工作站卡）。</li><li>跑 DeepSeek V4 Flash。</li><li>升级到 vLLM 0.29 nightly 加多模态补丁。</li><li>吞吐从 140–155 提到约 176 tokens/s。</li><li>整天稳定运行，没崩。</li><li>跟你相关：你在评估 vLLM/SGLang 多模态 serving。</li><li>这是张实打实的硬件实测数。</li><li>帖子 9/14 发的，今天没报过，补上。</li><li>🔗 <a href="https://www.threads.com/@tsla.mark/post/DdScr96GgjY">https://www.threads.com/@tsla.mark/post/DdScr96GgjY</a></li></ul>
+<h2>业内新闻</h2>
+<p><strong>无</strong></p>
+<ul><li>AI Infra Summit（Santa Clara，9/15–17）第二天。</li><li>暂无新的 session 级爆点被媒体报道。</li><li>云厂商推理服务这两天无实质进展。</li></ul>
+<h2>访谈与深度</h2>
+<p><strong>无</strong></p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/15 22:00→9/16 00:00 PDT）：六个框架无实质新版（vLLM v0.29.0、SGLang v0.5.19、TRT-LLM v1.3.0rc26、LMDeploy v0.17.0、llama.cpp 官方 v0.4.1、TGI 归档）；HN/Reddit 近 2h 无推理 serving 新帖；X 大V 名单（@lmsysorg、vLLM、@karpathy、@jimfan、swyx）无实质更新，深夜时段活跃度低；arXiv 近 24h PD 解耦/KV cache/投机解码/多模态推理 serving 方向无新提交；机器之心/量子位/InfoQ 中文站无新推理 serving 报道（InfoQ 的 FreeToken 页是 9 月初老新闻）；Spotify Latent Space 最新仍是 9/14 Richard Socher 访谈；social.search 近 2h 只有营销内容。渠道：GitHub releases、网页新闻搜索、HN、Reddit、X、arXiv、中文媒体搜索、Spotify、social.search。*</p></body></html>
