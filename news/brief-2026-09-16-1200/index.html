@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月16日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-16"/>
+<meta name="doc-ts" content="2026-09-16T19:08:23"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-16（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-16（12点版）</h1>
+<p>12点版来了，这轮有 4 条新东西。</p>
+<h2>业内新闻</h2>
+<p>苹果打算自己造 AI 服务器，还想用英伟达的互联技术。 爆料方是 The Information，引用的是消息人士。 NVLink Fusion 是英伟达的芯片互联技术，管多卡协同。 苹果自研芯片的推理服务器在考虑用它。 对你意味着：推理基建这盘棋，苹果也要下场了。 来源：Reuters 9/16 <a href="https://www.reuters.com/technology/apple-considers-nvidia-tech-return-server-market-information-reports-2026-09-16/">https://www.reuters.com/technology/apple-considers-nvidia-tech-return-server-market-information-reports-2026-09-16/</a></p>
+<p>Lambda 刚发了 MLPerf v6.1 成绩，万亿参数模型第一次上榜。 8 张 B200 上，vLLM 跑 Qwen3-VL 拿下多模态首测。 权重用 NVFP4，KV cache 用 FP8，离线跑出 101.56 queries/s。 NVFP4 是 4-bit 量化，专给新卡用。 SGLang 以 8 卡张量并行跑 Kimi K2.6，超万亿参数。 Agent 任务准确率 86.83%，1007 轮一次没挂。 GPT-OSS 120B 在 4 张 Blackwell Ultra 上，离线 65511 tok/s。 同硬件比上轮快 8.8%，纯软件栈优化的功劳。 来源：<a href="https://lambda.ai/blog/mlperf-inference-v6.1">https://lambda.ai/blog/mlperf-inference-v6.1</a></p>
+<p>英伟达把 Groq 3 LPX 推向量产了，9/14 的消息，之前漏报的。 LPX 是专用 decode 芯片，只管逐 token 生成。 它跟 Vera Rubin 平台搭伙，GPU 管理解和预填充。 实测 Gemma 4 31B 在 10 万上下文里跑出 3431 tok/s。 Nebius 会是第一个吃螃蟹的云厂商。 跟你研究的 P/D 解耦一个路数：分工流水线，各干各擅长的。 来源：Futurum 9/14 <a href="https://futurumgroup.com/insights/nvidia-groq-3-lpxs-promise-of-worlds-fastest-inference-enters-full-production/">https://futurumgroup.com/insights/nvidia-groq-3-lpxs-promise-of-worlds-fastest-inference-enters-full-production/</a></p>
+<h2>新技术与论文</h2>
+<p>投机解码不用预训练草稿模型了，RL 里现学现卖。 先让小模型猜几个 token，大模型再一次性验，猜对就赚。 GrowMTP 在 RL 的 rollout 里从零训练 draft 头。 draft 头就是那个猜 token 的小模块。 训练信号来自 RL 自带的验证步骤，更新跟主干解耦。 Qwen3-4B 上 rollout 快 2.13 倍，端到端快 1.6 倍。 没草稿头的模型也能直接加速，插拔式设计。 「值得深读」：想加投机解码但没现成草稿头，这篇给了零起步方案。 来源：arXiv 9/15 <a href="http://arxiv.org/abs/2609.16648v1">http://arxiv.org/abs/2609.16648v1</a></p>
+<h2>框架更新</h2>
+<p>六个框架都没发新版。 vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TensorRT-LLM 还是 v1.3.0rc26 预览版，LMDeploy v0.17.0。 llama.cpp v0.4.1，TGI 归档不动。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。 Latent Space 播客 9/16 出了新集。 但聊的是 agent 保险，跟推理 serving 无关。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/16 10:00→12:00 PDT）六大框架无新版（vLLM v0.29.0、SGLang v0.5.19、TRT-LLM v1.3.0rc26、LMDeploy v0.17.0、llama.cpp v0.4.1、TGI 归档）；X 大 V 名单（lmsysorg/vLLM 官方/karpathy/jimfan/swyx）、Reddit、HN、中文 AI 媒体（机器之心/量子位/InfoQ）、Simon Willison/Latent Space newsletter/The Batch 博客均无窗口内新动态；arXiv 其余方向无新稿；Spotify Latent Space 9/16 新集与 serving 无关；IG 科普帖（speculative decoding 轮播、LM Cache vs KV Cache 图、Llama 3.1 量化数字）为泛科普无新闻增量，未收录；quickbyteai 的 AWS/Cerebras 异构解耦说法无官方信源，剔除。Apple NVLink Fusion（Reuters 9/16）、Lambda MLPerf v6.1（Lambda 官方博客，9/15）、GrowMTP（arXiv 2609.16648，9/15 提交）、NVIDIA Groq 3 LPX（Futurum 9/14，补漏收录）此前均未报过；Cirrascale 生产版已于 9/15 14点版报过，未重复。渠道：GitHub releases（GitHub API 实时核验）、Reuters、Lambda 官方博客、Futurum、arXiv API、X/Reddit/HN 话题搜索、中文媒体搜索、Spotify、social.search。*</p></body></html>
