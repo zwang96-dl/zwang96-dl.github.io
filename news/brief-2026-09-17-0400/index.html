@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月17日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-17"/>
+<meta name="doc-ts" content="2026-09-17T10:59:04"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-17（4点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-17（4点版）</h1>
+<h2>框架更新</h2>
+<p><strong>1. 六大框架集体&quot;放假&quot;，半夜这轮还是零更新</strong> vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TRT-LLM、LMDeploy、TGI 全都没动。 llama.cpp 出了 b11019，但它每天自动出一个快照。 这不算正式发版，不用追。</p>
+<h2>新技术与论文</h2>
+<p>本轮无新论文。 arXiv 扫了一圈，没有新的 serving 相关论文。 昨天漏的几篇，2点版已经补报过了。</p>
+<h2>业内新闻</h2>
+<p><strong>2. DeepSeek 的投机解码方案 DSpark，已经上真线了</strong> 投机解码（小模型先猜，大模型再验）。 换句话说：DeepSeek 把这招用到了真实线上流量。 DSpark-5 跑在 V4-Flash 和 V4-Pro 上。 两个版本都传到了 Hugging Face。 配套开源工具 DeepSpec，不止支持自家模型。 Qwen 和 Gemma 的配置也给了。 对你意味着什么：这招已经在 DeepSeek 线上验证过了。 它的开源工具支持你熟悉的 Qwen，有时间可以直接试。 诚实提醒：DSpark 本身 9/9 和 9/12 都报过。 这条只是媒体跟进，不算全新消息。 <a href="https://www.computing.co.uk/news/2026/ai/deepseek-claims-new-technique-boosts-llm-serving-efficiency-by-up-to-85">报道</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无。Latent Space、Simon Willison 都没更新。 The Batch 也没动。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/17 02:00→04:00 PDT）：六大框架无新版（gh 实时核验）。arXiv 严格窗口内无新 serving 论文。DSpark 原始消息 9/9 1600、9/12 2000 已报，本轮 computing.co.uk 是媒体跟进，仅&quot;DSpark-5 上真线 + DeepSpec 支持 Qwen/Gemma&quot;两个细节此前未提。剔除：Arcfra Neutree 1.2（00点版已报）、MLPerf v6.1 Lambda 战报（9/16 12点版已报）、ASPIRE/前缀缓存修补/Ask the Tool/rMuscle（00/2点版已报）。X 大V、Reddit、HN、中文媒体、Spotify 本轮无 serving 实质新内容。渠道：GitHub releases API、arXiv API、网页新闻搜索、HN/Reddit/X 搜索、中文媒体搜索。*</p></body></html>
