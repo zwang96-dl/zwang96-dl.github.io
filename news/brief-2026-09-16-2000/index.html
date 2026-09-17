@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月16日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-16"/>
+<meta name="doc-ts" content="2026-09-17T03:00:37"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-16（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-16（20点版）</h1>
+<p>20点版来了，这轮就一条新消息。</p>
+<h2>框架更新</h2>
+<p>六大框架都没发新版。 vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TRT-LLM 还是 v1.3.0rc26 预览版。 LMDeploy 停在 v0.17.0，TGI 归档不动。 llama.cpp 出了 b11011，快照照常滚动。 常规滚动构建，不算发版。</p>
+<h2>新技术与论文</h2>
+<p>本轮无。 arXiv 接口被限流（429），论文侧没扫到新稿。 22点版继续。</p>
+<h2>业内新闻</h2>
+<p>英伟达 Rubin 首秀：MLPerf v6.1 成绩今天出炉。 这是下一代机架 NVL72 的首次公开跑分。 Qwen3-VL（阿里视觉语言模型）上比 GB300 快 3.7 倍。 DeepSeek-R1 上快 2.5 倍。 关键在软件：这仗用的是 vLLM + Dynamo。 Dynamo 是英伟达的开源推理框架。 它把 prefill 和 decode 拆开部署。 prefill 是&quot;第一遍读题&quot;的阶段。 decode 是逐 token 生成的阶段。 再加上大规模专家并行。 MoE 是混合专家（把活分给不同小专家）。 这套打法就是你正在评估的 P/D 解耦。 说白了：硬件新一代，软件思路跟你同路。 还有：同一批成绩里，软件优化也涨了。 GB300 跑 Qwen3-VL，比 v6.0 版本快了 1.6 倍。 驱动因素是 KV 缓存（草稿纸）优化和算子融合。 用的也是 vLLM + Dynamo。 划重点：新硬件要靠新软件思路才能跑满。 扩缩容也很漂亮：GB300 四个机架 288 张卡。 卡数翻 4 倍，吞吐涨 3.96 倍。 扩容几乎不浪费。 来源：NVIDIA 官方博客（成绩今日从 MLCommons 官网抓取） <a href="https://hitechub.com/nvidia-vera-rubin-nvl72-delivers-top-performance-in-mlperf-inference-v6-1-debut/">https://hitechub.com/nvidia-vera-rubin-nvl72-delivers-top-performance-in-mlperf-inference-v6-1-debut/</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无。 Latent Space 最新几期都是 agent 保险和物理模型。 没有 serving 相关的新单集。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/16 18:00→20:00 PDT）六大框架无新版（gh CLI 实时核验：vLLM v0.29.0、SGLang v0.5.19、TRT-LLM v1.3.0rc26 预览版、LMDeploy v0.17.0、TGI v3.3.7 归档；llama.cpp b11011 为窗口内常规滚动快照，不算发版）；NVIDIA Vera Rubin NVL72 MLPerf v6.1 首秀成绩为今日（9/16）发布、简报库首次收录（与 12 点版已报的 Lambda B200 MLPerf 博客、18 点版已报的 MLCommons 通稿同轮次但不同内容）；arXiv API 触发 429 限流，论文侧覆盖不全，已如实注明；X 大V 名单（lmsysorg/vLLM 官方/karpathy/jimfan/swyx）今日无 serving 实质帖子；Reddit、HN、中文 AI 媒体、social.search、Spotify 本轮均无 serving 实质新内容；Positron 融资（9/12 午间版已报）、Mindbeam（6月旧闻）等旧闻已剔除；本轮不生成深读笔记（厂商成绩通报无方法细节，宁缺毋滥）。渠道：GitHub releases（gh CLI 实时核验）、browser 搜索、社交媒体搜索、Spotify 站内播客。*</p></body></html>
