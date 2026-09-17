@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月17日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-17"/>
+<meta name="doc-ts" content="2026-09-17T07:01:36"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-17（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-17（00点版）</h1>
+<h2>框架更新</h2>
+<p><strong>1. 六家框架都没新版本，半夜这轮很安静</strong> vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TRT-LLM、LMDeploy、TGI 也都没动。 llama.cpp 出了 b11012，但只是每日滚动快照，不算发版。 <a href="https://github.com/sgl-project/sglang/releases">SGLang releases</a></p>
+<h2>新技术与论文</h2>
+<p><strong>2. ASPIRE：投机解码在批量推理里，终于可以&quot;各干各的&quot;</strong> 大白话：长文本推理慢，多半卡在注意力反复读 KV（草稿纸）上。 自投机解码（小模型先猜、大模型再验）能提速，但老方法要求整批请求同一步调。 ASPIRE 让每个请求自己定&quot;猜几步&quot;，草稿和验证混在一次前向计算里。 对你意味着什么：长上下文批量调度的一个新思路，值得扫一眼。 <a href="https://arxiv.org/abs/2609.17943">论文</a></p>
+<p><strong>3. 文档被改了，KV 缓存别全扔：只修&quot;污染区&quot;就行</strong> 大白话：RAG（先检索资料再回答）和 agent 系统里，缓存的上下文一改就过期。 全量重算太贵，只刷新改动处又会留下脏数据。 这篇把&quot;修缓存&quot;当成预算有限的重算问题来解。 结论：取改动点附近一段连续窗口重算，效果最好。 关键数据：事实问答基准上，能恢复 94% 以上的回答质量。 对你意味着什么：前缀缓存（请求开头相同就复用草稿纸）方向的实用补丁。 <a href="https://arxiv.org/abs/2609.17983">论文</a></p>
+<h2>业内新闻</h2>
+<p><strong>4. Arcfra 发了 Neutree 1.2：一个平台管所有模型，OCR 也不放过</strong> 大白话：Arcfra（做企业 AI 平台的公司）发了新版推理平台。 自研的 Flex 引擎能跑 MinerU、PaddleOCR 这类非大语言模型。 底层还是 vLLM 和 SGLang，上面套了个统一网关。 亮点是自动算 KV 缓存和显存：给上下文长度和并发数，它告诉你要几张卡。 对你意味着什么：企业级 serving 的新玩家，KV 估算功能挺贴心，已开源。 <a href="https://hkbusinesswire.com/arcfra-releases-neutree-1-2-to-add-non-llm-model-support-and-simplify-ai-operations/">新闻</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无。Latent Space 最新一集讲 AI 代理责任保险，跟 serving 无关。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/16 20:00→9/17 00:00 PDT）：六大框架无新版（gh 实时核验；SGLang releases 页首 Highlights 经核实是 9/5 的 v0.5.19 日志，非新版）。arXiv 扫到 9/16 两篇 serving 新论文，此前未报。剔除：ZSE（9/15 18点版已判为旧闻）、DeepSeek-V4.1-Flash 社区部署（9/10–9/13 已多轮报道）、MLPerf v6.1 全套（昨日已报）。X 大V、Reddit、HN、中文媒体、Spotify 本轮无 serving 实质新内容。渠道：GitHub releases API、arXiv API、网页新闻搜索、HN/Reddit/X 搜索、中文媒体搜索、Spotify 节目单。*</p></body></html>
