@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月16日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-16"/>
+<meta name="doc-ts" content="2026-09-17T01:01:09"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-16（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-16（18点版）</h1>
+<p>18点版来了，这轮有 5 条新东西。</p>
+<h2>框架更新</h2>
+<p>六个框架都没发新版。 vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TensorRT-LLM 还是 v1.3.0rc26 预览版。 LMDeploy 停在 v0.17.0，TGI 归档不动。 llama.cpp 出了 b11010 快照，落在窗口内。 但那是常规滚动构建，不算发版。</p>
+<h2>新技术与论文</h2>
+<p>看视频的模型也有了&quot;省电模式&quot;。 VideoMM 专门给长视频理解省 token。 思路是&quot;先粗看，再细看&quot;。 粗看用降采样帧找语义相关区域。 只有相关区域才送去高清细看。 其他方法都把整片视觉 token 一股脑塞进去。 实测 LongVideoBench 上快 6.13 倍。 精度反涨 7.4%，比现有最快的方法快 2.73 倍。 说白了：视觉 token 不再按吨收费。 「值得深读」：多模态推理优化正是你的研究方向。 encoder/prefill 阶段怎么砍视觉冗余。 这篇是现成的参考答案。 来源：arXiv 9/15 <a href="http://arxiv.org/abs/2609.16722v1">http://arxiv.org/abs/2609.16722v1</a></p>
+<p>一个基座、多个 LoRA 专家，草稿纸只写一次。 多 LoRA 部署常见：一个底座挂几个专家。 它们往往看的是同一份上下文。 这篇问了个实在问题：底座的 prefill KV 只算一次。 然后分给所有专家复用，质量亏多少。 prefill 是模型&quot;第一遍读题&quot;的阶段。 实验用 Qwen3-1.7B 挂了两个专家。 结论：普通训练好的 LoRA 直接复用，质量基本保住。 对你意味着：LoRA 混跑时，prefill 成本可以摊薄。 来源：arXiv 9/15 <a href="http://arxiv.org/abs/2609.17109v1">http://arxiv.org/abs/2609.17109v1</a></p>
+<p>循环 Transformer 的投机解码来了。 Looped Transformer 是把同一组层反复用的模型。 循环 Transformer 就是省参数，但解码慢。 LoopSpec 让它自己给自己当草稿。 每轮循环的中间状态直接猜下一个 token。 不用另训练草稿模型。 说白了：自己给自己打下手。 来源：arXiv 9/15 <a href="http://arxiv.org/abs/2609.17184v1">http://arxiv.org/abs/2609.17184v1</a></p>
+<h2>业内新闻</h2>
+<p>本轮无。 MLCommons 的 MLPerf v6.1 官方通稿。 跟 12 点版报过的 Lambda 博客同源。 投机解码进交互场景、双厂商异构首次提交。 都是同一轮成绩，不重复报。</p>
+<h2>访谈与深度</h2>
+<p>一台 GPU 干两份活，生产级 LoRA 混跑实战。 Swayam 的团队在 Azure 上跑的真架构。 一个 vLLM 实例，底座是开源视觉语言模型。 微调的 LoRA 适配器按需加载。 请求指定 domain-adapter 就走微调版。 不指定就走底座，零适配器开销。 另一路是多 agent 系统，直接连底座。 他们的原话：两台服务器两份账单太亏了。 一个实例、两个客户端，全搞定。 对你意味着：vLLM 有热切换适配器的官方姿势。 /v1/load_lora_adapter 接口，不用重启。 来源：Medium（今日） <a href="https://medium.com/@swayampatil7918/serving-two-llm-workloads-from-one-gpu-a-practical-mlops-architecture-on-azure-1ef290b32389">https://medium.com/@swayampatil7918/serving-two-llm-workloads-from-one-gpu-a-practical-mlops-architecture-on-azure-1ef290b32389</a></p>
+<p>多 token 预测到底在干嘛，一篇讲透了。 temperature2 写了篇 MTP 的深挖。 MTP 是多 token 预测，一次猜好几个 token。 它不是预训练的玄学。 它是投机解码的草稿，从模型自己身上长出来的。 关键数据：DeepSeek-V3 的 MTP 模块在 15.7B 规模上。 HumanEval 从 20.7 涨到 26.8。 GSM8K 从 25.4 涨到 31.4。 还提到：vLLM 9/14 的文档里，mtp 已经是原生方法。 跟 EAGLE 并列，不再是外挂。 来源：temperature2 9/15 <a href="https://temperature2.com/p/2026-09-15-did-you-know-multi-token-prediction/">https://temperature2.com/p/2026-09-15-did-you-know-multi-token-prediction/</a></p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/16 16:00→18:00 PDT）六大框架无新版（gh CLI 实时核验：vLLM v0.29.0、SGLang v0.5.19、TRT-LLM v1.3.0rc26 预览版、LMDeploy v0.17.0、TGI v3.3.7 归档；llama.cpp b11010 为窗口内常规滚动快照，不算发版）；arXiv 3 篇 9/15 新稿（VideoMM 2609.16722、Shared-Prefix KV Reuse 2609.17109、LoopSpec 2609.17184）简报库从未报过；X 大 V 名单（lmsysorg/vLLM 官方/karpathy/jimfan/swyx）今日无 serving 实质帖子（karpathy 的 LLM Knowledge Base 与 serving 无关）；Reddit/HN 9/16 无推理 serving 实质新讨论；中文 AI 媒体（机器之心/量子位/InfoQ）今日无相关新文；Spotify Latent Space 最新集为 agent 保险（9/16）与 Socher 访谈（9/14），与 serving 无关；Simon Willison/The Batch 近两天无 serving 新内容；MLCommons MLPerf v6.1 官方通稿与 12 点版已报的 Lambda 博客同源，不重复；amd-agi/infera、Lightbits KV 博客、LCLM、nivora、GladLabs、Lambda MLPerf 均已在既往期次报过，均未重复；VideoMM 生成深读笔记，Shared-Prefix/LoopSpec/Swayam/temperature2 与 P/D 解耦主线关联较弱或信息增量有限，本轮不生成深读笔记。渠道：GitHub releases（gh CLI 实时核验）、arXiv API、Reuters/MLCommons、Medium、temperature2、X/Reddit/HN 话题搜索、中文媒体搜索、Spotify、social.search。*</p></body></html>
