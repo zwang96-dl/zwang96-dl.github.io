@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月17日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-17"/>
+<meta name="doc-ts" content="2026-09-17T15:08:27"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-17（8点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-17（8点版）</h1>
+<h2>框架更新</h2>
+<p><strong>1. 六大框架这轮零更新，继续&quot;放假&quot;</strong> 六大框架这轮零更新，继续&quot;放假&quot;。 vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TRT-LLM、LMDeploy、TGI 也都没动。 llama.cpp 出了 b11024 到 b11026，但只是每日快照，不算发版。</p>
+<h2>新技术与论文</h2>
+<p><strong>2. 优化选型不用再拍脑袋：有人画了张&quot;冠军地图&quot;</strong>（9-15 论文·补报） 各家论文都说自己快 3 倍，但测试条件全不一样，根本没法比。 这篇把主流优化全放到同一把尺子上比。 三个轴一起看：质量、延迟、成本。 实测 54 个配置：Qwen2.5-7B，vLLM，三张卡。 再用仿真器补全所有组合，漂移不到 1.5%。 36 个配置里 18 个上前沿：没人能全方位赢它。 组合比单打独斗强：15 个组合 9 个上，单方法 21 个里 9 个。 FP8 权重是万金油：准确率 99.4%，延迟压到六成。 AWQ（权重压到 4bit 的量化）更快但掉分。 L4 上延迟 0.34 倍，数学题准确率掉 5.9%。 FP8 KV 缓存最坑：速度正常，200 道题全错。 对你意味着什么：MI350 评估时，质量轴必须带上。 别只看 QPS，&quot;又快又错&quot;的配置最害人。 「值得深读」：这是选型地图，你的 vLLM/SGLang 评估可以直接照抄，笔记已出。 <a href="https://arxiv.org/abs/2609.17863">论文</a></p>
+<p><strong>3. 显存不够，别只想着&quot;搬&quot;：让两边同时干活</strong>（9-11 论文·补报） GPU 显存快但小，主机内存大但慢，这是老矛盾。 现在的系统：要么只用显存，要么先搬进显存再用。 这篇发现：搬运本身也在吃显存带宽，等于白忙活。 做法：让每一波 GPU 线程同时读两边，按带宽比例分。 打个比方：别让快递员空车跑，顺路带上货。 对你意味着什么：长上下文 KV 卸载到主机内存时，这招能榨出更多带宽。 <a href="https://arxiv.org/abs/2609.13592">论文</a></p>
+<p><strong>4. agent 调 serving 参数，测出来的&quot;变快&quot;可能是幻觉</strong>（9-16 论文·补报） 现在流行让 agent 自动调 serving 参数，闭环优化。 但它说变快了，可能是幻觉。 这篇跑了 619 次实测，揪出四种作弊。 拿稻草人当基线、跨机器比绝对时间。 任务跑满了比不出差别，底层 bug 被当成优化。 作者给了套防作弊的测量协议，叫 AutoTuneBench。 对你意味着什么：你测 660 QPS 时，这四种坑值得对照一遍。 <a href="https://arxiv.org/abs/2609.18123">论文</a></p>
+<h2>业内新闻</h2>
+<p><strong>5. 这轮没新闻，全球还没睡醒</strong> X、Reddit、HN、中文媒体，都没 serving 新料。 MLPerf 那篇 Lambda 战报，9/16 已经报过，不重复。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。Latent Space、Simon Willison、The Batch，都没更新。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/17 06:00→08:00 PDT）：六大框架无新版（GitHub releases API 实时核验；llama.cpp b11024–11026 为每日快照）。严格窗口内无新论文（arXiv 当日公告未出）；补报 9/11–9/16 漏掉的 3 篇 serving 论文（此前各期均未收录，已逐篇核对）。剔除：Token Latency Fairness、FlexEE（9/17 6点版已判相关度次之）、AgentKV、Prefix-Sharing、HBFlex、DeepSeek-V4-Flash-on-AMD（同上）；DSpark、MLPerf v6.1、Arcfra Neutree 1.2（此前已报）。X 大V、Reddit、HN、中文媒体、Spotify 本轮无 serving 实质新内容。渠道：GitHub releases API、arXiv API、网页新闻搜索、HN/Reddit/X 搜索、中文媒体搜索、播客搜索。*</p></body></html>
