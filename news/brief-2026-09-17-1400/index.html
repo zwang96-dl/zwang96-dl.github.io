@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月17日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-17"/>
+<meta name="doc-ts" content="2026-09-17T21:07:48"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-17（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-17（14点版）</h1>
+<h2>框架更新</h2>
+<p>六大框架这轮继续&quot;躺平&quot;。 vLLM、SGLang、TRT-LLM、LMDeploy 都没发新版。 llama.cpp 出了 b11028 每日快照。 它是今早 10 点半发的，按惯例不算正式发版。 TGI 继续静默，快九个月没动静了。</p>
+<h2>新技术与论文</h2>
+<p><strong>论文一：&quot;优化到底伤没伤质量&quot;，终于有把标准尺子了</strong></p>
+<p>说白了，以前各家报的&quot;快 3 倍、精度几乎不掉&quot;，用的尺子都不一样。 没法横向比，谁吹得响谁赢。 Jerry Kaplan 这篇给了套校准过的测量方法。 核心招数：拿另一个大模型当裁判，给输出打分。 但裁判也可能有偏好，所以先给裁判做&quot;体检&quot;。 让它给同一模型跑两次分，看它有没有系统性偏心。 还加了个&quot;空条件&quot;对照组：分布跟原模型完全一样。 按理说它测出来差异必须是零，专治裁判&quot;看走眼&quot;。 这套方法跟你直接相关。 MI350 上选量化方案，它帮你避开 benchmark 幻觉。 你在评估 P/D 解耦时，也能拿它当裁判校准尺子。 深读笔记已生成：《给推理优化装一把&quot;校准过的尺子&quot;》，含原文 2 张关键图。 <a href="https://arxiv.org/abs/2609.18005">https://arxiv.org/abs/2609.18005</a></p>
+<p><strong>论文二：本地跑大模型，prompt 真的更&quot;私密&quot;吗？</strong></p>
+<p>很多人觉得：prompt 留在本地设备上，肯定比云上私密。 这篇论文说：未必。 作者扒了本地 LLM 服务栈四处漏 prompt 的地方。 模型加载、运行时内存、wrapper 持久化、服务接口，个个都可能漏。 作者还开源了检测框架 LLAnalyzer，自动测每道边界漏不漏。 偏安全工程方向，跟你的推理优化主线关系不大，知道有这事就行。 <a href="https://arxiv.org/abs/2609.18526">https://arxiv.org/abs/2609.18526</a></p>
+<h2>业内新闻</h2>
+<p><strong>Arcfra 发了 Neutree 1.2：统一推理平台开始接非 LLM 模型了</strong></p>
+<p>Neutree 是个统一推理平台。 底层搭在 vLLM 和 SGLang 上。 这版新增了 Flex Engine，专接非 LLM 模型。 比如 MinerU、PaddleOCR 这种文档解析和 OCR 工具。 还加了 KV-cache 用量自动估算。 KV-cache 就是推理时的&quot;草稿纸&quot;，现在部署前能自动算出来。 部署前就知道要多少显存，少踩&quot;爆显存&quot;的坑。 消息来自 PR Newswire 通稿，厂商自报，看看就好。 <a href="https://hkbusinesswire.com/arcfra-releases-neutree-1-2-to-add-non-llm-model-support-and-simplify-ai-operations/">https://hkbusinesswire.com/arcfra-releases-neutree-1-2-to-add-non-llm-model-support-and-simplify-ai-operations/</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无。 Latent Space 今天没出新单集。 最新还是 9/16 那期。 讲 AI Agent 保险，跟推理 serving 无关。 机器之心、量子位今天也没推理 serving 相关报道。 karpathy、jimfan、lmsysorg 今天都没新帖。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/17 12:00→14:00 PDT）。六大框架无正式发版（GitHub releases API 实时核验：vLLM v0.29.0、SGLang v0.5.19、TRT-LLM v1.3.0rc26、LMDeploy v0.17.0 均无更新；llama.cpp b11028 为 10:30 PDT 每日快照，落在窗口外；TGI 仍静默）。arXiv 推理优化方向 8 组关键词查询，9/16–17 新入库 2 篇未被报过（2609.18005、2609.18526；其余已在 0000/0400/1000 点版报过）。业内新闻：Arcfra Neutree 1.2 通稿（PR Newswire，9/17，已打开原文核验）。X 大V（lmsysorg、vLLM 官方、karpathy、jimfan、Latent Space）、Reddit（r/LocalLLaMA、r/MachineLearning）、HN、中文媒体（机器之心/量子位/InfoQ）、播客/YouTube、Spotify 站内均无窗口内实质新内容。深读笔记：《给推理优化装一把&quot;校准过的尺子&quot;》（arXiv:2609.18005）已生成：md + HTML（2 张原文关键图 base64 内嵌）+ README 索引已更新。渠道：GitHub releases API、arXiv API、网页新闻搜索、HN/Reddit/X 搜索、中文媒体搜索、播客搜索、Spotify 站内节目单。*</p></body></html>
