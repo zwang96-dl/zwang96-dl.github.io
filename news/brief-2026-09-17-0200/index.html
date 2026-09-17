@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月17日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-17"/>
+<meta name="doc-ts" content="2026-09-17T09:07:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-17（2点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-17（2点版）</h1>
+<h2>框架更新</h2>
+<p><strong>1. 六家框架都没新版本，半夜这轮继续安静</strong> vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TRT-LLM、LMDeploy、TGI 也都没动。 llama.cpp 只有每日快照，不算发版。</p>
+<h2>新技术与论文</h2>
+<p><strong>2. 别猜工具跑多久，直接问它：agent 等工具时 KV 缓存有救了</strong>（9-16 上午论文，之前漏报） 大白话：agent 调工具干等几分钟，KV 缓存（草稿纸）白占显存。 今天 serving 靠猜时长决定缓存去留，猜得很不准。 这篇让工具实时上报进度，serving 照着做留、踢、搬回。 关键数据：调用 90% 处误差不到 10%，历史预测是 80%。 生产实测：p90 TTFT（首字时间）降 20.7%，吞吐还涨 2%。 对你意味着什么：P/D 解耦评估的 agent 场景补丁。 「值得深读」：KV 缓存管理正是你的方向，笔记已出。 <a href="https://arxiv.org/abs/2609.18849">论文</a></p>
+<p><strong>3. rMuscle：给机器人装&quot;肌肉记忆&quot;，VLA 推理快三四成</strong>（9-16 上午论文，之前漏报） 大白话：VLA 模型（看图、理解、动手一条龙）是机器人的主流脑子。 机器人反应慢，多半卡在模型推理延迟上。 这篇发现：机器人重复干活时，动作和内部状态都很像。 于是做了&quot;肌肉记忆&quot;缓存：视觉 token 复用、神经元激活复用。 关键数据：实测快 1.3–1.4 倍，成功率不掉。 对你意味着什么：多模态推理优化在具身场景的实例，思路可借鉴。 <a href="https://arxiv.org/abs/2609.19104">论文</a></p>
+<h2>业内新闻</h2>
+<p><strong>4. NVIDIA 的 DMS 又被媒体翻出来：KV 缓存压 8 倍，精度不掉</strong> 大白话：DMS（动态记忆稀疏化）让模型自己挑要留的 token。 论文是 2025 年 6 月的老面孔，这次是媒体重新报道。 数据很亮眼：Qwen3-8B 吞吐翻 5 倍，同显存下得分反涨。 提醒一句：这是媒体翻红，不是新论文，别当新闻追。 <a href="https://venturebeat.com/orchestration/nvidias-new-technique-cuts-llm-reasoning-costs-by-8x-without-losing-accuracy">报道</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无。Latent Space、Simon Willison、The Batch 都没更新。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/17 00:00→02:00 PDT）：六大框架无新版（gh 实时核验）。严格窗口内无新论文；补报 9-16 上午漏掉的两篇 serving 论文（Ask the Tool、rMuscle），此前 8 期简报均未收录。DMS 是 2025 年 6 月老论文的媒体翻红。剔除：MLPerf v6.1 Lambda 战报（9/16 12点版已报）、Apple 考虑 NVLink Fusion（9/16 12点版已报）、Cirrascale（9/15–9/16 已报）。X 大V、Reddit、HN、中文媒体、Spotify 本轮无 serving 实质新内容。渠道：GitHub releases API、arXiv API、网页新闻搜索、HN/Reddit/X 搜索、中文媒体搜索、Spotify 节目单。*</p></body></html>
