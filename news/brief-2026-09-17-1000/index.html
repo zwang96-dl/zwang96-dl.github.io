@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月17日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-17"/>
+<meta name="doc-ts" content="2026-09-17T17:05:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-17（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-17（10点版）</h1>
+<h2>框架更新</h2>
+<p><strong>1. 六大框架这轮继续&quot;放假&quot;</strong> vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TRT-LLM 还在 v1.3.0rc26 预览版。 LMDeploy 停在 v0.17.0。 TGI 快九个月没发版了。 llama.cpp 出了个 b11027 快照，9:03 PDT 发布。 但那是每日自动构建，不算正式发版。</p>
+<h2>新技术与论文</h2>
+<p><strong>2. KV 缓存放哪层？有人画了张&quot;选址地图&quot;</strong>（9-14 论文） KV 缓存是草稿纸，问题是放哪张桌子。 GPU 显存快但小，主机内存大但慢，SSD 更大更慢。 这篇在仿真器里比了多种放法：按新旧、按复用频率、要不要提前搬。 覆盖了 Mooncake、LMCache、FlexGen 这些系统的思路。 对你意味着什么：长上下文 KV 卸载时。 这篇是&quot;放哪&quot;的决策参考。 <a href="http://arxiv.org/abs/2609.16215">论文</a></p>
+<p><strong>3. 文档改了，KV 缓存别全重算</strong>（9-16 论文） RAG 和 agent 场景里，文档一改，缓存的 KV 就&quot;过期&quot;了。 全量重算贵，只刷被改的片段又会留下不一致。 这篇把&quot;原地修复&quot;做成预算化问题：钱花在刀刃上。 核心结论：选修复位置时，&quot;连续性&quot;比&quot;重要性&quot;更重要。 对你意味着什么：prefix caching 场景的小技巧。 文档动态更新时能省算力。 <a href="http://arxiv.org/abs/2609.17983">论文</a></p>
+<h2>业内新闻</h2>
+<p><strong>4. PyTorch 官方：SGLang 跑 DeepSeek-V4，同等体验 5 倍吞吐</strong>（近日） Day-0 的栈只是个起点，之后又做了一轮内核和运行时优化。 GB300 解耦部署：DeepSeek-V4 Pro FP4，8k 输入 1k 输出。 从 Day-0 的 2200 tok/s/GPU 涨到 11200。 交互体验不变，吞吐 5 倍。 内核侧：MHC 融合、KV 压缩 V2、W4A4 MoE。 运行时侧：解耦准入、可断开 CUDA 图。 对你意味着什么：生产级调优长啥样，看这篇实录。 路由、缓存都调到了。 <a href="https://pytorch.org/blog/serving-deepseek-v4-on-gb300-with-sglang-5x-higher-throughput-at-the-same-interactivity-since-day-0/">博客</a></p>
+<p><strong>5. DeepSeek 撤回了 V4-Pro 切到 V4.1-Flash 的计划</strong> 原计划 9 月 14 日把 deepseek-v4-pro 的流量切到 V4.1-Flash。 现在官方 changelog 反悔了：V4-Pro 继续原价提供。 划重点：deepseek-flash 是个兼容别名，背后模型可能在变。 回归测试别只看字符串，要盯实际行为。 <a href="https://www.llmrumors.com/news/deepseek-v41-flash-pricing-agent-memory">报道</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无。 Latent Space 最新两期（9/16、9/14）不涉及推理 serving。 Simon Willison、The Batch、机器之心、量子位都没 serving 新料。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/17 08:00→10:00 PDT）：六大框架无正式发版（GitHub releases API 实时核验；llama.cpp b11027 为窗口内每日快照）。剔除：Rubin MLPerf v6.1 首秀（9/16 20点版已报）、SemiAnalysis Rubin 能效分析（9/15 16点版已报）、Pareto 冠军地图（9/17 8点版已报+深读）、ASPIRE（9/17 0点版已报）、Ask the Tool（9/17 6点版已报+深读）、Calibrate-Then-Route（9/17 6点版已报+深读）、Token Latency Fairness（9/17 6点版已判相关度次之）、Arcfra Neutree 1.2（9/16 已报）、V4.1-Flash 内核优化博客（9/12–9/13 已报）、gladlabs 三框架对比（9/16 14点版已报）；Weight Cache Daemon 博客为 8/21 旧闻不报。X 大V（karpathy/jimfan 无新帖；lmsysorg 的 day-0 官宣 cluster 只有镜像站摘要、无直接链接和确切时间，不报）；Reddit、HN、中文媒体、Spotify 本轮均无 serving 实质新内容。本轮不生成深读笔记（宁缺毋滥：候选两篇均为小改进型论文）。渠道：GitHub releases API、arXiv API、网页新闻搜索、HN/Reddit/X 搜索、中文媒体搜索、播客搜索、Spotify 站内节目单。*</p></body></html>
