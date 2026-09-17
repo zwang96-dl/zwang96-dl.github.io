@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月17日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-17"/>
+<meta name="doc-ts" content="2026-09-17T13:05:32"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-17（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-17（6点版）</h1>
+<h2>框架更新</h2>
+<p><strong>1. 六家框架继续&quot;放假&quot;，这轮还是零更新</strong> vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TRT-LLM、LMDeploy、TGI 也都没动。 llama.cpp 只有每日快照，不算发版。</p>
+<h2>新技术与论文</h2>
+<p><strong>2. P/D 解耦之后，请求分给谁成了新瓶颈</strong>（9-14 论文·补报） P/D 解耦是大势所趋：两个阶段各用一组 GPU。 prefill 管理解输入，decode 管逐字往外吐。 但请求到底发给哪个实例，大家还在轮询瞎分。 这篇做了个&quot;学出来的路由器&quot;。 它看四个信号：prompt 长度、预测输出长度、缓存压力、SLO 等级。 算出每个实例的边际成本，把请求发给最便宜的。 关键数据：8 张 A40 卡跑 vLLM。 KV 缓存（草稿纸）用 NIXL 在两组卡之间传。 混合突发流量下，goodput（达标吞吐）0.864，轮询 0.835。 最狠的一句：校准值了 4.5 个点。 用真机 5 分钟测出来的硬件常数，尾延迟优势的四成全靠它。 仿真器算出来的常数差了 7 倍，直接用会翻车。 对你意味着什么：你评估 P/D 解耦时，路由策略可以直接抄这套。 「值得深读」：路由正是 P/D 评估缺的一环，笔记已出。 <a href="https://arxiv.org/abs/2609.16206">论文</a></p>
+<p><strong>3. 流水线并行被小看了：agent 任务里它比 P/D 解耦还快</strong>（9-16 论文·补报） agent 干活和聊天不一样：它要的不是首字快，而是一整单活儿早点干完。 这篇说：流水线并行（把模型切成几段接力跑）被低估了。 它在 prefill 和 decode 之间找到了更合适的平衡点。 关键数据：在 64 张 H800 上跑两个 360B+ MoE 模型。 任务完成时间（JCT）比 SGLang 快 1.45 倍。 比 vLLM 的流水线快 2.33 倍。 连当下最强的 P/D 解耦部署也快了 1.54 倍。 对你意味着什么：评估 P/D 解耦时，记得把流水线并行拉进来当对手。 <a href="https://arxiv.org/abs/2609.16491">论文</a></p>
+<p><strong>4. 百万 token 解码：让每个 query 自己决定看几层 key</strong>（9-15 论文·补报） agent 会话跑到一百万 token，KV 缓存只能塞主机内存。 每次解码都要扫一遍所有 key，流量扛不住了。 Fathom 让每个 query 自己决定：key 的每个通道读几位。 打个比方：先看个大概，重要的通道再细看，不重要的就糊弄过去。 关键数据：百万 token、Qwen3-8B，单步解码快 1.67 倍。 用的还是量化 serving 本来就存的 4-bit K，零额外开销。 对你意味着什么：KV 卸载到主机内存的长上下文方案，又多一个趁手工具。 <a href="https://arxiv.org/abs/2609.17652">论文</a></p>
+<p><strong>5. MAPS：decode 池老是忙闲不均，靠预测输出长度来治</strong>（9-14 论文·补报） P/D 解耦后，decode 池经常忙闲不均。 输出多长事先不知道，调度只能瞎猜。 MAPS 让设备端帮忙：先预估输出长度。 预估和云端 prefill 重叠跑，几乎不占时间。 再按不确定性校准出个上限，调度按上限排队，安全。 关键数据：平均端到端延迟降 42.6%，尾延迟最多降 84.8%。 对你意味着什么：P/D 解耦的调度器设计，这篇给了个能抄的模板。 <a href="https://arxiv.org/abs/2609.15359">论文</a></p>
+<h2>业内新闻</h2>
+<p><strong>6. 这轮没新闻，全球都在睡觉</strong> 凌晨四点到六点，新闻线上一片安静。 X、Reddit、HN、中文媒体都没 serving 的新料。 Latent Space 新一期聊的是 agent 问责，跑题了。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。Simon Willison、The Batch 都没更新。</p>
+<hr/>
+<p>*去重说明：筛过简报库。本轮窗口（9/17 04:00→06:00 PDT）：六大框架无新版（GitHub releases API 实时核验）。严格窗口内无新论文；补报 9-14 至 9-16 漏掉的 4 篇 serving 论文（此前各期均未收录，已逐篇核对）。剔除：Ask the Tool、rMuscle、Shared-Prefix KV Reuse（9/16–9/17 已报）；DSpark（9/9、9/12 已报）；MLPerf v6.1 Lambda 战报、Arcfra Neutree 1.2（9/16 已报）；AgentKV、Prefix-Sharing、FairInference、HBFlex、Early-Bird、DeepSeek-V4-Flash-on-AMD（同批扫到，相关度次之未收）。X 大V、Reddit、HN、中文媒体、Spotify 本轮无 serving 实质新内容。渠道：GitHub releases API、arXiv API、网页新闻搜索、HN/Reddit/X 搜索、中文媒体搜索、Spotify 节目单。*</p></body></html>
