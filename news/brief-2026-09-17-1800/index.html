@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月17日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-17"/>
+<meta name="doc-ts" content="2026-09-18T01:01:58"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-17（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-17（18点版）</h1>
+<h2>框架更新</h2>
+<p>这轮框架都在休息。 vLLM、SGLang 都没发新版。 TRT-LLM、LMDeploy 也没动静。 GitHub releases 实测过，跟基线完全一致。 llama.cpp 只有每日快照，不算正式发版。 TGI 继续静默。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没新论文。 推理 serving 方向的关键词组全查了一遍。 今天早上报过的那几篇之外，没有新的入库。</p>
+<h2>业内新闻</h2>
+<p><strong>Crusoe 又融了 39 亿美元：帮 OpenAI 盖机房的那家公司，估值干到 309 亿</strong></p>
+<p>Crusoe 又融了 39 亿美元，估值 309 亿美元。 这家公司就是帮 OpenAI 在德州盖巨型数据中心的那家。 这轮 Nvidia、Founders Fund 都跟投了。 钱分两路花：继续建德州 Abilene 的大机房。 另一路是造小型模块化 AI 工厂，能装上卡车拉走。 背景：Crusoe 刚和 Jane Street 签了 130 亿美元的五年期 GPU 云合同。 对你意味着什么：推理算力现在是卖方市场，租卡只会越来越贵。 Nebius 这周刚涨价，Crusoe 又大笔融资，同一件事的两面。 说白了，推理优化这件事越来越值钱。 <a href="https://techcrunch.com/2026/09/17/crusoe-raises-3-9b-to-build-massive-data-centers-and-small-modular-ai-factories/">https://techcrunch.com/2026/09/17/crusoe-raises-3-9b-to-build-massive-data-centers-and-small-modular-ai-factories/</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无。 Reddit、HN 没新的热帖。 机器之心、量子位今天没新报道。 Spotify 上 Latent Space 还是 9/16 那期 agent 保险。 X 上 lmsysorg、karpathy、jimfan 都没动静。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/17 16:00→18:00 PDT）。六大框架无新发版（GitHub releases API 实测：vLLM v0.29.0、SGLang v0.5.19、TRT-LLM v1.3.0rc26、LMDeploy v0.17.0 均无更新；llama.cpp b11028 为今日 10:30 PDT 每日快照，按惯例不算发版；TGI 自 2025-12 v3.3.7 后静默）。arXiv 推理 serving 方向 8 组关键词（sortBy=submittedDate）全量查询：窗口内无新入库；9/16 后入库的 4 篇候选（ASPIRE 2609.17943、Ask the Tool 2609.18849、HBFlex 2609.18675、Token Latency Fairness 2609.18112）今日早版均已报过或判相关度次之，未重复。窗口内实质新料只有 Crusoe 39 亿美元 F 轮融资（TechCrunch 9/17，JSON-LD datePublished 2026-09-17T16:25 PDT 核验在窗口内，Nvidia/Founders Fund/GIC/QIA 跟投；Vertical Data 1.89 亿美元 AI 基建通稿为 9/17 但无精确时间戳、无法确认在窗口内，按规则未收录）。VentureBeat&quot;3x 推理加速烤进权重&quot;稿经核验为约 206 天前旧文重抓取，已排除。X 大V（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）、Reddit（r/LocalLLaMA、r/MachineLearning）、HN、中文媒体（机器之心/量子位/InfoQ）、YouTube、Spotify（Latent Space 9/16 期为 agent 保险、非 serving）、博客/Newsletter（Simon Willison、Latent Space、The Batch）均无窗口内新料。本轮无值得深读的技术内容，未生成深读笔记。渠道：GitHub releases API、arXiv API、网页新闻搜索、X/Reddit/HN 话题搜索、中文媒体搜索、YouTube、Spotify 站内、播客搜索。*</p></body></html>
