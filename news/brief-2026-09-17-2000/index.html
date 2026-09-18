@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月17日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-17"/>
+<meta name="doc-ts" content="2026-09-18T03:09:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-17（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-17（20点版）</h1>
+<h2>框架更新</h2>
+<p>六大框架这轮继续躺平。 vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TRT-LLM 最新还是 v1.3.0rc26 预览版。 LMDeploy v0.17.0、llama.cpp v0.4.1 都没动。 llama.cpp 的 b11028 是今天的每日快照。 按惯例不算正式发版。 TGI 自去年 12 月的 v3.3.7 后继续静默。</p>
+<h2>新技术与论文</h2>
+<p><strong>vLLM 和 TensorRT-LLM 贴身实测：前缀复用谁快，调度说了算</strong></p>
+<p>这篇论文干了一件实在事：同一块 H100、同样的请求，vLLM 和 TensorRT-LLM 贴身对比。 TensorRT-LLM 是 NVIDIA 的推理引擎。 前缀复用（prefix caching）：重复的前缀只算一遍。 KV 缓存就是草稿纸，存着算好的中间结果，跨请求复用。 开复用后两家缓存命中率都是 92%，打了个平手。 但谁更快看请求怎么来：请求一拥而上，TensorRT-LLM 的首 token 时间快 2.4 倍。 流量平稳时，vLLM 的 p95（95% 的请求都比它快）反杀 9.2 倍。 说白了，缓存本身一样好，胜负手在它上面的调度器。 <strong>值得深读</strong>：这篇的方法论可以直接抄。 你给 SGLang 和 vLLM 做对比测试时，突发和平稳两种流量都要测。 <a href="https://arxiv.org/abs/2609.19657">https://arxiv.org/abs/2609.19657</a></p>
+<p><strong>D-Quant：KV 缓存量化不用固定位宽，改用熵编码省显存</strong></p>
+<p>D-Quant 给 KV 缓存换了种压法：不用固定位宽，改用熵编码。 熵编码（entropy coding）：常见值用短码，稀有值用长码。 它发现 KV 值大多挤在中间，近似正态分布。 固定位宽给常见值和稀有值发同样的码，浪费。 这篇偏方法，先提一句，暂不深读。 <a href="https://arxiv.org/abs/2609.19880">https://arxiv.org/abs/2609.19880</a></p>
+<p><strong>SwitchSD：投机解码加了个智能开关，该抄才抄</strong></p>
+<p>投机解码（speculative decoding）：先让实习生打草稿，再让专家改。 草稿有两种写法：神经网络生成，或者直接从上下文复制。 复制在重复多的文本上更快，但容易误触发，反而拖慢。 SwitchSD 训练轻量探针读模型内部信号，只在真想复制时才抄。 Llama 和 Qwen 上比 EAGLE3 快 15%。 这篇跟投机解码方向相关，先提一句，暂不深读。 <a href="https://arxiv.org/abs/2609.20186">https://arxiv.org/abs/2609.20186</a></p>
+<p>注：这三篇都是今天白天入库的，之前各版漏掉了，这轮补上。</p>
+<h2>业内新闻</h2>
+<p>本轮无实质新料。 网页新闻搜了一圈，翻出来的都是已报过的。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。 X 上这几位都没新帖：lmsysorg、vLLM 官方、karpathy。 jimfan、swyx 也一样安静。 Reddit、HN 没新的热帖。 机器之心、量子位今天没推理 serving 相关报道。 Spotify 上 Latent Space 这周没出新单集。 出的那期还是聊 agent 保险，跟推理 serving 无关。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/17 18:00→20:00 PDT）。六大框架无正式发版（GitHub releases API 实时核验：vLLM v0.29.0、SGLang v0.5.19、TRT-LLM v1.3.0rc26、LMDeploy v0.17.0 均无更新；llama.cpp v0.4.1 为 9/14 发版早前已报过，b11028 为今日 10:30 PDT 每日快照，按惯例不算发版；TGI 自 2025-12 的 v3.3.7 后静默）。arXiv 推理 serving 方向 6 组关键词（sortBy=submittedDate）全量查询：窗口内无新入库。本轮 3 篇论文均为补漏收录（经全量简报库去重确认从未报过）：PrefixBench-H100（2609.19657，9/16 20:56 PDT 入库，恰落在 9/16 22点版未运行的空档）；D-Quant（2609.19880，9/17 01:29 PDT 入库）；SwitchSD（2609.20186，9/17 05:51 PDT 入库）——此前各版的 arXiv 关键词组合未命中这三篇。PrefixBench-H100 标值得深读，已生成深读笔记（含原文 Figure 1/2/3、HTML base64 内嵌、README 索引已更新）；D-Quant、SwitchSD 偏方法/相关度次之，按宁缺毋滥未深读。业内新闻搜索（since 2026-09-17）返回均为已报旧料：Arcfra Neutree 1.2（14点版已报）、Lambda MLPerf v6.1（早前已报）、Rubin NVL72（9/15 起多版已报）、VentureBeat MTP 稿（9/10 20点版已报）。X 大V（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）、Reddit（r/LocalLLaMA、r/MachineLearning）、HN、中文媒体（机器之心/量子位）、YouTube、Spotify（Latent Space 最新仍为 9/16 agent 保险期，非 serving）、博客/Newsletter 均无窗口内新料。渠道：GitHub releases API、arXiv API、网页新闻搜索、X/Reddit/HN 话题搜索、中文媒体搜索、YouTube 搜索、Spotify 站内。*</p></body></html>
