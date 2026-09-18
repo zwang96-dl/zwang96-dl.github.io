@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月18日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-18"/>
+<meta name="doc-ts" content="2026-09-18T23:02:11"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-18（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-18（16点版）</h1>
+<h2>框架更新</h2>
+<p>SGLang v0.5.20 发布了，今天下午刚切出来。</p>
+<p>划重点：DSpark 解码现在能跑在 P/D 解耦架构上了。</p>
+<p>先说 DSpark：它是一种投机解码。</p>
+<p>让小模型先打草稿，大模型再改。</p>
+<p>P/D 解耦就是 prefill 和 decode 分开部署，像分工流水线。</p>
+<p>现在 Kimi-Linear 这类混合模型也能在解耦架构里跑 DSpark 了。</p>
+<p>官方在 8 张 B300 上验证过，输入拉到 256K 也没问题。</p>
+<p>前缀缓存这版也升级了。</p>
+<p>分支点缓存像书签，卡在请求分叉处复用滑动窗口状态。</p>
+<p>DeepSeek-V4-Flash 实测结果来了。</p>
+<p>命中率从 43.8% 涨到 60.8%。</p>
+<p>平均首 token 时间从 1.57 秒降到 1.07 秒。</p>
+<p>还能外接 Mooncake 或 UMBP，共享全局内存池。</p>
+<p>新加了一个 CPU 模拟器，不用 GPU 也能做性能预测。</p>
+<p>它跑真实的调度器和缓存逻辑，只换掉模型前向算延迟。</p>
+<p>预测首 token 时间误差约 6%，前缀复用率误差不到 0.05%。</p>
+<p>调缓存策略前先模拟一轮，能省下真机调试的钱。</p>
+<p>DeepSeek-V4 在 Blackwell 上更快了。</p>
+<p>V4 的稀疏注意力层有了专用内核。</p>
+<p>B200 上 prefill 快 1.2 倍，decode 快 1.45 倍。</p>
+<p>RTX PRO 6000 上单批 decode 也更快了。</p>
+<p>延迟从 36.1ms 降到 10.5ms。</p>
+<p>AMD 卡装机变快了。</p>
+<p>4 张 MI355X 装 GLM-5.2，现在 40 秒搞定。</p>
+<p>之前要 505 秒，喝完咖啡回来还没装完。</p>
+<p>升级提醒：这版退役了 CUDA 12。</p>
+<p>v0.5.19 是最后一个带 cu12x 镜像的版本。</p>
+<p>新版只剩 CUDA 13，升级前先确认你的环境。</p>
+<p>RL 训练的采样掩码支持回放了。</p>
+<p>Qwen3-8B：batch 64 下 decode 吞吐涨 52%。</p>
+<p>新模型不少：GLM-5.3-Flash、腾讯 Hy4-Preview。</p>
+<p>还有 Qwen3.8-Flash-Next、K2 Horizon。</p>
+<p>扩散模型也加了几个：MiniMax 的 FastH3、VDN-H3。</p>
+<p>还有个破坏性变更：/v1/responses 默认不再存结果了。</p>
+<p>P/D 解耦部署下本来也不能开存结果，别配错了。</p>
+<p>发布页：<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.20">https://github.com/sgl-project/sglang/releases/tag/v0.5.20</a></p>
+<h2>其他渠道</h2>
+<p>vLLM、LMDeploy、TGI 本轮都没新版本。</p>
+<p>TRT-LLM、llama.cpp 也安静。</p>
+<p>arXiv 窗口内没搜到新的推理论文。</p>
+<p>vLLM 博客最新还是 9/18 那篇视频 captioning，已报过。</p>
+<p>X、Reddit、HN、中文媒体、播客都没新料。</p>
+<p>本轮无「值得深读」项。</p></body></html>
