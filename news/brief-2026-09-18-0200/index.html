@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月18日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-18"/>
+<meta name="doc-ts" content="2026-09-18T09:03:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-18（2点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-18（2点版）</h1>
+<h2>框架更新</h2>
+<p><strong>1. 六大框架这轮都没新版本，继续&quot;值夜班&quot;</strong> vLLM 停在 v0.29.0，SGLang 停在 v0.5.19。 TRT-LLM 还是昨晚 20:14 的 v1.3.0rc27。 LMDeploy、TGI 全没动。 llama.cpp 照常出了两个每日快照。 b11029 和 b11030，按惯例不算发版。</p>
+<h2>新技术与论文</h2>
+<p><strong>1. V4.1-Flash 的 KV 压缩出了正式论文版</strong> DeepSeek 昨天把这份工作挂上了 arXiv。 KV 就是推理时的&quot;草稿纸&quot;。 核心方法跟 9/11 深读笔记讲的完全一致。 论文多了 45T token 训练细节和完整评测，爱看实验的点进去。 之前没看过深读的，直接看那篇笔记就行。 <a href="https://arxiv.org/abs/2609.19969">论文</a> ｜ <a href="https://zwang96-dl.github.io/news/deep-20260910-deepseek-v4-1-flash-kv/">9/11 深读笔记</a></p>
+<p><strong>2. 按需注意力：模型自己决定什么时候&quot;翻旧账&quot;</strong> 有篇新论文叫 On-Demand Attention（按需注意力）。 思路像个聪明的秘书：每生成一步，先判断翻全局历史值不值。 值得翻才做全局注意力，不值就跳过，省下大把 KV 读取。 vLLM 里也做了 GPU 侧条件执行，长上下文实测提速。 <a href="https://arxiv.org/abs/2609.20734">论文</a></p>
+<p><strong>3. 图像生成的注意力也有&quot;对角线&quot;稀疏模式</strong> 自回归图像生成，一次要吐上千个视觉 token。 有团队第一次系统测了它的注意力稀疏：呈现对角线模式。 KV 读取是这类任务 decode 的瓶颈，稀疏化能换性能。 做多模态 serving 的，可以借鉴这个思路。 <a href="https://arxiv.org/abs/2609.19702">论文</a></p>
+<h2>业内新闻</h2>
+<p>本轮无实质新料。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。 Latent Space 最新仍是 9/16 那期。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/18 00:00→02:00 PDT）。GitHub releases API 实时核验：vLLM v0.29.0、SGLang v0.5.19、TensorRT-LLM v1.3.0rc27（9/17 20:14 PDT 发版，22点版已报）、LMDeploy v0.17.0、TGI v3.3.7 均无更新；llama.cpp b11029（9/18 00:34 PDT）、b11030（9/18 01:13 PDT）为每日快照（按惯例不算发版）。arXiv 推理 serving 方向 6 组关键词（sortBy=submittedDate）全量查询：窗口内（9/18 07:00→09:00 UTC）无新入库；另发现 3 篇 9/17 白天入库的论文此前各版全漏报，已补报：2609.19969（V4.1-Flash KV 压缩正式论文版，核心方法 9/11 深读笔记已覆盖，故不另立深读）、2609.20734（On-Demand Attention，按需全局注意力的 recall head + vLLM GPU 侧条件执行）、2609.19702（自回归图像生成的对角注意力稀疏）。业内新闻搜索（since 2026-09-17）、X 大V（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）、Reddit（r/LocalLLaMA、r/MachineLearning）、HN、中文媒体（机器之心/量子位）、YouTube、Spotify（Latent Space 最新仍为 9/16 agent 保险期）、social.search（Instagram/Threads/Facebook，窗口内仅一条 9/17 教程帖）均无窗口内新料。渠道：GitHub releases API、arXiv API、网页新闻搜索、X/Reddit/HN 话题搜索、中文媒体搜索、YouTube 搜索、Spotify、social.search。*</p></body></html>
