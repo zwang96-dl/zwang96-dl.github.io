@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月17日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-17"/>
+<meta name="doc-ts" content="2026-09-18T05:01:58"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-17（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-17（22点版）</h1>
+<h2>框架更新</h2>
+<p><strong>TensorRT-LLM 半夜放出 v1.3.0rc27，KV 缓存和解耦部署两条线都在加码</strong></p>
+<p>这是今天晚上 20:14 刚发布的预览版。 预览版（rc）：正式版之前的测试版，功能先放出来给大家试。 这次 KV 缓存的改动最多，像给&quot;草稿纸&quot;装上门卫。 没缓存过的前缀只放一个请求进去算，重复的排队等着抄作业。 混合模型就是 attention 和 Mamba 混搭的那种。 每层留多少缓存，自动算好。 KV 缓存事件走 StreamingEvent 推送，监控更省事。 P/D 解耦也有新动作。 解耦就是分工流水线：prefill 和 decode 分开跑。 流式接口打通了，agent 的多轮对话能黏在同一组 worker 上。 但有两个坑先记下：多卡解耦部署 TinyLlama 可能卡死在启动阶段。 Eagle3 的投机解码在多卡上也可能挂住。 投机解码就是先让小模型打草稿，大模型再改一遍。 还有一个破坏性改动：老的两模型投机解码接口被删了，升级要改代码。 多模态方面：Nemotron 3.5 Super VL 可以直接 serving 了。 MiniMax-H3 的文生视频也支持了。 trtllm-serve 还加了 Anthropic 兼容接口。 换句话说，想从 Anthropic 切过来的客户端，不用改代码就能用。 <a href="https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.3.0rc27">https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.3.0rc27</a></p>
+<p>其余五家继续躺平。 vLLM 还是 v0.29.0。 SGLang 还是 v0.5.19。 LMDeploy v0.17.0 没动。 llama.cpp 的 b11028 是今天的每日快照，按惯例不算正式发版。 TGI 自去年 12 月的 v3.3.7 后继续静默。</p>
+<h2>新技术与论文</h2>
+<p><strong>ASRB：给 K8s 上的推理服务换了个会看&quot;质量&quot;的路由器</strong></p>
+<p>这篇是今天白天入库的，之前各版漏掉了，这轮补上。 ASRB：K8s 原生的请求路由器，专门管推理服务的流量分发。 K8s 就是管容器的编排系统，很多服务都跑在它上面。 它不光看延迟，还看回答质量，按你定的权重在两者之间取舍。 打个比方：以前路由器只管&quot;哪条路快&quot;，现在还管&quot;哪条路风景好&quot;。 实测延迟优先时，平均响应比同类方案快 10ms 以上。 质量优先时准确率更高，监控开销还能省 70%。 但这篇偏运维调度，跟你研究的推理优化主线关系不大，暂不深读。 <a href="https://arxiv.org/abs/2609.20497">https://arxiv.org/abs/2609.20497</a></p>
+<h2>业内新闻</h2>
+<p>本轮无实质新料。 网页新闻搜了一圈，翻出来的都是已报过的。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。 X 上这几位都没新帖：lmsysorg、vLLM 官方、karpathy。 jimfan、swyx 也一样安静。 Reddit、HN 没新的热帖。 机器之心、量子位今天没推理 serving 相关报道。 Spotify 上 Latent Space 最新单集还是 9/16 那期聊 agent 保险的。 跟推理 serving 无关，这轮不推。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/17 20:00→22:00 PDT）。GitHub releases API 实时核验：vLLM v0.29.0、SGLang v0.5.19、LMDeploy v0.17.0、TGI v3.3.7 均无更新；llama.cpp b11028 为今日 10:30 PDT 每日快照（按惯例不算发版）。TensorRT-LLM v1.3.0rc27 于 20:14 PDT 发布，为窗口内唯一新发版，release notes 逐条核验（KV guard pages、混合模型自动推导每层 KV 窗口、StreamingEvent 推送 KV 事件、uncached prefix 单 context 准入、Kimi K3 KDA replay 走 KV-cache manager V2、DSpark drafter 专用 KV manager、P/D 解耦流式 RPC 与 sub-agent 亲和性、Eagle3 多卡 hang 与两模型 spec decoding 删除等已知问题均已确认）。arXiv 推理 serving 方向 6 组关键词 + 补充查询（sortBy=submittedDate）：窗口内（9/18 03:00→05:00 UTC）无新入库；ASRB（2609.20497，9/17 07:45 PDT 入库）为补漏收录（经全量简报库去重确认从未报过），偏运维调度、与用户主线关联弱，按宁缺毋滥未深读。业内新闻搜索（since 2026-09-17）返回均为已报旧料：gladlabs llama.cpp 对比（9/16 14点版、9/17 10点版已报）、Towards AI 三引擎对比（6 月旧文）、NeuralWired MLPerf v6.0 指南（7 月旧文）。X 大V（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）、Reddit（r/LocalLLaMA、r/MachineLearning）、HN、中文媒体（机器之心/量子位）、YouTube、Spotify（Latent Space 最新仍为 9/16 agent 保险期，非 serving）均无窗口内新料。渠道：GitHub releases API、arXiv API、网页新闻搜索、X/Reddit/HN 话题搜索、中文媒体搜索、Spotify 站内。*</p></body></html>
