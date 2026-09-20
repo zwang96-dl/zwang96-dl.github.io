@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月19日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-19"/>
+<meta name="doc-ts" content="2026-09-20T05:01:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-19（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-19（22点版）</h1>
+<h2>框架更新</h2>
+<p><strong>六大框架今晚全员休息</strong> vLLM 还是 v0.29.0，SGLang 还是 v0.5.20。 TRT-LLM 稳定版 v1.2.1，预发布版停在 rc27。 LMDeploy 还是 v0.17.0，TGI 还是 v3.3.7。 llama.cpp 还是 v0.4.1。 GitHub releases API 一个个核验过，没有暗更新。 顺手辟个谣：SGLang 目前没有 v0.5.21，别被碎片信息误导。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 今晚没上新</strong> 四组关键词都查了，窗口内零入库。 最新入库还是 9/17 那批，之前都报过。 这轮没有值得深读的论文。</p>
+<h2>业内新闻</h2>
+<p>本轮无实质新料。 网页、X、Reddit、HN、中文媒体、社交平台都扫过。 蹦出来的多是旧闻或已报过的内容。</p>
+<h2>访谈与深度</h2>
+<p><strong>补报一条：SGLang 登上 TPU</strong> 这条是两天前的视频，本系列还没报过。 主讲人是 RadixArk 的 Haolin Fu。 内容：在 Google Cloud TPU 上跑 SGLang。 大语言模型和多模态模型都覆盖。 PyTorch 和 JAX 两条后端路线都讲。 TPU 是 Google 自研的 AI 加速芯片。 它是条&quot;去英伟达化&quot;的路，成本可能更低。 好比打车不只盯着一家平台，谷歌 TPU 云是另一家，价格可能更香。 对你意味着：评估 SGLang 时别只看 GPU。 TPU 是另一个值得对标的硬件选项。 视频：<a href="https://www.youtube.com/watch?v=DYE397wbGzQ">https://www.youtube.com/watch?v=DYE397wbGzQ</a> 背景阅读：RadixArk 联手 Google 把 SGLang 全功能搬上 TPU（7 月官方博客）：<a href="https://lmsys.org/blog/2026-07-30-sglang-google-tpu/">https://lmsys.org/blog/2026-07-30-sglang-google-tpu/</a></p>
+<p>播客备注：Latent Space 最新 9/16 那期讲 AI agent 保险，跟推理 serving 无关，本轮不收录。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/19 20:00→22:00 PDT = 9/20 03:00→05:00 UTC）。GitHub releases API 实时核验：vLLM v0.29.0（9/9）、SGLang v0.5.20（9/18）、TensorRT-LLM v1.2.1 稳定版 / v1.3.0rc27 预发布（9/18，已报）、LMDeploy v0.17.0、TGI v3.3.7、llama.cpp v0.4.1，全部无更新；SGLang 无 v0.5.21 版本。arXiv 四组关键词（prefill/decode disaggregation、KV cache、speculative decoding、multimodal inference serving）窗口内无新入库，最新仍为 9/17 批。网页/X 大V（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）/Reddit/HN/中文媒体/social 搜索均无窗口内新料。Spotify 直读：Latent Space 最新为 9/16 期（AI agent 保险主题，与 serving 无关）。渠道：GitHub releases API、arXiv API、网页/X/Reddit/HN/中文媒体/social 话题搜索、Spotify 节目直读、YouTube。*</p></body></html>
