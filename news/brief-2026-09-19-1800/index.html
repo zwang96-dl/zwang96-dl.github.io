@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月19日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-19"/>
+<meta name="doc-ts" content="2026-09-20T01:01:29"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-19（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-19（18点版）</h1>
+<h2>框架更新</h2>
+<p><strong>六大框架这轮继续装死</strong> vLLM 停在 v0.29.0，SGLang 停在 v0.5.20。 TRT-LLM 稳定版还是 v1.2.1。 LMDeploy v0.17.0、TGI v3.3.7 都没挪窝。 llama.cpp 最新 tag 还是 v0.4.1。 GitHub releases API 逐个核验过，没有暗更新。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没上新菜</strong> 四组关键词按提交时间扫了一遍。 窗口内一条新入库都没有。 最新还是 9/17 那批，已经报过。</p>
+<p><strong>补报一条 9/17 的：IFM 搞了个&quot;扩散解码器&quot; Uno</strong> IFM（基础模型研究所）放出了 Uno。 它给自回归模型外挂一个&quot;扩散解码头&quot;。 一次吐好几个 token，不用再逐字蹦。 单请求提速 2.2 倍，大批量也有 1.7 倍。 适配器不到原模型的 4%，好比换个轻量外挂。 它不用投机解码（先让小模型打草稿、大模型批改）那一套。 官方声称采样「无损」，质量不打折。 划重点：数字全是 IFM 自己测的，第三方还没复现。 SGLang 已经支持，权重在 HuggingFace 上。 跟你研究的关联：这是并行解码的新路子，思路值得瞄一眼。 <a href="https://www.explainx.ai/blog/ifm-uno-diffusion-augmented-llm-speedup-2026">https://www.explainx.ai/blog/ifm-uno-diffusion-augmented-llm-speedup-2026</a> 论文：<a href="https://arxiv.org/abs/2609.04010">https://arxiv.org/abs/2609.04010</a></p>
+<h2>业内新闻</h2>
+<p><strong>Spheron 出了份&quot;怎么选推理引擎&quot;指南（约 3 天前更新、本系列首次收录）</strong> 一家 GPU 云厂商在 H100 上实测了三款引擎。 核心结论：别再问谁最快，先看你的流量长啥样。 前缀重复多（Agent、RAG、多轮聊天），选 SGLang。 实测里 SGLang 首字延迟 P50 比 vLLM 低 37%。 RadixAttention（前缀复用的缓存树）是它的看家本领。 但前缀各不相同时，SGLang 优势只剩 3.8%，基本归零。 流量杂、模型常换，选 vLLM，62 秒冷启动开箱即用。 模型长期不变且只用 NVIDIA 卡，TRT-LLM 上限最高。 代价是换一次模型要编译 28 分钟。 说白了：选错引擎，等于白扔三成 GPU 钱。 <a href="https://www.spheron.network/blog/llm-inference-optimization-2026/">https://www.spheron.network/blog/llm-inference-optimization-2026/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>播客和大 V 这轮都安静</strong> Spotify 直查：Latent Space 最新还是 Baseten 那期。 9/15 的 14 点版报过，这次不重复。 X 上 lmsysorg 和 vLLM 官方都没新帖。 karpathy、jimfan 同样安静。 Simon Willison 今天去拍野生动物了，没写推理。 Reddit、HN、中文媒体没有窗口内新帖。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/19 16:00→18:00 PDT = 9/19 23:00→9/20 01:00 UTC）。GitHub releases API 实时核验：vLLM v0.29.0、SGLang v0.5.20、TRT-LLM v1.2.1、LMDeploy v0.17.0、TGI v3.3.7、llama.cpp v0.4.1 均无更新。arXiv 四组关键词（LLM inference / KV cache / speculative decoding / disaggregated inference）按提交时间：窗口内无新入库。补报两条本系列未报过的实质内容：① IFM Uno 扩散适配器（9/17 发布，SGLang 已支持）；② Spheron 三引擎选型框架（约 3 天前更新），均注明时效。播客：Spotify search API 本轮已恢复，Latent Space 最新仍为 Baseten 推理工程大师课（9/15 14点版已报）。X 大V、Reddit、HN、中文媒体本轮无新料。渠道：GitHub releases API、arXiv API、网页搜索、X 话题搜索、Spotify 站内。*</p></body></html>
