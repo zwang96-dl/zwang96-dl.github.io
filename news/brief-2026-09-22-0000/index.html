@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月22日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-22"/>
+<meta name="doc-ts" content="2026-09-22T07:02:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-22（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-22（00点版）</h1>
+<h2>框架更新</h2>
+<p><strong>1. vLLM 0.30.0 来了：昨晚刚打的大版本</strong> v0.30.0 太平洋时间昨晚 10 点 20 刚发布。 762 个提交、315 位贡献者，一百多是新面孔。 上个版本 0.29.0 是 9/9 打的，这次跨度不小。 这是本轮唯一的实质性新料。 相关链接：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.30.0">https://github.com/vllm-project/vllm/releases/tag/v0.30.0</a></p>
+<p><strong>2. DeepSeek-V4.1-Flash 官配：KV 全塞进 MXFP8</strong> 新版本直接支持 DeepSeek-V4.1-Flash。 MXFP8（一种 8 位浮点压缩格式）存下全部 KV。 你跟踪的 V4-Flash 线，现在可以直接上 4.1 了。</p>
+<p><strong>3. V4-Flash-Vision-Exp：视觉版也来了，还上 ROCm</strong> 实验版的视觉版 Flash 模型也支持了。 关键是 AMD 显卡的软件栈 ROCm 也带上了。 你手里那张 MI350，跑它没障碍。 ROCm 版轮子也同步发布了。</p>
+<p><strong>4. Model Runner V2：引擎启动快了三倍多</strong> eager 模式做了双 batch 重叠。 图捕获时冻结 gc（垃圾回收器）。 H200 上引擎初始化从 28.9 秒砍到 8.2 秒。 投机解码（先猜后验的加速法）也支持了流水线并行。</p>
+<p><strong>5. HiSparse：KV 放不下就溢到主机内存</strong> 稀疏 MLA 解码的新一层缓存。 MLA（把 KV 压成隐向量的注意力）是省显存的招。 显存吃紧时，KV 页溢到主机内存。 就像桌面不够用，顺手借抽屉放东西。</p>
+<p><strong>6. P/D 解耦：Mamba 混合模型也能拆了</strong> DCP（跨机器传 KV 的招）支持混合 Mamba 模型。 稀疏 MLA 模型也支持了解耦部署。 你在评估 SGLang 的 P/D 分离，vLLM 这边也在补课。</p>
+<p><strong>7. 量化：NVFP4 在新卡上成了默认后端</strong> NVFP4（英伟达的 4 位浮点量化）在 Blackwell 卡上成了默认。 AutoRound（英特尔的低比特量化工具）支持 2/3/5/6/7 位了。 还能靶向在线量化，按需只压部分层。</p>
+<p><strong>8. 破坏性变更：scale-out 接口默认关了</strong> <code>vllm serve</code> 默认不再暴露 scale-out 接口。 想用就加 <code>--enable-scale-out</code>。 升级前注意这个，别踩坑。</p>
+<h2>新技术与论文</h2>
+<p>本轮 arXiv 窗口内无新入库。 上一批 9/21 入库的论文，20 点版和 22 点版已经报完。</p>
+<h2>业内新闻</h2>
+<p>本轮无新增。 vLLM 0.30.0 刚出不足两小时，社区还没反应过来。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 无新单集，最新仍是 Jev 那期（16 点版已报）。 Simon Willison、X 大V、Reddit、HN、中文媒体本轮都没动。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/21 22:00→9/22 00:00 PDT = 9/22 05:00→07:00 UTC）。GitHub releases API 实时核验：vLLM v0.30.0（9/22 05:20 UTC，窗口内新出）、SGLang v0.5.20（9/18）、TensorRT-LLM v1.2.1、LMDeploy v0.17.0、llama.cpp v0.4.1、TGI v3.3.7，均无其他更新。arXiv 五组关键词窗口内无新入库。新闻/X/Reddit/HN/中文媒体搜索：vLLM 0.30.0 刚出不足两小时，暂无社区报道；其余无新增。Spotify 直查：Latent Space 最新仍为 Jev 那期（9/21，16 点版已报）。渠道：GitHub releases API、arXiv API、新闻/X/Reddit/HN/中文媒体话题搜索、Spotify 站内。*</p></body></html>
