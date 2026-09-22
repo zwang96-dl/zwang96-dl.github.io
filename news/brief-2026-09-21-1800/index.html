@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月21日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-21"/>
+<meta name="doc-ts" content="2026-09-22T01:02:19"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-21（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-21（18点版）</h1>
+<h2>业内新闻</h2>
+<p>AMD 出了个自动调参工具，叫 Hyperloom。 专门调它自家的数据中心显卡，Instinct 系列。 你正在 MI350 上跑 vLLM 测吞吐，这工具跟你直接相关。</p>
+<p>调优的活又苦又重复。 每个新模型、每次框架升级、每代新卡，专家都得从头调一遍。 Hyperloom 让 AI 自己当调参师。 先给服务做体检，再改配置和内核。 最后压测验收，全程不用人盯。 以前是老师傅拿听诊器听发动机，现在换成机器 24 小时连轴转。</p>
+<p>数据是 AMD 自己的，听个参考就行。 官方称跑了 14000 多个模型，中位加速 1.73 倍。 最好 7.31 倍，最差 1.35 倍。 支持 vLLM 和 SGLang，开源在 GitHub。 对你最有用的是它调的就是 serving 配置层。 你现在正卡在调度层参数上，手动试参数最花时间。 这种工具正好把苦力活接过去。</p>
+<p>相关链接：<a href="https://aidailypost.com/news/amds-hyperloom-automates-gpu-inference">https://aidailypost.com/news/amds-hyperloom-automates-gpu-inference</a></p>
+<p>其他渠道本轮继续静默。 六大框架零正式更新，arXiv 窗口内无新入库。 大V和官方频道本轮都没动。 Latent Space 也没新单集，中文媒体也没新料。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/21 16:00→18:00 PDT = 9/21 23:00→9/22 01:00 UTC）。GitHub releases API 实时核验：vLLM v0.29.0（9/9）、SGLang v0.5.20（9/18）、TensorRT-LLM 正式版 v1.2.1（rc27 为 9/18 预览版）、LMDeploy v0.17.0、llama.cpp 正式版 v0.4.1（快照 b11090/b11093 按惯例不算发版）、TGI v3.3.7，全部无正式更新。arXiv 五组关键词（LLM inference、KV cache、speculative decoding、disaggregated prefill、multimodal inference）窗口内无新入库，最新仍为 9/18 批（已报）。英文新闻/X/Reddit/HN/中文媒体话题搜索：搜出的均为窗口外旧内容（7 月框架对比教程、6 月 Medium 旧文、12 点版已排查的 HN 帖）或营销短视频。Latent Space 最新单集仍为 Jev 那期（16 点版已报）。本轮唯一新增：AMD Hyperloom 今日报道（aidailypost 9/21 刊出；其 v1.0.0 稳定版 8/26、v1.1.0 9/9、v1.1.1 9/16 均从未被本简报覆盖，本轮属补报，未标「值得深读」）。界面新闻的信通院大模型平台标准（约 15:00 PDT 发布）略早于窗口，未收录。渠道：GitHub releases API、arXiv API、新闻/X/Reddit/HN/中文媒体话题搜索、Spotify API。*</p></body></html>
