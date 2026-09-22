@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月21日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-21"/>
+<meta name="doc-ts" content="2026-09-22T05:00:33"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-21（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-21（22点版）</h1>
+<h2>框架更新</h2>
+<p>六大框架本轮零正式更新。 GitHub releases API 实时核验过一遍。 vLLM 最新还是 v0.29.0（9/9 那版）。 SGLang 停在 v0.5.20（9/18）。 TensorRT-LLM 只有 v1.3.0rc27 预览版。 LMDeploy v0.17.0，TGI v3.3.7，都没动。 llama.cpp 最新快照 b11095 打在窗口之前。 按惯例每日快照不算正式发版。</p>
+<h2>新技术与论文</h2>
+<p>补报 4 篇今天下午入库的论文。 之前几轮都漏掉了，这轮一次补上。</p>
+<p><strong>1. SPECTRA：投机解码的硬件也该&quot;两条腿走路&quot;</strong> 投机解码里，验证这一步忽胖忽瘦。 接受率高时偏计算密集，低时偏访存密集。 固定硬件跑两种形态，总有一半在浪费。 SPECTRA 是个可重构分块架构。 每块 tile 在 systolic（GEMM 模式）和向量通道（GEMV 模式）之间秒切。 跟你研究的 spec decode 是同一招，只是战场搬到了边缘设备。 相关链接：<a href="https://arxiv.org/abs/2609.24847">https://arxiv.org/abs/2609.24847</a></p>
+<p><strong>2. DeepSeek-V4 树形投机解码：压缩注意力下的分支一致性</strong>「值得深读」 单链投机像买一张彩票，树形像同时买十张。 树形验证用一轮目标模型前向，同时验多条候选。 但 DeepSeek-V4 的在线压缩注意力（把 KV 压成 latent 的注意力）让不同分支的压缩状态对不上。 这篇用分支感知因果验证，再加临时状态隔离。 最后接受哪条路径，就把那条的状态刷回全机。 budget D=5 到 D=8、batch 1 开测都有提升。 跟你跟踪的 DeepSeek-V4-FLASH 和投机解码线直接相关。 相关链接：<a href="https://arxiv.org/abs/2609.24698">https://arxiv.org/abs/2609.24698</a></p>
+<p><strong>3. P/D 解耦的功率账：prefill 和 decode 各配几张卡</strong>「值得深读」 电厂批的电不够，机房也得精打细算。 prefill 吃计算，decode 吃显存和带宽。 配多少张 prefill 卡、多少张 decode 卡，之前靠 profiling 瞎试。 这篇给了功率感知的解析框架。 把供给能力建模成负载、硬件、排队、KV 预留的联合函数。 直接回答&quot;电有限时 P/D 解耦怎么配卡&quot;。 你在评估 SGLang 的 P/D 分离，这篇是它的供给侧配套。 相关链接：<a href="https://arxiv.org/abs/2609.24639">https://arxiv.org/abs/2609.24639</a></p>
+<p><strong>4. GDN Tree-Scan：vLLM 上的混合模型树验证器</strong> 混合模型（循环层 + attention 混搭）让树验证变难。 候选行还得带上循环状态，不然 attention mask 对了、历史也对不上。 这篇在 vLLM 里集成了 served verifier。 用了 FlashAttention-2 树偏置 attention 和分支内 GDN 扫描回放。 Qwen3.6-27B-FP8、batch=1、温度 0.6 上，六节点根分支树提速。 相关链接：<a href="https://arxiv.org/abs/2609.23900">https://arxiv.org/abs/2609.23900</a></p>
+<h2>业内新闻</h2>
+<p>本轮无新增。 新闻搜索搜出的都是窗口外旧内容。</p>
+<h2>访谈与深度</h2>
+<p>Simon Willison 今天也写了 Jev。 16 点版报过播客那期，这是他的文字版解读。 他把&quot;System One models&quot;叫&quot;decision models&quot;。 说白了：Jev 不生成文字，直接给你带概率的答案。 相关链接：<a href="https://simonwillison.net/2026/Sep/21/jev/">https://simonwillison.net/2026/Sep/21/jev/</a></p>
+<p>Latent Space 没有新单集，最新仍是 Jev 那期（16 点版已报）。 X 大V、Reddit、HN、中文媒体本轮都没动。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/21 20:00→22:00 PDT = 9/22 03:00→05:00 UTC）。GitHub releases API 实时核验：vLLM v0.29.0（9/9）、SGLang v0.5.20（9/18）、TensorRT-LLM 正式版 v1.2.1（rc27 为 9/18 预览版）、LMDeploy v0.17.0、llama.cpp 快照 b11095（打在 9/22 01:35 UTC，落在窗口之前，按惯例每日快照不算正式发版）、TGI v3.3.7，全部无正式更新。arXiv 五组关键词（LLM inference、KV cache、speculative decoding、disaggregated prefill、multimodal inference）窗口内无新入库；本轮补报 9/21 UTC 当天入库的 4 篇论文（此前各期均未覆盖，属补报），其中 2 篇标「值得深读」。英文新闻/X/Reddit/HN/中文媒体话题搜索：窗口内无新增。Spotify 直查：Latent Space 最新仍为 Jev 那期（9/21，16 点版已报）；Simon Willison 今天的 Jev 文字版为新角度附带一笔。渠道：GitHub releases API、arXiv API、新闻/X/Reddit/HN/中文媒体话题搜索、Spotify 站内。*</p></body></html>
