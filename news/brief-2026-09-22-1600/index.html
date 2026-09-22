@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月22日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-22"/>
+<meta name="doc-ts" content="2026-09-22T23:09:36"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-22（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-22（16点版）</h1>
+<p>这轮是下午 4 点版。 arXiv 今天的新批次还没到，00:00 UTC 才发，框架们也都在午休。 但翻旧账发现 4 篇 9/20–9/21 的论文前几轮漏收了，这轮补上。</p>
+<h2>框架更新</h2>
+<p>本轮无新增。 六个框架的 release 页逐个核过：vLLM 最新仍是 v0.30.0，00 点版已报。 SGLang 停在 v0.5.20（9/18），TRT-LLM、LMDeploy、TGI 都没动。 llama.cpp 只有每日快照，按惯例不算发版。</p>
+<h2>新技术与论文</h2>
+<p><strong>SPLASH：KV 缓存一半搬进新型闪存，长上下文 decode 快 3.5–11.4 倍</strong>「值得深读」 显存不够用是长上下文 serving 的头号瓶颈，这篇换了个思路：不压缩，换地方存。 SPLASH 是稀疏注意力 + 高带宽闪存的协同设计。KV cache 横跨两层放：热数据放 HBM，冷数据放 HBF。 HBM 是 GPU 上的高速显存。HBF 是高带宽闪存，容量 TB 级、读速接近显存。 稀疏注意力按闪存&quot;按页读取&quot;的特性重新设计，读的时候只抓需要的页。 实测每卡 decode 吞吐涨 3.5–11.4 倍，精度损失不到 4%。 划重点：这是除压缩之外的第二条路——存不下就换更大的&quot;仓库&quot;，跟你 P/D 解耦评估里的显存账直接相关。 <a href="https://arxiv.org/abs/2609.23816">https://arxiv.org/abs/2609.23816</a></p>
+<p><strong>ValueDiff：新模型上，老的 KV 缓存&quot;踢人&quot;策略失灵了</strong>「值得深读」 Qwen3 这类新模型用了 QK 归一化，注意力 sink 变弱了。 QK 归一化是让注意力分数更稳定的手法。sink 是几个常年被高看的 token。 老的驱逐策略都指望 sink 来保命，sink 一弱就抓瞎。 ValueDiff 是按 value 向量&quot;长相&quot;决定踢谁的驱逐法：看每个 token 的 value 向量离&quot;平均脸&quot;有多远，越特别的越留着。 RULER 上 2k 预算保住 88–99% 精度，7 个新架构模型里 6 个拿第一。 划重点：你现在评估的模型大多是这类新架构，老方法的假设已经变了，这是新假设下的第一套打法。 <a href="https://arxiv.org/abs/2609.23314">https://arxiv.org/abs/2609.23314</a></p>
+<p><strong>PREM：长视频问答不用再把几百帧全塞进 prompt</strong> 长视频最费的是视觉 token，一股脑塞进 prompt 又贵又慢。 PREM 是前缀引导的循环记忆，分两步走：先让一个循环 writer 把视频流&quot;看&quot;成 256KB 的联想记忆，看完就存起来。 问问题时不加新 token，只给 prompt 前缀加一层记忆引导的&quot;调制&quot;，一次写入、反复问。 只调 0.24% 参数，16 帧预算下平均精度涨 3.06%。 跟你的多模态推理线相关：encoder/prefill 侧的降本新姿势。 <a href="https://arxiv.org/abs/2609.23601">https://arxiv.org/abs/2609.23601</a></p>
+<p><strong>一篇机理小品：KV 缓存里到底写了啥</strong> 这篇不做优化，纯好奇：forward 时 KV cache 里&quot;操作&quot;那段到底留了什么。 因果实验证明：Llama-3.1-8B 第 12–15 层藏着操作的&quot;路由记录&quot;，能读出它读了哪个值。 偏机理，serving 直接用不上，感兴趣再点。 <a href="https://arxiv.org/abs/2609.24635">https://arxiv.org/abs/2609.24635</a></p>
+<h2>业内新闻</h2>
+<p>本轮无新增。 英文新闻、X 大V（lmsysorg、vLLM 官方、karpathy、jimfan）都没窗口内的料。 NVFP4 那篇博客（9/16）从 00 点版到 14 点版都报过，不重复。 机器之心、量子位今天没新稿。</p>
+<h2>访谈与深度</h2>
+<p>本轮无新增。 Latent Space 最新两期是 John Platt 谈 AI for Science（9/22）和 TypeSafe AI 生产模型访谈（9/21），都跟推理 serving 无关，不收录。 Simon Willison、The Batch 也没新货。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/22 14:00→16:00 PDT = 9/22 21:00→23:00 UTC）。GitHub releases 逐个核验：vLLM（v0.30.0，00 点版已报）、SGLang（v0.5.20，9/18）、TensorRT-LLM、LMDeploy（v0.17.0）、TGI（v3.3.7，仓库已归档只读）均无新增；llama.cpp 快照按惯例不计。arXiv 下一批 00:00 UTC 未到，窗口内结构性零入库；本轮 4 篇为 9/20–9/21 提交、前几轮漏收的补录（已对全部 9 月简报 grep 去重）。NVFP4 KV 博客（9/16）0000–1400 版已报；KV-COBRA（2609.24298，9/21 2000 版）、2609.24991（9/22 1000/1200/1400 版）、2609.24639/2609.24698（9/21 2200 版，已转深读笔记）均不重复。Reddit、HN、中文媒体、播客均无窗口内新增。渠道：GitHub releases、arXiv API、browser.search（技术新闻/X/Reddit/HN/中文媒体/博客话题）、social 公开搜索、Spotify 站内。*</p></body></html>
