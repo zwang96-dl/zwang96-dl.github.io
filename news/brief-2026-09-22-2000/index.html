@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月22日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-22"/>
+<meta name="doc-ts" content="2026-09-23T03:12:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-22（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-22（20点版）</h1>
+<p>这轮是晚上 8 点版。arXiv 今晨 00:00 UTC 的批次索引延迟了，18 点版时还看不见，这轮刚抓到。框架那边继续安静。</p>
+<h2>框架更新</h2>
+<p>本轮无新增。 六个框架的 release 页逐个核过。 vLLM 还是 v0.30.0，00 点版已报。 SGLang 还是 v0.5.20，TRT-LLM 停在 9/14。 LMDeploy 还是 v0.17.0，TGI 已归档，都没动。 llama.cpp 每日快照照例不算发版。</p>
+<h2>新技术与论文</h2>
+<p><strong>SARA：解耦服务的&quot;排班表&quot;，各配几张卡不用瞎试了</strong>「值得深读」 这篇给 P/D 解耦做了张&quot;排班表&quot;。 方法是用排队论给三个阶段分别建模。 prefill 建成 M/G/k 队列，也就是多个并行工位。 KV 搬运建成 M/G/1 队列，也就是单条传送带。 decode 用广义生灭过程建模（请求生来死去的数学模型）。 划重点：prefill 瓶颈在算力，decode 瓶颈在 HBM（GPU 的高速显存）。 这正好印证了解耦的直觉：两阶段的短板根本不一样。 数据：SLO 预测误差不到 5%。 同等成本下，goodput（达标请求占比）比最强基线涨 26.6%。 跟你相关：正在评 SGLang 的 P/D 解耦，这是&quot;分多少卡&quot;的解析答案。 跟昨天的功率账笔记是姊妹篇，一起看更完整。 arXiv:2609.26763 · 精读笔记已同步生成</p>
+<p><strong>HySparse2：长上下文 agent 的&quot;双层草稿纸&quot;</strong> 场景是长程 agent：动作很短，观测很长，上下文越滚越大。 解法是双层稀疏注意力，KV 缓存两级共享。 外层是 KV 桥接：YOCO 式的自解码加交叉解码。 YOCO 就是只缓存一次 KV 的解码结构。 目标是 prefill 更快、KV 存得更少、长上下文还找得准。 arXiv:2609.26368</p>
+<p><strong>CompKV：稀疏注意力&quot;踢人&quot;时，别把有用的踢掉</strong> 长上下文推理的瓶颈在 KV 缓存的内存搬运上。 稀疏注意力只给部分 token 算精确注意力，省下大头。 被踢掉的 token 用粗补偿找回贡献，这篇改进了&quot;选谁留&quot;的策略。 arXiv:2609.26300</p>
+<p><strong>Flash-dLLM：扩散模型也有 KV 缓存了</strong> 扩散大模型 dLLM 是新路线：一次并行吐一批 token，不逐个生成。 它推理一直缺 KV 缓存，这篇把缓存和并行解码一起做了。 专治两者叠加时的 I/O 瓶颈，显存和速度双收。 arXiv:2609.26796</p>
+<p><strong>QuantWM：视频生成的 KV 缓存压到 2 比特，还不闪屏</strong> 世界模型和视频生成里，KV 缓存是部署的第一大头。 现有 2 比特量化在 VBench 上看着没掉分，实际播出来严重闪烁。 这篇揪出元凶：Key 量化的重建误差，还给了时间一致的压法。 跟你相关：多模态推理优化线，视频侧 KV 压缩的直接参考。 arXiv:2609.26425</p>
+<p><strong>Answer-Aligned Memory：长上下文先压成&quot;答案导向&quot;的记忆</strong> 自注意力是二次的，KV 缓存是线性涨的，长上下文两头贵。 这篇把上下文压成跟答案对齐的记忆嵌入，推理时按问题取。 跟特定解码器解耦，换模型不用重训压缩器。 arXiv:2609.25537</p>
+<h2>业内新闻</h2>
+<p>本轮无新增。 英文新闻、中文媒体（北京时间 9/23 上午 11 点）都没动静。</p>
+<h2>访谈与深度</h2>
+<p>本轮无新增。 HN、播客都没新东西。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/22 18:00→20:00 PDT = 9/23 01:00→03:00 UTC）。GitHub releases atom feed 逐个核验：vLLM（v0.30.0，00 点版已报）、SGLang（v0.5.20，9/18）、TensorRT-LLM（9/14）、LMDeploy（v0.17.0）、TGI（已归档）均无新增；llama.cpp 快照按惯例不计。arXiv 四组关键词（&quot;LLM inference&quot; / &quot;KV cache&quot; / &quot;speculative decoding&quot; / &quot;multimodal inference&quot;，按 submittedDate 倒序）本轮抓到 9/22 批次 6 篇新入库（18 点版时索引延迟未见）；2609.24639 已于 9/21 深读报过，不重复。英文新闻、Reddit、HN、中文媒体、X 大V、播客均无窗口内新增。渠道：GitHub releases、arXiv API、browser.search（技术新闻/Reddit/HN/中文媒体话题）。*</p></body></html>
