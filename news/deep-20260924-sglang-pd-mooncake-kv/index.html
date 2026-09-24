@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang P/D 解耦的 mooncake KV 传输竞态：静默 corrupt 根因与修复"/>
+<meta name="doc-description" content="&gt; 原文：AMD infera 项目补丁文档（GitHub）"/>
+<meta name="doc-date" content="2026-09-24"/>
+<meta name="doc-ts" content="2026-09-24T19:19:29"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang P/D 解耦的 mooncake KV 传输竞态：静默 corrupt 根因与修复</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang P/D 解耦的 mooncake KV 传输竞态：静默 corrupt 根因与修复</h1>
+<blockquote><p>原文：AMD infera 项目补丁文档（GitHub）<br/><a href="https://github.com/amd-agi/infera/blob/HEAD/deploy/docker/patches/sglang_disagg/README.md">https://github.com/amd-agi/infera/blob/HEAD/deploy/docker/patches/sglang_disagg/README.md</a><br/>相关 issue：sglang#25583（症状相同，被 bot 自动关闭，无人跟进）</p></blockquote>
+<h2>一句话</h2>
+<p>SGLang 开 P/D 解耦、用 mooncake 传 KV、长 prompt 切块、传输计算重叠——四个条件凑齐，decode 拿到的 KV 是半成品，输出悄悄变错，不报错也不崩。</p>
+<h2>人话解读</h2>
+<p>P/D 解耦把&quot;读题&quot;和&quot;答题&quot;分给两拨 GPU。读题那拨算完 KV，得搬给答题那拨，mooncake 就是搬运工。长 prompt 会被切成几块逐段读，读完一块搬一块。为了快，搬运和计算重叠进行：上一块在搬，下一块接着算。问题就出在这里：搬运工没等算完就动手，把&quot;写了一半&quot;的 KV 页传了过去。答题那拨拿到半成品，输出就错了。最阴的是它不报错、不崩溃，只是答案悄悄变坏——benchmark 跑出来的数字是脏的，你还蒙在鼓里。</p>
+<h2>触发条件（四条全中才中招）</h2>
+<ol><li>SGLang 开了 P/D 解耦（--disaggregation-mode prefill|decode）。</li><li>KV 传输后端是 mooncake（mori / NIXL 不受影响）。</li><li>prompt 长到触发 chunked prefill（超过一个 chunk）。</li><li>开了 overlap scheduling（传输和计算重叠）。</li></ol>
+<h2>症状：怎么认出是它</h2>
+<ul><li>大海捞针测试：想捞 2183762，只捞出 2183，后面跟一串 think 标签重复。</li><li>corrupt 的边界正好落在 chunk 边界上，最后一个 chunk 里的 needle 永远是对的。</li><li>同样模型、同样配置，单机聚合模式 9/9 全过，只有 P/D 模式翻车。</li><li>不是崩溃、不是明显错答案，是&quot;部分正确&quot;——最难查的那种。</li></ul>
+<h2>根因</h2>
+<p>prefill.py 里其实记了一个 CUDA event 做 barrier，注释写得明明白白：让传输线程等写完再读。但只有 mori 后端读了这个 event，mooncake 的 conn.py 里 wait_event 和 synchronize 一个都没实现，barrier 从没生效过。更糟的是，overlap 调度下传非尾块的那个调用，连 event 都没记。尾块为啥没事？它走采样路径，自带 copy_done.synchronize()，天然有 barrier。所以症状永远是&quot;前面的 chunk 坏、最后一个 chunk 好&quot;。</p>
+<h2>修复（三处，照抄 mori 的做法）</h2>
+<ol><li>disaggregation/common/utils.py：TransferKVChunk 加 wait_event 字段，让 barrier 跟着 work item 走。</li><li>disaggregation/mooncake/conn.py：send() 接住并透传这个 event；transfer_worker 在读显存之前先 synchronize()。</li><li>disaggregation/prefill.py：overlap 路径下传非尾块时，在 forward_stream 上补记一个 event。</li></ol>
+<p>三处必须一次全上，少一处照样 corrupt，半吊子补丁等于没打。代价是 transfer worker 线程会被 block，拿一点传输重叠换正确性，上游合入时得量化这个开销。</p>
+<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NjAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgODYwIDQwMCIgZm9udC1mYW1pbHk9Ii1hcHBsZS1zeXN0ZW0sICdQaW5nRmFuZyBTQycsICdNaWNyb3NvZnQgWWFIZWknLCBzYW5zLXNlcmlmIj4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iODYwIiBoZWlnaHQ9IjQwMCIgcng9IjEyIiBmaWxsPSIjZmZmZmZmIi8+CiAgPGRlZnM+CiAgICA8bWFya2VyIGlkPSJhcnJSIiBtYXJrZXJXaWR0aD0iMTAiIG1hcmtlckhlaWdodD0iMTAiIHJlZlg9IjgiIHJlZlk9IjMiIG9yaWVudD0iYXV0byI+CiAgICAgIDxwYXRoIGQ9Ik0wLDAgTDgsMyBMMCw2IiBmaWxsPSJub25lIiBzdHJva2U9IiNlZjQ0NDQiIHN0cm9rZS13aWR0aD0iMS42Ii8+CiAgICA8L21hcmtlcj4KICAgIDxtYXJrZXIgaWQ9ImFyckciIG1hcmtlcldpZHRoPSIxMCIgbWFya2VySGVpZ2h0PSIxMCIgcmVmWD0iOCIgcmVmWT0iMyIgb3JpZW50PSJhdXRvIj4KICAgICAgPHBhdGggZD0iTTAsMCBMOCwzIEwwLDYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE2YTM0YSIgc3Ryb2tlLXdpZHRoPSIxLjYiLz4KICAgIDwvbWFya2VyPgogIDwvZGVmcz4KCiAgPCEtLSDkv67lpI3liY0gLS0+CiAgPHRleHQgeD0iMjQiIHk9IjM2IiBmb250LXNpemU9IjE3IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYjkxYzFjIj7kv67lpI3liY3vvJrmkKzov5Dlt6XkuI3nrYnnrpflrozlsLHliqjmiYs8L3RleHQ+CgogIDxnIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMxZjI5MzciIHRleHQtYW5jaG9yPSJtaWRkbGUiPgogICAgPHJlY3QgeD0iMjQiIHk9IjU2IiB3aWR0aD0iMTY4IiBoZWlnaHQ9IjY2IiByeD0iOCIgZmlsbD0iI2ZlZjJmMiIgc3Ryb2tlPSIjZWY0NDQ0IiBzdHJva2Utd2lkdGg9IjEuNSIvPgogICAgPHRleHQgeD0iMTA4IiB5PSI4MiI+PHRzcGFuIHg9IjEwOCIgZHk9IjAiPmZvcndhcmRfc3RyZWFtPC90c3Bhbj48dHNwYW4geD0iMTA4IiBkeT0iMjAiPuWGmSBjaHVuayBOIOeahCBLViDpobU8L3RzcGFuPjwvdGV4dD4KCiAgICA8cmVjdCB4PSIyNDIiIHk9IjU2IiB3aWR0aD0iMTY4IiBoZWlnaHQ9IjY2IiByeD0iOCIgZmlsbD0iI2ZlZjJmMiIgc3Ryb2tlPSIjZWY0NDQ0IiBzdHJva2Utd2lkdGg9IjEuNSIvPgogICAgPHRleHQgeD0iMzI2IiB5PSI4MiI+PHRzcGFuIHg9IjMyNiIgZHk9IjAiPnRyYW5zZmVyIHdvcmtlcjwvdHNwYW4+PHRzcGFuIHg9IjMyNiIgZHk9IjIwIj7nm7TmjqUgUkRNQSDor7votbA8L3RzcGFuPjwvdGV4dD4KCiAgICA8cmVjdCB4PSI0NjAiIHk9IjU2IiB3aWR0aD0iMTY4IiBoZWlnaHQ9IjY2IiByeD0iOCIgZmlsbD0iI2ZlZTJlMiIgc3Ryb2tlPSIjZWY0NDQ0IiBzdHJva2Utd2lkdGg9IjIiLz4KICAgIDx0ZXh0IHg9IjU0NCIgeT0iODIiPjx0c3BhbiB4PSI1NDQiIGR5PSIwIj5kZWNvZGUg5ou/5YiwPC90c3Bhbj48dHNwYW4geD0iNTQ0IiBkeT0iMjAiPuWNiuaIkOWTgSBLVjwvdHNwYW4+PC90ZXh0PgoKICAgIDxyZWN0IHg9IjY3OCIgeT0iNTYiIHdpZHRoPSIxNTgiIGhlaWdodD0iNjYiIHJ4PSI4IiBmaWxsPSIjZmVjYWNhIiBzdHJva2U9IiNiOTFjMWMiIHN0cm9rZS13aWR0aD0iMiIvPgogICAgPHRleHQgeD0iNzU3IiB5PSI4MiIgZm9udC13ZWlnaHQ9IjcwMCIgZmlsbD0iIzk5MWIxYiI+PHRzcGFuIHg9Ijc1NyIgZHk9IjAiPui+k+WHuuaChOaChOWPmOmUmTwvdHNwYW4+PHRzcGFuIHg9Ijc1NyIgZHk9IjIwIj7kuI3miqXplJkg4pyXPC90c3Bhbj48L3RleHQ+CgogICAgPGxpbmUgeDE9IjE5MiIgeTE9Ijg5IiB4Mj0iMjM2IiB5Mj0iODkiIHN0cm9rZT0iI2VmNDQ0NCIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYXJyUikiIHN0cm9rZS1kYXNoYXJyYXk9IjUsNCIvPgogICAgPHRleHQgeD0iMjE0IiB5PSI3OCIgZm9udC1zaXplPSIxMiIgZmlsbD0iI2I5MWMxYyI+5LiN562JIGV2ZW50PC90ZXh0PgogICAgPGxpbmUgeDE9IjQxMCIgeTE9Ijg5IiB4Mj0iNDU0IiB5Mj0iODkiIHN0cm9rZT0iI2VmNDQ0NCIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYXJyUikiLz4KICAgIDxsaW5lIHgxPSI2MjgiIHkxPSI4OSIgeDI9IjY3MiIgeTI9Ijg5IiBzdHJva2U9IiNlZjQ0NDQiIHN0cm9rZS13aWR0aD0iMS42IiBtYXJrZXItZW5kPSJ1cmwoI2FyclIpIi8+CiAgPC9nPgoKICA8IS0tIOWIhumalCAtLT4KICA8bGluZSB4MT0iMjQiIHkxPSIxNTgiIHgyPSI4MzYiIHkyPSIxNTgiIHN0cm9rZT0iI2U1ZTdlYiIgc3Ryb2tlLXdpZHRoPSIxIi8+CgogIDwhLS0g5L+u5aSN5ZCOIC0tPgogIDx0ZXh0IHg9IjI0IiB5PSIxOTIiIGZvbnQtc2l6ZT0iMTciIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNTgwM2QiPuS/ruWkjeWQju+8muetiSBldmVudCDlj5jnu7/lho3kvKA8L3RleHQ+CgogIDxnIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMxZjI5MzciIHRleHQtYW5jaG9yPSJtaWRkbGUiPgogICAgPHJlY3QgeD0iMjQiIHk9IjIxMiIgd2lkdGg9IjE2OCIgaGVpZ2h0PSI2NiIgcng9IjgiIGZpbGw9IiNmMGZkZjQiIHN0cm9rZT0iIzE2YTM0YSIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KICAgIDx0ZXh0IHg9IjEwOCIgeT0iMjM4Ij48dHNwYW4geD0iMTA4IiBkeT0iMCI+Zm9yd2FyZF9zdHJlYW08L3RzcGFuPjx0c3BhbiB4PSIxMDgiIGR5PSIyMCI+5YaZ5a6M6K6wIGV2ZW50PC90c3Bhbj48L3RleHQ+CgogICAgPHJlY3QgeD0iMjQyIiB5PSIyMTIiIHdpZHRoPSIxNjgiIGhlaWdodD0iNjYiIHJ4PSI4IiBmaWxsPSIjZjBmZGY0IiBzdHJva2U9IiMxNmEzNGEiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICA8dGV4dCB4PSIzMjYiIHk9IjIzOCI+PHRzcGFuIHg9IjMyNiIgZHk9IjAiPnRyYW5zZmVyIHdvcmtlcjwvdHNwYW4+PHRzcGFuIHg9IjMyNiIgZHk9IjIwIj5zeW5jaHJvbml6ZSDlkI7lho3or7s8L3RzcGFuPjwvdGV4dD4KCiAgICA8cmVjdCB4PSI0NjAiIHk9IjIxMiIgd2lkdGg9IjE2OCIgaGVpZ2h0PSI2NiIgcng9IjgiIGZpbGw9IiNkY2ZjZTciIHN0cm9rZT0iIzE2YTM0YSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgICA8dGV4dCB4PSI1NDQiIHk9IjIzOCI+PHRzcGFuIHg9IjU0NCIgZHk9IjAiPmRlY29kZSDmi7/liLA8L3RzcGFuPjx0c3BhbiB4PSI1NDQiIGR5PSIyMCI+5a6M5pW0IEtWPC90c3Bhbj48L3RleHQ+CgogICAgPHJlY3QgeD0iNjc4IiB5PSIyMTIiIHdpZHRoPSIxNTgiIGhlaWdodD0iNjYiIHJ4PSI4IiBmaWxsPSIjYmJmN2QwIiBzdHJva2U9IiMxNTgwM2QiIHN0cm9rZS13aWR0aD0iMiIvPgogICAgPHRleHQgeD0iNzU3IiB5PSIyMzgiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxNjY1MzQiPjx0c3BhbiB4PSI3NTciIGR5PSIwIj7ovpPlh7rmraPluLg8L3RzcGFuPjx0c3BhbiB4PSI3NTciIGR5PSIyMCI+4pyTPC90c3Bhbj48L3RleHQ+CgogICAgPGxpbmUgeDE9IjE5MiIgeTE9IjI0NSIgeDI9IjIzNiIgeTI9IjI0NSIgc3Ryb2tlPSIjMTZhMzRhIiBzdHJva2Utd2lkdGg9IjEuNiIgbWFya2VyLWVuZD0idXJsKCNhcnJHKSIvPgogICAgPHRleHQgeD0iMjE0IiB5PSIyMzQiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMxNTgwM2QiPuetiSBldmVudDwvdGV4dD4KICAgIDxsaW5lIHgxPSI0MTAiIHkxPSIyNDUiIHgyPSI0NTQiIHkyPSIyNDUiIHN0cm9rZT0iIzE2YTM0YSIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYXJyRykiLz4KICAgIDxsaW5lIHgxPSI2MjgiIHkxPSIyNDUiIHgyPSI2NzIiIHkyPSIyNDUiIHN0cm9rZT0iIzE2YTM0YSIgc3Ryb2tlLXdpZHRoPSIxLjYiIG1hcmtlci1lbmQ9InVybCgjYXJyRykiLz4KICA8L2c+CgogIDx0ZXh0IHg9IjI0IiB5PSIzMzAiIGZvbnQtc2l6ZT0iMTMiIGZpbGw9IiM2YjcyODAiPuS4ieWkhOS/ruWkjee8uuS4gOS4jeWPr++8mlRyYW5zZmVyS1ZDaHVuayDliqAgd2FpdF9ldmVudCDlrZfmrrUg4oaSIG1vb25jYWtlIGNvbm4g6YCP5Lyg5bm25Zyo6K+75YmNIHN5bmNocm9uaXplIOKGkiBwcmVmaWxsIG92ZXJsYXAg6Lev5b6E6KGl6K6wIGV2ZW50PC90ZXh0PgogIDx0ZXh0IHg9IjI0IiB5PSIzNTYiIGZvbnQtc2l6ZT0iMTMiIGZpbGw9IiM2YjcyODAiPuinpuWPkeadoeS7tu+8mlNHTGFuZyBQL0Qg6Kej6ICmICsgbW9vbmNha2Ug5Lyg6L6TICsgY2h1bmtlZCBwcmVmaWxsICsgb3ZlcmxhcCDosIPluqbvvIzlm5vmnaHlhajkuK3miY3kuK3mi5s8L3RleHQ+CiAgPHRleHQgeD0iMjQiIHk9IjM4MiIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzljYTNhZiI+5oyJIEFNRCBpbmZlcmEg6KGl5LiB5paH5qGj5o+P6L+w57uY5Yi2IMK3IOmqjOivgeeOr+Wig++8mjLDlzjDl01JMzI1WO+8jFJPQ20gNy4yLjDvvIxzZ2xhbmcgdjAuNS4xNjwvdGV4dD4KPC9zdmc+Cg==" alt="图 1：mooncake KV 传输竞态示意图（按原文描述绘制）。上半：修复前——transfer worker 不等前向写完就传走 KV，decode 拿到半成品，输出悄悄变错；下半：修复后——transfer worker 等待 event 变绿再传，decode 拿到完整 KV。"/></p>
+<h2>验证数据</h2>
+<p>环境：2×8×MI325X（gfx942），ROCm 7.2.0，sglang v0.5.16，GLM-5.2-FP8 一 prefill 一 decode，mooncake RDMA，overlap 开，chunk 大小 131072。</p>
+<table><thead><tr><th>测试</th><th>修复前</th><th>修复后</th></tr></thead><tbody><tr><td>大海捞针：3 种长度 × depth 10/50/90</td><td>5/9</td><td>9/9</td></tr><tr><td>大海捞针：29k depth sweep（9 个点）</td><td>4/9</td><td>9/9</td></tr><tr><td>全量正确性套件（needle + humaneval-long + 长上下文 delta）</td><td>needle 7/9</td><td>全部通过</td></tr></tbody></table>
+<p>修完之后，chunk size 变回纯性能旋钮，不用再靠大 chunk + 高显存占比的 workaround 续命，prefill 的 overlap 调度也不用关了。</p>
+<h2>附带：/v1/responses 在 PD 下直接 400</h2>
+<p>同一个补丁集里的另一个修复。ResponsesRequest 模型缺 bootstrap_host / bootstrap_port / bootstrap_room 三个字段，pydantic 默认 extra=&quot;ignore&quot;，代理传过来的标注被静默吞掉。scheduler 看到 bootstrap_room=None，直接 400 拒掉，日志里还看不出为啥。修完之后，Codex 这类默认走 Responses API 的 agent 负载才能进 P/D 部署。注意：harmony 内串工具循环的第二轮没修，会 fail fast；非 harmony 模型走不到那，不受影响。</p>
+<h2>上游状态</h2>
+<p>还没提交。最接近的是 sglang#25583（GLM-5-FP8 + NSA + 70k prompt，一模一样的症状），被 bot 自动关闭，没人跟进。作者认为这是疏忽不是设计取舍，值得提 issue。</p>
+<h2>跟研究方向的关联</h2>
+<p>你正在评估 SGLang 的 P/D 解耦，手里是 MI350X/MI300X。这份补丁的验证环境是 MI325X + ROCm 7.2，跟你的栈是同门，一线经验直接可用。做 PD 评估时，长 prompt 的正确性回归必须覆盖&quot;mooncake + overlap + 切块&quot;这个组合，否则静默 corrupt 会污染 benchmark 结论——数字看着正常，答案悄悄是错的。infera 本身就是 AMD 的 PD 部署方案，补丁脚本幂等、可直接拿去用。</p>
+<h2>术语表</h2>
+<table><thead><tr><th>术语</th><th>大白话</th></tr></thead><tbody><tr><td>P/D 解耦</td><td>prefill/decode disaggregation，读题和答题分两拨 GPU 跑</td></tr><tr><td>mooncake</td><td>P/D 之间搬运 KV 的传输层，走 RDMA</td></tr><tr><td>chunked prefill</td><td>长 prompt 切成小块，逐块做 prefill</td></tr><tr><td>overlap scheduling</td><td>传输和计算重叠进行，互相不等</td></tr><tr><td>CUDA event / barrier</td><td>GPU 上的&quot;完工信号&quot;，等它变绿再动手</td></tr><tr><td>bootstrap_room</td><td>P/D 两腿认亲的房间号，对不上就拒收</td></tr><tr><td>needle-in-a-haystack</td><td>大海捞针，长上下文检索能力的标准测试</td></tr><tr><td>DSA</td><td>GLM-5.2 用的稀疏注意力，检索时只看部分位置</td></tr><tr><td>TTFT</td><td>time to first token，第一个字出来的延迟</td></tr></tbody></table></body></html>

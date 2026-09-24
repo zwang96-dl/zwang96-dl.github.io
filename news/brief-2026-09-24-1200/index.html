@@ -1,0 +1,129 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月24日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-24"/>
+<meta name="doc-ts" content="2026-09-24T19:17:16"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-24（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-24（12点版）</h1>
+<h2>框架更新</h2>
+<p>这轮六大框架都没发新版，版本号一个没动。</p>
+<p>vLLM 还是 v0.30.0，SGLang 停在 v0.5.20。</p>
+<p>TensorRT-LLM 的 v1.3.0rc28 昨晚重新发布过一次。</p>
+<p>但 tag 没变，只是补了发布页，不算新版本。</p>
+<p>llama.cpp 照例出了今天的每日快照 b11160。</p>
+<p>按惯例滚动快照不算正式发版，这里只记一笔。</p>
+<p>LMDeploy 停在 v0.17.0。</p>
+<p>TGI 的仓库今年 3 月已归档只读，v3.3.7 成了绝版。</p>
+<h2>新技术与论文</h2>
+<p><strong>1. Medium 万字长文：2026 年的推理栈全盘点。</strong></p>
+<p>今天刚出炉，作者把四大引擎、两大架构变化一次讲透。</p>
+<p>还给了选型框架。</p>
+<p>通用 serving 用 vLLM，前缀复用重的活给 SGLang。</p>
+<p>前缀复用重的流量，SGLang 比 vLLM 快 29%。</p>
+<p>但作者也泼了冷水：这 29% 全靠前缀缓存。</p>
+<p>前缀缓存（算过的 KV 下次直接复用），省掉重复计算。</p>
+<p>prompt 各不相同、没有公共前缀，两家基本打平。</p>
+<p>P/D 解耦（读题和答题分两拨 GPU 跑）已经从研究进生产。</p>
+<p>投机解码（小模型先打草稿、大模型验算）延迟能压到一半以下。</p>
+<p>不过它只降延迟不涨吞吐，别指望它多卖 token。</p>
+<p>FP8 存 KV（KV 缓存用 8 位存），显存直接省一半。</p>
+<p>作者建议当默认配置开。</p>
+<ul><li>原文：<a href="https://medium.com/@charan.panthangi/the-llm-inference-stack-in-2026-vllm-sglang-tensorrt-llm-semantic-routing-and-the-combination-d9df1a16f93f">https://medium.com/@charan.panthangi/the-llm-inference-stack-in-2026-vllm-sglang-tensorrt-llm-semantic-routing-and-the-combination-d9df1a16f93f</a></li></ul>
+<p><strong>2. GLM-5.3 实测：8 张 H20 上 SGLang 和 vLLM 硬碰硬。</strong></p>
+<p>中文社区的一份实测，54 组结果、7680 个请求，零失败。</p>
+<p>短请求 SGLang 全胜：吞吐高 9% 到 57%。</p>
+<p>首 token（第一个字出来的延迟）也快一半以上。</p>
+<p>长输入画风突变：vLLM 首 token 更快，4K 输入 1.9 秒对 5.9 秒。</p>
+<p>但 SGLang decode 快，整请求反而先完成。</p>
+<p>吞吐还高 7% 到 11%，长尾场景别只看首字。</p>
+<p>注意这是裸配基线：加速优化全关了。</p>
+<p>MTP（一次多猜几个 token）、前缀缓存都没开。</p>
+<p>开优化之后排名可能变，别当终局结论。</p>
+<ul><li>实测报告：<a href="https://github.com/runzhliu/aik8s/blob/HEAD/articles/wechat/glm53-h20-sglang-vllm.md">https://github.com/runzhliu/aik8s/blob/HEAD/articles/wechat/glm53-h20-sglang-vllm.md</a></li></ul>
+<p><strong>3. 「值得深读」SGLang P/D 解耦惊现静默 corrupt：mooncake 传输竞态。</strong></p>
+<p>这条跟你手里的活直接相关，先说结论。</p>
+<p>AMD 的 infera 项目给 SGLang 的 P/D 解耦打了个关键补丁。</p>
+<p>mooncake 是 P/D 之间搬运 KV 的传输层。</p>
+<p>bug 是：非尾块的 KV 还没写完，就被提前传走了。</p>
+<p>decode 拿到半成品，长 prompt 的输出悄悄变错。</p>
+<p>不报错也不崩，最阴的那种。</p>
+<p>症状很好认：大海捞针（长文本里找数字的测试）只捞出前几位。</p>
+<p>后面全是乱码。</p>
+<p>根因很打脸：mooncake 根本没实现 event 等待。</p>
+<p>barrier 形同虚设，注释写了等于白写。</p>
+<p>修复就三处：给传输块加 wait_event，传之前先等前向算完。</p>
+<p>在 2×8 卡 MI325X 上验证：大海捞针 5/9 涨到 9/9。</p>
+<p>划重点：补丁还没提交上游，自己搭 PD 环境得手动打。</p>
+<p>推荐理由：帮你避开 PD 评估里最阴的坑。</p>
+<p>静默 corrupt 会污染 benchmark，数字正常但答案是错的。</p>
+<p>验证环境是 MI325X + ROCm，跟你的卡是同门。</p>
+<ul><li>补丁文档：<a href="https://github.com/amd-agi/infera/blob/HEAD/deploy/docker/patches/sglang_disagg/README.md">https://github.com/amd-agi/infera/blob/HEAD/deploy/docker/patches/sglang_disagg/README.md</a></li></ul>
+<h2>业内新闻</h2>
+<p>这轮没抓到业内大新闻。</p>
+<p>百度那场 SGLang meetup 是昨天的，20 点版已经报过。</p>
+<p>Jalapeno 的 Hot Chips 实测数字，21 号的 16 点版也报过了。</p>
+<h2>访谈与深度</h2>
+<p><strong>1. RohitAI：vLLM 0.30 的生产视角解读。</strong></p>
+<p>作者把 0.30 的两个新特性翻译成了运维语言。</p>
+<p>Fast Start（权重常驻显存、重启秒起）：重启不丢热状态。</p>
+<p>但它不恢复进行中的请求和 KV，期望别放错地方。</p>
+<p>HiSparse（稀疏 KV 页溢出到主机内存）：拿内存换 GPU 容量。</p>
+<p>注意 HiSparse 是 CUDA 独占，ROCm 不支持，跟你没关系。</p>
+<p>升级坑：GPTQ 激活顺序路径被删，YaRN 上下文限制被修正。</p>
+<p>核心警告：俩特性别当全局开关，得按模型逐个配。</p>
+<ul><li>原文：<a href="https://rohitai.com/blog/vllm-0-30-open-model-serving-runtime-upgrade">https://rohitai.com/blog/vllm-0-30-open-model-serving-runtime-upgrade</a></li></ul>
+<p><strong>2. 中文深度：SGLang 26.08 与 NVFP4 的精度账。</strong></p>
+<p>一篇中文拆解，把 Blackwell 这轮量化升级掰开揉碎了。</p>
+<p>NVFP4（英伟达 4-bit 浮点格式）是 Blackwell 独占。</p>
+<p>Hopper 想省显存，只能用 FP8，没有平替。</p>
+<p>MTP 在 GB300 上要显式开启，迁移配置得重调。</p>
+<p>精度这笔账被低估了。</p>
+<p>DeepSeek-V4 跑 GSM8K，NVFP4 比 FP8 低 0.3%。</p>
+<p>论文里不算啥，生产环境每千次错 3 次，可就不低了。</p>
+<p>作者观点：SGLang 押注吞吐，vLLM 押注调度可靠性。</p>
+<ul><li>原文：<a href="http://blog.hubianluanma.com/posts/sglang-26-nvfp4-blackwell-inference/">http://blog.hubianluanma.com/posts/sglang-26-nvfp4-blackwell-inference/</a></li></ul>
+<p><strong>3. DeepLearning.AI 上了门 SGLang 免费课。</strong></p>
+<p>内容正对你的胃口：手写 attention 和 KV 缓存。</p>
+<p>RadixAttention（自动复用公共前缀的 KV）跨请求共享也讲。</p>
+<p>还有扩散模型推理加速和多 GPU 并行，近期上线的。</p>
+<p>跟 LMSYS、RadixArk 合办，Richard Chen 主讲。</p>
+<ul><li>课程视频：<a href="https://www.youtube.com/watch?v=YW6oWf4xoGk">https://www.youtube.com/watch?v=YW6oWf4xoGk</a></li></ul>
+<hr/>
+<p>*窗口：9/24 10:00→12:00 PDT；上一期是 10 点版。* *去重：百度×SGLang meetup（23 日 20 点版已报）、Jalapeno Hot Chips 实测（21 日 16 点版已报）、Latent Space Jev 单集（21 日 16 点版已报）不再重复。*</p></body></html>
