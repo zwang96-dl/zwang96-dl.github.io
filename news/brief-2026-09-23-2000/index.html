@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月23日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-23"/>
+<meta name="doc-ts" content="2026-09-24T03:05:46"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-23（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-23（20点版）</h1>
+<p>这轮窗口只有两小时（18:00→20:00 PDT）。 六大框架全在摸鱼，一条新发布都没有。 只捡到一条中文新料，顺手补上。</p>
+<h2>框架更新</h2>
+<p>本轮无新增。 六大框架全部经 GitHub releases API 实时核验。 vLLM 还是 v0.30.0（9/22 已报）。 SGLang 还是 v0.5.20（9/18 已报）。 TensorRT-LLM 还是 v1.3.0rc28 预发布（9/23 上午，窗口外）。 LMDeploy 还是 v0.17.0（9/1 已报）。 llama.cpp 还是 v0.5.0。 9/23 下午发布，14 点版已报过。 TGI 还是 v3.3.7（已归档只读）。</p>
+<h2>新技术与论文</h2>
+<p>本轮无新增。 9/22 那批（CompKV、Flash-dLLM 等）已经报过。 本轮 arXiv API 抓取失败，没确认到新入库。 网页搜索也没翻到 9/23 提交的推理优化新论文。</p>
+<h2>业内新闻</h2>
+<p><strong>百度智能云 × SGLang 办了场推理 Meetup。</strong> 说白了：百度第一次公开讲它家 Agent 时代的推理底座怎么搭。 划重点：百度内部智能体的平均上下文已达 6 万 token，还在涨。 MoE 就是把大模型拆成多个小专家，各管一摊。 百舸（百度智能云的 AI 算力平台）把 MoE 专家压缩了 50%。 长输出加大并发时，输出吞吐是原来的 2.23 倍。 打个比方：厨师团队精简一半，出菜反而更快。 sglang-kunlun 插件打通 SGLang 和昆仑芯。 昆仑芯是百度自研的 AI 芯片。 国产卡开发能复用 70-80% 的 CUDA 生态经验。 这条是 9/23 早上的报道（美西 6:42），之前几轮漏了，今天补上。 来源：贝壳财经（新浪财经转载）<a href="https://finance.sina.cn/stock/jdts/2026-09-23/detail-inisvqcx5316939.d.html">https://finance.sina.cn/stock/jdts/2026-09-23/detail-inisvqcx5316939.d.html</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无新增。 Latent Space 最近三天更了三集。 三集聊的是生物安全、AI for Science 等话题。 都跟推理 serving 无关，不收录。 Simon Willison 最近在聊 Gemini 3.8 测评。 也跟推理 serving 无关，不收录。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/23 18:00→20:00 PDT = 9/24 01:00→03:00 UTC）。框架更新经 GitHub releases API 实时核验：vLLM v0.30.0（9/22 05:20 UTC）、SGLang v0.5.20（9/18）、TensorRT-LLM v1.3.0rc28 预发布（9/23 06:34 UTC，窗口外不计）、LMDeploy v0.17.0、llama.cpp v0.5.0（9/23 20:50 UTC，14 点版已报）、TGI v3.3.7（归档只读）。arXiv 本轮 API 抓取失败，未确认新入库；网页搜索未见 9/23 提交的推理优化新论文。新闻、X、Reddit、HN、中文媒体、博客、Spotify、YouTube 均已扫过：百度智能云 × SGLang Meetup 报道（贝壳财经经新浪转载，发布时间 2026-09-23 21:42 北京时间）此前各轮未报，今轮补上；Latent Space 近三天三集、Simon Willison 近期内容均无推理 serving 主题。渠道：GitHub releases API、browser.search（多组）、Spotify 站内。*</p></body></html>
