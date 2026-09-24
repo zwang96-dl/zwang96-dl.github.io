@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月23日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-23"/>
+<meta name="doc-ts" content="2026-09-24T05:01:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-23（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-23（22点版）</h1>
+<p>这轮窗口只有两小时（20:00→22:00 PDT）。 框架侧集体放假，一条新发布都没有。 好在今天白天几轮漏了几篇 KV cache 新论文。 还漏了一条英特尔的中文报道。 这轮一并补上，不算白跑。</p>
+<h2>框架更新</h2>
+<p>本轮无新增。 六大框架全部经 GitHub releases API 实时核验。 vLLM 还是 v0.30.0（9/22 已报）。 SGLang 还是 v0.5.20（9/18 已报）。 TensorRT-LLM 还是 v1.3.0rc28 预发布（9/23 早上，窗口外）。 LMDeploy 还是 v0.17.0（9/1 已报）。 llama.cpp 还是 v0.5.0（9/23 下午，14 点版已报）。 b11149 是每日快照，按惯例不算正式发版。 TGI 还是 v3.3.7（已归档只读）。</p>
+<h2>新技术与论文</h2>
+<p><strong>1. 「值得深读」The KV Cache Working Set：给推理服务算清缓存留多大。</strong> 说白了：prefix caching（前缀缓存，复用之前算过的 KV）好不好使。 全看缓存留不留得住历史的 KV 状态。 划重点：这篇定义了&quot;working set&quot;，即达到目标命中率缓存最少要多大。 还给了在线容量规划方法，不用离线调参。 打个比方：跟饭馆备菜一个道理，备多了浪费、备少了现做来不及。 它帮你算出&quot;刚好够&quot;的备菜量。 跟你的方向很相关：你在评估 SGLang 的 P/D 解耦。 容量规划正是部署配卡的直接依据。 agentic 工作负载下，前缀缓存命中率直接决定 prefill 开销。 来源：arXiv:2609.27746 <a href="https://arxiv.org/abs/2609.27746">https://arxiv.org/abs/2609.27746</a></p>
+<p><strong>2. Risk-Controlled KV-Cache Eviction：驱逐策略不看平均分，看挂科率。</strong> 说白了：以前评 KV 缓存驱逐只看&quot;平均掉多少分&quot;。 但平均分会掩盖个别请求崩盘的事实。 划重点：这篇把驱逐变成部署风险控制问题。 超过容忍阈值的请求占比就是风险。 还给了压缩器无关的认证流程，保证风险达标。 打个比方：考试不看平均分，看&quot;不及格率&quot;。 保证挂科的人数压在合同线以下。 来源：arXiv:2609.27981 <a href="https://arxiv.org/abs/2609.27981">https://arxiv.org/abs/2609.27981</a></p>
+<p><strong>3. Tensor Decomposition of KV Caches：KV 缓存这个四维张量哪儿能压。</strong> 说白了：KV 缓存是个四维张量，维度是头、token、特征、层组。 这篇把四个轴逐个拆开，看低秩结构在哪。 划重点：token 轴和特征轴低秩好压缩。 头轴和层轴几乎满秩，压不动。 四个经典分解里，Tucker 的压缩误差最小。 打个比方：这份名单里谁能当替补、谁是铁主力，一次测清楚。 来源：arXiv:2609.28029 <a href="https://arxiv.org/abs/2609.28029">https://arxiv.org/abs/2609.28029</a></p>
+<h2>业内新闻</h2>
+<p><strong>英特尔：Agent 时代 CPU 需求回暖，KV Shrink 开源了。</strong> 说白了：英特尔在技术创新大会上说，智能体任务一多。 CPU 侧的执行量也在跟着涨。 划重点：至强 6+ 有 288 个能效核，单颗最高撑 1000 多个智能体。 KV Cache 智能加速方案&quot;KV Shrink&quot;已经在 GitHub 开源。 KV Shrink 是把部分 KV 缓存从显存卸载到内存甚至远程服务器的方案。 打个比方：显存像办公桌放不下了，KV Shrink 把不常用的文件搬去隔壁仓库。 搬运用的是英特尔自家的数据加速器。 英特尔把未来数据中心分成三类：CPU 集群管智能体编排。 GPU 管模型推理，也就是&quot;Token 工厂&quot;。 存储集群管长对话、文档、合同这类不断变多的数据。 这条是今天早上第一财经的报道（9/23），之前几轮漏了，这轮补上。 来源：第一财经（新浪转载）<a href="https://finance.sina.cn/stock/jdts/2026-09-24/detail-inisvytr8393027.d.html">https://finance.sina.cn/stock/jdts/2026-09-24/detail-inisvytr8393027.d.html</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无新增。 Latent Space 近期三集聊生物安全和 AI for Science。 跟推理 serving 无关，不收录。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/23 20:00→22:00 PDT = 9/24 03:00→05:00 UTC）。框架更新经 GitHub releases API 实时核验：vLLM v0.30.0（9/22 05:20 UTC）、SGLang v0.5.20（9/18）、TensorRT-LLM v1.3.0rc28 预发布（9/23 06:34 UTC，窗口外不计）、LMDeploy v0.17.0、llama.cpp v0.5.0（9/23 20:50 UTC，14 点版已报；b11149 为每日快照不计）、TGI v3.3.7（归档只读）。arXiv 窗口内零入库；补报 9/23 白天入库的三篇 KV cache 论文（2609.27746 / 2609.27981 / 2609.28029，此前各轮未报）。新闻、X、Reddit、HN、中文媒体、博客、YouTube 均已扫过：英特尔技术创新大会报道（第一财经经新浪转载，2026-09-23）此前未报，今轮补上；Karpathy 的&quot;LLM Knowledge Base&quot;为 4 月旧帖且与推理 serving 无关，不收录。渠道：GitHub releases API、arXiv API、browser.search（多组）。*</p></body></html>
