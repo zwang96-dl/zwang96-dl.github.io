@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月24日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-24"/>
+<meta name="doc-ts" content="2026-09-24T13:07:00"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-24（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-24（6点版）</h1>
+<p>这轮是凌晨窗口（4:00→6:00 PDT）。 框架侧集体安静，论文侧窗口内也没新入库。 不过翻旧账翻出两篇 9/22–9/23 的漏网论文。 其中一篇跟你的 P/D 解耦评估直接相关，已经转了深读笔记。</p>
+<h2>框架更新</h2>
+<p>本轮无新增。 六大框架经 GitHub releases API 实时核验。 vLLM 还是 v0.30.0（9/22 已报）。 SGLang 还是 v0.5.20（9/18 已报）。 TensorRT-LLM 预览版还是 v1.3.0rc28。 它是 9/23 的，窗口外。 LMDeploy 还是 v0.17.0（9/1 已报）。 llama.cpp 正式版还是 v0.5.0。 9/23 发的，14 点版已报。 b11158、b11159 是 9/24 当日快照，按惯例不算正式发版。 TGI 还是 v3.3.7（归档只读）。</p>
+<h2>新技术与论文</h2>
+<p><strong>1. 「值得深读」Disaggregated Quantization：prefill 和 decode 各穿各的鞋。</strong> 说白了：量化别再&quot;一把尺子量全身&quot;。 prefill 是算力密集型，一次吞几千个 token。 decode 是访存密集型，一次只吐一个 token。 划重点：这篇给两阶段各配各的量化格式和权重。 prefill 用 NVFP4（英伟达 4-bit 浮点格式，算得快）。 decode 用 2-3 bit 权重编码（权重小，搬运快）。 训练方法叫 QADD，一次训练同时训出两套权重。 最抓眼球的数据：Qwen3.8-27B 的 1-bit 模型。 只换 prefill 那份权重，decode 完全不动。 MMLU-Pro 涨 32.5 分，MMMU-Pro 涨 35.3 分。 1-bit 精度直接翻倍还多。 还有个工程补丁 ODP：prefill 权重放 SSD 里流式加载。 8K prompt 下首 token 快 1.78 倍。 跟你方向的关联：你在 SGLang 上评估 P/D 解耦。 解耦后 prefill 池和 decode 池本来就是不同机器。 这篇等于说，两边的量化格式也可以不一样。 这是&quot;解耦&quot;思想在量化维度的延伸。 深读笔记已生成，含原文 Figure 1/2/5。 来源：arXiv:2609.26333 <a href="https://arxiv.org/abs/2609.26333">https://arxiv.org/abs/2609.26333</a></p>
+<p><strong>2. DPara：投机解码的&quot;打草稿&quot;和&quot;改稿&quot;彻底并行。</strong> 说白了：投机解码是先让小模型打草稿。 再让大模型批量改，快 2-3 倍还不掉精度。 投机解码就是&quot;实习生打草稿、专家改&quot;的套路。 划重点：以前的并行方案要&quot;猜&quot;验证结果。 猜错就退回串行，之前全白干。 DPara 用 diffusion 骨干提前算好各种接受边界的草稿。 验证结果一出来，轻量 head 瞬间拼出下一轮草稿。 每一轮都保证重叠，没有&quot;猜错回退&quot;这回事。 跟你方向的关联：投机解码是你工具箱里的一件。 SGLang 的 DSpark 系列草稿器可以直接套这个框架。 这篇没标深读，感兴趣点链接自己看。 来源：arXiv:2609.27396 <a href="https://arxiv.org/abs/2609.27396">https://arxiv.org/abs/2609.27396</a></p>
+<h2>业内新闻</h2>
+<p>本轮无新增。</p>
+<h2>访谈与深度</h2>
+<p>本轮无新增。 Latent Space 最新三集已用 Spotify 核验。 9/23 聊生物安全，9/22 聊 AI for Science。 9/21 那期是 Jev。 都跟推理 serving 无关，不收录。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/24 4:00→6:00 PDT = 9/24 11:00→13:00 UTC）。框架更新经 GitHub releases API 实时核验：vLLM v0.30.0（9/22）、SGLang v0.5.20（9/18）、TensorRT-LLM v1.3.0rc28 预览版（9/23，窗口外）、LMDeploy v0.17.0（9/1）、llama.cpp v0.5.0（9/23；b11158/b11159 为 9/24 当日滚动快照，按惯例不计）、TGI v3.3.7（归档只读）。arXiv 五组关键词窗口内零入库；补录两篇 9/22–9/23 漏网论文（2609.26333、2609.27396，经全部简报 grep 确认此前未报）。新闻、X 大V、Reddit、HN、中文媒体、博客、YouTube 均已扫过，无窗口内新增。Spotify：Latent Space 最新三集（9/23 生物安全、9/22 AI for Science、9/21 Jev）均与 serving 无关。渠道：GitHub releases API、arXiv API、browser.search（新闻/X/Reddit/HN/中文媒体/SGLang 动态）、Spotify API。*</p></body></html>
