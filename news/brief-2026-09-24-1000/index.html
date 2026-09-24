@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月24日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-24"/>
+<meta name="doc-ts" content="2026-09-24T17:08:39"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-24（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-24（10点版）</h1>
+<h2>框架更新</h2>
+<p>这轮六大框架都没发新版。</p>
+<p>vLLM 还是 v0.30.0，SGLang 停在 v0.5.20。</p>
+<p>llama.cpp 只有每日滚动快照，不算正式发版。</p>
+<p>TensorRT-LLM 最新还是 v1.3.0rc28 预览版。</p>
+<p>LMDeploy 停在 v0.17.0，TGI 停在 v3.3.7。</p>
+<h2>新技术与论文</h2>
+<p>Liquid AI 给视觉模型也配上了投机解码，解码直接快 3 倍。</p>
+<p>昨晚刚发布，今天补上。</p>
+<p>它给 LFM2.5-VL-3B 配了个 DSpark 小模型。</p>
+<p>投机解码这招，说白了就是让实习生先打草稿。</p>
+<p>小模型先猜出一串词，大模型一次验完。</p>
+<p>猜对了直接用，不用大模型一个字一个字往外蹦。</p>
+<p>草稿模型只有 280M，是 3B 目标模型的零头。</p>
+<p>GPU 上解码最高快 2.66 倍，端侧设备最高 3.13 倍。</p>
+<p>SGLang、llama.cpp、MLX-VLM 都已经支持。</p>
+<p>这是第一款给视觉语言模型配的投机解码草稿，开箱即用。</p>
+<ul><li>官方博客：<a href="https://www.liquid.ai/blog/lfm2-5-vl-dspark">https://www.liquid.ai/blog/lfm2-5-vl-dspark</a></li></ul>
+<p>Apple 开源了个 9B 文档分析模型，专治长文档看得慢。</p>
+<p>模型和代码都是今天刚放出来的。</p>
+<p>LensVLM-9B 先看压缩图找线索，再把关键页放大细读。</p>
+<p>这招叫选择性展开：先粗看再细看，省 token。</p>
+<p>压缩 5 到 15 倍可选，精度基本不掉。</p>
+<p>底层是改过的 Qwen 架构，模型和代码都公开了。</p>
+<ul><li>报道：<a href="https://www.alextech.ai/en/news/apple-releases-lensvlm-9b-for-compressed-document-analysis/">https://www.alextech.ai/en/news/apple-releases-lensvlm-9b-for-compressed-document-analysis/</a></li><li>模型：<a href="https://huggingface.co/apple/LensVLM-9B">https://huggingface.co/apple/LensVLM-9B</a></li><li>论文：<a href="https://arxiv.org/html/2605.07019">https://arxiv.org/html/2605.07019</a></li></ul>
+<h2>业内新闻</h2>
+<p>这轮没抓到业内大新闻。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没出 serving 相关新集。</p>
+<p>最新几集聊生物安全和科学 AI，跟推理 serving 不沾边。</p>
+<hr/>
+<p>*窗口：9/24 08:00→10:00 PDT；上一期是 08 点版。*</p></body></html>
