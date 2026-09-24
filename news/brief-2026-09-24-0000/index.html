@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月24日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-24"/>
+<meta name="doc-ts" content="2026-09-24T07:00:26"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-24（0点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-24（0点版）</h1>
+<p>这轮是凌晨窗口（22:00→0:00 PDT）。 框架侧集体安静，论文侧也没新入库。 只捞到一条 9/23 的公司通稿，之前几轮漏了。 算是有个交代。</p>
+<h2>框架更新</h2>
+<p>本轮无新增。 六大框架经 GitHub releases API 实时核验。 vLLM 还是 v0.30.0（9/22 已报）。 SGLang 还是 v0.5.20（9/18 已报）。 TensorRT-LLM 还是 v1.3.0rc28 预览版（9/23，窗口外）。 LMDeploy 还是 v0.17.0（9/1 已报）。 llama.cpp 正式版还是 v0.5.0（9/23 下午，14 点版已报）。 b11153、b11154 是每日快照，按惯例不算正式发版。 TGI 还是 v3.3.7（归档只读）。</p>
+<h2>新技术与论文</h2>
+<p>本轮 arXiv 零入库。 最新一篇 KV cache 相关论文是 9/23 白天那篇。 讲的是小样本学习，不是推理 serving，不收录。</p>
+<h2>业内新闻</h2>
+<p><strong>Ravelyn：给智能体配了个&quot;推理编译器&quot;，想赚省下来的钱。</strong> 说白了：这家新公司今天发了通稿，说要给 agent 做推理优化。 划重点：思路是&quot;难的事交给大模型，跑腿的活交给小模型&quot;。 大模型就是 frontier models，最强的那批闭源模型。 小模型是他们用你的业务数据微调出来的专才模型。 类比一下：好比公司里难案子派给合伙人，复印装订交给实习生。 收费方式挺有意思：按省下来的钱抽成，省不下来就不收钱。 还说要自己建两层 GPU 集群，一层专门微调，一层专门对外服务。 这条是公司自己发的通稿，数据未经第三方验证，看看就好。 跟你方向的关联：这是&quot;按调用复杂度分流&quot;的商业化版本。 你在评估的 P/D 解耦是框架层面的分流，这是模型选型层面的分流。 思路相通，落地的层次不一样。 来源：EINPresswire <a href="https://www.einpresswire.com/article/944455756/ravelyn-technology-introduces-an-inference-compiler-for-ai-agents-and-plans-a-large-scale-gpu-buildout">https://www.einpresswire.com/article/944455756/ravelyn-technology-introduces-an-inference-compiler-for-ai-agents-and-plans-a-large-scale-gpu-buildout</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无新增。 Latent Space 最新一集还是 9/23 那期聊生物安全的。 跟推理 serving 无关，不收录。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/23 22:00→9/24 0:00 PDT = 9/24 05:00→07:00 UTC）。框架更新经 GitHub releases API 实时核验（vLLM v0.30.0、SGLang v0.5.20、TensorRT-LLM v1.3.0rc28 预览、LMDeploy v0.17.0、llama.cpp v0.5.0 + 每日快照 b11153/b11154 不计、TGI v3.3.7）。arXiv 窗口内零入库，最新 KV cache 论文为 9/23 白天（小样本学习方向，与 serving 无关）。Ravelyn 通稿为 9/23 公司自发新闻稿，此前各轮未报，本轮补录，未标「值得深读」。AMD Hyperloom（9/21 18点版已报）不重复。X 大V、Reddit、HN、中文媒体、YouTube、Spotify 播客均已扫过：Latent Space 三集（9/23 生物安全、9/22 AI for Science、9/21 Jev）均与 serving 无关；其他渠道均为窗口外旧内容。渠道：GitHub releases API、arXiv API、browser.search（多组）、Spotify API。*</p></body></html>
