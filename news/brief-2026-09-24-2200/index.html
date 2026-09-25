@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月24日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-24"/>
+<meta name="doc-ts" content="2026-09-25T05:08:27"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-24（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-24（22点版）</h1>
+<p>这轮两小时（20:00→22:00 PDT）是&quot;扫尾&quot;性质。 20 点版刚把 9/25 00:00 UTC 的论文批次一网打尽。 本轮只捡到一篇论文遗珠，外加两条今日新闻。 框架侧继续安静，一条发布都没有。</p>
+<h2>框架更新</h2>
+<p>本轮无新增。 六大框架全部经 GitHub releases API 实时核验。 vLLM 还是 v0.30.0（9/22 已报）。 SGLang 还是 v0.5.20（9/18 已报）。 TRT-LLM 还是 v1.3.0rc28 预发布（9/23，窗口外）。 LMDeploy 还是 v0.17.0（9/1 已报）。 llama.cpp 正式版还是 v0.5.0（9/23 已报）。 窗口内只有 b11174、b11175 两个每日快照。 快照按惯例不算发版。 TGI 还是 v3.3.7（已归档只读）。</p>
+<h2>新技术与论文</h2>
+<p><strong>FlashLoop：循环模型的&quot;懒人更新&quot;，KV 直接砍 6 倍。</strong>「值得深读」 循环模型有个尴尬：参数省了，推理账单反而贵。 说白了：同一组模块反复跑 R 遍。 每遍都要存一份 KV cache（推理草稿纸）。 显存和计算量跟着轮数线性涨。 FlashLoop 发现后几轮基本在&quot;摸鱼&quot;：变化集中在少数 token 上。 于是三板斧：只重算没收敛的 token。 只挑重要的 key 列算注意力。 KV 只存相邻轮的低比特差值。 三招全都免训练，推理时直接上。 Ouro-2.6B 跑 4 遍：8K 上下文 KV 小 5.8 倍。 32K 上直接省 20 GiB，砍掉 82.8%。 端到端最高 1.64 倍加速，精度无损。 划重点：KV 压缩多了&quot;轮次间冗余&quot;这个新维度。 跟你研究的 KV 优化方向直接相关。 深读笔记已生成，3 张原文图配中文图注。 来源：<a href="https://arxiv.org/abs/2609.29812">https://arxiv.org/abs/2609.29812</a></p>
+<h2>业内新闻</h2>
+<p><strong>FriendliAI 推 InferenceSense：把闲置 GPU 变成&quot;印钞机&quot;。（今日）</strong> 连续批处理（vLLM 的核心调度机制）的原创作者。 Byung-Gon Chun 这周开了个新平台。 说白了：neocloud 厂商训练之余，卡都闲着。 InferenceSense 让闲置算力接付费推理单，按 token 分成。 像 AdSense 把闲置广告位变现，一个道理。 自家任务永远优先，推理任务随时被征用让路。 划重点：serving 供给侧的新玩法。 跟你想做的自动调参是同一条赛道。 来源：<a href="https://venturebeat.com/infrastructure/the-team-behind-continuous-batching-says-your-idle-gpus-should-be-running">https://venturebeat.com/infrastructure/the-team-behind-continuous-batching-says-your-idle-gpus-should-be-running</a></p>
+<p><strong>Cacheon 上线 Open Inference Arena：推理 serving 的&quot;公开擂台&quot;。（今日通稿）</strong> 固定开源模型，比谁的推理服务器又快又准。 说白了：输出必须一字不差，偷工减料直接判负。 同硬件跟基线比拼响应速度和生成速率。 主网本月稍晚部署，优胜者有奖励。 划重点：serving 优化的公开竞技场。 你搞自动调参的话，这是现成的比武场。 来源：<a href="https://www.prweb.com/releases/cacheon-launching-open-inference-arena-for-llm-serving-optimization-302768463.html">https://www.prweb.com/releases/cacheon-launching-open-inference-arena-for-llm-serving-optimization-302768463.html</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无新增。 X 大V 本轮都没动静。 扫了 @lmsysorg、vLLM 官方、@karpathy。 @jimfan 和 swyx（Latent Space）也没新帖。 Reddit、Hacker News 本轮无新帖。 机器之心、量子位今日无推理部署相关报道。 英文博客和 newsletter 也没新货。 Simon Willison、The Batch 都安静。 SGLang 官方频道、Latent Space 无新视频。 Spotify：Latent Space 最新单集还是 Runway 那期。 跟 serving 无关，本轮不收录。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/24 20:00→22:00 PDT = 9/25 03:00→05:00 UTC）。框架更新经 GitHub releases API 实时核验：vLLM v0.30.0、SGLang v0.5.20、TRT-LLM v1.3.0rc28（预发布）、LMDeploy v0.17.0、llama.cpp v0.5.0（正式版；b11174/b11175 为窗口内每日快照，按惯例不计）、TGI v3.3.7（归档只读）。arXiv：20 点版已补录 9/25 00:00 UTC 批次（NebulaSD、HeteroReason、Cross-Model Autoscaling、MILO、DeltaS），本轮补遗一篇此前各轮漏掉的 FlashLoop（2609.29812，经全部简报 grep 确认未报）；2609.28029/28250 等 KV 相关论文 9/23 22 点版已报。两条新闻严格说在窗口之外（FriendliAI 约 18:00 PDT、Cacheon 约 16:00 PDT），但都是今日新发、此前各轮未报，标注&quot;今日&quot;收录。新闻、X 大V、Reddit、HN、中文媒体、博客、YouTube、Spotify 均已扫过，无严格窗口内新增。渠道：gh CLI（GitHub releases API）、arXiv API、browser.search（新闻/X/Reddit/HN/中文媒体/博客）、Spotify API。*</p></body></html>
