@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月24日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-24"/>
+<meta name="doc-ts" content="2026-09-25T03:04:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-24（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-24（20点版）</h1>
+<p>这轮两小时（18:00→20:00 PDT）论文侧有收获。 上轮没赶上 00:00 UTC 的新批次。 四篇 serving 相关论文，这轮一次补上。 框架侧依然安静，一条发布都没有。</p>
+<h2>框架更新</h2>
+<p>本轮无新增。 六大框架全部经 GitHub releases API 实时核验。 vLLM 还是 v0.30.0（9/22 已报）。 SGLang 还是 v0.5.20（9/18 已报）。 TRT-LLM 还是 v1.3.0rc28 预发布（9/23，窗口外）。 LMDeploy 还是 v0.17.0（9/1 已报）。 llama.cpp 正式版还是 v0.5.0（9/23 14 点版已报）。 每日快照按惯例不算发版。 TGI 还是 v3.3.7（已归档只读）。</p>
+<h2>新技术与论文</h2>
+<p><strong>NebulaSD：推测解码的&quot;网约车拼车&quot;版。</strong> 推测解码这事有新玩法：打草稿和验稿彻底分开调度。 说白了：先让小模型打草稿，大模型再批量验稿。 但打草稿和验稿是两种活，爱用不同的批量配置。 绑死在一起，就互相拖后腿。 NebulaSD 搞了个 M-for-N 架构：草稿端和验证端解耦。 容量全局共享，谁闲谁上，不再一对一锁死。 划重点：跟你研究的投机解码方向直接相关。 也是 serving 解耦思路的一个新例子。 来源：<a href="https://arxiv.org/abs/2609.29364">https://arxiv.org/abs/2609.29364</a></p>
+<p><strong>HeteroReason：FPGA 和 GPU 搭伙跑推理。</strong> FPGA 和 GPU 搭伙跑推理模型，这事有人做成了。 说白了：推理模型（一步步想的模型）靠思维链往前想。 但它只往前想不回头，一步错、步步错。 HeteroReason 把草稿、验证、修正三步拆开。 分别放到 FPGA 和 GPU 上跑，各干各擅长的。 说白了就是 P/D 解耦的异构硬件版。 划重点：你正在评估 SGLang 的 P/D 解耦。 这篇是解耦思路的延伸，值得对照着看。 来源：<a href="https://arxiv.org/abs/2609.28717">https://arxiv.org/abs/2609.28717</a></p>
+<p><strong>Cross-Model Autoscaling：多模型抢卡时的&quot;交警&quot;。</strong> 多模型抢一张卡，有人做了个&quot;交警&quot;来管。 说白了：几个模型挤在一个 GPU 集群里。 各家流量忽高忽低，还都要保住延迟。 现有扩缩容只盯自己家，不管别人。 像只看自己车道、不看整条路的交警。 TRE（令牌份额再平衡引擎）统一分卡。 模型之间还能热切换，不用停机。 划重点：跟你想做的 SLA 自动调参沾边。 跨模型分容量，正是那块缺的拼图。 来源：<a href="https://arxiv.org/abs/2609.29160">https://arxiv.org/abs/2609.29160</a></p>
+<p><strong>MILO：上万个示例的 KV 瘦身术。</strong> 喂几千个例子再开工，KV cache 瘦身有新招。 说白了：many-shot 就是堆例子，KV 跟着膨胀。 KV cache（推理草稿纸）一膨胀，显存就告急。 MILO 发现这些示例的 KV 是低秩的。 信息密度低，压得住，不心疼。 块级低秩压缩，显存省了，精度还在。 来源：<a href="https://arxiv.org/abs/2609.29913">https://arxiv.org/abs/2609.29913</a></p>
+<p><strong>DeltaS：视频流模型的&quot;断舍离&quot;。</strong> 视频流模型的 KV 取舍，不用等提问。 说白了：视频语言模型边看边播。 KV 越积越多，得在提问前决定扔什么。 DeltaS 用门控注意力的内部状态打分。 先下手为强，跟你的多模态方向沾边。 来源：<a href="https://arxiv.org/abs/2609.27470">https://arxiv.org/abs/2609.27470</a></p>
+<h2>业内新闻</h2>
+<p>本轮无新增。 AWS 推理网关那条，18 点版已报。</p>
+<h2>访谈与深度</h2>
+<p>本轮无新增。 Latent Space 最新一集讲 Runway 实时世界生成。 跟推理 serving 无关，不收录。</p>
+<hr/>
+<p>*去重说明：本轮窗口（9/24 18:00→20:00 PDT = 9/25 01:00→03:00 UTC）。框架更新经 GitHub releases API 实时核验：vLLM v0.30.0（9/22）、SGLang v0.5.20（9/18）、TensorRT-LLM v1.3.0rc28 预发布（9/23，窗口外不计）、LMDeploy v0.17.0、llama.cpp v0.5.0（9/23 已报；当日快照不计）、TGI v3.3.7（归档只读）。arXiv 9/25 00:00 UTC 新批次：18 点版运行时批次尚未发布，本轮补录四篇 serving 相关新论文——NebulaSD（2609.29364）、Cross-Model Autoscaling（2609.29160）、MILO（2609.29913）、HeteroReason（2609.28717），经全部简报 grep 确认此前各轮均未报；DeltaS（2609.27470，视频流 KV 驱逐）此前未报，本轮一句话带过。新闻、X 大V、Reddit、HN、中文媒体、博客、YouTube 均已扫过，无窗口内新增。Spotify：Latent Space 最新为 Runway 实时世界生成单集，与 serving 无关。渠道：gh CLI（GitHub releases API）、arXiv API、browser.search（新闻/X/Reddit/HN/中文媒体）、Spotify API。*</p></body></html>
