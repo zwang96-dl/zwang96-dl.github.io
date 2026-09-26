@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月25日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-25"/>
+<meta name="doc-ts" content="2026-09-26T05:02:19"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-25（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-25（22点版）</h1>
+<p>今晚这轮窗口全生态安静，框架六家 GitHub API 逐家核验无新版。 arXiv 三组关键词倒序查，最新提交停在 9/24，窗口内零入库。 捡回来一条前几天官宣、但之前没报过的，对口你研究的上下文压缩。</p>
+<h2>业内新闻</h2>
+<ul><li>MIT 出来的 agent 推理公司，9/22 宣布融资 510 万美元。</li><li>这期是补收，因为它直接撞上你研究的上下文压缩方向。</li><li>卖点是动态上下文压缩 + 高效缓存。</li><li>动态上下文压缩说白了：agent 跑任务时，用不着的历史对话先压小。</li><li>压小了 token 就省，等于少烧算力、省钱。</li><li>高效缓存就是 KV cache：算过的草稿纸留着，省得重算。</li><li>官方自称：长 agent 任务能省 80% 的 token。</li><li>20 万 token 以上的长任务，速度快一倍。</li><li>还称在 TriE 基准上比 SGLang 快一倍。</li><li>划重点：以上数字全是厂商自报，没人独立验证过。</li><li>当八卦看可以，别当实测数据用。</li><li>值得你看的原因：它是专为长 agent 会话做的 serving 层。</li><li>正好撞上前缀缓存（prefix caching）和上下文压缩的前沿。</li><li>也算 SGLang 和 vLLM 的新对手。</li><li>官方博客：<a href="https://www.subconscious.dev/blog/subconscious-raises-5-1-million-to-build-the-inference-platform-for-long-running-agents">https://www.subconscious.dev/blog/subconscious-raises-5-1-million-to-build-the-inference-platform-for-long-running-agents</a></li><li>英文深度稿（9/25 傍晚更新）：<a href="https://completeaitraining.com/news/subconscious-raises-51-million-to-reduce-the-cost-of/">https://completeaitraining.com/news/subconscious-raises-51-million-to-reduce-the-cost-of/</a></li></ul>
+<p>*去重说明：本轮窗口（9/25 20:00→22:00 PDT = 9/26 03:00→05:00 UTC）内无实质新料。框架六家 GitHub releases API 实时核验无新版本：vLLM v0.30.0、SGLang v0.5.20、TRT-LLM 正式 v1.2.1 / 预览 v1.3.0rc28（9/23）、LMDeploy v0.17.0、llama.cpp v0.5.0、TGI v3.3.7；llama.cpp 滚了每日快照 b11193（03:30 UTC，hexagon 后端工具改动），按惯例不算正式发版。arXiv 四组关键词（KV cache、prefill/decode、speculative decoding、LLM inference）按 submittedDate 倒序查，最新提交停在 9/24 17:59 UTC，窗口内零入库。本轮唯一条目为 Subconscious 融资补收（9/22 官宣、completeaitraining 深度稿 9/25 傍晚更新），之前各期均未报过，X/大V（lmsysorg、vLLM 官方、karpathy、jimfan）、HN、Reddit r/LocalLLaMA、机器之心/量子位、Latent Space 均无窗口内新增。渠道：GitHub releases API、arXiv API、browser.search/open、子代理广度扫荡。缺口：lmsys.org/blog 页面 JS 渲染抓不到，x.com 登录墙只能看转述。*</p></body></html>
