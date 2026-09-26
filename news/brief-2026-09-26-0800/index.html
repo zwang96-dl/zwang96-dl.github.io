@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月26日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-26"/>
+<meta name="doc-ts" content="2026-09-26T15:10:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-26（8点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-26（8点版）</h1>
+<h2>框架更新</h2>
+<p>六家全静默：vLLM（开源推理引擎）停在 v0.30.0，SGLang 停在 v0.5.20，其余同样零更新。</p>
+<h2>新技术与论文</h2>
+<h3>vLLM 原班人马在 TPU 上焊了个&quot;超级大核&quot;：Kimi K3 跑得比 GB200 快 57%（值得深读）</h3>
+<p>简单说：写 vLLM 的那拨人出来创业，专攻&quot;让 TPU 跑推理更快&quot;。 这次成绩是 16 块 TPU v7 跑 Kimi K3，每秒 709 token。同规模 GB200 只有 452。 思路很妙：传统推理把一次 decode（解码：一个一个吐 token 的阶段）拆成几百个小 kernel（芯片上干活的小程序）排队跑。 每个小 kernel 交接时都有间隙，内存带宽就空转。好比流水线上每道工序交接班都要停几分钟。 他们直接把交接班取消了。Kimi K3 的 92 层 MoE（混合专家：每 token 只激活少数几个专家的结构）计算，被焊进一个 Pallas（谷歌给 TPU 做的底层语言，地位类似 CUDA）大程序里，一次跑完。 省下来的带宽去干预取：第 N 层还在算，第 N+1 层的权重已经提前搬进片上缓存。算力和搬运同时进行，一点不浪费。 最扎心的是纸面规格：TPU v7 的 HBM 带宽 7380 GB/s，反而低于 GB200 的 8000 GB/s。赢的不是硬件，是软件编排。 裸速（batch=1（batch：一次并行处理的请求数））接近 2 倍：249 vs 127 tok/s。batch=8 时 865 vs 636。4 块 TPU 跑 Qwen 3.8 27B：1515 vs 695。 加速还叠了 DeepSeek 的 DSpark 推测解码（小模型先打草稿，大模型再批量改）。接受长度 6，单步 decode 约 8.5ms。 精度没掉：GPQA-Diamond 94.4%、GSM8K 97.2%，跟 GPU 结果完全一致。 编译也快了 20 倍：XLA（谷歌默认编译工具链）编一次 30 分钟+，手写内核 90 秒不到。改一版一分半钟就能上机验证。 代码已开源：inferact/tpu-megakernels。这是他们和 Google Cloud 联合工程的第一批成果，目标是把 TPU 变成 vLLM 的一流支持对象。 划重点：这事跟你研究的 P/D 解耦（把 prefill 和 decode 分到不同设备）是同路人。P/D 解耦管&quot;阶段之间分工&quot;，megakernel 管&quot;decode 内部怎么重叠算和搬&quot;。 道理都是一个：推理的瓶颈不在算，在数据搬运。谁把搬运藏得好，谁就快。 深读理由：这是原班人马亲写的工程实录。Pallas 的 grid-less 启动、scoped VMEM 分配、异步 DMA（异步直接内存搬运）三个手法，配 Kimi K3 的 TP4×EP8（TP：张量并行切权重；EP：专家并行分发专家）具体策略。你在 MI350 上想做 serving 自动调参，这篇的&quot;瓶颈分析方法论&quot;值得先看。</p>
+<h2>业内新闻</h2>
+<p>无实质新料。HN 今日前 30 条无 serving 相关，Reddit r/LocalLLaMA 和 r/MachineLearning 周末无新帖。</p>
+<h2>访谈与深度</h2>
+<p>无新单集。Latent Space 9/26 无更新，X 上几位大V本周无 serving 相关动态。</p>
+<p>*去重脚注：本轮窗口 9/26 06:00→08:00 PDT。框架六家 GitHub releases API 实时核验全部静默：vLLM v0.30.0（9/22）、SGLang v0.5.20（9/18）、TRT-LLM v1.2.1、LMDeploy v0.17.0、llama.cpp v0.5.0、TGI v3.3.7（归档）。arXiv 四组关键词（LLM inference、KV cache、speculative decoding、prefill/decode disaggregation）按 submittedDate 倒序查，最新提交停在 9/24 15:55 UTC，窗口内零入库。量子位 Inferact 报道落款 9/26（原博客 9/23 首发），此前四期（0/2/4/6 点版）均未收录。Liquid AI 的 LFM2.5-VL-3B-DSpark 已于 9/24 的 10 点版报过，剔除。*</p></body></html>
