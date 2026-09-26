@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月25日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-25"/>
+<meta name="doc-ts" content="2026-09-26T03:05:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-25（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-25（20点版）</h1>
+<p>晚上这轮窗口偏安静，框架六家都没动。 但捡回来两条昨晚到今天的干货，都对口。</p>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 刚出了一期：OpenRouter 从种子到 Stripe。</li><li>嘉宾是 OpenRouter 的 CEO Alex Atallah。</li><li>OpenRouter 是推理 API 网关的头部公司。</li><li>一句话：它像模型超市的收银台。</li><li>开发者调一个接口，就能切换几百个模型。</li><li>现在每天经它手的 token 超过 10 万亿。</li><li>这期聊了路由层怎么做成关键基础设施。</li><li>还聊了 token 欺诈这个新话题。</li><li>说白了：agent 自己调 API 刷 token，防不胜防。</li><li>做推理网关和计费的人值得听一耳朵。</li><li>链接：<a href="https://www.latent.space/p/openrouter">https://www.latent.space/p/openrouter</a></li></ul>
+<ul><li>一篇生产复盘：自动扩缩容掩盖了缓存崩盘。</li><li>故事很简单：RAG 切块从 512 改成 500 个 token。</li><li>结果前缀缓存命中率从 85% 掉到 4%。</li><li>前缀缓存就是存重复提示词的草稿纸，省得每次重算。</li><li>流量没涨，GPU 副本却多了 80%。</li><li>凶手是哈希链：vLLM 的 KV 缓存按 16 个 token 一块存。</li><li>每块的哈希都带着前一块的哈希，像串起来的锁链。</li><li>第 500 个 token 一变，后面整串全对不上。</li><li>等于整条作废，全得重算。</li><li>SGLang 的 RadixAttention（树形前缀缓存）也一样。</li><li>前缀一分叉，整枝缓存就掉光了。</li><li>更扎心的是自动扩缩容：它只看队列长度。</li><li>队列变长就加机器，延迟达标了，账单却翻倍。</li><li>作者给了三组 PromQL，直接监控缓存命中率。</li><li>还能算出每千请求烧了多少 GPU 秒。</li><li>还有个数据点：llm-d 的前缀感知路由很猛。</li><li>TTFT p90 从 135.5 秒压到 0.3 秒内，吞吐 2.1 倍。</li><li>说白了：请求得送到存着它前缀的那台机器上。</li><li>链接：<a href="https://podostack.com/p/autoscaler-hid-prefix-cache-regression">https://podostack.com/p/autoscaler-hid-prefix-cache-regression</a></li></ul>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发新版，GitHub API 逐家核验过。</li><li>vLLM v0.30.0、SGLang v0.5.20，都没动。</li><li>llama.cpp 最新正式版还是 9/23 的 v0.5.0。</li><li>TRT-LLM 正式版还是 v1.2.1，LMDeploy 停在 v0.17.0。</li><li>TGI v3.3.7，仓库已归档。</li></ul>
+<p>*去重说明：本轮窗口（9/25 18:00→20:00 PDT = 9/26 01:00→03:00 UTC）内无实质新料。框架 release 六家 GitHub API 核验无新版本：vLLM v0.30.0、SGLang v0.5.20、TRT-LLM v1.2.1、LMDeploy v0.17.0、llama.cpp v0.5.0、TGI v3.3.7。arXiv 六组关键词（KV cache、speculative decoding、prefill 解耦、LLM inference、vLLM/SGLang、多模态 inference）按 submittedDate 倒序查，最新提交停在 9/24，窗口内零入库；9/24 那几篇 serving 相关的（NebulaSD、HeteroReason、MILO、Dynamo 快速恢复）已在 9/24 的 20点版/22点版报过。两条补收均为往期未报：Latent Space OpenRouter 单集（约 9/25 傍晚发布，browser.search 亲手核验）、podostack prefix cache 复盘（browser.open 亲手打开全文核验）。DSpark 相关（Liquid AI VLM 版 9/24 10点版、DeepSeek DSpark 9/20 起多期）与 Latent Space Runway 单集（14点版）均为已报，不重复。渠道：GitHub releases API、arXiv API、browser.search/open、子代理广度扫荡（HN/Reddit/X/Simon Willison/lmsys 博客/Latent Space/机器之心/量子位/Spotify）。缺口：lmsys.org/blog 页面 JS 渲染抓不到，x.com 登录墙只能看转述。*</p></body></html>
