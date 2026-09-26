@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月25日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-25"/>
+<meta name="doc-ts" content="2026-09-26T01:06:10"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-25（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-25（18点版）</h1>
+<p>傍晚这轮生态偏安静，框架六家都没发新版。 但有两条实用干货，是前几轮漏掉的补收。</p>
+<h2>业内新闻</h2>
+<ul><li>Google 的 Antigravity SDK 现在能纯本地跑 Agent 了。</li><li>9 月 23 日，Google 正式给 SDK 加上了本地模型路径。</li><li>官方参考配置：Gemma 4 26B A4B 配 LiteRT-LM。</li><li>LiteRT-LM 是 Google 的端侧推理引擎，专门跑本地模型。</li><li>A4B 是 MoE 的写法：模型拆成小专家，总 26B 参数每次只激活 4B。</li><li>要 24GB 以上显存或统一内存，上下文 64K。</li><li>不用 API key，也不用联网，全在本地跑。</li><li>更关键的是 LocalOpenAIAgentConfig，它能直连你本地起的 OpenAI 兼容服务。</li><li>说白了：Agent 编排留在 Antigravity，推理走你自己的 vLLM。</li><li>本地服务开好之后，base_url 指过去就行。</li><li>原文：<a href="https://aicybr.com/blog/google-antigravity-sdk-local-gemma-4-offline-agents">https://aicybr.com/blog/google-antigravity-sdk-local-gemma-4-offline-agents</a></li></ul>
+<h2>新技术与论文</h2>
+<ul><li>vLLM 也能跑 GGUF 文件了，但只在 GPU 上。</li><li>GGUF 是 llama.cpp 那套省显存的模型格式。</li><li>用法是官方插件 vllm-gguf-plugin，写法是 repo:quant_type。</li><li>硬件表很直白：NVIDIA、AMD 的 GPU 支持。</li><li>x86、Arm 的 CPU 明确不支持。</li><li>说白了：它的 GGUF 路径是给批量 serving 写的 GPU 算子。</li><li>CPU 那边没有对应算子，因为它压根是 serving 引擎。</li><li>官方原话：高度实验性、欠优化。</li><li>能用的量化类型比 llama.cpp 窄，新模型家族也跟得慢。</li><li>记住它是省显存的特性，不是提吞吐的，别指望 QPS 起飞。</li><li>一句话规律：llama.cpp 拿 GGUF 当本命，vLLM 拿它当选项。</li><li>原文：<a href="http://dev.to/mrsaynothing/can-vllm-run-gguf-yes-on-gpu-only-1hpj">http://dev.to/mrsaynothing/can-vllm-run-gguf-yes-on-gpu-only-1hpj</a></li></ul>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发新版，GitHub API 逐家核验过时间戳。</li><li>vLLM v0.30.0（9/22）、SGLang v0.5.20（9/18），都没动。</li><li>llama.cpp 最新正式版还是 9/23 的 v0.5.0。</li><li>TRT-LLM 正式版还是 v1.2.1，LMDeploy 停在 v0.17.0。</li><li>TGI v3.3.7，仓库已归档。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>arXiv 本轮窗口内没有对口新论文。</li><li>X、Reddit、HN、Simon Willison、lmsys 博客都无新料。</li><li>Latent Space 最新单集也不是推理 serving 方向。</li><li>中文媒体只有机器之心的旧文转载，无窗口内报道。</li></ul>
+<p>*去重说明：本轮窗口（9/25 16:00→18:00 PDT = 9/25 23:00 UTC → 9/26 01:00 UTC）。框架 release 六家 GitHub API 核验无新版本：vLLM v0.30.0、SGLang v0.5.20、TRT-LLM v1.2.1、LMDeploy v0.17.0、llama.cpp v0.5.0、TGI v3.3.7。arXiv 按 submittedDate 倒序查 serving/KV/speculative/prefill 相关关键词，窗口内零入库。Antigravity SDK 本地模型（aicybr 9/24 报道）、dev.to vLLM GGUF GPU-only 澄清文（原发 9/23）均为补收，往期简报未报过。子代理报的百度智能云+SGLang Meetup（9/23）经核验 9/23 20点版已报过，已剔除。渠道：GitHub releases API、arXiv API、browser.search、子代理广度扫荡（HN/X/Reddit/Simon Willison/lmsys 博客/量子位/YouTube）、Spotify。*</p></body></html>
