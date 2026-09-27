@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月26日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-26"/>
+<meta name="doc-ts" content="2026-09-27T00:59:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-26（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-26（18点版）</h1>
+<p>18点版来了。这轮窗口（16:00→18:00）生态很安静。 六家框架一个新版本都没有，arXiv 也零入库。 不过上午情报轮捡到两条干货，之前几期都没报过，今天必须补上。</p>
+<h2>框架更新</h2>
+<p>本轮无新版本。vLLM 停在 v0.30.0（9/22），SGLang 停在 v0.5.20（9/18）。 TensorRT-LLM、LMDeploy、llama.cpp、TGI 也都没动静。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 四组关键词倒序查过，最新提交还停在 9/24，窗口内零入库。 周末本来就没新批次，符合预期。</p>
+<h2>访谈与深度</h2>
+<p><strong>第一条：有人把 vLLM 跑分做成了一套&quot;体检标准&quot;，还在 4090 上交了作业</strong></p>
+<p>独立顾问 Houtini 刚发了篇长文，讲怎么科学地给 vLLM 跑分。 他拿两块 48GB 的 4090D，按同一套 protocol 实测了 21 个配置。 最扎眼的一组数：同一款 Qwen3.6-27B，官方 FP8 版只有 16.6 tok/s。 换 4-bit 量化（把权重压成 4 位精度存）提到 47.4。 再开推测解码（小模型先猜、大模型验）干到 64.2。 模型一个没换，光靠 build 和参数，速度翻了近 4 倍。 他还把跑分脚本开源了，叫 vllm-bench，MIT 协议，纯标准库零依赖。 对你意味着什么：你那台 4090 工作站可以直接抄这套 protocol。 他还列了 6 个跑分陷阱，比如数错 prompt 长度、镜像没 pin 导致版本偷换。 原文：<a href="https://houtini.com/articles/how-to-benchmark-vllm/">https://houtini.com/articles/how-to-benchmark-vllm/</a> 工具：<a href="https://github.com/houtini-ai/vllm-bench">https://github.com/houtini-ai/vllm-bench</a></p>
+<p><strong>第二条：SGLang 官方出了 Qwen3-VL 的部署&quot;菜谱&quot;</strong></p>
+<p>SGLang 官方文档刚更新，给 Qwen3-VL 出了一份部署 cookbook。 Qwen3-VL-235B-A22B 是通义最新旗舰多模态。 235B 参数，每次推理只激活 22B。 官方实测：8 卡并行下，平均 191ms 吐出第一个字，之后每个字 10.46ms。 并发拉到 100，输出吞吐 874 tok/s，MMMU（多模态理解基准）65.67%。 官方还给了几个调参要点。 注意力后端按卡选：H100 用 fa3。 B200 兼容性更好，官方让用 triton。 开 CUDA IPC 传图特征能明显降首字延迟，代价是多吃显存。 上下文默认 262K 太占地方，官方建议直接降到 128K。 对你意味着什么：你正在评估 SGLang 的多模态 serving，这就是官方标准答案。 原文：<a href="https://github.com/sgl-project/sgl-docs/blob/HEAD/cookbook/vlm/Qwen/Qwen3-VL.mdx">https://github.com/sgl-project/sgl-docs/blob/HEAD/cookbook/vlm/Qwen/Qwen3-VL.mdx</a></p>
+<h2>业内新闻</h2>
+<p>本轮无新料，跳过。</p>
+<p>*去重说明：本轮窗口（9/26 16:00→18:00 PDT = 9/27 23:00→01:00 UTC）内无实质新增。框架六家经 GitHub releases API 实时核验无新版本：vLLM v0.30.0（9/22）、SGLang v0.5.20（9/18）、TRT-LLM v1.2.1、LMDeploy v0.17.0（9/1）、llama.cpp v0.5.0（9/23）、TGI v3.3.7。arXiv 四组关键词（LLM inference、KV cache、speculative decoding、prefill/decode disaggregation）按 submittedDate 倒序查，最新提交仍停在 9/24 15:55 UTC，周末零入库。两条收录内容为 9/26 15:13 情报轮的补漏（此前各期均未报）：Houtini vllm-bench 文章（9/25 发，实测日期 9/26）、SGLang Qwen3-VL cookbook（约 9/24 更新）。browser.search 扫新闻/X/HN/Reddit/中文媒体均为已报旧料；lmsysorg、karpathy、jimfan 本周无 serving 新动态；Spotify Latent Space 最新仍是 9/25 两期（OpenRouter、Runway WorldPrompt），已在 9/25 20点版报过。渠道：GitHub releases API、arXiv API、browser.search、browser.open、Spotify。*</p></body></html>
