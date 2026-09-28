@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月28日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-28"/>
+<meta name="doc-ts" content="2026-09-28T17:02:04"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-28（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-28（10点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发新版，GitHub API 逐家核验过。</li><li>vLLM v0.30.0（9/22）、SGLang v0.5.20（9/18）都停在原地。</li><li>TensorRT-LLM 正式版还是 v1.2.1，预览版停在 rc28（9/23）。</li><li>LMDeploy v0.18.0 是 2 点版报过的，不重复。</li><li>llama.cpp 今天又出了 b11233–35 三个快照。</li><li>每日快照按惯例不算正式发版。</li><li>TGI v3.3.7 归档，没有变化。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮没有新批次，最新的还是 9/25 的 FragToken。</li><li>15:00–17:00 UTC 这个窗口，arXiv 本来就结构性零入库。</li></ul>
+<h2>业内新闻</h2>
+<p><strong>vLLM 踩了个 P/D 解耦相关的坑：空 KV connector 也能拖慢 decode</strong></p>
+<p>vLLM 社区报了个有意思的 bug：多机跑 decode 慢了 50–90%。 触发条件有两个。 Model Runner V2 是 v0.30 的默认执行引擎。 再加上异步调度和跨节点流水线并行。 诡异的是：挂一个什么都不干的空 KV connector，也照样变慢。 KV connector 是 KV 缓存搬运的通道。 P/D 解耦传数据，就靠这条传送带。 根因指向 reply-ring 写入器自旋时占着 GIL。 GIL 是 Python 的全局锁。 拿着它不放，别的线程就动不了。 回报者自己试了个诊断版：改用释放锁的等待方式。 额外延迟被压到约 13%。 换句话说：搬运通道自身的软件开销，把性能增益吃掉了。 这对你的 P/D 解耦评估是个提醒：搬运通道开销要单拎出来测。 注：这是社区单用户回报（9/27），issue 还开着，不是官方结论。 来源：<a href="https://github.com/vllm-project/vllm/issues/58920">GitHub issue #58920</a> · <a href="https://ainews.surl.tw/article/vllm-社群回報多機解碼延遲-空-kv-連接器也可能觸發效能下降-54d4cd37">SURL AI News 中文报道</a></p>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 播客没有新单集，最新还是 9/25 那两期。</li><li>X/Reddit/HN/中文媒体这轮扫下来，没什么值得报的。</li><li>关键大V（lmsysorg、karpathy、jimfan 等）过去 24 小时都挺安静。</li></ul>
+<p>*去重说明：本轮窗口（9/28 08:00→10:00 PDT = 9/28 15:00→17:00 UTC）。框架六家经 GitHub releases API 逐家核验无新版；arXiv API 按提交时间倒序查，最新仍为 9/25（符合 00:00 UTC 出批次规律，本窗口结构性零入库）；Spotify 查 Latent Space 无新单集；X/Reddit/HN/中文媒体窗口内无实质新料。收录 1 条 9/27 补收：vLLM KV connector 多机 decode 减速（issue #58920，经 GitHub API 与 SURL 原文双核验；社区单用户回报、未被维护者确认）。3 条候选按规则排除：Akamai×Anthropic 116 亿美元复盘（9/27 16点版已报 TechCrunch 原报道）、AWS SageMaker HyperPod 路由（底层 prefix-aware routing 9/12 午间版已报）、SGLang v0.5.20（9/25 8点版已调查过）。无「值得深读」项，未生成深读笔记。*</p></body></html>
