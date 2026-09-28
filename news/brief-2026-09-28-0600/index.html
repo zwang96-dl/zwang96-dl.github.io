@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月28日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-28"/>
+<meta name="doc-ts" content="2026-09-28T12:59:31"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-28（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-28（6点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发新版，GitHub API 逐家核验过。</li><li>vLLM v0.30.0（9/22）、SGLang v0.5.20（9/18），都没动。</li><li>TensorRT-LLM 正式版还是 v1.2.1，rc28 停在 9/23。</li><li>LMDeploy v0.18.0（9/28）是 2 点版报过的。</li><li>llama.cpp 出了 b11228/b11229 两个快照，按惯例不算正式发版。</li><li>TGI v3.3.7 归档，无变化。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮没新批次，最新还是 9/25 的。</li><li>FragToken 那篇是 9/27 报过的。</li></ul>
+<h2>业内新闻</h2>
+<p><strong>一线云厂商创始人实测：RTX PRO 6000 打两块 4090</strong> 一线云厂商创始人 Robert 刚发了实测。 他拿 RTX PRO 6000 单卡对比两块 RTX 4090。 单请求下两者差不多，高并发直接拉开差距。 32 并发时，单卡快 3.1 倍。 测了 20 万 token 的长上下文。 decode 速度还有 112–129 tok/s。 同样的请求跑第二遍，前缀缓存直接命中 19.7 万 token。 说白了：大显存单卡扛高并发就是稳。 划重点：压测 serving 只看单请求会误判。 提醒一句：作者是卖算力的云厂商创始人，数字当参考看。 来源：<a href="https://rodebrecht.medium.com/rtx-pro-6000-vs-2x-rtx-4090-for-llm-inference-same-speed-alone-3x-apart-under-load-d4b44dde4037">https://rodebrecht.medium.com/rtx-pro-6000-vs-2x-rtx-4090-for-llm-inference-same-speed-alone-3x-apart-under-load-d4b44dde4037</a></p>
+<p><strong>AT&amp;T 把内部 AI 请求往便宜模型上导</strong> AT&amp;T 用难度打分加路由，把简单请求分给开源模型。 它用 LiteLLM（开源的模型网关）做这套分流。 简单的请求分给 Llama、Gemma、Nemotron 这些开源模型。 AT&amp;T 说开源模型已承担 40% 的内部请求。 编码任务成本降 56%，质量只掉约 2%。 说白了：推理侧的钱正在流向便宜模型。 这跟花旗那份研报一个味道：降本才是主线。 注：这篇是转述 FT 和 SiliconData 的数据，二手信息。 来源：<a href="https://startupfortune.com/companies-are-quietly-routing-ai-work-away-from-openai-and-anthropic-to-cheaper-models/">https://startupfortune.com/companies-are-quietly-routing-ai-work-away-from-openai-and-anthropic-to-cheaper-models/</a></p>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 播客最新还是 9/25 那两期，没更新。</li><li>关键大V这轮基本静默。</li><li>lmsysorg 和 vLLM 官方都没新东西。</li><li>karpathy 和 jimfan 这两天也没动静。</li></ul>
+<p>*去重说明：本轮严格窗口（9/28 04:00→06:00 PDT = 9/28 11:00→13:00 UTC）。RTX PRO 6000 对比实测是窗口内新料，首收。AT&amp;T 那条是 9/27 傍晚的料，之前几期漏了，本轮补上。AWS SageMaker prefix-aware routing（merge.news 9/27 聚合）底层功能 9/12 的午间版已报过，不重复。六家框架经 GitHub releases API 实时核验无新版；arXiv API 按提交时间倒序查，最新仍为 9/25，无新批次；Spotify 查 Latent Space 最新仍为 9/25 两期；HN / Reddit / X / 中文媒体扫到的都是旧料。无「值得深读」项，未生成深读笔记。*</p></body></html>
