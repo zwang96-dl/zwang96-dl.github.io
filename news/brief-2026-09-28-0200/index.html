@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月28日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-28"/>
+<meta name="doc-ts" content="2026-09-28T08:58:17"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-28（2点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-28（2点版）</h1>
+<h2>框架更新</h2>
+<p><strong>LMDeploy v0.18.0 发版（今晨刚落地）</strong> LMDeploy 发新版了，今晨 0 点 05 分刚上线。这是上海 AI Lab 维护的推理框架，国产模型适配很快。 对你最有用的是 prefill 优化。prefill 就是模型读提示词的阶段。新版加了分段 CUDA graph prefill。 CUDA graph 好比提前录好的操作磁带。执行时一键播放，省掉重复的调度开销。整段一次录完，变长输入容易水土不服。现在分段录，更稳当。 还带了 AWQ 量化的 W4A16 后端原型。W4A16 就是权重 4bit、激活 16bit。AWQ 是一种掉精度很少的 4bit 量化。 MLA 相关的改进也很硬核。MLA 是 DeepSeek 的省显存注意力。这次修了它在混合并行下的切分 bug。还加了 TileLang 写的稀疏 MLA 后端。TileLang 是写 GPU 算子的新语言。 昇腾上新增支持 GLM-5.2。昇腾是华为的 AI 芯片。 来源：<a href="https://github.com/InternLM/lmdeploy/releases/tag/v0.18.0">https://github.com/InternLM/lmdeploy/releases/tag/v0.18.0</a></p>
+<h2>新技术与论文 / 业内新闻 / 访谈与深度</h2>
+<p>这三块这轮都没动静，扫到的全是几天前的旧料。</p>
+<p>*去重说明：本轮窗口（9/28 00:00→02:00 PDT = 9/28 07:00→09:00 UTC）。GitHub releases API 实时核验：LMDeploy v0.18.0（9/28 07:04:58Z，落在窗口内，已收录）；vLLM v0.30.0（9/22）、SGLang v0.5.20（9/18）、TRT-LLM 正式版 v1.2.1（预览 v1.3.0rc28 止于 9/23）、TGI v3.3.7、llama.cpp v0.5.0（9/23，9/23 那期已报过）均无更新。arXiv API 正常，LLM inference 关键词最新提交仍停在 9/25T17:20Z（FragToken，9/27 已报）。browser.search 扫新闻/Reddit/HN/X/中文媒体：返回的全是数天前的旧料。Spotify：Latent Space 最新仍是 9/25 两期（OpenRouter / WorldPrompt），已报过。无「值得深读」项，未生成深读笔记。*</p></body></html>
