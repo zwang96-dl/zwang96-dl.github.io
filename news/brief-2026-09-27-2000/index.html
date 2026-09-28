@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月27日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-27"/>
+<meta name="doc-ts" content="2026-09-28T02:59:42"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-27（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-27（20点版）</h1>
+<h2>框架更新</h2>
+<p>这轮六家框架都没发新版。 vLLM 停在 v0.30.0，SGLang 停在 v0.5.20。 TRT-LLM 还是 v1.3.0rc28 预览版。 LMDeploy v0.17.0，llama.cpp 只有日快照。 TGI 最新正式版还是 v3.3.7。</p>
+<h2>新技术与论文</h2>
+<h3>1. EAServe：多模态推理的&quot;三段式&quot;解耦</h3>
+<ul><li>多模态推理是三段流水线：先编码图片，再理解，最后逐字输出。</li><li>编码这段最尴尬：每请求必经它，GPU 却常年吃不饱。</li><li>EAServe 让编码当&quot;交通指挥&quot;：管放行节奏，也管去哪算。</li><li>GPU 怎么分块，它也一并说了算。</li><li>实测覆盖图像、视频、音频三种模型。</li><li>达标吞吐最高 4.3 倍，干掉了 Dynamo。</li><li>对比 vLLM 也有 1.7 倍，配置还能自动搜最优。</li><li>这篇跟你手头的事直接对口：你在看 SGLang 的 P/D 解耦。</li><li>它把同一套思路搬到多模态，多了编码这一段要管。</li><li>精读笔记已生成：EAServe-多模态Encode感知解耦。</li><li>原文：<a href="https://arxiv.org/abs/2609.31551">https://arxiv.org/abs/2609.31551</a></li></ul>
+<h3>2. KV Cache 新&quot;内存墙&quot;：一篇把五大门派重考一遍的综述</h3>
+<ul><li>长上下文越跑越慢，卡的不是算力，是显存带宽。</li><li>作者把 KV 优化分成五派：量化、扔 token、分页。</li><li>剩下两派：复用前缀、搬去异构存储。</li><li>同一套考卷重考：128k 上下文，Llama-3-70B。</li><li>关键结论分三段：短了拼权重，长了拼 KV，再长拼的是网卡。</li><li>4-bit 以下量化，精度掉得越来越快。</li><li>分页和前缀复用不掉精度，但只解决&quot;装不下&quot;，不解决&quot;搬不动&quot;。</li><li>硬件给了三档：H100、B200、MI300X。</li><li>你手里的 MI300X 也在表里。</li><li>选型有现成规则：看硬件、看长度、看精度预算。</li><li>原文：<a href="https://arxiv.org/abs/2609.30854">https://arxiv.org/abs/2609.30854</a></li></ul>
+<h3>3. ActKV：给 agent 的 KV 瘦身，先保&quot;动作记忆&quot;</h3>
+<ul><li>agent 一步步干活，KV 越堆越多，显存先顶不住。</li><li>这篇的思路：压缩别瞎压，先保住跟&quot;下一步动作&quot;有关的记忆。</li><li>长任务实测：精度保住 98.53%，显存只用 25.98%。</li><li>token 吞吐涨到 3.97 倍，任务吞吐 3.58 倍。</li><li>搞 agent 服务的话，这套&quot;动作优先&quot;值得借鉴。</li><li>原文：<a href="https://arxiv.org/abs/2609.31395">https://arxiv.org/abs/2609.31395</a></li></ul>
+<h3>4. FragToken：tokenizer 的&quot;一字多写法&quot;能拿来偷算力</h3>
+<ul><li>同一句话，tokenizer 能切出长短两种写法，攻击者专挑长的。</li><li>效果：解码步数翻倍，账单翻倍，但你看到的回复长度没变。</li><li>实测 token 膨胀 1.99–2.46 倍，质量几乎不掉。</li><li>这是供应链投毒的新姿势：不用刷请求，悄悄多烧钱。</li><li>做推理服务计费的话，得盯着这一手。</li><li>原文：<a href="https://arxiv.org/abs/2609.31552">https://arxiv.org/abs/2609.31552</a></li></ul>
+<h2>业内新闻</h2>
+<p>这轮没有。 窗口内新闻、X 大V、Reddit、HN 都扫过，无新料。</p>
+<h2>访谈与深度</h2>
+<p>这轮没有。 Latent Space 没出新单集。</p>
+<p>*去重说明：本轮窗口（9/27 18:00→20:00 PDT = 9/28 01:00→03:00 UTC）新料为 4 篇 9/25 arXiv 论文，此前各期未报过。GitHub releases API 实时核验六家框架无新版。browser.search 扫新闻/Reddit/HN/中文媒体/X 大V，social 渠道无实质技术内容。Spotify 核验 Latent Space 最新仍为 9/25 两期（已报过）。EAServe 已生成精读笔记（含原文关键图与自包含 HTML 版），其余三篇未达深读线。*</p></body></html>
