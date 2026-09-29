@@ -1,0 +1,143 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月29日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-29"/>
+<meta name="doc-ts" content="2026-09-29T07:02:34"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-29（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-29（00点版）</h1>
+<h2>框架更新</h2>
+<p>六家这轮都没发新版，GitHub releases 亲眼核验过。</p>
+<p>vLLM 停在 v0.30.0，SGLang 停在 v0.5.20。</p>
+<p>TRT-LLM 正式版还是 v1.2.1，rc 预览不算数。</p>
+<p>LMDeploy 停在 v0.18.0。</p>
+<p>llama.cpp 只有每日快照，不算正式版。</p>
+<p>TGI 已归档停更。</p>
+<h2>新技术与论文</h2>
+<p><strong>SlimWise：prefill 用完整模型，decode 用&quot;瘦身版&quot;</strong></p>
+<p>这篇跟你正在评估的 SGLang P/D 解耦正对口。</p>
+<p>MoE（一群专家分工的混合模型）decode 时要反复搬专家权重。</p>
+<p>搬着搬着，带宽先顶不住了。</p>
+<p>SlimWise 让 prefill 用全量专家，保住质量。</p>
+<p>decode 换剪掉一半专家的版本，专心提速。</p>
+<p>KV 缓存（模型的&quot;草稿纸&quot;）直接交接，一个字节都不用转，免训练。</p>
+<p>数据：Qwen3.6-35B-A3B 上测的。</p>
+<p>decode 吞吐最高 1.81 倍。</p>
+<p>精度基本不掉。</p>
+<p>vLLM 实现，P/D 解耦和同机部署都支持。</p>
+<p>论文：<a href="https://arxiv.org/abs/2609.34117">https://arxiv.org/abs/2609.34117</a></p>
+<p>深读笔记已生成，见文末链接。</p>
+<p><strong>WavePP：流水线 prefill 的&quot;满载调度&quot;</strong></p>
+<p>流水线并行（把模型按层切段分给各卡）跑 prefill 有个毛病。</p>
+<p>各段缓存各管各的，互不通气。</p>
+<p>局部缓存命中了，全流水线不一定能复用，管线经常吃不饱。</p>
+<p>WavePP 建在 TensorRT-LLM 上。</p>
+<p>它异步找&quot;全段可复用&quot;的前缀。</p>
+<p>请求准入和流水线执行重叠跑，管线不再空转。</p>
+<p>数据：并发 128、高缓存复用下，prefill 吞吐涨 2.91 倍。</p>
+<p>另一组模型上是 2.02 倍。</p>
+<p>40 组设置里，37 组赢过基线。</p>
+<p>基线包括 TRT-LLM、SGLang、vLLM 三家。</p>
+<p>论文：<a href="https://arxiv.org/abs/2609.35263">https://arxiv.org/abs/2609.35263</a></p>
+<p><strong>PEARL：给 agentic RL 的 P/D 配比装&quot;自动挡&quot;</strong></p>
+<p>训 agent 时，开销大头是 rollout。</p>
+<p>rollout 就是模型跟环境多轮交互采样。</p>
+<p>colocate 还是解耦？P/D 配比多少？</p>
+<p>最优答案随 workload 变，静态设死就亏。</p>
+<p>PEARL 按实时画像动态选 P/D 模式和配比。</p>
+<p>还能临时借用训练卡的闲 GPU。</p>
+<p>数据：吞吐是固定资源方案的 2.17–2.79 倍。</p>
+<p>论文：<a href="https://arxiv.org/abs/2609.35158">https://arxiv.org/abs/2609.35158</a></p>
+<p><strong>KV-streams：KV 缓存不倒掉，往前&quot;流&quot;</strong></p>
+<p>agent 轨迹太长塞不进显存，常用手段是压缩上下文。</p>
+<p>但压缩一次就要把整条轨迹重新 prefill 一遍，训练被拖慢。</p>
+<p>KV-streams 把 KV 缓存往前流式传输，不用每次倒掉重算。</p>
+<p>数据：三种压缩策略，训练墙钟提速 2.6–5 倍。</p>
+<p>论文：<a href="https://arxiv.org/abs/2609.35750">https://arxiv.org/abs/2609.35750</a></p>
+<p><strong>KVCMAS：多智能体共用一份&quot;草稿纸&quot;的修正术</strong></p>
+<p>多个 agent 共用一个模型，各自带着专属前缀。</p>
+<p>这些前缀会污染共享上下文的 KV 缓存。</p>
+<p>结果是每个 agent 都要重复 prefill，算力和显存双浪费。</p>
+<p>KVCMAS 用紧凑的低秩状态表示缓存偏差。</p>
+<p>偏差沿着 agent 链在线修正，不用重算。</p>
+<p>数据：TTFT（首 token 延迟）快 2 倍。</p>
+<p>峰值显存降 3.7 倍。</p>
+<p>论文：<a href="https://arxiv.org/abs/2609.34060">https://arxiv.org/abs/2609.34060</a></p>
+<p><strong>DAS：循环模型的&quot;浅层打草稿、深层改稿&quot;</strong></p>
+<p>Looped Transformer，循环复用同一组权重。</p>
+<p>它 decode 很贵。</p>
+<p>每个 token 都要跑很多遍循环。</p>
+<p>DAS 发现 query/key 比 value 更早&quot;长大&quot;。</p>
+<p>浅层的 Q/K 已经接近最终表示。</p>
+<p>于是草稿在浅层算，value 直接借用成熟的深层表示，不用重算。</p>
+<p>数据：四组模型上吞吐快 4–6.96 倍。</p>
+<p>论文：<a href="https://arxiv.org/abs/2609.34538">https://arxiv.org/abs/2609.34538</a></p>
+<p><strong>Redline：给扩散模型 serving 的加速配置买&quot;保险&quot;</strong></p>
+<p>Block-diffusion 模型，分块并行解码的扩散语言模型。</p>
+<p>它的加速配置，以前靠平均分定。</p>
+<p>说白了就是拍脑袋。</p>
+<p>平均分不告诉你：加速配置在多少 prompt 上会输给慢配置。</p>
+<p>Redline 是个有限样本流程，先拿校准 prompt 实测。</p>
+<p>把&quot;翻车概率&quot;压进预算，再选最快的过线配置。</p>
+<p>数据：风险预算 10% 时，LLaDA2 数学任务提速明显。</p>
+<p>每 forward 多提交三分之一 token。</p>
+<p>方法同样适用于投机解码和量化，代码已开源。</p>
+<p>论文：<a href="https://arxiv.org/abs/2609.33887">https://arxiv.org/abs/2609.33887</a></p>
+<h2>业内新闻</h2>
+<p><strong>APXInf 新进展：新增三个具身模型适配</strong></p>
+<p>9 月 16 号那期报过它开源，今天机器之心发了深度解读。</p>
+<p>清华 + 无问芯穹 + 上交大的端侧推理引擎，专给机器人本体跑具身模型。</p>
+<p>新动态：三个模型适配完成。</p>
+<p>π0-fast、GR00T、Qwen Drive。</p>
+<p>AMD 和国产芯片后端进了路线图。</p>
+<p>仓库：<a href="https://github.com/RLinf/APXinf-robo">https://github.com/RLinf/APXinf-robo</a></p>
+<p>解读：<a href="https://news.marsbit.co/20260929123711416173.html（机器之心原文的转载页">https://news.marsbit.co/20260929123711416173.html（机器之心原文的转载页</a>）</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 新单集：OpenRouter 从种子到 Stripe</strong></p>
+<p>聊 OpenRouter 怎么做成中立多模型路由层。</p>
+<p>它每天经手 10 万亿 token。</p>
+<p>偏市场格局、非 serving 技术，通勤时可听。</p>
+<p><a href="https://open.spotify.com/episode/3ilQ5yzSF7lBZrzNb6dqN3">https://open.spotify.com/episode/3ilQ5yzSF7lBZrzNb6dqN3</a></p>
+<p><strong>Simon Willison：Claude Sonnet 5.5 快 30%、便宜 30%</strong></p>
+<p>他 9/28 的博客：新模型自称多数负载快 30% 以上、便宜 30%。</p>
+<p>已成 claude.ai 免费档主力，推理成本经济学角度可一看。</p>
+<p><a href="https://simonwillison.net/">https://simonwillison.net/</a></p>
+<hr/>
+<p><strong>值得深读</strong>：<a href="https://zwang96-dl.github.io/news/deep-20260929-slimwise-pd-moe/">SlimWise：prefill 用完整模型，decode 用&quot;瘦身版&quot;——MoE 推理的 P/D 分工新思路</a> —— 精读笔记已发布，含原文 Figure 1（架构总览）/ Figure 4（吞吐实测）中文解读：KV 缓存免转换交接、P/D 解耦与同机两种部署的提速数据，跟你正在评估的 SGLang P/D 解耦直接相关。</p>
+<p>*去重说明：APXInf 开源 9 月 16 号那期已报；Cerebras×Gimlet、ElasticKV/CascadeEP/PReCache 往期已报；六家框架经 GitHub releases/tags 实时核验无新正式版；HN、X、Reddit 本轮无推理 serving 实质讨论；Latent Space 其他新单集与 serving 无关未收录。*</p></body></html>
