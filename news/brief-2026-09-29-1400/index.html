@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月29日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-29"/>
+<meta name="doc-ts" content="2026-09-29T21:00:30"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-29（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-29（14点版）</h1>
+<h2>框架更新</h2>
+<ul><li>五家框架逐家核验过，都没发正式新版。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>TensorRT-LLM 正式版还是 v1.2.1。</li><li>它的预发布 v1.3.0rc29 在 4 点版已报过。</li><li>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</li><li>llama.cpp 只有例行每日快照，5 笔小修补。</li><li>按惯例不算正式版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 按提交时间倒序查过，窗口内零新论文。</li><li>关键词范围内最新一条停在 9/28 16:38 UTC。</li><li>arXiv 每日批次约在 00:00 UTC 发布。</li><li>这轮（19:00→21:00 UTC）是结构性空档，正常。</li><li>顺带补报：前两天批次有 3 篇论文之前漏掉了。</li><li>方向是注意力内核优化、KV 缓存和量化。</li></ul>
+<p><strong>「值得深读」MpFA：Blackwell 上跑 FP4 注意力</strong></p>
+<ul><li>长上下文推理里，注意力（算 token 间关系）是头号瓶颈。</li><li>Blackwell 是英伟达新一代 GPU 架构。</li><li>它的 FP4（4 位浮点）算得快，但实测提速不明显。</li><li>卡在三件事：量化时机不对、数据搬运、softmax 太挤。</li><li>softmax 是注意力里算权重的函数。</li><li>MpFA 的办法是混搭，各取所长。</li><li>QK 用 NVFP4（英伟达的 4 位浮点格式）。</li><li>PV 用 FP8（8 位浮点，更稳一些）。</li><li>打个比方：QK 是粗活，FP4 够快就行。</li><li>PV 是细活，FP8 保住精度。</li><li>精度掉的部分，用一个低秩补偿补回来。</li><li>说白了就是：掉的精度，用一次额外矩阵乘找回来。</li><li>数据：在 B200（Blackwell 旗舰卡）上测的。</li><li>上下文从 16K 到 128K。</li><li>端到端吞吐涨了 2.81 倍。</li><li>对比的是 BF16 的 FlashAttention-4。</li><li>精度损失追回 62.5%，额外开销只有约 2%。</li><li>而且免训练，拿来就能用。</li><li>一句话关联：这是 prefill 算子层的硬功夫。</li><li>跟你调 vLLM、SGLang 的注意力后端直接相关。</li><li>精读笔记已生成，含原文关键图，见深读目录。</li><li>论文：<a href="https://arxiv.org/abs/2609.33135">https://arxiv.org/abs/2609.33135</a></li></ul>
+<p><strong>一句话补报其余两篇</strong></p>
+<ul><li>Distance-KV：长上下文里，检索能力跟相对距离有关。</li><li>它离线学个保留模式，KV 显存砍掉 65.4%。</li><li>解码加速 1.66 倍，RULER 128K 上反超 9.3 分。</li><li>论文：<a href="https://arxiv.org/abs/2609.32663">https://arxiv.org/abs/2609.32663</a></li><li>QuantaSpike：脉冲神经网络思路的量化，偏冷门。</li><li>4 步触发窗口下精度接近 FP16，线性层能耗降约 8 成。</li><li>跟主流 serving 栈关系不大，知道有这路子就行。</li><li>论文：<a href="https://arxiv.org/abs/2609.34259">https://arxiv.org/abs/2609.34259</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮窗口内没有实质业内新闻。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>X、Reddit、HN、中文媒体、播客这轮扫过，窗口内没新料。</li><li>搜到的多是几天前的旧文，关联度不高。</li></ul>
+<p>*去重说明：本轮窗口（9/29 12:00→14:00 PDT = 19:00→21:00 UTC）。GitHub releases API 实时核验五家框架正式版和 TRT-LLM 预发布列表：均无新版（v1.3.0rc29 为 4 点版已报）；arXiv 按提交时间倒序查窗口内零入库；X、Reddit、HN、中文媒体、播客综合搜索窗口内无实质新料。顺带补报 3 篇 9/26–9/28 批次此前漏报的论文（均经 arXiv 页面核验，此前各期简报 grep 确认未报），其中 MpFA 生成深读笔记。*</p></body></html>
