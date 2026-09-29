@@ -1,0 +1,95 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月28日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-28"/>
+<meta name="doc-ts" content="2026-09-29T05:05:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-28（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-28（22点版）</h1>
+<h2>框架更新</h2>
+<p>六家这轮都没发新版，生态挺安静。</p>
+<p>vLLM 停在 v0.30.0，SGLang 停在 v0.5.20。</p>
+<p>TRT-LLM 正式版还是 v1.2.1，rc 预览不算数。</p>
+<p>LMDeploy v0.18.0，llama.cpp v0.5.0，TGI v3.3.7。</p>
+<h2>新技术与论文</h2>
+<p><strong>AsymFlow：本地服务器的新分工——GPU 只管 prefill，CPU 接管 decode</strong></p>
+<p>这篇跟你正在评估的 SGLang P/D 解耦正对口。</p>
+<p>场景是本地 CPU-GPU 服务器：长上下文的 KV 缓存太大，GPU 显存撑不住。</p>
+<p>AsymFlow 让 GPU 专做 prefill（计算密集，GPU 擅长）。</p>
+<p>decode（访存密集，瓶颈在搬数据）搬到 CPU，用 AMX（Intel 的矩阵加速指令）跑 attention。</p>
+<p>KV 通过共享内存池逐层异步传输，传输时间藏进计算里。</p>
+<p>还有个任务感知调度器，按实时队列决定每个请求走 GPU 还是 CPU。</p>
+<p>数据：32K 上下文纯 GPU 会 OOM（内存爆掉），它稳稳跑完。</p>
+<p>比纯 GPU 快 1.08–1.25 倍，比 KV offload（KV 缓存卸到内存的方案）快 1.32–2.49 倍。</p>
+<p>显存越紧，优势越大。</p>
+<p>提醒：4K 短上下文反而慢到 0.84 倍，别无脑上。</p>
+<p>论文：<a href="https://dl.acm.org/doi/10.1145/3832810.3832866（ICPP&amp;#x27;26，9/27">https://dl.acm.org/doi/10.1145/3832810.3832866（ICPP&amp;#x27;26，9/27</a> 发表；ACM 全文可读，PDF 暂未开放）</p>
+<p><strong>Spexis：投机解码不当加速器，当第三条并行轴用</strong></p>
+<p>多卡推理的老两样是流水线并行和张量并行。</p>
+<p>Spexis 加了第三轴：投机并行。</p>
+<p>做法很巧：用模型前几层当草稿模型，一边打草稿一边验证，并行跑。</p>
+<p>草稿和正常执行共享同一份 KV 缓存，不额外占显存。</p>
+<p>还配了个成本模型，自动选出 PP/TP/SP 的最优组合。</p>
+<p>再加前瞻调度：没信心的草稿直接扔，显存要爆就先别放新请求进来。</p>
+<p>数据：跨节点最高多接 34% 的请求，解码吞吐最高高出 54%。</p>
+<p>基于 vLLM 实现，代码已开源：<a href="https://github.com/mlsys-seo/spexis">https://github.com/mlsys-seo/spexis</a></p>
+<p>论文：<a href="https://arxiv.org/abs/2609.34370">https://arxiv.org/abs/2609.34370</a></p>
+<p>深读笔记已生成，见文末链接。</p>
+<p><strong>arXiv 新批次速览（9/28 提交）</strong></p>
+<ul><li>CacheRepair：RAG 里多文档 KV 拼起来缺跨块信息，学个修复模块补上。<a href="https://arxiv.org/abs/2609.35139">https://arxiv.org/abs/2609.35139</a></li><li>TempoKV：KV 太多放不下时，按&quot;时机&quot;分批搬到闪存，瞎搬等于白搬。<a href="https://arxiv.org/abs/2609.35065">https://arxiv.org/abs/2609.35065</a></li><li>Cartridges++：同一长文档反复 serving，KV 压缩表示还不跑偏。<a href="https://arxiv.org/abs/2609.35621">https://arxiv.org/abs/2609.35621</a></li><li>BV Loss：给扩散式投机解码设计训练目标，按&quot;块验证&quot;来算账。<a href="https://arxiv.org/abs/2609.34832">https://arxiv.org/abs/2609.34832</a></li><li>SANTA++：每个 query 只看每组的&quot;代表键&quot;，免训练的稀疏注意力。<a href="https://arxiv.org/abs/2609.35629">https://arxiv.org/abs/2609.35629</a></li><li>Tool Waiting：Agent 等工具返回时，静态编译的 NPU serving 浪费多少，算了一笔账。<a href="https://arxiv.org/abs/2609.34663">https://arxiv.org/abs/2609.34663</a></li></ul>
+<h2>业内新闻</h2>
+<p><strong>Red Hat：在 vLLM 上跑 DiffusionGemma，连 NVFP4 权重都备好了</strong></p>
+<p>TypeSafe 的决策模型 Jev 最近走红，底座是 DiffusionGemma（Google 的扩散式语言模型）。</p>
+<p>Red Hat 演示了在 vLLM 上跑它，还发布了优化好的 FP8-dynamic / NVFP4 量化权重。</p>
+<p>NVFP4（NVIDIA 的 4 位浮点格式）权重开箱即用。</p>
+<p>vLLM 稳定版加入 structured-read 支持后，会进入 Red Hat AI Inference Server。</p>
+<p>想玩扩散模型 serving 的可以直接抄作业。</p>
+<p>原文：<a href="https://developers.redhat.com/articles/2026/09/28/run-decision-model-vllm-and-red-hat-ai">https://developers.redhat.com/articles/2026/09/28/run-decision-model-vllm-and-red-hat-ai</a></p>
+<h2>访谈与深度</h2>
+<p><strong>SemiAnalysis：GLM-5.3 的稀疏 attention，serving 成本到底降了多少</strong></p>
+<p>拆的是智谱 GLM-5 系列稀疏 attention 模型的实际 serving 成本。</p>
+<p>InferenceX 基准：在 150 tok/s 响应速度下，GB300（Dynamo-TRT-LLM）单位 token 成本最低。</p>
+<p>Dynamo-SGLang 在 GB300 上每 GPU 约 13950 tok/s，比 GB200 高 17.5%。</p>
+<p>但 GB300 小时单价更贵，优势被吃掉一部分。</p>
+<p>GB200 跟 AMD MI355X 在三档速度下各有胜负。</p>
+<p>做成本选型（尤其 MI355X 那条线）值得看一眼。</p>
+<p>原文：<a href="https://newsletter.semianalysis.com/p/sparse-savings-persistent-demand-inside-glm53">https://newsletter.semianalysis.com/p/sparse-savings-persistent-demand-inside-glm53</a></p>
+<hr/>
+<p><strong>值得深读</strong>：<a href="https://zwang96-dl.github.io/news/deep-20260929-spexis/">Spexis：投机解码当&quot;第三条并行轴&quot;，多卡推理最高快 34%</a> —— 精读笔记已发布，含原文 4 张关键图中文解读：自投机模型结构、投机并行时序、解码吞吐实测、性能拆解。</p>
+<p>*去重说明：Cerebras×Gimlet 推理云 8 点版已报；ElasticKV/CascadeEP/PReCache 三篇 arXiv 论文 20 点版已报；六家框架经 GitHub releases API 实时核验无新版；Latent Space 新单集与 serving 无关未收录。*</p></body></html>
