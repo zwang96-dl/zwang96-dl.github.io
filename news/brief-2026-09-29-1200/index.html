@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月29日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-29"/>
+<meta name="doc-ts" content="2026-09-29T19:07:21"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-29（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-29（12点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架逐家核验过，都没发正式新版。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>TensorRT-LLM 正式版还是 v1.2.1。</li><li>它的预发布 v1.3.0rc29 在 4 点版已报过。</li><li>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</li><li>llama.cpp（ggml-org）只有例行每日快照。</li><li>3 笔小修补，按惯例不算正式版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 按提交时间倒序查过，窗口内零新论文。</li><li>关键词范围内最新一条停在 9/28 10:25 UTC。</li><li>那是 BV Loss，28 日 22 点版已报过。</li><li>arXiv 每日批次约在 00:00 UTC 发布。</li><li>这轮（17:00→19:00 UTC）是结构性空档，正常。</li><li>顺带补报：昨天批次有 4 篇论文之前漏掉了。</li><li>方向是投机解码（小模型先猜、大模型再验）和显存优化。</li></ul>
+<p><strong>「值得深读」SpecStream：KV 不用搬完就开工</strong></p>
+<ul><li>长上下文 serving 里，KV（注意力草稿纸）太大，显存放不下。</li><li>老办法搬去 CPU 内存，但有个笨规矩：等全搬完才开工。</li><li>等货的时候 GPU 还闲着，等于花钱雇人发呆。</li><li>SpecStream 出了三招，招招冲着&quot;别让 GPU 闲着&quot;去。</li><li>只搬&quot;板上钉钉&quot;的旧 KV，候选的一律不搬。</li><li>来一块算一块，不用等全部到齐。</li><li>等货的空档，让小模型在同一张卡上打草稿。</li><li>数据：在 SGLang 0.5.17 上实现，硬件 2 张 A800。</li><li>对 TriForce（同类 KV 搬运基线）1.41、1.32 倍。</li><li>原来要 3 张卡，现在 2 张搞定，每卡吞吐涨 55.4%。</li><li>质量差距不到 0.2 个百分点，基本无损。</li><li>精读笔记已生成，含原文 Figure 2/3/5，见深读目录。</li><li>一句话关联：它是 P/D 解耦思想在投机解码维度的版本。</li><li>论文：<a href="https://arxiv.org/abs/2609.33184">https://arxiv.org/abs/2609.33184</a></li></ul>
+<p><strong>一句话补报其余三篇</strong></p>
+<ul><li>RecGuide：草稿和验证的算力预算按负载动态分。</li><li>低并发时重叠起来算，高并发时省着用，最高 1.8 倍。</li><li>论文：<a href="https://arxiv.org/abs/2609.34388">https://arxiv.org/abs/2609.34388</a></li><li>Tsubame：树形候选分两遍走，先定树形再采样填节点。</li><li>理论上无损，扩散式草稿模型专用。</li><li>论文：<a href="https://arxiv.org/abs/2609.33652">https://arxiv.org/abs/2609.33652</a></li><li>DGE：KV 驱逐别在 prefill 完就动手。</li><li>等小模型先打出 2 个 token，看清方向再动手。</li><li>LongBench 上 44.2 分，打平全量 KV 的 44.3。</li><li>论文：<a href="https://arxiv.org/abs/2609.33334">https://arxiv.org/abs/2609.33334</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮窗口内没有实质业内新闻。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>X、Reddit、HN、中文媒体、播客这轮扫过，窗口内没新料。</li><li>搜到的多是几天前的旧文，关联度不高。</li></ul>
+<p>*去重说明：本轮窗口（9/29 10:00→12:00 PDT = 17:00→19:00 UTC）。GitHub releases API 实时核验五家框架正式版和 TRT-LLM 预发布列表：均无新版；arXiv 按提交时间倒序查窗口内零入库；X、Reddit、HN、中文媒体、播客综合搜索窗口内无实质新料。顺带补报 4 篇 9/27–9/28 批次此前漏报的论文（均经 arXiv 页面核验），其中 SpecStream 生成深读笔记。*</p></body></html>
