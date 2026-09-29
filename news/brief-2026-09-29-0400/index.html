@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月29日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-29"/>
+<meta name="doc-ts" content="2026-09-29T10:57:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-29（04点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-29（04点版）</h1>
+<h2>框架更新</h2>
+<ul><li>TensorRT-LLM 凌晨发了新版本 v1.3.0rc29。</li><li>这是预发布版（RC），正式版还没到，先别上生产。</li><li>跟你研究最相关的：P/D 解耦修了 KV 传输的 bug。</li><li>P/D 解耦就是 prefill 和 decode 分开部署，像流水线分工。</li><li>KV 就是模型推理时的草稿纸，两个车间之间搬运时出过岔子，这版修好了。</li><li>草稿解码（speculative decoding）也有更新。</li><li>先让小模型打草稿、大模型负责改，现在支持了 FP8 和 FP4 的 MLA（DeepSeek 系用的注意力变体）。</li><li>模型支持方面，加了 Qwen3.5 的全局 FP8 量化。</li><li>FP8 是 8 位浮点，比 FP16 省一半显存。</li><li>Gemma4 的视觉位置编码也优化了，省掉一次矩阵乘。</li><li>改动清单：<a href="https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.3.0rc29">https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.3.0rc29</a></li><li>vLLM、SGLang、LMDeploy、llama.cpp、TGI 这轮都没新版，GitHub API 逐家核验过。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮零入库，按提交时间倒序查过，最新还是昨天报过的 KV-streams。</li><li>半夜本就是论文低谷期，下一批得等今晚 00:00 UTC 左右。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮没有，Web 扫到的都是几天前的旧料。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>这轮关键账号都没动静，lmsysorg 和 vLLM 官方都没新帖。</li><li>Reddit、HN、量子位扫到的也都是旧料，没新东西。</li></ul>
+<p>*去重说明：本轮窗口（9/29 02:00→04:00 PDT = 9/29 09:00→11:00 UTC）。GitHub releases API 实时核验六家框架，仅 TensorRT-LLM 出了 v1.3.0rc29（预发布版）；arXiv 按提交时间倒序查无新入库；X/Reddit/HN/中文媒体窗口内无实质新料。无「值得深读」项，未生成深读笔记。*</p></body></html>
