@@ -1,0 +1,119 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月28日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-28"/>
+<meta name="doc-ts" content="2026-09-29T03:00:33"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-28（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-28（20点版）</h1>
+<h2>框架更新</h2>
+<p>六家都没发新版，窗口内平静。</p>
+<p>vLLM 停在 v0.30.0（9/22）。</p>
+<p>SGLang 停在 v0.5.20（9/18）。</p>
+<p>TRT-LLM 正式版还是 v1.2.1。</p>
+<p>v1.3.0 的 rc28 预览版在测，不算正式发版。</p>
+<p>LMDeploy v0.18.0（2点版已报）。</p>
+<p>llama.cpp v0.5.0，TGI v3.3.7。</p>
+<h2>新技术与论文</h2>
+<p><strong>ElasticKV：显存不够就把 KV 降半格，先跑起来再说</strong></p>
+<p>这是今晚最对你胃口的一篇。</p>
+<p>arXiv 刚出的新论文，直击 KV 缓存优化。</p>
+<p>现在的推理引擎有个死规矩。</p>
+<p>完整精度的 KV 不在显存里，请求就只能排队或被踢掉。</p>
+<p>被踢掉代价极大：KV 丢了要重算，首字延迟直接爆炸。</p>
+<p>ElasticKV 给了第三条路。</p>
+<p>把 KV 临时换成 8 位&quot;简版&quot;先跑起来。</p>
+<p>等显存宽裕，再换回 16 位完整版。</p>
+<p>有三个巧思。第一，成对打包。</p>
+<p>两个块凑一对，降级后两份简版塞进一个物理块。</p>
+<p>腾出的整块还给系统。</p>
+<p>不然半个块空着也拿不回来。</p>
+<p>第二，简版能直接参与计算。</p>
+<p>无压力时，完整版路径性能零损耗。</p>
+<p>第三，调度不对称。</p>
+<p>降级果断动手，升级谨慎观望。</p>
+<p>关键 token（attention 开头的锚点）永远不降级。</p>
+<p>数据很硬：高并发下，平均首字延迟降 3.8–4 倍。</p>
+<p>最慢的 10% 降 9.1 倍。</p>
+<p>基线抢占几千个请求，它零抢占。</p>
+<p>精度没崩：LongBench 21 个任务基本追平 FP16。</p>
+<p>比全程固定 FP8 还好。</p>
+<p>A100 和 AMD MI355X 双平台都测过。</p>
+<p>跟你的关联：这是&quot;运行时动态精度&quot;维度。</p>
+<p>跟静态量化互补，之前没人系统做过。</p>
+<p>P/D 解耦里，decode 节点的 KV 压力也能借这套思路。</p>
+<p>深读笔记已生成，见文末链接。</p>
+<p><strong>CascadeEP：MoE 的 prefill 别等齐了再开工</strong></p>
+<p>MoE 推理里，attention 各副本算完 prefill 的时间不一样。</p>
+<p>老做法是等所有副本到齐，专家层才一起算。</p>
+<p>慢的拖死快的。</p>
+<p>CascadeEP 让专家异步执行：谁先到谁先算，不用等。</p>
+<p>跟你研究的 prefill 优化直接相关。</p>
+<p>论文：<a href="https://arxiv.org/abs/2609.33252">https://arxiv.org/abs/2609.33252</a></p>
+<p><strong>PReCache：多 LoRA 智能体别再各存各的 KV</strong></p>
+<p>多个 LoRA 智能体共用一个底座模型。</p>
+<p>但每个都重复处理越来越长的共享轨迹，各自存 KV。</p>
+<p>PReCache 用低秩预计算 + 中性重建，让它们共享 KV。</p>
+<p>省掉重复 prefill。</p>
+<p>做多 LoRA serving 的可以看看。</p>
+<p>论文：<a href="https://arxiv.org/abs/2609.34054">https://arxiv.org/abs/2609.34054</a></p>
+<h2>业内新闻</h2>
+<p><strong>TuringData 发布 ContextCube：给整个集群配一个&quot;公共草稿纸柜&quot;</strong></p>
+<p>新加坡 Tech Week 上刚发布的硬件。</p>
+<p>约两小时前的消息，窗口内新料。</p>
+<p>思路很直白：KV 缓存以前各家 GPU 各存各的。</p>
+<p>ContextCube 做成共享设备，集群里算过的上下文都往这存。</p>
+<p>节点之间走 RDMA 直接取，不用重复算。</p>
+<p>首字延迟降，GPU 腾出来专心生成 token。</p>
+<p>配置：NVIDIA CMX 推理存储参考架构。</p>
+<p>4 块 BlueField-3 DPU（NVIDIA 的数据处理芯片）。</p>
+<p>26 块 NVMe 硬盘。</p>
+<p>单台 120GB/s 的 KV 带宽。</p>
+<p>缓存池按配置能到几百 TB。</p>
+<p>兼容 vLLM、SGLang，以及 LMCache、Mooncake 这类 KV 软件。</p>
+<p>提醒一句：这是厂商通稿。</p>
+<p>性能数字是&quot;按配置和负载而定&quot;，当方向参考，别当实测。</p>
+<p>原文：<a href="https://www.prnewswire.com/apac/news-releases/turingdata-launches-contextcube-at-tech-week-singapore-2026-bringing-shared-kv-cache-to-gpu-inference-clusters-302891006.html">https://www.prnewswire.com/apac/news-releases/turingdata-launches-contextcube-at-tech-week-singapore-2026-bringing-shared-kv-cache-to-gpu-inference-clusters-302891006.html</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无新增。</p>
+<p>Latent Space 出了一期新单集（Claude Code 主题）。</p>
+<p>跟推理 serving 关系不大，这期就不收了。</p>
+<hr/>
+<p><strong>值得深读</strong>：<a href="DEEPREAD_URL_PLACEHOLDER">ElasticKV：显存吃紧时，KV 缓存降半格照样跑</a> —— 精读笔记已发布，含原文 3 张关键图中文解读：混合精度执行契约、成对打包布局、高并发实测数据。</p>
+<p>*去重说明：TRT-LLM v1.3.0rc 系列预览版按惯例不算正式发版；量子位浪潮 MCIS 那篇 27 日 10点版已报；AWS SageMaker HyperPod 网关 12 日已报。*</p></body></html>
