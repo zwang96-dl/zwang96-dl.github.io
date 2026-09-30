@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月30日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-30"/>
+<meta name="doc-ts" content="2026-09-30T20:58:56"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-30（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-30（14点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发正式新版。</li><li>GitHub API 逐家核验过，全都停在原地。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>llama.cpp 只有每日快照，按惯例不算正式发版。</li><li>框架这条线，继续等下一版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮零入库，符合预期。</li><li>每日新批次在 00:00 UTC 发布，窗口正好卡在两批之间。</li><li>两组关键词按提交时间倒序查，最新还是 9/29 那批。</li><li>跟 P/D 解耦直接相关的没有新论文。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>GMI Cloud 今天宣布融了 6.68 亿美元。</li><li>其中 2.23 亿是股权融资，4.45 亿是银行授信。</li><li>领投的是 ARCHIV，NVIDIA 也掏了钱。</li><li>划重点：它的推理平台现在每周处理约 4 万亿 token。</li><li>客户名单里有 Fireworks、OpenRouter，都是推理大厂。</li><li>用的都是 NVIDIA 的 GB200/GB300 整机柜。</li><li>对你意味着：推理算力还在大把加仓，NVIDIA 继续下注推理云。</li><li>新闻：<a href="https://www.businesswire.com/news/home/20260930886227/en/">https://www.businesswire.com/news/home/20260930886227/en/</a></li></ul>
+<ul><li>Digital Realty 和 Blackfuel 官宣了合作。</li><li>Digital Realty 是全球最大的数据中心运营商之一。</li><li>Blackfuel 是一家专做推理的云，搭在巴塞罗那的新机房。</li><li>硬件组合挺有意思：戴尔液冷 AI 整机 + AMD 显卡。</li><li>卖点是专线直连，号称能把首字延迟（TTFT）压下来。</li><li>说白了：推理也开始拼&quot;离用户多近&quot;，不只拼显卡快不快。</li><li>对你意味着：AMD 卡的推理部署又多了一个欧洲样板间。</li><li>新闻：<a href="https://www.globenewswire.com/news-release/2026/09/30/3372048/0/en/digital-realty-brings-native-ai-inference-platform-on-servicefabric-with-blackfuel.html">https://www.globenewswire.com/news-release/2026/09/30/3372048/0/en/digital-realty-brings-native-ai-inference-platform-on-servicefabric-with-blackfuel.html</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>X、Reddit、HN、中文媒体这轮都没新料。</li><li>Spotify 核验：Latent Space 还是 9/29 那期。</li><li>Simon Willison 那边也没有 serving 相关新帖。</li><li>技术群这两小时安静得出奇。</li></ul>
+<p>*去重说明：本轮窗口（9/30 12:00→14:00 PDT = 9/30 19:00→21:00 UTC）。GitHub releases API 实时核验六家框架均无正式新版（llama.cpp 仅每日快照 prerelease，按惯例不报）；arXiv 两组关键词按提交时间倒序查、窗口内零入库（结构性批次间隙）；Digital Realty+Blackfuel 通告为 9/30 9:47 AM EDT 发布、此前的版未报、本轮补上；GMI Cloud 6.68 亿美元融资为 9/30 发布的新料；新闻/X/Reddit/HN/中文媒体/Spotify 窗口内无其他实质内容；本轮无「值得深读」项，未生成深读笔记。*</p></body></html>
