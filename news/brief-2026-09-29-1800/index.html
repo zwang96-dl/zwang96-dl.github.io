@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月29日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-29"/>
+<meta name="doc-ts" content="2026-09-30T00:59:52"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-29（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-29（18点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架的 releases 逐家核验过，都没发正式新版。</li><li>vLLM 还是 v0.30.0（9/22），SGLang 还是 v0.5.20（9/18）。</li><li>TensorRT-LLM 预发布还是 v1.3.0rc29，4点版已报过。</li><li>LMDeploy 还是 v0.18.0（9/28），TGI 仓库已归档。</li><li>llama.cpp 滚了 b11263 到 b11268 六个每日快照，都是例行构建。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 按提交时间倒序查过，窗口内零新论文。</li><li>新一批还没放出来，最新还是 9/28 的 IMC-CLINIC。</li><li>跟 serving 无关，跳过。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮窗口内没有实质业内新闻。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>今天有篇新文章，把 vLLM 0.30 和 SGLang 0.5.20 放一起对了遍数。</li><li>标题叫《The Inference War, in Numbers》，两个大版本就差四天发布。</li><li>文章自己声明了：数字全是官方发布说明里抄的，没人独立复现过。</li><li>说白了就是一本&quot;厂商宣称账本&quot;，不是测评结论。</li><li>划重点：vLLM 0.30 主打两个东西。</li><li>Fast Start（权重缓存走 CUDA IPC，启动更快）。</li><li>HiSparse（稀疏 KV 溢出到主机内存）。</li><li>就像草稿纸不够了，先抄到本子上腾地方。</li><li>SGLang 0.5.20 主打 RL 采样掩码（强化学习采样用的掩码表）。</li><li>宣称 batch 64 下解码吞吐 +52%。</li><li>你正好在二选一做 PD 解耦评估，一页纸看完两边宣称的东西，省时间。</li><li>跟你做的 PD 解耦评估直接相关。</li><li>两边这轮都把 KV 显存和启动速度当主战场。</li><li>选型时可以先抄这本账，再在自己卡上实测对账。</li><li>链接：<a href="https://medium.com/@m.awais1060/vllm-0-30-vs-sglang-0-5-20-the-inference-war-in-numbers-bcb1053c3e03">https://medium.com/@m.awais1060/vllm-0-30-vs-sglang-0-5-20-the-inference-war-in-numbers-bcb1053c3e03</a></li></ul>
+<p>*去重说明：本轮窗口（9/29 16:00→18:00 PDT = 23:00→01:00 UTC）。GitHub releases API 实时核验六家框架（vLLM、SGLang、TensorRT-LLM、LMDeploy、ggml-org/llama.cpp、TGI）：均无正式新版；llama.cpp 新增 b11263–b11268 例行每日快照（仅构建/测试改动）；arXiv 按提交时间倒序查窗口内零入库（00:00 UTC 新批次尚未放出）；X/Reddit/HN/中文媒体/Spotify 播客窗口内无实质新料；顺带收录今日发表的 Medium 对比文章（两版均已报过，属一页纸汇总）；Latent Space 最新单集（Claude Code、OpenRouter、Runway、生物安全）均与 serving 无关，未收录。无「值得深读」项，未生成深读笔记。*</p></body></html>
