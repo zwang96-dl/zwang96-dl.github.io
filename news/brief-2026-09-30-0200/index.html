@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月30日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-30"/>
+<meta name="doc-ts" content="2026-09-30T08:59:44"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-30（2点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-30（2点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架的 releases API 逐家核验过，都没发正式新版。</li><li>vLLM 还是 v0.30.0（9/22）。</li><li>SGLang 还是 v0.5.20（9/18）。</li><li>TensorRT-LLM 预发布还是 v1.3.0rc29。</li><li>LMDeploy 还是 v0.18.0（9/28）。</li><li>llama.cpp 正式版还是 v0.5.0，TGI 仓库还是归档状态。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>补两篇漏网论文：都出自 9/29 那批 arXiv。</li><li>20 点版说那批&quot;全收录&quot;，其实漏了两篇 serving 相关的。</li><li>第一篇叫 Purlin，干的是给分布式推理通信分层。</li><li>原来通信的语义、调度、搬数据全揉在一起。</li><li>换新硬件、改通信策略都特别费劲。</li><li>Purlin 把它们拆成两层。</li><li>SNAC 管何时何地搬，Atom 管具体怎么搬。</li><li>跟你的 P/D 解耦评估直接相关。</li><li>prefill 和 decode 之间传 KV，底层靠的就是集合通信。</li><li>Purlin 标为「值得深读」，精读笔记已生成。</li><li>论文：<a href="https://arxiv.org/abs/2609.36954">https://arxiv.org/abs/2609.36954</a></li><li>第二篇是 RouteFM：给 LLM 路由训练了一个通用路由器。</li><li>思路借鉴了 foundation model。</li><li>它看模型行为猜能力，不背每个模型的身份证。</li><li>一个路由器可以在不同任务、不同模型池之间通用，不用换环境就重训。</li><li>这跟你想的 AI 自动调参同路。</li><li>请求该往哪个池子、哪个模型去，都是路由层的事。</li><li>论文：<a href="https://arxiv.org/abs/2609.37362">https://arxiv.org/abs/2609.37362</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>本轮窗口没抓到业内大新闻。</li><li>X、Reddit、HN、中文媒体都扫过，没啥新料。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Medium 上有篇新鲜横评。</li><li>拿 vLLM 0.30 和 SGLang 0.5.20 的数字直接对打。</li><li>它把两家 release notes 里自己报的成绩摆在一起。</li><li>release notes 就是各家自己写的版本更新说明。</li><li>vLLM 主打启动加速和稀疏 MLA 的 KV 外溢。</li><li>MLA 是把注意力头压缩成潜向量的省显存结构。</li><li>SGLang 主打 RL 采样掩码，decode 吞吐最高涨 52%。</li><li>RL 就是强化学习。</li><li>V4-Flash 的首 token 1.57 秒压到 1.07 秒。</li><li>作者自己声明：全是厂商自报数据。</li><li>没第三方复现过，当成绩单看，别当判决书。</li><li>原文：<a href="https://medium.com/@m.awais1060/vllm-0-30-vs-sglang-0-5-20-the-inference-war-in-numbers-bcb1053c3e03">https://medium.com/@m.awais1060/vllm-0-30-vs-sglang-0-5-20-the-inference-war-in-numbers-bcb1053c3e03</a></li></ul>
+<p>*去重说明：本轮窗口（9/30 00:00→02:00 PDT = 9/30 07:00→09:00 UTC）。GitHub releases API 实时核验六家框架（vLLM、SGLang、TensorRT-LLM、LMDeploy、ggml-org/llama.cpp、TGI）：均无正式新版；arXiv 9/30 新批次尚未发布、最新仍为 9/29 批次——但 20 点版收录那批时漏了两篇 serving 相关论文（Purlin 2609.36954、RouteFM 2609.37362），已二次核验此前各版确实没报过，本轮补上；ZK-LLM 2609.36437（零知识证明量化）与 serving 主线不沾边、未收录；SGLang CVE-2026-102634 官方 issue #40125 复查仍 open、无新动态；X/Reddit/HN/中文媒体/YouTube/Spotify 窗口内无实质新料；bex.co 的 SGLang 40 万 GPU 文章（9/24）、GLM-5.3 H20 实测（9/23）均为历史已报；Purlin 标为值得深读，已生成中文精读笔记（含原文 Figure 1/7/10 转高清图，md+内嵌图片 HTML 双版）。*</p></body></html>
