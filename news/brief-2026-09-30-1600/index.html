@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月30日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-30"/>
+<meta name="doc-ts" content="2026-09-30T23:00:56"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-30（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-30（16点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发正式新版。</li><li>GitHub API 逐家核验过，全都停在原地。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>llama.cpp 只有每日快照，按惯例不算正式发版。</li><li>框架这条线，继续等下一版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮零入库，符合预期。</li><li>每日新批次在 00:00 UTC 发布，窗口正好卡在两批之间。</li><li>三组关键词按提交时间倒序查，最新还是 9/29 那批。</li><li>跟 P/D 解耦直接相关的没有新论文。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>一家医疗公司把 AI 推理搬上了 CoreWeave。</li><li>Ennoble Care 做的是上门医疗。</li><li>这次它把临床 AI 推理搬上了云。</li><li>用的是 NVIDIA RTX PRO 6000。</li><li>这是 Blackwell 架构的专业卡。</li><li>部署在 CoreWeave 的 Kubernetes 服务上。</li><li>卖点是数据安全：硬件级隔离加零信任。</li><li>说白了：推理需求正在渗入强合规行业。</li><li>对你意味着：推理云的客户画像正在变宽。</li><li>新闻：<a href="https://www.businesswire.com/news/home/20260930542844/en/Ennoble-Care-Selects-CoreWeave-to-Power-AI-Inference-Across-Its-Home-Based-Care-Network">https://www.businesswire.com/news/home/20260930542844/en/Ennoble-Care-Selects-CoreWeave-to-Power-AI-Inference-Across-Its-Home-Based-Care-Network</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>量子位这篇把 KV 缓存的账算明白了。</li><li>KV 缓存就是模型的草稿纸。</li><li>标题叫《把记忆交给CPU，大模型会变快》。</li><li>核心观点就一个：显存放不下，就分层存。</li><li>热数据留 HBM（GPU 显存），温数据下 CPU，冷数据进 SSD。</li><li>像冰箱分层：常用放冷藏，囤货放冷冻。</li><li>文里还点了 vLLM 的 KV 卸载功能。</li><li>英特尔那边推了套 QAT 硬件压缩。</li><li>QAT 是至强 CPU 里的专用压缩单元。</li><li>厂商测试说 500TB 缓存能压掉三成。</li><li>划重点：数字都是英特尔自己测的，没人独立验证。</li><li>跟你的 KV 优化方向直接相关，建议点进去看。</li><li>链接：<a href="https://www.qbitai.com/2026/09/489724.html">https://www.qbitai.com/2026/09/489724.html</a></li></ul>
+<ul><li>Latent Space 更新了 9/30 那期。</li><li>这期聊 Dwarkesh 和 Computer Use 的争论。</li><li>聊的是推理时计算（test-time compute）和 agent。</li><li>跟 serving 基础设施关系不大，感兴趣再听。</li><li>Spotify：<a href="https://open.spotify.com/show/2p7zZVwVF6Yk0Zsb4QmT7t">https://open.spotify.com/show/2p7zZVwVF6Yk0Zsb4QmT7t</a></li></ul>
+<ul><li>Simon Willison、X、Reddit、HN 这轮都没新料。</li></ul>
+<p>*去重说明：本轮窗口（9/30 14:00→16:00 PDT = 9/30 21:00→23:00 UTC）。GitHub releases API 实时核验六家框架均无正式新版（llama.cpp 仅每日快照 prerelease，按惯例不报）；arXiv 9/30 新批次尚未发布（00:00 UTC）、窗口内零入库；Ennoble Care×CoreWeave 为 9/30 新通告、此前各版未报；QumulusAI B300 合同（08点版已报）、Gimlet×Cerebras（00点版已报）、CoreWeave Rubin NVL72（08点版已报）本轮不重复；量子位 KV 缓存文为 9/16 发布、今日搜索新发现、此前各版未报；Latent Space 9/30 新单集为 serving 外围内容、仅收录一行；Simon Willison、X、Reddit、HN 窗口内无 serving 相关新料；本轮无「值得深读」项，未生成深读笔记。*</p></body></html>
