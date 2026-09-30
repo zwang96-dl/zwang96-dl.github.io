@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月29日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-29"/>
+<meta name="doc-ts" content="2026-09-30T03:01:29"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-29（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-29（20点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架用 releases API 逐家核验过，都没发正式新版。</li><li>vLLM 还是 v0.30.0（9/22）。SGLang 还是 v0.5.20（9/18）。</li><li>LMDeploy 还是 v0.18.0（9/28）。</li><li>TensorRT-LLM 预发布 rc29 是今早的，4点版报过。</li><li>llama.cpp 只有例行每日快照，TGI 仓库已归档。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>中科院计算所发了篇 SPLASH：注意力并行也能「运行时换挡」了。</li><li>现在的引擎启动时定死一种并行方式。</li><li>请求少用 TP：张量并行，权重切开分到各卡。</li><li>长 prompt 用 CP：上下文并行，按位置切分。</li><li>请求多用 DP-attention：数据并行注意力，每卡独立干一批。</li><li>Agent 负载一直在变：开头几千个短请求，结尾只剩几条长推理链。</li><li>定死的布局总有一段跑亏，像穿一双鞋跑全程马拉松。</li><li>SPLASH 让引擎在服务中切换布局，不用排空重启。</li><li>切换开销不到单步的 0.51%，几乎无感。</li><li>它还提出了新布局 DOP：权重切分、KV 单主人，零冗余。</li><li>B200 上跑 GLM-5.3，每卡腾出 12.69 GiB 给 KV。</li><li>吞吐快 1.3–1.73 倍。</li><li>SGLang 实现已经开源。</li><li>「值得深读」：跟你做的 P/D 解耦评估同维度，静态部署追不上动态负载。</li><li>这篇的调度思路可以直接参考：成本模型选布局，设阈值防来回抖。</li><li>论文：<a href="https://arxiv.org/abs/2609.37626">https://arxiv.org/abs/2609.37626</a></li></ul>
+<ul><li>动态跳层一直「省了算力、亏了调度」，vSkipper 把这账算平了。</li><li>跳层就是让每个 token 只跑一部分层，算力能省。</li><li>但旧方案配不上连续批处理，省的算力全被调度亏掉。</li><li>FlexiDepth 跳了 8 层，解码反而慢 14–21%。</li><li>vSkipper 做了一层虚拟化：跳层变成插件。</li><li>连续批处理、paged KV、CUDA 图全保留。</li><li>想用跳层加速，先得过 serving 引擎这一关。</li><li>论文：<a href="https://arxiv.org/abs/2609.37062">https://arxiv.org/abs/2609.37062</a></li></ul>
+<ul><li>Agent 服务的 KV 存哪是个新问题：历史长，还穿插工具调用。</li><li>新论文把稀疏 KV 存到 SSD 上，比放 CPU 内存便宜。</li><li>难点是选哪些 KV 要读：选择依赖推理中间值。</li><li>SSD 读取卡在关键路径上。</li><li>长上下文 agent 服务的存储分层思路，值得看一眼。</li><li>论文：<a href="https://arxiv.org/abs/2609.36938">https://arxiv.org/abs/2609.36938</a></li></ul>
+<ul><li>这批论文里 KV 压缩扎堆。</li><li>WUSH-KV 做低比特量化，KV-Kaizen 学压缩配置。</li><li>ARC-KV 做重建式压缩。</li><li>AVSG 加速 KV offload 的稀疏读取。</li><li>说明长上下文的瓶颈全压在 KV 显存上，各种路数都在卷。</li><li>论文：<a href="https://arxiv.org/abs/2609.38121">https://arxiv.org/abs/2609.38121</a></li><li>论文：<a href="https://arxiv.org/abs/2609.37988">https://arxiv.org/abs/2609.37988</a></li><li>论文：<a href="https://arxiv.org/abs/2609.36835">https://arxiv.org/abs/2609.36835</a></li><li>论文：<a href="https://arxiv.org/abs/2609.37538">https://arxiv.org/abs/2609.37538</a></li></ul>
+<ul><li>SEED 是自投机解码的新玩法：自己写草稿、自己改。</li><li>早退法草稿便宜但质量差，多 token 预测质量好但每步都要全量前向。</li><li>SEED 复用深层表示，草稿又好又便宜，像让实习生先看专家笔记再打草稿。</li><li>论文：<a href="https://arxiv.org/abs/2609.36590">https://arxiv.org/abs/2609.36590</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>窗口内没有实质业内新闻。</li><li>ContextCube（共享 KV 缓存一体机）是昨天的，之前报过。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>X、Reddit、HN、中文媒体扫过，窗口内无新料。</li><li>Latent Space 最新几期讲 Claude Code、生物安全。</li><li>跟 serving 无关。</li></ul>
+<p>*去重说明：本轮窗口（9/29 18:00→20:00 PDT = 9/30 01:00→03:00 UTC）。GitHub releases API 实时核验六家框架（vLLM、SGLang、TensorRT-LLM、LMDeploy、ggml-org/llama.cpp、TGI）：均无正式新版；TRT-LLM rc29 为今日早间发布、4点版已报；arXiv 9/29 UTC 新批次出炉，serving 相关论文此前各版均未收录，本轮收录 5 组（SPLASH 标为值得深读，已生成中文精读笔记）；X/Reddit/HN/中文媒体/Spotify 播客窗口内无实质新料；ContextCube（9/28）等新闻候选均为历史已报。*</p></body></html>
