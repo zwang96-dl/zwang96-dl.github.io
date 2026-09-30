@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月30日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-30"/>
+<meta name="doc-ts" content="2026-09-30T06:58:26"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-30（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-30（00点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架的 releases API 逐家核验过，都没发正式新版。</li><li>vLLM 还是 v0.30.0（9/22）。</li><li>SGLang 还是 v0.5.20（9/18）。</li><li>TensorRT-LLM 预发布还是 v1.3.0rc29，4点版已报过。</li><li>LMDeploy 还是 v0.18.0（9/28），TGI 仓库已归档。</li><li>llama.cpp 窗口内多了一个 b11272，例行每日快照。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 几个关键词按提交时间倒序扫过，窗口内零新增。</li><li>00:00 UTC 的新批次还没到，最新还是 9/29 那批。</li><li>那批的 serving 论文，20点版和22点版已经全收录了。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>22点版报的 SGLang 漏洞，跟进一条进展。</li><li>官方 issue #40125 依然开着，没确认修复。</li><li>你测 PD 解耦时，那条 bootstrap_room 校验还得自己补上。</li><li>也顺手再提醒一句：服务别裸奔到公网。</li><li>CVE 详情：<a href="https://www.thehackerwire.com/vulnerability/CVE-2026-102634/">https://www.thehackerwire.com/vulnerability/CVE-2026-102634/</a></li><li>官方 issue：<a href="https://github.com/sgl-project/sglang/issues/40125">https://github.com/sgl-project/sglang/issues/40125</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>X、Reddit、HN、中文媒体、YouTube 扫过，窗口内无新料。</li><li>Latent Space 最新几期在 Spotify 上亲眼看过。</li><li>Claude Code、OpenRouter、生物安全，跟 serving 都不沾边。</li></ul>
+<p>*去重说明：本轮窗口（9/29 22:00→9/30 00:00 PDT = 9/30 05:00→07:00 UTC）。GitHub releases API 实时核验六家框架（vLLM、SGLang、TensorRT-LLM、LMDeploy、ggml-org/llama.cpp、TGI）：均无正式新版；llama.cpp 窗口内新增 b11272 例行每日快照；TRT-LLM rc29 为 9/29 早间发布、4点版已报；arXiv 多关键词按提交时间倒序核验，最新时间戳停在 9/29 批次（早于本窗口），窗口内零入库（下一批次尚未发布）；9/29 批次的 serving 论文此前 20 点版/22 点版已全收录；CVE-2026-102634 官方 issue #40125 复查仍 open、未确认修复；X/Reddit/HN/中文媒体/YouTube/Spotify（Latent Space 最新单集）窗口内无实质新料；Gimlet+Cerebras 100MW（9/28）等新闻候选均为历史已报。无「值得深读」项，未生成深读笔记。*</p></body></html>
