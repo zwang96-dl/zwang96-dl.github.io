@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月1日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-01"/>
+<meta name="doc-ts" content="2026-10-01T19:07:49"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-01（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-01（12点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发正式新版。</li><li>全是 GitHub releases API 亲手验的。</li><li>vLLM 停在 v0.30.0（9/22 打的包）。</li><li>SGLang 停在 v0.5.20（9/18）。</li><li>TRT-LLM 正式版还是 v1.2.1，预览版停在 v1.3.0rc29。</li><li>LMDeploy v0.18.0，TGI 还是去年的 v3.3.7。</li><li>llama.cpp 窗口内有新提交，但没打新快照标签。</li><li>快照就是每日构建的开发版，按惯例不报。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>JARQ：给量化模型做&quot;精抛光&quot;的小工具。</li><li>目标是训练后量化（PTQ，训完模型再压精度省显存的技术）。</li><li>流程：先用 GPTQ、AWQ 这类常用工具出初版。</li><li>JARQ 再交替微调缩放因子和整数码。</li><li>类比：粗磨之后再精抛，不换模具。</li><li>实测覆盖 Llama-2、Llama-3、Qwen 三个系列。</li><li>90 组里 96 组困惑度下降。</li><li>3-bit 的 RTN 量化，困惑度最多降 36%。</li><li>速度不慢：7B 模型每块不到 1 分钟。</li><li>跟你关系大：你 serving 的 llama、gemma 少不了量化。</li><li>量化精度掉得心疼时，拿它再救一波。</li><li>这篇是单点增量改进，就不标「值得深读」了。</li><li>论文：<a href="https://arxiv.org/abs/2609.38599">https://arxiv.org/abs/2609.38599</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>PyTorch 北美大会 10 月 20–21 日在圣何塞开。</li><li>vLLM 这次派了重兵去。</li><li>核心维护者 Simon Mo 上台讲 keynote。</li><li>题目是 vLLM Update: Scaling Open Frontier Inference Infrastructure。</li><li>内容：vLLM 核心架构升级、KV cache 管理、GPU kernel 优化。</li><li>还有&quot;跟 vLLM 开发者面对面&quot;环节。</li><li>Red Hat 的维护者讲 Agentic Inference 和 Attention。</li><li>Poster 区有：解耦 serving、RDMA 传 KV cache。</li><li>RDMA（远程直接内存访问，网卡直传数据不走 CPU）。</li><li>还有多卡 KV cache 迁移、分层路由。</li><li>这几份 poster 正对上你评估的 P/D 解耦。</li><li>大会开完可以看看有没有录像放出来。</li><li>来源：<a href="https://events.linuxfoundation.org/pytorch-conference-north-america/program/keynote-speakers/?_hsmi=323808841&amp;amp;utm_medium=email&amp;amp;utm_source=hs_email">https://events.linuxfoundation.org/pytorch-conference-north-america/program/keynote-speakers/?_hsmi=323808841&amp;amp;utm_medium=email&amp;amp;utm_source=hs_email</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>这轮社区线扫了一圈，没挖到新东西。</li><li>Reddit、HN、X 大V、中文媒体都没窗口内新料。</li><li>播客线 24 小时内也没有新的 serving 单集。</li></ul>
+<p>*去重说明：本轮窗口（10/1 10:00→12:00 PDT = 10/1 17:00→19:00 UTC）。框架六家经 GitHub releases API 实测均无正式新版（llama.cpp 窗口内有新提交但无新快照标签，按惯例不报）。arXiv API 间歇性超时，我亲手用 4 组关键词（LLM inference / KV cache / speculative decoding / prefill-disaggregation）按 submittedDate 倒序扫过 2609.39xxx–40xxx 段并逐篇 grep 全文：其余均已报过（PatchKV、HBF、DScale、QATFactory、WUSH-KV、KVTether、SparseEngine、Herschel、Inference Auctions、CoVisco、UBTree、2609.40098 定价经济学为纯理论不收录），本轮新增仅 JARQ（2609.38599，arXiv abs 全文核验）。PyTorchCon vLLM 阵容（约 1 天前官宣，经官方 program 页核验）经 briefs 全文 grep 确认从未报过。本轮无「值得深读」新条目（JARQ 为单点增量改进、PyTorchCon 为会讯，按宁缺毋滥不转深读）。*</p></body></html>
