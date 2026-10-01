@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月30日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-30"/>
+<meta name="doc-ts" content="2026-10-01T05:00:54"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-30（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-30（22点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发正式新版。</li><li>GitHub releases API 逐家核验过，版本号全停在原地。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>LMDeploy 还是 9/28 的 v0.18.0。</li><li>TensorRT-LLM 还是 v1.3.0rc29 预览版。</li><li>TGI 还是去年 12 月的 v3.3.7。</li><li>llama.cpp 新增 b11312 一个每日快照。</li><li>快照按惯例不算正式版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>这轮补收 6 篇漏网论文，往期简报都没报过。</li><li>其中 1 篇标了「值得深读」，精读笔记已生成。</li></ul>
+<ul><li>DLFP：prefill 和 decode 抢资源的&quot;软件解法&quot;。</li><li>场景你很熟：正在吐字的请求，被新来的长 prompt 一卡，全机顿一下。</li><li>业界通用做法是 prefill 切块。</li><li>但块大小得人肉调，模型一换就得重调。</li><li>DLFP 不建模，直接看延迟：实测延迟超标，下一块就切小一点。</li><li>富余了就放大一点。像开车只看油表，不预测油耗。</li><li>只在&quot;有 decode 在跑&quot;时生效。</li><li>没 decode 就随便跑，保住吞吐。</li><li>实测：Qwen3-0.6B，单张 A100。</li><li>最卡的 1% token 间隔降了 27.7%。</li><li>三轮降幅：24.8%、30.1%、28.2%。</li><li>SLO（服务等级目标）300 个请求全过。</li><li>代价：首字延迟涨 34.8%，但还在 SLO 线内。顺滑了，第一个字慢一点。</li><li>翻车也写得很诚实：8B、32B 和双卡上全不灵。</li><li>根因：反馈信号拿&quot;调度器调用间隔&quot;冒充 GPU 真实耗时。</li><li>大模型上这个信号失真了。</li><li>「值得深读」：中文精读笔记已生成。</li><li>含控制律公式、Table 1 和 Figure 1。</li><li>跟你研究的 P/D 解耦是同一道题：解耦是物理分开，这篇是软件限流。</li><li>论文：<a href="https://arxiv.org/abs/2609.38386">https://arxiv.org/abs/2609.38386</a></li></ul>
+<ul><li>共享 KV 缓存有个&quot;认错人&quot;的坑。</li><li>很多生产部署把 KV 缓存做成机群共享层。</li><li>key 只按 token 内容算。</li><li>但同一个 token 串，adapter（微调适配器）不同。</li><li>算出的 KV 完全不一样。</li><li>共享层只看 token 不看&quot;出身&quot;，就会张冠李戴。</li><li>实测很吓人：跨 adapter 撞 key。</li><li>准确率从 0.94 掉到 0.64。</li><li>KV 表示不兼容时，推理准确率直接归零。</li><li>更狠的是计时攻击。</li><li>93% 的 prompt 能从访问时间被反推出来。</li><li>作者在 vLLM 和两版 SGLang 上都复现了。</li><li>覆盖 12 个模型、160 多种配置。</li><li>解法是给每个缓存条目打&quot;出身标签&quot;，key 里带上计算和共享上下文。</li><li>一句话：上了共享 KV 缓存的，key 设计要回炉检查了。</li><li>论文：<a href="https://arxiv.org/abs/2609.38706">https://arxiv.org/abs/2609.38706</a></li></ul>
+<ul><li>KV 缓存往闪存下沉那派，又添一篇系统级实测。</li><li>思路是分层：HBM 放热数据，高带宽闪存（HBF）放冷数据。</li><li>还给了个&quot;带缓冲的缓存感知调度&quot;，专门伺候闪存的写入寿命。</li><li>实测：加了闪存的系统，完成时间比纯 HBM 快 36.1%–87.0%。</li><li>建模的能耗最多省 55.8%，但轻负载下闪存反而更费电。</li><li>调度优化后，闪存写入寿命从 4.77 年延长到 14.82 年。</li><li>一句话：跟 20 点版忆联/英特尔白皮书同路，这篇是学术版的量化对照。</li><li>论文：<a href="https://arxiv.org/abs/2609.39131">https://arxiv.org/abs/2609.39131</a></li></ul>
+<ul><li>PatchKV：KV 压缩的新思路，把信息&quot;藏&quot;进权重里找补。</li><li>现有压缩法（丢 token、近似）一到激进压缩比就掉精度。</li><li>PatchKV 免训练：上下文加载时算一个&quot;权重补丁&quot;。</li><li>岭回归闭式解，一次搞定。</li><li>补丁合进模型后，每次推理的计算图不变，单上下文多查询零额外开销。</li><li>在 170K token 上下文、四个基准上都测了。</li><li>SCBench、SQuAD、NIAH、GSM8K 全覆盖。</li><li>覆盖三个模型架构。</li><li>结论：各种压缩法配上它，在激进压缩下都更稳。</li><li>一句话：KV 压不住了别只盯缓存，权重里也能&quot;藏&quot;上下文。</li><li>论文：<a href="https://arxiv.org/abs/2609.39329">https://arxiv.org/abs/2609.39329</a></li></ul>
+<ul><li>UBTree：投机解码的草稿环节，出了个并行新打法。</li><li>背景：小模型先打草稿，大模型批量验证，草稿对了就加速。</li><li>但目标分布越&quot;发散&quot;，草稿越难中，并行草稿器的效果就掉。</li><li>UBTree 两步走：unigram（一元模型）提候选。</li><li>bigram（二元模型）负责选搭配。</li><li>搭出一棵草稿树。</li><li>训练时不只盯贪心路径，分支也给监督信号。</li><li>验证时更容易多收几个 token。</li><li>实测：Qwen3-4B/8B，7 个基准。</li><li>相对自回归解码平均加速 5.84–6.94 倍。</li><li>28 组对比全胜 DARTree，生产级评测也赢了 DSpark。</li><li>一句话：草稿质量看&quot;树&quot;不看&quot;链&quot;，想上投机解码的可以看一眼。</li><li>论文：<a href="https://arxiv.org/abs/2609.39972">https://arxiv.org/abs/2609.39972</a></li></ul>
+<ul><li>消费级多卡跑 MoE（混合专家模型），通信是个大头。</li><li>MoE 每个 token 激活多个专家，专家分散在多卡上，每层都要通信。</li><li>消费级 GPU 没有 NVLink，卡间通信都得经过 CPU 内存中转。</li><li>现有库都假设 GPU 能直连。</li><li>NCCL 在这种机器上有多余的 PCIe 搬运。</li><li>还跟专家计算抢资源，越跑越亏。</li><li>ThunderEP 专为 PCIe 消费级卡设计。</li><li>去掉 ring 算法的中转跳数。</li><li>用 DMA 引擎搬数据，不跟计算抢资源，同步轮询的开销也压低了。</li><li>接进 vLLM，在 4090/5090 系统上测了三个 MoE 模型。</li><li>分发和合并通信，比 NCCL 快 2.00 倍和 1.53 倍。</li><li>端到端最高 1.66 倍。</li><li>一句话：家用多卡玩 MoE 的，通信库换这个思路能榨出不少。</li><li>论文：<a href="https://arxiv.org/abs/2609.40093">https://arxiv.org/abs/2609.40093</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮 2 小时窗口里，业内新闻线没新料。</li><li>搜了一圈，出来的都是几天前的内容，不重复报。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Spotify 上 Latent Space 9/30 出了新单集。</li><li>讲 computer use agent 和 OpenAI 的新动作。</li><li>跟推理 serving 关系不大，不收录。</li><li>lmsysorg、karpathy、jimfan 这两天都没实质动态。</li><li>Simon Willison、机器之心、量子位。</li><li>都没新的 serving 内容。</li></ul>
+<p>*去重说明：本轮窗口（9/30 20:00→22:00 PDT = 10/1 03:00→05:00 UTC）。GitHub releases API 实测六家框架均无正式新版（llama.cpp 新增 b11312 每日快照，快照按惯例不报）；arXiv 无新批次（下批约 10/1 00:00 UTC 公布），本轮收录 6 篇均为 briefs 全文 grep 确认往期未报过的漏网：DLFP（9/29 批次）、Provenance（9/30）、HBF（9/30）、PatchKV（9/30）、UBTree（9/30）、ThunderEP（9/30）；20 点版的 MoSE/Herschel/Inference Auctions/Vosti/SparLeak/QATFactory、CoreWeave Forge、Blackfuel 官宣、General Compute×Cerebras 不重复；本轮新增「值得深读」：DLFP（prefill/decode 干扰的反馈控制，跟 P/D 解耦同一道题的软件解法），深读笔记已生成（含原文控制律公式、Table 1/Figure 1，HTML 版图片已内嵌）。*</p></body></html>
