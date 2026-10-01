@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月1日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-01"/>
+<meta name="doc-ts" content="2026-10-01T11:02:39"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-01（4点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-01（4点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发正式新版。</li><li>GitHub releases API 逐家核验过，版本号全停在原地。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>LMDeploy 还是 v0.18.0。</li><li>TensorRT-LLM 还是 v1.3.0rc29 预览版。</li><li>TGI 还是去年 12 月的 v3.3.7。</li><li>llama.cpp 新增 b11317–b11319 三个每日快照。</li><li>发布时间 09:32–10:44 UTC，全落在本轮窗口里。</li><li>快照按惯例不算正式版。</li></ul>
+<ul><li>安全提醒一句：LMDeploy 解耦链路有过 pickle RCE。</li><li>pickle 反序列化是&quot;收到字节直接当代码跑&quot;，最危险的那种。</li><li>CVE-2025-66455，CVSS 9.8，0.16.0 已修。</li><li>你不用 LMDeploy，但自建解耦链路时别学它。</li><li><a href="https://github.com/advisories/GHSA-q66m-3fcg-jjh7">https://github.com/advisories/GHSA-q66m-3fcg-jjh7</a></li></ul>
+<h2>新技术与论文</h2>
+<ul><li>本轮窗口内 arXiv 没有新批次。</li><li>下面 5 篇是 9/30 批次里往期漏掉的。</li><li>briefs 全文 grep 确认没报过，这轮补上。</li></ul>
+<ul><li>RATIO：量化把推理模型变&quot;啰嗦&quot;了，专治这个。</li><li>推理模型被量化后，爱反复自我验证，输出变长。</li><li>省下的算力，被更长的回答吃回去。</li><li>RATIO 先找出这个模型特有的 21 个啰嗦词。</li><li>再给每个词量身定做惩罚力度，推理时直接减分。</li><li>全程不用训练，也不增加推理开销。</li><li>实测：精度最高涨 9.8 个百分点。</li><li>思维链最长砍掉 51.3%。</li><li>类比：以前全班统一罚站，现在按话痨程度单独谈话。</li><li>「值得深读」：中文精读笔记已生成。</li><li>含原文 Figure 2/3/5：啰嗦词云、方法总览、精度权衡。</li><li>跟你 serving 量化模型的&quot;隐藏税&quot;直接相关。</li><li>论文：<a href="https://arxiv.org/abs/2609.39801">https://arxiv.org/abs/2609.39801</a></li></ul>
+<ul><li>Periodic Weak Spots：分块压 KV cache 的隐藏坑。</li><li>分块压 KV cache 有个隐藏坑：token 站位决定好不好找。</li><li>同一个信息，召回准确率能差 40 个百分点。</li><li>这叫相位敏感：压缩窗口的&quot;相位&quot;是个新坐标。</li><li>平均分看着高，某些位置系统性翻车。</li><li>做 chunked KV 压缩的，测评得按相位分开测。</li><li>类比：书架按固定格打包，塞在格子边缘的书最难找。</li><li>论文：<a href="https://arxiv.org/abs/2609.36322">https://arxiv.org/abs/2609.36322</a></li></ul>
+<ul><li>TORQUE：旋转前后，&quot;保谁&quot;要分开算。</li><li>随机旋转是量化前的常用预处理，把数值分布&quot;揉圆&quot;。</li><li>TORQUE 教你：旋转前后，分别保哪些坐标的高精度。</li><li>固定 bit 预算下联合分配，误差更小。</li><li>旋转前保住大坐标，防旋转把误差摊开。</li><li>旋转后保住最大的一小撮，剩下的更好量化。</li><li>实测场景：KV cache 压缩、激活压缩、最近邻检索。</li><li>类比：搬家前先把易碎品单独包好，剩下的随便装。</li><li>论文：<a href="https://arxiv.org/abs/2609.36032">https://arxiv.org/abs/2609.36032</a></li></ul>
+<ul><li>LeapQuant：线性注意力的&quot;循环状态&quot;也能压到 8-bit。</li><li>线性注意力是 KV 不随长度涨的注意力变体。</li><li>它把历史压成固定大小的&quot;循环状态&quot;。</li><li>反复读写这块状态，是长上下文推理的新瓶颈。</li><li>LeapQuant：训练无关的 8-bit 状态量化，号称几乎无损。</li><li>两招：按窗口&quot;跳着量化&quot;，窗口内用高精度缓冲顶着。</li><li>外加&quot;补偿 token&quot;：把最大的离群值单独高精度存着。</li><li>实测：kernel 加速 2.05–3.70×，端到端 1.47×。</li><li>在 B200、RTX PRO 6000、RTX 5090 上都测过。</li><li>跟上轮的 STEPQuant 是同一道题的两种解法。</li><li>论文：<a href="https://arxiv.org/abs/2609.38166">https://arxiv.org/abs/2609.38166</a></li></ul>
+<ul><li>Replay the Curvature：NVFP4 量化的 scale 怎么选才准。</li><li>NVFP4 是 Blackwell 上的新低精度格式。</li><li>16 个权重共享一个 scale，局部范围利用率更高。</li><li>GPTQ 逐列量化时，scale 选错会误估重建误差。</li><li>这篇用&quot;Schur 重放&quot;把 GPTQ 的更新过程复刻一遍再打分。</li><li>还解决了大模型校准塞不进一张卡的问题。</li><li>Qwen3.5-397B 上，精度恢复到 BF16 的 99% 以上。</li><li>你手里没 Blackwell，这篇先存着当技术参考。</li><li>论文：<a href="https://arxiv.org/abs/2609.36654">https://arxiv.org/abs/2609.36654</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮 2 小时窗口里，业内新闻线没新料。</li><li>HN、Reddit、X、中文媒体都没实质动态。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>这轮 2 小时窗口里，访谈线没新料。</li><li>lmsysorg、karpathy、jimfan 都没实质动态。</li><li>Latent Space 最新几期聊的都不是 serving。</li><li>Spotify 已保存节目扫过，无新增 serving 单集。</li></ul>
+<p>*去重说明：本轮窗口（10/1 02:00→04:00 PDT = 10/1 09:00→11:00 UTC）。GitHub releases API 实测六家框架均无正式新版（llama.cpp 新增 b11317–b11319 三个每日快照，09:32–10:44 UTC 落在窗口内，快照按惯例不报）；窗口内 arXiv 无新批次，X/Reddit/HN/关键人物/中文媒体/播客均无实质新料；本轮收录 5 篇论文均为 9/30 批次、briefs 全文 grep 确认往期未报过的补报：RATIO（2609.39801）、Periodic Weak Spots（2609.36322）、TORQUE（2609.36032）、LeapQuant（2609.38166）、Replay the Curvature（2609.36654）；框架更新里的 LMDeploy pickle RCE 安全提醒（CVE-2025-66455，GitHub Advisory GHSA-q66m-3fcg-jjh7，已用 browser.search 验证）；本轮新增「值得深读」：RATIO（量化推理模型的 overthinking 与 token 级惩罚），深读笔记已生成（含原文 Figure 2/3/5，HTML 版图片已内嵌）。*</p></body></html>
