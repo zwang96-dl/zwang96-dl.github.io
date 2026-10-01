@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月30日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-30"/>
+<meta name="doc-ts" content="2026-10-01T01:04:09"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-30（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-30（18点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发正式新版。</li><li>GitHub API 逐家核验过，全都停在原地。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>llama.cpp 只有 b11298–b11307 每日快照。</li><li>按惯例快照不算正式发版。</li><li>TRT-LLM 的 v1.3.0rc29 是 prerelease。</li><li>prerelease（预发布版）也不算正式版。</li><li>但 vLLM 仓库里有个 RFC 值得看一眼。</li><li>RFC（征求意见稿）就是&quot;有个想法大家来讨论&quot;。</li><li>编号 #58537，标题叫 KV Context Editing。</li><li>想法是：agent 宣布某段上下文&quot;语义上死了&quot;。</li><li>引擎就对这段零分配、零搬运、不参与注意力计算。</li><li>但原文保持字节稳定，前后缓存复用不受影响。</li><li>说白了：agent 扔掉的历史，不再交显存税。</li><li>跟你的 prefix caching（前缀缓存）方向直接相关。</li><li>链接：<a href="https://github.com/vllm-project/vllm/issues/58537">https://github.com/vllm-project/vllm/issues/58537</a></li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 9/30 新批次还没进 API 索引。</li><li>最新只到 9/29 的批次，窗口内零入库。</li><li>补录一篇 9/27 的论文：SuffixReplay。</li><li>它专治 hybrid 模型（全注意力+线性注意力混搭）的前缀缓存。</li><li>线性层的循环状态（整层压缩成一个向量）没法回退到任意前缀边界。</li><li>这篇的思路是&quot;让它忘掉远古历史&quot;。</li><li>只存一小段输入当锚点，命中时重放一小段后缀。</li><li>质量保留 91.4–100%，存储只要 SGLang 默认方案的零头。</li><li>跟你评估 SGLang 时 hybrid 模型的暗坑直接相关。</li><li>「值得深读」：中文精读笔记已生成。</li><li>含原文 Figure 1/2/10 和 Table 1。</li><li>论文：<a href="https://arxiv.org/abs/2609.33477">https://arxiv.org/abs/2609.33477</a></li><li>9/28–9/29 那批论文此前各版已报过。</li><li>包括 WUSH-KV、DScale、LongSpark。</li><li>这轮不重复。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>Threads 上 @alv.rauf 发了条技术帖，窗口内的。</li><li>讲 SGLang 的 RadixAttention 给 agent 推理降 TTFT。</li><li>RadixAttention 就是基数树存 KV 前缀。</li><li>TTFT 就是&quot;首字延迟&quot;，第一个字蹦出来要等多久。</li><li>帖主宣称能降 70–80%，这是他自己的数字。</li><li>没独立验证，看看思路就行。</li><li>一句话：缓存架构比堆 GPU 更管用。</li><li>跟你评估的 SGLang 方向贴合。</li><li>链接：<a href="https://www.threads.com/@alv.rauf/post/Dd7qQemih4h（俄语写的">https://www.threads.com/@alv.rauf/post/Dd7qQemih4h（俄语写的</a>）</li></ul>
+<ul><li>Mark Collier 在 PyTorch 中国大会上做了主题演讲。</li><li>他是 PyTorch 基金会的执行董事。</li><li>vLLM 和 SGLang 对三款新模型做到 day-zero 支持。</li><li>它们是 Kimi K3、MiniMax M3、Qwen 3.8。</li><li>day-zero 支持就是新模型发布当天就能跑。</li><li>还提到 Shopify 的一个案例。</li><li>agent+PyTorch+vLLM 让 serving 成本降了约 96%。</li><li>这是大会宣传口径，数字谨慎看。</li><li>一句话：开源推理引擎已经卷到&quot;当天就能跑&quot;。</li><li>链接：<a href="https://www.facebook.com/reel/2123388231606686/">https://www.facebook.com/reel/2123388231606686/</a></li></ul>
+<ul><li>r/LocalLLaMA 有个实战帖：多用户本地并发，量化格式怎么选。</li><li>结论是并发场景 vLLM 为王。</li><li>量化优先选 FP8/INT8/FP16 这类硬件原生精度。</li><li>AWQ/GPTQ 转来转去反而慢。</li><li>一句话：想压榨并发吞吐，选量化格式比选引擎更要紧。</li><li>链接：<a href="https://reddit.cflre.workers.dev/r/LocalLLaMA/comments/1lafihl/comment/mxl0qyk/?solution=2ed3fa1b8ec142bf2ed3fa1b8ec142bf&amp;amp;jsc_token=7afd7253fec22262ff1c52b1703fe9ecf87b259bf36374bcf4d886cdf194c702&amp;amp;jsc_orig_r=&amp;amp;context=3（reddit">https://reddit.cflre.workers.dev/r/LocalLLaMA/comments/1lafihl/comment/mxl0qyk/?solution=2ed3fa1b8ec142bf2ed3fa1b8ec142bf&amp;amp;jsc_token=7afd7253fec22262ff1c52b1703fe9ecf87b259bf36374bcf4d886cdf194c702&amp;amp;jsc_orig_r=&amp;amp;context=3（reddit</a> 镜像代理链接）</li></ul>
+<ul><li>loxilb-inference-gateway 是个开源新选择。</li><li>它是 eBPF 网关（内核态的高性能网络组件）。</li><li>卖点：KV 感知路由加 P/D 解耦加 NIXL 传 KV。</li><li>KV 感知路由就是&quot;懂缓存的负载均衡&quot;。</li><li>6 天前刚更新，AWS 那套托管能力的开源对照。</li><li>链接：<a href="https://github.com/loxilb-io/loxilb-inference-gateway/blob/HEAD/README.md">https://github.com/loxilb-io/loxilb-inference-gateway/blob/HEAD/README.md</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>HN 上一条 9/27 的评论，把 P/D 解耦讲透了。</li><li>网友 ssivark：prefill 是读提示词的体力活。</li><li>decode 是逐字生成的精细活。</li><li>基础设施就该按两种活分开设计。</li><li>一句话：P/D 解耦的底层逻辑，一句话讲透。</li><li>链接：<a href="https://news.ycombinator.com/item?id=49870162">https://news.ycombinator.com/item?id=49870162</a></li></ul>
+<ul><li>Latent Space 9/30 那期补一句新信息。</li><li>16点版报过这期，当时只讲了上半场争论。</li><li>下半场是 OpenAI API 团队的 Nikunj Handa。</li><li>他拆了 OpenAI 新的开发者栈。</li><li>他列了个优化清单。</li><li>包括 UltraFast inference、prompt caching。</li><li>还有 pre-warming、compaction、Decisions API。</li><li>一句话：OpenAI 的推理侧优化清单一次性放出来了。</li><li>抠延迟和成本的思路值得听听。</li><li>链接：<a href="https://au.radio.net/podcast/latent-space-podcast">https://au.radio.net/podcast/latent-space-podcast</a></li></ul>
+<ul><li>Threads @alv.rauf 还有条实操帖（9/30 早上发的）。</li><li>长 prompt 会把正在生成的请求&quot;冻住&quot;。</li><li>首字延迟直接飙升，用户体验崩了。</li><li>开 chunked prefill 能治。</li><li>它把长 prompt 切块，跟 decode 穿插跑。</li><li>一句话：P99 抖动比峰值速度更重要。</li><li>链接：<a href="https://www.threads.com/@alv.rauf/post/Dd6UiS7iD68（俄语写的">https://www.threads.com/@alv.rauf/post/Dd6UiS7iD68（俄语写的</a>）</li></ul>
+<ul><li>Simon Willison、X、中文媒体这轮没 serving 新料。</li></ul>
+<p>*去重说明：本轮窗口（9/30 16:00→18:00 PDT = 10/1 00:00→02:00 UTC）。GitHub releases API 实测六家框架均无正式新版（llama.cpp 新增 b11298–b11307 每日快照，prerelease 按惯例不报；TRT-LLM v1.3.0rc29 为 prerelease）；arXiv 9/30 批次尚未入库（API 只到 9/29），窗口零入库；QumulusAI B300（08点版已报）、Ennoble Care×CoreWeave（16点版已报）、Digital Realty×Blackfuel（14点版已报）、Gimlet×Cerebras（00点版已报）、SageMaker prefix-aware routing（已报）、量子位 KV 缓存文（16点版已报）不重复；9/28–9/29 论文簇（WUSH-KV、KV-Kaizen、ARC-KV、AVSG、SEED、DScale、LongSpark、TempoKV、vSkipper、SSD 稀疏 KV）已在 9/28–9/29 各版报过；Spexis、SPLASH 已有深读笔记；本轮新增「值得深读」：SuffixReplay（hybrid 模型前缀缓存），深读笔记已生成（含原文图 Figure 1/2/10、Table 1，HTML 版图片已内嵌）。*</p></body></html>
