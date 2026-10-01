@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月1日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-01"/>
+<meta name="doc-ts" content="2026-10-01T17:00:33"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-01（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-01（10点版）</h1>
+<h2>框架更新</h2>
+<ul><li>这轮窗口内，六家框架都没发正式新版。</li><li>GitHub releases API 逐家亲手核验过。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>TRT-LLM 还是 v1.3.0rc29 预览版。</li><li>LMDeploy 还是 v0.18.0。</li><li>TGI 还是去年 12 月的 v3.3.7。</li><li>llama.cpp 本窗口没出新快照。</li><li>llama.cpp 的快照就是每日构建的开发版，不算正式发版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv API 这轮连不上，直连两次都超时。</li><li>窗口（15:00–17:00 UTC）本就结构性零入库。</li><li>8 点版已确认最新提交还停在 9/30 那批。</li><li>这轮论文线就记一笔，不挖了。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>Nebius 收购了一家以色列公司 Inferize。</li><li>交易价估计 1 到 1.5 亿美元。</li><li>官方没公布金额，数字是 CTech 和 Globes 猜的。</li><li>Inferize 的技术能给&quot;热好的&quot;推理引擎拍快照。</li><li>类比：游戏打到 boss 门前先存个档。</li><li>下次扩容或抢回 spot 节点时，直接读档恢复。</li><li>快照里有 CPU 和 GPU 状态。</li><li>编译好的 kernel（计算核）和 CUDA graph 也在里面。</li><li>它在引擎底下干活，不用改引擎和应用。</li><li>公司自称：DeepSeek V4 Pro 读档只要 20 秒。</li><li>冷启动则要 23 分钟。</li><li>快了约 70 倍。</li><li>注意：这是他们自己测的，没人独立验证过。</li><li>这笔交易并入 Nebius 的 Token Factory。</li><li>Token Factory 是推理托管平台。</li><li>划重点：做弹性扩缩容的人值得留意这条。</li><li>你用 H100/MI350X 跑 serving 时。</li><li>最烦的就是扩容慢。</li><li>读档恢复能省下这笔等待。</li><li>同类思路还有 Modal（2000 秒压到 50 秒）。</li><li>vLLM 也有实验性的引擎快照功能，但只支持单卡。</li><li>原文：<a href="https://runtimewire.com/article/nebius-acquires-inferize-gpu-inference">https://runtimewire.com/article/nebius-acquires-inferize-gpu-inference</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>补报一篇昨天更新的多模态部署指南。</li><li>出自 GPU 云厂商 Spheron 的技术博客。</li><li>讲的是 vLLM-Omni（三阶段解耦方案）。</li><li>核心观点：两阶段解耦对纯文本够用了。</li><li>但多模态模型还有个 encoder（视觉编码器）。</li><li>图片/音频先要过 ViT（视觉 Transformer）这一关。</li><li>跟 prefill 抢卡，越堆越慢。</li><li>做法是再拆出一层 encoder 池。</li><li>编码、prefill、decode 三拨人各干各的。</li><li>类比：厨房加了个专职备菜员。</li><li>切配（encoder）专人干。</li><li>烹饪（prefill）和装盘（decode）也一样。</li><li>三个池之间靠 NIXL（英伟达高速传输库）传数据。</li><li>每次请求要跳两站。</li><li>第一跳 encoder→prefill。</li><li>第二跳 prefill→decode。</li><li>RDMA（远程直接内存访问）下开销 3–12 毫秒。</li><li>并发到 64 以上才划算，并发低反而亏。</li><li>跟你评估 SGLang P/D 解耦对得上。</li><li>8 点版那份 vLLM 官方手册也是这个方向。</li><li>那份是两阶段的，这篇把 encoder 也拆出来了。</li><li>vendor 博客带自家云广告，数字自己斟酌着看。</li><li>原文：<a href="https://www.spheron.network/blog/deploy-vllm-omni-disaggregated-multimodal-serving-gpu-cloud/">https://www.spheron.network/blog/deploy-vllm-omni-disaggregated-multimodal-serving-gpu-cloud/</a></li></ul>
+<p>*去重说明：本轮窗口（10/1 08:00→10:00 PDT = 10/1 15:00→17:00 UTC）。框架六家经 GitHub releases API 实测均无正式新版（llama.cpp 本窗口无新快照）；arXiv API 两次直连超时（符合 15–17 UTC 结构性零入库预期，8 点版已确认最新提交停在 9/30 批）。Nebius 收购 Inferize（10/1 7:14 PDT 发布，窗口前 46 分钟）经 briefs 全文 grep 确认从未报过，主代理已 browser.open 全文核验；Spheron vLLM-Omni 三阶段解耦指南（约 1 天前更新）经 briefs 全文 grep 确认从未报过，主代理已 browser.open 全文核验。播客线：Spotify 已保存节目 + YouTube 三个目标频道 24 小时内无 serving 新料。关键人物（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）无窗口内实质动态；机器之心/量子位无相关新报道；Simon Willison、Latent Space newsletter、lmsys.org 博客无新帖。本轮无「值得深读」新条目（两条均为新闻/厂商指南，按宁缺毋滥不转深读）。*</p></body></html>
