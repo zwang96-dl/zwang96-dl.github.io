@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月1日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-01"/>
+<meta name="doc-ts" content="2026-10-01T15:05:02"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-01（8点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-01（8点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发正式新版。</li><li>GitHub releases API 逐家核验过，版本号全停在原地。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>LMDeploy 还是 v0.18.0。</li><li>TensorRT-LLM 还是 v1.3.0rc29 预览版。</li><li>TGI 还是去年 12 月的 v3.3.7。</li><li>llama.cpp 新增 b11321 每日快照。</li><li>07:09 落在窗口内。</li><li>快照按惯例不算正式版，这里只记一笔。</li></ul>
+<ul><li>补报一条上轮漏的。</li><li>llama.cpp 合并了 GLM-5.3-Flash 支持。</li><li>PR #27773，9/29 深夜合并。</li><li>标签里带了 highlight。</li><li>GLM-5.3-Flash 是 GLM-5 系列里第一个原生多模态。</li><li>意思就是：这个模型现在能在 llama.cpp 本地跑了。</li><li>链接：<a href="https://github.com/ggml-org/llama.cpp/pull/27773">https://github.com/ggml-org/llama.cpp/pull/27773</a></li></ul>
+<h2>新技术与论文</h2>
+<ul><li>这轮窗口内 arXiv 没有新批次。</li><li>关键词查过，最新提交还停在 9/30 那批。</li><li>9/30 那批的内容往期都报过，这轮不重复。</li></ul>
+<ul><li>vLLM 官方出了一篇 P/D 解耦实战手册。</li><li>P/D 就是 prefill 和 decode 分卡跑。</li><li>一个 vllm serve 平时同时干三份工。</li><li>prefill 读 prompt，decode 吐 token。</li><li>还有一堆 CPU 杂活。</li><li>长 prompt 一来，几十个正在吐字的请求全被卡住。</li><li>类比：一个厨师又切菜又炒菜又洗碗，高峰期全乱套。</li><li>解法就是分工：prefill 一批卡，decode 一批卡。</li><li>中间传 KV cache（草稿纸：每 token 的注意力键值）。</li><li>搬运工叫 KV connector。</li><li>NIXL（英伟达高速传输库）是主力。</li><li>实测数据很实在：两张 L40S，8k 长 prompt。</li><li>负载到 0.4 req/s，不拆的 p99 字间延迟翻了 7 倍。</li><li>从 23 ms 跳到 169 ms。</li><li>2 req/s 时冲到 263 ms。</li><li>拆了之后全程压在 25–52 ms，尾巴被按住了。</li><li>AMD 那边更夸张：8 张 MI300X 上达标率翻 2.4 倍。</li><li>划重点：解耦买的是达标率，不是峰值吞吐。</li><li>同样的卡，不设延迟目标时吞吐不一定涨。</li><li>坑也写明白了：KV 传得慢就先修传输。</li><li>每个首字都要为传输买单，首字延迟敏感就别拆。</li><li>多模态也有份：encoder 解耦，图片预处理搬去 CPU。</li><li>「值得深读」：中文精读笔记已生成，含原文两张图。</li><li>跟你评估 SGLang P/D 解耦直接可比，调参旋钮都列了。</li><li>原文：<a href="https://vllm.ai/blog/2026-09-29-disaggregated-serving-guide">https://vllm.ai/blog/2026-09-29-disaggregated-serving-guide</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮 2 小时窗口里，业内新闻线没新料。</li><li>HN、Reddit、X、中文媒体都扫过，无实质动态。</li><li>lmsysorg、karpathy、jimfan 都很安静。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>播客线：已保存节目 24 小时内无新增 serving 单集。</li><li>Spotify 实查过。</li><li>Latent Space 最新还是 9/30 那期。</li><li>那期聊的是 computer use，不是 serving。</li><li>YouTube 上官方频道也无新 serving 内容。</li></ul>
+<p>*去重说明：本轮窗口（10/1 06:00→08:00 PDT = 10/1 13:00→15:00 UTC）。GitHub releases API 实测六家框架均无正式新版（llama.cpp b11321 每日快照 07:09 PDT 落在窗口内，按惯例不报）；arXiv 多组关键词查最新提交仍停在 9/30 批，窗口内零入库；新闻扫荡覆盖 HN/Reddit/X/中文媒体/博客/newsletter，播客扫荡覆盖 Spotify 已保存节目与 YouTube 官方频道，主代理另行核验 vLLM 官方博客原文与 llama.cpp PR #27773；vLLM P/D 解耦实战指南（9/29 发布）与 llama.cpp GLM-5.3-Flash 支持合并（9/29 23:20 PDT）经 briefs 全文 grep 确认往期未报过；关键人物（lmsysorg、karpathy、jimfan）无新动态。本轮新增「值得深读」：vLLM 官方 P/D 解耦实战手册（跟 SGLang P/D 解耦评估直接可比，含调参旋钮与决策表），深读笔记已生成（含原文 Figure 1/2，HTML 版图片已内嵌）。*</p></body></html>
