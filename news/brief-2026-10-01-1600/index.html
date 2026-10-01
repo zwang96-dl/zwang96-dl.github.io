@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月1日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-01"/>
+<meta name="doc-ts" content="2026-10-01T23:02:20"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-01（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-01（16点版）</h1>
+<h2>框架更新</h2>
+<ul><li>vLLM 憋了个大招：v0.31.0 的 rc 系列出了三版。</li><li>rc1 在 9/28，rc2 在 9/29，rc3 在今天凌晨。</li><li>对比 v0.30.0，多了 722 个提交。</li><li>主线就一个：Model Runner V2 转正。</li><li>Model Runner V2 是 vLLM 的新一代模型执行引擎。</li><li>新引擎装上了 spec decode 的 draft 模型支持。</li><li>投机解码（先让小模型打草稿，大模型只改错）。</li><li>rc3 还加了 randomized dummy inputs。</li><li>随机假输入，专门用来喂性能分析。</li><li>Mamba 系模型的 prefill 也修了一批 Bug。</li><li>prefill 就是模型先&quot;吃&quot;提示词的阶段。</li><li>说白了：下个正式版要换&quot;心脏&quot;。</li><li>玩 spec decode 的可以蹲一波。</li><li>提醒：stable 还是 v0.30.0（9/22），rc 只管尝鲜。</li><li>生产环境先别动，等正式版。</li><li>SGLang 的 stable 还是 v0.5.20（9/18）。</li><li>v0.5.21 只有 tag，release 页面还是空的。</li><li>TRT-LLM 预览版 v1.3.0rc29，正式版 v1.2.1。</li><li>LMDeploy v0.18.0，TGI v3.3.7，都没动。</li><li>llama.cpp 只有每日快照，按惯例不报。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮窗口内零入库。</li><li>3 组关键词按提交时间亲手扫过，最新停在 9/30。</li><li>新批次 00:00 UTC（今天 17:00 PDT）才来。</li><li>这是已知规律，不用担心漏了。</li><li>补扫捞到的 5 篇候选，grep 一查全是往期报过的。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>Cerebras 官宣：解耦让推理吞吐翻了 5 倍。</li><li>说白了，算力和显存各干各的。</li><li>prefill 吃算力，decode 吃显存，分开就不打架。</li><li>就像流水线分工：一个备料，一个炒菜。</li><li>同样的系统数量，token 生成速度没掉。</li><li>出自官方博客，Isaac Tai 和 Zhenwei Gao 写的。</li><li>这是个系列的开篇，科普味很重。</li><li>对你意味着什么：芯片厂商亲自下场验证 P/D 解耦。</li><li>跟你正在评估的 SGLang 解耦方向是同一个逻辑。</li><li>8点版 vLLM 官方手册是这条线。</li><li>10点版的 Spheron 指南也是。</li><li>提醒：5 倍是厂商自己测的 early results，看看就好。</li><li>来源：<a href="https://www.unite.ai/cerebras-reports-5x-inference-throughput-gain-from-disaggregation/">https://www.unite.ai/cerebras-reports-5x-inference-throughput-gain-from-disaggregation/</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>社区线这轮没挖到新东西。</li><li>HN、Reddit、X 大V、中文媒体都没窗口内新料。</li><li>Latent Space 最新 8 期都看过。</li><li>没有 serving 主题的专集。</li><li>Threads 上那条 Cerebras 5x 是同源转发，不算。</li></ul>
+<p>*去重说明：本轮窗口（10/1 14:00→16:00 PDT = 10/1 21:00→23:00 UTC）。框架六家经 GitHub releases API 亲手核验：vLLM v0.31.0 rc1–rc3 系列为首次收录（briefs 全文 grep 零命中；rc1 打在 9/28、rc2 打在 9/29、rc3 打在 10/1 凌晨，对比 v0.30.0 共 722 个提交）；SGLang stable 仍 v0.5.20（v0.5.21 只有 tag，release 页面还是空的）；TRT-LLM 预览版 v1.3.0rc29；LMDeploy v0.18.0（注意：仓库路径是 InternLM/lmdeploy，lmdeploy/lmdeploy 已 404）；TGI v3.3.7；llama.cpp 每日快照按惯例不报。arXiv 3 组关键词（KV cache / speculative decoding / disaggregation）按 submittedDate 倒序亲手扫过：窗口内零入库（符合 00:00 UTC 日批次规律）；补扫 5 篇候选（2609.40118、2609.39329、2609.39131、2609.37532、2609.40127）经 grep 确认均为往期已报。Cerebras 解耦博客（Unite.AI 覆盖，约 23 小时前发布）经 briefs 全文 grep 确认首次收录。主动排除：Futurum Group 的 Cerebras 4400 tokens/s 分析（新闻本体已报，只有数字和观点，不重复收录）、Threads 转发 Cerebras 5x（同源）、&quot;Devin 在 Vera Rubin NVL72 上 4.8x&quot;（第三方营销口径，无独立验证）。本轮无「值得深读」新条目（vLLM rc 系版本新闻、Cerebras 系厂商博客，按宁缺毋滥不转深读）。*</p></body></html>
