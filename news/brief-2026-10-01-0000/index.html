@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月1日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-01"/>
+<meta name="doc-ts" content="2026-10-01T07:00:03"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-01（0点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-01（0点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发正式新版。</li><li>GitHub releases API 逐家核验过，版本号全停在原地。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>LMDeploy 还是 9/28 的 v0.18.0。</li><li>TensorRT-LLM 还是 9/29 的 v1.3.0rc29 预览版。</li><li>TGI 还是去年 12 月的 v3.3.7。</li><li>llama.cpp 新增 b11310、b11311、b11312 三个每日快照。</li><li>快照按惯例不算正式版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>这轮收 4 篇新论文，往期简报都没报过。</li><li>其中 1 篇标了「值得深读」，精读笔记已生成。</li></ul>
+<ul><li>KVTether：Agent 的 KV 缓存，不该只懂 LRU。</li><li>Agent 跑起来，KV 缓存是最贵的账单之一。</li><li>但框架管的是&quot;消息&quot;，serving 层只认 token。</li><li>消息逻辑上死了，KV 还占着显存。</li><li>实测僵尸 KV 最高占掉 LMCache 36.3% 容量。</li><li>LMCache 是一个开源 KV 缓存方案。</li><li>更惨的是 LRU 杀错人。</li><li>Agent 里新产生的 KV 往往在等工具，离复用还远。</li><li>LRU 以为&quot;新=快用&quot;，71%–95% 的淘汰杀错了对象。</li><li>KVTether 的解法是把消息的&quot;生死簿&quot;传进来。</li><li>六个语义原语统一各家框架的操作。</li><li>事件驱动管理器把消息事件翻译成 KV 状态。</li><li>死 KV 主动删，活 KV 用 MRU（跟 LRU 反着来）保。</li><li>12 张 GB200、三条生产 trace 实测。</li><li>命中率比 LMCache 高 33.3 个百分点。</li><li>高负载下 LMCache 命中率塌到 10.2%，它还保住 49.5%。</li><li>端到端延迟平均降 16.5%，单任务价格平均降 40%。</li><li>「值得深读」：中文精读笔记已生成。</li><li>含原文 Figure 1/7/11（消息生命周期、设计总览、评测数据）。</li><li>跟你研究的 KV 缓存优化直接相关：淘汰策略可借鉴。</li><li>论文：<a href="https://arxiv.org/abs/2609.39819">https://arxiv.org/abs/2609.39819</a></li></ul>
+<ul><li>SparseEngine：稀疏注意力的&quot;操作系统&quot;。</li><li>背景：长上下文 Agent 的历史越攒越长，KV 和计算都吃不消。</li><li>稀疏注意力能省，但各家 KV 表示五花八门，接不进现有引擎。</li><li>SparseEngine 从头造了个&quot;稀疏优先&quot;的推理引擎。</li><li>15 种稀疏方法共享一套生命周期契约。</li><li>每种方法自己管 KV 表示，状态流转统一协调。</li><li>还带了 Chain Cache（历史续跑）和可控前缀剪枝。</li><li>实测：KV 淘汰场景吞吐 10 倍以上。</li><li>同并发下 decode 比 vLLM 快 2.5 倍。</li><li>Agent 基准端到端快 2 倍。</li><li>一句话：想在生产里上稀疏注意力，这套&quot;共用底盘&quot;值得看。</li><li>论文：<a href="https://arxiv.org/abs/2609.39068">https://arxiv.org/abs/2609.39068</a></li></ul>
+<ul><li>投机解码的草稿训练，有个&quot;标签作废&quot;的坑。</li><li>草稿模型常拿外部语料训练，一个词对不上，后面全白学。</li><li>以前做法是直接把对不上的槽位扔掉，浪费严重。</li><li>这篇用 rollout（目标模型自己跑一遍）重打标签。</li><li>贪心目标分布替换语料标签，所有槽位都保住监督信号。</li><li>实测：贪心接受长度比 DFlash 最多涨 36.5%。</li><li>训一轮就超过以前最好的&quot;擦除&quot;策略。</li><li>视觉-语言语料上也有效。</li><li>一句话：草稿模型训不动的，先看看是不是标签全扔了。</li><li>论文：<a href="https://arxiv.org/abs/2609.38795">https://arxiv.org/abs/2609.38795</a></li></ul>
+<ul><li>DeCoPrune：视频生成的 KV 剪枝新思路。</li><li>自回归视频扩散（逐帧生成视频）历史越长 KV 越大。</li><li>以前剪枝看注意力局部信号，不直接量&quot;这块信息有没有用&quot;。</li><li>DeCoPrune 把剪枝当成去噪一致性问题。</li><li>模型自己中间预测和最终结果差得大的 token，说明信息独特。</li><li>只留这些，剪掉&quot;可预测&quot;的。</li><li>实测：历史 KV token 累计砍掉 85.43%。</li><li>一句话：多模态视频生成的 KV 优化，思路可迁移到 VLM。</li><li>论文：<a href="https://arxiv.org/abs/2609.39096">https://arxiv.org/abs/2609.39096</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮 2 小时窗口里，业内新闻线没新料。</li><li>搜了一圈，出来的都是几天前的内容，不重复报。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>lmsysorg、karpathy、jimfan 这两天都没实质动态。</li><li>机器之心、量子位、Simon Willison 都没新的 serving 内容。</li><li>HN 上 Anthropic 规模化 serving 那帖，04 点版已报过。</li></ul>
+<p>*去重说明：本轮窗口（9/30 22:00→10/1 00:00 PDT = 10/1 05:00→07:00 UTC）。GitHub releases API 实测六家框架均无正式新版（llama.cpp 新增 b11310/b11311/b11312 每日快照，快照按惯例不报）；本轮收录 4 篇均为 briefs 全文 grep 确认往期未报过的：KVTether（9/30）、SparseEngine（9/30）、Recovering Off-Policy Supervision（9/30）、DeCoPrune（9/30）；22 点版的 DLFP/Provenance/HBF/PatchKV/UBTree/ThunderEP 不重复；本轮新增「值得深读」：KVTether（Agent serving 的生命周期感知 KV 缓存管理，淘汰策略可借鉴），深读笔记已生成（含原文 Figure 1/7/11，HTML 版图片已内嵌）。*</p></body></html>
