@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月1日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-01"/>
+<meta name="doc-ts" content="2026-10-01T13:04:14"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-01（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-01（6点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发正式新版。</li><li>GitHub releases API 逐家核验过，版本号全停在原地。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>LMDeploy 还是 v0.18.0。</li><li>TensorRT-LLM 还是 v1.3.0rc29 预览版。</li><li>TGI 还是去年 12 月的 v3.3.7。</li><li>llama.cpp 新增 b11320 每日快照，落在窗口内。</li><li>快照按惯例不算正式版，这里只记一笔。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>本轮窗口内 arXiv 没有新批次。</li><li>下面 5 篇是 9/29–9/30 批次里往期漏掉的。</li><li>briefs 全文 grep 确认没报过，这轮补上。</li></ul>
+<ul><li>CoVisco：视觉编码器里直接&quot;压&quot;token。</li><li>多模态最烧钱的是视觉 token，26 万个 patch 很常见。</li><li>以前都是事后压缩，训练部署两张皮。</li><li>CoVisco 把压缩做进编码器：视频切段、每段派 100 个代表。</li><li>代表就是 abstract token（可学习的压缩表示）。</li><li>段内随便聊，段间只走代表传话。</li><li>还能直接读 H.265 压缩流，不用先解码。</li><li>64 帧视频只交 400 个 token，成绩基本打平。</li><li>对比基线要交 10368 个，差了 26 倍。</li><li>类比：以前写完长报告再删节，现在直接练写摘要。</li><li>「值得深读」：中文精读笔记已生成。</li><li>含原文 Figure 1/2：框架总览和细节可视化。</li><li>跟你多模态 encoder 侧优化、prefill 降本直接相关。</li><li>论文：<a href="https://arxiv.org/abs/2609.39924">https://arxiv.org/abs/2609.39924</a></li></ul>
+<ul><li>Triage：音频 token 的重要性，编码器看一眼就知道。</li><li>1 分钟语音变成上千个 token。</li><li>这些全都要走 prefill。</li><li>以前剪枝都等 LLM 跑起来再说，太晚了。</li><li>这篇发现：音频 token 的注意力排名，编码器输出就能线性预测。</li><li>13 个模型里 11 个达标，准确率不低。</li><li>方法叫 Triage：进 LLM 之前先砍一刀。</li><li>Qwen2.5-Omni-3B 上，能塞的音频变多了。</li><li>从 21.8 分钟涨到 62 分钟。</li><li>最狠的档位，一张卡能多扛 4 倍并发。</li><li>类比：面试前先看简历筛一轮，不用全员面完再定。</li><li>论文：<a href="https://arxiv.org/abs/2609.38878">https://arxiv.org/abs/2609.38878</a></li></ul>
+<ul><li>GleanVID：视频 token 怎么选，要看&quot;互补&quot;。</li><li>现有方法各评各的，跨帧的重复证据全留下了。</li><li>GleanVID 把选 token 当成攒证据的过程。</li><li>先按时间新颖度给每帧分预算，再挑互补的 token。</li><li>免训练，推理时直接用。</li><li>只留 25% 的 token，Qwen3-VL 保住 98.6% 性能。</li><li>prefill 延迟降 44.7%。</li><li>类比：剪辑集锦不按每段打分，而看整片信息量。</li><li>论文：<a href="https://arxiv.org/abs/2609.37042">https://arxiv.org/abs/2609.37042</a></li></ul>
+<ul><li>OmniRoute：音视频一起上，按时间分主次。</li><li>全模态模型把音频和视频 token 交错排，prefill 很贵。</li><li>这篇两步走：先看哪段时间内哪个模态更重要。</li><li>再按预算压主模态，校准从模态的保留量。</li><li>也是免训练，推理时直接用。</li><li>四个基准上，效率和精度的权衡都更好。</li><li>类比：开会时谁发言含金量高，就多给谁时间。</li><li>论文：<a href="https://arxiv.org/abs/2609.37052">https://arxiv.org/abs/2609.37052</a></li></ul>
+<ul><li>MoE 推理的通信账：仿真告诉你瓶颈在哪。</li><li>MoE 推理跨卡，通信时间占了九成以上。</li><li>这篇用 ASTRA-sim 跑了 768 组对照仿真。</li><li>结论：专家并行拉满比张量并行划算，差 3.7–4.4 倍。</li><li>集合通信算法选 Ring，别用 Double Binary Tree。</li><li>RoCE 上拥塞控制用 HPCC，别用 DCQCN。</li><li>类比：仓库发货，路线规划比多雇司机重要。</li><li>注意：这是仿真，不是真机实测。</li><li>论文：<a href="https://arxiv.org/abs/2609.37828">https://arxiv.org/abs/2609.37828</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮 2 小时窗口里，业内新闻线没新料。</li><li>HN、Reddit、X、中文媒体都没实质动态。</li><li>The Batch 9/30 有两条相关。</li><li>DeepSeek 降本和 OpenAI-AMD 合作。</li><li>往期简报都报过，这轮不重复。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>这轮 2 小时窗口里，访谈线没新料。</li><li>Latent Space 最新几期聊的都不是 serving。</li><li>Spotify 已保存节目扫过，无新增 serving 单集。</li><li>几个关键人物都没实质动态。</li><li>lmsysorg、karpathy、jimfan 都很安静。</li></ul>
+<p>*去重说明：本轮窗口（10/1 04:00→06:00 PDT = 10/1 11:00→13:00 UTC）。GitHub releases API 实测六家框架均无正式新版（llama.cpp 新增 b11320 每日快照，11:20 UTC 落在窗口内，快照按惯例不报）；窗口内 arXiv 无新批次，HN/Reddit/X/中文媒体/关键人物/播客均无实质新料；本轮收录 5 篇论文均为 9/29–9/30 批次、briefs 全文 grep 确认往期未报过的补报：CoVisco（2609.39924）、Triage（2609.38878）、GleanVID（2609.37042）、OmniRoute（2609.37052）、MoE 通信仿真（2609.37828）；The Batch 9/30 的 DeepSeek V3.2-Exp 降本（9/10、9/19 的简报已报）、OpenAI-AMD 6GW（2025 年 10 月旧闻，AMD 万亿市值 10/1 的 2点版已报）均不重复收录；本轮新增「值得深读」：CoVisco（多模态视觉编码器原生 token 压缩，64 帧只交 400 token），深读笔记已生成（含原文 Figure 1/2，HTML 版图片已内嵌）。*</p></body></html>
