@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月1日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-01"/>
+<meta name="doc-ts" content="2026-10-01T09:05:34"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-01（2点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-01（2点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发正式新版。</li><li>GitHub releases API 逐家核验过，版本号全停在原地。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>LMDeploy 还是 v0.18.0。</li><li>TensorRT-LLM 还是 v1.3.0rc29 预览版。</li><li>TGI 还是去年 12 月的 v3.3.7。</li><li>llama.cpp 新增 b11313 每日快照。</li><li>发布时间 08:05 UTC，正好落在本轮窗口里。</li><li>快照按惯例不算正式版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>本轮窗口内 arXiv 没有新批次。</li><li>下面 5 篇是 9/30 批次里往期漏掉的。</li><li>briefs 全文 grep 确认没报过，这轮补上。</li></ul>
+<ul><li>STEPQuant：循环状态的量化，得看&quot;住多久、住哪格&quot;。</li><li>线性注意力把历史压成一块固定大小的&quot;循环状态&quot;。</li><li>线性注意力是一种 KV 不随长度涨的注意力变体。</li><li>并发一高，这块状态也吃显存。</li><li>直接量化成低精度，模型精度会崩。</li><li>因为误差会跟着状态更新一轮轮传下去。</li><li>论文发现：误差&quot;住多久&quot;和&quot;住哪格&quot;，决定伤不伤精度。</li><li>时间维按&quot;寿命&quot;分配精度。</li><li>门控是控制记忆忘多快的开关。</li><li>半衰期是&quot;忘一半要多少 token&quot;。</li><li>寿命越长的单元，误差传得越久，分更高精度。</li><li>空间维按&quot;住址&quot;双轴拟合。</li><li>key 行和 value 列各配一套 scale。</li><li>scale 是量化时用的缩放系数。</li><li>实测：6-bit 追平 FP32，4-bit 超过均匀 INT8。</li><li>接入 SGLang 加优化 kernel：状态内存压 5 倍多。</li><li>总 serving 内存最高降 68.7%。</li><li>类比：酒店按住多久定装修。</li><li>常住客住套房，过客住标间，总预算不变。</li><li>「值得深读」：中文精读笔记已生成。</li><li>含原文 Figure 1/2/3：动机、空间结构、serving 效率。</li><li>跟你研究的量化方向直接相关。</li><li>循环状态是权重、KV 之外的新维度。</li><li>SGLang 有现成 kernel，可以直接拿来试。</li><li>论文：<a href="https://arxiv.org/abs/2609.38169">https://arxiv.org/abs/2609.38169</a></li></ul>
+<ul><li>DEdit：投机解码的草稿，写错了可以改。</li><li>投机解码是先让小模型打草稿、大模型批量改。</li><li>扩散式草稿模型一次吐多个 token。</li><li>但这些 token 各写各的，前面错一个后面全作废。</li><li>哪怕后面的预测是对的，也一起被扔掉。</li><li>DEdit 让草稿模型能&quot;回头改&quot;。</li><li>后面的预测当双向上下文，修前面的错。</li><li>还能顺手把通过的草稿再延长一点。</li><li>实测 Qwen3-4B/8B：平均加速 5.72×/5.97×。</li><li>七个基准里，它的接受率都是最高。</li><li>训练技巧叫 ProposalMix。</li><li>按首轮置信度混草稿和真值。</li><li>教模型&quot;修错可以，别乱改&quot;。</li><li>类比：以前写错一个字整页撕掉。</li><li>现在拿橡皮擦改，省纸。</li><li>论文：<a href="https://arxiv.org/abs/2609.38510">https://arxiv.org/abs/2609.38510</a></li></ul>
+<ul><li>LSP：学出来的低秩压缩，比拍脑袋砍维度更准。</li><li>低秩分解是把大矩阵拆成两个小矩阵。</li><li>省显存也省算力，大家都在用。</li><li>但以前&quot;砍哪个子空间&quot;都是局部拍脑袋。</li><li>看激活能量、逐层重建误差，都只看一层。</li><li>误差随层数累积，压得越狠崩得越快。</li><li>LSP 端到端学&quot;砍哪里最划算&quot;。</li><li>LSP 是可学习的投影方法。</li><li>每层配一个正交投影器，一起对着全局目标优化。</li><li>权重冻结不动，只学投影器。</li><li>训完合并成标准低秩因子，直接能用。</li><li>注意力里还能只缓存一个窄隐变量。</li><li>不用存完整的 KV，顺手省了缓存。</li><li>在 OPT、Qwen3-4B、Llama-2-7B 上都有效。</li><li>一句话：别再手调了，让模型自己学砍哪里。</li><li>论文：<a href="https://arxiv.org/abs/2609.40127">https://arxiv.org/abs/2609.40127</a></li></ul>
+<ul><li>Cascadia：拿 Intel AI PC 组&quot;去中心化&quot;推理集群。</li><li>不用买 GPU 服务器，用现成的 Intel AI PC。</li><li>每台的 CPU、核显、NPU 都用上。</li><li>没有中央调度节点。</li><li>节点用 libp2p 组网，自己 gossip 负载。</li><li>libp2p 是一种点对点组网协议。</li><li>三种跑法：整模型单节点、多副本、流水线切分。</li><li>还支持 KV 缓存跟着请求&quot;搬家&quot;。</li><li>搬错了就地重算，不纠结。</li><li>实测 3 节点跑 Phi-3.5-mini：吞吐是单节点的 3.10×。</li><li>一句话：边缘推理的&quot;丐版集群&quot;思路。</li><li>省钱，但别指望打生产大模型。</li><li>论文：<a href="https://arxiv.org/abs/2609.38697">https://arxiv.org/abs/2609.38697</a></li></ul>
+<ul><li>ReCAP：Agent 的记忆压缩，不用每次都&quot;重读一遍&quot;。</li><li>Agent 历史越长，prefill 越贵。</li><li>压缩记忆是刚需。</li><li>以前要么调模型做摘要，要么重编码 KV。</li><li>都费算力。</li><li>新请求一来，&quot;哪些历史重要&quot;就变了。</li><li>以前的方法得把历史重算一遍。</li><li>ReCAP 把注意力里的重要性分数存下来。</li><li>加上消息之间的依赖关系，组成一张&quot;上下文图&quot;。</li><li>新请求来了，按图挑消息。</li><li>不用再调模型，省一次大计算。</li><li>实测：比 Codex 默认的摘要压缩，延迟降约 95%。</li><li>每次调用带的历史减半，任务质量不掉。</li><li>一句话：Agent serving 的&quot;记忆账本&quot;。</li><li>跟 KVTether 的&quot;生死簿&quot;是同一类思路。</li><li>论文：<a href="https://arxiv.org/abs/2609.40118">https://arxiv.org/abs/2609.40118</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>World Labs 加入 AMD，HN 评论区聊到了推理生态。</li><li>World Labs 是李飞飞的公司，做空间智能那家。</li><li>帖子：<a href="https://news.ycombinator.com/item?id=49888432">https://news.ycombinator.com/item?id=49888432</a></li><li>评论者 imjonse 说了句实在话。</li><li>torch、vLLM、SGLang、llama.cpp 这四家。</li><li>在 AMD 上已经挺能打。</li><li>跟 CUDA 的差距不大，而且比以前好装得多。</li><li>对 AMD GPU 推理生态是实质利好。</li><li>你手里的 MI350X、MI300X 也沾光。</li></ul>
+<ul><li>Fireworks AI 悄悄涨了 serverless 的价。</li><li>涨的是 DeepSeek V4.1 Flash。</li><li>9/30 17:00 PDT 生效。</li><li>Standard 档输入涨价了。</li><li>每 1M token：$0.22 涨到 $0.30。</li><li>输出从 $0.66 涨到 $1.20，涨得更狠。</li><li>缓存输入从 $0.007 降到 $0.006，留了颗糖。</li><li>官方说法是基础设施改进，缓存命中率更高了。</li><li>来源是第三方 changelog 镜像，非官方原文。</li><li><a href="https://github.com/uwuclxdy/ai-pricelog/blob/HEAD/state/announce/fireworks/changelog.md">https://github.com/uwuclxdy/ai-pricelog/blob/HEAD/state/announce/fireworks/changelog.md</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>这轮 2 小时窗口里，访谈线没新料。</li><li>lmsysorg、karpathy、jimfan 都没实质动态。</li><li>Latent Space 最新两期聊的都不是 serving。</li><li>一期 Computer Use，一期 Claude Code。</li><li>Simon Willison 那边没新的 serving 内容。</li><li>机器之心、量子位也没有。</li><li>Spotify 已保存节目扫过，无新增 serving 单集。</li></ul>
+<p>*去重说明：本轮窗口（10/1 00:00→02:00 PDT = 10/1 07:00→09:00 UTC）。GitHub releases API 实测六家框架均无正式新版（llama.cpp 新增 b11313 每日快照，08:05 UTC 落在窗口内，快照按惯例不报）；窗口内 arXiv 无新批次，X/Reddit/HN/关键人物/中文媒体/播客均无实质新料；本轮收录 5 篇论文均为 9/30 批次、briefs 全文 grep 确认往期未报过的补报：STEPQuant（2609.38169）、DEdit（2609.38510）、LSP（2609.40127）、Cascadia（2609.38697）、ReCAP（2609.40118）；业内新闻 2 条为过去 24 小时内未报过的：World Labs 加入 AMD（HN 帖 49888432，简报历史从未报过）、Fireworks AI 调价（第三方 changelog 镜像，非官方原文）；本轮新增「值得深读」：STEPQuant（线性注意力循环状态的时空量化，SGLang 已有 kernel 实现），深读笔记已生成（含原文 Figure 1/2/3，HTML 版图片已内嵌）。*</p></body></html>
