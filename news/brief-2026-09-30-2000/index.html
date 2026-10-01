@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 9月30日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-09-30"/>
+<meta name="doc-ts" content="2026-10-01T03:01:18"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-09-30（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-09-30（20点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发正式新版。</li><li>GitHub API 逐家核验过，全都停在原地。</li><li>vLLM 还是 v0.30.0，SGLang 还是 v0.5.20。</li><li>LMDeploy 最新是 9/28 的 v0.18.0。</li><li>TGI 还停在去年 12 月的 v3.3.7。</li><li>TRT-LLM 的 v1.3.0rc29 是 prerelease。</li><li>llama.cpp 新增 b11309–b11311 三个每日快照。</li><li>快照和 prerelease 按惯例都不算正式版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 9/30 批次这轮终于进了 API 索引。</li><li>上轮 18 点版查时还不可见，这轮补上。</li><li>六篇跟推理 serving 相关的，逐篇确认往期没报过。</li></ul>
+<ul><li>MoSE：给推理集群的网络装了个&quot;换挡器&quot;。</li><li>P/D 解耦会把 KV 搬运变成主干道流量。</li><li>但集群网络多半按训练那套静态拓扑配的。</li><li>KV 得绕 2 到 3 跳，才能从 prefill 送到 decode。</li><li>MoSE 让网络跟着负载改道。</li><li>推理忙就直连 prefill 和 decode，训练忙就切回均匀扩张器。</li><li>靠光电路交换重配：用光开关重排链路，不加端口、不改路由。</li><li>1024 组仿真，跑了 20 个随机种子。</li><li>KV 通信代价平均降 90.8%，P95 降 91.9%。</li><li>直连比例从 0.4% 涨到 100%。</li><li>KV 平均跳数从 5.66 降到 1.00。</li><li>「值得深读」：中文精读笔记已生成。</li><li>含原文 Figure 1/2/3 和 Table I。</li><li>论文：<a href="https://arxiv.org/abs/2609.39138">https://arxiv.org/abs/2609.39138</a></li></ul>
+<ul><li>Herschel：生产环境的推理优化，改成&quot;按需体检&quot;。</li><li>一直开全量 profiling（性能剖析）太贵。</li><li>只采轻量数据，又不够定位问题。</li><li>Herschel 热插拔到运行中的进程上采证据。</li><li>查完就走，不改引擎、不重启。</li><li>定位到低效机制后，让 AI agent 动手改。</li><li>动的是 engine 和 kernel。</li><li>改动先在受控环境里验证。</li><li>专家审核通过才上线，改动保留触发问题的负载。</li><li>受控测试里主动采集对首字延迟的影响不到 0.5%。</li><li>一句话：这就是你 autotuner 想做的&quot;线上诊断+自动改参&quot;。</li><li>论文：<a href="https://arxiv.org/abs/2609.40247">https://arxiv.org/abs/2609.40247</a></li></ul>
+<ul><li>Inference Auctions：算力不够分时，拿&quot;拍卖&quot;来排队。</li><li>用户对延迟的容忍度不同，但现在的分级定价太粗。</li><li>这篇设计了个拍卖机制：用户出价买更快服务。</li><li>算法保证真实出价最划算，还配了个自动出价 agent。</li><li>按预算自动调出价，追求效用最大。</li><li>实测说不丢延迟，还保住了 SGLang 的缓存利用率优势。</li><li>一句话：调度策略的经济学视角，排队论之外的另一种思路。</li><li>论文：<a href="https://arxiv.org/abs/2609.40070">https://arxiv.org/abs/2609.40070</a></li></ul>
+<ul><li>Vosti：给&quot;推理确定性&quot;立了个形式化规矩。</li><li>9/10 的深读笔记讲过：temperature=0 也不可复现。</li><li>vLLM 的 batch-invariant 模式宣称输出稳定。</li><li>SGLang 的确定性模式也这么宣称。</li><li>这篇一测，发现问题了。</li><li>某些执行变化下，它们的 logits（模型输出的原始分数）真不一样。</li><li>Vosti 自己造了个引擎：kernel 选择不看运行时状态。</li><li>KV 缓存跟逻辑 token 前缀绑定，还用 Verus 做了归纳证明。</li><li>一句话：厂商的&quot;确定性模式&quot;被形式化测试翻了车，这篇是修复版。</li><li>论文：<a href="https://arxiv.org/abs/2609.38981">https://arxiv.org/abs/2609.38981</a></li></ul>
+<ul><li>SparLeak：稀疏注意力在共享 GPU 上会&quot;漏&quot;隐私。</li><li>稀疏注意力（只看部分 token 的注意力）的访存模式跟输入有关。</li><li>同卡上的邻居能从 KV 缓存的访问痕迹反推你的问题和回答。</li><li>prefill 阶段能猜查询属性，decode 阶段能重建回答内容。</li><li>一句话：长上下文都在上稀疏注意力，共享 GPU 的隔离假设要打问号了。</li><li>论文：<a href="https://arxiv.org/abs/2609.38830">https://arxiv.org/abs/2609.38830</a></li></ul>
+<ul><li>QATFactory：量化训练对齐部署的开源框架。</li><li>痛点：激进的训练后量化掉精度，但训练时又没对应精度的硬件。</li><li>它在 BF16 里模拟部署时的量化噪声。</li><li>比如在 H100 上训 NVFP4。</li><li>NVFP4 是英伟达 4bit 浮点格式，H100 原生不支持。</li><li>支持 NVFP4、MXFP4、llama.cpp 的 Q4_K。</li><li>导出直给 vLLM 和 llama.cpp。</li><li>8B 到 230B 都测过，导出没有额外转换损失。</li><li>一句话：想上 FP4 又不想掉精度，这套工具链值得看一眼。</li><li>论文：<a href="https://arxiv.org/abs/2609.39223">https://arxiv.org/abs/2609.39223</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>CoreWeave 发布了 Forge：AI 开发层。</li><li>把训练、推理、评估、可观测性、agent 开发收进一个&quot;AI 循环&quot;。</li><li>整合了收购来的 W&amp;B Models 和 OpenPipe 后训练能力。</li><li>CEO 同场说 agent AI 正在拉动 CPU 侧的实质需求。</li><li>一句话：CoreWeave 从&quot;卖卡&quot;转向&quot;卖推理全栈软件&quot;。</li><li>Rubin NVL72 量产上线 08 点版已报过，这轮不重复。</li><li>链接：<a href="https://www.hpcwire.com/aiwire/2026/09/30/coreweave-forge-launches-turning-the-ai-loop-production-run-into-a-better-model-and-agent/">https://www.hpcwire.com/aiwire/2026/09/30/coreweave-forge-launches-turning-the-ai-loop-production-run-into-a-better-model-and-agent/</a></li></ul>
+<ul><li>Blackfuel 正式出 stealth。</li><li>签了 2.5 亿美元多年期合同。</li><li>14 点版报过它跟 Digital Realty 的合作。</li><li>这轮是完整官宣。</li><li>推理栈是 vLLM + SGLang，加自研路由、计量、商业化软件。</li><li>首批巴塞罗那机房跑 AMD MI355X。</li><li>还推了&quot;Logical GPU&quot;。</li><li>按 token 配额租碎片算力，不按整卡。</li><li>甚至用 agent 给每个模型×硬件×负载自动调推理运行时。</li><li>一句话：公开以 vLLM+SGLang 为核心的商业推理栈。</li><li>AMD 卡上的生产部署可以参考。</li><li>链接：<a href="https://www.businesswire.com/news/home/20260930319072/en/Blackfuel-Emerges-From-Stealth-with-More-Than-$250-Million-in-Contracted-Revenue-to-Build-a-Global-AI-Token-Grid">https://www.businesswire.com/news/home/20260930319072/en/Blackfuel-Emerges-From-Stealth-with-More-Than-$250-Million-in-Contracted-Revenue-to-Build-a-Global-AI-Token-Grid</a></li></ul>
+<ul><li>补一条 9/29 的漏报。</li><li>General Compute 跟 Cerebras 签了多年期协议。</li><li>大规模部署 wafer-scale（晶圆级）推理系统。</li><li>首个负载是 agentic coding。</li><li>coding agent 顺序调用多，延迟累积效应明显，吃极速推理。</li><li>预计 2027 年 Q1 上线。</li><li>链接：<a href="https://www.cerebras.ai/press-release/general-compute-selects-cerebras-to-bring-ultra-fast-inference-to-agentic-coding">https://www.cerebras.ai/press-release/general-compute-selects-cerebras-to-bring-ultra-fast-inference-to-agentic-coding</a></li></ul>
+<ul><li>忆联和英特尔出了份 Agentic AI 推理加速白皮书。</li><li>方案是三层 KV Cache。</li><li>GPU HBM → CPU DDR → 远端全闪。</li><li>用忆联 UH812a PCIe 5.0 SSD 做下沉。</li><li>KVShrink 压缩降搬运。</li><li>目标：少重复 prefill、降首字延迟、省 HBM 成本。</li><li>这是厂商 PR（美通社口径），数字按通稿看。</li><li>一句话：KV 缓存&quot;下沉到 SSD&quot;那派，又添一个系统级落地案例。</li><li>链接：<a href="http://www.presentnews.cn/zqkj/128894.html">http://www.presentnews.cn/zqkj/128894.html</a></li></ul>
+<ul><li>SemiAnalysis 有个说法。</li><li>OpenAI 最贵的 Ultrafast 档跑在英伟达 GPU 上。</li><li>不是外界猜的 Cerebras。</li><li>6 倍溢价买的是低 batch 留容量换速度。</li><li>经 officechai 转述，原报告没直接看到，出处打个折。</li><li>一句话：batch 越小越快越贵。</li><li>这正是你 autotuner 要建模的那种权衡。</li><li>链接：<a href="https://officechai.com/ai/openais-gpt-6-1-sol-ultrafast-is-not-running-on-cerebras-but-on-nvidia-gpus-says-semi-analysis/">https://officechai.com/ai/openais-gpt-6-1-sol-ultrafast-is-not-running-on-cerebras-but-on-nvidia-gpus-says-semi-analysis/</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>这轮访谈和播客线没新料。</li><li>Spotify 搜过。</li><li>Latent Space 最新两期跟 serving 弱相关。</li><li>Simon Willison 博客没 serving 新帖。</li><li>机器之心、量子位也没新的。</li><li>lmsysorg、karpathy、jimfan 这两天都没实质动态。</li></ul>
+<p>*去重说明：本轮窗口（9/30 18:00→20:00 PDT = 10/1 01:00→03:00 UTC）。GitHub releases API 实测六家框架均无正式新版（llama.cpp 新增 b11309–b11311 每日快照，prerelease 按惯例不报）；arXiv 9/30 批次在本轮才进入 API 索引（18 点版查时不可见），本轮收录 6 篇全部经 briefs 全文 grep 确认未报过；CoreWeave Rubin NVL72 量产（08 点版）、Blackfuel×Digital Realty 合作（14 点版）、9/28–9/29 论文簇（WUSH-KV、DScale、LongSpark、KV-Kaizen 等）、SuffixReplay（18 点版，已有深读）不重复；本轮新增「值得深读」：MoSE（P/D 解耦集群的网络拓扑可重配），深读笔记已生成（含原文 Figure 1/2/3、Table I，HTML 版图片已内嵌）。*</p></body></html>
