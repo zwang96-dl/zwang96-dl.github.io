@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月1日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-01"/>
+<meta name="doc-ts" content="2026-10-01T20:59:49"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-01（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-01（14点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮全都没发新版。</li><li>GitHub releases API 逐个亲手验过。</li><li>vLLM 停在 v0.30.0（9/22）。</li><li>SGLang 停在 v0.5.20（9/18）。</li><li>TRT-LLM 正式版 v1.2.1，预览版 v1.3.0rc29。</li><li>LMDeploy v0.18.0，TGI 还是 v3.3.7。</li><li>llama.cpp 正式版 v0.5.0（9/23，往期已报）。</li><li>每日快照按惯例不算发版，不报。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮窗口内零入库。</li><li>5 组关键词按提交时间亲手扫过。</li><li>最新提交都停在 9/30 那批。</li><li>符合已知规律：新批次凌晨发布（00:00 UTC）。</li><li>下一轮再看看能不能捞到新料。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>有人赌&quot;用光做计算&quot;，Altman 和 Jeff Dean 都掏了钱。</li><li>旧金山公司 Volantis 宣布拿了 8800 万美元 A 轮。</li><li>目标：造光子推理系统 A-1，2027 年交付首批客户。</li><li>绝活：用激光在芯片和内存之间传数据，绕开电线瓶颈。</li><li>官方目标：单 GPU 周围挂 220 块内存芯片。</li><li>能跑 20T 参数的大模型。</li><li>背书阵容不小：Altman、Jeff Dean 都在。</li><li>还有 John Doerr 等一众大佬。</li><li>对你意味着什么：算力瓶颈正从&quot;算不动&quot;转向&quot;喂不动&quot;。</li><li>内存墙（显存喂数据的速度跟不上）才是下一代推理的命门。</li><li>注意：这些数字都是公司自己说的，2027 年交付见真章。</li><li>来源：<a href="https://www.unite.ai/volantis-raises-88m-series-a-to-build-photonic-ai-inference-system/">https://www.unite.ai/volantis-raises-88m-series-a-to-build-photonic-ai-inference-system/</a></li></ul>
+<ul><li>OpenAI 找了个新帮手：芯片设计软件巨头 Synopsys。</li><li>两家要联手训练 GPT-Synopsys，专门用来设计和验证芯片。</li><li>说白了：让 AI 自己画电路、自己检查 Bug。</li><li>工程师只定目标、看结果，脏活累活交给模型。</li><li>顺带官宣实锤了 Jalapeno。</li><li>Jalapeno（OpenAI 自研的第一颗推理芯片）。</li><li>Jalapeno 跟 Broadcom 合作研发。</li><li>从设计到流片只用了 9 个月。</li><li>对你意味着什么：OpenAI 正把算力命脉从&quot;买卡&quot;转向&quot;自己造卡&quot;。</li><li>推理芯片越多，你 serving 的&quot;弹药库&quot;选择就越多。</li><li>来源：<a href="https://www.reuters.com/business/synopsys-openai-strike-deal-develop-ai-model-chip-design-work-2026-09-30/">https://www.reuters.com/business/synopsys-openai-strike-deal-develop-ai-model-chip-design-work-2026-09-30/</a></li></ul>
+<ul><li>华为在济南 AI 大会前展示了 Ascend 950 超级节点。</li><li>单体架构能连 8192 张卡，自研凌渠互联。</li><li>单跳延迟从 2 微秒压到 200 纳秒。</li><li>FP4 精度下峰值 2 EFLOPS，单卡推理是传统堆叠的 3 倍。</li><li>对你意味着什么：国产算力在&quot;卡数堆规模&quot;上追得很快。</li><li>但注意：这是厂商发布会口径，实测数字还没见。</li><li>来源：<a href="https://www.chinatechnews.com/2026/10/01/130161-huawei-massing-8192-chip-supernode-strategic-offensive-to-smash-computing-bottlenecks">https://www.chinatechnews.com/2026/10/01/130161-huawei-massing-8192-chip-supernode-strategic-offensive-to-smash-computing-bottlenecks</a></li></ul>
+<ul><li>第三方实测：Google G4 云实例推理跑分赢了 AWS G7e。</li><li>同样 8 卡 RTX PRO 6000，多模态场景全面领先。</li><li>输出吞吐高 17.6%，首 token 快 20.5%。</li><li>端到端延迟低 28%。</li><li>报告说：赢在 Google 的全互联 P2P GPU fabric。</li><li>换句话说：卡和卡之间直连，通信不掉队。</li><li>对你意味着什么：多卡推理选云实例时，互联拓扑比卡本身更重要。</li><li>提醒：这是第三方机构的报告，偏向性自己掂量。</li><li>来源：<a href="https://globalwarming.einnews.com/pr_news/946686116/google-cloud-g4-vm-outperformed-amazon-ec2-g7e-on-multi-gpu-ai-inference-in-principled-technologies-study">https://globalwarming.einnews.com/pr_news/946686116/google-cloud-g4-vm-outperformed-amazon-ec2-g7e-on-multi-gpu-ai-inference-in-principled-technologies-study</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>这轮社区线扫了一圈，没挖到新东西。</li><li>Reddit、HN、X 大V、中文媒体都没窗口内新料。</li><li>播客线 24 小时内没有新的 serving 单集。</li></ul>
+<p>*去重说明：本轮窗口（10/1 12:00→14:00 PDT = 10/1 19:00→21:00 UTC）。框架六家经 GitHub releases API 亲手核验均无正式新版（llama.cpp 正式版 v0.5.0 往期已报，每日快照按惯例不报）。arXiv 5 组关键词（LLM inference / KV cache / speculative decoding / multimodal inference / prefill disaggregation）按 submittedDate 倒序亲手扫过：窗口内零入库（符合 00:00 UTC 日批次规律，最新提交停在 9/30）。X 大V（lmsysorg、vLLM 官方、karpathy、jimfan）无窗口内实质帖子。主动排除：Nebius 收购 Inferize（10/1 10点版已报）、AWS HyperPod Inference Gateway（9/19 16点版已报）、Latent Space 9/30 单集（非 serving 主题，不收录）。业内 4 条经 briefs 全文 grep 确认首次收录（Volantis 光子推理、OpenAI×Synopsys、Ascend 950 超级节点、Google G4 跑分）；其中 Volantis 与 OpenAI×Synopsys 经主代理 browser.search 二次核验（后者以 Reuters 为准）。本轮无「值得深读」新条目（均为业内新闻，按宁缺毋滥不转深读）。*</p></body></html>
