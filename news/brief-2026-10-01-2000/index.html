@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月1日 20:00"/>
+<meta name="doc-description" content="值得深读：DRelay（2610.01439）。"/>
+<meta name="doc-date" content="2026-10-01"/>
+<meta name="doc-ts" content="2026-10-02T02:59:48"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-01（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-01（20点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架亲手核验，本轮一个新版都没发。</li><li>SGLang 的 release 页动过一次。</li><li>时间是 18:09 PDT，只是补字。</li><li>只是给 v0.5.21 的 notes 补字，tag 没动。</li><li>vLLM stable 还是 v0.30.0，rc 系列停在 rc3。</li><li>TRT-LLM、LMDeploy、TGI 都没动。</li><li>llama.cpp 只有每日快照，按惯例不报。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 新日批次这轮入库了，一口气 8 篇。</li><li>全部是 2610.x 新 ID，往期没报过。</li><li><strong>值得深读：DRelay（2610.01439）。</strong></li><li>并行投机解码有个毛病：一个 draft 早错，整条都作废。</li><li>DRelay 在验证前用全局上下文把错先修好。</li><li>直接在 SGLang serving 上实测过。</li><li>比 DFlash 等快 8–17%。</li><li>对你意味着什么：你在评估 SGLang，这招开箱能抄。</li><li>来源：<a href="https://arxiv.org/abs/2610.01439">https://arxiv.org/abs/2610.01439</a></li><li>HAWK（2610.00623）：视觉语言模型的投机解码器。</li><li>drafter 是负责打草稿的小模型。</li><li>它不喂原始视觉 token，只喂压缩后的视觉隐状态。</li><li>还建模了 draft 偏离后 target 的预测漂移。</li><li>target 是负责拍板的大模型。</li><li>多模态接受率更高，正中你研究的交叉点。</li><li>来源：<a href="https://arxiv.org/abs/2610.00623">https://arxiv.org/abs/2610.00623</a></li><li>EchoPress（2610.00412）。</li><li>免训练的 KV cache 剪枝。</li><li>KV cache 是推理时的&quot;草稿纸&quot;，存历史算好的结果。</li><li>它用 prefill 阶段现成的 attention 信息估重要性。</li><li>LongBench 上压缩质量接近 KVzip。</li><li>KVzip 是要额外 forward 的那款。</li><li>长上下文 serving 的显存减负利器。</li><li>来源：<a href="https://arxiv.org/abs/2610.00412">https://arxiv.org/abs/2610.00412</a></li><li>多模态选择推理（2610.01892）。</li><li>多模态搜索智能体把推理改成&quot;选择题&quot;。</li><li>不让模型自由生成，改成并行打分选答案。</li><li>KV cache 共享复用，每步延迟降 90% 以上。</li><li>整题推理延迟降 28–54%。</li><li>来源：<a href="https://arxiv.org/abs/2610.01892">https://arxiv.org/abs/2610.01892</a></li><li>TopK-Guided（2610.01763）：训练无关的激活稀疏。</li><li>按 token 和层动态分配稀疏预算。</li><li>Llama-2/3 上精度优于 TEAL 和 WINA。</li><li>来源：<a href="https://arxiv.org/abs/2610.01763">https://arxiv.org/abs/2610.01763</a></li><li>AgSpec（2610.01108）。</li><li>coding agent 版投机解码。</li><li>解决语料里没可复用文本、draft 长度不适配的问题。</li><li>来源：<a href="https://arxiv.org/abs/2610.01108">https://arxiv.org/abs/2610.01108</a></li><li>CAST（2610.00321）：整块 draft 一次前向全打分。</li><li>候选拼成树一次验证，模型权重都不动。</li><li>只按成本决定树宽。</li><li>来源：<a href="https://arxiv.org/abs/2610.00321">https://arxiv.org/abs/2610.00321</a></li><li>Clock Diffusion（2610.00894）。</li><li>半自回归的扩散语言模型。</li><li>补上可变长度生成和 KV cache 支持。</li><li>给扩散式解码加速探了条新路。</li><li>来源：<a href="https://arxiv.org/abs/2610.00894">https://arxiv.org/abs/2610.00894</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮没搜到值得报的。</li><li>挖到的 4 条都是 9/28–9/29 的旧料。</li><li>且 serving 相关性弱，不硬凑数。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>HN 热帖：prefill 和 decode 是两种完全不同的活。</li><li>prefill 吃算力，decode 吃显存，infra 设计得分开看。</li><li>有个观点很妙：像 Jev 这样的模型可以只做 prefill。</li><li>直接跳过 decode，成本和延迟都更香。</li><li>跟你评估的 P/D 解耦是一个逻辑。</li><li>社区又给这条路投了一票。</li><li>来源：<a href="https://news.ycombinator.com/item?id=49870162">https://news.ycombinator.com/item?id=49870162</a></li><li>karpathy、jimfan、lmsysorg 都没新帖。</li><li>24 小时内无 serving 相关动态。</li><li>Reddit、中文媒体、播客也都静悄悄。</li></ul>
+<p>*去重说明：本轮窗口（10/1 18:00→20:00 PDT = 10/2 01:00→03:00 UTC）。框架六家经 GitHub releases 亲手核验：SGLang v0.5.21 的 release 页在 10/2 01:09 UTC（10/1 18:09 PDT）仅为 notes 编辑（tag 未动，18点版已报，不算新发布）；vLLM stable 仍 v0.30.0（tag 列表最新仍 v0.31.0rc3，16点版已报）；TRT-LLM 预览版仍 v1.3.0rc29、正式版 v1.2.1；LMDeploy 仍 v0.18.0（走 InternLM/lmdeploy 真实路径）；TGI 仍 v3.3.7（仓库已于 2026-03-21 归档只读，不可能再有新 release）；llama.cpp 窗口内只有每日快照（b11334，10/2 02:33 UTC，按惯例不报）。arXiv 新日批次（10/2 00:00 UTC）在 serving 关键词下入库：3 组查询取 75 条去重后 12 篇 2610.x 候选，剔除 3 篇训练侧/弱相关后收录 8 篇，全部为新 ID（去重名单 2609.x 无一命中，无重复推送风险）。新闻线 4 条旧料按宁缺毋滥舍弃：Inworld 收购 Ultravox（10/1，语音智能体收购）、Cerebras 向 Gimlet Labs 供 CS-4（9/28 Reuters 旧闻）、CoreWeave Forge 平台（9/29）、NetApp 拟收购 PEAK:AIO（9/28，存储层，相关性弱）。社区线：HN item 49870162（约 1 天前有更新活动）首次收录；karpathy、jimfan、swyx 近 24 小时无 serving 新帖；Reddit r/LocalLLaMA、r/MachineLearning 近 24 小时无高赞 serving 讨论；Latent Space 今日新单集仍为学术话题（已排除）；机器之心/量子位近 2 天无相关报道。深读：DRelay（2610.01439，SGLang serving 实测，并行 draft 错误修复）转精读笔记；HAWK（2610.00623）仅简报推荐，不转深读。*</p></body></html>
