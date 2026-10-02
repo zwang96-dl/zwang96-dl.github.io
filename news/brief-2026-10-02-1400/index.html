@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月2日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-02"/>
+<meta name="doc-ts" content="2026-10-02T21:03:06"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-02（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-02（14点版）</h1>
+<h2>框架更新</h2>
+<ul><li>这轮六家框架全都没动静。</li><li>vLLM stable 还是 9/22 的 v0.30.0。</li><li>rc 系列最新是 v0.31.0rc4，10/1 已报。</li><li>SGLang 停在 v0.5.21，10/1 报过。</li><li>TRT-LLM 预览版还是 rc29。</li><li>LMDeploy 停在 9/28 的 v0.18.0。</li><li>TGI 归档只读，不可能有新版。</li><li>llama.cpp 只有每日快照，按惯例不报。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>推理引擎赛道来了个新玩家：Magnitude。</li><li>Magnitude 是 YC 今年夏季孵化的公司。</li><li>YC 是硅谷最有名的创业孵化器。</li><li>它把自家推理引擎开源了，Apache 2.0 协议。</li><li>打法是&quot;量体裁衣&quot;：在本机上编译调优 kernel。</li><li>Kernel 是跑在芯片上的小计算程序。</li><li>别家发均码版，它按你的硬件现场定制。</li><li>官方宣称：比 llama.cpp 快最多 2 倍。</li><li>苹果 Metal 上 decode 快 92%。</li><li>Metal 是苹果的 GPU 编程接口。</li><li>NVIDIA 卡上（CUDA）快 19%。</li><li>CUDA 是 NVIDIA 的并行计算平台。</li><li>Decode 是模型逐字吐词的阶段。</li><li>场景是本地跑 agent 用的小模型。</li><li>底子是 Rust，搭在 llama.cpp 上。</li><li>支持苹果芯片、NVIDIA、AMD 和纯 CPU。</li><li>GitHub 已经攒了 6200 多个 star。</li><li>HN 上 194 分、97 条评论，讨论很热。</li><li>HN 是程序员爱逛的技术论坛。</li><li>对你意味着什么：推理引擎不止云上几家。</li><li>本地 serving 也在卷 kernel 级优化。</li><li>提醒：2 倍是官方自报，还没第三方验证。</li><li>来源：<a href="https://github.com/magnitudedev/magnitude">https://github.com/magnitudedev/magnitude</a></li><li>讨论：<a href="https://laxima.tech/signal/launch-hn-magnitude-yc-s25-self-optimizing-inference-engine-hn-49911995">https://laxima.tech/signal/launch-hn-magnitude-yc-s25-self-optimizing-inference-engine-hn-49911995</a></li><li>报道：<a href="https://aiweekly.co/alerts/magnitude-yc-s25-launches-self-compiling-inference-engine-claims-92-faster">https://aiweekly.co/alerts/magnitude-yc-s25-launches-self-compiling-inference-engine-claims-92-faster</a></li></ul>
+<ul><li>arXiv 这轮没新货。</li><li>日批次每天 00:00 UTC 才更新。</li><li>换算成今天 17:00 PDT，归 18点版。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮没挖到实质新料。</li><li>AMD×Cerebras 是 12点版报过的。</li><li>CoreWeave、Nebius 也是上午的老面孔。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Spotify 查了 48 小时内的播客单集。</li><li>Latent Space 最新两期都不是 serving 话题。</li><li>The Batch 今天那期就是 12点版的 issue-373。</li><li>机器之心、量子位也没新 serving 报道。</li></ul>
+<p>*去重说明：本轮窗口（10/2 12:00→14:00 PDT = 19:00→21:00 UTC）。框架六家经 GitHub API 亲手核验：vLLM stable 仍 v0.30.0（9/22），rc 系列最新 v0.31.0rc4（10/1 8点版已报）；SGLang 仍 v0.5.21（10/1 20点版已报，01:09 UTC 仅 notes 编辑）；TRT-LLM 仍 v1.3.0rc29（9/29）；LMDeploy 仍 v0.18.0（InternLM 真实路径，9/28）；TGI 仍 v3.3.7（归档只读）；llama.cpp 仅每日快照（按惯例不报）。arXiv：P/D 解耦关键词最新 9/28 SlimWise（9/29 0点版已报且已转深读）；serving 广谱查询 10/1 批次 12 篇（DRelay、HAWK、EchoPress、KVTether、AgSpec 等）经 briefs 全文 grep 确认全部已报；下一日批次 00:00 UTC（今日 17:00 PDT，18点版窗口）。新闻线排除：SGLang v0.5.21（已报）、Google G4 vs AWS G7e（10/1 14点版已报）、llm-d v0.8（往期已报多次且 GitHub 实际已到 v0.10.0，帖子信息过时）、The Batch Oct 2 期（即 12点版已报的 issue-373）。社区/大V：Spotify 48h 内无新 serving 单集；X 名单搜索引擎不索引记&quot;未找到证据&quot;；Reddit/HN 48h 内无新增高赞 serving 帖；机器之心/量子位 48h 内无 serving 报道；karpathy 新帖（AI 定制视频讲解）不沾 serving。深读：本轮无新增——Magnitude 是产品发布非技术论文，按宁缺毋滥不转深读。*</p></body></html>
