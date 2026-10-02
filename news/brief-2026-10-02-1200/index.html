@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月2日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-02"/>
+<meta name="doc-ts" content="2026-10-02T19:02:05"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-02（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-02（12点版）</h1>
+<h2>框架更新</h2>
+<ul><li>这轮六家框架全都没动静。</li><li>vLLM stable 还是 9/22 的 v0.30.0。</li><li>rc4 是 10/1 深夜打的，8点版报过了。</li><li>SGLang 停在 v0.5.21。</li><li>TRT-LLM 预览版还是 rc29。</li><li>LMDeploy、TGI、llama.cpp 都没新版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>DeepSeek V4.1-Flash 又被 The Batch 拆了一遍。</li><li>The Batch 是吴恩达办的 AI 周刊。</li><li>它把 KV cache 压到每 token 890 字节。</li><li>这是 V4-Flash 的四分之一、V1 的 437 分之一。</li><li>秘诀有三招：层间抄作业、4-bit 量化、近因全记。</li><li>层间抄作业：上层直接复用下层的缓存。</li><li>4-bit 量化：16 个数共用一个缩放因子。</li><li>近因全记：最近 128 个 token 每层都留着。</li><li>效果：prefill 算力几乎减半。</li><li>输入越长越划算：4K 拉到 1M 只多 25% 计算。</li><li>第三方实测：AutomationBench 68.9% 全场第一。</li><li>AA 智能指数 39 分，任务成本不到 V4-Pro 一半。</li><li>价格也降了：缓存输入降价 57%，输出只降 9%。</li><li>说白了：agent 读得多写得少，这刀砍在点子上了。</li><li>这事跟你有关：KV cache 就是推理时的&quot;草稿纸&quot;。</li><li>草稿纸越薄，同样的显存能接的客人就越多。</li><li>提醒：9 月中旬这模型已做过深读，不重复造轮子。</li><li>来源：<a href="https://www.deeplearning.ai/the-batch/issue-373">https://www.deeplearning.ai/the-batch/issue-373</a></li><li>论文：<a href="https://arxiv.org/abs/2609.19969">https://arxiv.org/abs/2609.19969</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>AMD 和 Cerebras 官宣技术合作。</li><li>目标是做异构 P/D 解耦推理。</li><li>AMD Helios 机架负责吞吐：读 prompt 和超长上下文。</li><li>Cerebras 晶圆级芯片负责吐 token。</li><li>一个管&quot;备料&quot;，一个管&quot;爆炒&quot;。</li><li>低延迟拉满，先上 Cerebras Cloud。</li><li>时间是 2026 年下半年，之后开放给第三方。</li><li>对你意味着什么：P/D 解耦不只是论文了。</li><li>芯片大厂开始真金白银组队干。</li><li>提醒：这是技术合作，不是并购。</li><li>来源：<a href="https://www.datacenterdynamics.com/en/news/amd-partners-with-big-chip-co-cerebras-for-ultra-low-latency-and-high-throughput-ai-inference-system/">https://www.datacenterdynamics.com/en/news/amd-partners-with-big-chip-co-cerebras-for-ultra-low-latency-and-high-throughput-ai-inference-system/</a></li></ul>
+<ul><li>CoreWeave 把 Vera Rubin NVL72 投产了。</li><li>Vera Rubin 是 NVIDIA 新一代 GPU。</li><li>首个客户是 Devin 的母公司 Cognition。</li><li>SWE-2 推理总吞吐号称 GB200 的 4.8 倍。</li><li>注意：4.8 倍是客户自报，还没第三方验证。</li><li>顺手还发了 serverless GPU 私有预览。</li><li>按小时计费，不用签合同。</li><li>来源：<a href="https://transcriptdaily.com/2026/10/02/coreweave-inc-nasdaq-crwv-puts-vera-rubin-into-production.html">https://transcriptdaily.com/2026/10/02/coreweave-inc-nasdaq-crwv-puts-vera-rubin-into-production.html</a></li></ul>
+<ul><li>Nebius 10 月 1 日上调 GPU 按需价。</li><li>涨幅 16.9% 到 21%。</li><li>H100 从 3.85 涨到 4.5 美元/卡时。</li><li>H200、B200、B300 同步涨。</li><li>说白了：卡还是不够用，云厂商坐地起价。</li><li>来源：<a href="https://respectinvestment.com/investor-strategy/nebius-and-coreweave-lift-nvidia-gpu-prices-by-up-to-21/">https://respectinvestment.com/investor-strategy/nebius-and-coreweave-lift-nvidia-gpu-prices-by-up-to-21/</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>ThursdAI 10/1 那期复盘了 OpenAI DevDay。</li><li>还确认了 CoreWeave serverless GPU 私有预览。</li><li>顺带聊了 SGLang 对决策模型的原生支持。</li><li>来源：<a href="https://sub.thursdai.news/p/thursdai-oct-1-openai-joins-the-assistant">https://sub.thursdai.news/p/thursdai-oct-1-openai-joins-the-assistant</a></li><li>视频：<a href="https://www.youtube.com/watch?v=Mb4530V7UKE">https://www.youtube.com/watch?v=Mb4530V7UKE</a></li><li>Simon Willison 近期帖全是沙盒和 agent 安全。</li><li>跟推理 serving 都没关系。</li><li>Latent Space 播客最新还是 Alex Zhang 那期。</li><li>lmsys 博客最新一篇是 9/25 的 JEV 决策模型。</li><li>机器之心、量子位近两天无 serving 报道。</li><li>X 大V 名单搜索引擎不索引，记为&quot;未找到证据&quot;。</li></ul>
+<p>*去重说明：本轮窗口（10/2 10:00→12:00 PDT = 17:00→19:00 UTC）。框架六家经 GitHub API 亲手核验：vLLM stable 仍 v0.30.0（tag 列表无 rc5，rc4 在 10/1 23:06 PDT，8点版已报）；SGLang 仍 v0.5.21（10/1 18:09 UTC 仅 release notes 编辑，10/1 22点版已报）；TRT-LLM 仍 v1.3.0rc29（9/29）；LMDeploy 仍 v0.18.0（9/28，走 InternLM 真实路径）；TGI v3.3.7（归档只读）；llama.cpp 无新 tag release（快照按惯例不报）。arXiv：prefill/decode 关键词最新仍为 9/26 RR-Evict；下一日批次 00:00 UTC（即今日 17:00 PDT，18点版窗口）。新闻线排除：Cerebras 10/1 异构 PD 博文英文复述（10/1 16点版已报原博文）、General Compute×Cerebras $400M 债融（10/2 10点版已报）、Nebius 收购 Inferize（10/1 四期已报）、F5 BlueField-3 DPU 3.24x（techtimes 厂商 PR，宁缺毋滥舍弃）、APXInf 端侧引擎（9/29 且 PR 成分重，舍弃）、量子位 Kimi K3 TPU v7 跑分（超 48h 窗口，舍弃）。社区线：HN 过去 48h 无新增高赞 serving 帖；Reddit r/LocalLLaMA / r/MachineLearning 无新热门帖。X 大V 名单搜索引擎不索引，&quot;未找到证据&quot;记为无证据而非无动态。深读：V4.1-Flash 的 KV 压缩深读笔记已存在（DeepSeek-V4.1-Flash-KV压缩极限.md/.html），The Batch 为二手整合报道，不重复生成；AMD×Cerebras 为行业新闻非技术材料，本轮无新增深读笔记。*</p></body></html>
