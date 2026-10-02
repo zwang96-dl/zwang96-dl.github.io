@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月2日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-02"/>
+<meta name="doc-ts" content="2026-10-02T17:03:07"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-02（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-02（10点版）</h1>
+<h2>框架更新</h2>
+<ul><li>这轮六家框架都没动静。</li><li>vLLM stable 还是 9/22 的 v0.30.0。</li><li>rc4 是凌晨发的，8点版报过了。</li><li>SGLang、TRT-LLM、LMDeploy 全没动。</li><li>llama.cpp 只有每日快照，按惯例不报。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮没有新批次入库。</li><li>日批次每天 00:00 UTC 发一次。</li><li>P/D 解耦关键词最新还是 9/30 的 PEARL。</li><li>那批往期都报过了。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>按推理阶段挑芯片，这门生意有人做了。</li><li>General Compute 借 4 亿美元，押注解耦推理。</li><li>prefill 跑 NVIDIA GPU，decode 四家芯片任选。</li><li>就像流水线：备料和炒菜分开干。</li><li>首批负载是 agentic coding，2027 年 Q1 上线。</li><li>对你意味着什么：P/D 解耦开始有人买单了。</li><li>提醒：4 亿美元是债，不是收入，别看反了。</li><li>来源：<a href="https://rcrtech.com/semiconductor-news/general-compute-cerebras-inference/">https://rcrtech.com/semiconductor-news/general-compute-cerebras-inference/</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>这轮社区线没新料。</li><li>X 和 Reddit 这轮没动静。</li><li>HN、中文媒体也没窗口内新帖。</li><li>Latent Space、Spotify 播客线也静悄悄。</li></ul>
+<p>*去重说明：本轮窗口（10/2 08:00→10:00 PDT = 15:00→17:00 UTC）。框架六家经 GitHub API 亲手核验：vLLM stable 仍 v0.30.0（rc4 在 10/1 23:06 PDT，8点版已报；tag 列表无 rc5）；SGLang 仍 v0.5.21（10/1 18点版已报 release notes 要点）；TRT-LLM 预览版仍 v1.3.0rc29（9/29）、正式版 v1.2.1；LMDeploy 仍 v0.18.0（9/28，走 InternLM 真实路径）；TGI 仍 v3.3.7（归档只读）；llama.cpp 窗口内快照 b11349（15:41 UTC），按惯例不报。arXiv 日批次 00:00 UTC 发布，本轮窗口结构性零入库（9/22 10点版终报教训）；prefill/decode、speculative decoding 关键词最新仍为 9/28–10/1 旧批次，往期全报过。新闻线：General Compute×Cerebras 的官方通稿（多年期协议、wafer-scale、agentic coding、2027 Q1）9/30 20点版已报，本轮收录的是 RCR Wireless 深挖的新细节（$400M Upper90 债融、SambaNova SN50 芯片做抵押、NVIDIA 做 prefill + Cerebras/SambaNova/Positron/d-Matrix 四家做 decode 的解耦架构），与通稿不重复。主动排除：Cerebras 解耦博客 5x（10/1 16点版已报）、HN 49870162（10/1 20点版已报）、Volantis $88M（10/1 14点版已报）、SGLang v0.5.21 新 tag 说法（子代理误报，tag 9/30 已有，18点版已报）、HN SpecInfer 重贴（2023 旧论文，价值存疑）、Google G4 跑分（厂商赞助软文）。X 大V 名单搜索引擎基本不索引，&quot;无结果&quot;记为未找到证据而非无动态。深读：本轮无新增（RCR 为行业新闻非技术材料，按宁缺毋滥不转深读）。*</p></body></html>
