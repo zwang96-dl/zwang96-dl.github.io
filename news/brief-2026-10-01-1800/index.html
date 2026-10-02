@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月1日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-01"/>
+<meta name="doc-ts" content="2026-10-02T01:03:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-01（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-01（18点版）</h1>
+<h2>框架更新</h2>
+<ul><li>SGLang v0.5.21 的正式 release notes 上线了。</li><li>16点版记录时，这个页面还是空的。</li><li>713 个 PR，237 位贡献者，stable 正式换代。</li><li>PD 解耦新支持 DSpark 草稿 KV 跨 worker 传。</li><li>DSpark 是混合模型用的投机解码技术。</li><li>前缀缓存换了统一 radix 树（共享前缀的索引结构）。</li><li>同提示词下，token 命中率涨到 60.8%。</li><li>首 token 时间从 1.57 秒降到 1.07 秒。</li><li>ROCm 用户也有糖。</li><li>4 块 MI355X 上，GLM-5.2 加载从 505.7 秒降到 40.4 秒。</li><li>你的 MI350X 同架构，值得看一眼。</li><li>来源：<a href="https://github.com/sgl-project/sglang/releases">https://github.com/sgl-project/sglang/releases</a></li><li>vLLM 还是老样子：stable 停在 v0.30.0。</li><li>rc3 是昨天凌晨发的，窗口之外。</li><li>TRT-LLM、LMDeploy、TGI 也都没动。</li><li>llama.cpp 窗口内新增两个每日快照。</li><li>快照按惯例不算正式版，这里只提一句。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 新日批次在 serving 关键词下没命中新论文。</li><li>9/30 尾批次的 8 篇候选，全是往期报过的。</li><li>这轮论文线挂空，不硬凑数。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>OpenAI 找了个新金主：AWS，380 亿美元。</li><li>7 年协议，立即开用，2026 年底全部部署。</li><li>内容是数十万块 NVIDIA GPU。</li><li>GB200/GB300，走 EC2 的超级服务器。</li><li>AWS 明说：覆盖 ChatGPT 推理，也管新模型训练。</li><li>说白了：OpenAI 把算力账单又找了个大户分摊。</li><li>来源：<a href="https://www.constellationr.com/insights/news/openai-inks-38-billion-deal-aws-starts-renting-gpus-immediately">https://www.constellationr.com/insights/news/openai-inks-38-billion-deal-aws-starts-renting-gpus-immediately</a></li><li>Anthropic 的 IPO 招股书被 Reuters 扒了。</li><li>未来 10 年，AI 基建要花 5180 亿美元。</li><li>大头是 Google：1111 亿买 TPU。</li><li>Amazon 也不少：1100 亿押 Trainium。</li><li>Trainium 是亚马逊自研的 AI 芯片。</li><li>微软 314 亿，博通设备租赁 1612 亿。</li><li>最狠的是约 80% 不可取消：不用也得付钱。</li><li>说白了：Anthropic 把未来十年的算力房租一次锁死。</li><li>来源：<a href="https://www.reuters.com/business/anthropics-518-billion-ai-buildout-hinges-largely-deals-that-cannot-be-canceled-2026-09-29/">https://www.reuters.com/business/anthropics-518-billion-ai-buildout-hinges-largely-deals-that-cannot-be-canceled-2026-09-29/</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>社区线这轮没新料。</li><li>HN、Reddit、X 大V、中文媒体，24 小时内都没 serving 新东西。</li><li>Latent Space 今日新单集是学术话题，不收录。</li></ul>
+<p>*去重说明：本轮窗口（10/1 16:00→18:00 PDT = 10/2 00:00→02:00 UTC）。框架六家经 GitHub releases atom feed 亲手核验：SGLang v0.5.21 的正式 release notes 已上线（发布于 9/30 23:22 PDT，16点版记录时页面仍空；stable 由 v0.5.20 换代）；vLLM stable 仍 v0.30.0（rc3 为 10/1 凌晨，窗口之外）；TRT-LLM 预览版 v1.3.0rc29、正式版 v1.2.1；LMDeploy v0.18.0；TGI v3.3.7；llama.cpp 窗口内新增 b11330/b11331 两个每日快照（按惯例不报）。arXiv 新日批次（00:00 UTC）在 serving 关键词下无命中；9/30 尾批次 8 篇候选（2609.39972、2609.38795、2609.38510、2609.40247、2609.39138、2609.39819、2609.39068、2609.38981）经 grep 确认已在 9/30 晚–10/1 凌晨各版报过。业内 2 条经 briefs 全文 grep 确认首次收录，另经主代理 browser.search 二次核验（OpenAI-AWS 以 Constellation Research 为准；Anthropic 以 Reuters 为准）。主动排除：Nebius 收购 Inferize（10/1 10点版已报）、Google G4 跑分（10/1 14点版已报）、CoreWeave Vera Rubin（9/30 已报）、Anthropic HN serving 帖（10/1 4点版已报，另一话题）。播客线：Latent Space 今日新单集为学术话题（MIT Alex Zhang），非 serving 内容。X 大V（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）24 小时内无 serving 实质动态；机器之心/量子位近 2 天无相关报道。本轮无「值得深读」新条目（框架为版本纠偏、论文线挂空、业内 2 条均为大新闻，按宁缺毋滥不转深读）。*</p></body></html>
