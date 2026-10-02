@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月2日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-02"/>
+<meta name="doc-ts" content="2026-10-02T22:59:27"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-02（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-02（16点版）</h1>
+<h2>框架更新</h2>
+<ul><li>vLLM 冒出个新候选版：v0.31.0rc5。</li><li>rc 就是正式版之前的&quot;公测版&quot;。</li><li>tag 打在今天 15:18，正好落在本轮窗口里。</li><li>跟 rc4 相比只有 3 个小修复。</li><li>最值得看的一条：修了 MiniMax-M3 的兼容 bug。</li><li>MiniMax-M3 是 MiniMax 家的多模态大模型。</li><li>出问题的是 vLLM 里处理图文输入的那块代码。</li><li>新版 Transformers 一升级，它就挂了。</li><li>Transformers 是 HuggingFace 的模型加载库。</li><li>说白了：库升级太快，老代码跟不上了。</li><li>对你意味着什么：你在 vLLM 上跑多模态模型，rc5 少踩一个版本坑。</li><li>另外两个修复：requirements 锁了 Transformers 版本上限，CI 删了个过期测试。</li><li>正式版 stable 还是 9/22 的 v0.30.0，没动。</li><li>来源：<a href="https://github.com/vllm-project/vllm/compare/v0.31.0rc4...v0.31.0rc5">https://github.com/vllm-project/vllm/compare/v0.31.0rc4...v0.31.0rc5</a></li></ul>
+<ul><li>其余五家这轮全静默。</li><li>SGLang 停在 v0.5.21。</li><li>TRT-LLM 预览版还是 rc29。</li><li>LMDeploy 停在 v0.18.0。</li><li>TGI 归档只读，不会有新版。</li><li>llama.cpp 只有每日快照，按惯例不报。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮结构性安静。</li><li>日批次每天 00:00 UTC 才放出来。</li><li>换算成今天 17:00 PDT，归 18点版。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>NVIDIA 给桌面 AI 小钢炮出了个丐版：DGX Spark 64GB。</li><li>丐版就是配置砍一刀、价格也砍一刀的版本。</li><li>10 月 23 日开卖，$4,999 起。</li><li>芯片还是 GB10，内存从 128GB 砍到 64GB。</li><li>GB10 是 NVIDIA 给桌面 AI 做的 Grace Blackwell 芯片。</li><li>官方宣称：单机能跑 100B 参数的模型。</li><li>出厂预装 vLLM、Ollama、PyTorch，开箱即用。</li><li>两台还能拿线连起来组簇，内存拼成 128GB。</li><li>官方内测：双机跑 Qwen3.8-27B 快 1.7 倍。</li><li>对你意味着什么：本地跑大模型的硬件门槛又降了一档。</li><li>但有个冷知识：内存涨价，128GB 版据说涨到了 $6,950 上下。</li><li>所以&quot;丐版&quot;其实比初代 128GB 首发价还贵。</li><li>来源：<a href="https://www.technobezz.com/news/nvidia-dgx-spark-64gb-price-launch">https://www.technobezz.com/news/nvidia-dgx-spark-64gb-price-launch</a></li><li>来源：<a href="https://videocardz.com/newz/nvidia-dgx-spark-drops-to-64gb-memory-but-costs-more-than-the-original-128gb-version">https://videocardz.com/newz/nvidia-dgx-spark-drops-to-64gb-memory-but-costs-more-than-the-original-128gb-version</a></li></ul>
+<ul><li>其余新闻线无新料。</li><li>QumulusAI 的 $240.9M B300 推理合同是 9/29 的旧闻。</li><li>CoreWeave、Gimlet×Cerebras 都是往期报过的。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>这轮没挖到实质新料。</li><li>Latent Space、播客线 14点版刚查过。</li></ul>
+<p>*去重说明：本轮窗口（10/2 14:00→16:00 PDT = 21:00→23:00 UTC）。框架六家经 GitHub API 亲手核验：vLLM stable 仍 v0.30.0（9/22），tags 新增 v0.31.0rc5（2026-10-02T22:18:12Z = 今日 15:18 PDT，本轮首次报出；rc4→rc5 共 3 个 cherry-pick：#59613 修 MiniMax-M3 多模态处理器在 Transformers v5.18 下的兼容、#59614 加 Transformers 版本上限、CI 删过期测试）；10点版/12点版脚注明确记过&quot;tag 列表无 rc5&quot;，确认未报过。SGLang 仍 v0.5.21（10/1 已报）；TRT-LLM 仍 v1.3.0rc29（9/29）；LMDeploy 仍 v0.18.0（9/28，InternLM 真实路径）；TGI 仍 v3.3.7（归档只读）；llama.cpp 仅每日快照（按惯例不报）。arXiv：日批次 00:00 UTC 发布，本轮结构性零入库；下一批次今日 17:00 PDT（18点版窗口）。新闻线排除：QumulusAI $240.9M B300 合同（9/29，超窗口）、wccftech CoreWeave Vera Rubin 4.8x（12点版已报）、Gimlet×Cerebras（9/28，超 48h 窗口）、Inference Auction dev.to 复述（往期已报）、Ollama vs vLLM 对比文（导购文无新料）、Seven Architectures Replacing KV Cache（8 天前旧文）。社区/大V：Reddit/HN 本轮无新增高赞 serving 帖；X 名单搜索引擎不索引，记&quot;未找到证据&quot;而非无动态；机器之心/量子位本轮无新 serving 报道。深读：本轮无新增——rc5 是 3 个小修复的候选版、DGX Spark 是硬件产品发布，按宁缺毋滥不转深读。*</p></body></html>
