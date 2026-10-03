@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月3日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-03"/>
+<meta name="doc-ts" content="2026-10-03T11:00:11"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-03（4点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-03（4点版）</h1>
+<h2>框架更新</h2>
+<ul><li>vLLM 正式版 v0.31.0 还在发版中：tag 没动，PyPI 还是 0.30.0。</li><li>SGLang、TRT-LLM、LMDeploy 都没动。</li><li>TGI、llama.cpp 也没动，本轮框架线无新版本。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 10/3 那批还没放出来，API 亲手查了。</li><li>最新还是 10/1 的，延迟已经约 11 小时。</li><li>本轮窗口零新论文，6 点版再撞它。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>Prime Intellect 推出了 Prime Inference，自家的推理服务平台。</li><li>人话版：这家做分布式训练的公司，现在开始卖推理服务了。</li><li>跑在自家 Blackwell 卡上，首批上了 GLM-5.3。</li><li>技术栈是 NVIDIA Dynamo（英伟达的推理调度框架）加 vLLM。</li><li>再配 Mooncake（KV cache 分离传输框架）和 FlashInfer（高性能算子库）。</li><li>划重点：用了 prefill/decode 解耦（&quot;理解问题&quot;和&quot;写答案&quot;分开干）。</li><li>宣称 p90 词间延迟（九成请求的出词间隔）降了 40%。</li><li>对你：P/D 解耦正是你在评估的方向，数字先打问号，方向值得盯。</li><li>来源：marktechpost 10/2 报道 <a href="https://www.marktechpost.com/2026/10/02/prime-intellect-launches-prime-inference-serverless-and-reserved-serving-for-frontier-open-models/">https://www.marktechpost.com/2026/10/02/prime-intellect-launches-prime-inference-serverless-and-reserved-serving-for-frontier-open-models/</a></li></ul>
+<ul><li>TensorFold：德国小团队 Context Studios 做了个本地推理引擎。</li><li>自称 exact decoding（输出和原模型逐 token 完全一致）。</li><li>号称速度是 vLLM 的 1.6 到 3 倍。</li><li>文里有 DGX Spark 上的实测，还有第三方做的并发对比。</li><li>有意思的是：单用户场景它最快，多并发下 vLLM 反超。</li><li>说白了：核心是 speculative decoding（先让小模型打草稿、大模型改）。</li><li>但它保证输出逐字节不变，这是卖点。</li><li>来源：Context Studios 博客（10/1–10/2） <a href="https://www.contextstudios.ai/blog/tensorfold-the-engine-that-makes-local-llms-2-3-faster-without-a-single">https://www.contextstudios.ai/blog/tensorfold-the-engine-that-makes-local-llms-2-3-faster-without-a-single</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>loxilb 推理网关新添了一份 SGLang KV cache 感知路由文档。</li><li>KV cache 就是存着算过中间结果的草稿纸。</li><li>文档讲路由怎么利用它，还拆了 P/D 解耦下两端数据块指纹的差异。</li><li>跟你评估 P/D 解耦时的路由层选型直接相关。</li><li>这是 3 天前的文档，本轮新发现，顺手补上。</li><li>来源：<a href="https://github.com/loxilb-io/loxilb-inference-gateway/blob/HEAD/docs/load-balancing/15-sglang-kv-cache-aware-routing.md">https://github.com/loxilb-io/loxilb-inference-gateway/blob/HEAD/docs/load-balancing/15-sglang-kv-cache-aware-routing.md</a></li></ul>
+<ul><li>播客线：Spotify 亲手查过了。</li><li>Latent Space 近 48 小时只有一期学术话题单集，不是 serving 方向。</li><li>The Batch 最新一期上轮已报过，不重复。</li><li>YouTube 近 7 天没有新的 serving 相关 talk。</li><li>X 名单搜不到可核验的新帖，记未找到证据。</li></ul>
+<h2>值得深读</h2>
+<ul><li>本轮无。</li><li>Prime Inference 是产品发布稿，TensorFold 是厂商自测。</li><li>按宁缺毋滥，这轮不转深读。</li></ul>
+<p>*去重说明：本轮窗口（10/3 02:00→04:00 PDT = 10/3 09:00→11:00 UTC）。框架六家经 GitHub API 亲手核验无变化：vLLM 正式版仍 v0.30.0（v0.31.0 正式说明未发布、PyPI 未上架）；SGLang v0.5.21、TRT-LLM rc29、LMDeploy v0.18.0、TGI v3.3.7（归档只读）、llama.cpp v0.5.0 均无变化。arXiv 10/3 批次仍未放出（延迟约 11 小时），本轮零新论文；6 点版再查。新闻线新收录：Prime Inference（10/2 发布，简报此前未报过）、TensorFold（10/1–10/2 发布，未报过）、loxilb SGLang 路由文档（3 天前，本轮新发现）。深读：本轮无新增。*</p></body></html>
