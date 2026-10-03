@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月3日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-03"/>
+<meta name="doc-ts" content="2026-10-03T13:05:21"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-03（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-03（6点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架本轮都没发新版，逐家 API 亲手核验过。</li><li>vLLM 还是 v0.30.0（9/22）；SGLang 还是 v0.5.21。</li><li>TensorRT-LLM 还是 rc29；LMDeploy 还是 v0.18.0。</li><li>TGI 仓库已归档只读；llama.cpp 只有每日快照 b11375。</li><li>快照按惯例不算正式版，本轮只当水位线记一笔。</li></ul>
+<ul><li>TRT-LLM 1.3 发布说明更新了（文档先行，GitHub 正式版还没发）。</li><li>TRITON MoE 后端（Triton 写的 MoE 融合核）被标记弃用了。</li><li>3 个月迁移期，之后彻底删掉。</li><li>接替的是 moe_config.backend=&quot;CUTLASS&quot;。</li><li>它在 Hopper 上功能完全覆盖。</li><li>W4A16_MXFP4、BF16、FP8 三种格式都支持。</li><li>唯一还留 TRITON 的场景：GPT-OSS 在 Hopper 上 MXFP4 有一点点性能优势。</li><li>对你：以后测 TRT-LLM 的 MoE 直接写 CUTLASS，别再配 TRITON。</li><li>来源：<a href="https://nvidia.github.io/TensorRT-LLM/release-notes.html">https://nvidia.github.io/TensorRT-LLM/release-notes.html</a></li></ul>
+<ul><li>vLLM 生态：Semantic Router v0.4 &quot;Hermes&quot;（9/24 官方博客）。</li><li>注意这是路由项目，不是 vLLM 核心引擎。</li><li>它是个智能网关，负责把请求分给合适的模型。</li><li>这版的核心目标是&quot;自进化路由器&quot;。</li><li>做法是：跑评估、调配方、把证据回灌进代码。</li><li>新增 safety route（安全路由，防 prompt 攻击）。</li><li>还有 prompt selector（让小模型帮选候选模型）。</li><li>以及 Fusion 面板评审和 Workflows 工具编排。</li><li>对你：跟 SGLang 解耦评估时的路由层选型是同类问题，可以对照看。</li><li>来源：<a href="https://github.com/vllm-project/semantic-router/blob/HEAD/website/blog/2026-09-24-v0.4-vllm-sr-hermes-release.md">https://github.com/vllm-project/semantic-router/blob/HEAD/website/blog/2026-09-24-v0.4-vllm-sr-hermes-release.md</a></li></ul>
+<ul><li>第三方小工具：ReadyLLM v0.2.0（10/2）。</li><li>这是个推理引擎调参和监控小工具。</li><li>新增 SGLang 引擎支持，可以跟 vLLM、llama.cpp 放一起管。</li><li>对你：调参思路可以参考，生产环境先别上。</li><li>来源：<a href="https://github.com/htobty/ReadyLLM/releases/tag/v0.2.0">https://github.com/htobty/ReadyLLM/releases/tag/v0.2.0</a></li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 10/3 那批还是没放出来，延迟已经超 12 小时。</li><li>4 组关键词亲手扫过，最新仍是 10/1 的。</li><li>本轮窗口零新论文，8 点版再撞它。</li></ul>
+<ul><li>「值得深读」Disaggregated Quantization（NVIDIA+ISTA，9/22）。</li><li>一句话：prefill 和 decode 各用各的量化格式，谁也不将就谁。</li><li>prefill 是算力密集型（啃 prompt），用 NVFP4（英伟达的 4 位浮点格式）加速。</li><li>decode 是搬运密集型（逐个吐 token），只用权重量化，省显存带宽。</li><li>同一副权重两套打法，decode 精度掉得少，还不用多存一份权重。</li><li>实在要全拆开：单独训练一份 NVFP4 的 prefill 权重。</li><li>Qwen3.8-27B 上，1-bit 权重配 NVFP4 prefill 打头阵。</li><li>MMLU-Pro 涨 32.5 分，MMMU-Pro 涨 35.3 分。</li><li>decode 那份权重原封不动，白捡精度。</li><li>还有一招 ODP：把 prefill 权重放 SSD 上，用时再流式读。</li><li>8K 长 prompt 下首 token 快 1.78 倍，还不占显存。</li><li>在 vLLM 里验证过解耦部署，最大测到 2.8T 参数的 MoE。</li><li>跟你：量化路线加 P/D 解耦评估，两条线都对得上。</li><li>来源：<a href="https://arxiv.org/abs/2609.26333v1">https://arxiv.org/abs/2609.26333v1</a></li><li>精读笔记已生成，见文末「值得深读」。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>d-Matrix 的 Raptor 推理芯片出了新细节（RuntimeWire 10/2）。</li><li>设计很激进：TSMC 4nm 逻辑 die 跟定制 DRAM die 面对面堆叠。</li><li>目标就是 decode 阶段反复搬权重和 KV cache（草稿纸）这个瓶颈。</li><li>ISCA 论文建模：带宽 100 TB/s，吞吐是 HBM 方案的 4.71 倍。</li><li>但整卡只有 32GB 显存，能塞下多大模型要打问号。</li><li>划重点：全是建模数据，不是实测成绩。</li><li>商业版预计 2027 年 Q4 才进 NVIDIA MGX 机架。</li><li>（9/27 已报过它进 NVLink Fusion 的合作，这轮是芯片新料。）</li><li>对你：decode 专用加速卡思路，跟 P/D 解耦&quot;decode 另起炉灶&quot;同路。</li><li>来源：<a href="https://runtimewire.com/article/d-matrix-raptor-stacked-dram-inference">https://runtimewire.com/article/d-matrix-raptor-stacked-dram-inference</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Intel KV Shrink（9/23 新浪报道，本轮新发现的补扫）。</li><li>把部分 KV cache（草稿纸）从显存卸载到系统内存。</li><li>甚至可以卸到远端服务器上。</li><li>用 DSA（英特尔的数据流加速器）做数据搬运。</li><li>再加压缩和流水线调度，显存压力就下来了。</li><li>相关项目已在 GitHub 开源。</li><li>对你：KV 外置/卸载的另一条工程路线，超长上下文时可以参考。</li><li>来源：<a href="https://finance.sina.cn/2026-09-23/detail-inisvqcz1081362.d.html">https://finance.sina.cn/2026-09-23/detail-inisvqcz1081362.d.html</a></li></ul>
+<ul><li>Shared KV Caching for Replicated 27B（arXiv 2609.15021，9/14，补扫）。</li><li>两个单卡 27B 的 vLLM 副本，共享一个 256GiB 的 LMCache 池。</li><li>128k 超长输入下，跨副本首 token 从 31.7 秒降到 0.605 秒。</li><li>说白了：前缀缓存做成共享的，第二个请求直接&quot;抄作业&quot;。</li><li>来源：<a href="https://arxiv.org/abs/2609.15021">https://arxiv.org/abs/2609.15021</a></li></ul>
+<ul><li>播客线：Spotify 亲手查过。</li><li>Latent Space 10/2 那期是学术访谈（GPU kernels 话题）。</li><li>无 serving 相关新单集。</li><li>X 名单（lmsysorg、karpathy、jimfan）：搜不到可核验的新帖。</li><li>记未找到证据，不是记&quot;没动态&quot;。</li><li>HN、Reddit 近 24 小时无新增高赞 serving 讨论。</li><li>机器之心、量子位近 2 天无推理 serving 相关报道。</li></ul>
+<h2>值得深读</h2>
+<ul><li>Disaggregated Quantization（arXiv:2609.26333）已转精读笔记。</li><li>理由：P/D 各自最优量化格式，跟你正在评估的解耦方向直接相关。</li><li>数据也扎实：vLLM 验证过，最大测到 2.8T 参数 MoE。</li><li>ODP 那招（SSD 流式读 prefill 权重）是低成本试解耦的巧办法。</li><li>笔记：files/深度阅读/DQ-prefill和decode分开量化.html</li></ul>
+<p>*去重说明：本轮窗口（10/3 04:00→06:00 PDT = 10/3 11:00→13:00 UTC）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.30.0（9/22）、SGLang v0.5.21（10/2，已报）、TRT-LLM rc29（9/29）、LMDeploy v0.18.0（9/28）、TGI v3.3.7（归档只读）、llama.cpp b11375（窗口内新快照，05:36 PDT，按惯例不算正式版）。TRT-LLM 1.3 发布说明（nvidia.github.io 亲手打开核验）：TRITON MoE 后端弃用、CUTLASS 接替，GitHub 正式版尚未发布（tag 仍止于 rc29），属文档先行。vLLM Semantic Router v0.4（9/24 官方 release blog，搜索核验）经 briefs 全文 grep 确认首次收录；ReadyLLM v0.2.0（10/2，gh 亲手核验）首次收录。arXiv 10/3 日批次仍未放出（延迟超 12 小时），本轮窗口零新论文；Disaggregated Quantization（2609.26333，9/22）经 grep 确认从未报过，NVIDIA+ISTA 作者经 arXiv 页核验。d-Matrix Raptor：NVLink Fusion 合作 9/27 18点版已报，本轮收录的是 RuntimeWire 10/2 文章的芯片新料（亲手打开核验：ISCA 建模数据、32GB、2026 年底 tape out、MGX Q4 2027）。Intel KV Shrink（9/23 新浪科技，亲手打开核验）与 Shared KV Caching 27B（2609.15021）经 grep 确认均未报过，属补扫。Cerebras 解耦博客、TorchTPU talk、Inference Auction、APXInf、Neysa 博客、originsHQ 长文、karpathy 定制视频帖均经 grep 确认为往期已报或已排除，不重复。深读：Disaggregated Quantization 已转精读笔记（含原文关键图）。*</p></body></html>
