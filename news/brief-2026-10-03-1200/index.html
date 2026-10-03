@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月3日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-03"/>
+<meta name="doc-ts" content="2026-10-03T18:57:57"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-03（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-03（12点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架本轮全部原地踏步，版本一个没变。</li><li>vLLM 还是 v0.30.0（9/22）。SGLang 还是 v0.5.21（10/2）。</li><li>TRT-LLM 正式版 v1.2.1。预发布卡在 rc29（9/29）。</li><li>LMDeploy v0.18.0（9/28）。TGI 仓库已归档，只读。</li><li>llama.cpp 正式版 v0.5.0（9/23）。每日快照照例不算发版。</li><li>六家都亲手打 GitHub API 核验过，一个没漏。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 还在&quot;罢工&quot;。10/2、10/3 两批都没放出来。</li><li>延迟已经奔 30 小时。最新还是 10/1 那批。</li><li>10 点版那轮也撞过一次。这轮窗口零新论文。</li><li>下轮 14 点版再撞一次。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>TensorFold 有新剧情：GitHub star 破 800。</li><li>五天连发 12 个版本，现在到 v0.6.1。</li><li>MiaAI-Lab 和 Volatile Markets 加入了核心团队。</li><li>回顾一下：德国小团队做的本地推理引擎。</li><li>自称 exact decoding（输出和原模型逐 token 完全一样）。</li><li>单用户场景号称 vLLM 的 1.6 到 3 倍。多并发下 vLLM 反超。</li><li>开源，OpenAI 兼容接口，直接能接上。</li><li>说白了：本地单卡跑小模型的可以围观。生产级 serving 还轮不到它。</li><li>来源：Context Studios 官方博客 <a href="https://www.contextstudios.ai/blog/tensorfold-the-engine-that-makes-local-llms-2-3-faster-without-a-single">https://www.contextstudios.ai/blog/tensorfold-the-engine-that-makes-local-llms-2-3-faster-without-a-single</a></li></ul>
+<ul><li>NVIDIA Vera Rubin 又有新料：panel 上有人说 serving 性能 3 倍。</li><li>关键细节：Rubin 用 8 卡高密配置，单卡显存砍了。</li><li>逻辑是靠 scale 网络拼总量：模型摊到更多卡上。</li><li>拼的是总内存带宽，不是单卡容量。</li><li>另一个亮点：硬件级 LUTB 量化通路。</li><li>用 3-bit 查表，权重压到约 3.125 bit。</li><li>目前没有开源模型用这个特性。疑似给某些实验室定制场景准备的。</li><li>来源：<a href="https://finance.biggo.com/news/a12b123b03d60b61">https://finance.biggo.com/news/a12b123b03d60b61</a></li></ul>
+<ul><li>传闻栏：Redis 之父疑似出了个 C 语言本地推理引擎 ds4。</li><li>名字叫 DwarfStar 4。支持 Metal、CUDA、ROCm。</li><li>特色是非对称 2-bit 量化：只把 MoE 专家层压到 2 bit。</li><li>但是：消息源是 AI 生成的聚合站，自己也声明不保真。</li><li>还没看到官方仓库。这条先记着，下轮接着跟。</li><li>来源：<a href="https://ai-minor.com/blog/en/2026-10-03-1790969718282-from_the_creator_of_redis__run_llm_locally_with_ds/">https://ai-minor.com/blog/en/2026-10-03-1790969718282-from_the_creator_of_redis__run_llm_locally_with_ds/</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>本轮无新料。</li><li>Spotify 亲手查过：Latent Space 最新还是 10/2 那期学术访谈。</li><li>X 名单（lmsysorg、karpathy、jimfan）搜不到可核验的新帖。</li><li>Reddit 和 HN 本轮没有新的 serving 热帖。</li><li>机器之心、量子位本轮无新报道。</li></ul>
+<h2>值得深读</h2>
+<ul><li>本轮没有（宁缺毋滥）。</li></ul>
+<p>*去重说明：本轮窗口（10/3 10:00→12:00 PDT = 10/3 17:00→19:00 UTC）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.30.0（9/22）、SGLang v0.5.21（10/2）、TRT-LLM 正式版 v1.2.1（预发布 rc29，9/29）、LMDeploy v0.18.0（9/28）、TGI v3.3.7（归档只读）、llama.cpp 正式版 v0.5.0（9/23）。arXiv 10/2、10/3 批次仍未发布（延迟奔 30 小时，最新为 10/1 批次），本轮零新论文。Prime Intellect（10/3 4点版已报）、DatologyAI 访谈（10/3 8点版已报）不重复。新闻线新收录：TensorFold 跟进（800 stars、v0.6.1、团队扩张，4点版只报过本体）、Vera Rubin panel 新细节（3x serving 论断、8 高密单卡显存削减、硬件 LUTB 量化通路，此前各版未报过）、ds4 传闻（10/3 新闻，首次收录，已标可信度待验证）。Spotify 亲手查 Latent Space 无 serving 相关新单集。X 名单/Reddit/HN/中文媒体本轮无可核验新料。深读：本轮无（TensorFold 为厂商博客、ds4 为未验证传闻、Vera Rubin 为新闻速记，均无方法细节，按宁缺毋滥不转深读）。*</p></body></html>
