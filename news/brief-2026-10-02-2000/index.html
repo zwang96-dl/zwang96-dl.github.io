@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月2日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-02"/>
+<meta name="doc-ts" content="2026-10-03T03:02:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-02（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-02（20点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家这轮集体静默。</li><li>vLLM 最新还是 v0.31.0rc5，rc6 没露头。</li><li>rc 是候选发布版的意思，就是正式版之前的试水。</li><li>SGLang 停在 v0.5.21，没动。</li><li>TRT-LLM 还是 v1.3.0rc29 预览版。</li><li>LMDeploy 停在 v0.18.0。</li><li>TGI 仓库归档只读，不会有新版。</li><li>llama.cpp 正式 tag 没变，每日快照按惯例不报。</li><li>以上全部经 GitHub API 亲手核验。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 10/3 批次迟到了。</li><li>名义上 00:00 UTC 放出，也就是今天 17:00 PDT。</li><li>亲手查 API：到 03:00 UTC 还没出来，晚了近 3 小时。</li><li>本轮窗口内零新论文，不是没料，是批次没到。</li><li>22 点版第一时间再撞它。</li></ul>
+<ul><li>捡回一篇漏网之鱼：RapidMoE，标注补报。</li><li>它是 10/1 那批 arXiv 里被漏掉的，之前各期没报过。</li><li>人话版：MoE 模型太大，专家权重塞不进 GPU。</li><li>专家是 MoE 里轮流上场的神经网络模块。</li><li>RapidMoE 让 CPU 和 GPU 按各自擅长分工搬运专家。</li><li>目标是绕开 PCIe 传输这个堵点。</li><li>PCIe 是 CPU 和 GPU 之间的数据通道。</li><li>通道堵了，GPU 就只能干等。</li><li>跟你的关系：它和上期补报的 MoE-CORE 是姐妹思路。</li><li>都是&quot;显存不够时怎么聪明地搬专家&quot;。</li><li>但你这边的卡内存管够，更多是思路参考。</li><li>跟 P/D 解耦没有直接关联。</li><li>来源：<a href="https://arxiv.org/abs/2610.01265">https://arxiv.org/abs/2610.01265</a></li><li>深读：按宁缺毋滥不转笔记，原因同上。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>SemiAnalysis 的 Dylan Patel 放了个狠数据。</li><li>推理服务商在开源模型上的毛利率干到了 60% 左右。</li><li>毛利率是扣掉成本后剩下的利润比例。</li><li>九个月前还是 10%，翻了六倍。</li><li>他点名了 Base10 和 Fireworks。</li><li>Together、Morph 也在名单里。</li><li>推理赚钱了，副作用是 GPU 更难租。</li><li>他说新实验室现在几乎租不到卡。</li><li>以前租 8000 卡的单子，现在压缩到 1000 卡。</li><li>对你的启示：推理 infra 正在变成卖方市场。</li><li>自建和优化的价值在涨，纯租卡的议价权在跌。</li><li>原始出处是 Latent Space 播客那期访谈。</li><li>这条来自聚合站转写的播客内容，可信度打个折。</li><li>链接：<a href="https://finance.biggo.com/news/b8d98348206703ea">https://finance.biggo.com/news/b8d98348206703ea</a></li></ul>
+<ul><li>一篇扎实的第三方实测：Qwen 3.8 27B 跨服务商对比。</li><li>作者 Aleksei Romanov，独立第三方，不是厂商软文。</li><li>测了 Together、Fireworks、Doubleword 等五家。</li><li>固定 2 张 H100，并发从 1 拉到 64。</li><li>划重点一：单机张量并行赢在延迟。</li><li>张量并行是把一层权重切开、两张卡一起算。</li><li>Together 的 TP2 在并发 1 时跑出 189.6 tok/s。</li><li>跨机器做张量并行会直接崩。</li><li>并发 8 时吞吐掉到 75.75 tok/s。</li><li>GPU 95% 的时间都在等网络，白白罚站。</li><li>结论：没 InfiniBand 千万别跨节点做张量并行。</li><li>InfiniBand 是机房里卡跟卡之间的高速专线。</li><li>划重点二：推测解码不是头数越多越好。</li><li>推测解码是先让小头猜几个词、再让大模型一次验。</li><li>MTP4 接受率 59%，MTP8 掉到 39%。</li><li>MTP8 反而慢了 2–4%，延迟还涨了十几个点。</li><li>划重点三：B200 相对 H100 纯提速 1.6–1.7 倍。</li><li>代码不用改，换卡就行，decode 吃的就是显存带宽。</li><li>划重点四：前缀缓存也很香。</li><li>前缀缓存是把重复前缀的计算结果存下来复用。</li><li>结构化提示词上能干到 1140 tok/s 以上。</li><li>还有个大坑：128 token 的上限只管住了最终答案。</li><li>模型先偷偷想了 15774 个 token，跑了 247 秒。</li><li>测推理模型吞吐，得先把思考过程关掉再比。</li><li>跟你的关系：P/D 解耦做容量规划时，并发-延迟曲线这套方法可以直接抄。</li><li>来源：<a href="https://medium.com/@gfactor/benchmarking-qwen-3-8-27b-across-inference-providers-together-fireworks-doubleword-and-g-factor-b763acc4f528">https://medium.com/@gfactor/benchmarking-qwen-3-8-27b-across-inference-providers-together-fireworks-doubleword-and-g-factor-b763acc4f528</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>这轮无新料。</li><li>Latent Space 播客最新几期跟 serving 无关。</li><li>Simon Willison 近两天没写推理 serving。</li><li>机器之心、量子位 48 小时内无相关报道。</li><li>Reddit、HN 本轮无新增热门 serving 讨论。</li><li>X 名单搜不到可核验的帖子，记未找到证据。</li></ul>
+<p>*去重说明：本轮窗口（10/2 18:00→20:00 PDT = 10/3 01:00→03:00 UTC）。框架六家经 GitHub API 亲手核验：vLLM v0.31.0rc5（rc6 未出现，stable 仍 v0.30.0）；SGLang v0.5.21；TRT-LLM v1.3.0rc29；LMDeploy v0.18.0（InternLM 路径）；TGI v3.3.7（归档只读）；llama.cpp v0.5.0（每日快照按惯例不报）。arXiv：10/3 批次名义 00:00 UTC 发布，截至 03:00 UTC 仍未在 API 放出（API 最新仍是 10/1 批次 2610.02206），本轮窗口零新论文；22点版再查。RapidMoE（arXiv 2610.01265v1，2026-10-01T08:02:24Z 提交，cs.DC，属 10/1 批次）：briefs 全文 grep 确认往期未报过，为漏报补报，已如实标注。备选核验：Mira（2609.38090）未报过、留作后备；Efficient Expert-Parallel Communication（2609.40093）9/30 2200版已报过，排除。深读：RapidMoE 为内存受限设备 MoE 卸载系统工程，与用户 SGLang P/D 解耦评估线无直接关联，按宁缺毋滥不转深读。OpenAI×Cerebras 传闻（nationpress.com 小众聚合站，无交叉核验）未收录。新闻两条均亲手打开原文核验：Patel 毛利率 60% 出自 Latent Space 播客访谈的聚合转写；Qwen 3.8 27B 实测为 Medium 独立第三方长文（Oct 2026）。*</p></body></html>
