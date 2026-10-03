@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月2日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-02"/>
+<meta name="doc-ts" content="2026-10-03T01:07:11"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-02（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-02（18点版）</h1>
+<h2>框架更新</h2>
+<ul><li>这轮六家全部静默。</li><li>vLLM 停在 v0.31.0rc5。</li><li>rc5 是 16点版刚报的，rc6 还没影。</li><li>SGLang 停在 v0.5.21。</li><li>TRT-LLM 预览版还是 rc29。</li><li>LMDeploy 停在 v0.18.0。</li><li>TGI 归档只读，不会有新版。</li><li>llama.cpp 只有每日快照，按惯例不报。</li><li>以上全部经 GitHub API 亲手核验。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>捡回一篇漏网之鱼：MoE-CORE。</li><li>它是昨天 17:00 PDT 那批 arXiv 里被大家漏掉的。</li><li>全文 grep 确认，之前各期都没报过。</li><li>人话版：MoE 模型的专家权重太多，小设备显存塞不下。</li><li>专家是 MoE 里轮流干活的神经网络模块。</li><li>权重放不下就只能从主机内存搬，搬一次卡一次。</li><li>MoE-CORE 干了三件事：统筹&quot;专家卸载、留谁扔谁、跨层预取&quot;。</li><li>卸载是把权重暂时挪出显存。</li><li>预取是提前把下一层可能用的专家搬回来。</li><li>decode 时按路由历史决定换谁，像按客流补货。</li><li>关键数据：在 DeepSeek-V4-Flash 上每 token 38–44.8 毫秒。</li><li>它对比的 vLLM Prefetch 配置是 1268.9–1269.1 毫秒。</li><li>但这个对比有点不对等：MoE-CORE 测了 1K token 输出。</li><li>vLLM 那边只测了 128 token。</li><li>作者自己也在摘要里交代了这点，算坦率。</li><li>84GB 显存上限下，它在 GSM8K 做到 21.5 毫秒每 token。</li><li>用的配置是近似专家替换加 2 层多 token 预测。</li><li>多 token 预测就是一次猜好几个词，再一起验。</li><li>跟你的关系：思路跟 P/D 解耦里的传输调度相通。</li><li>但它解决的是小显存设备的难题。</li><li>你的 MI350X 内存管够，更多是思路参考。</li><li>来源：<a href="https://arxiv.org/abs/2610.01950">https://arxiv.org/abs/2610.01950</a></li></ul>
+<ul><li>arXiv 10/3 新批次还没放出来。</li><li>新批次通常 00:00 UTC 发布，也就是今天 17:00 PDT。</li><li>亲手查了 arXiv API，最新还是 10/1 那批。</li><li>等 20点版再撞它。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮无新料。</li><li>新闻线翻了一圈，都是 8 天前的旧文章。</li><li>社区线：HN 48h 内无新增高赞 serving 帖。</li><li>Reddit 本轮无新增热门 serving 帖。</li><li>X 名单搜索引擎不索引，记&quot;未找到证据&quot;而非无动态。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>这轮无新料。</li><li>Latent Space、播客线 14点版刚查过，无新增 serving 单集。</li><li>机器之心、量子位 48h 内无推理 serving 报道。</li></ul>
+<p>*去重说明：本轮窗口（10/2 16:00→18:00 PDT = 23:00→01:00 UTC）。框架六家经 GitHub API 亲手核验：vLLM 无新 tag（rc5 已报，rc6 未出现）；SGLang v0.5.21；TRT-LLM v1.3.0rc29；LMDeploy v0.18.0（InternLM 路径）；TGI v3.3.7（归档只读）；llama.cpp 每日快照（按惯例不报）。arXiv：10/3 批次截至 18点版发稿尚未在 API 放出（API 最新仍是 10/1 批次，下一批 20点版再查）。新闻/社区/大V/播客线无窗口内新料（news 搜索返回的全是 9/24–9/25 旧文）。唯一收录 MoE-CORE（arXiv 2610.01950，2026-10-01T16:11:45Z 提交，属 10/1 17:00 PDT 公布批次）：briefs 全文 grep（MoE-CORE / 2610.01950）确认此前各期均未报过，为往期漏报、属实新收录；其时间戳属实落在窗口外，本简报如实标注为补报。深读：MoE-CORE 为内存受限设备的系统工程论文，与用户当前 SGLang P/D 解耦评估线不直接相关，按宁缺毋滥不转深读。*</p></body></html>
