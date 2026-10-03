@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月3日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-03"/>
+<meta name="doc-ts" content="2026-10-03T14:59:30"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-03（8点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-03（8点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架本轮都没动，版本全部原地踏步。</li><li>vLLM 还是 v0.30.0（9/22）。SGLang 还是 v0.5.21（10/2）。</li><li>TensorRT-LLM 正式版没发出来。预发布卡在 rc29（9/29）。</li><li>LMDeploy 还是 v0.18.0（9/28）。TGI v3.3.7（仓库已归档）。</li><li>llama.cpp 正式版 v0.5.0（9/23）。每日快照照旧不算正式版。</li><li>六家都亲手打了 GitHub API 核验过，一个没漏。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 继续&quot;罢工&quot;，10/2 和 10/3 两批都没放出来。</li><li>4 组关键词亲手扫过。最新还是 10/1 的文章。</li><li>6点版时延迟就超 12 小时。现在快奔 24 小时了。</li><li>本轮窗口零新论文。10点版再去撞它。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>本轮没捡到值得说的业内新闻，直接略过。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>DatologyAI CTO 出来聊了他们一年造 12 万亿合成 token 的故事。</li><li>这家是合成数据公司。一次跑了 12T token（7T 网页、5T 数学代码）。</li><li>最干货的一段：光调 vLLM 的 serving 参数。</li><li>调的是 batch size、投机解码配置这些&quot;旋钮&quot;。纯网格搜索，吞吐直接涨了 40%。</li><li>说白了：调 serving 参数收益真不小。你的 autotuner 方向有人背书。</li><li>他们目前主力还是 vLLM。但已经在试 SGLang。</li><li>另一个细节：S3 元数据请求打包后，关键步骤从 11 天压到 2 小时。</li><li>跨集群的 GPU/CPU 调度，被他们当成&quot;装箱问题&quot;来解。</li><li>原访谈在 AI Engineer 频道，10/2 发布，20 分钟。</li><li>来源：<a href="https://finance.biggo.com/news/3c9006f63582ab1f">https://finance.biggo.com/news/3c9006f63582ab1f</a></li></ul>
+<h2>值得深读</h2>
+<ul><li>本轮没有（宁缺毋滥）。</li></ul>
+<p>*去重说明：本轮窗口（10/3 06:00→08:00 PDT = 10/3 13:00→15:00 UTC）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.30.0（9/22）、SGLang v0.5.21（10/2，6点版已报）、TRT-LLM rc29（9/29）、LMDeploy v0.18.0（9/28）、TGI v3.3.7（归档只读）、llama.cpp 正式版 v0.5.0（9/23）。arXiv 10/2、10/3 两批次仍未发布（4 组关键词亲手扫过，最新仍是 10/1），本轮零新论文。DatologyAI 访谈经 briefs 全文 grep 确认首次收录；Prime Intellect（10/3 4点版已报）、Corbenic/Galahad（10/1 22点版已报）不重复。X 名单（lmsysorg、karpathy、jimfan）、Reddit、HN、机器之心/量子位本轮无可核验新帖。Spotify 亲手查过：Latent Space 最新 10/2 那期是 GPU kernels 学术访谈，无 serving 相关新单集。*</p></body></html>
