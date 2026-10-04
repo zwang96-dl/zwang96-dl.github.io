@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月4日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-04"/>
+<meta name="doc-ts" content="2026-10-04T13:00:14"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-04（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-04（6点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮集体静默。</li><li>GitHub API 逐个亲手核验过，一个没漏。</li><li>vLLM 还是 v0.30.0（9/22）。</li><li>v0.31.0 的 tag 在，但 release 说明还没发。</li><li>SGLang 停在 v0.5.21（10/2）。</li><li>TRT-LLM 预览版还是 rc29（9/29）。</li><li>LMDeploy 停在 v0.18.0（9/28）。</li><li>TGI 已归档只读。</li><li>llama.cpp 只有每日快照，按惯例不报。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 还是周末模式。</li><li>推理 serving 关键词查过，最新还是 8 月底的老论文。</li><li>本轮零新论文。</li><li>下一批周一凌晨放出，下轮继续撞。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>欧洲出了个新开源大模型：Aleph Alpha 的 Kolibri。</li><li>说人话：78B 的 MoE（混合专家，像按需叫专家干活）。</li><li>每 token 只激活 3.46B 参数，瘦得很。</li><li>Apache 2.0 开源，vLLM 一行命令就能跑。</li><li>单张 B200 或 H200 就能带，上下文给到 1M。</li><li>德英双语，德国团队自己训的。</li><li>划重点：又多了一个能在 vLLM 上跑分的欧洲开源权重。</li><li>做 serving 选型对比时，可以拿它当新参照物。</li><li>来源：<a href="https://www.marktechpost.com/2026/10/04/aleph-alpha-releases-kolibri-a-78-1b-open-weight-english-german-moe-model-with-only-3-46b-active-parameters/">https://www.marktechpost.com/2026/10/04/aleph-alpha-releases-kolibri-a-78-1b-open-weight-english-german-moe-model-with-only-3-46b-active-parameters/</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>一篇趋势文章：窄引擎正在各自赛道跑赢 vLLM。</li><li>窄引擎只认一个模型和一类显卡。</li><li>比如 Strata 这款引擎。</li><li>它专为 Qwen3.8-Flash-Next 125B 打造。</li><li>单张游戏卡 decode（逐词生成）跑到 53.2 tok/s。</li><li>同一台机器上 llama.cpp 只有 20.8，差了 2.6 倍。</li><li>类比一下：通用引擎是瑞士军刀，窄引擎是手术刀。</li><li>代价也写得很明白：换模型换显卡可能直接不支持。</li><li>这跟你评估 vLLM/SGLang 的思路正好互补，值得一看。</li><li>来源：<a href="https://startupfortune.com/a-wave-of-narrow-ai-inference-engines-is-beating-vllm-and-llamacpp-at-their-own-game/">https://startupfortune.com/a-wave-of-narrow-ai-inference-engines-is-beating-vllm-and-llamacpp-at-their-own-game/</a></li></ul>
+<h2>值得深读</h2>
+<ul><li>本轮没有（宁缺毋滥）。</li><li>Kolibri 是模型发布不是方法论文。</li><li>窄引擎那篇是趋势讨论，没有可复用的方法细节。</li></ul>
+<p>*去重说明：本轮窗口（10/4 04:00→06:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.30.0（9/22；v0.31.0 tag 在但 release notes 仍未发，10/3 已报过）；SGLang v0.5.21（10/2）；TRT-LLM 预览版 rc29（9/29）；LMDeploy v0.18.0（9/28）；TGI v3.3.7（归档只读）；llama.cpp v0.5.0（9/23，每日快照按惯例不报）。arXiv 周末模式，本轮零新论文；下一批周一 00:00 UTC。两篇新料均亲手打开原文核验（marktechpost 10/4、StartupFortune 约 12 小时前）。主动排除已报候选：Cerebras 解耦 5x（10/1 已报）、Dylan Patel 推理毛利率 60%（10/2 已报）、vLLM Decision 2.0（10/4 02点版）、vLLM 多伦多 meetup（02点版）、Mooncake CVE 簇（10/2 已报）、Baseten Agentic inference（往期已报）、LMSYS NVFP4 KV Cache（往期已报）、Prime Intellect（多轮已报）、TorchTPU talk（往期已报）。X 名单、Reddit、HN、机器之心/量子位本轮无窗口内新料；Latent Space 最新仍为 10/2 MIT 访谈。深读：本轮无（宁缺毋滥）。*</p></body></html>
