@@ -2,7 +2,7 @@
 <meta name="doc-title" content="多模态推理简报 · 10月4日 12:00"/>
 <meta name="doc-description" content=""/>
 <meta name="doc-date" content="2026-10-04"/>
-<meta name="doc-ts" content="2026-10-04T19:04:24"/>
+<meta name="doc-ts" content="2026-10-04T19:13:19"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>多模态大模型推理服务简报 · 2026-10-04（12点版）</title><style>
@@ -45,12 +45,12 @@ img{border-color:#30363d}
 <h2>框架更新</h2>
 <ul><li>六家框架这轮继续集体静默。</li><li>GitHub API 逐个亲手核验，一个没漏。</li><li>vLLM 还是 v0.30.0（9/22）。</li><li>v0.31.0 的 tag 在，release 说明还没发。</li><li>SGLang 停在 v0.5.21（10/2）。</li><li>TRT-LLM 稳定版 v1.2.1，预览版还是 rc29。</li><li>LMDeploy 停在 v0.18.0（9/28）。</li><li>TGI 已归档只读，llama.cpp 只有每日快照。</li></ul>
 <h2>新技术与论文</h2>
-<ul><li>arXiv 还是周末模式。</li><li>四组关键词亲手查过，最新还是 8 月底的老论文。</li><li>本轮零新论文。</li><li>下一批周一凌晨放出，下轮继续撞。</li></ul>
+<ul><li>arXiv 还是周末模式。</li><li>四组关键词亲手查过，最新还是 8 月底的老论文。</li><li>本轮零新论文。</li><li>下一批周一凌晨放出，下轮继续撞。</li><li>补扫一篇 9/26 的论文：RR-Evict。</li><li>Agent 的前缀缓存，别用 LRU 连根拔。</li><li>一个 agent 的历史新近度全一样，LRU 一杀杀一串。</li><li>被拔光的回来重算整个上下文，首字延迟爆表。</li><li>解法：轮流薅尾巴，每家只薅一小截。</li><li>SGLang 上实测，P99 首字延迟最高降 75%。</li><li>还在 P/D 解耦配置下测过，跟你的评估直接相关。</li><li>已标「值得深读」，精读笔记随后到。</li><li>来源：<a href="https://arxiv.org/abs/2609.32278">arXiv</a></li></ul>
 <h2>业内新闻</h2>
 <ul><li>本地推理引擎 Strata 今天发了 v0.1.39。</li><li>还一口气冲上 HN 第一。</li><li>输出和上一版逐字节一样，解码更快、prompt 更长。</li><li>多会话并发、老显卡支持、Codex CLI 直连都安排上了。</li><li>它专跑 Qwen3.8-Flash-Next。</li><li>125B 参数，每次只激活 6B 干活。</li><li>一张游戏卡就能跑，HN 上 300 多分、近 200 条评论。</li><li>跟 6点版报的窄引擎趋势是同一条线，这是今天的新进展。</li><li>项目方数字一贯要打折，独立实测还很少。</li><li>来源：<a href="https://laxima.tech/signal/run-qwen-3-8-flash-next-125b-on-consumer-hardware-rtx-4090-a-hn-49953495">laxima HN 镜像</a> · <a href="https://www.linuxcompatible.org/story/strata-v0139-runs-125b-local-ai-faster-without-changing-one-byte/">linuxcompatible</a> · <a href="https://hackaday.com/2026/10/04/ai-on-your-gaming-pc/">Hackaday</a></li></ul>
 <h2>访谈与深度</h2>
 <ul><li>Nebius 的工程师上了 AI Engineer 播客。</li><li>大谈推理 serving 怎么省钱。</li><li>核心观点：模型都够聪明了，拼的是 serving 栈。</li><li>缓存感知路由是关键：知道缓存落在哪张卡，请求就往哪送。</li><li>几十万卡规模下，路由乱了缓存命中率就崩。</li><li>speculative decoding 他讲得最细。</li><li>小模型先打草稿，大模型只管验稿。</li><li>通用数据训的草稿模型能提速 30%，拿自家数据训更好。</li><li>他们要上一键功能：拿生产数据自动训草稿模型。</li><li>KV cache 是他眼里 ROI 最高的优化。</li><li>说白了就是草稿纸：存着算好的中间结果，免得重算。</li><li>他们也在做 prefill/decode 解耦。</li><li>分工流水线嘛，缓存跨卡搬运，跟你的 P/D 方向直接相关。</li><li>厂商数字（5 到 10 倍）先打个折再看。</li><li>来源：BigGo 转载的播客单集总结：<a href="https://finance.biggo.com/news/d64022e748642911">链接</a></li></ul>
 <ul><li>dev.to 上有篇 K8s 推理全景，帮你画了张地图。</li><li>已经卷透的：缓存感知路由、P/D 解耦都有成熟方案。</li><li>Dynamo 和 llm-d 把 P/D 解耦覆盖得很好。</li><li>还没人做好的有三块：权重分发、延迟感知扩缩容、LoRA 生命周期管理。</li><li>权重动不动 100GB+，全靠临时下载，冷启动要等 2 到 10 分钟。</li><li>LoRA 是给大模型打补丁的微调方法，管几百个补丁还是手工活。</li><li>当地图看很省时间，知道哪块已经挤、哪块还能进。</li><li>来源：<a href="https://dev.to/avneet_bansal_a65b3f31fc4/llm-serving-on-kubernetes-in-2026-whats-solved-and-whats-still-open-52ad">dev.to</a></li></ul>
 <h2>值得深读</h2>
-<ul><li>本轮没有（宁缺毋滥）。</li></ul>
-<p>*去重说明：本轮窗口（10/4 10:00→12:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.30.0（9/22；v0.31.0 tag 在但 release 对象仍 404）；SGLang v0.5.21（10/2）；TRT-LLM 稳定版 v1.2.1、预览版 rc29（9/29）；LMDeploy v0.18.0（9/28）；TGI v3.3.7（归档只读）；llama.cpp v0.5.0（每日快照按惯例不报）。arXiv 周末模式，四组关键词（LLM inference serving、KV cache、prefill decode disaggregation、speculative decoding）最新提交仍为 8/28，本轮零新论文；下一批周一 00:00 UTC。新闻/X 名单/Reddit/HN/机器之心/量子位/social 扫过：Strata v0.1.39（今日发布）+ HN 登顶为本轮新料（6点版报的是 v0.1.38 趋势旧文，不重复）；Nebius AI Engineer 播客单集（约 18 小时前，BigGo 转载已亲手打开核验，原播客直链未找到）与 dev.to K8s 全景（1 天前，亲手打开核验）为今日新料补入。Latent Space 最新仍为 10/2 MIT 访谈（Spotify 亲手查过，无新单集）。X 仍受登录墙限制（已知缺口）。深读：本轮无（宁缺毋滥）。*</p></body></html>
+<ul><li>RR-Evict（arXiv:2609.32278）已转精读笔记。</li><li>理由：SGLang 前缀缓存淘汰，P/D 解耦下也测过。</li><li>跟你的评估方向直接相关。</li><li>数据扎实：P99 首字延迟最高降 75%。</li><li>未缓存的 prompt token 也降了 66%。</li><li>跟 KVTether 是姊妹篇。</li><li>一个管&quot;杀得太狠&quot;，一个管&quot;杀错人&quot;。</li><li>笔记：files/深度阅读/RR-Evict-Agent前缀缓存轮流薅尾巴.html</li></ul>
+<p>*去重说明：本轮窗口（10/4 10:00→12:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.30.0（9/22；v0.31.0 tag 在但 release 对象仍 404）；SGLang v0.5.21（10/2）；TRT-LLM 稳定版 v1.2.1、预览版 rc29（9/29）；LMDeploy v0.18.0（9/28）；TGI v3.3.7（归档只读）；llama.cpp v0.5.0（每日快照按惯例不报）。arXiv 周末模式，四组关键词（LLM inference serving、KV cache、prefill decode disaggregation、speculative decoding）最新提交仍为 8/28，本轮零新论文；下一批周一 00:00 UTC。新闻/X 名单/Reddit/HN/机器之心/量子位/social 扫过：Strata v0.1.39（今日发布）+ HN 登顶为本轮新料（6点版报的是 v0.1.38 趋势旧文，不重复）；Nebius AI Engineer 播客单集（约 18 小时前，BigGo 转载已亲手打开核验，原播客直链未找到）与 dev.to K8s 全景（1 天前，亲手打开核验）为今日新料补入。Latent Space 最新仍为 10/2 MIT 访谈（Spotify 亲手查过，无新单集）。X 仍受登录墙限制（已知缺口）。补扫 RR-Evict（arXiv:2609.32278，9/26 提交，UCSD，SGLang 前缀缓存淘汰；经 briefs 全文 grep 确认往期未报；标值得深读，精读笔记已生成，含原文 Figure 2/3/6）。深读：本轮 1 篇（RR-Evict）。*</p></body></html>
