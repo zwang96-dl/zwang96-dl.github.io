@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月4日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-04"/>
+<meta name="doc-ts" content="2026-10-04T08:59:20"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-04（02点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-04（02点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架本轮继续原地踏步。</li><li>GitHub API 逐个亲手核验过，一个没漏。</li><li>vLLM 还是 9/22 的 v0.30.0。</li><li>SGLang 停在 10/2 的 v0.5.21。</li><li>TRT-LLM 预览版还是 9/29 的 rc29。</li><li>LMDeploy 停在 9/28 的 v0.18.0。</li><li>TGI 归档只读，llama.cpp 只有每日快照，按惯例不报。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 还是周末模式。</li><li>四组关键词查过，最新提交停在 10/1。</li><li>本轮零新论文。</li><li>周一凌晨下一批放出，下轮继续撞。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>补扫一条：vLLM 官方出了 Decision 2.0。</li><li>这是套决策专用小模型。</li><li>说人话：不写字、只打分，专干分类路由打分。</li><li>你给它一段输入加一堆问题，它一次前向全答完。</li><li>64 个问题一次搞定，单卡中位 12.9 毫秒。</li><li>类比一下：以前每个决策都要先写小作文再抠答案，现在直接填表交卷。</li><li>数据：4B 版 JevArena 63.6，同尺寸第一。</li><li>JevArena 是决策模型的公开竞技场，同题同分。</li><li>比上一代 1.0 高 7.1 分，2B 版单问只要 7.2 毫秒。</li><li>Apache-2.0 开源，transformers 直接加载就能用。</li><li>划重点：这是 P/D 解耦的极致，prefill 跑完就收工。</li><li>整个 token-by-token 的 decode 循环直接砍掉。</li><li>跟 SGLang 的 /v1/decisions 是同一赛道。</li><li>vLLM 官方亲自下场了。</li><li>来源：<a href="https://huggingface.co/vllm-sr/Decision-2.0-Nox-4B">https://huggingface.co/vllm-sr/Decision-2.0-Nox-4B</a></li><li>2B 版：<a href="https://huggingface.co/vllm-sr/Decision-2.0-Sol-2B">https://huggingface.co/vllm-sr/Decision-2.0-Sol-2B</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>本轮无新的访谈和深度文章。</li><li>顺带一条活动：vLLM 10/15 在多伦多办 meetup。</li><li>Cohere、NVIDIA 联合主办，聊 vLLM 下一步路线图。</li><li>免费参加，人在多伦多的可以去听。</li><li>来源：<a href="https://www.linkedin.com/company/vllm-project/">https://www.linkedin.com/company/vllm-project/</a></li></ul>
+<h2>值得深读</h2>
+<ul><li>Decision 2.0 的 HF 模型卡，精读笔记已生成。</li><li>这篇能帮你把决策类 serving 的选型补全。</li><li>SGLang 有 /v1/decisions，vLLM 有官方模型。</li><li>两边齐了。</li><li>跟你研究的 prefill-only 方向直接相关。</li><li>prefix caching 那块也能对上。</li></ul>
+<p>*去重说明：本轮窗口（10/4 00:00→02:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.30.0（9/22）、SGLang v0.5.21（10/2）、TRT-LLM 预览版 rc29（9/29）、LMDeploy v0.18.0（9/28）、TGI v3.3.7（归档只读）、llama.cpp 仅每日快照（按惯例不报）。arXiv 四组关键词（inference serving / disaggregated prefill decode / KV cache serving / speculative decoding）最新提交仍停在 10/1（周末模式），本轮零新论文。补扫收录：vLLM Decision 2.0（约 10/3 经 LinkedIn 发布，briefs 全文 grep 确认从未报过；HF 模型卡亲手打开核验：Nox-4B/Sol-2B 卡片、JevArena 对比表、三张评测图、Apache-2.0）；vLLM 多伦多 meetup（10/15，同源 LinkedIn，未报过）。主动排除已报候选：Prime Intellect（10/3–10/4 多轮已报）、TorchTPU talk（往期已报）。X 名单、Reddit、HN、机器之心/量子位本轮无窗口内新料。深读：Decision 2.0 一篇（含原文 Figure 1/2/3，HTML 版图片已内嵌）。*</p></body></html>
