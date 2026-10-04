@@ -1,0 +1,69 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · Jev 与 SGLang /v1/decisions：不生成文字的决策推理"/>
+<meta name="doc-description" content="&gt; 原文：Tim Wu《「90% 信心」不是機率：拆解一個不生成文字的 LLM》（Medium，2026-09-20，9/30 补记 SGLang 开源实现）"/>
+<meta name="doc-date" content="2026-10-04"/>
+<meta name="doc-ts" content="2026-10-04T04:59:17"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Jev 与 SGLang /v1/decisions：不生成文字的决策推理</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>Jev 与 SGLang /v1/decisions：不生成文字的决策推理</h1>
+<blockquote><p>原文：Tim Wu《「90% 信心」不是機率：拆解一個不生成文字的 LLM》（Medium，2026-09-20，9/30 补记 SGLang 开源实现）<br/><a href="https://medium.com/@changtimwu/90-%E4%BF%A1%E5%BF%83-%E4%B8%8D%E6%98%AF%E6%A9%9F%E7%8E%87-%E6%8B%86%E8%A7%A3%E4%B8%80%E5%80%8B%E4%B8%8D%E7%94%9F%E6%88%90%E6%96%87%E5%AD%97%E7%9A%84-llm-13b18d2decc9">https://medium.com/@changtimwu/90-%E4%BF%A1%E5%BF%83-%E4%B8%8D%E6%98%AF%E6%A9%9F%E7%8E%87-%E6%8B%86%E8%A7%A3%E4%B8%80%E5%80%8B%E4%B8%8D%E7%94%9F%E6%88%90%E6%96%87%E5%AD%97%E7%9A%84-llm-13b18d2decc9</a></p></blockquote>
+<p>&gt;</p>
+<blockquote><p>Archer Hume 原文《Jev&#x27;s Architecture Unmasked》（2026-09-17）：<a href="https://archerhume.com/posts/jevs-architecture-unmasked/">https://archerhume.com/posts/jevs-architecture-unmasked/</a></p></blockquote>
+<p>&gt;</p>
+<blockquote><p>SGLang 决策模型官方文档：<a href="https://github.com/lovedheart/sglang/blob/HEAD/docs/docs/supported-models/decision_models.mdx">https://github.com/lovedheart/sglang/blob/HEAD/docs/docs/supported-models/decision_models.mdx</a></p></blockquote>
+<p>&gt;</p>
+<blockquote><p>注：本文为纯文字实验记录，无原文配图，关键数据见下文&quot;关键数据&quot;。</p></blockquote>
+<h2>人话解读</h2>
+<p>这篇拆解了一个反常识的发现：做决策，不一定要让模型&quot;说话&quot;。</p>
+<p>TypeSafe 的 Jev 是个闭源决策服务。你给它一份共享的证据（state），再给一堆问题。每道题它只回每个选项的概率，一个字都不生成。</p>
+<p>研究者 Archer Hume 花了约一万次 API 调用，从外面把它摸了个透。结论是：Jev 大概率是个因果解码器（causal decoder），但只跑 prefill，不跑 decode。prefill 结束、接上 readout（读数头）就收工。token-by-token 的生成链整条消失。</p>
+<p>SGLang 在 9 月底把同一套思路做成了开源实现 /v1/decisions。任何 chat 模型都能用。不用训练，不用特殊 checkpoint。渲染一次问题，读答案位置上几个选项 label 的 next-token 概率就行。</p>
+<h2>核心方法</h2>
+<p>Jev 这边的逆向手段（Archer Hume，约 9392 次调用，全部黑箱）：</p>
+<ul><li>延迟扫描：固定一题拉长 state，对比固定短 state 加题数到 1500。看延迟曲线在哪转折。</li><li>Token 账目：1 题 268 tokens、2 题 276 tokens。加法完全可加，说明是&quot;共同前缀 + 各题后缀&quot;结构。</li><li>Tokenizer 指纹：415 个探针对 192 个公开 tokenizer，全不匹配。最接近 Qwen，命中 348/415。</li><li>信息可见性探针：某题塞密码&quot;ZEBRA-7741&quot;，另一题问&quot;其他题提到的密码是什么&quot;。答对概率 0.00。同一句话移到 state 里，概率跳到 0.90–0.92。题目之间完全隔离。</li><li>随机化 block 加配对对照：同一个请求重复跑，吸收请求噪声，再看选项顺序/无关选项的影响。</li></ul>
+<p>SGLang /v1/decisions 这边的实现思路：</p>
+<ul><li>把问题渲染成一次 prefill。选项标成 A/B/C 等 label。</li><li>直接读答案位置上这些 label 的 next-token log-probability。</li><li>不生成任何文字，不解析输出。/v1/systemone 上 output_tokens 直接是 0。</li></ul>
+<h2>关键数据</h2>
+<ul><li>选项顺序效应：只把选项调换顺序，正确答案概率从 0.84–0.89 跳到 0.93–0.96。阈值设在 0.9 附近的话，if 会走向不同分支。</li><li>IIA 违反：加一个明显无关的第五选项（&quot;坏天气造成的&quot;），原两选项 log-odds 从 +0.38 掉到 +0.11。十个随机化 block 每一个都下降，平均 −0.28（95% 区间 −0.36 到 −0.19）。模型把整张选项表当有序整体读。</li><li>confidence 是算术：TypeSafe 官方 adapter 公式是 c = (p_max − 1/K) / (1 − 1/K)。三选项、最高概率 0.8，得到 0.7。它衡量&quot;领先答案比均匀分布高多少&quot;，不是学出来的正确性估计。</li><li>校准：1200 题 MMLU 上十桶 ECE = 0.031，相当不错。但 990 题挤在 0.9–1.0 这一桶，ECE 被高分桶主导。</li><li>新鲜数学题（避 benchmark 污染）：三位数乘法平均概率 83.0%、实际正确率 86.7%。两步文字题 30.4% 对 32.0%。模指数运算 34.9% 对 56.0%，明显低估自己。</li><li>延迟：100 题以内 server time 几乎不动。1500 题的请求几百毫秒内回来。单 branch 上限约 32768 tokens（2 的 15 次方），整个请求上限约 65536 tokens（2 的 16 次方）。23k tokens 的 state 配 5000 个问题是合法请求。30k tokens 约 160ms，推测是 ~10B active 参数的稀疏 MoE。</li><li>SGLang 官方文档的实测警告：冷启动和 prefix cache 命中之间、不同 batch 组成之间，概率最多飘 0.07，label_mass 最多飘 0.14。要完全一致就得关掉 radix cache，代价是失去 prefix 重用。超过 26 个选项得用 AA、AB 双字母 label，先验概率不相等，顺序效应更明显。</li><li>生态：llm2jev（SGLang/Transformers/MLX 三后端，支持图文输入，9/20 加 SGLang scoring 后端）。diffusion-jev-sglang（DiffusionGemma 做图像决策，&quot;Jev 加眼睛&quot;，单卡 A100）。s1decide、ruling、Kev-0.5B（Qwen2.5-0.5B 冻结 + 9.3M LoRA + pointer 读数头）等复刻。</li></ul>
+<h2>跟你研究方向的关联</h2>
+<ul><li>prefill-only 推理是 P/D 解耦的极致形态。P/D 解耦把 prefill 和 decode 分到不同卡上。这套直接把 decode 整个砍掉，延迟和成本再降一档。</li><li>共享 state 的 KV cache 加并行 branch，就是 prefix caching 的另一种形态。一桌人共用一份菜单，各人点各人的菜。radix tree 在这里天然适用。</li><li>分类、路由、打分、审核这类 workload，本来就不需要生成文字。用 chat completion 硬套，等于为每个决策多付一整轮 decode 的钱。这个接口把价格打下来了。</li><li>校准这件事值得单独看。ECE 0.031 的数字背后，是用 proper scoring rule（log loss / Brier loss）对着真实结果训练。你的 serving 评估里如果涉及决策类 SLO，可以借这套评估思路。</li><li>坑要记住：选项顺序会动概率，batch 组成会动概率，confidence 只是算术。做阈值决策前，先在自己 workload 的标注数据上验证。</li></ul>
+<h2>术语表</h2>
+<ul><li>Jev：TypeSafe 公司的闭源决策模型服务。只出概率，不生成文字。2026-09-15 发布。</li><li>RLCD：Reinforcement Learning for Calibrated Decisions。TypeSafe 训练决策概率的方法，配方未公开。目标是用真实结果把概率校准。</li><li>readout（读数头）：把最后一层 hidden vector 接一个小线性层加 softmax，直接输出选项概率。z = Wh + b，p = softmax(z)。</li><li>branch（分支）：共享同一份 state 下的一道独立题目。题目之间互相看不见。</li><li>IIA（无关选项独立性）：理性选择理论的假设。加无关选项不该改变原有选项的胜负比。Jev 违反了它。</li><li>ECE（期望校准误差）：所有标成 0.8 的案例里，是不是真的大约 80% 成真。越小越好。</li><li>proper scoring rule（严格评分规则）：log loss、Brier loss 这类损失函数。期望上，只有回报真实条件分布时损失最小。</li><li>/v1/decisions：SGLang 的原生扩展接口。把 chat 模型变成决策模型。不是 OpenAI API 的一部分，要走 HTTP 直接调。</li></ul>
+<h2>原文链接</h2>
+<ul><li>Tim Wu 解读（本文主要来源）：<a href="https://medium.com/@changtimwu/90-%E4%BF%A1%E5%BF%83-%E4%B8%8D%E6%98%AF%E6%A9%9F%E7%8E%87-%E6%8B%86%E8%A7%A3%E4%B8%80%E5%80%8B%E4%B8%8D%E7%94%9F%E6%88%90%E6%96%87%E5%AD%97%E7%9A%84-llm-13b18d2decc9">https://medium.com/@changtimwu/90-%E4%BF%A1%E5%BF%83-%E4%B8%8D%E6%98%AF%E6%A9%9F%E7%8E%87-%E6%8B%86%E8%A7%A3%E4%B8%80%E5%80%8B%E4%B8%8D%E7%94%9F%E6%88%90%E6%96%87%E5%AD%97%E7%9A%84-llm-13b18d2decc9</a></li><li>Archer Hume 原文：<a href="https://archerhume.com/posts/jevs-architecture-unmasked/">https://archerhume.com/posts/jevs-architecture-unmasked/</a></li><li>SGLang 决策模型文档：<a href="https://github.com/lovedheart/sglang/blob/HEAD/docs/docs/supported-models/decision_models.mdx">https://github.com/lovedheart/sglang/blob/HEAD/docs/docs/supported-models/decision_models.mdx</a></li><li>llm2jev（开源复刻，支持图文）：<a href="https://github.com/yinsongxu/llm2jev">https://github.com/yinsongxu/llm2jev</a></li><li>diffusion-jev-sglang（图像决策版）：<a href="https://github.com/hangzhi/diffusion-jev-sglang">https://github.com/hangzhi/diffusion-jev-sglang</a></li></ul></body></html>
