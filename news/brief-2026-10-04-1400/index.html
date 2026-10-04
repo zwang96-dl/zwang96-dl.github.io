@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月4日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-04"/>
+<meta name="doc-ts" content="2026-10-04T21:08:37"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-04（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-04（14点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮继续集体静默。</li><li>GitHub API 逐个亲手核验，一个没漏。</li><li>vLLM 还是 v0.30.0（9/22）。</li><li>v0.31.0 的 tag 在，release 说明还是没发。</li><li>SGLang 停在 v0.5.21（10/2）。</li><li>TRT-LLM 稳定版 v1.2.1，预览版还是 rc29。</li><li>LMDeploy 停在 v0.18.0（9/28）。</li><li>TGI 已归档只读，llama.cpp 只有每日快照。</li></ul>
+<ul><li>顺手提醒一句：vLLM 0.30.0 的权重缓存有个坑。</li><li>Fast Start 是 vLLM 的秒启动权重缓存。</li><li>它的指纹只扫文件头，不看权重值。</li><li>说白了就是只看简历封面，不看里面的字。</li><li>同结构微调版和基座模型的指纹会撞车。</li><li>有人实测过：引擎静默加载了别人家的权重，全程不报错。</li><li>修复 PR 已经提了，但还没合进去。</li><li>你在 v0.30.0 上跑多 checkpoint 测试的话，多留个心眼。</li><li>来源：<a href="https://dev.to/homelabpm/vllms-weight-cache-can-serve-another-checkpoints-weights-when-the-tensor-layout-matches-2a62">dev.to</a></li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 还是周末模式。</li><li>四组关键词亲手查过：LLM inference serving、KV cache、prefill decode disaggregation、speculative decoding。</li><li>最新提交还是 9/30 和 10/1 的老论文。</li><li>本轮零新论文。</li><li>下一批周一凌晨放出，下轮继续撞。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>马斯克今天亲口确认：正在跟台积电谈 Terafab 合作。</li><li>Terafab 是马斯克的史诗级芯片制造计划。</li><li>之前只点名过英特尔一家，现在台积电也上桌。</li><li>方案一：台积电直接运营新工厂。</li><li>方案二：SpaceX 控股、台积电运营。</li><li>方案三：纯技术合作。</li><li>一期就砸 168 亿美元。</li><li>远期目标：年产约 1TW 的 AI 算力。</li><li>1TW 大约等于当前全球 AI 算力年产出的 50 倍。</li><li>这是推理算力供给端的大动作，跟你的推理栈上下游直接相关。</li><li>来源：<a href="https://finance.sina.cn/stock/jdts/2026-10-04/detail-initzvpf3873066.d.html">新浪科技转载量子位</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>HN 上有个受 DwarfStar 启发的小引擎讨论串。</li><li>有个有趣细节：AMD 给 antirez 寄了 Strix Halo，做 ROCm 适配。</li><li>Strix Halo 是 AMD 的高性能 APU，一块芯片集成 CPU 和 GPU。</li><li>窄引擎这条线还在发酵，跟 6点版报的趋势是同一条。</li><li>来源：<a href="https://news.ycombinator.com/item?id=49938078">HN</a></li></ul>
+<h2>值得深读</h2>
+<ul><li>本轮没有（宁缺毋滥）。</li></ul>
+<p>*去重说明：本轮窗口（10/4 12:00→14:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.30.0（9/22；v0.31.0 tag 在但 release 说明仍 404）；SGLang v0.5.21（10/2）；TRT-LLM 稳定版 v1.2.1、预览版 rc29（9/29）；LMDeploy v0.18.0（9/28）；TGI v3.3.7（归档只读）；llama.cpp（每日快照按惯例不报）。arXiv 四组关键词亲手查过，最新提交仍为 9/30–10/1，本轮零新论文；下一批周一 00:00 UTC。Terafab（马斯克 10/3 在 X 确认、新浪科技 10/4 13:59 转载，窗口内新料）为本轮主菜；补扫收录：vLLM 0.30.0 Fast Start 权重缓存静默串权 bug（dev.to，约 10/3，briefs 全文 grep 确认从未报过，原文亲手打开核验：issue 上游已开、修复 PR 未合）、HN DwarfStar 衍生讨论串（10/3–10/4，首次收录）。主动排除已报候选：startupfortune 窄引擎汇总（06点版）、Prime Inference（10/3-0400版）、玄武 V900（9/26-27版）、Astra/Nvidia 8x 站台（9/13-21版）、Cerebras/General Compute（10/2版）、AMD 收购 World Labs（10/1版）、RR-Evict（12点版深读）、Strata v0.1.39（12点版）、Nebius 播客（12点版）、dev.to K8s 全景（12点版）。X 仍受登录墙限制（已知缺口）。Latent Space/Spotify 亲手查过：最新仍为 10/2 MIT 访谈，无新单集。深读：本轮无（宁缺毋滥）。*</p></body></html>
