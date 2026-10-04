@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月4日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-04"/>
+<meta name="doc-ts" content="2026-10-04T19:04:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-04（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-04（12点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮继续集体静默。</li><li>GitHub API 逐个亲手核验，一个没漏。</li><li>vLLM 还是 v0.30.0（9/22）。</li><li>v0.31.0 的 tag 在，release 说明还没发。</li><li>SGLang 停在 v0.5.21（10/2）。</li><li>TRT-LLM 稳定版 v1.2.1，预览版还是 rc29。</li><li>LMDeploy 停在 v0.18.0（9/28）。</li><li>TGI 已归档只读，llama.cpp 只有每日快照。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 还是周末模式。</li><li>四组关键词亲手查过，最新还是 8 月底的老论文。</li><li>本轮零新论文。</li><li>下一批周一凌晨放出，下轮继续撞。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>本地推理引擎 Strata 今天发了 v0.1.39。</li><li>还一口气冲上 HN 第一。</li><li>输出和上一版逐字节一样，解码更快、prompt 更长。</li><li>多会话并发、老显卡支持、Codex CLI 直连都安排上了。</li><li>它专跑 Qwen3.8-Flash-Next。</li><li>125B 参数，每次只激活 6B 干活。</li><li>一张游戏卡就能跑，HN 上 300 多分、近 200 条评论。</li><li>跟 6点版报的窄引擎趋势是同一条线，这是今天的新进展。</li><li>项目方数字一贯要打折，独立实测还很少。</li><li>来源：<a href="https://laxima.tech/signal/run-qwen-3-8-flash-next-125b-on-consumer-hardware-rtx-4090-a-hn-49953495">laxima HN 镜像</a> · <a href="https://www.linuxcompatible.org/story/strata-v0139-runs-125b-local-ai-faster-without-changing-one-byte/">linuxcompatible</a> · <a href="https://hackaday.com/2026/10/04/ai-on-your-gaming-pc/">Hackaday</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Nebius 的工程师上了 AI Engineer 播客。</li><li>大谈推理 serving 怎么省钱。</li><li>核心观点：模型都够聪明了，拼的是 serving 栈。</li><li>缓存感知路由是关键：知道缓存落在哪张卡，请求就往哪送。</li><li>几十万卡规模下，路由乱了缓存命中率就崩。</li><li>speculative decoding 他讲得最细。</li><li>小模型先打草稿，大模型只管验稿。</li><li>通用数据训的草稿模型能提速 30%，拿自家数据训更好。</li><li>他们要上一键功能：拿生产数据自动训草稿模型。</li><li>KV cache 是他眼里 ROI 最高的优化。</li><li>说白了就是草稿纸：存着算好的中间结果，免得重算。</li><li>他们也在做 prefill/decode 解耦。</li><li>分工流水线嘛，缓存跨卡搬运，跟你的 P/D 方向直接相关。</li><li>厂商数字（5 到 10 倍）先打个折再看。</li><li>来源：BigGo 转载的播客单集总结：<a href="https://finance.biggo.com/news/d64022e748642911">链接</a></li></ul>
+<ul><li>dev.to 上有篇 K8s 推理全景，帮你画了张地图。</li><li>已经卷透的：缓存感知路由、P/D 解耦都有成熟方案。</li><li>Dynamo 和 llm-d 把 P/D 解耦覆盖得很好。</li><li>还没人做好的有三块：权重分发、延迟感知扩缩容、LoRA 生命周期管理。</li><li>权重动不动 100GB+，全靠临时下载，冷启动要等 2 到 10 分钟。</li><li>LoRA 是给大模型打补丁的微调方法，管几百个补丁还是手工活。</li><li>当地图看很省时间，知道哪块已经挤、哪块还能进。</li><li>来源：<a href="https://dev.to/avneet_bansal_a65b3f31fc4/llm-serving-on-kubernetes-in-2026-whats-solved-and-whats-still-open-52ad">dev.to</a></li></ul>
+<h2>值得深读</h2>
+<ul><li>本轮没有（宁缺毋滥）。</li></ul>
+<p>*去重说明：本轮窗口（10/4 10:00→12:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.30.0（9/22；v0.31.0 tag 在但 release 对象仍 404）；SGLang v0.5.21（10/2）；TRT-LLM 稳定版 v1.2.1、预览版 rc29（9/29）；LMDeploy v0.18.0（9/28）；TGI v3.3.7（归档只读）；llama.cpp v0.5.0（每日快照按惯例不报）。arXiv 周末模式，四组关键词（LLM inference serving、KV cache、prefill decode disaggregation、speculative decoding）最新提交仍为 8/28，本轮零新论文；下一批周一 00:00 UTC。新闻/X 名单/Reddit/HN/机器之心/量子位/social 扫过：Strata v0.1.39（今日发布）+ HN 登顶为本轮新料（6点版报的是 v0.1.38 趋势旧文，不重复）；Nebius AI Engineer 播客单集（约 18 小时前，BigGo 转载已亲手打开核验，原播客直链未找到）与 dev.to K8s 全景（1 天前，亲手打开核验）为今日新料补入。Latent Space 最新仍为 10/2 MIT 访谈（Spotify 亲手查过，无新单集）。X 仍受登录墙限制（已知缺口）。深读：本轮无（宁缺毋滥）。*</p></body></html>
