@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM v0.31.0：大规模 serving 更新精读"/>
+<meta name="doc-description" content="原文链接：https://github.com/vllm-project/vllm/releases/tag/v0.31.0"/>
+<meta name="doc-date" content="2026-10-05"/>
+<meta name="doc-ts" content="2026-10-05T07:01:07"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM v0.31.0：大规模 serving 更新精读</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM v0.31.0：大规模 serving 更新精读</h1>
+<p>原文链接：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.31.0">https://github.com/vllm-project/vllm/releases/tag/v0.31.0</a> 发布时间：2026-10-04 23:44 PDT（本轮窗口内发布） 版本规模：717 个提交，307 位贡献者（96 位新人）</p>
+<h2>人话解读</h2>
+<ul><li>vLLM 发了个大版本，核心就一句话：大模型上云 serving 更快、更稳、更好管了。</li><li>对你最直接的三块：prefill 并行混搭数据并行。</li><li>MoE 通信换了更均衡的后端，调度器多了新旋钮。</li><li>运维向的：引擎重启不用重新读权重了，秒级回来。</li><li>这篇笔记只挑 serving 相关的讲，模型支持和纯 bugfix 略过。</li></ul>
+<h2>核心更新</h2>
+<h3>大规模 serving</h3>
+<ul><li>新增 MoonEP：更均衡的专家并行通信后端。</li><li>MoE 推理时，专家之间要交换 token 数据。</li><li>以前的后端负载不均，有的卡闲有的卡排队。</li><li>MoonEP 把这份通信摊得更平，长尾延迟下来了。</li><li>用法就是一行参数：--all2all-backend moonep。</li><li>prefill 的上下文并行，现在能跟数据并行组合。</li><li>上下文并行是把长 prompt 切段分给多卡一起读。</li><li>数据并行是多份请求复制模型同时跑。</li><li>以前两者难兼得，现在可以叠起来用了。</li><li>DeepEPv2 也支持了序列并行。</li><li>EPLB 加了共享专家重叠，通信和计算错开跑。</li><li>KV 卸载加了背压检测。</li><li>KV 往 CPU 搬时如果下游跟不上，会提前告警。</li><li>以前是默默变慢，现在能感知到瓶颈在哪。</li></ul>
+<h3>调度器新旋钮</h3>
+<ul><li>--max-num-active-seqs：单独限制&quot;正在跑&quot;的请求数。</li><li>以前的 max_num_seqs 管的是总数。</li><li>新参数把&quot;排队&quot;和&quot;在跑&quot;分开管，更精细。</li><li>--long-prefill-token-threshold 改成自适应。</li><li>以前长 prompt 超固定阈值就被切块。</li><li>现在看排队里有多少 prefill，再动态定阈值。</li><li>类比：以前食堂按固定人数开窗口。</li><li>现在看排队长度动态加减窗口。</li><li>等待队列改写：已占着 KV 块的请求优先调度。</li><li>占着位置的先上车，省得 KV 块反复分配释放。</li><li>修了一个死锁：KV connector 配 MTP 时。</li><li>KV 压力下一度会卡死，这版修好了。</li></ul>
+<h3>快速重启</h3>
+<ul><li>新命令 vllm preload：起一个权重缓存守护进程。</li><li>权重经过量化、切分后常驻 GPU 显存。</li><li>引擎重启时通过 CUDA IPC 直接映射。</li><li>CUDA IPC 是同机 GPU 进程间共享显存的机制。</li><li>不再从磁盘重新读权重。</li><li>以前重启要几分钟，现在秒级回来。</li><li>这轮还加上了数据并行和 MTP 草稿模型支持。</li><li>新增 /health 端点和就绪等待，方便编排。</li><li>实验性功能：vllm snapshot。</li><li>用 CRIU 给初始化好的引擎拍快照。</li><li>CRIU 是 Linux 下给进程拍快照恢复的工具。</li><li>快照恢复是整机状态还原，适合 TP1 小引擎。</li></ul>
+<h3>推测解码</h3>
+<ul><li>Model Runner V2 上支持了草稿模型推测解码。</li><li>Model Runner V2 是 vLLM 新一代执行引擎。</li><li>推测解码就是小模型先打草稿、大模型改。</li><li>新增 LiLiCorr drafter，一种新的草稿模型。</li><li>DFlash 支持异步调度。</li><li>草稿的上下文 KV 预计算进了 CUDA 图。</li><li>DSpark 自适应验证支持 Gemma4。</li><li>Kimi-K3 支持变长 decode。</li><li>MRV2 做内存估算时把 MoE 内存也算进去了。</li><li>以前 WideEP 部署容易 OOM，现在提前算准。</li></ul>
+<h3>多模态相关</h3>
+<ul><li>视觉 tower 支持了编码器 CUDA 图。</li><li>CUDA 图是把一串 kernel 调用录下来一次下发。</li><li>省的是 kernel 调度开销。</li><li>多模态前缀缓存改成增量式块哈希。</li><li>前缀缓存就是&quot;算过的 prompt 片段不用重算&quot;。</li><li>新加了 Triton 写的 mm_input_norm kernel。</li><li>SWA 滑动窗口的 KV 不再进前缀缓存。</li><li>滑动窗口注意力只看最近一段。</li><li>缓存它没意义还占地方，干脆不进缓存。</li></ul>
+<h3>安全与 breaking change</h3>
+<ul><li>每个请求的多模态参数默认被拒绝。</li><li>可信部署要在启动时加 --trust-request-mm-kwargs。</li><li>前缀缓存的 key 现在按来源打标签。</li><li>以前 LoRA 名字和 cache_salt 可能撞车。</li><li>现在分开了，LoRA 路径也进了块哈希。</li><li>tokenizer_mode=&quot;slow&quot; 被删了。</li><li>在线量化 fp8 改名 fp8_per_tensor。</li><li>Quark 的静默在线量化被移除。</li><li>AllSpark INT8 后端被移除。</li><li>升级前先在 staging 测一遍，别直接升生产。</li></ul>
+<h2>关键数据</h2>
+<ul><li>717 commits，307 位贡献者，96 位新人。</li><li>安装：pip install vllm（CUDA 13.0）。</li><li>Docker：vllm/vllm-openai:v0.31.0。</li><li>另有 CUDA 12.9、ROCm、CPU、XPU 镜像。</li><li>新支持模型：Kimi K3、MiniMax-M3。</li><li>还有 Qwen3.8-Flash-Next、GLM-5.3-Flash。</li><li>以及 MiMo V2 MXFP4、DeepSeek-V4.1-Flash。</li></ul>
+<h2>跟你研究方向的关联</h2>
+<ul><li>你在评估 SGLang 的 P/D 解耦。</li><li>vLLM 这版就是&quot;对照组&quot;的进度条。</li><li>prefill 上下文并行加数据并行：prefill 侧多了一种姿势。</li><li>评估时可以对比 SGLang 的对应能力。</li><li>MoonEP：MoE 大规模 serving 的通信瓶颈。</li><li>SGLang 那边也有 DeepEP，值得横向看。</li><li>调度新旋钮：--max-num-active-seqs 和自适应阈值。</li><li>都是 SLA 内调 throughput 的现成抓手。</li><li>跟你想做的 AI 自动调参系统直接相关。</li><li>vllm preload：生产滚动升级的停机大头是权重加载。</li><li>这个能力上线后，可以重新测重启开销。</li><li>SWA 的 KV 不进前缀缓存：滑动窗口模型的前缀缓存策略。</li><li>跟 RR-Evict 笔记里的淘汰策略可以对照看。</li></ul>
+<h2>图表说明</h2>
+<ul><li>官方 release notes 是纯文字更新日志。</li><li>没有关键图表，所以本篇不配图，不硬凑。</li></ul>
+<h2>术语表</h2>
+<ul><li>SM100：Blackwell 架构的流多处理器代号，B200 用的就是。</li><li>NVFP4：4 位浮点格式，NVIDIA 的低精度量化格式。</li><li>MXFP8：8 位微缩放浮点，微软主导的格式。</li><li>FlashMLA：DeepSeek 开源的高效注意力实现。</li><li>MoE：混合专家模型，每次只激活一部分专家。</li><li>EP：专家并行，MoE 专家分到不同卡上。</li><li>all2all：集合通信的一种，互相都要发数据。</li><li>DP：数据并行，多份数据同时跑。</li><li>TP：张量并行，一个算子切到多卡。</li><li>MTP：多 token 预测，一次前向猜多个 token。</li><li>SWA：滑动窗口注意力，只看最近一段上下文。</li><li>EPLB：专家并行负载均衡。</li><li>WideEP：专家并行规模很大的部署形态。</li></ul>
+<h2>原文链接</h2>
+<ul><li><a href="https://github.com/vllm-project/vllm/releases/tag/v0.31.0">https://github.com/vllm-project/vllm/releases/tag/v0.31.0</a></li></ul></body></html>

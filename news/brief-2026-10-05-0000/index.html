@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月5日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-05"/>
+<meta name="doc-ts" content="2026-10-05T07:00:22"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-05（0点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-05（0点版）</h1>
+<h2>框架更新</h2>
+<ul><li>vLLM v0.31.0 终于来了，今晚 23:44 发布的。</li><li>之前几轮它的 release 说明一直没发，这次实锤了。</li><li>一共 717 个提交、307 位贡献者，量很大。</li><li>头号亮点：DeepSeek-V4.1-Flash 提速。</li><li>主角是 FlashMLA 配 NVFP4 压缩的 KV cache。</li><li>FlashMLA 是一种更快的注意力算法。</li><li>KV cache 就是推理时的&quot;草稿纸&quot;，存着算过的中间状态。</li><li>NVFP4 是 4 位浮点压缩，草稿纸占内存更少了。</li><li>这套组合成了 Blackwell 显卡的默认路径。</li><li>大规模 serving 这块，跟你最相关。</li><li>新增 MoonEP：更均衡的专家并行通信后端。</li><li>MoE 模型里专家之间要传数据，MoonEP 让这步更顺。</li><li>prefill 并行现在能跟数据并行组合用了。</li><li>prefill 就是&quot;读题阶段&quot;，一次性消化输入。</li><li>调度器也加了三个新旋钮。</li><li>--max-num-active-seqs：单独限制同时跑的请求数。</li><li>长 prefill 阈值改成自适应，不再一刀切。</li><li>已经占着 KV 块的请求优先调度，省得反复腾地方。</li><li>还有个运维向的：vllm preload。</li><li>权重常驻显存，引擎重启不用重新加载。</li><li>说白了：以前重启要几分钟读盘，现在秒级回来。</li><li>推测解码这块也加强了。</li><li>推测解码就是先让小模型打草稿、大模型改。</li><li>新 drafter 叫 LiLiCorr。</li><li>DSpark 自适应验证也支持 Gemma4 了。</li><li>注意一个 breaking change。</li><li>tokenizer_mode=&quot;slow&quot; 被删了。</li><li>在线量化写法也变了，fp8 改成 fp8_per_tensor。</li><li>升级前先看一眼 release 说明，别直接升生产。</li><li>来源：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.31.0">v0.31.0 release 说明</a></li></ul>
+<ul><li>其余五家这轮继续静默。</li><li>SGLang 停在 v0.5.21（10/2）。</li><li>TRT-LLM 稳定版 v1.2.1，预览版还是 rc29。</li><li>LMDeploy 停在 v0.18.0（9/28）。</li><li>TGI 已归档只读，llama.cpp 只有每日快照。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 还是周末模式。</li><li>两组关键词亲手查过：LLM 推理服务、KV cache。</li><li>最新提交还是 10/2 的老论文。</li><li>本轮零新论文。</li><li>下一批周一 17:00 PDT 放出，下轮继续撞。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>本轮无新料。</li><li>新闻、HN、Reddit、X、中文媒体全扫过。</li><li>候选都去重排除了，脚注里有清单。</li><li>X 仍受登录墙限制，这是已知缺口。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>本轮没有新的访谈和深度文章。</li><li>Latent Space 最新还是 10/2 那期 MIT 访谈。</li><li>Spotify 上亲手查过，没出新单集。</li><li>Simon Willison 博客这轮没更新。</li><li>近 48 小时无 serving 相关新帖。</li></ul>
+<h2>值得深读</h2>
+<ul><li>vLLM v0.31.0 release 说明，精读笔记已生成。</li><li>重点看了跟你 PD 解耦评估相关的更新。</li><li>prefill 并行加数据并行、MoonEP、调度新旋钮。</li><li>这篇能帮你判断 vLLM 大规模 serving 的进度。</li></ul>
+<p>*去重说明：本轮窗口（10/4 22:00→10/5 00:00 PDT）。框架六家经 GitHub API 亲手核验：vLLM v0.31.0（published 2026-10-05T06:44:55Z，即 10/4 23:44 PDT，本窗口内新发布；release 对象此前多轮 404）；SGLang v0.5.21（10/2）；TRT-LLM 稳定版 v1.2.1、预览版 v1.3.0rc29（9/29）；LMDeploy v0.18.0（9/28，InternLM/lmdeploy）；TGI v3.3.7（归档只读）；llama.cpp v0.5.0（9/23，每日快照按惯例不报）。arXiv 两组关键词亲手查过，最新提交为 10/02 的老论文，本轮零新论文；下一批周一 00:00 UTC。候选逐个去重排除：startupfortune 窄引擎汇总（10/4 06点版已报核心数据、14点版明确排除）、vLLM weight-cache 指纹串权 bug（10/4 14点版已报，同一 dev.to 链接）、llama.cpp /v1/systemone 决策模型 API（10/4 08点版已报）、llama.cpp PR 29761 Qwen MTP（单个 PR、24 prompt 小样本 benchmark，未达收录线）、Ollama v0.35.1 与决策模型支持（聚合站弱来源，未达收录线）、Google Cloud G4 vs AWS G7e 实测（10/1 已报）、LMDeploy v0.18.0（9/28，超窗口）。Reddit/HN/X/中文媒体本轮无窗口内新料；X 仍受登录墙限制（已知缺口）。Latent Space（Spotify 亲手查过，最新仍为 10/2 MIT 访谈，无新单集）。深读：本轮 1 篇（vLLM v0.31.0 serving 相关更新精读；release notes 无关键图表，已如实说明）。*</p></body></html>
