@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月5日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-05"/>
+<meta name="doc-ts" content="2026-10-05T17:17:34"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-05（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-05（10点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮继续静默，没有新版本。</li><li>vLLM 还是 v0.31.0，SGLang 停在 v0.5.21。</li><li>TRT-LLM 稳定版 v1.2.1，预览版停在 rc29。</li><li>LMDeploy 停在 v0.18.0，TGI 归档只读。</li><li>llama.cpp 只有每日快照，按惯例不算发版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 还是没有新批次，最新仍是 10/2 那批。</li><li>下一批今天 17:00 PDT 公告，下轮再筛。</li><li>捞出两篇 10/2 的漏报，之前各期都没报过。</li></ul>
+<ul><li>智能体 RL 训练也有&quot;解耦&quot;大招：VenusRL。</li><li>它的两个隐形税：慢轨迹拖住全局，沙盒内存只用了 8%。</li><li>解法是&quot;全解耦 + 优先级调度&quot;。</li><li>先用轻量预测器猜每条样本&quot;还剩多长&quot;。</li><li>快做完的插队：抢 GPU 槽位、保 KV 前缀、跨 worker 搬家。</li><li>KV 缓存（草稿纸）淘汰时先踢闲置的，在跑的前缀死保。</li><li>沙盒按页复用快照，写时才分开，密度拉满。</li><li>数据：对 RollFlash 最高快 4.24 倍。</li><li>环境成本最高降 89%。</li><li>消融显示 KV 常驻是最大功臣，调度只排第三。</li><li>这对你意味着：P/D 解耦评估里&quot;保谁踢谁&quot;的优先级思路可以直接抄。</li><li>来源：<a href="https://arxiv.org/abs/2610.03286v1">arXiv 2610.03286</a></li></ul>
+<ul><li>长推理的 KV 缓存有新淘汰策略：AvoKV-E。</li><li>老办法只看&quot;这个 key 以后还读不读&quot;。</li><li>它发现两个盲点：低注意力的条目可能带着大 value 包。</li><li>刚生成的条目可能还没被读过就被判了&quot;死刑&quot;。</li><li>解法：先给新条目&quot;观察期&quot;。</li><li>再按读取压力、key 冗余、value 分量打分。</li><li>免训练，即插即用。</li><li>数据：在最紧的缓存预算下涨幅最大，持平或超过现有基线。</li><li>这对你意味着：长 CoT serving 的 KV 预算可以再压一压。</li><li>来源：<a href="https://arxiv.org/abs/2610.03007v1">arXiv 2610.03007</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>本轮没有值得报的业内新闻。</li><li>Prime Intellect 那条 10/3 已报过。</li><li>DGX Spark 64GB 那条 6 点版已报过。</li><li>窄引擎汇总文 06 点版已报过。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>本轮没有新的访谈和深度内容。</li><li>Latent Space 的 Spotify 亲手查过，没有新单集。</li><li>还是 10/2 那期 MIT 访谈。</li><li>机器之心、量子位这轮没出 serving 新料。</li><li>Simon Willison 这轮没 serving 动态。</li><li>karpathy、jimfan 也都没有。</li><li>X 仍受登录墙限制（已知缺口）。</li></ul>
+<h2>值得深读</h2>
+<ul><li>VenusRL 精读笔记已生成。</li><li>md + HTML 双版，README 已更新。</li><li>理由：全解耦思路跟 P/D 解耦同构。</li><li>优先级三板斧可直接抄进你的 SGLang 评估。</li><li>length-prediction 是现成的调度特征。</li><li>autotuner 可以直接用。</li><li>原文 Figure 1/4/10 已裁图配中文图注。</li></ul>
+<p>*去重说明：本轮窗口（10/5 08:00→10/5 10:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.31.0；SGLang v0.5.21；TRT-LLM 稳定版 v1.2.1、预览版 rc29；LMDeploy v0.18.0；TGI v3.3.7 归档只读；llama.cpp 每日快照按惯例不报。arXiv 两组关键词亲手查过，无新批次（最新仍是 10/2 批次，下一批今日 17:00 PDT 公告）；VenusRL（2610.03286）、AvoKV-E（2610.03007）为 10/2 批次漏报，arXiv ID 逐个核验为真，briefs 全文 grep 确认 10 月各期未报过。候选逐个去重排除：Prime Intellect（10/3 已报）、DGX Spark 64GB（6点版经华硕 Ascent GX10 已报）、窄引擎汇总文（06点版已报）、OneTriangle YC 页（营销通稿未达线）、DigitalOcean P/D 科普（基础科普非新闻）、HN Show HN Shaide（8 小时前早期产品发布，未达线）、SGLang LinkedIn day-0 Engram 帖（实为 3 周前帖子，V4.1 Flash day-0 本体 9/12 已报）。Latent Space Spotify 亲手查无新单集（最新仍是 10/2 MIT 那期）；机器之心/量子位无新料；大V名单无 serving 动态；X 仍登录墙。深读：VenusRL 精读笔记 1 篇（md+HTML，原文 Figure 1/4/10 裁图内嵌），README 索引已更新。*</p></body></html>
