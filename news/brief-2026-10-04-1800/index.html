@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月4日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-04"/>
+<meta name="doc-ts" content="2026-10-05T00:59:31"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-04（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-04（18点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮继续集体静默。</li><li>GitHub API 逐个亲手核验，一个没漏。</li><li>vLLM 还是 v0.30.0（9/22）。</li><li>v0.31.0 的 tag 在，release 说明还是没发。</li><li>SGLang 停在 v0.5.21（10/2）。</li><li>TRT-LLM 稳定版 v1.2.1，预览版还是 rc29。</li><li>LMDeploy 停在 v0.18.0（9/28）。</li><li>TGI 已归档只读，llama.cpp 只有每日快照。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 还是周末模式。</li><li>两组关键词亲手查过：LLM 推理服务、KV cache 解耦。</li><li>最新提交还是 9/30 的老论文。</li><li>本轮零新论文。</li><li>下一批周一凌晨放出，下轮继续撞。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>NVIDIA 这个月把推理算力搬到你桌上了。</li><li>RTX Spark 的 Windows PC 十月开卖，联想、Acer 首发。</li><li>配置：20 核 Grace CPU 配 Blackwell 显卡，内存最高 128GB。</li><li>统一内存是杀手锏：CPU 和 GPU 共用一个大内存池。</li><li>本地跑大模型，不再被小显存卡脖子。</li><li>算力标到 1 Petaflop FP4。FP4 是 4 位浮点，权重占内存更少。</li><li>还配了 Windows Agent 框架，后台 AI 助手直接跑本机。</li><li>说白了：云端推理的生意，NVIDIA 想在桌面上再分一杯。</li><li>对你意味着什么：本地推理这条线越来越热，DGX Spark 有伴了。</li><li>来源：<a href="https://bitcoinversus.tech/2026/10/04/semiconductors-nvidia-rtx-spark-october-local-ai-windows/">Reuters 转载</a>、<a href="https://dev.to/cortexflow_tech/nvidia-rtx-spark-local-ai-agents-are-arriving-on-your-desk-1l8">dev.to 梳理</a></li></ul>
+<ul><li>还有个配套软件 PAIR，本轮首次收录。</li><li>PAIR 是 NVIDIA 的免费开源小工具，个人 AI 路由器。</li><li>它能把推理请求分给局域网里多台电脑一起跑。</li><li>家里两台电脑，就拼成一个小算力集群。</li><li>支持 Ollama、LM Studio，苹果 M4 的 Mac 也能加进来。</li><li>像把家里的闲置电脑都征用成打工人。</li><li>来源：<a href="https://www.technobezz.com/news/nvidia-rtx-spark-pcs-local-ai">technobezz</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>本轮没有新的访谈和深度文章。</li><li>Latent Space 最新还是 10/2 那期 MIT 访谈。</li><li>Spotify 上亲手查过，没出新单集。</li><li>vLLM 博客最新还是 9/29 的解耦实战，之前报过。</li></ul>
+<h2>值得深读</h2>
+<ul><li>本轮没有（宁缺毋滥）。</li></ul>
+<p>*去重说明：本轮窗口（10/4 16:00→18:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.30.0（9/22；v0.31.0 release 对象仍 404）；SGLang v0.5.21（10/2）；TRT-LLM 稳定版 v1.2.1、预览版 rc29（9/29）；LMDeploy v0.18.0（9/28）；TGI v3.3.7（归档只读）；llama.cpp 每日快照按惯例不报。arXiv 两组关键词亲手查过，最新提交为 9/30 和 8/28 的老论文，本轮零新论文；下一批周一 00:00 UTC。主菜为 NVIDIA RTX Spark 十月开卖（Reuters 约 10/3 报道，briefs 全文 grep 确认从未报过；IFA 2026 首发、联想 Yoga Pro 9n 与 Acer 紧凑桌面打头、另有 6 家 OEM 同期跟进）与 PAIR（个人 AI 路由器，免费开源 beta，briefs 全文 grep 确认从未报过）。主动排除：Cerebras/Gimlet（10/1–10/2 已报多轮）、OpenAI-Synopsys 联盟（10/1 已报）、DGX Spark 64GB $4,999（10/2 已报）、阿里玄武 V900（9/26–27 版）、Prime Inference（10/3–0400 版）、AMD MI450 股价综述（MI450 订单 9/10、9/14 已报）、MiniCPM5-2B 模型发布（纯模型发布、无 serving 增量信息）、vLLM 博客 9/29 解耦实战（10/1 2200 版已报）。HN/Reddit/X/中文媒体本轮无窗口内新料；X 仍受登录墙限制（已知缺口）。Latent Space（Spotify 亲手查过，最新仍为 10/2 MIT 访谈，无新单集）。深读：本轮无（宁缺毋滥）。*</p></body></html>
