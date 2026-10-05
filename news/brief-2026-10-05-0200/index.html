@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月5日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-05"/>
+<meta name="doc-ts" content="2026-10-05T09:05:43"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-05（2点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-05（2点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮集体静默，没有新版本。</li><li>vLLM v0.31.0 是昨晚 23:44 发的，0点版已经报过。</li><li>才过去 2 小时，第三方报道和实测还没跟上。</li><li>SGLang 停在 v0.5.21，TRT-LLM 预览版还是 rc29。</li><li>LMDeploy 停在 v0.18.0，llama.cpp 只有每日快照。</li><li>每日快照按惯例不算正式发版，就不报了。</li><li>TGI 已归档只读，无变化。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>这轮有 4 篇 10/2 的新论文，之前周末模式漏报了，补上。</li></ul>
+<ul><li>KV 缓存又出新压法：SlimKV 一次压两个维度。</li><li>KV cache 是推理时的&quot;草稿纸&quot;，长上下文先爆的是显存。</li><li>老路线两条：删 token 会丢信息，压特征维度要重建才慢。</li><li>SlimKV 两手抓：分块插&quot;信标 token&quot;写小结，只存小结的 KV。</li><li>小结从训练起就是低秩形态，存量直接砍一刀。</li><li>最妙的一招：信标去掉位置编码几乎不掉分。</li><li>解码直接在潜空间算 attention，重建这步省了。</li><li>数据：16 倍/32 倍压缩仍超基线，4 倍/8 倍保住原模型 96% 以上。</li><li>128K 长度下 attention 快 7.34 倍，端到端解码快 3.38 倍。</li><li>跟你的 P/D 解耦评估直接相关：decode 卡的显存规划就看 KV 预算。</li><li>精读笔记已生成，含原文两张关键图。</li><li>来源：<a href="http://arxiv.org/abs/2610.02953v1">arXiv 2610.02953</a></li></ul>
+<ul><li>投机解码不用草稿模型了：BitNest 把草稿&quot;绣&quot;进权重里。</li><li>投机解码就是小模型先打草稿、大模型改，旧方案要多备一个模型。</li><li>BitNest 把低精度草稿嵌进高精度权重的比特表示，一套权重两种精度。</li><li>专为显存紧张的设备省内存，端侧友好。</li><li>来源：<a href="http://arxiv.org/abs/2610.02800v1">arXiv 2610.02800</a></li></ul>
+<ul><li>调度器也能被&quot;插队&quot;：一篇给 P/D 调度敲警钟的攻击论文。</li><li>现在的调度器靠预测输出长度排优先级，短任务先上。</li><li>这篇证明：对抗后缀能操纵长度预测，让请求插队降延迟。</li><li>你在调 P/D 解耦的调度策略，安全维度值得知道。</li><li>来源：<a href="http://arxiv.org/abs/2610.03430v1">arXiv 2610.03430</a></li></ul>
+<ul><li>端侧多 agent 推理：decode 阶段把内存总线堵死了。</li><li>统一内存架构就是 CPU 和 GPU 共用一块内存。</li><li>多 agent 在上面一跑，decode 期内存瓶颈引发总线争用。</li><li>还发现多 agent 下投机解码的草稿难度方差极大。</li><li>偏端侧，跟你数据中心 serving 主线关系不大，一句话带过。</li><li>来源：<a href="http://arxiv.org/abs/2610.03394v1">arXiv 2610.03394</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>Anthropic 把 Claude 推理搬进印度境内，专吃合规这碗饭。</li><li>今天宣布：Claude 经 Amazon Bedrock 在印度本地推理。</li><li>覆盖 Opus 5、Sonnet 5、Haiku 4.5 三个模型。</li><li>印度 endpoint 的请求只走境内服务器。</li><li>主打银行和政府的数据主权合规需求。</li><li>Reliance、CRED 已经内测过，8 月的承诺今天兑现。</li><li>来源：<a href="https://www.storyboard18.com/how-it-works/anthropic-brings-claude-in-country-inference-to-india-through-amazon-bedrock-111980.htm">Storyboard18（10/5）</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>本轮没有新的访谈和深度内容。</li><li>Latent Space 最新还是 10/2 那期 MIT 访谈。</li><li>Spotify 上亲手查过，没有新单集。</li><li>Newsletter 这轮也没出新刊。</li></ul>
+<h2>值得深读</h2>
+<ul><li>SlimKV 精读笔记已生成，重点看了 KV 联合压缩和去位置编码那招。</li><li>这篇能帮你给 P/D 解耦的 decode 卡算 KV 显存账。</li></ul>
+<p>*去重说明：本轮窗口（10/5 00:00→10/5 02:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.31.0（0点版已报，发布仅 2 小时、无第三方报道）；SGLang v0.5.21（10/2）；TRT-LLM 稳定版 v1.2.1、预览版 rc29；LMDeploy v0.18.0（9/28）；TGI v3.3.7（归档只读）；llama.cpp 每日快照 b11406–b11408（按惯例不报）。arXiv 四组关键词亲手查过，新批次仍未放出；4 篇 10/2 论文为补报，briefs 全文 grep 确认 10 月各期未报过，arXiv ID 逐个核验为真。候选逐个去重排除：vLLM Decision 2.0（10/4 02点版已报+深读）、vLLM weight-cache 指纹 bug（10/4 14点版已报，同一 dev.to 链接）、Dylan Patel 推理毛利率 60%（10/2 20点版已报）、TorchTPU talk（往期已报）、vLLM 多伦多 meetup（10/4 02点版已报）。X 仍受登录墙限制（已知缺口）；karpathy、jimfan、Simon Willison、The Batch、机器之心/量子位、SGLang 官方 YouTube 本轮无 serving 相关新料；Latent Space newsletter 无新刊（Spotify 播客亲手查过，无新单集）。深读：本轮 1 篇（SlimKV，含原文 Figure 1/2，HTML 版图片已内嵌）。*</p></body></html>
