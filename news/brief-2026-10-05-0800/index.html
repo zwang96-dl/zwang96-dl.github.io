@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月5日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-05"/>
+<meta name="doc-ts" content="2026-10-05T15:06:05"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-05（8点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-05（8点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮还是静默，没有新版本。</li><li>vLLM 还是 v0.31.0，安装包今天刚传完。</li><li>现在 pip 能装到完整版本了，之前包还没齐。</li><li>SGLang 停在 v0.5.21，TRT-LLM 停在 rc29。</li><li>LMDeploy 停在 v0.18.0，TGI 维护模式无变化。</li><li>llama.cpp 只有每日快照 b11424，按惯例不算发版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 还是没有新批次，最新仍是 10/2 那批。</li><li>捞出一篇流式 VLM 的漏报，之前各期都没报过。</li></ul>
+<ul><li>流式 VLM 学会了&quot;边跑边探路&quot;：FORESIGHT。</li><li>老办法是固定算力全程跑，场景变了也不加减。</li><li>它上了两套孪生模型，权重和 KV 缓存都共享。</li><li>KV 缓存就是模型的草稿纸，存着算过的中间结果。</li><li>一个盯着当前画面，另一个跑到前面去预判。</li><li>探路的那个定好计划：下次何时推理、看什么、看多细。</li><li>好比开车时副驾先看导航，告诉你下个路口怎么走。</li><li>数据：Qwen3-VL-8B 冻结权重，OmniPro Online 拿 23.0 分。</li><li>比最强的训练版基线高 9.5 个百分点，而且零训练。</li><li>StreamingBench +6.7，OVO-Bench +15.4。</li><li>这对你意味着：流式多模态场景的算力调度有新思路了。</li><li>来源：<a href="https://arxiv.org/abs/2610.03123v1">arXiv 2610.03123</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>本轮没有值得报的业内新闻。</li><li>Prime Intellect 推理平台那条 10/3 已报过。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>本轮没有新的访谈和深度内容。</li><li>Latent Space 的 Spotify 亲手查过，没有新单集。</li><li>还是 10/2 那期 MIT 访谈。</li><li>机器之心、量子位这轮没出 serving 相关新料。</li><li>karpathy、jimfan、Simon Willison 本轮都没 serving 动态。</li><li>X 仍受登录墙限制（已知缺口）。</li></ul>
+<h2>值得深读</h2>
+<ul><li>本轮没有新开精读，FORESIGHT 只做简报收录。</li><li>它的预判式调度跟流式场景相关，但偏感知规划。</li><li>核心 serving 优化线这轮没新论文。</li></ul>
+<p>*去重说明：本轮窗口（10/5 06:00→10/5 08:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.31.0（安装包 10/5 06:45 UTC 传完，标签本身 0点版已报）；SGLang v0.5.21；TRT-LLM 预览版 rc29；LMDeploy v0.18.0；TGI v3.3.7 归档只读；llama.cpp 每日快照 b11424。arXiv 两组关键词亲手查过，无新批次（最新仍是 10/2 批次）；FORESIGHT（2610.03123）为 10/2 批次漏报，arXiv ID 核验为真，briefs 全文 grep 确认 10 月各期未报过。HN、Reddit 本轮无新讨论；X 仍登录墙无数据；Latent Space Spotify 亲手查无新单集（最新仍是 10/2 MIT 那期）；机器之心/量子位无新料；大V名单（karpathy、jimfan、Simon Willison、The Batch）无 serving 动态。候选逐个去重排除：Prime Intellect 推理平台（10/3 三期已报）、Corrupted but Correct（2610.03445，VLM 鲁棒性而非 serving，未达线）、Medium「Inference War」旧版本对比（6点版已排除）。深读：本轮无新开。*</p></body></html>
