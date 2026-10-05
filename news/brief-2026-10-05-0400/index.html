@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月5日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-05"/>
+<meta name="doc-ts" content="2026-10-05T10:59:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-05（4点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-05（4点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮继续静默，没有新版本。</li><li>vLLM v0.31.0 还是 10/4 晚上 23:44 那个，0点版报过了。</li><li>SGLang 停在 v0.5.21，TRT-LLM 预览版还是 rc29。</li><li>LMDeploy 停在 v0.18.0，TGI 归档只读无变化。</li><li>llama.cpp 出了 b11411、b11412 两个新快照。</li><li>每日快照按惯例不算正式发版，就不报了。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>10/2 批次又有 4 篇漏报的，这轮补上。</li><li>2点版补了 4 篇，同一批里还有几篇 KV 和仿真相关的。</li></ul>
+<ul><li>调 P/D 配置不用先买卡：ServeTwin 做了个&quot;沙盘&quot;。</li><li>它从模型+引擎+硬件规格直接算耗时，不需要去目标卡上实测。</li><li>闭环仿真把&quot;耗时→调度→队列→KV&quot;这个反馈环接上了。</li><li>P/D 解耦的 KV 交接也显式建模：decode 有空才拉，满了就背压 prefill。</li><li>数据：DeepSeek-R1 FP8 在 H200/B200/GB200 上，27 个点平均误差 3.6%。</li><li>多轮 agent 任务误差 9.9%，换硬件只改规格参数照样准。</li><li>跟你最相关：autotuner 正缺便宜又准的代价模型，它就是候选。</li><li>精读笔记已生成，含原文三张关键图。</li><li>来源：<a href="https://arxiv.org/abs/2610.02732v1">arXiv 2610.02732</a></li></ul>
+<ul><li>GQA 下 KV 淘汰别再各头各选了：Page-EntroKV 按物理粒度做。</li><li>GQA（分组查询注意力）就是多个 query 头共享一份 KV 缓存。</li><li>老方法每个头独立打分选 token，取并集后缓存膨胀到组数的倍数。</li><li>取均值又把专门管事实召回的检索头&quot;稀释&quot;了。</li><li>新思路：直接在 GQA 实际分配的粒度上做熵加权淘汰。</li><li>长上下文 serving 的淘汰策略，跟 SGLang prefix caching 是一套账。</li><li>来源：<a href="https://arxiv.org/abs/2610.03135v1">arXiv 2610.03135</a></li></ul>
+<ul><li>一份 prefill 给多个问题复用：KV² 先筛后精炼。</li><li>一个预填好的上下文要服务很多不同问题，压缩和质量两难。</li><li>轻量打分便宜但不准，全量重算准但贵。</li><li>KV² 两步走：先用轻量代理筛出信息量高的 token。</li><li>只对这小部分重算打分，决定最终淘汰谁。</li><li>跟前缀缓存是同一个场景，思路可以借鉴。</li><li>来源：<a href="https://arxiv.org/abs/2610.03198v1">arXiv 2610.03198</a></li></ul>
+<ul><li>KV cache 压到 1 比特：TaSQ 给向量量化&quot;量体裁衣&quot;。</li><li>向量量化（VQ）是把 KV 向量映射到码本上存，压得狠。</li><li>但压到 1 比特时老方法掉分严重，码本容量不够用。</li><li>TaSQ 三招：query 引导的通道加权、跨头归一化、协方差感知。</li><li>说白了：让有限的码本容量花在刀刃上。</li><li>来源：<a href="https://arxiv.org/abs/2610.03027v1">arXiv 2610.03027</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮没有新的业内新闻。</li><li>凌晨时段，云厂商和芯片厂都没动静。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>本轮没有新的访谈和深度内容。</li><li>Latent Space 最新还是 10/2 那期 MIT 访谈。</li><li>Spotify 亲手查过，没有新单集。</li><li>机器之心、量子位这轮没出 serving 相关新料。</li></ul>
+<h2>值得深读</h2>
+<ul><li>ServeTwin 精读笔记已生成，重点看 P/D 解耦的 KV 交接背压那张图。</li><li>这篇能当你 autotuner 的代价模型候选，P/D 配置搜索不用真机试。</li></ul>
+<p>*去重说明：本轮窗口（10/5 02:00→10/5 04:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.31.0（10/4 0点版已报）；SGLang v0.5.21（10/2）；TRT-LLM 预览版 rc29（9/29）；LMDeploy v0.18.0（9/28）；TGI v3.3.7（归档只读）；llama.cpp 新快照 b11411/b11412（每日快照按惯例不报）。arXiv 两组关键词亲手查过，最新仍是 10/2 批次（新一批未放出）；4 篇论文为 10/2 批次补报，briefs 全文 grep 确认 10 月各期未报过，arXiv ID 逐个核验为真。候选逐个去重排除：Anthropic-scale HN 帖（10/2、10/3 已报）、Prime Intellect Prime Inference（10/4 已报）、SlimKV/BitNest/调度攻击/端侧多 agent 四篇（10/5 2点版已报）。HN、Reddit 本轮无新讨论；X 仍受登录墙限制（已知缺口）；karpathy、jimfan、Simon Willison、The Batch、SGLang 官方 YouTube 本轮无 serving 相关新料；Latent Space 无新刊（Spotify 播客亲手查过）；机器之心/量子位无新料。深读：本轮 1 篇（ServeTwin，含原文 Figure 2/3/6，HTML 版图片已内嵌）。*</p></body></html>
