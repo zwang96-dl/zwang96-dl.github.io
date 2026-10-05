@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月5日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-05"/>
+<meta name="doc-ts" content="2026-10-05T19:05:14"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-05（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-05（12点版）</h1>
+<h2>框架更新</h2>
+<ul><li>llama.cpp 今天早上发了 v0.6.0。</li><li>这是它改成每日快照后，第一个正式版本号。</li><li>上轮 10 点版检查时它还没发布（09:56 PDT 上线），这轮补上。</li><li>最大看点是新的 <code>llama_batch_ext</code> 批处理 API，配 <code>llama_process()</code>。</li><li>它让一个 batch 混装 token 和 embedding。</li><li>embedding 就是词向量。</li><li>每个 token 还能带&quot;状态&quot; embedding。</li><li>这是给 MTP（多 token 预测）和 deepstack 模型用的。</li><li>MTP 就是&quot;一次前向多猜几个 token&quot;，给投机解码当草稿。</li><li>例子、投机解码、mtmd、server 全迁到这套新 API 上了。</li><li>Qwen4Exp 吃上 MTP 投机解码。</li><li>DGX Spark 上 decode 快约 1.5 倍。</li><li>苹果用户有福。</li><li>Metal 新增 F16 KV 的 flash attention 核。</li><li>flash attention 是一种省显存的注意力算法。</li><li>few-row MMA 矩乘核：专为投机解码和批量解码优化。</li><li>苹果 GPU 上矩乘最高快约 3 倍。</li><li>量化线：新增 <code>llama_prec_policy</code>。</li><li>还有模型驱动的 W4A4（NVFP4/MXFP4）矩阵乘路径。</li><li>新模型：GLM-5.3-Flash（GLM5-Next）。</li><li>它是 320B 图文混合模型。</li><li>还有 Clef 决策模型。</li><li>server 新增 <code>/v1/systemone</code> 决策模型 API。</li><li>支持 laya、julia-1、lev 三个。</li><li>还有 openjev、kev、nimble。</li><li>这对你意味着：MTP 内置草稿头又添一个实战样本。</li><li>可对照 SGLang 的 MTP 路线看。</li><li>Metal 那两笔加速，跟你 Mac 本地跑模型直接相关。</li><li>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/24669">PR #24669（batch API）</a>、<a href="https://github.com/ggml-org/llama.cpp/pull/29761">PR #29761（Qwen4Exp MTP）</a>、<a href="https://github.com/ggml-org/llama.cpp/pull/29570">PR #29570（Metal FA）</a>、<a href="https://github.com/ggml-org/llama.cpp/pull/29869">PR #29869（Metal MMA）</a></li></ul>
+<ul><li>其余五家本轮静默：vLLM 还是 v0.31.0。</li><li>SGLang 停在 v0.5.21。</li><li>TRT-LLM 稳定版 v1.2.1，预览版停在 rc29。</li><li>LMDeploy 停在 v0.18.0，TGI 归档只读。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 本轮无新批次，最新仍是 10/2 那批。</li><li>下一批今天 17:00 PDT 公告，下轮再筛。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>本轮没有值得报的业内新闻。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 的 Spotify 亲手查过，没有新单集。</li><li>还是 10/2 那期 MIT 访谈。</li><li>机器之心、量子位这轮没出 serving 新料。</li><li>Simon Willison 这轮没 serving 动态。</li><li>karpathy、jimfan 也一样。</li><li>X 仍受登录墙限制（已知缺口）。</li></ul>
+<h2>值得深读</h2>
+<ul><li>llama.cpp v0.6.0 精读笔记已生成。</li><li>md + HTML 双版，README 已更新。</li><li>理由：新 batch API 是投机解码链路的地基重写。</li><li>MTP 投机解码给你一条可对照的实战路线。</li><li>Metal 两笔加速跟你 Mac 本地跑模型直接相关。</li></ul>
+<p>*去重说明：本轮窗口（10/5 10:00→12:00 PDT）。框架六家经 GitHub API 亲手核验：vLLM v0.31.0；SGLang v0.5.21；TRT-LLM 稳定版 v1.2.1、预览版 rc29；LMDeploy v0.18.0；TGI v3.3.7 归档只读；llama.cpp v0.6.0（2026-10-05T16:56:22Z 发布，即今日 09:56 PDT，上轮检查时尚未发布，briefs 全文 grep 确认 10 月各期未报过）。arXiv 两组关键词亲手查过，无新批次（最新仍是 10/2 批次，下一批今日 17:00 PDT 公告）。新闻 4 轮 browser.search：均为旧内容或营销通稿，未达线。Latent Space Spotify 亲手查无新单集（最新仍是 10/2 MIT 那期）；机器之心/量子位无新料；大V名单无 serving 动态；X 仍登录墙。深读：llama.cpp v0.6.0 精读笔记 1 篇（md+HTML；release notes 无关键图表，已说明），README 索引已更新。*</p></body></html>

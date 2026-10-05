@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · llama.cpp v0.6.0：投机解码链路地基重写，MTP 草稿头实战落地"/>
+<meta name="doc-description" content="&gt; 原文：llama.cpp GitHub release notes（2026-10-05 发布，v0.6.0）"/>
+<meta name="doc-date" content="2026-10-05"/>
+<meta name="doc-ts" content="2026-10-05T19:03:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>llama.cpp v0.6.0：投机解码链路地基重写，MTP 草稿头实战落地</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>llama.cpp v0.6.0：投机解码链路地基重写，MTP 草稿头实战落地</h1>
+<blockquote><p>原文：llama.cpp GitHub release notes（2026-10-05 发布，v0.6.0）<br/>数据源：<code><a href="https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/v0.6.0">https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/v0.6.0</a></code><br/>说明：release notes 无关键图表（vLLM v0.31.0 笔记同例），以下为文字精读。</p></blockquote>
+<h2>人话解读</h2>
+<ul><li>llama.cpp 今天发了 v0.6.0。</li><li>这是它改成每日快照后，第一个正经版本号。</li><li>上次正式发版还是 b11027 时代，快照按惯例不算发版。</li><li>这次内容很实在：批处理 API 重写、MTP 投机解码、Metal 两笔加速。</li><li>一句话：它在给&quot;一次猜多个 token&quot;这条路铺地基。</li></ul>
+<h2>核心更新点</h2>
+<ul><li>新 API <code>llama_batch_ext</code>，配 <code>llama_process()</code>。</li><li>一个 batch 里能混装 token 和 embedding（词向量）。</li><li>每个 token 还能带&quot;状态&quot; embedding。</li><li>这是给 MTP（多 token 预测）模型用的。</li><li>deepstack 模型也用得上。</li><li>例子、投机解码、mtmd（多模态处理模块）、server 全迁到新 API。</li><li>MTP 简单说：模型一次前向，顺手多猜后面几个 token。</li><li>Qwen4Exp 吃上这套：MTP 投机解码正式可用。</li><li>投机解码还修了几个 bug：simple draft 和 MTP 的概率采样。</li><li>n-gram 草稿截断后被误拒的问题也修了。</li><li>Metal 端：F16 KV 的 flash attention 新核。</li><li>flash attention 是一种省显存的注意力算法。</li><li>few-row MMA 矩乘核：专为投机解码和批量解码优化。</li><li>苹果 GPU 上矩乘最高快约 3 倍。</li><li>MMA 是矩阵乘累加指令，GPU 算矩阵乘法的硬件原语。</li><li>量化线：新增 <code>llama_prec_policy</code>。</li><li>还有模型驱动的 W4A4（NVFP4/MXFP4）矩阵乘路径。</li><li>新模型支持：GLM-5.3-Flash（GLM5-Next）。</li><li>它是 320B 图文混合模型。</li><li>还有 Clef 决策模型、Ling 3.0 VL。</li><li>server 新增 <code>/v1/systemone</code> 决策模型 API。</li><li>支持六个决策模型：laya、julia-1、lev。</li><li>还有 openjev、kev、nimble。</li><li><code>/v1/embeddings</code> 现在接受带类型的视觉/音频/视频输入。</li><li>ggml 升到 v0.26.0。</li><li>Web UI 大改版，接了 Hugging Face Hub 数据层。</li></ul>
+<h2>关键数据</h2>
+<ul><li>Qwen4Exp 吃上 MTP 投机解码。</li><li>DGX Spark 上 decode 快约 1.5 倍。</li><li>苹果 GPU few-row MMA 矩乘：投机/批量解码场景最高快约 3 倍。</li><li>GLM-5.3-Flash：320B 图文混合模型。</li><li>架构是 KDA/DSA 混合 + mHC + MoE。</li><li>session 格式升级：<code>LLAMA_SESSION_VERSION</code> 11，<code>LLAMA_STATE_SEQ_VERSION</code> 4。</li></ul>
+<h2>跟你研究方向的关联</h2>
+<ul><li>MTP 草稿头 = 内置的投机解码，不用另养小模型。</li><li>这跟 SGLang 那边的 MTP/EAGLE 路线是同一道题，可以对照看。</li><li>batch API 重写说明了一件事。</li><li>MTP 和 deepstack 需要&quot;token 带状态&quot;的新表达。</li><li>你评估 P/D 解耦时若碰 hybrid/MTP 模型。</li><li>这个 API 设计值得参考。</li><li>Metal 两笔加速跟你 Mac 本地跑模型直接相关。</li><li>W4A4（NVFP4/MXFP4）是量化线的下一个落点，vLLM 那边也在跟进。</li><li>决策模型 API（<code>/v1/systemone</code>）跟 vLLM Decision 2.0 是同一赛道。</li></ul>
+<h2>术语表</h2>
+<ul><li>MTP（multi-token prediction，多 token 预测）。</li><li>一次前向猜出后面好几个 token，给投机解码当草稿。</li><li>llama_batch_ext：新的批处理数据结构。</li><li>它让 token 和 embedding 混装。</li><li>deepstack：把中间层状态也拿出来用的模型结构。</li><li>W4A4：权重和激活都压到 4bit 的量化格式。</li><li>NVFP4/MXFP4：NVIDIA 和 OCP 推的 4bit 浮点格式。</li><li>决策模型：不生成文本、只输出分类/打分概率的小模型。</li><li>draft（草稿）：投机解码里小模型先写的候选 token，大模型再验。</li></ul>
+<h2>原文链接</h2>
+<ul><li>Release notes（GitHub API）：<a href="https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/v0.6.0">https://api.github.com/repos/ggml-org/llama.cpp/releases/tags/v0.6.0</a></li><li>llama_batch_ext（PR #24669）：<a href="https://github.com/ggml-org/llama.cpp/pull/24669">https://github.com/ggml-org/llama.cpp/pull/24669</a></li><li>Qwen4Exp MTP（PR #29761）：<a href="https://github.com/ggml-org/llama.cpp/pull/29761">https://github.com/ggml-org/llama.cpp/pull/29761</a></li><li>Metal flash attention（PR #29570）：<a href="https://github.com/ggml-org/llama.cpp/pull/29570">https://github.com/ggml-org/llama.cpp/pull/29570</a></li><li>Metal few-row MMA（PR #29869）：<a href="https://github.com/ggml-org/llama.cpp/pull/29869">https://github.com/ggml-org/llama.cpp/pull/29869</a></li><li>W4A4 NVFP4/MXFP4（PR #24364）：<a href="https://github.com/ggml-org/llama.cpp/pull/24364">https://github.com/ggml-org/llama.cpp/pull/24364</a></li><li>/v1/systemone（PR #29818）：<a href="https://github.com/ggml-org/llama.cpp/pull/29818">https://github.com/ggml-org/llama.cpp/pull/29818</a></li><li>GLM-5.3-Flash（PR #27773）：<a href="https://github.com/ggml-org/llama.cpp/pull/27773">https://github.com/ggml-org/llama.cpp/pull/27773</a></li></ul></body></html>
