@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月5日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-05"/>
+<meta name="doc-ts" content="2026-10-05T13:08:32"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-05（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-05（6点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮全静默，没有新版本。</li><li>GitHub API 亲手查过，release 列表无变化。</li><li>vLLM 还是 v0.31.0（10/4 23:44 那个，0点版已报）。</li><li>SGLang 停在 v0.5.21，TRT-LLM 预览版还是 rc29。</li><li>LMDeploy 停在 v0.18.0，TGI 归档只读无变化。</li><li>llama.cpp 只有每日快照，按惯例不算发版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮没有新批次，最新还是 10/2 那批。</li><li>但挖出两篇多模态相关的漏报，之前各期都没报过。</li></ul>
+<ul><li>VLM 推理可以&quot;偷工减料&quot;：P2P 按层剪视觉计算。</li><li>它从可解释性里借了个诊断工具：activation patching（神经元干预）。</li><li>把某层输出换成&quot;平均脸&quot;，精度不掉就说明这层在摸鱼。</li><li>摸鱼的层推理时直接跳过矩阵乘法，token 一个不删。</li><li>数据：3% 精度容忍下，FLOPs 降 55%，精度保留 94%。</li><li>关键发现：视觉计算&quot;两头轻、中间重&quot;，中间层才是干活的。</li><li>这对你意味着：多模态 prefill 配算力时，层级配比有地图了。</li><li>标记「值得深读」：精读笔记已生成，含原文 Figure 1/3 和 Table 1。</li><li>来源：<a href="https://arxiv.org/abs/2610.03389v1">arXiv 2610.03389</a></li></ul>
+<ul><li>长视频 VLM 的 token 双轴压缩：VETO。</li><li>单轴压缩（只压空间或只压时间）有个效率天花板。</li><li>VETO 两步走：帧内先按语义合并相似 token，再跨帧合并重复帧。</li><li>先压空间再压时间，后面的全局匹配便宜得多。</li><li>数据：LLaVA-OneVision-7B 上推理快 45%，精度不降反升。</li><li>10% token 预算的极限档，它 55.7%，VisionZip 只有 52.6%。</li><li>三个模型家族（LLaVA-OneVision、InternVL-2.5、LongVA）都通用。</li><li>跟 P2P 是互补路线：一个剪计算，一个剪 token。</li><li>来源：<a href="https://arxiv.org/abs/2610.01785v1">arXiv 2610.01785</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>华硕发了台 64GB 的桌面 AI 超算：Ascent GX10。</li><li>NVIDIA Grace Blackwell 芯片，64GB 统一内存。</li><li>插电即用，能本地跑 30–35B 的开源模型。</li><li>两台还能组集群，拼出 128GB 显存、2 PFLOPS 算力。</li><li>对你意味着：本地调小模型、跑 autotuner 实验又多一个选择。</li><li>来源：<a href="https://www.moneydeals.com/news/asus-announces-64gb-configuration-asus-ascent-gx10-ai">moneydeals 报道</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>本轮没有新的访谈和深度内容。</li><li>Latent Space 的 Spotify 亲手查过，没有新单集。</li><li>还是 10/2 那期 MIT 访谈。</li><li>机器之心、量子位这轮没出 serving 相关新料。</li><li>karpathy、jimfan、Simon Willison 本轮都没 serving 动态。</li><li>X 仍受登录墙限制（已知缺口）。</li></ul>
+<h2>值得深读</h2>
+<ul><li>P2P 精读笔记已生成，重点看&quot;两头轻、中间重&quot;那张热图。</li><li>这篇的层级分析能直接指导多模态 prefill 的算力配比。</li><li>VETO 这轮只做简报收录，没做精读（token 压缩线已有 CoVisco 笔记）。</li></ul>
+<p>*去重说明：本轮窗口（10/5 04:00→10/5 06:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.31.0（10/4 23:44，0点版已报）；SGLang v0.5.21；TRT-LLM 预览版 rc29；LMDeploy v0.18.0；TGI v3.3.7 归档只读；llama.cpp 只有每日快照。arXiv 两组关键词亲手查过，无新批次（最新仍是 10/2 批次 TaSQ）；P2P（2610.03389）与 VETO（2610.01785）为 10/1–10/2 批次漏报，arXiv ID 逐个核验为真，briefs 全文 grep 确认 10 月各期未报过。HN、Reddit 本轮无新讨论；Reddit 约 10/3 的第三方汇总帖无真实 reddit 链接、未达收录线；X 仍登录墙无数据；Latent Space Spotify 亲手查无新单集；机器之心/量子位无新料（量子位浪潮 AICC 稿核心 HC2000 内容 9/27 10点版已报）。候选逐个去重排除：RTX Spark 开卖（10/4 18/20/22点版已报）、AMD $633.91 万亿市值（10/2 08点版、10/3 06点版已报）、Nebius 收购 Inferize（10/1 已报）、G4 vs G7e 实测（10/1 已报）、Runware serverless GPU（10/1 PR 稿、营销味、未达线）、Medium「Inference War」vLLM 0.30 vs SGLang 0.5.20（旧版本对比、时效已过）。深读：本轮 1 篇（P2P，含原文 Figure 1/3、Table 1，HTML 版图片已内嵌）。*</p></body></html>
