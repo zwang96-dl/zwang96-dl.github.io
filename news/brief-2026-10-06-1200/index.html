@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月6日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-06"/>
+<meta name="doc-ts" content="2026-10-06T19:06:55"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-06（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-06（12点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮都没发新版，GitHub API 亲手查过。</li><li>vLLM 停在 v0.31.0，SGLang 还是 v0.5.21。</li><li>TRT-LLM 稳定版 v1.2.1，预览版停在 rc29。</li><li>LMDeploy 还是 v0.18.0，TGI 归档只读无变化。</li><li>llama.cpp 窗内有 b11446 到 b11449 四个快照。</li><li>但它们都是日构建，按惯例不算正式发版。</li><li>vLLM、SGLang 官方博客今天也没新文章。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮没有新批次入库。</li><li>四个关键词查过最新时间戳，确认无漏报。</li><li>KV cache 和 speculative decoding 最新都停在 10/5。</li><li>P/D 解耦（prefill 和 decode 分开跑）方向最新还是 10/2。</li><li>推理 serving 关键词最新停在 10/4。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>推理云赛道出大新闻：Modal 拿到 3.55 亿美元融资。</li><li>估值 46.5 亿美元，一年涨了四倍还多。</li><li>领投的是 General Catalyst 和 Redpoint。</li><li>其实第一批钱是按 25 亿估值进的，抢的人太多又加了一轮高价。</li><li>Modal 不建数据中心，专做 serverless 算力调度。</li><li>创始人说用户几分钟就能从 0 扩到 1000 张卡。</li><li>这家就是&quot;按需租算力跑推理&quot;，跟你研究的 serving 离得很近。</li><li>来源：<a href="https://www.datacenterdynamics.com/en/news/modal-labs-secures-funding/">https://www.datacenterdynamics.com/en/news/modal-labs-secures-funding/</a></li></ul>
+<ul><li>博通要给 Anthropic 供算力，玩法很新：不卖芯片、只租。</li><li>为此联合华尔街银行团启动 600 亿美元债务融资。</li><li>说白了，AI 算力正从&quot;买设备&quot;变成&quot;买金融服务&quot;。</li><li>来源：<a href="http://news.sina.cn/bignews/insight/2026-10-06/detail-iniuhuii5613097.d.html">http://news.sina.cn/bignews/insight/2026-10-06/detail-iniuhuii5613097.d.html</a></li></ul>
+<ul><li>瑞典一家算力公司 Alpha Compute 签了 7190 万美元长约。</li><li>卖的是 NVIDIA B300 高密度集群，训练推理都能跑。</li><li>换句话说，推理算力现在成了&quot;期货&quot;，得提前锁单。</li><li>来源：<a href="https://www.financialcontent.com/article/gnwcq-2026-10-6-alpha-compute-corp-signs-agreement-with-ai-platform-to-deliver-compute-via-its-alpha-02-cluster-in-sweden-with-a-total-value-of-719-million">https://www.financialcontent.com/article/gnwcq-2026-10-6-alpha-compute-corp-signs-agreement-with-ai-platform-to-deliver-compute-via-its-alpha-02-cluster-in-sweden-with-a-total-value-of-719-million</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 的 Spotify 亲手查过，没有新单集。</li><li>还是 10/2 那期 MIT 访谈。</li><li>X 登录墙依然卡着，一线账号的实时帖子核验不了。</li><li>机器之心、量子位这轮没有推理 serving 新报道。</li></ul>
+<p>*去重说明：本轮窗口（10/6 10:00→12:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.31.0（2026-10-05T06:44:55Z）；SGLang v0.5.21（2026-10-02T01:09:04Z）；TRT-LLM 稳定版 v1.2.1、预览版 v1.3.0rc29；LMDeploy v0.18.0（2026-09-28T07:04:58Z）；TGI 归档只读；llama.cpp 窗内 b11446–b11449 四个快照（日构建，按惯例不计）。arXiv 四关键词（KV cache / speculative decoding / P-D disaggregation / LLM inference serving）亲手查过最新时间戳，最新为 10/5 批次 17:58 UTC，无新批次。候选逐个去重排除：GMI Cloud $668M（10/1，窗外）；Anthropic Claude 经 Bedrock 印度推理（10/5，窗外）；startupfortune 窄引擎趋势综述（10/4，窗外）；Zayo 光纤需求（边缘相关）；Karpathy 近期 X 帖（模型/应用层，无 serving 实质内容）；YouTube 上 SGLang/Latent Space 窗内无新视频；Simon Willison / Latent Space newsletter / The Batch 窗内无 serving 重磅内容。本轮新收录的三条业内新闻（Modal $355M、博通&quot;租芯片&quot;600 亿美元、Alpha Compute $71.9M 长约）均为今天首次报出、此前各期均未收录，发布时间略早于严格 2 小时窗口（10/6 凌晨至上午），经原文核验为真实新进展。X 登录墙仍受限。本轮无深读笔记（宁缺毋滥：新增三条均为行业新闻，无可深读的技术论文/文章）。*</p></body></html>
