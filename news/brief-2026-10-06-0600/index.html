@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月6日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-06"/>
+<meta name="doc-ts" content="2026-10-06T13:00:16"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-06（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-06（6点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮全静默，没有新版本。</li><li>GitHub API 亲手查过，release 列表没动。</li><li>vLLM 还是 v0.31.0，SGLang 停在 v0.5.21。</li><li>TRT-LLM 预览版还是 rc29，稳定版 v1.2.1。</li><li>LMDeploy 停在 v0.18.0，TGI 归档只读无变化。</li><li>llama.cpp 还是日构建快照，按惯例不算正式版。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮没有新批次。</li><li>关键词亲手查过最新时间戳，确认无漏报。</li><li>下一批今天 17:00 PDT 公告，18点版统一筛。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>只有一条边缘线索，看看就好。</li><li>Anthropic 的 Cowork 把推理和 VM 全搬上云了。</li><li>之前是&quot;云端推理、本地 VM&quot;，现在全上云。</li><li>原因是本地 VM 太吃磁盘、电量和性能。</li><li>这是自家部署架构的小八卦，不是新技术。</li><li>来源：Simon Willison 转引 Anthropic 工程师 Felix Rieseberg（10/5）。</li><li><a href="https://simonwillison.net/2026/Oct/5/felix-rieseberg/">https://simonwillison.net/2026/Oct/5/felix-rieseberg/</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 的 Spotify 亲手查过，没有新单集。</li><li>还是 10/2 那期 MIT 访谈。</li><li>newsletter 最新一期是 17 天前的旧文。</li><li>karpathy、jimfan 近期帖子不沾 serving。</li><li>中文网这轮没出 serving 新料。</li><li>X 仍受登录墙限制（已知缺口）。</li></ul>
+<p>*去重说明：本轮窗口（10/6 04:00→06:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.31.0；SGLang v0.5.21；TRT-LLM 稳定版 v1.2.1、预览版 rc29；LMDeploy v0.18.0；TGI v3.3.7 归档只读；llama.cpp 日构建快照不计。arXiv 关键词亲手查过最新时间戳，无新批次（17:00 PDT 公告批次由 18点版筛）；无漏报。候选逐个去重排除：SGLang 官方 LinkedIn&quot;欢迎 IntelXPU 加入标准 release&quot;帖（~10/5，登录墙无单帖 URL，内容多为已有版本回顾）；Cerebras 博客&quot;Disaggregated Inference From the Ground Up&quot;（10/1，窗口外）；HN&quot;Anthropic scale serving 讨论&quot;帖（10/1，窗口外）；Startup Fortune&quot;窄推理引擎 beating vLLM&quot;文（~10/4，窗口外）；PyTorch 转 vLLM&quot;Helion x vLLM linear backend&quot;（~10/3，窗口外）；SGLang GitHub issue #42511 多模态图像解码 OOM（10/4，feature request 非新闻）；NVIDIA 开发者博客 4 篇（~10/1，全部窗口外）；Latent Space newsletter 最新一期 17 天前旧文；karpathy 10/2 输出格式帖子、nanochat 讨论（均不沾 serving）；中文渠道（机器之心、量子位、36氪、InfoQ）10/5 之后无 serving 主线新文（智谱股价、英特尔晶圆合作等均为窗口内非技术线）；百度智能云 × SGLang 社区文（9/23，窗口外）。Latent Space Spotify 亲手查无新单集（最新仍是 10/2 MIT 那期）；X 仍登录墙。本轮无深读笔记（宁缺毋滥：唯一在窗内的是 Anthropic 部署架构小八卦，不值得深读）。*</p></body></html>
