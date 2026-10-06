@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月5日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-05"/>
+<meta name="doc-ts" content="2026-10-06T01:11:17"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-05（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-05（18点版）</h1>
+<h2>框架更新</h2>
+<ul><li>六家框架这轮全静默，一个新版本都没有。</li><li>GitHub API 亲手查过，release 列表纹丝不动。</li><li>vLLM 停在 v0.31.0，SGLang 停在 v0.5.21。</li><li>TRT-LLM 稳定版还是 v1.2.1，预览版 rc29。</li><li>LMDeploy v0.18.0，TGI 归档只读。</li></ul>
+<p>llama.cpp v0.6.0，都是老面孔。</p>
+<ul><li>漏报一个小工具：inferlint 0.3.0（10 月 1 日发布）。</li><li>它是个推理引擎&quot;体检仪&quot;：读各引擎的指标和启动日志，挑配置毛病。</li><li>新版加了 SGLang 和 TensorRT-LLM 支持。</li></ul>
+<p>以前它只懂 vLLM。</p>
+<ul><li>比如 SGLang 没开指标开关，它会直接告诉你去开。</li><li>来源：<a href="https://github.com/radianvector/inferlint/blob/HEAD/CHANGELOG.md">https://github.com/radianvector/inferlint/blob/HEAD/CHANGELOG.md</a></li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 新批次到了，就是 17:00 公告的那批。</li><li>10 月 3 日提交的 serving 相关有 4 篇，3 篇值得报。</li><li>第一篇 InferOpt，华为出的&quot;自动调参框架&quot;。</li><li>专治 serving 旋钮太多。</li></ul>
+<p>比如每层 KV 留多少、每层 MoE 开几个专家。</p>
+<ul><li>它把调参变成多目标优化：给变量范围、资源代价公式、评测接口就行。</li><li>搜的时候超预算的候选直接扔，连模型都不跑，省时间。</li><li>Qwen2.5-7B 上 16K 缓存压掉 64.4%。</li></ul>
+<p>吐 token 速度快了一倍。</p>
+<ul><li>「值得深读」：跟你的 autotuner 想法直接同构，精读笔记已出。</li><li>来源：<a href="https://arxiv.org/abs/2610.04473v1">https://arxiv.org/abs/2610.04473v1</a></li><li>第二篇 MOIRA，长上下文解码的稀疏注意力优化。</li><li>每个 query 头需要的 KV 页数不一样，固定预算太浪费。</li><li>它在 kernel 层解决参差不齐的页列表。</li></ul>
+<p>不用 padding 硬凑。</p>
+<ul><li>FlashAttention-3 只擅长整齐的行，它补上了这块短板。</li><li>来源：<a href="https://arxiv.org/abs/2610.04313v1">https://arxiv.org/abs/2610.04313v1</a></li><li>第三篇 FlashGaze，视频理解的训练无关剪枝。</li><li>长视频时空冗余大，视觉 token 特别烧钱。</li><li>它在 ViT 编码之前做多尺度剪枝，不用额外训练辅助网络。</li><li>多模态 encoder 降本的又一条路子。</li><li>来源：<a href="https://arxiv.org/abs/2610.04225v1">https://arxiv.org/abs/2610.04225v1</a></li><li>PhaseGate 那篇是端侧 CPU 调度。</li></ul>
+<p>跟你数据中心主线不沾，略过。</p>
+<h2>业内新闻</h2>
+<ul><li>这轮没有新的业内新闻。</li><li>GMI Cloud 6.68 亿美元融资是 9/30 的旧闻。</li></ul>
+<p>今天只是又有媒体转载。</p>
+<ul><li>Nebius 收购 Inferize 之前几轮都已报过。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 的 Spotify 亲手查过，还是没有新单集。</li><li>最新仍是 10/2 那期 MIT 访谈。</li><li>Simon Willison 今天发了条引用帖。</li></ul>
+<p>讲的是 Anthropic Cowork 把推理搬上云。</p>
+<ul><li>那是产品架构动态，不是 serving 技术，这轮略过。</li><li>机器之心、量子位这轮没出 serving 新料。</li><li>karpathy 10/2 的帖子不沾 serving，之前已排除。</li><li>X 仍受登录墙限制（已知缺口）。</li></ul>
+<p>*去重说明：本轮窗口（10/5 16:00→18:00 PDT）。框架六家经 GitHub API 亲手核验无新版本：vLLM v0.31.0；SGLang v0.5.21；TRT-LLM 稳定版 v1.2.1、预览版 rc29；LMDeploy v0.18.0；TGI v3.3.7 归档只读；llama.cpp v0.6.0。arXiv 新批次（17:00 PDT 公告，含 10/3 提交论文）两组关键词亲手筛出 4 篇 serving 相关：InferOpt、MOIRA、FlashGaze 收录，PhaseGate（端侧 CPU 调度）略过。候选逐个去重排除：Magnitude Launch HN（9/30 发布，10/2 14点版已报）、GMI Cloud 融资（9/30 14点版已报，今日仅媒体转载）、Nebius 收购 Inferize（已报多轮）、Google G4 vs AWS G7e（10/1 14点版已报）、Simon Willison 的 2026 in LLMs 回顾帖（9/27，非 serving）、Simon Willison 今日引用帖（Cowork 产品动态，非 serving 技术）、karpathy 10/2 帖（AI 定制视频讲解，不沾 serving）。inferlint 0.3.0（10/1）为漏报补收。Latent Space Spotify 亲手查无新单集（最新仍是 10/2 MIT 那期）；机器之心/量子位无新料；X 仍登录墙。本轮深读：InferOpt 精读笔记 1 篇（md+HTML，含原文 Figure 1/2，README 已置顶）。*</p></body></html>
