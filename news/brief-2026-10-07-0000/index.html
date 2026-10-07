@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月7日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-07"/>
+<meta name="doc-ts" content="2026-10-07T06:59:55"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-07（0点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-07（0点版）</h1>
+<p>半夜这轮是论文补漏专场。 10/6 那批 arXiv 里，有 5 篇今天各期都没筛到，这轮一口气补上。 框架六家继续安静，新闻和播客线也没新料。</p>
+<h2>框架更新</h2>
+<p>这轮六家都没动静，GitHub releases 亲手核验过一遍。 vLLM 停在 v0.31.0（10/5），SGLang 停在 v0.5.21（10/2）。 TensorRT-LLM 稳定版 v1.2.1、预览版 rc29，都没动。 LMDeploy 停在 v0.18.0（9/28），TGI 归档只读。 llama.cpp 的 v0.6.0 是 10/5 的料，12点版报过，这轮不重复。</p>
+<h2>新技术与论文</h2>
+<p><strong>1. Foveated Compression：多模态 token 压缩，学人眼看图</strong></p>
+<p>多模态模型最烧钱的是视觉 token，一张图进来几千个 token 就没了。 这篇问了个实在问题：token 预算固定时，高清该留给哪块区域。 做法像人眼：中间看得清、边缘模糊。整图先压一遍，再挑 9 个格子里最关键的一格留高清。 21% token 预算下，学出来的选择器比随机挑强。但还是不如直接把整图缩小。 说人话：局部高清不是万能药，全图均匀压有时更划算。 划重点：这篇直接对准你的多模态推理优化线。深读笔记已备好。 <a href="https://arxiv.org/abs/2610.07729">https://arxiv.org/abs/2610.07729</a></p>
+<p><strong>2. Lachesis：KV cache 按&quot;寿命&quot;分房，HBM 和闪存各住各的</strong></p>
+<p>Agent 跑起来，KV cache 越堆越多。HBM 快但贵，高带宽闪存便宜但写多了会折寿。 这篇的洞察很妙：按 KV cache 的&quot;寿命&quot;分房。短命的住 HBM，写得多也不心疼。 长命的才下沉到闪存。从 agent 编排器的行为里看出来谁命长谁命短。 仿真结果：闪存寿命延长 1.19 到 3.13 倍，连轴跑也撑得过 5 年质保。 说白了：HBM 当草稿纸，闪存当档案柜。跟你研究的 KV cache 优化同一条线。 <a href="https://arxiv.org/abs/2610.08378">https://arxiv.org/abs/2610.08378</a></p>
+<p><strong>3. OSFP4：NVFP4 量化再打磨，精度和速度都要</strong></p>
+<p>NVFP4 是英伟达的 4 位浮点格式（Blackwell 卡原生支持），存得小跑得快。 但 4 位太糙，直接压会掉精度。这篇把对角平滑矩阵和块缩放一起联合优化。 结果：同类方案里精度最高，prefill 吞吐保住官方 NVFP4 的 94% 到 97%。 换句话说：速度几乎没损失，精度还保住了。量化这条线留个索引。 <a href="https://arxiv.org/abs/2610.08231">https://arxiv.org/abs/2610.08231</a></p>
+<p><strong>4. ReFold：agent 上下文太长，折起来但不许扔</strong></p>
+<p>Agent 跑长任务，历史记录越堆越长，每次全量重发又贵又慢。 以前的办法要么再调一次模型，要么靠规则，还会把前缀缓存搞失效。 ReFold 不预测不训练：重复内容换成小纸条，办完的轮次折成一句话。 关键是可逆，折错了能从历史里恢复，不会永久丢东西。 实测：token 消耗最多降 2.5 倍，直接插进 ReAct 类框架就能用。 做 agent serving 的可以看看。 <a href="https://arxiv.org/abs/2610.07863">https://arxiv.org/abs/2610.07863</a></p>
+<p><strong>5. DySCo：边和云一起跑模型，层数对齐了再拼 batch</strong></p>
+<p>手机和 IoT 设备也想跑大模型，但整机塞不下，只能跟云分工。 问题是切分点不一样：边跑几层、云跑几层，互相等，batch 也拼不起来。 DySCo 让各请求都推进到最深的切分点，再把公共后缀拼成一个 batch。 KV cache 留在本地，权重不用反复加载。 边云协同 serving 的新思路，物联网场景可以关注。 <a href="https://arxiv.org/abs/2610.08268">https://arxiv.org/abs/2610.08268</a></p>
+<h2>业内新闻</h2>
+<p>这轮没有。新闻站、Reddit、HN、中文媒体全扫过，可验证的新料是零。 HN 上那个 Anthropic serving 讨论帖是 6 天前的旧料，这轮不重复报。</p>
+<h2>访谈与深度</h2>
+<p>这轮没有。Latent Space 在 Spotify 上亲手查过，最新单集还是 10/2 的 MIT 访谈。 X 上一线账号仍是登录墙，看不到实时帖子。</p>
+<p>*去重说明：本轮窗口（10/6 20:00→10/7 00:00 PDT）。框架六家经 GitHub releases API 实时核验无新版本：vLLM v0.31.0（10/5）；SGLang v0.5.21（10/2）；TRT-LLM 稳定版 v1.2.1、预览版 rc29（9/29）；LMDeploy v0.18.0（9/28）；TGI v3.3.7 归档只读；llama.cpp v0.6.0（10/5 12点版已报，日快照不计）。arXiv 10/6 批次亲手筛过，5 篇论文为今天各期首次收录（此前均未报过）：Foveated Compression 07729、Lachesis 08378、OSFP4 08231、ReFold 07863、DySCo 08268；其余候选（07782 多智能体持久记忆、07774 多模态 MoE 安全、07767 TRACE FP4、07940 Hybrid Latent Attention）或偏离 serving 主线、或为纯架构/安全研究，本轮略过。新闻/社区侧逐个排除：HN Anthropic serving 讨论帖（10/1，窗口外）、Spheron/particula 选型文（旧文）、中文媒体无 serving 主线新料。大V名单无新 serving 动态；X 仍登录墙。Latent Space Spotify 亲手查无新单集（最新仍是 10/2 MIT 那期）。本轮深读笔记 1 篇：Foveated Compression（arXiv:2610.07729）。*</p></body></html>
