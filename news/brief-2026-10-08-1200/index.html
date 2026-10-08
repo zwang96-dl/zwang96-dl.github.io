@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月8日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-08"/>
+<meta name="doc-ts" content="2026-10-08T19:08:57"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-08（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-08（12点版）</h1>
+<p>10 点到 12 点，vLLM 官方扔了颗大的。 vLLM-Omni 技术报告：多模态 serving 的统一调度器。 另外 llama.cpp 照例两连发，全是小修补。</p>
+<h2>框架更新</h2>
+<ul><li>llama.cpp 10:23 发了 b11511。</li><li>修的是 CUDA 量化矩阵乘的越界读取。</li><li>MMQ 就是混合精度量化矩阵乘（GPU 上算量化的核心算子）。</li><li>越界读会悄悄算错数，修完更稳。</li><li>发布页：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11511">https://github.com/ggml-org/llama.cpp/releases/tag/b11511</a></li></ul>
+<ul><li>10:39 又发了 b11512。</li><li>修的是 DFlash 的输出头权重共享 bug。</li><li>DFlash 是 llama.cpp 里新的注意力加速路径。</li><li>名字还撞上了：微软今天官宣的本地推理，用的正是 DFlash2。</li><li>发布页：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11512">https://github.com/ggml-org/llama.cpp/releases/tag/b11512</a></li></ul>
+<ul><li>其余五家继续静默。</li><li>vLLM v0.31.0、SGLang v0.5.21 都没动。</li><li>TRT-LLM、LMDeploy、TGI 同样零更新。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>「值得深读」vLLM-Omni 技术报告来了。</li><li>这是 vLLM 官方给多模态 serving 造的统一调度器。</li><li>以前 vLLM 只管文字接龙，现在语音画图机器人全接。</li><li>核心招数：一切拆成多阶段流水线，一个总调度管推进。</li><li>KV 交接走 Mooncake 专线（跨节点传 KV 的高速通道）。</li><li>P/D 解耦只是它的一个特例，跟你评估 SGLang 对得上。</li><li>精读笔记已写好，见深读目录。</li><li>原文：<a href="https://arxiv.org/abs/2610.09307">https://arxiv.org/abs/2610.09307</a></li></ul>
+<ul><li>VisionWeave：让视觉 token 数量看菜下碟。</li><li>多模态最烧钱的就是图片切成的死 token。</li><li>简单图少用 token，复杂图多用 token。</li><li>从结构层面给多模态模型 serving 省算力。</li><li>原文：<a href="https://arxiv.org/abs/2610.07987">https://arxiv.org/abs/2610.07987</a></li></ul>
+<ul><li>EncBank：把 LLM 下半截当文档编码器复用。</li><li>同一份文档反复问，别每次都重算。</li><li>下层输出用 4bit 存起来，上层直接读。</li><li>实测 prefill 快 1.4 倍，精度几乎不掉。</li><li>前缀缓存的兄弟思路，这是 encoder 复用版。</li><li>原文：<a href="https://arxiv.org/abs/2610.10058">https://arxiv.org/abs/2610.10058</a></li></ul>
+<ul><li>还有一篇讲&quot;怎么测 QPS 才靠谱&quot;。</li><li>跑分抖动大到没法比版本，它给了套隔离测试法。</li><li>你给 autotuner 跑基准时能用上。</li><li>原文：<a href="https://arxiv.org/abs/2610.09778">https://arxiv.org/abs/2610.09778</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>GitHub Copilot 本月底能跑本地模型了。</li><li>微软官宣：自动在云端和本地之间切换，也能强制本地。</li><li>首发模型 MAI Code 1.1 Flash：137B 总参数的 MoE（混合专家模型）。</li><li>每次只激活约 6.8B 参数，权重压到约 3.3bit。</li><li>还用了 DFlash2 推测解码（先让小模型打草稿再验）提速。</li><li>先上 Surface Laptop Ultra，走 Windows ML。</li><li>本地推理不收按次费，代码不离本机。</li><li>官方博客：<a href="https://commandline.microsoft.com/local-models-sandboxed-tools-github-windows/?trk=organization_guest_main-feed-card-text">https://commandline.microsoft.com/local-models-sandboxed-tools-github-windows/?trk=organization_guest_main-feed-card-text</a></li></ul>
+<ul><li>有人实测了 5 家 GPU 云的按需价。</li><li>A100 80GB 每小时：Vast.ai $1.2 最便宜。</li><li>RunPod $1.89，Lambda $1.5。</li><li>GCP $2.9，AWS $3.2 最贵。</li><li>7B/13B 小模型别租 A100，4090 每小时 $0.35 够用。</li><li>出处：<a href="https://dev.to/qisuancloud/i-compared-5-gpu-clouds-for-llm-inference-in-2026-heres-what-i-found-4884">https://dev.to/qisuancloud/i-compared-5-gpu-clouds-for-llm-inference-in-2026-heres-what-i-found-4884</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 播客：Spotify 亲手查过，无新单集。</li><li>最新还是今天那期 Periodic Labs，10 点版报过。</li><li>补一条 3 天前的 YouTube 科普。</li><li>《SGLang vs vLLM：推理引擎到底怎么工作》。</li><li>手把手讲 PagedAttention、连续批处理这些基本功。</li><li>你评估 SGLang，正好拿它当入门对照。</li><li><a href="https://www.youtube.com/watch?v=NO7afDtQp_M">https://www.youtube.com/watch?v=NO7afDtQp_M</a></li></ul>
+<p>*去重说明：本轮窗口（10/8 10:00→12:00 PDT）。框架六家经 GitHub releases API 实时核验：llama.cpp 窗口内两连发 b11511（10:23 PDT，CUDA MMQ 越界读取修复，PR #29953）、b11512（10:39 PDT，DFlash 输出头共享修复，PR #30111）；vLLM v0.31.0、SGLang v0.5.21、TRT-LLM v1.3.0rc29、LMDeploy v0.18.0、TGI 归档只读均零更新。arXiv 本轮 API 健康无 429：4 篇新论文已跟 10/5–10/8 简报按 ID 双重去重（2610.10411/10381/09827 在 10/7 20点版已报，2610.08378/07729 在 10/7 0点版已报）。微软 Copilot 本地推理经官方博客（commandline.microsoft.com，10/8）+ dev.to/windowsreport 交叉核验；5 家 GPU 云比价经 dev.to 原文亲手打开核验数字。Latent Space 播客经 Spotify API 亲手核验无新单集（最新仍是 10/8 Periodic Labs 那期）；X 仍登录墙、Reddit/HN/中文媒体窗口内无 serving 新帖。本轮深读 1 篇：vLLM-Omni 技术报告（精读笔记+HTML 已生成，README 已更新）。*</p></body></html>
