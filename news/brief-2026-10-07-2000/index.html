@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月7日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-07"/>
+<meta name="doc-ts" content="2026-10-08T03:11:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-07（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-07（20点版）</h1>
+<p>晚上这轮有料。 llama.cpp 连发 4 个日快照，arXiv 新批次 8 篇论文进账。 还补上一篇昨天漏掉的 vLLM 官方博客。</p>
+<h2>框架更新</h2>
+<p>llama.cpp 今晚连发 4 个日快照（18:36–19:45）。 b11480：MoE 专家加了 GPU 缓存。 专家放内存里，每次用都要从 CPU 搬。 现在常用专家直接住 GPU，少搬运。 b11481：多模态框架 mtmd 支持 Cohere2 vision。 b11482：CUDA 的 FWHT 内核扩展到 1024–8192 宽度。 纯性能向优化。 b11483：新增 LiquidAI d1-3B 决策模型支持。 mtmd 还能从 GGUF 读 LFM2 的图片缩放算法。 其余五家继续静默。 vLLM v0.31.0、SGLang v0.5.21、TRT-LLM v1.3.0rc29、LMDeploy v0.18.0 都没动。 TGI 归档只读。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 今日批次入库了，8 篇相关。 PD 解耦和多模态 serving 方向这轮挂零。</p>
+<p>「值得深读」投机解码的考核标准换了。 以前看&quot;每块草稿写得像不像&quot;。 现在直接看&quot;整个任务要跑几轮验算&quot;。 新目标叫 EDR（期望解码轮数）。 作者把解码建成马尔可夫奖励过程。 拒绝就开新轮，代价按状态占用率加权。 两个主流草稿模型换上它，9 个测试全赢。 深读笔记已生成，见深度阅读目录。 <a href="https://arxiv.org/abs/2610.10411v1">https://arxiv.org/abs/2610.10411v1</a></p>
+<p>SPIN：稀疏注意力的&quot;影子索引&quot;来了。 每步 decode 都要给整个 KV cache 打分，太贵。 SPIN 用影子预测器先猜，省下这笔开销。 <a href="https://arxiv.org/abs/2610.09025v1">https://arxiv.org/abs/2610.09025v1</a></p>
+<p>KV cache 量化这轮扎堆，共 4 篇。 ResidualQuant：给 Looped Transformer 做的 2-bit 残差量化。 <a href="https://arxiv.org/abs/2610.10381v1">https://arxiv.org/abs/2610.10381v1</a> Dual-QK：query 通道剪枝配 2-bit key 量化。 <a href="https://arxiv.org/abs/2610.09827v1">https://arxiv.org/abs/2610.09827v1</a> Few Bits, One Law：三合一极限压缩。 权重 2-bit、激活 4-bit、KV cache 2-bit。 还给了统一框架处理三者误差打架。 <a href="https://arxiv.org/abs/2610.09202v1">https://arxiv.org/abs/2610.09202v1</a> 自剪枝 Transformer：用衰减机制替掉 RoPE。 KV cache 压到极限，模型自己会&quot;剪枝&quot;。 <a href="https://arxiv.org/abs/2610.09051v1">https://arxiv.org/abs/2610.09051v1</a></p>
+<p>安全向一篇：视觉记忆攻击能&quot;借尸还魂&quot;。 对抗输入从上下文删掉也没用。 KV cache 里留的痕迹还能继续操控模型。 <a href="https://arxiv.org/abs/2610.09027v1">https://arxiv.org/abs/2610.09027v1</a></p>
+<h2>业内新闻</h2>
+<p>补报一篇 vLLM 官方博客（昨天发的，之前漏了）。 主角是 DeepSeek-V4.1-Flash。 vLLM 团队三周内把它低并发提速 1.9 倍。 SemiAnalysis AgentX 测试上吞吐 5 倍。 技术点：SWA bounded replay、CUDA graphs。 加上 DeepSeek 新 kernel 和 vLLM 的 kernel 融合。 <a href="https://vllm.ai/blog/2026-10-07-deepseek-v41-flash">https://vllm.ai/blog/2026-10-07-deepseek-v41-flash</a></p>
+<p>其余新闻侧无新料。 Architect 的推理拍卖交易所（10/6）、Mistral Large 4（10/6）都是窗口外的旧闻。</p>
+<h2>访谈与深度</h2>
+<p>这轮没有。 Latent Space 在 Spotify 上查过，无新单集。 Simon Willison 今天没发 serving 相关。 机器之心、量子位今天没有推理 serving 报道。 X 仍是登录墙，看不到一线实时帖子。 Reddit、HN 也无新帖。</p>
+<p>*去重说明：本轮窗口（10/7 18:00→20:00 PDT）。框架六家经 GitHub releases API 实时核验：vLLM v0.31.0、SGLang v0.5.21、TRT-LLM v1.3.0rc29、LMDeploy v0.18.0、TGI 归档只读均无更新；llama.cpp 4 个日快照（b11480–b11483，18:36–19:45 PDT）为窗口内新发布；arXiv 四关键词新批次（提交窗口 10-06T18:00Z→10-07T18:00Z）入库 8 篇，PD 解耦与多模态 serving 关键词零入库；vLLM 官方博客《DeepSeek-V4.1-Flash on vLLM》为 10/7 00:00 UTC 发布、经核对今日早前各版未收录，本轮补报；其余新闻/社区/播客/中文媒体逐个排除，均为窗口外旧料或无更新。本轮深读笔记 1 篇：EDR-期望解码轮数-投机解码草稿训练新目标。*</p></body></html>
