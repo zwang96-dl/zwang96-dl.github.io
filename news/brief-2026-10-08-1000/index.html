@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月8日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-08"/>
+<meta name="doc-ts" content="2026-10-08T17:13:05"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-08（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-08（10点版）</h1>
+<p>8 点到 10 点，llama.cpp 又是全场唯一的动静。 一天之内连发六个快照，够拼的。 但说实话，三个全是小修小补。</p>
+<h2>框架更新</h2>
+<ul><li>llama.cpp 早上 8:27 发了 b11507。</li><li>这次给 MoE 模型加了多卡专家缓存。</li><li>MoE 就是混合专家模型，好比医院分科室看病。</li><li>以前专家缓存只认单张卡，现在能跨多张卡分开放。</li><li>在两张 4090 上实测了 Qwen3.8-Flash-Next。</li><li>跟你关系不大，你玩的是 vLLM 和 SGLang。</li><li>发布页：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11507">https://github.com/ggml-org/llama.cpp/releases/tag/b11507</a></li></ul>
+<ul><li>8:49 又发了 b11509。</li><li>修的是 CUDA 编译时的一个版本判断 bug。</li><li>新版 CCCL 会被误判成不支持。</li><li>CCCL 是英伟达的 GPU 基础算法库。</li><li>误判后排序算子悄悄走慢速路径，性能白白丢了。</li><li>纯修 bug，用户完全无感。</li><li>发布页：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11509">https://github.com/ggml-org/llama.cpp/releases/tag/b11509</a></li></ul>
+<ul><li>9:15 再发 b11510。</li><li>修的是 CUDA 的 PAD 算子，PAD 就是填充。</li><li>行数超过 65535 会溢出，现在改成循环处理。</li><li>超大张量才踩得到，一般人碰不上。</li><li>发布页：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11510">https://github.com/ggml-org/llama.cpp/releases/tag/b11510</a></li></ul>
+<ul><li>其余五家继续静默。</li><li>vLLM 停在 v0.31.0，SGLang 停在 v0.5.21。</li><li>TRT-LLM 还是 v1.3.0rc29，LMDeploy 还是 v0.18.0。</li><li>TGI 仓库已归档，无动静。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮没查成，接口返回 429 限流。</li><li>不过 8 点版两小时前刚亲手查过，零新入库。</li><li>这个时段本来就是 arXiv 的结构性空窗。</li><li>12 点版应该能看到 10/8 的新批次。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>有家金融科技公司搞了个&quot;推理拍卖所&quot;。</li><li>名字叫 Liquid Inference，今天上的新闻。</li><li>玩法是：每条推理请求拿出来竞价。</li><li>谁报价低、还满足你的延迟要求，谁接单。</li><li>兼容 OpenAI 和 Anthropic 的客户端，不用改代码。</li><li>首批 500 个用户送 20 美元额度。</li><li>说白了就是把推理算力当股票一样撮合交易。</li><li>跟你调参关系不大，但商业模式挺有意思。</li><li>通稿：<a href="https://www.prnewswire.com/news-releases/architect-financial-technologies-launches-liquid-inference-a-real-time-exchange-for-ai-inference-302900862.html">https://www.prnewswire.com/news-releases/architect-financial-technologies-launches-liquid-inference-a-real-time-exchange-for-ai-inference-302900862.html</a></li><li>报道：<a href="https://www.marktechpost.com/2026/10/08/architect-launches-liquid-inference-a-real-time-auction-for-llm-inference/?amp=1">https://www.marktechpost.com/2026/10/08/architect-launches-liquid-inference-a-real-time-auction-for-llm-inference/?amp=1</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 今天上了新单集。</li><li>嘉宾是 Periodic Labs 的 Liam Fedus。</li><li>聊的是用 AI 从半导体一路做到超导材料。</li><li>偏芯片和材料发现，跟推理 serving 弱相关。</li><li>但你做推理优化，听听芯片侧在想什么不亏。</li><li>这期是今天刚发的，8 点版还没报过。</li><li>Spotify：<a href="https://open.spotify.com/episode/4r9mghhk5Ch3N9f7JOd1xe">https://open.spotify.com/episode/4r9mghhk5Ch3N9f7JOd1xe</a></li></ul>
+<p>*去重说明：本轮窗口（10/8 08:00→10:00 PDT）。框架六家经 GitHub releases API 实时核验：vLLM v0.31.0（10/5）、SGLang v0.5.21（10/2）、TRT-LLM v1.3.0rc29（9/29）、LMDeploy v0.18.0（9/28）、TGI 归档只读均无更新；llama.cpp 窗口内三连发：b11507（08:27 PDT，MoE 专家缓存多卡支持，PR #30112）、b11509（08:49 PDT，CCCL 版本判断修 bug，PR #29453）、b11510（09:15 PDT，CUDA PAD 算子循环修溢出，PR #30147）。arXiv 本轮 API 返回 429 限流未查成；8 点版两小时前已亲手核验零新入库，本窗口属结构性空窗。Liquid Inference（Architect Financial，PR Newswire 10/7 通稿、MarkTechPost 10/8 报道）为新闻渠道本轮唯一新增。Latent Space 新单集（10/8，Periodic Labs，Spotify 亲手核验）为播客渠道本轮唯一新增；关键人物子代理曾误报&quot;无新单集&quot;，已由我直接用 spotify-api 核验纠正。Simon Willison 10/8 暂无新帖（最新 10/7，均无 serving 相关）；HN/Reddit/中文媒体窗口内无新帖；X 仍登录墙。本轮无深读笔记（宁缺毋滥：三个快照均为单 PR 小修补、Liquid Inference 为商业通稿、播客为访谈非技术论文）。*</p></body></html>
