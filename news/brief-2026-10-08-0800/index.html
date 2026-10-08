@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月8日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-08"/>
+<meta name="doc-ts" content="2026-10-08T14:59:47"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-08（8点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-08（8点版）</h1>
+<p>早上 6 点到 8 点，生态依然安静。 llama.cpp 贡献了本轮全部新料。 三个快照全是小修小补。</p>
+<h2>框架更新</h2>
+<ul><li>llama.cpp 早上 5:57 发了 b11501。</li><li>这是上一轮错过的一个，这轮补上。</li><li>它给 SYCL（英特尔显卡的编程框架）后端做了优化。</li><li>优化的是 FWHT（一种打散权重的数学变换）。</li><li>量化前先用它把离群值摊平。</li><li>这次在英特尔 Arc 显卡上跑得更快了。</li><li>跟你关系不大，你手里是 H100 和 MI300。</li><li>发布页：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11501">https://github.com/ggml-org/llama.cpp/releases/tag/b11501</a></li></ul>
+<ul><li>早上 6:29 又发了 b11503。</li><li>这次只是更新了一个 HTTP 库。</li><li>cpp-httplib 是 llama-server 内置的轻量网络库。</li><li>从旧版本升级到 0.60.1，纯属维护性更新。</li><li>用户完全无感，不用管。</li><li>发布页：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11503">https://github.com/ggml-org/llama.cpp/releases/tag/b11503</a></li></ul>
+<ul><li>早上 7:37 发了 b11505。</li><li>这次修的是 Vulkan（跨平台显卡接口）后端的 bug。</li><li>修的是 TOP_K 采样：取概率最高的 k 个 token 那步。</li><li>以前正无穷和 NaN 会被错误跳过。</li><li>后果：英伟达卡上可能卡死，AMD 卡上可能算错数。</li><li>用 Vulkan 跑模型的人建议升级。</li><li>发布页：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11505">https://github.com/ggml-org/llama.cpp/releases/tag/b11505</a></li></ul>
+<ul><li>其余五家继续静默。</li><li>vLLM 停在 v0.31.0，SGLang 停在 v0.5.21。</li><li>TRT-LLM 还是 v1.3.0rc29，LMDeploy 还是 v0.18.0。</li><li>TGI 仓库已归档，无动静。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 这轮零新入库。</li><li>四个关键词的最新时间戳都还停在 10/7。</li><li>10/8 的批次还没发布。</li><li>下一轮应该能看到新一批。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮没有新料。</li><li>中文媒体这两天没有 serving 相关报道。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Simon Willison 这轮没发新文章。</li><li>最新还是 10/7 的几篇，跟 serving 都不沾边。</li><li>Latent Space 在 Spotify 上没有新单集。</li><li>最新一期还是 10/2 的那期。</li><li>HN 和 Reddit 窗口内没有新帖。</li><li>X 还是一线动态的登录墙，继续看不到。</li></ul>
+<p>*去重说明：本轮窗口（10/8 06:00→08:00 PDT）。框架六家经 GitHub releases API 实时核验：vLLM v0.31.0（10/5）、SGLang v0.5.21（10/2）、TRT-LLM v1.3.0rc29（9/29）、LMDeploy v0.18.0（9/28）、TGI 归档只读均无更新；llama.cpp 窗口内三连发：b11501（05:57 PDT，SYCL FWHT 优化，PR #29605，上一轮 6点版 错过、本轮补报）、b11503（06:29 PDT，cpp-httplib 升级到 0.60.1，PR #30134）、b11505（07:37 PDT，Vulkan TOP_K 修 +inf/NaN 计数 bug，PR #30107，NVIDIA 可能卡死、AMD 可能算错）；arXiv 亲手 curl，四关键词最新时间戳均在 10/7 批次内（20点版已筛），10/8 批次未发布，零新入库；Simon Willison 博客亲手打开核验，10/8 暂无新帖（最新 10/7，均无 serving 相关）；Spotify 经技能亲手核验，Latent Space 最新单集仍为 10/2（Academia is for Ambition）；HN/Reddit/中文媒体多路搜索，窗口内无新帖。本轮无深读笔记（宁缺毋滥：三个快照均为小修补、与用户现有 H100/MI300 系列硬件关联弱）。*</p></body></html>
