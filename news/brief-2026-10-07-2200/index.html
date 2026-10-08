@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月7日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-07"/>
+<meta name="doc-ts" content="2026-10-08T05:03:39"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-07（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-07（22点版）</h1>
+<p>深夜这轮就一家有动静。 llama.cpp 又连发 7 个快照。 其余渠道全线安静。</p>
+<h2>框架更新</h2>
+<ul><li>llama.cpp 今晚又连发 7 个快照。</li><li>编号 b11484 到 b11490，都是今晚发的。</li><li>主力是骁龙 Hexagon 后端优化（高通手机芯片的 AI 加速单元）。</li><li>手机上跑大模型，靠的就是这块小芯片。</li><li>b11486 修了 GELU 的计算精度。</li><li>GELU 是一种常用的激活函数。</li><li>Q4_K 和 Q6_K 是两种量化格式。</li><li>b11487 让 Q4_K 和 Q6_K 的取行操作支持分块。</li><li>b11489 把 Q6_K 权重的反量化提速了。</li><li>反量化就是把压缩权重还原。</li><li>b11490 升级了内存分配器，大 MoE 默认动态内存提到 512MB。</li><li>MoE 就是专家混合模型。</li><li>聊天模板有两个小修。</li><li>一个是工具调用解析规则按索引命名。</li><li>另一个修了 TranslateGemma 的 jinja 解析 bug。</li><li>TranslateGemma 是翻译模型，jinja 是模板解析语言。</li><li>b11488接入LiquidAI的d1-omni-600M决策模型。</li><li>就是个小个头的决策模型。</li><li>服务器端还能走图片和音频输入。</li><li>发布页：<a href="https://github.com/ggml-org/llama.cpp/releases">https://github.com/ggml-org/llama.cpp/releases</a></li><li>其余五家继续静默。</li><li>vLLM 停在 v0.31.0，SGLang 停在 v0.5.21。</li><li>TRT-LLM 还是 v1.3.0rc29。</li><li>LMDeploy 还是 v0.18.0。</li><li>TGI 归档只读，没有动静。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 今晚结构性空窗。</li><li>今日批次 17:00 已经发完，这轮零入库。</li><li>四个关键词查了一遍，最新时间戳都在批次里。</li><li>没有新论文，也就没有值得深读的。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>这轮没有新料。</li><li>几个 10/7 的新闻都没有具体小时，归不到本窗口。</li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 在 Spotify 上没有新单集。</li><li>最新还是 10/2 那期，跟 20点版基线一致。</li><li>机器之心、量子位今天没有推理 serving 报道。</li><li>Simon Willison 今天的两篇都不是 serving 相关。</li><li>X 还是登录墙，看不到一线实时帖子。</li><li>HN 和 Reddit 这轮都没有新讨论。</li></ul>
+<p>*去重说明：本轮窗口（10/7 20:00→22:00 PDT）。六家框架经 GitHub releases API 亲手核验：vLLM v0.31.0、SGLang v0.5.21、TRT-LLM v1.3.0rc29、LMDeploy v0.18.0 均无更新；TGI 归档只读（本轮 API 限流一次，但归档状态不变）；llama.cpp 7 个日快照（b11484–b11490，20:03–21:59 PDT）为窗口内新发布，20点版只报到 b11483；arXiv 四关键词亲手 curl，最新时间戳均在今日批次内，零新入库；Spotify 经技能核验，Latent Space 最新仍是 10/2 单集，无新单集；新闻/社区/中文媒体/关键人物多路搜索，仅 llama.cpp 快照一条新料，其余均为窗口外旧料或无更新。本轮无深读笔记。*</p></body></html>
