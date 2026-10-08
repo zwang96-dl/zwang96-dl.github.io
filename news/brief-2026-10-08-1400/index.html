@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月8日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-08"/>
+<meta name="doc-ts" content="2026-10-08T21:00:14"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-08（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-08（14点版）</h1>
+<p>12 点到 14 点，llama.cpp 又是两连发。 这次不是修 bug，是采样环节实打实的提速。 另外投机解码出了篇安全论文，结论挺扎心。</p>
+<h2>框架更新</h2>
+<ul><li>llama.cpp 12:18 发了 b11513。</li><li>主菜是 CUDA top-k 采样大提速。</li><li>top-k（采样时从概率最高的 k 个词里挑下一个）。</li><li>以前长上下文要启动 167 万次小 kernel。</li><li>现在换成 radix select（基数选择，一种分桶思路），只剩 2329 次。</li><li>实测 3.5 万 token 上下文，耗时从 5.76 秒降到 0.94 秒。</li><li>长文本推理&quot;挑词&quot;这个环节不再拖后腿。</li><li>发布页：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11513">https://github.com/ggml-org/llama.cpp/releases/tag/b11513</a></li></ul>
+<ul><li>13:14 又发了 b11514。</li><li>只修了摩尔线程 MUSA 后端的 FWHT bug。</li><li>FWHT（一种蝶形快速变换）。</li><li>跟你手里的 H100/MI350X 没关系，跳过就行。</li><li>发布页：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11514">https://github.com/ggml-org/llama.cpp/releases/tag/b11514</a></li></ul>
+<ul><li>其余五家继续静默。</li><li>vLLM、SGLang、TRT-LLM、LMDeploy、TGI 都没动。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>投机解码（先让小模型打草稿、大模型验稿的加速法）出了篇安全论文。</li><li>它是第一篇系统研究&quot;投机解码安不安全&quot;的。</li><li>结论挺扎心：有损投机解码提速的同时，安全代价不成比例。</li><li>越狱和提示注入的攻击成功率，涨得比速度快得多。</li><li>你给 autotuner 加投机解码开关时，这篇是必读背景。</li><li>原文：<a href="https://arxiv.org/abs/2610.08678">https://arxiv.org/abs/2610.08678</a></li></ul>
+<ul><li>EntroPrefill：prefill 中途剪枝的新玩法。</li><li>prefill（模型第一次读完整段输入的阶段）。</li><li>它用 Renyi 熵挑出&quot;没用&quot;的上下文，中途就扔掉。</li><li>还给了数学保证：扔掉的部分确实不影响输出。</li><li>跟 P/D 解耦不直接相关，但 prefill 提速思路可以借鉴。</li><li>原文：<a href="https://arxiv.org/abs/2610.09757">https://arxiv.org/abs/2610.09757</a></li></ul>
+<ul><li>稀疏注意力出了篇纯理论结果。</li><li>问题是：用向量检索近似注意力，最少捡回多少个 key。</li><li>单索引要捡根号 n 量级，多索引并用能压到 log n 量级。</li><li>没有实验，看看结论就行。</li><li>原文：<a href="https://arxiv.org/abs/2610.10135">https://arxiv.org/abs/2610.10135</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>Towards AI 发了篇硬核普查：本地 agent 的瓶颈在解析器。</li><li>他们把四个 runtime 源码翻了个遍：vLLM、SGLang、Ollama、llama.cpp。</li><li>四家一共 136 个 tool-call 解析器（把模型吐的文本切成函数调用）。</li><li>vLLM 53 个，SGLang 42 个，Ollama 25 个，llama.cpp 16 个。</li><li>41 个模型家族有专属解析器，只有 8 个四家全有。</li><li>Llama 和 Phi 是短板：Llama 只有 vLLM 和 SGLang 有，Phi 只有 vLLM 有。</li><li>vLLM 的 53 个里 18 个文档压根没写，想用得翻源码。</li><li>本地跑 agent 时 tool call 变成纯文本，八成是解析器没对上。</li><li>这是三部曲第一篇，后面还讲 token 开销和上下文窗口。</li><li>原文：<a href="https://pub.towardsai.net/local-llm-tool-calling-depends-on-your-runtimes-parser-b636843b6c97">https://pub.towardsai.net/local-llm-tool-calling-depends-on-your-runtimes-parser-b636843b6c97</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 播客：Spotify 亲手查过，无新单集。</li><li>最新还是今早那期 Periodic Labs。</li><li>HN、Reddit、机器之心、量子位：窗口内无 serving 新帖。</li><li>X 仍是登录墙，看不到一线工程师动态。</li></ul>
+<p>*去重说明：本轮窗口（10/8 12:00→14:00 PDT）。框架六家经 GitHub releases API 实时核验：llama.cpp 窗口内两连发 b11513（12:18 PDT，CUDA top-k radix select，PR #28713）、b11514（13:14 PDT，MUSA FWHT fix，PR #30167）；vLLM v0.31.0、SGLang v0.5.21、TRT-LLM v1.3.0rc29、LMDeploy v0.18.0、TGI 归档只读均零更新。arXiv 亲手 curl：10/6–10/8 已报 ID 全部排除（10411/10381/10058/09778/09307/09051/09025/09202/09827/08378/08268/08231/07987），新收录 08678/09757/10135。Towards AI 解析器普查亲手打开核验（10 月新文，未报过）；CVE-2026-105757、Mooncake 漏洞、spheron 选型指南均为之前已覆盖/排除的旧料。Latent Space 经 Spotify API 亲手核验无新单集；X 登录墙、中文媒体窗口内无新料。本轮无深读笔记（宁缺毋滥：安全论文偏安全方向、两篇偏理论、无关键图表且与多模态 serving 主线关联弱）。*</p></body></html>
