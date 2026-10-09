@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月8日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-08"/>
+<meta name="doc-ts" content="2026-10-09T03:02:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-08（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-08（20点版）</h1>
+<p>今晚 arXiv 10/8 批次入库了。 8 篇全是 serving 直接相关。 其中 KV cache 优化占了 4 篇。 这期是今晚最有料的一轮。</p>
+<h2>框架更新</h2>
+<ul><li>llama.cpp 出了新日快照 b11515。</li><li>发布时间 19:54 PDT，刚好压着窗口尾。</li><li>这是本轮窗口内唯一的新 release。</li><li>vLLM、SGLang 等其余五家全部静默。</li><li>全部经 GitHub releases API 亲手核验。</li><li>链接：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11515">https://github.com/ggml-org/llama.cpp/releases/tag/b11515</a></li></ul>
+<h2>新技术与论文</h2>
+<p>arXiv 10/8 批次本轮入库。 17:00 PDT 发布，8 篇新收录。</p>
+<ul><li>RaReCache：让小模型替大模型做 prefill。</li><li>KV cache（推理时的草稿纸）跨模型复用，不用重算。</li><li>这解决级联 serving 的老大难。</li><li>中途换大模型，提示词不用重算一遍。</li><li>方法是 rank disagreement。</li><li>给每个 token 打信息密度分。</li><li>只重算最密的 30% 位置，大模型精度保住 95–99%。</li><li>Qwen3 0.6B→14B 上测的。</li><li>23 倍参数差，prefill 快 3 倍。</li><li>跟你评估的 P/D 解耦是亲戚：小模型干粗活，大模型只干精活。</li><li>标「值得深读」，精读笔记单独出了。</li><li><a href="https://arxiv.org/abs/2610.11358">https://arxiv.org/abs/2610.11358</a></li></ul>
+<ul><li>Dual-QK：把 KV cache 压到 2 bit。</li><li>还能动态剪掉 query 通道。</li><li>query（查询向量）通道剪掉后，读 KV cache 更快。</li><li>128K 上下文下，KV cache 压缩 6.8 倍。</li><li>读取量降 8.3 倍。</li><li>作者在 SGLang 里实现了，decode 吞吐最高 3.75 倍。</li><li>你手上正好有 SGLang，这篇可以直接对着代码看。</li><li><a href="https://arxiv.org/abs/2610.09827">https://arxiv.org/abs/2610.09827</a></li></ul>
+<ul><li>TokenRouter。</li><li>给 token 级路由做的 serving 系统。</li><li>背景：不同 token 分给不同模型跑，省钱又保质量。</li><li>现有系统跑这种细粒度路由会步调失调、频繁卡顿。</li><li>它给每个模型开一个子服务器，异步调度。</li><li>decode 吞吐比现有系统高 2–64 倍。</li><li><a href="https://arxiv.org/abs/2610.12242">https://arxiv.org/abs/2610.12242</a></li></ul>
+<ul><li>SparseDecoding：decode 阶段的训练无关剪枝法。</li><li>校准不用自然文本，用模型自己生成的 token。</li><li>这样避免分布偏移，decode 读内存更快。</li><li><a href="https://arxiv.org/abs/2610.12327">https://arxiv.org/abs/2610.12327</a></li></ul>
+<ul><li>Read What Matters。</li><li>读 KV cache 时动态分精度。</li><li>按每次 query 的需求来定。</li><li>存下来的条目不动，每次按查询逐条分配 key 通道精度。</li><li>少浪费显存带宽。</li><li><a href="https://arxiv.org/abs/2610.11245">https://arxiv.org/abs/2610.11245</a></li></ul>
+<ul><li>KV 量化与线性注意力的统一理论（RAM-Net）。</li><li>把&quot;逐条压缩&quot;和&quot;聚合压缩&quot;统一成一个机制。</li><li>理论味重，但指向低显存推理的权重迁移路径。</li><li><a href="https://arxiv.org/abs/2610.11214">https://arxiv.org/abs/2610.11214</a></li></ul>
+<ul><li>Exit-Guided Speculative Decoding。</li><li>研究 draft 树哪里丢了 target 质量。</li><li>从 target 分布视角看，给验证器设计划理论上限。</li><li><a href="https://arxiv.org/abs/2610.11750">https://arxiv.org/abs/2610.11750</a></li></ul>
+<ul><li>Speedbumps：投机解码的生产安全警告。</li><li>攻击者在 prompt 里加点扰动。</li><li>draft 和 target 分歧变大。</li><li>接受率一掉，推理反而比自回归还慢、还贵。</li><li>14点版报过 Secure Speculative Decoding。</li><li>这篇是它的攻击实证版。</li><li><a href="https://arxiv.org/abs/2610.10929">https://arxiv.org/abs/2610.10929</a></li></ul>
+<p>补收一篇 P/D 强相关（9 月底的，往期漏了）：</p>
+<ul><li>MoSE：P/D 解耦下 KV 传输的网络层优化。</li><li>prefill 和 decode 节点间要传 KV。</li><li>这跟训练的集合通信打架。</li><li>它提出可切换拓扑的 expander，KV 通信开销降约 90%。</li><li>跟你正在评估的 P/D 解耦直接相关。</li><li><a href="https://arxiv.org/abs/2609.39138">https://arxiv.org/abs/2609.39138</a></li></ul>
+<h2>业内新闻</h2>
+<ul><li>HPE 发布 ProLiant Gen 13 服务器线。</li><li>定位企业 AI 推理市场。</li><li>旗舰 DL585a：10U 机箱塞 8 张双宽 GPU。</li><li>配双 256 核 EPYC 芯片。</li><li>2027 年 3 月供货，企业私有化推理又多一个硬件选项。</li><li><a href="https://techstartups.com/2026/10/08/top-tech-news-today-october-8-2026-globalfoundries-google-manus-microsoft-nvidia-openai-tencent-more/">https://techstartups.com/2026/10/08/top-tech-news-today-october-8-2026-globalfoundries-google-manus-microsoft-nvidia-openai-tencent-more/</a></li></ul>
+<ul><li>Aviz Networks 推出 AI-Parser。</li><li>给推理流量做可观测的工具。</li><li>部署在 GPU 节点旁抓包，不用给应用插桩。</li><li>能解析六家引擎的 OpenAI 兼容流量。</li><li>包括 vLLM、SGLang、TGI、Triton 等六家。</li><li>看 token 消耗和 GPU 闲置，管推理成本的新帮手。</li><li><a href="https://aviznetworks.com/products/ai-parser">https://aviznetworks.com/products/ai-parser</a></li></ul>
+<p>去重排除两条旧料。 CVE-2026-105757：vLLM 旧漏洞，往期已排除两轮。 Superlinked 选型博客：厂商推广，16点版已排除。</p>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 播客：Spotify 亲手核验，无新单集。</li><li>Simon Willison：10/7–10/8 的帖子亲手看过。</li><li>五篇里无 serving 相关。</li><li>Latent Space newsletter：无新 issue。</li><li>机器之心、量子位：近两天无 serving 新报道。</li><li>HN、Reddit：窗口内无 serving 新帖。</li><li>X：登录墙依旧，一线工程师动态看不到。</li></ul>
+<p>*去重说明：本轮窗口（10/8 18:00→20:00 PDT）。框架六家经 GitHub releases API 亲手核验，窗口内仅 llama.cpp b11515；arXiv 10/8 批次（17:00 PDT 发布）本轮入库，8 篇新论文均为亲手 API 查询、与往期已报清单逐一对过；MoSE 为 9 月底论文、往期未收录，本轮补收；新闻两条为 10/8 当天新动态；播客与关键人物四渠道亲手核验无新料；X 登录墙依旧。本轮有深读笔记：RaReCache（KV cache 跨模型复用）。*</p></body></html>
