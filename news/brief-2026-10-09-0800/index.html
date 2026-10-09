@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月9日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-09"/>
+<meta name="doc-ts" content="2026-10-09T14:58:52"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-09（8点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-09（8点版）</h1>
+<p>早上好，这轮生态里几乎没动静。 唯一的新东西是 llama.cpp 的两个日快照。 两个都是小修小补，一句话就能说完。</p>
+<h2>框架更新</h2>
+<p><strong>llama.cpp b11527</strong>（07:19 PDT）：</p>
+<ul><li>WebGPU 后端的一次内部重构。</li><li>WebGPU 是浏览器里跑模型的图形接口。</li><li>把 1D 任务调度统一改成 2D 写法。</li><li>你不在浏览器里跑模型，可以忽略。</li><li>链接：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11527">https://github.com/ggml-org/llama.cpp/releases/tag/b11527</a></li></ul>
+<p><strong>llama.cpp b11528</strong>（07:53 PDT）：</p>
+<ul><li>修了一个 KV cache 视图触发的断言崩溃。</li><li>KV cache 是推理时的草稿纸，存着算过的中间结果。</li><li>用 --split-mode tensor 做部分卸载时会踩到这个坑。</li><li>你用 vLLM/SGLang 伺服，这条跟你关系不大。</li><li>有意思的细节：这次修补标注了模型协助（Qwen3.8-Flash-Next）。</li><li>链接：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11528">https://github.com/ggml-org/llama.cpp/releases/tag/b11528</a></li></ul>
+<ul><li>其余五家全部静默。</li><li>vLLM 停在 v0.31.0，SGLang 停在 v0.5.21。</li><li>TensorRT-LLM 停在 v1.3.0rc29。</li><li>LMDeploy 停在 v0.18.0，TGI 归档只读。</li><li>全部经 GitHub releases API 亲手核验。</li></ul>
+<h2>新技术与论文</h2>
+<p>这轮没有。 arXiv 下一批要今天 17:00 PDT 才发布。 亲手查过 API，最新还是 10/8 那批。 20点版的 8 篇已经报全，没新入库。</p>
+<h2>业内新闻</h2>
+<p>无窗口内新增。 新闻四路都搜过：通用、Reddit、HN、中文媒体。 命中的全是旧文章或非 serving 话题。 TowardsAI 那篇 parser 横评是 4点版报过的。 机器之心、量子位近两天没有 serving 报道。</p>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 播客：Spotify 亲手核验。</li><li>无新单集，最新还是 10/8 的 Periodic Labs 那期。</li><li>这期 10点版已经报过。</li><li>Simon Willison、The Batch 窗口内无 serving 新帖。</li><li>SGLang 官方频道和 Latent Space 频道都没新视频。</li><li>X：登录墙依旧，一线工程师动态看不到。</li></ul>
+<p>*去重说明：本轮窗口（10/9 06:00→08:00 PDT）。框架六家经 GitHub releases API 亲手核验：窗口内仅 llama.cpp b11527（07:19 PDT，WebGPU 后端 1D 调度改 2D）和 b11528（07:53 PDT，meta 后端支持 host 视图、修 --split-mode tensor 部分卸载下 KV cache 视图断言），均为小修小补；上轮报过的 b11523/b11524 在窗口外。其余五家基线未动：vLLM v0.31.0、SGLang v0.5.21、TensorRT-LLM v1.3.0rc29、LMDeploy v0.18.0、TGI v3.3.7（归档只读）。arXiv 亲手 API 查询确认无新入库（下一批 10/9 17:00 PDT），10/8 批次的 8 篇 serving 论文 20点版已报全。新闻四路（通用/Reddit/HN/中文媒体）窗口内无 serving 新帖：TowardsAI parser 横评约 1 天前、4点版已报，命中其余均为旧文。社区四渠道亲手核验：Latent Space 经 Spotify API 复核无新单集（最新 10/8 Periodic Labs 那期，10点版已报），Simon Willison、The Batch 窗口内无 serving 新帖，SGLang 官方频道与 Latent Space 频道无新视频，中文媒体近两天无 serving 报道，X 登录墙依旧。本轮无深读笔记（两个日快照均为日常小修小补，无深读价值）。*</p></body></html>
