@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月9日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-09"/>
+<meta name="doc-ts" content="2026-10-09T19:01:09"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-09（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-09（12点版）</h1>
+<p>这轮又是 llama.cpp 的独角戏。 两小时连发四个日快照，全是小修小补。 没一个值得深读，先说结论：这期很短。</p>
+<h2>框架更新</h2>
+<p><strong>llama.cpp b11532</strong>（10:13 PDT）：</p>
+<ul><li>ModernBERT 这类 encoder 模型换用精确版 GELU。</li><li>GELU 是激活函数，管神经元&quot;开多大&quot;。</li><li>以前用 tanh 近似版，总差那么一点点。</li><li>本地跑 BERT 系 embedding 模型的值得更新。</li><li>链接：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11532">https://github.com/ggml-org/llama.cpp/releases/tag/b11532</a></li></ul>
+<p><strong>llama.cpp b11533</strong>（10:41 PDT）：</p>
+<ul><li>修了 Adreno a6x 系列 GPU 的 OpenCL 编译崩溃。</li><li>中招的是 IoT 小设备上的 a623 芯片。</li><li>跟你没关系，除非你在冰箱上跑模型。</li><li>链接：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11533">https://github.com/ggml-org/llama.cpp/releases/tag/b11533</a></li></ul>
+<p><strong>llama.cpp b11534</strong>（11:29 PDT）：</p>
+<ul><li>CUDA 后端砍掉 SSM 扫描后的多余显存拷贝。</li><li>SSM 是 Mamba 那类模型的状态扫描算子。</li><li>以前 state 先拷贝一遍再塞进 recurrent cache。</li><li>现在一步到位，少一次搬运。</li><li>Mamba 系模型 decode 能快一点点。</li><li>链接：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11534">https://github.com/ggml-org/llama.cpp/releases/tag/b11534</a></li></ul>
+<p><strong>llama.cpp b11535</strong>（11:49 PDT）：</p>
+<ul><li>llama-bench 测速工具的小修。</li><li>-fitc 参数大于默认测速规模时不再被忽略。</li><li>纯工具修正，跳过也行。</li><li>链接：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11535">https://github.com/ggml-org/llama.cpp/releases/tag/b11535</a></li></ul>
+<p><strong>其余五家全部静默</strong>：</p>
+<ul><li>vLLM 停在 v0.31.0，SGLang 停在 v0.5.21。</li><li>TensorRT-LLM 停在 v1.3.0rc29。</li><li>LMDeploy 停在 v0.18.0，TGI 停在 v3.3.7（归档只读）。</li><li>全部经 GitHub releases API 亲手核验。</li></ul>
+<h2>新技术与论文</h2>
+<p>这轮没有。 arXiv 这轮被限流拦下（rate exceeded），没查成。 按此前多期核验的规律，下一批 17:00 PDT 才发布。 现在本来就是结构性空窗，查了也白查。</p>
+<h2>业内新闻</h2>
+<p>窗口内无新增。 通用新闻、Reddit、HN、中文媒体四路都搜过。 Scality AI Inference Factory（10/8 那期已报）。 TokenRouter、DeepSeek-V4.1-Flash（前几期已报）。 机器之心、量子位这两天没有 serving 新报道。</p>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 播客：Spotify 亲手核验。</li><li>无新单集，最新还是 10/8 的 Periodic Labs 那期（已报）。</li><li>Simon Willison、The Batch 窗口内无 serving 新帖。</li><li>社交渠道只捞到一条 Facebook 群组旧信息图（DGX Spark serving 之旅，窗外帖子），没新料。</li><li>X 登录墙依旧，一线工程师动态看不到。</li></ul>
+<p>*去重说明：本轮窗口（10/9 10:00→12:00 PDT）。框架六家经 GitHub releases API 亲手核验：窗口内仅 llama.cpp 四连发——b11532（10:13 PDT，ModernBERT encoder 改用精确版 GELU）、b11533（10:41 PDT，Adreno a6x/a623 IoT 芯片 OpenCL kernel 编译崩溃修复）、b11534（11:29 PDT，CUDA 删掉 SSM_SCAN 后冗余拷贝、state snapshot 直写 recurrent cache）、b11535（11:49 PDT，llama-bench -fitc 参数小修）；上轮报过的 b11529/b11530/b11531 在窗口外。其余五家基线未动：vLLM v0.31.0、SGLang v0.5.21、TensorRT-LLM v1.3.0rc29、LMDeploy v0.18.0、TGI v3.3.7（归档只读）。arXiv 本轮被 rate limit 拦下（429，不再重试）；按此前多期规律下一批 10/9 17:00 PDT 发布，属结构性空窗。新闻四路窗口内无 serving 新帖：Scality AI Inference Factory（10-08 1800版已报）、TokenRouter（10-08 2000版已报）、DeepSeek-V4.1-Flash（10-07/10-08/10-09 0200版已报）、HN 的 axem/Shaide、vLLM-mlx fork、Omnidocs（均已报）；机器之心、量子位近两天无 serving 报道；Simon Willison、The Batch 窗口内无 serving 新帖；X 登录墙依旧。Latent Space 经 Spotify API 复核无新单集。social.search 仅捞到一条窗外 Facebook 群组旧信息图（DGX Spark serving 之旅，10/8 17:13 PDT 发布），不值得收录。本轮无深读笔记（四个日快照均为日常小修小补，无深读价值）。*</p></body></html>
