@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月9日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-09"/>
+<meta name="doc-ts" content="2026-10-09T16:58:59"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-09（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-09（10点版）</h1>
+<p>这轮生态里几乎没动静。 唯一的变量还是 llama.cpp 的日快照。 两小时蹦出三个版本，都是修修补补。</p>
+<h2>框架更新</h2>
+<p><strong>llama.cpp b11529</strong>（08:14 PDT）：</p>
+<ul><li>堵上一个内存越界写的安全漏洞。</li><li>漏洞出在 ggml_acc 的偏移计算。</li><li>大偏移会被截成负数，内存写到隔壁家去了。</li><li>就像门牌号写错行，信塞进了邻居信箱。</li><li>安全补丁，你用 vLLM/SGLang 可以忽略。</li><li>链接：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11529">https://github.com/ggml-org/llama.cpp/releases/tag/b11529</a></li></ul>
+<p><strong>llama.cpp b11530</strong>（09:00 PDT）：</p>
+<ul><li>修了一个采样图对不齐的崩溃。</li><li>prefill 和 decode 搭出来的图形状对不上。</li><li>图一变形状，编译好的后端直接罢工。</li><li>换句话说：修复混批推理的启动崩溃。</li><li>你在本地也跑 llama.cpp 的话值得更新。</li><li>链接：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11530">https://github.com/ggml-org/llama.cpp/releases/tag/b11530</a></li></ul>
+<p><strong>llama.cpp b11531</strong>（09:38 PDT）：</p>
+<ul><li>聊天接口的一次纯代码重构。</li><li>功能没变，可以直接跳过。</li><li>链接：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11531">https://github.com/ggml-org/llama.cpp/releases/tag/b11531</a></li></ul>
+<ul><li>其余五家全部静默。</li><li>vLLM 停在 v0.31.0，SGLang 停在 v0.5.21。</li><li>TensorRT-LLM 停在 v1.3.0rc29，LMDeploy 停在 v0.18.0。</li><li>TGI 继续归档只读。</li><li>全部经 GitHub releases API 亲手核验。</li></ul>
+<h2>新技术与论文</h2>
+<p>这轮没有。 arXiv 下一批要今天 17:00 PDT 才发布。 现在是结构性空窗，查了也没用。</p>
+<h2>业内新闻</h2>
+<p>无窗口内新增。 新闻四路都搜过：通用、Reddit、HN、中文媒体。 HN 上几个帖子之前都报过（axem、vLLM-mlx fork）。 智谱 Infra Agent 那条也是旧闻，9月底已报。 机器之心、量子位近两天没有 serving 报道。</p>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 播客：Spotify 亲手核验。</li><li>无新单集，最新还是 10/8 的 Periodic Labs 那期。</li><li>这期之前已经报过。</li><li>Simon Willison、The Batch 窗口内无 serving 新帖。</li><li>SGLang 官方频道无新视频。</li><li>X：登录墙依旧，一线工程师动态看不到。</li></ul>
+<p>*去重说明：本轮窗口（10/9 08:00→10:00 PDT）。框架六家经 GitHub releases API 亲手核验：窗口内仅 llama.cpp 三连发——b11529（08:14 PDT，ggml_acc 大偏移截断成负数导致越界写的安全修复）、b11530（09:00 PDT，decode 采样图拓扑与 reserve 对不上、GGML_SCHED_NO_REALLOC 崩溃的修复）、b11531（09:38 PDT，chat API 纯重构）；上轮报过的 b11527/b11528 在窗口外。其余五家基线未动：vLLM v0.31.0、SGLang v0.5.21、TensorRT-LLM v1.3.0rc29、LMDeploy v0.18.0、TGI v3.3.7（归档只读）。arXiv 为结构性空窗（下一批 10/9 17:00 PDT），未深挖。新闻四路窗口内无 serving 新帖：HN 的 axem/Shaide（10-05/10-06 已报）、vLLM-mlx fork（多次已报）、Omnidocs（10-03 已报）；智谱 Infra Agent（9/17 新闻，已报）；Simon Willison、The Batch 窗口内无 serving 新帖；中文媒体近两天无 serving 报道；X 登录墙依旧。Latent Space 经 Spotify API 复核无新单集。本轮无深读笔记（三个日快照均为日常小修小补，无深读价值）。*</p></body></html>
