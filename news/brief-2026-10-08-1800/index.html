@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月8日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-08"/>
+<meta name="doc-ts" content="2026-10-09T01:02:31"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-08（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-08（18点版）</h1>
+<p>16 点到 18 点，框架圈继续静默。 arXiv 新批次还是没入库。 但捞到两条实料，条条都跟 serving 直接相关。</p>
+<h2>框架更新</h2>
+<ul><li>六家窗口内零 release。</li><li>llama.cpp 最新还是 b11514（13:14，已报过）。</li><li>全部经 GitHub releases API 亲手核验。</li></ul>
+<h2>新技术与论文</h2>
+<ul><li>arXiv 10/8 批次还没入库，最新仍是 10/7 那批。</li><li>四组关键词亲手 curl 过，无新论文。</li></ul>
+<h2>业内新闻</h2>
+<ul><li>Scality 今天发布了 AI Inference Factory。</li><li>一个开箱即用的企业本地推理栈，开放代码。</li><li>自带验证过的开源模型，整套打包卖支持。</li><li>核心是 P/D 解耦（提示理解和生成分开跑）。</li><li>说白了像工厂流水线：两段工序各自独立加人。</li><li>解耦靠共享 KV cache（推理时的草稿纸）实现。</li><li>缓存放在 Scality 自研的 ADI 存储层里。</li><li>它号称恢复 14K 上下文只要 166 毫秒。</li><li>只比 HBM（显卡高速显存）慢 83 毫秒。</li><li>比重新算一遍快 14 倍，超长 439K 上下文快 72 倍。</li><li>划重点：这正是你在评估的 P/D 解耦思路，人家做成了产品。</li><li>新闻：<a href="https://contentmediasolution.com/technology/scality-launches-ai-inference-factory-to-bring-enterprise-ai-on-premises/amp/">https://contentmediasolution.com/technology/scality-launches-ai-inference-factory-to-bring-enterprise-ai-on-premises/amp/</a></li></ul>
+<h2>访谈与深度</h2>
+<ul><li>Medium 新文：vLLM 跑 DeepSeek-V4.1-Flash，三周做到 5 倍吞吐。</li><li>作者 Jatinkumar Parmar，Inferact 的一线工程师。</li><li>招数有三板斧。第一斧：滑动窗口注意力（只看最近一段上下文）。</li><li>配上 CUDA 图（GPU 算子的固定排班表）重放，首 token 时间降 30%。</li><li>第二斧：接入 DeepSeek 官方新算子 MegaAttention 等。</li><li>第三斧：剩下算子疯狂融合。</li><li>all-reduce（多卡同步求和的通信算子）跟前后算子合成一个核。</li><li>低并发快 1.9 倍，150 TPS 压测下吞吐 5.3 倍。</li><li>模型本身也争气：解码只激活 16B 参数。</li><li>KV 压到每 token 890 字节。</li><li>这篇对你调优 vLLM 很有参考价值。</li><li>注意全文会员可见，目前只读到 TL;DR。</li><li>原文：<a href="https://jhparmar.medium.com/deepseek-v4-1-flash-on-vllm-5x-agentic-throughput-since-day-0-078a22fc2bfc">https://jhparmar.medium.com/deepseek-v4-1-flash-on-vllm-5x-agentic-throughput-since-day-0-078a22fc2bfc</a></li></ul>
+<ul><li>Latent Space 播客：Spotify 亲手查过，无新单集。</li><li>HN、Reddit、机器之心、量子位：窗口内无 serving 新帖。</li><li>X 仍是登录墙，看不到一线工程师动态。</li></ul>
+<p>*去重说明：本轮窗口（10/8 16:00→18:00 PDT）。框架六家经 GitHub releases API 亲手核验零更新；arXiv 四组关键词亲手 curl，10/8 批次仍未入库、最新仍是 10/7；Scality 发布为今日（10/8）新闻、往期简报未报过；Medium 的 vLLM×V4.1-Flash 调优文约 1 天前发布、往期未收录（全文会员可见，只读到 TL;DR）；Latent Space 经 Spotify API 亲手核验无新单集；HN/Reddit/中文媒体窗口内无 serving 新帖；X 登录墙依旧。本轮无深读笔记：Medium 文拿不到会员全文的关键图表，Scality 为厂商新闻稿、无可深挖的技术细节。*</p></body></html>
