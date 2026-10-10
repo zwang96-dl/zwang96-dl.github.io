@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月9日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-09"/>
+<meta name="doc-ts" content="2026-10-10T01:01:08"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-09（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-09（18点版）</h1>
+<p>这轮窗口内本身没新料，但有一条安全大新闻要补报。 它跟你正在评估的 SGLang 直接相关，先看这条。</p>
+<h2>框架更新</h2>
+<p>六家全部静默：vLLM v0.31.0、SGLang v0.5.21、TRT-LLM v1.3.0rc29、LMDeploy v0.18.0、llama.cpp b11539、TGI v3.3.7。 GitHub releases API 亲手核验过，窗口内一个新版都没有。</p>
+<h2>安全补报（重要）</h2>
+<p><strong>SGLang 爆了个 9.8 分的远程代码执行漏洞</strong>：</p>
+<ul><li>编号 CVE-2026-93034，10/8 公开披露。</li><li>简单说：SGLang 进程之间用 ZeroMQ 传消息。</li><li>解码消息时无条件调 pickle.loads（Python 里最危险的反序列化函数）。</li><li>攻击者只要能连上 ZeroMQ 端口，就能让服务器执行任意代码。</li><li>最坑的是：官方给的 SGLANG_USE_PICKLE_IPC 开关关不掉这个洞。</li><li>研究者 m00dy.sh 证实，关掉开关还有另一条路径照样中招。</li><li>影响版本：v0.5.20 及更早。你如果用的是 v0.5.21，那就没事。</li><li>远程利用的条件：开了数据并行注意力，且 --dist-init-addr 不是本机地址。</li><li>目前官方还没发补丁。建议：别把 ZeroMQ 端口暴露给不可信网络。</li><li>一周内这是推理 infra 第二个 pickle RCE，LMCache 那个（CVE-2026-105192）也是同款毛病。</li><li>链接：<a href="https://forkast.news/sglang-llm-serving-framework-has-cvss-9-8-pickle-deserialization-rce-that-persists-even-when-pickle-is-disabled/">https://forkast.news/sglang-llm-serving-framework-has-cvss-9-8-pickle-deserialization-rce-that-persists-even-when-pickle-is-disabled/</a></li></ul>
+<h2>新技术与论文</h2>
+<p>arXiv 亲手查过，10/10 00:00 UTC 那批新论文里没有 serving 相关的。 最新还是 10/8 的 SparseDecoding 那批（已报）。</p>
+<h2>业内新闻</h2>
+<p>窗口内无新增。Reddit、HN、机器之心、量子位都扫过。 X 登录墙依旧，一线工程师动态看不到。</p>
+<h2>访谈与深度</h2>
+<ul><li>Latent Space 出了期新播客《Why AlphaFold Didn&#x27;t Solve Protein Folding》（10/9 17:31 PDT）。</li><li>嘉宾是 DeepMind 的 Pushmeet Kohli 和 Biohub 的 Sal Candido。</li><li>但主题是 AI for biology（蛋白折叠、生物数据 scaling law），跟推理 serving 关系不大，感兴趣可以当闲听。</li></ul>
+<p>*去重说明：本轮窗口（10/9 16:00→18:00 PDT）。六家框架经 GitHub releases API 亲手核验全部静默：vLLM v0.31.0、SGLang v0.5.21、TensorRT-LLM v1.3.0rc29、LMDeploy v0.18.0、llama.cpp b11539（15:38 PDT，16点版已报）、TGI v3.3.7（归档只读）。arXiv 三组查询（KV cache / LLM inference serving / speculative decoding + PD disaggregation）亲手核验 10/10 00:00 UTC 批次零 serving 入库，最新仍是 10/8 批次。新闻四路窗口内无 serving 新料：Reddit site 查询 0 结果、HN 全是旧帖、机器之心/量子位无窗口内报道；X 直连被策略拦截、搜索侧亦无新鲜帖子。Latent Space RSS 亲手核验：窗口内新单集《Why AlphaFold Didn&#x27;t Solve Protein Folding》（Sat 10 Oct 00:31 UTC = 10/9 17:31 PDT，主题 AI for biology，serving 无关）。安全补报 CVE-2026-93034（10/8 披露，经 Forkast 与 StackFlag 两源核验，影响 SGLang ≤v0.5.20，v0.5.21 不在影响范围）：今天各期简报均未报过，属补报。本轮无深读笔记（CVE 为安全通告而非技术论文，不符合深读笔记体裁）。*</p></body></html>
