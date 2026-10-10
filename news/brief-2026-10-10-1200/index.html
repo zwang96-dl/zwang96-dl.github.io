@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月10日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-10"/>
+<meta name="doc-ts" content="2026-10-10T19:03:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-10（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-10（12点版）</h1>
+<p>这轮窗口（10:00→12:00）总体安静。 六家框架零正式版，arXiv 周六没有新批次。 但补漏了一条：LMSYS 官方把 SGLang 搬上新卡 Rubin。 这条跟 10点版的 vLLM Rubin 是镜像关系。 一句话：没大事，但这条值得看一眼。</p>
+<h2>框架更新</h2>
+<p>六家全部静默。 vLLM 停在 v0.31.0。 SGLang 停在 v0.5.21。 TRT-LLM 稳定版还是 v1.2.1，预览版还是 rc29。 LMDeploy 还是 v0.18.0。 llama.cpp 冒了个 b11550 日快照。 日快照按惯例不算正式发版。 TGI 归档只读。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮周六轮空。 cs.CL 列表页还停在周五 10/9 那批。 这是周末结构性空窗，不是漏查。 两组查询（KV cache、inference serving）最新都是 10/8 的。 那些已经报过，这轮无新增。</p>
+<h2>业内新闻</h2>
+<p>补漏一条 LMSYS 官方 10/9 的博客。 主题是 SGLang 和 Miles 搬上英伟达新平台 Vera Rubin。 Rubin 是 Blackwell Ultra 之后的下一代卡。 LMSYS 拿到两台真机，一共 8 张卡。 推理这边调的是 Kimi K3 的 NVFP4 版本。 NVFP4 是一种 4 位浮点量化格式。 这是 10点版 vLLM Rubin 博客的姊妹篇。</p>
+<p>注意力内核动了好几刀。 MLA（一种压缩 KV 存的注意力机制）流水线加深了 2 档。 batch 16、128k 上下文快 16%。 split-KV（把长上下文拆开并行算）的归约换了写法。 FP8 的 MLA 快 20%。 拆分粒度从 32 提到 64，端到端快 1.9%。 FP8 转换加了截断保护，准备内核快 2.5 倍。</p>
+<p>MoE 尾部被熔成一个大内核。 收尾、共享专家、跨卡同步、归一化一口气做完。 每步 decode 省掉 276 次内核启动。 端到端快 5.9%。 KDA（线性注意力的一种）验证内核重排了。 v 线程的空闲时间被填上活，屏障从两条减到一条。 实测快 20%。 还砍掉 PyTorch 悄悄塞的 2.6 微秒拷贝。 69 层每步都摊这个税，砍掉后每步快 1.8%。</p>
+<p>第三方数据也有：Cognition 用自家 SGLang 栈。 Rubin 整机柜比 GB200 整机柜，token 吞吐最高 4.8 倍。</p>
+<p>训练这边也顺了：Miles 是 LMSYS 的强化学习训练框架。 SGLang 做采样、Megatron 做训练，装在一个镜像里。 一块板子 4 张卡就能开箱跑。 Qwen3-30B-A3B 在 GSM8K 上训了 50 轮。 GSM8K 是数学推理评测集。 奖励从 45% 爬到 95%，曲线和 GB300 完全重合。 智能体 RL 也跑通了：64 个沙盒并行。 每回合长度缩短约 30%。</p>
+<p><strong>值得深读</strong>：这是 SGLang 侧的 Rubin 内核账本。 每一笔优化都对应 decode 的一个小痛点。 split-KV、all-reduce、内核熔合——全是你在评估的方向。 跟 10点版的 vLLM 那篇配对看，Rubin 的拼图就全了。</p>
+<p><a href="https://www.lmsys.org/blog/2026-10-09-vera-rubin">LMSYS 官方博客原文</a></p>
+<h2>访谈与深度</h2>
+<p>Simon Willison 亲手打开核验过。 最新帖是 Anthropic agent 失控的新闻引用。 Deno 加入 Cloudflare 也在窗口外。 没有 serving 相关内容。 Latent Space 用 Spotify 亲手查过。 最新单集聊的是决策模型。 主题不是 serving。 X 登录墙依旧，一线动态看不到。</p>
+<p>*去重说明：本轮窗口（10/10 10:00→12:00 PDT）。六家框架经 GitHub releases API 亲手核验零正式版：vLLM v0.31.0（10/5）、SGLang v0.5.21（10/2）、TensorRT-LLM 稳定版 v1.2.1（4/20）/预览版 v1.3.0rc29（9/29）、LMDeploy v0.18.0（9/28）、llama.cpp 窗口内有 b11550 日快照（11:29 PDT，日快照按惯例不算正式发版）、TGI v3.3.7（归档只读）。SGLang 窗口内另有 2 个小 commits（HiCache cgroup、Qwen3 B300 文档），未达收录标准。arXiv 两组查询（标题关键词 + cs.CL 摘要 KV cache，按提交时间倒序）亲手核验，最新仍是 10/8 批次（SparseDecoding、TokenRouter 等，均已报过）；cs.CL 列表页仍停在 10/9 周五批次（周六无新批次，结构性零入库）。新闻 vertical 补漏一条 LMSYS 官方博客《SGLang and Miles on NVIDIA Vera Rubin》（10/9 发布，之前各期从未收录，已标深读）；其余翻出的 Prime Intellect、LMCache CVE、Mooncake CVE 均为已报过或窗口外。Reddit r/LocalLLaMA 无窗口内新帖，HN 全是旧帖。中文侧：机器之心/量子位窗口内无 serving 新报道。关键人物：Simon Willison 博客亲手打开，最新帖（Anthropic agents 引用 NYT、Deno 加入 Cloudflare、ttok 1.0）均非 serving 相关；Latent Space Spotify 亲手核验（show experience 端点持续 500，改 search EPISODES），最新单集为 Jev 决策模型访谈（非 serving）；X 登录墙依旧。本轮深读笔记 1 篇（SGLang Rubin）。*</p></body></html>
