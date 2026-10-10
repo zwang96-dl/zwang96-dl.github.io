@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月10日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-10"/>
+<meta name="doc-ts" content="2026-10-10T21:05:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-10（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-10（14点版）</h1>
+<p>这轮窗口（12:00→14:00）特别安静。 六家框架零正式版，arXiv 周六轮空。 补漏一条昨天（10/9）的 SGLang-Diffusion 视频。 跟多模态 serving 直接相关，值得看一眼。</p>
+<h2>框架更新</h2>
+<p>六家全部静默。 vLLM 停在 v0.31.0。 SGLang 停在 v0.5.21。 TRT-LLM 稳定版还是 v1.2.1，预览版还是 rc29。 LMDeploy 还是 v0.18.0。 llama.cpp 冒了个 b11552 日快照。 日快照按惯例不算正式发版。 TGI 归档只读。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 周六结构性轮空。 两组查询亲手确认：最新还是 10/8 那批。 10/9–10/11 零新增。 这是周末正常空窗，不是漏查。</p>
+<h2>业内新闻</h2>
+<p>补漏一条昨天（10/9）的视频。 主角是 SGLang-Diffusion。 它要去 PyTorch 大会做专场分享。 它是 SGLang 给扩散模型做的 serving 框架。 扩散模型就是文生图、文生视频那类模型。 分享人来自 RadixArk。 Yihao Wang 和 Kevin Mi 两位工程师。 大会 10/20–21 在 San Jose 开。</p>
+<p>换句话说：SGLang 的 serving 内核正式杀进扩散模型。 之前它只管大语言模型，玩的是 KV cache 那一套。 扩散模型是迭代去噪，一步步把噪声洗成图。 LLM 的 batching 和调度直接搬过来不好使。 这场分享会讲请求调度和显存管理。 batching 策略、执行路径优化也会聊。 还聊扩散 serving 和 LLM serving 到底差在哪。 跟你研究的资源分离方向是一个味。 就是 encoder/prefill/decode 那套。 都是把不同阶段的计算拆开，各自优化。</p>
+<p>划重点：统一框架同时吃离线批量生成和实时推理。 离线要吞吐，实时要延迟，两个都要。 扩散模型正从图片视频往世界模型扩。 世界模型是能预测物理变化的生成模型。 serving 得跟上这个节奏。</p>
+<p><a href="https://www.youtube.com/watch?v=sAJU8Z_csWI">SGLang-Diffusion PyTorch Conf 2026 预告视频</a></p>
+<p>这篇不标「值得深读」。 它是 talk 预告，没有技术细节和数字。 等 10/20–21 大会完整分享出来再深挖。</p>
+<h2>访谈与深度</h2>
+<p>Simon Willison 博客亲手打开过。 最新几帖都跟 serving 无关。 Latent Space 最近 10 期没有 serving 专题。 机器之心、量子位窗口内无新报道。 X 登录墙还在，一线动态看不到。</p>
+<p>*去重说明：本轮窗口（10/10 12:00→14:00 PDT）。六家框架经 GitHub releases API 亲手核验零正式版：vLLM v0.31.0（10/5）、SGLang v0.5.21（10/2）、TensorRT-LLM 稳定版 v1.2.1（4/20）/预览版 v1.3.0rc29（9/29）、LMDeploy v0.18.0（9/28）、llama.cpp 窗口内 b11552 日快照（含 server prompt-cache 竞态修复，日快照按惯例不算正式发版）、TGI v3.3.7（归档只读）。SGLang 窗口内 9 个 commit 均为重构/小 fix，未达收录标准。arXiv 两组查询（标题关键词 + cs.CL 摘要 KV cache，按提交时间倒序）亲手核验：最新仍是 10/8 批次，10/9–10/11 零新增（周六结构性零入库）。news vertical 当天仅 Texas Inference 加密算力服务一条，偏 GPU 服务、非核心推理优化，未收录。r/LocalLLaMA 有一条今晨的 megakernel 帖（Qwen3.8-27B 单 3090 140 tok/s），但 Reddit 直链未能从工具输出确认，按不编造 URL 规矩跳过。HN 两条相关帖距今 8–10 天。Scality RDMA Inference Factory（10/8 18点版已报）、Architect Liquid Inference（10/8 10点版已报）、Mooncake/LMCache 漏洞（多期已报）、Prime Inference（10/8 已排除）均跳过。中文侧：机器之心/量子位窗口内无 serving 新报道。X 因域名被策略拦截无法查，未硬撑。关键人物：Simon Willison 博客亲手打开（签证表单 agent 事件、Deno 加入 Cloudflare、Minicrypt 等，均非 serving）；Latent Space Spotify 最近 10 期无 serving 专题。本轮无技术深度内容达标，不生成深读笔记。*</p></body></html>
