@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月10日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-10"/>
+<meta name="doc-ts" content="2026-10-10T15:03:21"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-10（8点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-10（8点版）</h1>
+<p>窗口内依旧安静，补漏一条 SGLang 官方博客。 六家框架零正式版，arXiv 新批次还没索引出来。 一句话：没啥大事，补的那条值得看一眼。</p>
+<h2>框架更新</h2>
+<p>六家全部静默。 vLLM 停在 v0.31.0，SGLang 停在 v0.5.21。 TRT-LLM 还是 v1.3.0rc29，LMDeploy 还是 v0.18.0。 llama.cpp 最新快照 b11541 是凌晨 1 点的，窗口内零新快照。 TGI 归档只读。</p>
+<p>补漏一条：SGLang 官方 9 月 25 日的博客，之前几轮漏报了。 Jev 类决策模型（只给选项打分、不写长回复的模型）要同时给多个候选项打分。 题干会被重复算很多遍，纯属浪费。 SGLang 的 MIS（多条目打分），说白了就是题干只算一遍。 p95 就是 95% 的请求都比它快。 16 个候选的 p95 延迟从 54.1ms 压到 20.6ms。 数据是在 Qwen3-8B 上测的。 类比一下：以前每个候选各念一遍题干，现在只念一遍。</p>
+<p><a href="https://www.lmsys.org/blog/2026-09-25-sglang-decision-models/">SGLang 官方博客原文</a></p>
+<h2>新技术与论文</h2>
+<p>arXiv 两组查询亲手核验。 最新还是 10/8 那批，已报过。 10/10 00:00 UTC 的新批次到 8 点还没索引完。 这是结构性延迟，下一轮（10点版）再看。</p>
+<h2>业内新闻</h2>
+<p>窗口内无新增。 新闻 vertical 翻出来的全是旧料。 Mooncake 漏洞、vLLM CVE、选型指南都报过。 Reddit 零结果，HN 全是旧帖。 机器之心、量子位窗口内无新报道。</p>
+<h2>访谈与深度</h2>
+<p>Simon Willison 最新几条和 serving 无关。 Latent Space RSS + Spotify 双源核验过。 最新仍是 10/10 的 AlphaFold 那期，非 serving。 X 登录墙依旧，一线动态看不到。</p>
+<p>*去重说明：本轮窗口（10/10 06:00→08:00 PDT）。六家框架经 GitHub releases API 亲手核验零正式版：vLLM v0.31.0（10/5）、SGLang v0.5.21（10/2）、TensorRT-LLM v1.3.0rc29（9/29，含预发布版核验）、LMDeploy v0.18.0（9/28）、llama.cpp 日快照 b11541（10/10 08:02Z = 01:02 PDT，在窗口外；窗口内零新快照，按惯例日快照不算正式发版）、TGI v3.3.7（归档只读）。SGLang CVE-2026-93034 官方仍无补丁版本。arXiv 两组查询（标题关键词 + cs.CL 摘要 KV cache，按提交时间倒序）亲手核验，最新仍是 10/8 批次（Exit-Guided Speculative Decoding、RaReCache 等，均已报过），10/10 00:00 UTC 新批次截至 8 点尚未索引完（结构性延迟）。新闻 vertical 翻出的 Mooncake CVE、vLLM CVE-2026-105757、LMCache CVE-2026-105192、Prime Inference、Spheron 选型指南、Towards AI 解析器普查均为窗口外或已报过；Reddit site 查询 0 结果、HN 全是旧帖；机器之心/量子位无窗口内 serving 报道。关键人物核验：Simon Willison 博客亲手打开，最新数帖（Anthropic agents 引用 NYT、Deno 加入 Cloudflare、Matt Green 加密推文）均非 serving 相关；Latent Space RSS + Spotify 双源核验，最新单集仍是 10/10 的 AlphaFold 访谈（窗口外、非 serving），其次是 10/8 的 Synthesis Superintelligence、10/2 的 Alex Zhang 访谈；X 登录墙依旧。补漏一条 LMSYS 官方博客《Scaling JEV-like Decision Models with SGLang》（9/25 发布，150 期简报从未收录过，本轮未标深读）。本轮无深读笔记（窗口内无新料）。*</p></body></html>
