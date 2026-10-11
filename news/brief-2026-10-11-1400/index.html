@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月11日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-11"/>
+<meta name="doc-ts" content="2026-10-11T21:01:20"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-11（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-11（14点版）</h1>
+<p>这轮（12:00→14:00）还是安静。 六家框架水位全平，arXiv 水位纹丝不动。 社区、中文媒体、关键人物全部静默。 X 依旧进不去，按惯例如实标注。</p>
+<h2>框架更新</h2>
+<p>六家全部静默，水位一个没动。 vLLM 停在 v0.31.0，SGLang 停在 v0.5.21。 TRT-LLM 还是 v1.3.0rc29 预览版。 LMDeploy 还是 v0.18.0，TGI 归档只读。 llama.cpp 窗口内出了一个每日快照 b11559。 按惯例快照不算正式版，所以这轮还是零。 六家水位全部亲手用 gh CLI 核验过。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮亲自查了三组关键词。 &quot;LLM inference&quot; 最新还是 10 月 8 日那篇。 &quot;KV cache&quot; 最新也是 10 月 8 日。 &quot;multimodal inference&quot; 最新是 10 月 5 日。 时间戳跟上一轮一字不差，窗口内零入库。 HN 用 Algolia 精确窗口查了两组。 &quot;vLLM&quot; 命中一帖，是 LLM 指路趣味评测。 跟推理 serving 无关，已经略过。 &quot;SGLang inference&quot; 零命中。</p>
+<h2>业内新闻</h2>
+<p>本轮无。 news vertical 里 10 月 11 日当天没有新文。 最新的是 10 月 10 日那篇。 ContentBuffer 报道了 TokenRouter。 TokenRouter 是清华的 token 级 LLM 路由方案。 它对应 arXiv 10 月 8 日的论文，之前已报过。 Reddit 这边 24 小时内没有 serving 新帖。 翻到的 vLLM 相关帖都是 5 天以上的旧帖。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。 Latent Space 最新单集还是 AlphaFold 那场访谈。 10 号的 20 点版已经报过，这轮不重复。 这次 Spotify CLI 的 experience 接口恢复正常了。 亲手查了节目页，单集水位确认没动。 Simon Willison 今天没有新帖。 他最新一篇还是 8 月那篇，跟 serving 无关。 中文媒体这边，量子位今日头条是分子模拟方向。 机器之心、量子位都没有 serving 新报道。</p>
+<p>*去重说明：本轮严格窗口（10/11 12:00→14:00 PDT）实质新增为零，连续第五轮全静默。六家框架亲手用 gh CLI 核验零正式版（水位全持平：vLLM v0.31.0、SGLang v0.5.21、TRT-LLM v1.3.0rc29、LMDeploy v0.18.0、TGI v3.3.7；llama.cpp 每日快照 b11559（19:14 UTC = 12:14 PDT，窗口内但按惯例不算正式版））。arXiv 三组关键词（LLM inference、KV cache、multimodal inference）亲手用 curl 核验，最新时间戳分别为 10/8、10/8、10/5，与上一轮一致，窗口内零入库（周日中午结构性轮空）。HN Algolia 精确窗口（1791745200→1791752400）：vLLM 1 hit 为 fig.blue 的 LLM 凭记忆指路趣味评测（无关 serving，已略过），SGLang inference 0 hits。news vertical 10/11 当天零新文（最新是 10/10 ContentBuffer 的 TokenRouter 报道，arXiv 10/8 已报过）。Reddit r/LocalLLaMA 24 小时内无 serving 新帖。Spotify CLI experience 接口本轮恢复正常（status=connected），Latent Space 最新单集仍是 2026-10-10 AlphaFold 访谈（20点版已报）。Simon Willison 博客 10/11 当天无新帖。中文媒体（机器之心、量子位）10/11 当天无 serving 报道。X 无法访问，按惯例如实标注。本轮无值得深读项，不生成深读笔记。*</p></body></html>
