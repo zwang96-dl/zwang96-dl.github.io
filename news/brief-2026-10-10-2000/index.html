@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月10日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-10"/>
+<meta name="doc-ts" content="2026-10-11T03:01:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-10（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-10（20点版）</h1>
+<p>这轮（18:00→20:00）窗口内依旧安静。 六家框架零正式版，社区也全静默。 唯一的新鲜事：vLLM 今天把 Q4 路线图发出来了。</p>
+<h2>框架更新</h2>
+<p>六家全部静默，水位一个没动。 vLLM 停在 v0.31.0，SGLang 停在 v0.5.21。 TRT-LLM 稳定版还是 v1.2.1，预览版还是 rc29。 LMDeploy 还是 v0.18.0，TGI 归档只读。 llama.cpp 的当日快照全在窗口之前。 按惯例不算正式版，本轮直接略过。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 本轮没查成。 它的 API 直接返回 429 限流。 按规矩限流就是硬停，不许再试。 下一轮再亲手核验时间戳。</p>
+<h2>业内新闻</h2>
+<h3>vLLM 公布 Q4 路线图</h3>
+<p>今天刚发布的官方 issue，作者是 simon-mo。 整份路线图按兴趣小组（SIG）分工写成。 跟你最相关的有四条。</p>
+<p>第一：P/D 解耦要出&quot;生产配方&quot;了。 P/D解耦就是分工流水线，prefill和decode各干各的。 路线图说要发布成熟的部署配方。 还包括 KV 卸载（offloading）的权衡说明。 这正是你在评估 SGLang 时的对照组。</p>
+<p>第二：CUDA 图要按 prefill/decode 分开抓。 现在的图捕获是糊在一起的。 分开之后，padding 的浪费能少一块。 KV cache（草稿纸）也想做成可插拔接口。</p>
+<p>第三：量化侧继续推 FP4 KV 缓存。 目标是扩到更多模型，还支持落盘。 落盘就是草稿纸写满了放硬盘上。 Rubin 上的 LUT-B（W3A8）格式也要定稿。</p>
+<p>第四：新硬件优先级给了 Rubin 和 MI455X。 AMD 侧要补上 ROCm 的 P/D 解耦短板。 还说要把 Humming 在 Hopper 上扶正。 Humming 是 vLLM 自研的新量化内核。</p>
+<ul><li>原文：<a href="https://github.com/vllm-project/vllm/issues/61024">https://github.com/vllm-project/vllm/issues/61024</a></li></ul>
+<h3>英伟达要投推理芯片公司 d-Matrix</h3>
+<p>The Information 10 月 8 日爆的料。 d-Matrix 做推理芯片，上月刚接入 NVLink Fusion。 NVLink Fusion 是英伟达的开放机架接口。 第三方芯片也能插进它的机架生态。 现在英伟达还要直接投它，金额没说。 首批搭载 Raptor 芯片的机架预计 2027 年 Q4 出货。 推理芯片的战争又添一把火。</p>
+<ul><li>来源：<a href="https://aiweekly.co/alerts/nvidia-to-invest-in-inference-rival-d-matrix-via-nvlink-fusion">https://aiweekly.co/alerts/nvidia-to-invest-in-inference-rival-d-matrix-via-nvlink-fusion</a></li></ul>
+<h3>一个独立开发者造的&quot;部署前自检&quot;工具</h3>
+<p>GitHub 上的 entail 项目，个人作品，star 才 3 个。 它干的事很实在：检查模型文件声明的东西。 引擎实际跑起来是不是真照做了。 比如 vLLM 0.30 的 rope_scaling 参数。 它会静默改掉 64 个模型的 RoPE 基准。 Llama-3.2-3B 的 GSM8K 实测从 379 掉到 273。 全程没有任何警告。 你以后在 MI350X 上测模型，可以拿它先过一遍。</p>
+<ul><li>仓库：<a href="https://github.com/wwoosshh/entail">https://github.com/wwoosshh/entail</a></li></ul>
+<h2>访谈与深度</h2>
+<p>Latent Space 播客出了三期新节目。 主题全是科学向：AlphaFold 蛋白折叠、超导材料、学术访谈。 没有 serving 专题，本轮略过。 HN、Reddit、中文媒体本轮无 serving 新内容。 X 本轮还是进不去，按惯例如实标注。</p>
+<p>*去重说明：本轮严格窗口（10/10 18:00→20:00 PDT）实质新增只有 vLLM Q4 路线图 issue（10/10 当日发布，亲手核验）。六家框架亲手用 gh CLI 核验零正式版（水位全持平：vLLM v0.31.0、SGLang v0.5.21、TRT-LLM v1.2.1/rc29、LMDeploy v0.18.0、TGI v3.3.7；llama.cpp 当日快照全在窗口前）。arXiv 本轮未能核验：API 返回 HTTP 429，按政策硬停，未对时间戳下断言。entail（个人项目）、d-Matrix（10/8–10/9）为窗口外补收，往期简报全文 grep 确认未报过。Quanome XDT 算力大单（数据中心签约，非 serving 技术）未达线跳过。18点版的 VibeSys/SYFI、Temperature2 投机解码分析、SGLang CVE-2026-93034 均跳过。本轮无值得深读项，不生成深读笔记。*</p></body></html>
