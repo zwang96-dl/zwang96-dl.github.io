@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月12日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-12"/>
+<meta name="doc-ts" content="2026-10-12T06:57:19"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-12（0点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-12（0点版）</h1>
+<p>这轮（10/11 22:00→10/12 00:00）周日半夜没新货。 llama.cpp 出了个日常快照，内容是构建小改，无新功能。 顺手补收一条昨晚漏报的：界面新闻讲&quot;有效算力&quot;的。</p>
+<h2>框架更新</h2>
+<h3>llama.cpp b11563 快照：构建内部清理，无新功能（顺手一记）</h3>
+<p>这是 23:38 出炉的每日快照，按惯例不算正式版。 改动是把 ggml（llama.cpp 底层的算子库）的内部符号默认隐藏掉。 简单说就是修了下编译时的符号泄露，不影响跑模型。 本地用 llama.cpp 的不用升级，跳过就行。</p>
+<p><a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11563">https://github.com/ggml-org/llama.cpp/releases/tag/b11563</a></p>
+<p>其余五家水位全持平：vLLM v0.31.0、SGLang v0.5.21、TRT-LLM v1.3.0rc29 预览版、LMDeploy v0.18.0、TGI v3.3.7。</p>
+<h2>新技术与论文</h2>
+<p>本轮静默。 arXiv 三组关键词窗口内零入库，最新还是 10/08 和 10/09 的旧论文。 arXiv 每日批次约在 00:00 UTC 发，周日半夜轮空在预期内。</p>
+<h2>业内新闻</h2>
+<h3>&quot;有效算力&quot;：卡买回来了，但七成在空转（窗口外补收）</h3>
+<p>界面新闻盘了 WAIC 2026 上的一个热词：有效算力。 说的是数据中心花大价钱买的 GPU，真正在跑的不到三成。 打个比方，就像买了辆 500 匹的跑车，结果天天堵在高架上。 热度背后是 AI 产业重心在换档：算力消耗主力从训练转向推理。 到 2026 年，推理已经占全部 AI 算力的约三分之二。 训练像盖工厂，一次性投入；推理像工厂开工，7×24 烧钱不停。 计费也在变：以前按租 GPU 时长收费，现在越来越多按 Token 收费。 谁能把单位 Token 的成本压下来，谁就占便宜。 受益环节点名两个：光互联（800G 光模块成标配）和液冷散热。 跟你做推理优化直接相关：行业现在拼的就是&quot;真能用多少&quot;。</p>
+<p><a href="https://finance.sina.cn/stock/jdts/2026-10-12/detail-iniuxrzp7287104.d.html">https://finance.sina.cn/stock/jdts/2026-10-12/detail-iniuxrzp7287104.d.html</a></p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 水位没动，最新还是 10 月 10 日的 AlphaFold 访谈。 The Batch 最新还是 10 月 9 日那期。 Simon Willison 今日无 serving 相关更新。</p>
+<p>*去重说明：本轮窗口（10/11 22:00→10/12 00:00 PDT，epoch 1791781200→1791788400）框架零正式版，水位全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、TRT-LLM v1.3.0rc29 预览版（09/29）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19）。llama.cpp v0.6.0 为 10/05 旧正式版（已报过），本轮 b11563 快照（23:38 PDT，ggml 符号默认隐藏）按惯例不算正式版，仅记一笔。arXiv 三组关键词 curl 亲手核验窗口内零入库（LLM inference 最新 10/08、KV cache 最新 10/09、multimodal inference 最新 10/05；arXiv 日批次约 00:00 UTC 发，周日半夜轮空在预期内）。补收界面新闻&quot;有效算力&quot;（PDT 10/11 20:40 发布，22点版窗口内漏报；grep 确认今日各期简报均未报过）。RTX 5090 停产爆料 22点版已报过，不重复。HN/Reddit/YouTube 窗口内无新 serving 讨论。X 无法访问。news vertical 与中文媒体本轮无 serving 新货。Spotify 水位 22点版已确认未动。无「值得深读」内容，本期不做深读笔记。*</p></body></html>
