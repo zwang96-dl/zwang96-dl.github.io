@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月12日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-12"/>
+<meta name="doc-ts" content="2026-10-12T22:58:02"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-12（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-12（16点版）</h1>
+<p>下午四点，serving 圈还是安静。 本轮正式版零更新。 arXiv 也没新论文入库。 唯一的动静还是 llama.cpp。 它两小时里连出两个日快照。</p>
+<h2>框架更新</h2>
+<h3>llama.cpp b11576：让大头模型别丢闪存注意力</h3>
+<p>这个快照在下午 2 点 30 分出来。 按惯例是日快照，不算正式版。 它修的是无缓存注意力路径。 有些大头尺寸的模型会中招。 闪存注意力会悄悄退回 CPU 跑。 速度一下就慢下来了。 这次给 KV 维度补齐到 256。 KV 就是模型记上下文的草稿纸。 补齐后闪存注意力能正常开。 说白了就是少一次无声降速。</p>
+<p><a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11576">https://github.com/ggml-org/llama.cpp/releases/tag/b11576</a></p>
+<h3>llama.cpp b11577：修一个多序列小 case</h3>
+<p>这个快照在下午 3 点 55 分出来。 同样是日快照，不算正式版。 说明里只写了一句修复。 修的是某个多序列场景。 细节很少，还留了个 TODO。 影响面看起来很窄。 主线用户基本无感，记一笔就行。</p>
+<p><a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11577">https://github.com/ggml-org/llama.cpp/releases/tag/b11577</a></p>
+<p>vLLM、SGLang、TRT-LLM 全没动。 LMDeploy、TGI 也一样。</p>
+<h2>新技术与论文</h2>
+<p>本轮静默。 arXiv 五组关键词亲手核验。 窗口内还是零入库。 最新还是 10 月 8、9 号的旧论文。 新批次要等 UTC 零点才发布。</p>
+<h2>业内新闻</h2>
+<p>本轮静默。 news 垂直翻出来的全是旧闻。 还是那篇 agent 推理层选型文。 它是营销向对比，没有新数据。 HN 和 Reddit 都没窗口内新帖。 X 搜索也没有窗口内新帖。 中文媒体这边也没新货。 社交平台今天还是教学图卡。 讲的都是老工具和老概念，跳过就行。</p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 最新还是 10 月 10 日那期。 那期聊的是 AlphaFold。 The Batch 最新还是 10 月 9 日那期。 Simon Willison 今天没有新增。 最新还是中午那篇 Python 3.15。 跟推理没关系，跳过就行。</p>
+<p>*去重说明：本轮窗口（10/12 14:00→16:00 PDT，epoch 1791838800→1791846000）正式版零更新，水位全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、TRT-LLM v1.3.0rc29 预览版（09/29）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19）。llama.cpp 窗口内两个日快照：b11576（14:30 PDT，无缓存注意力路径给 KV 维度补齐到 256，修闪存注意力对 head size 512 模型退回 CPU 的问题 #30416）、b11577（15:55 PDT，修 vllm d3 多序列 case #30408，说明极简），按惯例不算正式版，仅记一笔；上一快照 b11575 为 14 点版已记。arXiv 五组关键词 curl 亲手核验窗口内零入库（LLM inference 最新 10/08、KV cache 最新 10/09、multimodal inference 最新 10/05、PD disaggregation 最新 10/05、speculative decoding 最新 10/09）。news 垂直、HN、Reddit、X 均无窗口内新内容；Superlinked 选型文为 14 点版已记的营销向对比。social 搜索窗口内无实质新帖，返回均为教学图卡。中文媒体无窗口内 serving 新货（量子位翻出为 4 天前 KV cache 分层旧文与 9 月旧文）。Spotify 亲手查 Latent Space 节目列表，水位未动（最新 10/10 AlphaFold 访谈，episode 5EF0UIceefCE1qLusnhxjV）。The Batch 最新仍为 10/09 那期。Simon Willison atom 亲手拉，最新仍为 12 点版已记的 10/12 Python 3.15 一篇，无新增。无「值得深读」内容，本期不做深读笔记。*</p></body></html>
