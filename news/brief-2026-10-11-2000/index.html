@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月11日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-11"/>
+<meta name="doc-ts" content="2026-10-12T02:58:31"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-11（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-11（20点版）</h1>
+<p>这轮（18:00→20:00）窗口内继续静默。 框架、论文、社区都没新动静。 但顺手挖出一篇 10 月 9 日漏报的论文。 它跟前缀缓存直接相关，值得你看一眼。</p>
+<h2>框架更新</h2>
+<p>六家全静默，水位一个没动。 vLLM 停在 v0.31.0，SGLang 停在 v0.5.21。 TRT-LLM 还是 v1.3.0rc29 预览版。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。 llama.cpp 最新快照是 b11559。 按惯例快照不算正式版。 全部用 gh CLI 亲手核验过。</p>
+<h2>新技术与论文</h2>
+<h3>KV-Repurpose：前缀缓存认不清&quot;同一段话换个位置&quot;（值得深读）</h3>
+<p>说白了，它解决的是这个毛病：同一份文档，换个系统提示或对话历史，前缀缓存就认不出来，只能重算。 前缀缓存（KV cache 按相同开头复用，只算不同的部分）像按门牌号认人：地址一换就不认识了。 它的做法是把 KV cache 按&quot;段&quot;拆开存，请求来了按段拼回去。 基于 vLLM 实现，代码已开源，Apache-2.0。 长上下文单文档问答里，瞎拼回去质量基本不掉。 但跨文档推理不行，几个文档混在一起它就晕。 数据很打眼：Zipfian（热点长尾分布，少数文档被反复问）RAG 负载下，30GB 缓存时 token 级命中率 63.9%，传统前缀缓存只有 3.3%。 更狠的是：就算给前缀缓存加到 1TB，命中率也只有 17.9%。 跟你评估的 SGLang RadixAttention（前缀树复用）是同一道题的升级版。 区别是：RadixAttention 还是认&quot;开头一样&quot;，它直接不管开头了。 深读笔记已生成，链接见末尾。</p>
+<h2>业内新闻</h2>
+<p>本轮无新货。 news 垂直和中文媒体窗口内全静默。 X 依旧无法访问，按惯例如实标注。</p>
+<h2>访谈与深度</h2>
+<p>本轮无新货。 Latent Space 最新还是 10 月 10 日的 AlphaFold 访谈。 这次 Spotify 官方接口亲手查的，节目水位没动。 Simon Willison 今天只发了 Dwarf Fortress 玩梗（跟 serving 无关）。 The Batch 最新还是 10 月 9 日那期。 HN 窗口内就一条 Ask HN（3 赞 1 评论，聊 Show HN 规范）。 跟 serving 无关，已略过。</p>
+<p>*去重说明：本轮窗口（10/11 18:00→20:00 PDT）框架零正式版（水位全持平：vLLM v0.31.0、SGLang v0.5.21、TRT-LLM v1.3.0rc29、LMDeploy v0.18.0、TGI v3.3.7；llama.cpp b11559 快照，2026-10-11T19:14:38Z，窗口外且按惯例不算正式版），全部用 gh CLI 亲手核验。arXiv 三组关键词 curl 亲手核验窗口内零入库（&quot;LLM inference&quot; 最新 10/8、&quot;KV cache&quot; 最新 10/9、&quot;multimodal inference&quot; 最新 10/5）。补报 KV-Repurpose（arXiv:2610.13060，2026-10-09，窗口外但前几轮漏报且与 prefix caching 强相关；vLLM-based segment-wise KV-cache reuse 开源系统；Zipfian RAG 负载 30GB 缓存下 token 级命中率 63.9% vs prefix caching 3.3%，1TB 下 prefix caching 仅 17.9%；已生成深读笔记）。HN Algolia 精确窗口（1791766608→1791773808）：vLLM 1 hit（&quot;Ask HN: Can we discourage Show HNs that &#x27;ship the first draft&#x27;&quot;，3 赞 1 评论，无关已略过）、SGLang 0 hits。news vertical、Reddit、中文媒体（机器之心/量子位方向）窗口内无新内容。Spotify status=connected，experience 接口亲手确认 Latent Space 最新单集仍是 2026-10-10 AlphaFold 访谈（10/10 18点版已报）。Simon Willison 10/11 无 serving 相关更新。The Batch 最新仍是 10/09 那期（旧货）。X 无法访问。*</p></body></html>
