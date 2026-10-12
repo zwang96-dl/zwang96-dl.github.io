@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月11日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-11"/>
+<meta name="doc-ts" content="2026-10-12T04:59:45"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-11（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-11（22点版）</h1>
+<p>这轮（20:00→22:00）几乎没啥新货。 llama.cpp 出了个每日快照，顺手记一笔。 另外补一条 10 月 10 日的爆料：RTX 5090 疑似停产。 这条今天各期简报都没报过。</p>
+<h2>框架更新</h2>
+<h3>llama.cpp b11560 快照：Hexagon 加速器添新算子（顺手一记）</h3>
+<p>这是 20:57 出炉的每日快照，按惯例不算正式版。 内容是给 Hexagon 后端加了 IM2COL_3D 支持。 Hexagon 是高通芯片里的 AI 加速器，手机端跑模型就靠它。 IM2COL_3D 是一种 3D 卷积的展开算法，说白了是把卷积变成矩阵乘法来算。 做手机端推理的可以瞄一眼，其他人直接跳过。</p>
+<p><a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11560">https://github.com/ggml-org/llama.cpp/releases/tag/b11560</a></p>
+<p>其余五家水位全持平：vLLM v0.31.0、SGLang v0.5.21、TRT-LLM v1.3.0rc29 预览版、LMDeploy v0.18.0、TGI v3.3.7。</p>
+<h2>新技术与论文</h2>
+<p>本轮静默。 arXiv 三组关键词窗口内零入库，周日半夜的批次本来就轮空。 HN 窗口内没有 serving 相关的实质帖，搜到的都是评论区噪音。</p>
+<h2>业内新闻</h2>
+<h3>RTX 5090 疑似停产：产能让位给 RTX Pro 专业卡（窗口外补收）</h3>
+<p>爆料人 Jukan 10 月 10 日在 X 上说，GB202 芯片停产了。 GB202 就是 RTX 5090 用的那颗 GPU 芯片。 停产省下来的产能，据说全转去供 RTX Pro 专业卡。 RTX Pro 是英伟达的工作站卡，主打 AI 训练和推理。 划重点：只是爆料，英伟达官方还没确认，别当实锤。 还惦记买 5090 跑本地推理的，先观望，别急着高价入手。</p>
+<p><a href="https://www.rswebsols.com/news/nvidia-allegedly-halts-production-of-rtx-5090-to-address-rtx-pro-chip-scarcity/">https://www.rswebsols.com/news/nvidia-allegedly-halts-production-of-rtx-5090-to-address-rtx-pro-chip-scarcity/</a></p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 最新还是 10 月 10 日的 AlphaFold 访谈。 节目水位没动，10 日版已经报过。 The Batch 最新还是 10 月 9 日那期。 Simon Willison 今天没有 serving 相关的更新。 X 直链依旧打不开，一线工程师的原帖看不到，如实说明。</p>
+<p>*去重说明：本轮窗口（10/11 20:00→22:00 PDT，epoch 1791774000→1791781200）框架零正式版，水位全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、TRT-LLM v1.3.0rc29 预览版（09/29）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19）。llama.cpp v0.6.0 为 10/05 旧正式版（已报过），本轮 b11560 快照（20:57 PDT，Hexagon IM2COL_3D）按惯例不算正式版，仅记一笔。arXiv 三组关键词 curl 亲手核验窗口内零入库（LLM inference 最新 10/08、KV cache 最新 10/09、multimodal inference 最新 10/05；arXiv 日批次约 00:00 UTC 发，周日半夜轮空在预期内）。补收 RTX 5090 停产爆料（10/10，Jukan，英伟达官方未确认；grep 确认今日各期简报均未报过）。HN Algolia 精确窗口：vLLM hits 全为评论区 &quot;LLM&quot; 部分匹配噪音（无实质帖）、SGLang 0 hits。news vertical 与中文媒体（量子位/机器之心方向）窗口内无 serving 新货。Spotify experience 接口亲手确认 Latent Space 水位未动（最新仍是 10/10 AlphaFold 访谈）。The Batch 最新 10/09，Simon Willison 今日无 serving 更新。Reddit/YouTube 窗口内无新 serving 讨论（均为 3–48 天前旧内容）。X 无法访问。social.search（IG/Threads/FB）3 条均为窗口外或营销号翻发，不达收录线。*</p></body></html>
