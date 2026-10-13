@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月13日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-13"/>
+<meta name="doc-ts" content="2026-10-13T17:00:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-13（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-13（10点版）</h1>
+<p>10点版来了。 这轮只有一条算正经新闻。 讲的是钱，不是技术。 但跟你做的推理优化关系很大。 便宜模型正在把 token 价格往下砸。 谁 serving 做得省，谁就活得久。</p>
+<h2>框架更新</h2>
+<p>主流框架这轮零正式版。 vLLM、SGLang、TRT-LLM 都没动。 LMDeploy、TGI 也一样。 llama.cpp 倒是出了个新快照。 版本号是 b11588，早上 08:20 发的。 但它只是每日快照，不是正式版。 按老规矩，只记一笔，不细看。</p>
+<h2>新技术与论文</h2>
+<p>本轮静默。 arXiv 窗口内零新入库。 推理、KV cache、PD 解耦都查了。 KV cache 就是模型的草稿纸。 PD 解耦就是前后工序分工干。 最新一批还停在 10 月 8 日和 9 日。 新批次要等后面再看。</p>
+<h2>业内新闻</h2>
+<p>便宜的中国模型，可能掀翻基建账。 这是 The Register 今早的报道。 它转述了投行 Jefferies 的一份研报。 Jefferies 是一家华尔街投行。 研报先甩了一组流量数字。 数据来自聚合平台 OpenRouter。 OpenRouter 是个多模型调用平台。 说白了，它像个模型版的携程。 截至 9 月 27 日那一周。 中国模型处理了 76.12 万亿 token。 4 月下旬时，这个数只有 4.37 万亿。 同期美国前四家只处理了 14.2 万亿。 研报还点名了月之暗面的 Kimi K3。 它估 Kimi K3 已到前沿水平。 性能约是 Claude Fable 5 的 95%。 这几个数都是研报口径，没人独立验过。 先打个问号，别全当真。 真正扎心的是后面这笔账。 四家云巨头今年要砸 6000 到 8000 亿美元。 钱主要花在建数据中心上。 它们手里的合约积压约 2.3 万亿美元。 其中约一半来自 OpenAI 和 Anthropic。 Jefferies 的担心很直接。 token 价格一直在跌，跌得很快。 模型这门生意，还能不能赚钱？ 砸下去的基建钱，还收不收得回？ 它管这叫一场迟早要来的「重置」。 对你意味着什么？划重点。 价格越往下打，拼的越是单位成本。 同一个模型，谁跑得更省谁赢。 这正是推理优化的主场。 PD 解耦、KV cache 优化都是省钱招。 草稿纸用得省，流水线分得顺。 每一招最后都落在成本账上。 所以这条看着是财经新闻。 其实是给你方向的一次背书。 来源：<a href="https://www.theregister.com/paas-and-iaas/2026/10/13/cheap-chinese-and-open-source-llms-could-trigger-trillion-dollar-ai-infrastructure-reset/5302774">https://www.theregister.com/paas-and-iaas/2026/10/13/cheap-chinese-and-open-source-llms-could-trigger-trillion-dollar-ai-infrastructure-reset/5302774</a></p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 最新还是 10 月 10 日那期。 那期聊的是 AlphaFold。 Spotify 上亲手查过，水位没动。 Simon Willison 窗口内没有新文。 Karpathy、Jim Fan 也没新帖被搜到。 Reddit、中文媒体都没新文。 社交平台只有图卡和营销短视频。 没有新数据，不收。</p>
+<p>本期不标「值得深读」。 Register 这篇是分析师观点转述。 没有方法，也没有一手数据。 当方向参考看看就好。 硬凑深读不如不写。</p>
+<p>*去重说明：本轮窗口（10/13 08:00→10:00 PDT，epoch 1791903600→1791910800）正式版零更新，水位全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、TRT-LLM v1.3.0rc29 预览版（09/29）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19）。llama.cpp 窗口内有新日快照 b11588（2026-10-13T15:20:38Z，即 08:20 PDT），按惯例日快照不算正式发版，仅记一笔。arXiv 亲手核验窗口内零入库（LLM inference 最新 10/08、KV cache 最新 10/09、speculative decoding 最新 10/09、disaggregated inference 最新 09/13）。HN Algolia 精确窗口（tags=story）：SGLang、KV cache、llama.cpp 均零命中；vLLM 名下命中含 The Register 一条（2026-10-13T16:32:31Z 贴出，原文 16:30Z 发布，即 09:30 PDT，窗口内），本期收录，其余为数学新闻等无关帖。文中 76.12 万亿 token、Kimi K3 约 95% 等数字均为 Jefferies 研报经 The Register 转述的口径，OpenRouter 仅为聚合平台流量、非全球总量，本期已标注未独立验证。新闻搜索翻出的 Mooncake 双漏洞、SGLang CVE-2026-93034 均为 10月10日 00点版已报旧料；SparseEngine 文章为 10/11、论文为 09/30，窗口外；Decisions API 相关汇总为 10/10 旧文，均剔除。中文媒体返回均为 10/12 及更早旧文。Spotify 亲手查 Latent Space 节目（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t），最新仍为 10/10 AlphaFold 访谈（episode 5EF0UIceefCE1qLusnhxjV）。Simon Willison atom 最新仍为 10/13 13:32Z Geoffrey Huntley 一篇（08点版已剔除）。social 搜索窗口内仅图卡与营销内容。无「值得深读」内容，本期不做深读笔记。*</p></body></html>
