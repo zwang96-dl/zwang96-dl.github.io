@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月12日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-12"/>
+<meta name="doc-ts" content="2026-10-13T02:59:07"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-12（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-12（20点版）</h1>
+<p>今晚框架和论文还是没动。 但芯片那边有一条漏网的。 Intel 今天给推理芯片正式定名了。 之前各期都没报过，这期补上。</p>
+<h2>框架更新</h2>
+<p>本轮静默。 vLLM、SGLang、TRT-LLM 全没动。 LMDeploy、TGI 也一样。 llama.cpp 最新还是 b11577。 那是下午三点五十五分那版。 新快照还没出来，记一笔就行。</p>
+<h2>新技术与论文</h2>
+<p>本轮静默。 arXiv 五组关键词亲手核验。 窗口内还是零入库。 最新还是 10 月 8、9 号的旧论文。 周末加周一，批次就是慢。 下一轮再看看有没有新货。</p>
+<h2>业内新闻</h2>
+<p><strong>Intel 的推理芯片有正式名字了：D270。</strong> 它以前只有代号，叫 Crescent Island。 今天在 OCP 峰会上正式定名。 OCP 是数据中心硬件圈的大会。</p>
+<p>先说人话版结论。 这卡不拼蛮力，拼的是内存大又便宜。 像开餐厅不拼厨师手速。 拼的是备菜台够大、租金够低。</p>
+<p>硬指标看这几个。 FP8 算力 1.3 PFLOPS。 FP8 就是低精度快算模式。 内存带宽 1.5 TB/s。 整卡功耗 350 瓦，风冷就行。 还是标准 PCIe 卡，老机房能直接插。</p>
+<p>最抢眼的是内存容量。 Intel 自家卡带 160GB 内存。 用的是 LPDDR5X（手机同款内存）。 合作厂商最高能做到 480GB。 单卡号称能装 300B 参数模型。 八卡拼起来号称能过万亿参数。</p>
+<p>内存大对你意味着什么。 KV cache（模型的草稿纸）能多留很多。 长上下文、多会话都更能装。 这正是它主打的卖点。</p>
+<p>但短板也要看清。 带宽只有 1.5 TB/s。 HBM 卡是它的好几倍。 decode 阶段最吃带宽。 草稿纸再大，翻页慢也白搭。 所以它更适合 prefill 重的活。 或者对价格敏感的批量推理。</p>
+<p>软件这边它倒很懂行。 官方栈直接接 vLLM 和 SGLang。 还有 llm-d 和 Dynamo。 新卡第一天就进主流框架。 这点比堆参数聪明。</p>
+<p>跟你手里的卡比一比。 MI350P 的 FP8 是 2.3 PFLOPS。 算力差不多是它 1.8 倍。 但功耗最高到 600 瓦。 D270 走的是每瓦 token 路线。</p>
+<p>划重点：数字全是 Intel 自报的。 独立实测一家都还没有。 价格和正式上市时间也没给。 只说客户送样已经开始。 先记个名字，等实测再下结论。</p>
+<p>来源：</p>
+<ul><li><a href="https://www.storagereview.com/news/intel-gpu-d-series-480gb-lpddr5x-1-3-pflops-fp8-350w-pcie-card">https://www.storagereview.com/news/intel-gpu-d-series-480gb-lpddr5x-1-3-pflops-fp8-350w-pcie-card</a></li><li><a href="https://www.servethehome.com/intels-crescent-island-ai-server-gpu-gets-a-name-and-specs-meet-the-intel-gpu-d-series/">https://www.servethehome.com/intels-crescent-island-ai-server-gpu-gets-a-name-and-specs-meet-the-intel-gpu-d-series/</a></li><li><a href="https://videocardz.com/newz/intel-gpu-d270-is-xe3p-crescent-island-card-with-480gb-lpddr5x-memory">https://videocardz.com/newz/intel-gpu-d270-is-xe3p-crescent-island-card-with-480gb-lpddr5x-memory</a></li></ul>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 最新还是 10 月 10 日那期。 那期聊的是 AlphaFold。 Spotify 上亲手查过，水位没动。 The Batch 最新还是 10 月 9 日那期。 Simon Willison 今天没有新增。 最新还是中午那篇 Python 3.15。 跟推理没关系，跳过就行。</p>
+<p>本期不标「值得深读」。 D270 只有厂商自报参数。 没有实测，也没有方法细节。 等独立 benchmark 出来再深读不迟。</p>
+<p>*去重说明：本轮窗口（10/12 18:00→20:00 PDT，epoch 1791853200→1791860400）正式版零更新，水位全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、TRT-LLM v1.3.0rc29 预览版（09/29）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19）。llama.cpp 窗口内零新快照，最新仍为 16 点版已记的 b11577（15:55 PDT）。arXiv 五组关键词 curl 亲手核验窗口内零入库（LLM inference 最新 10/08、KV cache 最新 10/09、multimodal inference 最新 10/05、PD disaggregation 最新 10/05、speculative decoding 最新 10/09）。业内新闻补入一条：Intel 于 10/12 在 OCP 全球峰会正式发布 GPU D 系列（首款 D270，前代号 Crescent Island），此前各期从未收录，本期补入；规格均为 Intel 自报、无独立实测，正文已标注。news 垂直其余条目（Mooncake 漏洞、Superlinked 选型文、SGLang 漏洞）均为已报过或窗口外旧闻。HN 全为旧帖，Reddit 与 X 搜索无窗口内新帖，中文媒体无窗口内 serving 新货（量子位为 4 天前 KV 分层旧文，无问芯穹融资 10 点版已注明为窗口外旧消息）。social 搜索窗口内无实质新帖。Spotify 亲手查 Latent Space 节目列表，水位未动（最新 10/10 AlphaFold 访谈，episode 5EF0UIceefCE1qLusnhxjV）。The Batch 最新仍为 10/09 那期。Simon Willison atom 亲手拉，最新仍为 12 点版已记的 10/12 Python 3.15 一篇，无新增。无「值得深读」内容，本期不做深读笔记。*</p></body></html>
