@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月13日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-13"/>
+<meta name="doc-ts" content="2026-10-13T12:58:43"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-13（06点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-13（06点版）</h1>
+<p>06点版来了。 这轮大框架全员安静。 只有个小引擎冒了个头。 它叫 MDMA，今早被贴上了 HN。 先说清：它还很早期。 热度和数据都别太当真。</p>
+<h2>框架更新</h2>
+<p>主流框架这轮零正式版。 vLLM、SGLang、TRT-LLM 都没动。 LMDeploy、TGI 也一样。 llama.cpp 也没出新快照。 最新还是 04点版记过的 b11583。</p>
+<p>小引擎 MDMA 值得记一笔。 MDMA 是个新的推理引擎。 全名是模型分发与内存分配器。 说白了，它专跑家里现成的机器。 台式机、笔记本、迷你主机都算。 它自带六种硬件后端。 CPU、英伟达、AMD 显卡都在内。 苹果芯片和英特尔核显也支持。 它主打一块显卡多人共用不打架。 秘诀是先预订显存，再真正分配。 装不下的请求当场被拒绝。 这就像订酒店先锁房。 锁不到就明确说没房。 不会等人到店才发现住不下。 多台机器还能私下组队互跑。 组队走加密直连，不要云中转。 状态提醒：它自标实验阶段。 仓库 9 月 22 日才建。 作者博客是 10 月 11 日发的。 今早 04:59 它被贴上 HN。 HN 上目前只有 2 分。 仓库星数也只有 12 颗。 作者自报的千 token 速度别全信。 那是它私有旧系统的成绩。 公开版作者自己说还没达到。 也没有任何第三方实测。 所以这条只当个线索看看。 跟你的多机分工方向有点关系。 但离能用还远，不建议投入时间。 来源：<a href="https://github.com/seuros/mdma">https://github.com/seuros/mdma</a> 作者自述：<a href="https://www.seuros.com/blog/mdma/">https://www.seuros.com/blog/mdma/</a></p>
+<h2>新技术与论文</h2>
+<p>本轮静默。 arXiv 窗口内零新入库。 亲手查的最新还停在 10 月 8 日和 9 日。 凌晨本来就是论文空窗期。 新批次要等下一轮再看。</p>
+<h2>业内新闻</h2>
+<p>本轮基本静默。 HN 精确窗口只捞到 MDMA 一条。 已经放在上面框架段了。 其余命中都是评论，不是新帖。 别被搜索的假命中骗了。 Reddit、中文媒体都没新文。 社交平台只有教学图卡。 有讲 KV cache 基础概念的短视频。 KV cache 就是模型的草稿纸。 这类科普没有新数据，不收。</p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 最新还是 10 月 10 日那期。 那期聊的是 AlphaFold。 Spotify 上亲手查过，水位没动。 Simon Willison 最新还是 10 月 12 日的文。 讲的是 Python 版本，跟 serving 无关。 Karpathy 那条漏斗帖是 10 月 11 日的。 这轮 HN 上只是有人又提了它。 不是新帖，不重复报。</p>
+<p>本期不标「值得深读」。 MDMA 热度太低，又没实测数据。 硬凑深读不如不写。</p>
+<p>*去重说明：本轮窗口（10/13 04:00→06:00 PDT，epoch 1791889200→1791896400）正式版零更新，水位全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、TRT-LLM v1.3.0rc29 预览版（09/29）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19）。llama.cpp 窗口内零新快照，最新仍为 b11583（02:34 PDT，04点版已记）。arXiv 亲手核验窗口内零入库（LLM inference 最新 10/08、KV cache 最新 10/09）。HN Algolia 精确窗口（tags=story）KV cache 与 SGLang 均零命中，LLM inference 仅 MDMA 一条故事帖（2026-10-13T11:59:30Z，即 04:59 PDT，2 分，仓库 github.com/seuros/mdma）；仓库建于 09/22、作者博客 10/11，均为窗口外旧内容，本期以 HN 上新帖为由仅作线索收录，并标注实验阶段、无第三方实测。HN 搜索中 Karpathy 相关命中经逐条核验为评论而非新帖，其原帖为 10/11，已剔除。Reddit、X、中文媒体均无窗口内实质新帖，social 搜索窗口内仅教学图卡与营销视频。Spotify 亲手查 Latent Space 节目，最新仍为 10/10 AlphaFold 访谈。Simon Willison atom 最新仍为 10/12 Python 3.15 一篇。无「值得深读」内容，本期不做深读笔记。*</p></body></html>
