@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月13日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-13"/>
+<meta name="doc-ts" content="2026-10-14T05:01:32"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-13（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-13（22点版）</h1>
+<p>22点版来了。 这轮有真东西，别错过。 20点版时 arXiv 被限流了。 新批次论文一直没筛成。 今晚接口恢复，我补上了。 一口气翻出六篇新论文。 最狠的一篇讲光网络传草稿纸。 草稿纸就是 KV cache。 它正对你的 PD 解耦评估。</p>
+<h2>框架更新</h2>
+<p>主流框架本轮零正式版。 vLLM、SGLang、TRT-LLM 全没动。 LMDeploy、TGI 也一样。 llama.cpp 本轮零新快照。 最新还是 b11609。 它在下午五点五十一就发了。 18点版已经记过一笔。</p>
+<h2>新技术与论文</h2>
+<p>先说今晚的头条论文。 有人给 PD 解耦换了条专线。 PD 解耦就是前后工序分工干。 prefill 算完要把草稿纸送走。 送去 decode 那张卡接着写。 现在这趟搬运走普通网络。 网络一挤，首字就得等。 首字延迟行话叫 TTFT。 这篇改用光电路交换机。 行话缩写是 OCS。 说白了就是给搬运修专线。 专线不跟别人抢道。 麻烦是专线开通要等几十毫秒。 作者把等待藏进 prefill 里。 prefill 还在算，先把线订好。 算完那一刻，线刚好通。 这招他们叫预约调度。 效果是仿真加实测拼出来的。 他们在 H100 上实测了 prefill。 真实服务轨迹拿来跑仿真。 结果跟 400G 普通网络打平。 这里的 400G 是网络带宽。 成本只有对手的五成五到七成八。 对手是超订一倍的普通网络。 连 50 毫秒的慢开通都扛得住。 划重点：搬运账别只算带宽。 开通延迟也能靠调度藏起来。 这跟你算 KV 搬运账直接相关。 <strong>值得深读</strong>：已做成精读笔记。 它能帮你补上网络层这一块。 你评 PD 解耦时正缺这块账。 来源：<a href="https://arxiv.org/abs/2610.18444">https://arxiv.org/abs/2610.18444</a></p>
+<p>第二篇讲前缀缓存的堵车。 论文名叫 RadixFlow。 混合模型有个新麻烦。 有的分支要等另一分支的状态。 调度器一等就整队停住。 停住的空位行话叫执行气泡。 明明有活干，槽位却空着。 RadixFlow 把匹配和就绪拆开。 谁没就绪就只卡谁自己。 别堵住后面能干活的分支。 五个混合模型上都测了。 平均延迟降了 3% 到 24%。 调度轮次少了 11% 到 44%。 缓存复用率几乎没变。 你看前缀缓存调度时用得上。 来源：<a href="https://arxiv.org/abs/2610.18143">https://arxiv.org/abs/2610.18143</a></p>
+<p>第三篇讲投机解码的新账。 投机解码就是先猜再验。 论文名叫 SpecFit。 场景是 MoE 权重放主机内存。 MoE 就是混合专家模型。 猜得越多，搬的专家越多。 搬运一贵，投机反而更慢。 SpecFit 按吞吐挑猜测子树。 不再只按猜中长度挑。 在 Qwen3-30B-A3B 上测的。 比同缓存的 EAGLE-3 快 21.6%。 另一个任务上快 7.0%。 数字都是作者自报。 来源：<a href="https://arxiv.org/abs/2610.15417">https://arxiv.org/abs/2610.15417</a></p>
+<p>还有三篇短的，记一笔。 SparPR 讲消费卡救草稿纸。 它在笔记本显卡上做实验。 延迟降了 31% 到 63%。 场景偏消费级，跟你主线远。 来源：<a href="https://arxiv.org/abs/2610.18140">https://arxiv.org/abs/2610.18140</a></p>
+<p>TWP 讲无服务器推理调度。 它按 token 级别放行请求。 不再整批一股脑塞进去。 作者说吞吐最高涨 45%。 来源：<a href="https://arxiv.org/abs/2610.17689">https://arxiv.org/abs/2610.17689</a></p>
+<p>VHA 讲注意力结构瘦身。 它想同时压小 KV cache。 还想少算 prefill 的账。 对着 GQA-8，缓存小了四倍。 这是改模型结构，不是改引擎。 来源：<a href="https://arxiv.org/abs/2610.17959">https://arxiv.org/abs/2610.17959</a></p>
+<h2>业内新闻</h2>
+<p>本轮静默。 HN 精确窗口八个词全零命中。 网页搜索翻出的全是旧闻。 Run:ai 开源白天已经报过。 Liquid 新模型也已经报过。 X 和 Reddit 站内搜索零结果。 中文媒体返回的也全是旧文。 社交平台窗口内有三条新帖。 全是入门教学短视频。 讲的还是逐 token 生成科普。 没有新数据，不收。</p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 没有新一期。 最新还是 Jason Ma 那期。 16点版已经报过，不重复。 Simon Willison 也没新文。 最新还是晚上十一点那篇。 18点版和20点版都记过。</p>
+<p>*去重说明：本轮窗口（10/13 20:00→22:00 PDT，epoch 1791946800→1791954000）框架正式版零更新，水位全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、TRT-LLM v1.3.0rc29 预览版（09/29）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19）。llama.cpp 窗口内零新快照，最新仍为 b11609（2026-10-14T00:51:19Z，即 10/13 17:51 PDT），18点版已记。本期论文均为迟到补筛：arXiv 10/14 00:00 UTC 批次（即 10/13 17:00 PDT 公布）含提交于 10/11–10/13 的新论文，20点版时 API 返回 429 限流未能筛查，21:13 的另一档检查亦记录了此缺口；本轮 API 恢复后亲手复查六个方向，确认以下新水位——Optical KV Cache Network 2610.18444（10/13T14:16Z）、RadixFlow 2610.18143（10/13T10:49Z）、SparPR 2610.18140（10/13T10:47Z）、Virtual Head Attention 2610.17959（10/13T08:39Z）、TWP 2610.17689（10/13T04:10Z）、SpecFit 2610.15417（10/11T07:41Z，投机解码水位由 10/09 前移）。六篇标题经全量 briefs grep 确认从未报过。各篇数字均为作者自报：Optical 为真实轨迹仿真加 H100 实测 prefill 时间、非线上部署实测；其余为作者实验结果，本期未独立复核。同批次 Towards Green AI 量化能效一篇（10/13T00:52Z）偏能效评估、与 serving 主线弱相关，不收。disaggregated inference 与 multimodal inference 两方向水位未变（仍为 09/13 与 10/05）。HN Algolia 精确窗口（tags=story）亲手复查：SGLang、KV cache、TensorRT、speculative decoding、LLM inference、llama.cpp、vLLM、LLM 泛搜均零命中。browser.search 其余结果均为窗口外旧闻或厂商对比稿（Run:ai 开源为 10/13 上午旧闻且已报、Liquid LFM2.5 为已报旧闻、Spheron 对比文为旧稿），均剔除。social 搜索窗口内 3 条（03:41Z、03:46Z、04:33Z）均为逐 token 生成入门教学短视频（Architecting Intelligence 等，个位数赞），不收。Spotify 亲手查 Latent Space 节目（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t），status connected，最新仍为 10/13 的 Dyna-2 一期（episode 1MKwsVwjN23Vb0qTw5fvtX），16点版已报。Simon Willison atom 最新仍为 2026-10-13T23:00:06Z，无新增。「值得深读」为 Optical KV Cache Network 一篇，已做精读笔记（含原文 Figure 1/2/3/4）。*</p></body></html>
