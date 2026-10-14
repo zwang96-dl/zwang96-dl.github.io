@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月14日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-14"/>
+<meta name="doc-ts" content="2026-10-14T07:03:26"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-14（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-14（00点版）</h1>
+<p>00点版来了。 这轮框架还是全线安静。 惊喜全在论文那边。 22点版筛过一遍 arXiv。 当时接口还没放全。 今晚又冒出四篇同批次的。 都是 10 月 13 日提交的。 索引这会儿才刷出来。 最贴你主线的一篇讲视觉模型。 它给投机解码换了个选法。</p>
+<h2>框架更新</h2>
+<p>主流框架本轮零正式版。 vLLM、SGLang、TRT-LLM 全没动。 LMDeploy、TGI 也一样。 llama.cpp 窗口内零新快照。 最新还是 b11609。 它在昨天下午就发了。 22点版之前已经记过。</p>
+<h2>新技术与论文</h2>
+<p>先说今晚的头条。 视觉模型用投机解码有个坑。 投机解码就是先猜再验。 先让草稿猜，再让大模型验。 图片、视频、文字混着来。 外挂的小草稿很难猜准。 这篇改用自投机解码。 说白了，大模型自己兼职草稿。 办法是跳几层，或者少看图。 新问题是配置每道题都不同。 留层多猜得准，但也猜得慢。 留层少猜得快，但常被拒。 作者做了个边跑边选的控制器。 名字叫 SP²ec。 它像玩老虎机一样试配置。 试几下就锁定这道题的甜点。 全程不用训练。 在两个 7B 视觉模型上测的。 Qwen2.5-VL 和 LLaVA-NeXT。 三十个组合全部变快。 相对提升最高约 11%。 数字都是作者自报。 先提醒一个前提。 实验只测了 batch 1。 batch 就是一次并行几条请求。 高并发下成不成立还没验。 <strong>值得深读</strong>：已做成精读笔记。 它能帮你给调参清单加一维。 草稿配置原来也能在线搜。 来源：<a href="https://arxiv.org/abs/2610.18735">https://arxiv.org/abs/2610.18735</a></p>
+<p>第二篇给草稿纸分精度。 论文名叫 MultiAlloc。 草稿纸就是 KV cache。 KV 量化就是把草稿记得糙点。 糙一点省显存，但容易记错。 问题是精度预算就这么多。 该花在层上，还是花在词上？ 有的层敏感，要记得细。 有的词关键，也要记得细。 MultiAlloc 先离线摸一遍底。 摸清每层和每个词的脾气。 再按固定显存预算自动分配。 推理时不用在线现搜。 作者说多个模型上都赢了。 赢过只按层、只按词的老办法。 模型含 Llama、Mistral 等。 摘要没给具体百分比。 等全文表格再下结论。 跟你的显存预算账很对口。 来源：<a href="https://arxiv.org/abs/2610.18642">https://arxiv.org/abs/2610.18642</a></p>
+<p>第三篇是快手的注意力升级。 名字叫 Kwai Summary Attention V2。 它把远处上下文压成摘要词。 摘要词就是每段的代表。 老版本有个僵硬处。 每层压缩的段长必须一样。 想按层调压缩率，调不了。 全注意力层还有笔冤枉账。 它不用摘要词，却照样付全价。 prefill 的平方级计算全付了。 V2 让每层用不同的段长。 摘要词还兼职当索引。 顺手把全注意力层的账省了。 KV 压缩和 prefill 降本都沾。 技术报告没给端到端大数字。 细节得翻全文看。 来源：<a href="https://arxiv.org/abs/2610.18654">https://arxiv.org/abs/2610.18654</a></p>
+<p>第四篇讲给推理上保险。 芯片偶尔会算错还不报错。 行话叫静默数据损坏，缩写 SDC。 规模一大，这种错躲不过。 老办法查错的开销不小。 这篇换了个更轻的查法。 用的是柯西-施瓦茨范数界。 稠密层上查错能力保住 99%。 查错开销比老办法降 87%。 但有个明显的短板。 MoE 路由那块只保住 55%。 MoE 就是混合专家模型。 路由算错，影响面不小。 结论是能用，但别全指望它。 来源：<a href="https://arxiv.org/abs/2610.18557">https://arxiv.org/abs/2610.18557</a></p>
+<h2>业内新闻</h2>
+<p>本轮静默。 HN 精确窗口只有两个低分帖。 一个讲图灵完备的理论帖。 一个讲 PS5 上跑 llama.cpp。 都跟 serving 主线无关，不收。 网页搜索翻出的全是旧闻。 Intel 新推理芯片白天报过。 X 和 Reddit 站内搜索零结果。 中文媒体返回的也全是旧文。 社交平台窗口内有四条新帖。 全是科普动画和推广图卡。 讲连续批处理、投机解码入门。 没有新数据，不收。</p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 没有新一期。 最新还是 Jason Ma 那期。 22点版之前已经报过。 Simon Willison 也没新文。 最新还是 10 月 13 日那篇。 讲 Anthropic 改源码管理的。 22点版之前已经记过。</p>
+<p>*去重说明：本轮窗口（10/13 22:00→10/14 00:00 PDT，epoch 1791954000→1791961200）框架正式版零更新，水位全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、TRT-LLM v1.3.0rc29 预览版（09/29）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19）。llama.cpp 窗口内零新快照，最新仍为 b11609（2026-10-14T00:51:19Z，即 10/13 17:51 PDT），18点版已记。本期四篇论文均为迟到补筛：同属 arXiv 10/14 00:00 UTC 批次（10/13 17:00 PDT 公布），提交于 10/13 白天（SP²ec 17:08Z、Kwai Summary Attention V2 16:18Z、MultiAlloc 16:10Z、Cauchy-Schwarz SDC 15:30Z），22点版复查时 API 搜索索引尚未刷出这四篇，本轮亲手复查六个方向才见新水位——speculative decoding 水位由 SpecFit（10/11）前移至 SP²ec（10/13），KV cache 水位由 Optical（10/13T14:16Z）前移至 Kwai V2（10/13T16:18Z）；disaggregated inference（09/13）与 multimodal inference（10/05）水位未变。四篇标题经 briefs 全量 grep 确认从未报过。各篇数字均为作者自报、本期未独立复核：SP²ec 的 batch 1 前提与含试探开销口径已在正文与精读笔记中标明；MultiAlloc 与 Kwai V2 摘要未给出端到端百分比，正文已如实说明。HN Algolia 精确窗口（tags=story）亲手复查：SGLang、KV cache、TensorRT、speculative decoding、LLM inference 均零命中；vLLM 名下 2 条（LLMs Are Turing-Complete、LeanLLM SDK，各 1 分）与 llama.cpp 名下 1 条（PS5 跑 GGUF 展示帖，1 分）均与 serving 主线无关，不收。browser.search 其余结果均为窗口外旧闻或厂商稿（Spheron 对比文、GPU 云比价文、Intel D270 报道为 10/13 白天旧闻且已报），均剔除。social 搜索窗口内 4 条（05:22Z、05:32Z、05:37Z、06:48Z）均为连续批处理科普动画、.NET 学习路线推广、PagedAttention 风格图卡与投机解码入门推广，不收。Spotify 亲手查 Latent Space 节目（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t），status connected，最新仍为 10/13 的 Dyna-2 一期（episode 1MKwsVwjN23Vb0qTw5fvtX），已报。Simon Willison atom 最新仍为 2026-10-13T23:00:06Z，无新增。「值得深读」为 SP²ec 一篇，已做精读笔记（含原文 Figure 1/2/3，代码仓库已核到原文给出的链接）。*</p></body></html>
