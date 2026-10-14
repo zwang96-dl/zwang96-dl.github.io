@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月14日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-14"/>
+<meta name="doc-ts" content="2026-10-14T17:00:54"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-14（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-14（10点版）</h1>
+<p>10点版来了。 这轮有一条真更新。 英伟达的推理引擎出候选版了。 其余渠道基本安静。</p>
+<h2>框架更新</h2>
+<p>主角是 TensorRT-LLM。 它出了 1.4.0 的候选版。 版号是 1.4.0rc0。 今早 09:35 刚发布的。 我用 GitHub 接口核过了。 它是预发布版，不是正式版。 先别急着上生产环境。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.4.0rc0">https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.4.0rc0</a></p>
+<p>先说跟你最相关的。 你正在看 P/D 解耦。 P/D 解耦就是分工流水线。 读题和答题分开用机器。 这版给视觉模型加了交接。 编码、预填充、解码能分工。 行话叫 EPD 分离。 Nemotron 视觉模型先用上。 稀疏 KV 也能往外卸载了。 KV cache 就是模型的草稿纸。 草稿太多时，先挪一部分出去。 它还接入了 Mooncake 存储池。 Mooncake 是个月之暗面的缓存层。 解耦传 KV 时也更稳了。 传一半的块不会被误用。 多模态调度卡死也修了。</p>
+<p>其他亮点也不少。 新模型一口气加了几个。 有 GLM-5.3-Flash。 还有 MiniMax-M3。 它能用 NVFP4 存 KV。 NVFP4 是一种更省显存的格式。 投机解码也更好查了。 投机解码就是先猜再验。 现在每条请求能报接受率。 猜得准不准，一眼能看到。</p>
+<p>划重点，说两个坑。 这版有两个破坏性改动。 老接口升级前先看说明。 已知问题清单也不短。 H100 多卡可能卡在启动。 Blackwell 上部分模型会崩。 候选版就是给大家试错的。 等正式版再认真评估不迟。</p>
+<p>其余几家都没动。 vLLM 正式版还是 0.31.0。 SGLang 还是 0.5.21 版。 LMDeploy 和 TGI 也持平。 llama.cpp 还是 b11617。 06点版已经记过了。</p>
+<h2>新技术与论文</h2>
+<p>论文这轮没有新的。 arXiv 七个方向都复查了。 水位跟 08点版一字不差。 投机解码最新还是 SP²ec。 多图方向最新还是 mmVB。 白天才有新一批入库。 这个时段不硬凑论文。</p>
+<h2>业内新闻</h2>
+<p>本轮基本静默。 HN 窗口里只有一条旧面孔。 还是 Torvalds 用模型写补丁。 跟 serving 主线无关，不收。 X 和 Reddit 还是零结果。 中文媒体返回的全是旧文。 社交平台这轮零帖子。 没有新数据，不硬凑。</p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 没有新一期。 最新还是 Jason Ma 那期。 前面已经报过了。 Simon Willison 有一篇新文。 今早 09:26 发的。 讲 AI 批量反编译游戏。 跟推理服务无关，不收。</p>
+<p>本期不标「值得深读」。 候选版是更新清单，不是论文。 没有图表可以拆解。 跟你相关的点已挑完了。 想看全量清单点来源链接。</p>
+<p>*去重说明：本轮窗口（10/14 08:00→10:00 PDT，epoch 1791990000→1791997200）唯一新发布为 TensorRT-LLM v1.4.0rc0（2026-10-14T16:35:44Z，即 09:35 PDT，预发布版），经 gh API 亲手核验，此前水位为 v1.3.0rc29（09/29）；正文亮点为对官方 release notes 的中文概括，未大段转述原文。其余框架正式版全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19），llama.cpp 最新仍 b11617（05:53 PDT，06点版已记）。arXiv 亲手复查七个方向水位全未动：speculative decoding 仍 SP²ec（2610.18735）、KV cache 方向仍 MultiAlloc（2610.18642）、visual tokens 仍 mmVB（2610.18858）、disaggregated inference 仍 09/13、multimodal inference 仍 10/05、LLM inference 仍 MultiAlloc、prefill 仍 Optical KV（2610.18444）。HN Algolia 精确窗口亲手复查（首轮 Python 请求被远端断开后用 curl 重试成功）：SGLang、KV cache、TensorRT-LLM 均零命中，vLLM 名下仅 Torvalds 补丁帖（此前窗口已见、无关主线），不收。browser.search 其余结果均为窗口外旧稿（引擎对比文、2023 年 TensorRT-LLM 发布旧闻等），均剔除。X、Reddit 站内搜索零结果；中文媒体返回全是旧文。social 搜索（since 2026-10-14）零帖子返回。Spotify 亲手查 Latent Space 节目（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t），status connected，最新仍为 10/13 的 Dyna-2 一期（episode 1MKwsVwjN23Vb0qTw5fvtX），已报。Simon Willison atom 窗口内有一篇新文（2026-10-14T16:26:53Z，即 09:26 PDT，AI 反编译游戏），与 serving 主线无关，不收。无「值得深读」内容，本期不做深读笔记。*</p></body></html>
