@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月13日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-13"/>
+<meta name="doc-ts" content="2026-10-14T03:00:47"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-13（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-13（20点版）</h1>
+<p>20点版来了。 这轮框架和论文还是安静。 只有一条迟到的好料值得说。 谷歌新模型帮 vLLM 提了速。 主角是 Gemma 的小模型。 数字是谷歌自报，先打个问号。</p>
+<h2>框架更新</h2>
+<p>主流框架本轮零正式版。 vLLM、SGLang、TRT-LLM 全没动。 LMDeploy、TGI 也一样。 llama.cpp 本轮零新快照。 最新还是 b11609。 它在下午五点五十一就发了。 18点版已经记过一笔。</p>
+<h2>新技术与论文</h2>
+<p>本轮没有可确认的新论文。 arXiv 接口这轮被限流了。 它直接回了 429 错误。 按规矩我停手没硬刷。 网页搜索也没翻到新论文。 搜到的全是九月底旧文。 已知最新水位还是老样子。 论文还停在十月八九日那批。</p>
+<h2>业内新闻</h2>
+<p>谷歌今天发了新旗舰模型。 名字叫 Gemini 4 Argon。 Argon 是谷歌新一代大模型。 这篇博文上午九点就发了。 白天各期都没收它的干货。 今晚 Threads 上有人转帖。 我顺藤摸瓜核到了原文。 这才把 serving 这段补上。 serving 就是在线推理服务。 划重点在下面这一段。 谷歌说 Argon 帮了个大忙。 它去改 vLLM 的推理代码。 优化对象是 Gemma 4 E2B。 E2B 是 Gemma 的端侧小模型。 端侧就是在本地设备上跑。 测试用的卡是一张 A100。 吞吐从约 3.79 万涨到 10.8 万。 单位是每秒生成的 token 数。 token 就是模型处理的文字块。 算下来提速约 2.85 倍。 谷歌还说输出一个字没变。 它说质量也没有下降。 改动从注意力调优一路做。 一直做到投机解码那层。 投机解码就是先猜再验。 先让小模型猜，再让大模型验。 谷歌说改动已提上游 PR。 PR 就是给开源项目交的改法。 这跟你评 vLLM 直接相关。 有空值得翻一下 PR 列表。 看看它到底动了哪几处。 但先说清一个前提。 以上数字全是谷歌自报。 目前没有独立实测复核。 别直接拿去当选型依据。 来源：<a href="https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-argon/">https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-argon/</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Jason Ma 那期。 16点版已经报过，不重复。 Simon Willison 也没新文。 最新还是 18点版看过的那篇。 Reddit 和 X 都没新文。 中文媒体也没新报道。</p>
+<p>本期不标「值得深读」。 谷歌这篇是发布博文。 它只给了结论数字。 具体 PR 还没逐条核完。 硬写深读容易注水，不写。</p>
+<p>*去重说明：本轮窗口（10/13 18:00→20:00 PDT，epoch 1791939600→1791946800）正式版零更新，水位全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、TRT-LLM v1.3.0rc29 预览版（09/29）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19）。llama.cpp 窗口内零新快照，最新仍为 b11609（2026-10-14T00:51:19Z，即 10/13 17:51 PDT），已在 18点版记过。arXiv 本轮特殊情况如实说明：API 查询返回 429 限流及多次超时，按硬停规则未再重试该接口，故本轮无法亲手复核 arXiv 入库；browser.search 搜推理、KV cache、投机解码方向只翻到 9/30 及更早旧文，已知最新水位仍为 18点版核验过的那批（LLM inference 最新 10/08、KV cache 最新 10/09、speculative decoding 最新 10/09、disaggregated inference 最新 09/13、multimodal inference 最新 10/05、prefill/decode 最新 10/09）。HN Algolia 精确窗口（tags=story）亲手复查：SGLang、KV cache、TensorRT、speculative decoding、LLM inference、llama.cpp 均零命中；LLM 泛搜命中均为低分个人展示帖（Membrane 本地 LLM 记忆工具 02:33Z、3 分；代码翻译研究帖等），与推理服务无关，不收。本期唯一收录为 Google 官方博文（datePublished 2026-10-13T16:00:00Z，即 09:00 PDT），经全天各期 briefs grep 确认 Argon、Gemini 4、Gemma 4 此前从未报过；白天 Simon Willison 的 llm-gemini 0.35 一文只被当作工具小更新剔除，其背后的 Argon 发布及 vLLM 优化段落未被收录。今晚窗口内 Threads 转帖（2026-10-14T02:02:33Z，@leobumjin，截图转述同一组数字）翻出此事后，已回溯核到 Google 一手原文才收录，并在正文标注发布时间与自报属性；文中 2.85 倍、约 37,900→108,000 token/s、100% token parity 等均为 Google 自报，本期未独立复核，其所称上游 PR 未逐条核验。browser.search 其余结果均为窗口外旧闻：Decisions API 汇总（10/06–10/10，10点版已剔除）、d-Matrix 投资传闻（10/08 报道）、RTX 5090 停产传闻（10/10）等，均不收。Reddit、X 站内搜索零结果；中文媒体返回均为旧文。social 搜索窗口内 7 条均为教学图卡与推广内容（KV Cache 科普图卡 01:35Z、GPUStack 推广短视频 01:03Z、AirLLM 推广短视频 01:00Z、RAG 流程教学图 02:42Z、LLM 入门推广视频 02:30Z、推理概念教学短视频 01:32Z，及上述 Argon 转帖 02:02Z），除 Argon 转帖引出原文核验外均不收。Spotify 亲手查 Latent Space 节目（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t），status connected，最新仍为 10/13 的 Dyna-2 一期（episode 1MKwsVwjN23Vb0qTw5fvtX），16点版已报。Simon Willison atom 最新仍为 2026-10-13T23:00:06Z 的 Anthropic 源码管理一篇，无新增。无「值得深读」内容，本期不做深读笔记。*</p></body></html>
