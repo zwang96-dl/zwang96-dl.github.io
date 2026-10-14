@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月14日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-14"/>
+<meta name="doc-ts" content="2026-10-14T14:59:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-14（08点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-14（08点版）</h1>
+<p>08点版来了。 这轮只有一条真东西。 讲 vLLM 下一版的安全改动。 其余渠道还是全线安静。</p>
+<h2>框架更新</h2>
+<p>正式版这轮还是零更新。 vLLM 稳定版还是 0.31.0。 SGLang 还是 0.5.21 版。 其余几家水位也没动。 llama.cpp 窗口内没新快照。 最新还是凌晨的 b11617。 06点版已经记过了。</p>
+<p>但预发布版有个动静。 vLLM 的 0.32 还在候选阶段。 候选版号是 0.32.0rc0。 我用 GitHub 标签核过了。 它确实存在，不是传闻。 正式版还没发，先别升级。 真正值得看的是里面一项改动。 今早一篇实测文刚讲透它。 文章今早 06:42 发的。 刚好落在这轮窗口里。 来源：<a href="https://dev.to/sampop3/vllm-032-stops-letting-any-website-call-your-model-server-1604">https://dev.to/sampop3/vllm-032-stops-letting-any-website-call-your-model-server-1604</a></p>
+<p>说白了，是个大门问题。 CORS 就是网页的门禁规则。 老版默认对所有网页敞开。 你随便打开一个陌生网页。 它就能偷调你本机的模型。 还能把回答直接读走。 新版默认把门关上了。 默认名单改成空名单。 只有你点名的网页能调。 非浏览器的调用不受影响。 curl 和官方工具照常用。 划重点：现在就能自保。 不用等 0.32 正式版。 在 0.31 上手动设名单就行。 没网页直连就设成空名单。 再配上接口密钥更稳。 但门禁不等于门锁。 文章也提醒了这一点。 有些请求仍能直达服务。 服务别裸奔上公网。 前面最好再加一层代理。</p>
+<h2>新技术与论文</h2>
+<p>论文这轮没有新的。 arXiv 七个方向都复查了。 水位跟 06点版一字不差。 投机解码最新还是 SP²ec。 多图方向最新还是 mmVB。 白天才有新一批入库。 这个时段不硬凑论文。</p>
+<h2>业内新闻</h2>
+<p>本轮基本静默。 HN 窗口里有几条低分帖。 一条讲统一推理小工具。 只有 2 分，热度太低。 先记下，不单独收录。 X 和 Reddit 还是零结果。 中文媒体返回的全是旧文。 社交平台窗口内有十几条。 全是科普动画和推广帖。 没有新数据，不收。</p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 没有新一期。 最新还是 Jason Ma 那期。 前面已经报过了。 Simon Willison 也没新文。 最新还是 10 月 13 日那篇。</p>
+<p>本期不标「值得深读」。 唯一新内容是操作提醒。 它是上手清单，不是论文。 照着设一遍就够了。</p>
+<p>*去重说明：本轮窗口（10/14 06:00→08:00 PDT，epoch 1791982800→1791990000）框架正式版零更新，水位全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、TRT-LLM v1.3.0rc29 预览版（09/29）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19），均经 gh API 复核。llama.cpp 窗口内零新快照，最新仍为 b11617（2026-10-14T12:53:33Z，即 05:53 PDT），06点版已记。收录的 dev.to 一文发布于 2026-10-14T13:42:01Z（即 06:42 PDT，窗口内），此前各期经 briefs 全量 grep 确认从未报过 CORS 或 0.32 相关内容；文中两项关键事实已亲手核验：GitHub 标签 v0.32.0rc0 确实存在（注：它只是标签，未建 GitHub Release 条目，所以 releases 列表里看不到），安全提交 fcae5c9（#61009，2026-10-11T08:26:02Z）确实存在；候选版 10 月 12 日发布一说为原文说法，未独立核到精确时间。文中复现实验为作者自报（作者注明未真跑 GPU 上的 vLLM），正文已按操作提醒定位。arXiv 亲手复查七个方向水位全未动：speculative decoding 仍 SP²ec（2610.18735）、KV cache 仍 Kwai Summary Attention V2（2610.18654）、visual tokens 仍 mmVB（2610.18858）、disaggregated inference 仍 09/13、multimodal inference 仍 10/05、LLM inference 仍 MultiAlloc（2610.18642）、prefill 仍 Optical KV（2610.18444）。HN Algolia 精确窗口亲手复查：SGLang、KV cache、speculative decoding 均零命中；vLLM 与 LLM inference 名下命中含 Tessaract 统一推理层帖（2 分）与 Torvalds 等无关帖，均不收。browser.search 其余结果均为窗口外旧稿（Mooncake 与 SGLang 安全类旧文、Spheron 对比文等），均剔除。X、Reddit 站内搜索零结果；中文媒体返回全是旧文。social 搜索窗口内帖子均为 KV cache 科普动画、引擎对比图卡与入门推广，无新数据，不收。Spotify 亲手查 Latent Space 节目（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t），status connected，最新仍为 10/13 的 Dyna-2 一期（episode 1MKwsVwjN23Vb0qTw5fvtX），已报。Simon Willison atom 最新仍为 2026-10-13T23:00:06Z，无新增。无「值得深读」内容，本期不做深读笔记。*</p></body></html>
