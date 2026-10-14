@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月13日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-13"/>
+<meta name="doc-ts" content="2026-10-14T00:59:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-13（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-13（18点版）</h1>
+<p>18点版看完了，这轮没啥值得报的。 下午四点到六点这个窗口。 框架、论文、新闻还是全线安静。 只有 llama.cpp 在刷日快照。 16点版那期播客还是今天最后的热闹。</p>
+<h2>框架更新</h2>
+<p>主流框架本轮零正式版。 vLLM、SGLang、TRT-LLM 全没动。 LMDeploy、TGI 也一样。 llama.cpp 窗口内出了三个新快照。 从 b11607 一路到 b11609。 最新一版是下午五点五十一发的。 但它们只是每日快照，不是正式版。 按老规矩，只记一笔，不细看。</p>
+<h2>新技术与论文</h2>
+<p>本轮静默。 arXiv 窗口内零新入库。 亲手查了六个方向。 推理、KV cache、PD 解耦都查了。 KV cache 就是模型的草稿纸。 PD 解耦就是前后工序分工干。 投机解码和多模态推理也查了。 最新论文还停在 10 月 8 日和 9 日。 新批次要等后面再看。</p>
+<h2>业内新闻</h2>
+<p>本轮基本静默。 HN 精确窗口只有两条命中。 一条是给 AI 用的网页爬虫展示帖。 一条是本地记账 App 的展示帖。 两个都是个人小项目，不收。 Liquid AI 今天发了个新模型。 名字叫 LFM2.5-24B-A2B。 它是个端侧智能体模型。 端侧就是在你自己设备上跑。 这事 12点版就已经扫到过。 当时只有营销短视频，没有一手数据。 这轮翻到的是同一天的转载报道。 数字全是厂商自报，没有独立实测。 不在这轮重复报，记一笔就行。 Reddit、X、中文媒体都没新文。 社交平台窗口内只有四条内容。 全是教学图卡和推广短视频。 没有新版本，也没有新数据，不收。</p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 最新还是今天那期。 嘉宾 Jason Ma 聊机器人 Dyna-2。 16点版已经报过，不重复。 Simon Willison 窗口内有两篇新文。 一篇讲他的 llm 工具小更新。 一篇讲 Anthropic 怎么改源码管理。 源码管理就是存代码的那套系统。 两篇都跟推理服务无关，不收。</p>
+<p>本期不标「值得深读」。 没有新论文，也没有新深度文。 硬凑一篇不如不写。</p>
+<p>*去重说明：本轮窗口（10/13 16:00→18:00 PDT，epoch 1791932400→1791939600）正式版零更新，水位全持平：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、TRT-LLM v1.3.0rc29 预览版（09/29）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19）。llama.cpp 窗口内有三个日快照 b11607（00:18Z）、b11608（00:35Z）、b11609（00:51Z），按惯例日快照不算正式发版，仅记一笔。arXiv 亲手核验窗口内零入库（LLM inference 最新 10/08、KV cache 最新 10/09、speculative decoding 最新 10/09、disaggregated inference 最新 09/13、multimodal inference 最新 10/05、prefill/decode 最新 10/09）。HN Algolia 精确窗口（tags=story）：SGLang、LLM inference、KV cache、llama.cpp、TensorRT、speculative decoding 均零命中；LLM 名下 2 条为 Jevcrawl 爬虫展示帖（23:35Z、4 分）与 Pulse Local 本地记账 App 展示帖（23:13Z、29 分），均与推理服务无关，不收。browser.search 翻出的 Liquid AI LFM2.5-24B-A2B 报道（unite.ai、cryptobriefing 等）均为 10/13 当天发布的转载，模型本身 12点版已扫到并因无一手 serving 数据剔除，其端侧与 B300 吞吐数字均为厂商自报、无独立实测，本轮不重复报；NVIDIA Run:ai 开源为已报旧闻，AWS HyperPod Inference Gateway 为 9/18 旧闻，均剔除。Reddit、X 站内搜索零结果；中文媒体返回均为旧文。social 搜索窗口内 4 条均为教学图卡与推广内容（LangChain 图卡 23:48Z、LLM 工程师路线图短视频 00:00Z、DECISION 3.0 推广图卡 00:09Z、bitnet.cpp 推广短视频 00:37Z），不收。Spotify 亲手查 Latent Space 节目（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t），最新仍为 10/13 的 Dyna-2 一期（episode 1MKwsVwjN23Vb0qTw5fvtX），16点版已报。Simon Willison atom 窗口内有 llm-gemini 0.35（22:28Z）与 Redesigning source control at Anthropic（23:00Z）两篇，均与推理服务无关，不收。无「值得深读」内容，本期不做深读笔记。*</p></body></html>
