@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月14日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-14"/>
+<meta name="doc-ts" content="2026-10-15T04:59:57"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-14（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-14（22点版）</h1>
+<p>22点版有干货了。 arXiv 新一批今晚刚入库。 前两期没刷出来，这期补上。 一篇 KV 压缩的结果很扎眼。 已标深读，笔记随后就到。</p>
+<h2>框架更新</h2>
+<p>本轮正式版还是全没动。 vLLM 还是 0.31.0 版。 SGLang 还是 0.5.21 版。 LMDeploy 和 TGI 也持平。 英伟达候选版是 10点版报的。 这轮没有新候选版。</p>
+<p>llama.cpp 窗口内出了四个快照。 从 b11632 一直到 b11636。 最新一个是 21:50 发的。 按老规矩，快照不算正式版。 简单记一笔水位就行。</p>
+<h2>新技术与论文</h2>
+<p><strong>清华这篇把草稿纸练小了。</strong> 新论文叫 Latent Compaction。 KV 缓存就是模型的草稿纸。 它不删草稿，而是重新练一份。 练的时候模型本体完全冻结。 只拿跟文档有关的通用问题练。 后面的真问题它事先看不到。 RULER 测试里压缩 32 倍。 精度还有 96.7%。 同场对手 KVZip+ 只剩 40%。 数字都是作者自报。 代价是每份文档要先练一轮。 只适合会被反复问的文档。 来源：<a href="https://arxiv.org/abs/2610.20582">https://arxiv.org/abs/2610.20582</a></p>
+<p><strong>投机解码这轮连出两篇。</strong> 投机解码就是先猜再验。 像实习生打草稿，专家来改。 ReaDy 瞄准混合线性注意力模型。 它拿循环状态当草稿的上下文。 循环状态就是模型的小记事本。 在 B200 上平均快 3.16 倍。 比 DSpark 吞吐再高约 8%。 来源：<a href="https://arxiv.org/abs/2610.20503">https://arxiv.org/abs/2610.20503</a></p>
+<p><strong>FOLD 专治长文的投机解码。</strong> 草稿模型多半在短文上练的。 一碰长文，接受率就往下掉。 FOLD 完全不用重新训练。 近处的位置信息原样保留。 远处条目统一当远期记忆看。 上下文最长测到 25.6 万 token。 最好情况加速从 2.08 倍翻到 4.22 倍。 来源：<a href="https://arxiv.org/abs/2610.20392">https://arxiv.org/abs/2610.20392</a></p>
+<p><strong>多模态这边有一篇剪视觉 token 的。</strong> STP-GUI 服务的是网页操作智能体。 截图又大，历史又长，token 很烧。 老剪法各剪各的，容易剪碎按钮。 它按空间窗口成片地选和剪。 只留 21% 的 token 时。 还能保住 77.7% 的完整表现。 延迟降 31%，计算量降 57%。 来源：<a href="https://arxiv.org/abs/2610.20390">https://arxiv.org/abs/2610.20390</a></p>
+<p><strong>同批还有两篇，简单记一笔。</strong> JetSpec++ 把起草成本藏进流水线。 号称最高比自回归快 7.45 倍。 PN-Mix 给 Key 缓存做混合精度量化。 按通道对的重要性分配比特数。 两篇数字同样是作者自报。 来源：<a href="https://arxiv.org/abs/2610.19792">https://arxiv.org/abs/2610.19792</a> 来源：<a href="https://arxiv.org/abs/2610.19605">https://arxiv.org/abs/2610.19605</a></p>
+<h2>业内新闻</h2>
+<p>本轮静默。 HN 窗口里没有正经新帖。 命中的全是评论里的顺带提及。 X 和 Reddit 还是零结果。 中文媒体返回的全是旧文。 社交平台没查到窗口内新帖。 搜索冒出的安全旧闻都在窗口外。 一篇讲 Mooncake 的已过期漏洞。 一篇讲 SGLang 的反序列化风险。 都是几天前的，不重复报。</p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 没有新一期。 最新还是 Leash Bio 那期。 14点版已经记过了。 Simon Willison 也没新动态。 最新一篇还是讲小游戏的。 跟推理服务主线无关。</p>
+<p>本期标一篇「值得深读」。 就是 Latent Compaction 那篇。 它能帮你看 KV 压缩的新上限。 也提醒你算单次文档的摊销账。 深读笔记随后生成并上站。</p>
+<p>*去重说明：本轮窗口（10/14 20:00→22:00 PDT，epoch 1792033200→1792040400）框架正式版零更新，经 gh API 亲手复核：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02）、LMDeploy v0.18.0（09/28）、TGI v3.3.7（2025-12-19）全持平；TensorRT-LLM 仍 v1.4.0rc0（10点版已报）。llama.cpp 窗口内新快照 b11632（03:20Z）、b11633（03:37Z）、b11635（03:58Z）、b11636（04:50Z），按惯例只记水位。arXiv 本轮亲手复核：00:00 UTC 10/15 批次（17:00 PDT 公布）四篇经 id_list 逐篇取摘要核验——Latent Compaction（2610.20582）、ReaDy（2610.20503）、FOLD（2610.20392）、STP-GUI（2610.20390）；该批次 18点版与 20点版未刷出（20点版 arXiv 查询被 429 限流），本期作迟到补收；同批 JetSpec++（2610.19792）与 PN-Mix（2610.19605）只作一笔带过。方向查询确认：解耦方向最新仍 OpWeave（09/13），prefill 方向无更新入库。HN Algolia 精确窗口亲手复查：SGLang、KV cache、TensorRT、llama.cpp、speculative decoding 均零命中；vLLM 的 20 条命中全是评论顺带提及旧帖，无新帖。browser.search 的 X 站内零结果，其余结果均为窗口外旧稿（Mooncake 安全文 11 天前、SGLang CVE 文 5 天前、Chainguard 文 10/13，均已过期不重复报）。social 搜索（since 2026-10-14）未见窗口内可收的新帖。Spotify 亲手查 Latent Space 节目（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t），status connected，最新仍为 Leash Bio 一期（4gxrKxKiYM9XVmnc0AhM6V），14点版已记。Simon Willison atom 最新仍为 Tree Appreciator（2026-10-14T21:23:01Z，在本窗口之前）。「值得深读」为 Latent Compaction，深读笔记含原文 Figure 1/2。*</p></body></html>
