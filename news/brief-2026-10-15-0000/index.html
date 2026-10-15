@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月15日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-15"/>
+<meta name="doc-ts" content="2026-10-15T06:58:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-15（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-15（00点版）</h1>
+<p>00点版来了。 这轮框架还是静默。 只有 llama.cpp 在动。 另有一条权重开放补收。 时间我先说清楚。 不冒充是刚发生的。</p>
+<h2>框架更新</h2>
+<p>本轮正式版全都没动。 vLLM 还是 0.31.0 版。 SGLang 还是 0.5.21 版。 LMDeploy 和 TGI 也持平。 英伟达候选版是 10点版报的。 这轮没有新候选版。</p>
+<p>llama.cpp 窗口内出三个快照。 分别是 b11639 到 b11641。 最新一个 23:53 发的。 按老规矩，快照不算正式版。 简单记一笔水位就行。</p>
+<h2>新技术与论文</h2>
+<p>本轮没有确认到新论文。 arXiv 最新还是昨天那批。 打头的就是 Latent Compaction。 22点版已经报过并深读了。 下一批要等今天 17 点。 这个时段不硬凑论文。</p>
+<h2>业内新闻</h2>
+<p><strong>阶跃把大模型权重开放了。</strong> 这条是补收，先说时间。 模型 9 月 20 日就发布了。 权重原定 10 月 15 日开放。 中文报道上午陆续出来。 换成太平洋时间是昨晚。 上一期搜索没刷出来。 这期补上，不装新消息。</p>
+<p>模型叫 Step 5 Preview。 总参数 600B，个头很大。 MoE 就是一堆专家轮流干活。 每个 token 只激活 27B。 上下文最长 100 万 token。 原生能看文本和图片。 还支持视频输入。 权重有 BF16 和 FP8 两版。 FP8 就是用 8 位数存权重。 显存和带宽都更省。 权重已上两个开源平台。 部署可走 vLLM 或 SGLang。 接口兼容 OpenAI 那套。</p>
+<p>对你来说，重点在 serving。 又来一个大 MoE 要部署。 百万上下文下 KV 才是大头。 KV 缓存就是模型的草稿纸。 FP8 版值得拿来对照测。 数字都来自厂商和转述。 没有独立实测，先别当结论。 来源：<a href="https://www.ifanr.com/digest/1684406">https://www.ifanr.com/digest/1684406</a> 来源：<a href="https://finance.sina.cn/2026-10-15/detail-inivhpns4577279.d.html">https://finance.sina.cn/2026-10-15/detail-inivhpns4577279.d.html</a></p>
+<p><strong>同日还有一个开源，记一笔。</strong> 蚂蚁百灵开源了新模型。 模型叫 Ling-3.1-flash。 总参数约 560B。 每个 token 激活约 25B。 上下文最高也标 1M。 它披露的细节少得多。 先记一笔，不展开。 来源：<a href="https://finance.sina.cn/7x24/2026-10-15/detail-inivhiew1374096.d.html">https://finance.sina.cn/7x24/2026-10-15/detail-inivhiew1374096.d.html</a></p>
+<h2>访谈与深度</h2>
+<p>本轮静默。 Latent Space 没有新一期。 最新还是 Leash Bio 那期。 14点版已经记过了。 Simon Willison 也没新动态。 最新一篇还是讲小游戏的。 跟推理服务主线无关。</p>
+<p>本期不标「值得深读」。 阶跃只有转述材料可核。 没有原文图表能提取。 硬凑深读不如不写。 等原文和模型卡可核再说。</p>
+<p>*去重说明：本轮窗口（10/14 22:00→10/15 00:00 PDT，epoch 1792040400→1792047600）框架正式版零更新，经 gh API 亲手复核：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02，sgl-project/sglang）、LMDeploy v0.18.0（09/28，InternLM/lmdeploy）、TGI v3.3.7（2025-12-19）全持平；TensorRT-LLM 仍 v1.4.0rc0（10/14 16:35Z，10点版已报）。llama.cpp 窗口内新快照 b11639（06:04Z，即 23:04 PDT）、b11640（06:28Z）、b11641（06:53Z），按惯例只记水位。arXiv 四个方向查询亲手复核（KV cache、speculative decoding、disaggregated inference、multimodal inference）：最新仍为 10/14 17:57Z 的 Latent Compaction（2610.20582，22点版已报），解耦方向最新仍 Prorsa（2610.16592，10/12），窗口内无新入库。HN Algolia 精确窗口亲手复查：SGLang、KV cache、llama.cpp、inference 均零命中；vLLM 仅命中无关旧帖（RenkuOS 等，2 分，不收）。browser.search 的 X、Reddit 站内零结果；通用搜索全是旧对比文。中文媒体补收两条：Step 5 Preview 权重开放（爱范儿 10/15 12:05 北京时间、澎湃经新浪 10/15 11:56 北京时间，均约合 10/14 晚间 PDT，属上一窗口冒头、22点版搜索未刷出，本期如实标补收，规格经爱范儿与新浪两源交叉核对）；Ling-3.1-flash 开源（新浪 10/15 10:45 北京时间）只记一笔。英特尔推理微服务文（10/14 消息）已过期，不收。social 搜索（since 2026-10-14）窗口内仅 06:41/06:44 UTC 两条通用信息图（LLM 工程科普），非新动态，不收。Spotify 亲手查 Latent Space 节目（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t），status connected，最新仍为 Leash Bio 一期（4gxrKxKiYM9XVmnc0AhM6V），14点版已记。Simon Willison atom 最新仍为 Tree Appreciator（2026-10-14T21:23:01Z，窗口之前）。无「值得深读」内容：Step 5 仅有中文转述可核、无原文图表可提取，按宁缺毋滥本期不做深读笔记。*</p></body></html>
