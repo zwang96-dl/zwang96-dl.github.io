@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月15日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-15"/>
+<meta name="doc-ts" content="2026-10-15T19:00:20"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-15（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-15（12点版）</h1>
+<p>12点版来了。 这轮有两条真东西。 一条是 llama.cpp 出正式版。 一条正中你的 P/D 解耦。</p>
+<h2>框架更新</h2>
+<p><strong>llama.cpp 出了 v0.7.0 正式版。</strong> 这是它的第二个语义版本号。 上一个正式版还是 10 月 5 日。 这次干货主要在 MoE 上。 MoE 就是一堆专家轮流干活。 专家放主机内存时有个新招。 GPU 里开个小缓存存常用专家。 常用的留在卡上随取随用。 官方说解码最多快约 2.2 倍。 数字是官方自报，先记着。 投机解码也加了新打法。 名字叫 LiliCorr。 它是给草稿再加一层筛选。 还有 GLM5-Next 的 MTP 支持。 MTP 就是一次猜好几个词。 新模型也一口气加了一批。 多模态的 MiniCPM-V 4.7 在列。 EmbeddingGemma-2 也支持了。 它能算文本、图像和音频。 有个小坑要提前说一声。 服务默认端口改成了 9931。 原来是 8080，升级要改配置。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/v0.7.0">https://github.com/ggml-org/llama.cpp/releases/tag/v0.7.0</a></p>
+<p>其他几家正式版都没动。 vLLM 还是 0.31.0 版。 SGLang 还是 0.5.21 版。 其余几家也都持平。</p>
+<h2>新技术与论文</h2>
+<p><strong>草稿纸改直送，首字快三倍。</strong> 这是 vLLM 官方的新博客。 讲的是 P/D 解耦的 KV 搬运。 P/D 解耦就是分工流水线。 KV 缓存就是模型的草稿纸。 老办法是拉式，收货方去取。 取之前还要来回对单子。 新办法是推式，发货方直送。 收货方提前报好存放位置。 草稿一算完就直接发出。 准备杂活交给后台线程。 主循环一点都不被耽误。 实测用的是 Qwen3-32B。 一台读题，一台续写。 高负载下首字等约 1.7 秒。 推式只要约 0.54 秒。 差不多快了 3 倍。 每词延迟也稳住了三成。 数字是作者自报。 代价是收货机要更早定好。 临时按负载选机的自由变少。 这篇能帮你算搬运协调账。 跟你 autotuner 的选机时机相关。 深读笔记已经做好了。 原文四张图都在笔记里。 来源：<a href="https://vllm.ai/blog/2026-10-14-nixl-push-connector">https://vllm.ai/blog/2026-10-14-nixl-push-connector</a></p>
+<p>本轮没有新论文入库。 arXiv 最新还是昨天那批。 下一批要等今天 17 点。 这个时段不硬凑论文。</p>
+<h2>业内新闻</h2>
+<p>本轮没有确认到大新闻。 中文媒体也没有新动态。 10点版之后没有新料。 这轮就不重复炒冷饭了。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 前面几期已经报过了。 Simon Willison 也没更新。 X 和 Reddit 本轮零结果。 社交平台没有一手新动态。</p>
+<p>*去重说明：本轮窗口（10/15 10:00→12:00 PDT，epoch 1792083600→1792090800）经 gh API 亲手复核：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02，sgl-project/sglang）、TensorRT-LLM v1.4.0rc0（10/14，已报）、LMDeploy v0.18.0（09/28，InternLM/lmdeploy）、TGI v3.3.7（2025-12-19）全持平；llama.cpp 窗口内发布 v0.7.0 正式版（17:13Z，即 10:13 PDT，非快照、非预发布，gh API 与站外索引双路确认），收录展开，MoE 缓存 2.2 倍为官方 release notes 自报。vLLM 推式 KV 博客原文发布于 10/14，此前各期未收录，本轮经 HN 精确窗口命中（18:41Z 提交）后核原文补收并做深读，属补报非重复。arXiv KV cache 与 disaggregated 两方向最新仍为 10/14 批次（Latent Compaction、FOLD，均已报），窗口内无新入库，下一批预计 10/15 17:00 PDT。browser.search 通用搜索其余命中为旧对比文与安全旧闻（Mooncake、SGLang pickle CVE，均已报过），中文搜索无窗口内新报道，X 站内与 Reddit 站内零结果。social 搜索窗口内仅监控面板截图与面试题信息图，无一手新动态，不收。Spotify status connected，experience 亲手拉到 Latent Space 最新仍为 Leash Bio 一期（spotify:episode:4gxrKxKiYM9XVmnc0AhM6V，2026-10-14，已报）。Simon Willison atom 最新仍为 2026-10-15T13:04:03Z 一条（08点版已记），窗口内无新增。本期「值得深读」为 vLLM 推式 KV 传输，笔记见深度阅读目录 vLLM推式KV传输-PD解耦首字延迟砍三倍.html（含原文 4 张图）。*</p></body></html>
