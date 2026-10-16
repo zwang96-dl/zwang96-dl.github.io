@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月15日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-15"/>
+<meta name="doc-ts" content="2026-10-16T04:59:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-15（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-15（22点版）</h1>
+<p>22点版来了。 这轮有一条干货。 苹果把 Mac 集群数据全摊开了。 20点版只说了双机能跑。 这期是官方实测的完整版。</p>
+<h2>框架更新</h2>
+<p>正式版全都没动。 vLLM 还是 0.31.0 版。 SGLang 还是 0.5.21 版。 其他几家也都持平。 llama.cpp 有个新快照。 新快照编号是 b11678。 快照按惯例不算正式版。 只记水位，不展开。</p>
+<h2>新技术与论文</h2>
+<p>本轮没有新论文入库。 arXiv 最新还是今天那批。 20点版已经报过那批了。 下批要等明天再刷。 这个时段不硬凑论文。</p>
+<p><strong>苹果官方拆了 Mac 集群推理。</strong> 主角还是 Muse Spark Open。 它就是 20点版那个大家伙。 总参数 816B，每次激活 42B。 苹果这次给了完整实测表。 测的是四台 Mac Studio。 芯片是新一代 M5 Ultra。 四台一起跑解码约 37 词每秒。 这里词指 token（模型吐的字）。 两台张量并行约 25 词每秒。 两台流水线并行约 16 词每秒。 说白了，多拆几台真能变快。 首词等待也一起变短了。 四台时只要约 4.8 秒。 两台时约 8.2 到 8.4 秒。 上下文用的是 8192 词那档。</p>
+<p><strong>两种拆法，脾气完全不同。</strong> 流水线拆法是按层切开。 前半层放一台，后半层放另一台。 就像流水线一人管一段。 它改代码最少，上手最快。 解码速度基本和单机持平。 但长题预填充反而能加速。 6.5 万词时最高快约 1.8 倍。 原因是分块后能重叠计算。 张量拆法是按宽度切开。 每一层都摊到几台机器上。 它算得更并行，解码更快。 代价是通信次数特别多。 每层都要广播再汇总一次。 没有低延迟网络它必翻车。</p>
+<p><strong>秘密武器是雷电口直连。</strong> 新系统带了 RDMA 驱动。 RDMA 是网卡直读内存技术。 数据绕开 CPU 直接搬。 几台 Mac 用雷电线直连。 每对机器还插了两根线。 带宽直接翻倍，延迟压到最低。 长题那档效果很明显。 首词从约 50.5 秒降到 40.6 秒。 MLX 新版还配了通信库。 名字叫 jaccl，专管多机同步。 MLX 是苹果的机器学习框架。</p>
+<p><strong>新芯片强在两个地方。</strong> 首词靠算力，M5 涨幅最大。 比上一代最高快约 4.6 倍。 解码靠带宽，差距小一点。 内存带宽升到 1.2 TB/s。 上一代是 819 GB/s。 解码因此快了约 1.6 倍。 功耗也低得有点离谱。 单台峰值约 300 瓦。 上一代约 200 瓦。 放家里办公室都能直接跑。</p>
+<p>这篇跟你的方向有交集。 你看的是 PD 解耦（预填解码分开）。 PD 解耦也是分工流水线。 这篇讲的是另一种分工。 流水线和张量怎么选怎么配。 通信贵不贵决定拆法成败。 这个账跟 PD 传草稿纸很像。 KV 缓存就是那份草稿纸。 先记下思路，不急着下结论。 来源：<a href="https://machinelearning.apple.com/research/mlx-distributed-inference">Apple 机器学习博客</a></p>
+<h2>业内新闻</h2>
+<p>本轮没有新的业内新闻。 白天的大新闻都报过了。 Muse Spark Open 在 20点版。 Tensormesh 在 18点版。 这轮不重复炒冷饭。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 前面几期已经报过了。 Simon 今天也没有新帖。 最新还是那篇游戏帖。 X 和 Reddit 本轮零结果。 中文媒体也没有新动态。</p>
+<p>本期不标「值得深读」。 苹果这篇数据已拆完。 关键数字都在正文里了。 按宁缺毋滥先不做笔记。</p>
+<p>*去重说明：本轮窗口（10/15 20:00→22:00 PDT，epoch 1792119600→1792126800）经 gh API 亲手复核：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02，sgl-project/sglang）、TensorRT-LLM v1.4.0rc0（10/14，已报）、LMDeploy v0.18.0（09/28，InternLM/lmdeploy）、TGI v3.3.7（2025-12-19）全持平；llama.cpp 正式版仍 v0.7.0（12点版已报），窗口内新快照 b11678（10/16 04:25Z，即 21:25 PDT），按惯例只记水位。arXiv 四方向（KV cache、speculative、multimodal、disaggregated/prefill-decode）亲手复核，最新仍为 10/15 白天批次（2610.21500 等，20点版已报），窗口内无新提交。HN Algolia 精确窗口：Apple MLX 分布式推理一帖在窗口内提交（03:34Z，3 分 1 评论），本期据此打开苹果官方原文核对全部数字（四台张量 36.73 词/秒、两台张量 24.99、两台流水线 15.74、TTFT 四台 4.8 秒、M5 对 M3 首词最高 4.6 倍与解码 1.6 倍、双线 50.5→40.6 秒，均为苹果官方口径）；同窗口另一帖为 RL 论文 2610.14270，与 serving 无关，不收。苹果这篇正文系 10/15 白天随 Muse Spark Open 同步发布，20点版只报了双机可跑与二手来源，未引苹果官方实测，本期如实定位为官方细节补深，不算窗口内首发。browser.search 其余命中为 Nemotron、Liquid AI 等已报或旧闻，不收；X 站内与 Reddit 站内零结果，中文媒体无新动态。social 搜索（since 2026-10-15）窗口内多条内容同为苹果 RDMA/MLX 话题的短视频解读，无一手新信息，不单独收。Spotify status connected，Latent Space 最新仍为 Leash Bio 一期（spotify:episode:4gxrKxKiYM9XVmnc0AhM6V，2026-10-14，已报），无新单集。Simon Willison atom 最新仍为 Chirp Pong（19:47Z，已记），无新增。本期不标「值得深读」，不做深读笔记。*</p></body></html>
