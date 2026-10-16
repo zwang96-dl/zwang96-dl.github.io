@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月16日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-16"/>
+<meta name="doc-ts" content="2026-10-16T11:00:47"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-16（04点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-16（04点版）</h1>
+<p>04点版来了。 窗口内本身还是安静。 框架没有新正式版。 但昨天批次有两篇漏网的。 都是讲 SSD 存草稿纸的。 一篇已做深读，一篇讲清。 如实标补记，不冒充新发。</p>
+<h2>框架更新</h2>
+<p>正式版全都没动。 vLLM 还是 0.31.0 版。 SGLang 还是 0.5.21 版。 其他几家也都持平。 llama.cpp 快照推进了。 最新编号是 b11693。 是凌晨 03:56 那一版。 快照按惯例不算正式版。 只记水位，不展开。</p>
+<h2>新技术与论文</h2>
+<p>本轮窗口没有新论文入库。 arXiv 最新还是昨天那批。 下批要等今天下午再刷。 下面两条是同批补记。 它俩昨天没被展开过。</p>
+<p><strong>从 SSD 捞草稿，先别按件算账。</strong> KV 放不下，就溢到 SSD。 SSD 就是楼下的仓库。 原装路径按件收费。 同一份草稿切得越细。 查、登记、搬运就越多。 首字耗时能涨四成多。 新系统 Range 改了计费。 逻辑上细切，物理上整装。 耗时全程钉在 1.79 秒。 只比显存直用慢一点点。 它跟 RemoteKV 正好接上。 一个管远程，一个管本地。 每件固定开销怎么算。 你调 KV 分级时用得上。 精读笔记已经做好了。 来源：<a href="https://arxiv.org/abs/2610.21241v1">arXiv</a></p>
+<p><strong>LMCache 存 SSD，还有一笔隐藏账。</strong> 这篇是实测体检报告。 它比了两个版本的 LMCache。 新版有去重和直读盘。 去重只对一字不差的重复灵。 写入能从 1.62 GB 降到 12 MB。 题目稍有不同就不灵了。 还有个坑藏在系统缓存里。 缓存还热时，看着几乎不读盘。 缓存一冷，要现读约 1 GB。 直读盘换来的是可预测。 代价是热题首字变慢。 27 毫秒变成 93 毫秒。 结论是拿平均换稳定。 你压尾延迟时要想好。 来源：<a href="https://arxiv.org/abs/2610.21249v1">arXiv</a></p>
+<h2>业内新闻</h2>
+<p>本轮没有新的业内新闻。 中文媒体刷到的还是旧事。 Muse 和 Nemotron 都报过。 不再重复占版面了。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 前面几期已经报过了。 Simon 今天也没有新帖。 最新还是那篇游戏帖。 X 和 Reddit 本轮零结果。 社交平台全是科普动画。 没有一手信息，不收。</p>
+<p>*去重说明：本轮窗口（10/16 02:00→04:00 PDT，epoch 1792141200→1792148400）经 gh API 亲手复核：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02，sgl-project/sglang）、TensorRT-LLM v1.4.0rc0（10/14，已报）、LMDeploy v0.18.0（09/28，InternLM/lmdeploy）、TGI v3.3.7（2025-12-19）、FlashInfer v0.7.2（10/15，已报）全持平；llama.cpp 窗口内新快照 b11684 至 b11693（最新 10:56Z，即 03:56 PDT），按惯例只记水位。arXiv 五方向亲手复核，窗口内无新提交，最新仍为 10/15 批次；其中 2610.21241 与 2610.21249 同属该批次（10/15 04:37Z 与 04:44Z 提交），此前各期简报未展开，由今晨另一情报任务先行收集，本期如实定位为同批补记，数据为对两篇原文摘要与正文的中文转述，均为作者自报。HN Algolia 精确窗口六组关键词全零命中。browser.search 其余命中为 Muse Spark Open、Nemotron 3.5 Super VL、Intel 推理微服务等已报旧闻与旧对比文，不收；X 站内零结果，中文媒体无窗口内新动态。social 搜索（since 2026-10-15）窗口内均为 KV 缓存科普动画与贴图，无一手新信息，不收。Spotify status connected，以节目 URI 复核 Latent Space 单集列表，最新仍为 Leash Bio 一期（spotify:episode:4gxrKxKiYM9XVmnc0AhM6V，2026-10-14，已报），无新单集；注：以节目名查 experience 本轮一度返回 500，改用 URI 后成功，此为接口小故障、非数据缺口。Simon Willison atom 最新仍为 Chirp Pong（2026-10-15T19:47Z，已记），无新增。本期深读：Range（arXiv:2610.21241），笔记与自包含 HTML 已存深度阅读目录，含原文 Figure 1/3 与 Table 2，README 索引已更新。*</p></body></html>
