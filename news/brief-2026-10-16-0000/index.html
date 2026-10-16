@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月16日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-16"/>
+<meta name="doc-ts" content="2026-10-16T06:58:49"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-16（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-16（00点版）</h1>
+<p>00点版来了。 窗口内本身很安静。 框架和新闻都没大动静。 但昨天那批论文里有漏网的。 两篇讲 KV 共享的，没展开过。 这期如实标补记，讲清它俩。</p>
+<h2>框架更新</h2>
+<p>正式版全都没动。 vLLM 还是 0.31.0 版。 SGLang 还是 0.5.21 版。 其他几家也都持平。 llama.cpp 有两个新快照。 编号是 b11680 和 b11681。 快照按惯例不算正式版。 只记水位，不展开。</p>
+<h2>新技术与论文</h2>
+<p>本轮窗口没有新论文入库。 arXiv 最新还是昨天那批。 下批要等今天下午再刷。 下面这条是同批补记。 它昨天没被展开过。</p>
+<p><strong>别家的草稿纸，不能直接借。</strong> 场景是多个智能体互相协作。 智能体就是能自己干活的模型。 A 读完资料，想把理解传给 B。 最省事的想法是传 KV 缓存。 KV 缓存就是模型的草稿纸。 把 A 的草稿纸塞给 B 用。 B 自己就不用重读一遍了。 作者实测说，这条路走不通。 他们试了八种替换方法。 两边模型都不做任何训练。 结果全部贴着没用的基线。 草稿长得像不像，没参考价值。 看着越像，不代表越能用。 失败还不是慢慢变差那种。 是到某个点直接就崩了。 来源：<a href="https://arxiv.org/abs/2610.22016v1">arXiv</a></p>
+<p><strong>能走通的是加法，不是替换。</strong> B 留着自己的草稿纸。 再把 A 的当额外参考摊开。 只微调 B 提问的那一侧。 效果就超过了 B 自己的基线。 八个发送方拼一起也能用。 无方向地全摊开反而变差。 同批还有一篇姊妹研究。 它把传法拆成二维来比。 传草稿纸，还是传中间状态。 结论跟上面这篇正好对上。 草稿纸适合增补，不适合替换。 中间状态则相反，适合直写。 写对位置时，不用训就有效。 一个适配器还能服务多家。 前提是对方状态跟自己够近。 来源：<a href="https://arxiv.org/abs/2610.22026v1">arXiv</a></p>
+<p>这组结论对你有参考。 你看 KV 复用和跨机搬运。 多智能体迟早也要传状态。 这篇等于先划了条红线。 别人的缓存只能当参考。 想直接当自己的用，先别想。 本期先记下，不标深读。</p>
+<h2>业内新闻</h2>
+<p>本轮没有新的业内新闻。 白天的大新闻都报过了。 Muse Spark Open 在 20点版。 苹果集群实测在 22点版。 中文媒体有篇苹果 Meta 评论。 讲的还是 Muse 那件事。 属于评论跟进，不重复收。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 前面几期已经报过了。 Simon 今天也没有新帖。 最新还是那篇游戏帖。 X 和 Reddit 本轮零结果。 HN 只有个一分的旧论文帖。 是 10 月 7 日的旧论文。 不值得占版面，不收。</p>
+<p>本期不标「值得深读」。 补记这两篇结论已讲透。 关键判断都在正文里了。 按宁缺毋滥先不做笔记。</p>
+<p>*去重说明：本轮窗口（10/15 22:00→10/16 00:00 PDT，epoch 1792126800→1792134000）经 gh API 亲手复核：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02，sgl-project/sglang）、TensorRT-LLM v1.4.0rc0（10/14，已报）、LMDeploy v0.18.0（09/28，InternLM/lmdeploy）、TGI v3.3.7（2025-12-19）全持平；llama.cpp 窗口内新快照 b11680（10/16 05:28Z）与 b11681（05:47Z），按惯例只记水位。arXiv 四方向（KV cache、speculative、multimodal、disaggregated/prefill-decode）亲手复核，窗口内无新提交，最新仍为 10/15 批次；其中 2610.22016 与 2610.22026 同属该批次，此前各期未展开（20点版只记了 2610.22172 与 2610.21436 两篇标题），本期如实定位为同批补记，结论为对两篇摘要的中文转述。HN Algolia 精确窗口：SGLang 与 llama.cpp 零命中，KV cache 仅命中 AbridgeKV 的 GitHub 帖（1 分，原论文为 10/07 提交，已过期），vLLM 命中多为评论帖，不收。browser.search 其余命中为旧对比文与已报的 Nemotron 等，不收；X 站内与 Reddit 站内零结果；中文搜索命中 Marsbit 的苹果与 Meta 评论（北京时间 10/16 上午，讲已报的 Muse Spark Open），属评论跟进，不收。social 搜索（since 2026-10-15）无一手新动态。Spotify status connected，Latent Space 最新仍为 Leash Bio 一期（spotify:episode:4gxrKxKiYM9XVmnc0AhM6V，2026-10-14，已报），无新单集。Simon Willison atom 最新仍为 Chirp Pong（2026-10-15T19:47Z，已记），无新增。本期不标「值得深读」，不做深读笔记。*</p></body></html>
