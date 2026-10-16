@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月15日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-15"/>
+<meta name="doc-ts" content="2026-10-16T03:02:09"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-15（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-15（20点版）</h1>
+<p>20点版来了。 这轮有两条真东西。 一条是今天的论文批次。 一条是白天漏掉的大新闻。 先说清，第二条是补收。 它白天就发了，前面几期没刷到。</p>
+<h2>框架更新</h2>
+<p>正式版全都没动。 vLLM 还是 0.31.0 版。 SGLang 还是 0.5.21 版。 其他几家也都持平。 llama.cpp 有两个新快照。 编号是 b11672 和 b11675。 快照按惯例不算正式版。 只记水位，不展开。</p>
+<h2>新技术与论文</h2>
+<p><strong>远程草稿纸，比重算还慢。</strong> 这是今天新批次里的论文。 讲的是远程 KV 复用翻车。 KV 缓存就是模型的草稿纸。 草稿纸存到共用仓库里。 新请求来了直接取，不重算。 听着很美，实测却帮倒忙。 实验跑在 8 张 B300 上。 模型是 GLM-5.3。 取一次草稿要约 0.88 秒。 现场重算只要约 0.31 秒。 问题出在仓库只有一个窗口。 带宽最高约 1.71 GB/s。 作者算出一条盈亏线。 这套配置线是约 2.53 GB/s。 低于这条线，命中必亏。 命中一多，队伍还会失稳。 尾巴延迟爆到约 83 秒。 那时显卡只忙了 7%。 解法是把仓库拆成八份。 每张卡配一个独立实例。 再把取货改成异步进行。 带宽涨到约 10.76 GB/s。 尾巴延迟降到约 0.67 秒。 读题吞吐也涨了约 14%。 改动已提交给 LMCache。 LMCache 是 KV 复用工具。 这篇能帮你算远程复用的账。 盈亏线就是现成的判断公式。 短题直接重算可能更划算。 <strong>值得深读</strong>，笔记已做好。 来源：<a href="https://arxiv.org/abs/2610.21500v1">arXiv</a></p>
+<p>同批还有两篇先记标题。 一篇讲跨地域的 KV 迁移。 编号是 2610.22172。 一篇讲手机云端协同猜词。 编号是 2610.21436。 这轮先不展开，避免硬凑。</p>
+<h2>业内新闻</h2>
+<p><strong>Meta 开源了个大家伙。</strong> 名字叫 Muse Spark Open。 这是今天白天的发布。 前面几期没刷到，这期补收。 它总参数有 816B。 B 就是十亿，这里指规模。 每次只激活其中 42B。 上下文能装 100 万词。 文字、图片、声音都能进。 它主打写代码和干长活。 本地跑法很抓眼球。 两台 Mac Studio 就能跑。 每台要 512GB 内存。 两台加起来约 1TB。 苹果的 MLX 框架把它们连起来。 MLX 是苹果的机器学习框架。 云上也能直接调它。 首批有七家平台提供服务。 权重能从 Hugging Face 下。 推理引擎支持得很全。 vLLM 和 SGLang 都在列。 llama.cpp 和 MLX 也在列。 还有个细节跟你直接相关。 它自带一批 GPU 内核。 内核能在 SGLang 里自调优。 单个内核最高快约 3.95 倍。 这是厂商口径，先记着。 整套负载在 MI350 上涨约 3%。 MI350 就是你手里那张卡。 3% 不大，但方向值得看。 自调优内核正是你想做的事。 许可不是完全自由那种。 商用有附加条件，下前看清。 来源：<a href="https://techcrunch.com/2026/10/15/meta-launches-an-open-weight-model-that-runs-on-macs/">TechCrunch</a> 来源：<a href="https://siliconangle.com/2026/10/15/meta-releases-816b-parameter-muse-spark-open-for-coding-and-agent-work/">SiliconANGLE</a> 来源：<a href="https://www.iclarified.com/102861/meta-releases-muse-spark-open-ai-optimized-for-mac-studio">iClarified</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 前面几期已经报过了。 Simon 今天也没有新帖。 最新还是那篇游戏帖。 X 和 Reddit 本轮零结果。 中文媒体也没有新动态。</p>
+<p>本期「值得深读」是远程 KV 那篇。 笔记里有原文三组图表。 盈亏线公式也在笔记里。</p>
+<p>*去重说明：本轮窗口（10/15 18:00→20:00 PDT，epoch 1792112400→1792119600）经 gh API 亲手复核：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02，sgl-project/sglang）、TensorRT-LLM v1.4.0rc0（10/14，已报）、LMDeploy v0.18.0（09/28，InternLM/lmdeploy）、TGI v3.3.7（2025-12-19）全持平；llama.cpp 正式版仍 v0.7.0（12点版已报），窗口内新快照 b11672（10/16 02:22Z）与 b11675（02:47Z），按惯例只记水位。arXiv API 本轮返回 429 限流，改走 arXiv 列表页亲手复核：17 点批次已出，cs.DC 列表中 2610.21500（10/15 提交）为本期深读，2610.22172 与 2610.21436 只记标题未展开；此前各期所报最新仍为 10/14 批次，不重复。HN Algolia 精确窗口四方向均零命中。Muse Spark Open 为 10/15 白天发布（TechCrunch 13:04 PDT、SiliconANGLE 15:20 PDT），此前 12点版至 18点版均未收录，本期如实标补收；816B/42B、100 万上下文、双 Mac Studio、七家托管与引擎支持经 TechCrunch、SiliconANGLE、iClarified 三源交叉核对，Helion 内核与 MI350 约 3% 一项来自二手汇总转述 Meta 口径，已在正文标厂商口径。browser.search 其余命中为旧对比文，不收；X 站内与 Reddit 站内零结果，中文媒体无新动态。social 搜索（since 2026-10-15）窗口内仅教程类视频与面试资料帖，无一手新动态，不收。Spotify status connected，Latent Space 最新仍为 Leash Bio 一期（spotify:episode:4gxrKxKiYM9XVmnc0AhM6V，2026-10-14，已报），无新单集。Simon Willison atom 最新仍为 Chirp Pong（19:47Z，14点版已记），无新增。本期「值得深读」为 arXiv:2610.21500，笔记见深度阅读目录 RemoteKV-远程KV比GPU还慢-盈亏线公式.html（含原文 Figure 1/2 与 Table 2/Figure 4/5）。*</p></body></html>
