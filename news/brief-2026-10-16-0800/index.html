@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月16日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-16"/>
+<meta name="doc-ts" content="2026-10-16T14:59:49"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-16（08点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-16（08点版）</h1>
+<p>08点版来了。 框架和论文这轮都安静。 业内有三条值得看。 两条是昨晚漏网的补收。 一条是今天在湾区开幕。 都如实标好，不冒充新发。</p>
+<h2>框架更新</h2>
+<p>正式版全都没动。 vLLM 还是 0.31.0 版。 SGLang 还是 0.5.21 版。 其他几家也都持平。 llama.cpp 这轮没新快照。 最新还是 b11696 版。 那是上一轮记过的。 快照按惯例不展开。</p>
+<h2>新技术与论文</h2>
+<p>本轮没有新论文入库。 arXiv 最新还是昨天那批。 昨天那批已经报完了。 下批要等今天下午再刷。 这个时段不硬凑论文。</p>
+<h2>业内新闻</h2>
+<p><strong>集群层来了个新管家。</strong> 范式智能开了个源。 新平台叫模域 ModelSphere。 它不管单机怎么算。 它管整个集群怎么分工。 卖点正好对着你的方向。 内置 PD 分离部署。 PD 分离就是分工流水线。 还带三级 KV 缓存。 KV 缓存就是那张草稿纸。 还有统一的缓存池。 路由会先看缓存再分活。 另带 AutoTune 自动调参。 多芯片也能统一调度。 它和 vLLM 是搭档关系。 引擎管单机，它管集群。 划重点，先别全信数字。 吞吐涨 285% 是厂商自报。 公告没给测试方法。 也没有独立实测跟上。 代码已按 Apache 2.0 开源。 值得你扫一眼架构再判断。 注：此为北京时间 10/16 公告。 换成美西是昨晚时段。 此前各期没报，本期补收。 来源：<a href="https://hongkong-invest.com/%E7%AF%84%E5%BC%8F%E6%99%BA%E8%83%BD%E8%81%AF%E5%90%8C%E7%9D%BF%E6%80%9D%E6%99%BA%E8%81%AF%E6%8E%A8%E5%87%BA%E9%96%8B%E6%BA%90%E4%B8%80%E7%AB%99%E5%BC%8F%E7%94%9F%E7%94%A2%E7%B4%9Aai%E9%83%A8%E7%BD%B2/">公告原文</a>；<a href="https://github.com/modelsphere/modelsphere">GitHub 仓库</a></p>
+<p><strong>新一代机架开始出货了。</strong> 联想说已经全球交付。 交付的是 Vera Rubin NVL72。 这是英伟达的新机架系统。 一柜 72 颗 Rubin GPU。 再配 36 颗 Vera CPU。 说白了，货开始动了。 不再只是发布会上的图。 性能数字先打个问号。 每兆瓦吞吐最高涨 30 倍。 每百万词元成本降到 1/45。 这两句都是平台厂商口径。 没有独立实测，别当结论。 注：此为北京时间 10/16 报道。 此前各期没报，本期补收。 来源：<a href="https://finance.sina.cn/stock/jdts/2026-10-16/detail-inivkwtm7781084.d.html">新浪财经</a></p>
+<p><strong>湾区开源周今天开幕。</strong> 名字就叫 Open Source AI Week。 10月16日到25日，一共十天。 全湾区有 60 多场活动。 跟你最相关的有两场。 10月20日在 Sunnyvale。 SGLang 和 LinkedIn 合办见面会。 主题是高性能模型服务。 10月22日有 LMCache 工作坊。 四小时专讲 KV 缓存管理。 活动都要先注册才能进。 日历在 Luma 上能查。 你在湾区，顺路能去听。 来源：<a href="https://lifestyle.quebecnewstribune.com/story/402943/open-source-ai-week-kicks-off-october-16-with-more-than-60-community-run-events-across-the-san-francisco-bay-area-2/">活动通稿</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 前面几期已经报过了。 Simon 今天也没有新帖。 最新还是那篇游戏帖。 X 和 Reddit 本轮零结果。 社交平台全是科普贴图。 没有一手信息，不收。</p>
+<p>本期不标「值得深读」。 三条都是公告和通稿。 没有方法和数据可深挖。 按宁缺毋滥先不做笔记。</p>
+<p>*去重说明：本轮窗口（10/16 06:00→08:00 PDT，epoch 1792155600→1792162800）经 gh API 亲手复核：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02，sgl-project/sglang）、TensorRT-LLM v1.4.0rc0（10/14，已报）、LMDeploy v0.18.0（09/28，InternLM/lmdeploy）、TGI v3.3.7（2025-12-19）、FlashInfer v0.7.2（10/15，已报）全持平；llama.cpp 窗口内无新快照，最新仍 b11696（10/16 11:26Z，06点版已记）。arXiv 五方向（KV cache、speculative、multimodal、disaggregated/prefill-decode、LLM serving）亲手复核，窗口内无新提交，最新仍为 10/15 批次。HN Algolia 精确窗口七组关键词：llama.cpp、KV cache、TensorRT、speculative decoding 零命中，vLLM、SGLang、LLM inference 命中均为评论提及、无故事帖，不收。browser.search 命中：ModelSphere 公告（Media OutReach，北京时间 10/16，页面标注 2026-10-16 发布；GitHub 仓库 modelsphere/modelsphere 经 API 复核 2026-09-27 建仓、10/16 08:43Z 有推送）与联想 Vera Rubin 交付报道（新浪财经转财闻，北京时间 10/16 13:06），经全量 grep 确认此前各期未报，本期如实标补收，性能数字均为厂商自报、无独立实测，已在正文标注；Open Source AI Week 通稿为 10/16 当天开幕信息，SGLang 见面会与 LMCache 工作坊细节经通稿原文核对。其余命中为 Spheron、BIZON、Medium 等旧对比文，不收；X 站内与 Reddit 站内零结果。social 搜索（since 2026-10-15）窗口内均为推理优化科普视频与贴图，无一手新信息，不收。Spotify status connected，以节目 URI（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t）复核 Latent Space 单集列表，最新仍为 Leash Bio 一期（spotify:episode:4gxrKxKiYM9XVmnc0AhM6V，2026-10-14，已报），无新单集。Simon Willison atom 最新仍为 Chirp Pong（2026-10-15T19:47Z，已记），其下一条为 10/15 更早的 Anthropic 营收转述、与 serving 无关且非窗口内新增，不收。本期不标「值得深读」，不做深读笔记。*</p></body></html>
