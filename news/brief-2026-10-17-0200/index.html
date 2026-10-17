@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月17日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-17"/>
+<meta name="doc-ts" content="2026-10-17T09:01:12"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-17（02点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-17（02点版）</h1>
+<p>02点版来了。 这轮有两条真东西。 一条是 DeepSeek 小更新。 一条是 Google 的部署实录。 细节都在下面。</p>
+<h2>框架更新</h2>
+<p>正式版这轮全都没动。 vLLM 还是 0.31.0 版。 SGLang 还是 0.5.21 版。 其他几家也都持平。 llama.cpp 出了个新快照。 编号 b11707，凌晨刚出。 快照按惯例不展开。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没有新论文。 最新还是 10 月 15 日那批。 那批前面已经报完了。</p>
+<p>有个耗电数据值得一看。 缓存没命中，电费涨很多。 最高多耗约 140% 的电。 数据来自 Neuralwatt 云。 它是按电量计费的推理云。 它统计了自家真实流量。 问题出在提示词拼装上。 每轮改一点前面的内容。 前缀缓存就整段作废。 前缀缓存是存好的草稿纸。 长会话的 agent 最受伤。 说白了，草稿纸别乱涂改。 数字是厂商自报，先参考。 原文昨晚发，本轮补记。 HN 这轮把它顶起来了。 来源：<a href="https://runtimewire.com/article/neuralwatt-harness-cache-energy-chad-gibson">https://runtimewire.com/article/neuralwatt-harness-cache-energy-chad-gibson</a></p>
+<h2>业内新闻</h2>
+<p>DeepSeek 发了个小更新。 新版叫 V4.1 Flash 1017。 官方说这是一次小升级。 权重已开源，协议是 MIT。 MIT 是最宽松的开源协议。 它能看图，也能读文字。 上下文长达 100 万 token。 编程和 agent 分数涨明显。 Terminal-Bench 涨了 11 分。 HLE 涨了约 6 分。 但别信网传的追平 Opus。 Opus 5 的 HLE 是 56.3 分。 它只有 42.6 分，还差一截。 价格还是最大卖点。 输入每百万 token 0.15 美元。 输出每百万 token 0.60 美元。 有个小坑要提醒你。 这版没带 Jinja 模板。 Jinja 是常用的对话模板。 自己部署要多绕一步。 来源：<a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017">https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017</a> 来源：<a href="https://openrouter.ai/deepseek/deepseek-v4.1-flash-1017">https://openrouter.ai/deepseek/deepseek-v4.1-flash-1017</a></p>
+<p>Google 发了篇部署实录。 主角是 Beam 编程大模型。 Beam 是 Reflection 的开源模型。 总参数约 501B。 每步只激活约 23B。 Google 给了三层加速配方。 路由先看哪台机有草稿。 读题和写答拆开跑。 冷草稿下放到内存和 SSD。 大机器上吞吐最高 5 倍。 延迟最高降到八分之一。 数字是厂商自报，先参考。 配方和脚本都开源了。</p>
+<p><strong>值得深读：</strong> Google 这篇部署实录。 它正中你的 P/D 解耦评估。 SGLang 侧的配方给得最全。 路由粘缓存的账讲得最细。 笔记已存进深度阅读目录。 来源：<a href="https://cloud.google.com/blog/topics/ai-infrastructure/day-0-support-with-5x-perf-for-reflection-beam-on-google-cloud">https://cloud.google.com/blog/topics/ai-infrastructure/day-0-support-with-5x-perf-for-reflection-beam-on-google-cloud</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 Simon 这轮也没有新帖。 最新还是代码评审那篇。 Reddit 这轮零结果。 社交平台只有旧科普。 没有一手信息，不收。</p>
+<p>*去重说明：本轮窗口（10/17 00:00→02:00 PDT，epoch 1792220400→1792227600）经 gh API 亲手复核：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02，sgl-project/sglang）、TensorRT-LLM v1.4.0rc0（10/14，已报）、LMDeploy v0.18.0（09/28，InternLM/lmdeploy）、TGI v3.3.7（2025-12-19）、FlashInfer v0.7.2（10/15，已报）全持平；llama.cpp 窗口内新增快照 b11707（10/17 07:50Z，即本窗口 00:50 PDT），按每日快照惯例不展开。arXiv API 亲手复核：LLM inference 与 KV cache 方向最新仍为 10/15 提交批次（arXiv:2610.22311、arXiv:2610.22172，均已报），无窗口内新提交。HN Algolia 精确窗口（stories 共 51 条）：DeepSeek-V4.1-Flash-1017 的 HF 链接、X 公告转帖与讨论帖均在本窗口（08:21–08:39Z），经 HF 官方模型卡与 OpenRouter 页面双源核实为真发布（2026-10-17，MIT 权重，$0.15/$0.60 每百万 token，缓存读 $0.003），收录；Neuralwatt 缓存未命中耗电帖（08:46Z）原文发表于 10/16 晚（runtimewire，2026-10-17T01:30Z），属上一窗口漏收，本轮明确标注补记，数字为 Neuralwatt 自家云流量自报、无独立验证。Google Cloud 的 Beam 首日支持博客标注发布于 2026-10-17，内容为 llm-d（vLLM）与 Dynamo（SGLang）的 P/D 解耦、KV 感知路由与分层 KV 配方，5 倍吞吐与 8 倍延迟降幅为厂商与客户自报、无独立复核，已标「值得深读」并做深读笔记（原文 3 图已存）。browser.search 其余命中：Kandinsky 6.0 两篇（10/17 05:32–05:33Z，属 00点版窗口且为视频生成题材）不收；Reflection Beam 的 AWS 部署文 14点版已记为旧闻，不重复。X 站内与 Reddit 站内搜索零结果；中文媒体搜索无机器之心、量子位的新动态，命中均为低质聚合站，不收。social 搜索（since 2026-10-16）均为旧科普视频，无一手信息，不收。Spotify 已连接，以节目 URI（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t）复核 Latent Space 单集列表，最新仍为 Leash Bio 一期（spotify:episode:4gxrKxKiYM9XVmnc0AhM6V，2026-10-14，已报），无新单集。Simon Willison atom 最新仍为代码评审引用帖（2026-10-16T22:06Z，已记），窗口内无新增。*</p></body></html>
