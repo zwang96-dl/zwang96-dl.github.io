@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月17日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-17"/>
+<meta name="doc-ts" content="2026-10-17T10:58:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-17（04点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-17（04点版）</h1>
+<p>04点版来了。 这轮整体很安静。 只有一条补充消息。 是 DeepSeek 的官方说明。 模型本身上轮已报过。 这轮补的是接口开放。 细节都在下面。</p>
+<h2>框架更新</h2>
+<p>正式版这轮全都没动。 vLLM 还是 0.31.0 版。 SGLang 还是 0.5.21 版。 其他几家也都持平。 llama.cpp 也没出新快照。 最新还是 b11707 版。 那版上轮已经记过了。 快照按惯例不展开。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没有新论文。 最新还是 10 月 15 日那批。 那批前面已经报完了。 下批要等下个工作日。 这个时段不硬凑论文。</p>
+<h2>业内新闻</h2>
+<p>DeepSeek 补了官方说明。 模型本身 02点版已报。 这轮新的是接口开放。 搜索和抓取接口全量开放。 Search 是联网搜索接口。 Fetch 是网页抓取接口。 两个接口一个价。 每千次调用收 0.75 美元。 走它家工具调用暂时免费。 Harness 里调用不收费。 Claude Code 里也免费。 Codex 里调用同样免费。 免费期到 10 月 31 日止。 当天开始正式计费。 时间是 16 点整 UTC。 UTC 是世界标准时间。 官方还提了个小提醒。 Harness 建议升到新版。 版本号 v0.2.1-rc.1 起步。 升完才能吃到最佳效果。 这条对你就是省钱提示。 你调它的接口能白嫖两周。 来源：<a href="https://api-docs.deepseek.com/news/news261017/">https://api-docs.deepseek.com/news/news261017/</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 Simon 这轮也没有新帖。 最新还是代码评审那篇。 X 和 Reddit 本轮零结果。 社交平台只有旧科普。 没有一手信息，不收。 中文媒体也没有新动态。</p>
+<p>本期不标「值得深读」。 窗口内确实没有干货。 按宁缺毋滥先不做笔记。 下轮继续盯新批次。</p>
+<p>*去重说明：本轮窗口（10/17 02:00→04:00 PDT，epoch 1792227600→1792234800）经 gh API 亲手复核：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02，sgl-project/sglang）、TensorRT-LLM v1.4.0rc0（10/14，已报）、LMDeploy v0.18.0（09/28，InternLM/lmdeploy）、TGI v3.3.7（2025-12-19）、FlashInfer v0.7.2（10/15，已报）全持平；llama.cpp 窗口内零新增，最新仍 b11707（10/17 07:50Z，属 02点版窗口）。arXiv API 亲手复核：LLM inference 与 KV cache 方向最新仍为 10/15 提交批次（arXiv:2610.22311、arXiv:2610.22172，均已报），无窗口内新提交。HN Algolia 精确窗口（stories 共 55 条）：仅 DeepSeek 官方文档帖（10:15Z）与 serving 相关，亲手打开原文核实——模型本体 02点版已报，本轮只收其新增信息：Search &amp; Fetch API 全量开放、每千次 0.75 美元、经 Harness／Claude Code／Codex 的服务端工具调用对 API 用户暂时免费、2026-10-31 16:00 UTC 起计费、Harness 建议 v0.2.1-rc.1 起步；其余命中（NVIDIA Indic 预训练博客为训练题材、其余与 serving 无关）不收。browser.search 其余命中均为旧对比文或已报内容，不收；X 站内与 Reddit 站内零结果；中文媒体无机器之心、量子位的新动态。social 搜索（since 2026-10-16）返回均为旧科普视频，无一手信息，不收。Spotify 已连接，以节目 URI（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t）复核 Latent Space 单集列表，最新仍为 Leash Bio 一期（spotify:episode:4gxrKxKiYM9XVmnc0AhM6V，2026-10-14，已报），无新单集。Simon Willison atom 最新仍为代码评审引用帖（2026-10-16T22:06Z，已记），窗口内无新增。本期不标「值得深读」，不做深读笔记。*</p></body></html>
