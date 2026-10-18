@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月18日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-18"/>
+<meta name="doc-ts" content="2026-10-18T15:00:49"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-18（08点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-18（08点版）</h1>
+<p>08点版来了。 窗口内没有新发版。 也没有新论文入库。 但有一篇漏收的好文。 HN 这轮把它顶起来了。 是 vLLM 的内核优化实录。 细节都在下面。</p>
+<h2>框架更新</h2>
+<p>正式版这轮全都没动。 vLLM 还是 0.32.0 版。 那是 00点版刚报的。 SGLang 还是 0.5.21 版。 其他几家也都持平。 llama.cpp 也没新快照。 最新还是 b11719 版。 那是 06点版记的水位。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没有新论文。 最新还是 15 日那批。 那批前面已经报完了。 今天周日，没有新批次。 下批要等下个工作日。</p>
+<p><strong>vLLM 靠 AI 写内核提速了。</strong> 原文是 10 月 16 日发的。 本轮 HN 把它顶进窗口。 此前各期都没报过。 我按补收处理，不算新发。 主角是月之暗面的 Kimi K3。 团队让编程 agent 写内核。 agent 就是能干活的 AI 助手。 它把解码整条路重写了。 注意力、专家、通信全融合。 就像把十道工序并成一条线。 每层内核数从 23 个降到 13 个。 每层耗时从 130 微秒降到 69 微秒。</p>
+<p>数字只测了 GB300 这款卡。 GB300 是英伟达最新旗舰卡。 16 张卡跑单请求解码。 最高冲到每秒 842 个词元。 比原版 vLLM 快了 1.73 倍。 这组开了 DSpark 投机解码。 投机解码就是先猜再验。 不打开投机也普遍更快。 批量 16 到 64 时快 1.6 倍多。 有个数字要当心别误读。 AgentX 互动速度号称快 1.8 倍。 但新结果用了 16 张卡。 旧结果只用了 8 张卡。 卡数不一样，不能直接比。 这点原文自己写明了。</p>
+<p>对你更值钱的是方法。 他们立了个快速通道规矩。 优化只关起门改单个模型。 先划清能跑的硬件范围。 正确性和速度都要过全套测。 以后 DeepSeek 新版也走这条路。 Meta 新模型两天就见了效果。 但先泼盆冷水定个数。 这条路只支持 GB300 卡。 你的 H100 和 AMD 卡跑不了。 能借的是思路，不是代码。 让 agent 写内核可以学。 配套的自动验货流程更该学。 来源：<a href="https://vllm.ai/blog/2026-10-16-kimi-k3-megakernel">https://vllm.ai/blog/2026-10-16-kimi-k3-megakernel</a></p>
+<p>HN 还顶起另外两条。 一条是英伟达多模态模型稿。 一条是远程 KV 那篇论文。 这两条前面都报过了。 多模态稿 10 月 15 日报过。 远程 KV 还做过深读笔记。 这轮不重复占版面。</p>
+<h2>业内新闻</h2>
+<p>本轮没有新的业内新闻。 HN 窗口里共 80 条帖。 除上面三条都是闲聊。 中文媒体也没有新动态。 搜到的全是旧文翻炒。 不重复收录，跳过。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 那期是 10 月 14 日的。 Simon 这轮也没有新帖。 X 和 Reddit 本轮零结果。 社交平台只有科普图卡。 有三家引擎的对比图卡。 没有一手信息，不收。</p>
+<p>本期不标「值得深读」。 Kimi 这篇只支持 GB300。 跟你的硬件对不上口。 SGLang 侧同题已深读过。 按宁缺毋滥先不做笔记。 方法要点正文已讲清。</p>
+<p>*去重说明：本轮窗口是 10/18 06:00 到 08:00 PDT。对应 epoch 是 1792328400 到 1792335600。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z，00点版已报。SGLang 仍是 v0.5.21，发布于 10/02。仓库路径用 sgl-project/sglang。TensorRT-LLM 仍是 v1.4.0rc0，已报过。LMDeploy 仍是 v0.18.0，发布于 09/28。仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2，已报过。llama.cpp 最新仍是 b11719。发布时间是 10/18 11:11Z，属 06点版窗口。本窗口无新快照。arXiv 亲手复核两组查询。LLM inference 最新仍是 2610.22172。提交时间是 10/15 16:31Z。KV cache 最新仍是 10/15 批次。窗口内无新提交。HN 用 Algolia 精确窗口复核。窗口内 stories 共 80 条。serving 相关共三条。vLLM 的 Kimi K3 博客帖在 13:08Z 入窗。原文标注 2026-10-16 发布。此前简报库 grep 无 842、GB300 加 Kimi、latency_specialized 等关键串。确认未报，按补收收录并标原日期。数字均亲手打开原文核对。842 词元每秒是 16 张 GB300、DSpark、合成接受长度 6 的条件。AgentX 的 1.8 倍对比卡数不一致。原文第 196 到 197 行自述新测 16 卡、旧测 8 卡。正文已如实标注。Nemotron 3.5 Super VL 帖在 14:37Z 入窗。本体 10/15 早间多期已报，不重复。RemoteKV 帖在 14:23Z 入窗。原文 arXiv 2610.21500 已于 10/15 20点版深读，不重复。browser.search 命中均为旧文或已报。vLLM 0.32.0 聚合稿本体 00点版已报。Intel 分叉稿 02点版已判定旧闻。X 站内与 Reddit 站内零结果。中文媒体无新 serving 动态。social 搜索窗口内只有引擎对比图卡与课程推广。无一手信息，故不收。Spotify 节目复核加网页交叉确认。Latent Space 最新仍是 Leash Bio 期。日期是 2026-10-14，已报过。Simon atom 最新仍是脚本小技巧帖。发布时间是 10/17 21:11Z，与 serving 无关。本期不标「值得深读」。本期不做深读笔记。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
