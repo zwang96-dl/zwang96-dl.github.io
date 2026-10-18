@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月17日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-17"/>
+<meta name="doc-ts" content="2026-10-18T03:01:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-17（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-17（20点版）</h1>
+<p>20点版看完了。 这轮没啥值得报的。 框架和论文都安静。 各渠道都扫了一遍。 水位如实记在下面。</p>
+<h2>框架更新</h2>
+<p>正式版全都没动。 vLLM 还是 0.31.0 版。 SGLang 还是 0.5.21 版。 其他几家也都持平。 llama.cpp 出了一个快照。 新编号是 b11717 版。 快照按惯例不展开。</p>
+<h2>新技术与论文</h2>
+<p>本轮没有新论文入库。 今天是周六，本就没新批次。 arXiv 接口这轮返回空。 我又用搜索交叉核了一遍。 也没见到窗口内的新论文。 这一项下轮再补筛确认。 另有一篇跟进实测被搜到。 测的是 DeepSeek 小更新。 模型本体 02点版已报过。 这篇是第三方自己跑的。 结论是推理变短了两三成。 答案对错基本没变化。 就像写答案少绕弯路了。 但它没标发布时间。 没法证明是这轮的新料。 先只当跟进看看，不算新闻。 来源：<a href="https://sference.com/blog/deepseek-v41f-1017-benchmark">https://sference.com/blog/deepseek-v41f-1017-benchmark</a></p>
+<h2>业内新闻</h2>
+<p>本轮没有新的业内新闻。 HN 窗口里多是闲聊帖。 有一篇免费 GPU 云指南。 那是厂商写的推广长文。 没有 serving 新方法，不收。 中文媒体也没有新动态。 08点版那个漏洞别忘堵。 Xinference 记得设密钥。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 Simon 窗口外有一篇新帖。 讲的是网页脚本小技巧。 跟 serving 无关，不收。 X 和 Reddit 本轮零结果。 社交平台只有旧科普。 没有一手信息，不收。</p>
+<p>本期不标「值得深读」。 窗口内确实没有干货。 那篇实测样本也偏小。 按宁缺毋滥先不做笔记。 下轮继续盯新批次。</p>
+<p>*去重说明：本轮窗口（10/17 18:00→20:00 PDT，epoch 1792285200→1792292400）经 gh API 亲手复核：vLLM v0.31.0（10/05）、SGLang v0.5.21（10/02，sgl-project/sglang）、TensorRT-LLM v1.4.0rc0（10/14，已报）、LMDeploy v0.18.0（09/28，InternLM/lmdeploy）、TGI v3.3.7（2025-12-19）、FlashInfer v0.7.2（10/15，已报）全持平；llama.cpp 窗口内新增快照 b11717（10/18 02:50Z），按每日快照惯例不展开。arXiv API 本轮请求返回空、未拿到条目列表，未能像往轮那样完成独立复核；已改用 browser.search 交叉核查（LLM inference、KV cache、disaggregation 等词），命中均为旧文（Mooncake 旧论文总结、SparseEngine 为 5 天前旧稿等），未见窗口内新论文，周六无新批次与此前多轮规律一致，此项完整性不打包票、下轮补筛。HN Algolia 精确窗口（stories 共 35 条）：无 serving 相关条目；其中 GMI Cloud《Best Free GPU Cloud Options》经 browser.open 亲手核为厂商推广指南、无 serving 方法与可核发布时间，不收；其余如 Go 语言博客、Copilot 版权判决、OpenAI 间谍案报道等均无关。browser.search 其余命中均为已报或旧文：DeepSeek V4.1-Flash-1017 与 Neuralwatt 缓存耗电（均 02点版已报，04点版已补官方说明）、SGLang Summit（18点版已报，官网 sglang.io/summit 本轮搜索中再次确认、非新料）、三框架源码解读长文（数天前旧文），不重复收录。Sference 的 DeepSeek 实测（自称 2026-10-17 以 1440 次请求自测）经 browser.open 亲手读全文：页面未标注发布时间、无法证明落在窗口内，故正文仅作跟进提示、不算窗口新料；其文中价格口径与 02点版已核的官方口径不一致，正文未引用其价格数字。X 站内与 Reddit 站内零结果；中文媒体无机器之心、量子位的新 serving 动态（命中均为旧稿与低质聚合站）。social 搜索（since 2026-10-16）返回仍为 10/16–10/17 白天旧科普（如 7 种 LLM 优化技巧轮播帖，与多轮所见相同），无一手信息，不收。Spotify 已连接，以节目 URI（spotify:show:2p7zZVwVF6Yk0Zsb4QmT7t）复核 Latent Space 单集列表，最新仍为 Leash Bio 一期（spotify:episode:4gxrKxKiYM9XVmnc0AhM6V，2026-10-14，已报），无新单集。Simon Willison atom 最新为《Inline rendering with document.currentScript》（2026-10-17T21:11Z，属 16点版窗口、非本窗口，且为 JavaScript 话题与 serving 无关），本轮不收。本期不标「值得深读」，不做深读笔记。本体无 chat.read_messages 工具，去重以 briefs/ 目录与 hidden_files checklog 为准。*</p></body></html>
