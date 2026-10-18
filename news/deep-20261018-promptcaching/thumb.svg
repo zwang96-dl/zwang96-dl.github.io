@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" width="720" height="400" font-family="Georgia, serif" fill="#252825" role="img"><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8Z" fill="#686e68"/></marker></defs>
+<text x="360" y="25" text-anchor="middle" font-size="16">Turn 1</text>
+<text x="118" y="62" text-anchor="middle" font-size="16">Input</text>
+<rect x="40" y="75" width="44" height="34" rx="5" fill="#e8f0fa" stroke="#3f6fa0"/><text x="62.0" y="97.0" text-anchor="middle" font-size="16">A</text><rect x="90" y="75" width="44" height="34" rx="5" fill="#e8f0fa" stroke="#3f6fa0"/><text x="112.0" y="97.0" text-anchor="middle" font-size="16">B</text><rect x="140" y="75" width="44" height="34" rx="5" fill="#e8f0fa" stroke="#3f6fa0"/><text x="162.0" y="97.0" text-anchor="middle" font-size="16">C</text>
+<path d="M192 92 L260 92" stroke="#686e68" fill="none" marker-end="url(#arrow)"/>
+<rect x="270" y="68" width="150" height="48" rx="5" fill="#fff" stroke="#686e68"/><text x="345.0" y="97.0" text-anchor="middle" font-size="16">Model</text>
+<path d="M430 92 L490 92" stroke="#686e68" fill="none" marker-end="url(#arrow)"/>
+<text x="565" y="62" text-anchor="middle" font-size="16">Answer</text>
+<rect x="515" y="75" width="44" height="34" rx="5" fill="#fce6cd" stroke="#d18a2a"/><text x="537.0" y="97.0" text-anchor="middle" font-size="16">D</text><rect x="565" y="75" width="44" height="34" rx="5" fill="#fce6cd" stroke="#d18a2a"/><text x="587.0" y="97.0" text-anchor="middle" font-size="16">E</text>
+<text x="360" y="160" text-anchor="middle" font-size="16">Turn 2</text>
+<text x="360" y="190" text-anchor="middle" font-size="16">Input: previous prompt + previous answer + new input</text>
+<rect x="163" y="205" width="44" height="34" rx="5" fill="#e8f0fa" stroke="#3f6fa0"/><text x="185.0" y="227.0" text-anchor="middle" font-size="16">A</text><rect x="213" y="205" width="44" height="34" rx="5" fill="#e8f0fa" stroke="#3f6fa0"/><text x="235.0" y="227.0" text-anchor="middle" font-size="16">B</text><rect x="263" y="205" width="44" height="34" rx="5" fill="#e8f0fa" stroke="#3f6fa0"/><text x="285.0" y="227.0" text-anchor="middle" font-size="16">C</text><rect x="313" y="205" width="44" height="34" rx="5" fill="#fce6cd" stroke="#d18a2a"/><text x="335.0" y="227.0" text-anchor="middle" font-size="16">D</text><rect x="363" y="205" width="44" height="34" rx="5" fill="#fce6cd" stroke="#d18a2a"/><text x="385.0" y="227.0" text-anchor="middle" font-size="16">E</text><rect x="413" y="205" width="44" height="34" rx="5" fill="#eef8ee" stroke="#4a8a4a"/><text x="435.0" y="227.0" text-anchor="middle" font-size="16">X</text><rect x="463" y="205" width="44" height="34" rx="5" fill="#eef8ee" stroke="#4a8a4a"/><text x="485.0" y="227.0" text-anchor="middle" font-size="16">Y</text><rect x="513" y="205" width="44" height="34" rx="5" fill="#eef8ee" stroke="#4a8a4a"/><text x="535.0" y="227.0" text-anchor="middle" font-size="16">Z</text>
+<text x="535" y="262" text-anchor="middle" font-size="14">X Y Z: new input</text>
+<text x="480" y="284" text-anchor="middle" font-size="14">(e.g., user message or tool result)</text>
+<path d="M355 245 L355 306" stroke="#686e68" fill="none" marker-end="url(#arrow)"/>
+<rect x="280" y="315" width="150" height="48" rx="5" fill="#fff" stroke="#686e68"/><text x="355.0" y="344.0" text-anchor="middle" font-size="16">Same model</text>
+<path d="M440 339 L510 339" stroke="#686e68" fill="none" marker-end="url(#arrow)"/>
+<rect x="520" y="315" width="145" height="48" rx="5" fill="#fff" stroke="#686e68"/><text x="592.5" y="344.0" text-anchor="middle" font-size="16">Next answer: ?</text>
+</svg>

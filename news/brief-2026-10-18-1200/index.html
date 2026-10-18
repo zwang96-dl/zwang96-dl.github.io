@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月18日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-18"/>
+<meta name="doc-ts" content="2026-10-18T19:01:26"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-18（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-18（12点版）</h1>
+<p>12点版来了。 这轮有两条真东西。 一条是 llama.cpp 新快照。 一条是缓存讲解神文。 它把前缀复用讲透了。 已经做成深读笔记。 细节都在下面。</p>
+<h2>框架更新</h2>
+<p><strong>llama.cpp 连出两个新快照。</strong> b11720 先在窗口内发布。 b11721 紧接着也发布了。 两个都落在这一轮窗口。 上一轮水位还是 b11719。 b11721 带了个 CUDA 融合。 它把四步计算并成一个核。 对象是 Qwen 新实验架构。 就像四道工序并成一条线。 这是每日快照，不是大版。 按惯例只记水位，不深读。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/download/b11721/llama-b11721-bin-ubuntu-x64.tar.gz">https://github.com/ggml-org/llama.cpp/releases/download/b11721/llama-b11721-bin-ubuntu-x64.tar.gz</a></p>
+<p>其他框架全都没动。 vLLM 还是 0.32.0 版。 那是 00点版刚报的。 SGLang 还是 0.5.21 版。 TensorRT-LLM 还是候选版。 LMDeploy 还是 0.18.0 版。 TGI 和 FlashInfer 也持平。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没有新论文。 最新还是 15 日那批。 那批前面已经报完了。 今天周日，没有新批次。 下批要等下个工作日。</p>
+<p><strong>缓存神文来了。</strong> 今天刚发，HN 把它顶起来。 它逐个词元讲清一件事。 KV 缓存和 Prompt 缓存不同。 KV 缓存就是模型草稿纸。 单次回答内，它省重算。 Prompt 缓存更进一步。 它让下一轮接着用草稿。 省的是开头那段读题。 它不直接返回旧答案。 新内容还是要照常生成。</p>
+<p>为啥前缀能原样复用？ 因果掩码挡住了后文。 后面的词看不见前面。 前面每层的草稿就不变。 vLLM 找缓存靠块哈希。 块哈希就是内容指纹。 它把词元切成定长小块。 只有装满的块能复用。 半块不算数，只能重算。 查找从第一块开始扫。 第一块没中就直接停。 中间对上号也不算数。</p>
+<p>还有一个坑特别实用。 系统提示开头别放时间戳。 时间戳每轮都会变。 第一个词元一变就全变。 后面没变的也认不出来。 结果是零个词元复用。 稳定内容要放最前面。 变化内容尽量往后放。 这篇能帮你抠命中率。 你的请求前 200 词共享。 块大小就是命中上限。 深读笔记已经做好了。 来源：<a href="https://www.sithankanna.com/posts/prompt-caching-vs-kv-caching.html">https://www.sithankanna.com/posts/prompt-caching-vs-kv-caching.html</a></p>
+<h2>业内新闻</h2>
+<p>本轮没有新的业内新闻。 HN 窗口里共 80 条帖。 只有缓存那篇跟推理相关。 其余都是闲聊和小秀。 搜索命中的聚合稿是旧闻。 全是 vLLM 大版的翻炒。 00点版已经报过了。 中文媒体也没有新动态。 搜到的全是旧文，不收。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 那期是 10 月 14 日的。 Simon 这轮也没有新帖。 最新还是脚本小技巧帖。 跟推理服务没有关系。 X 和 Reddit 本轮零结果。 社交平台全是科普对比。 没有一手信息，不收。</p>
+<p>本期值得深读一篇。 就是上面那篇缓存神文。 笔记含原文三张图。 图注都配了中文讲解。</p>
+<p>*去重说明：本轮窗口是 10/18 10:00 到 12:00 PDT。对应 epoch 是 1792342800 到 1792350000。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z，00点版已报。SGLang 仍是 v0.5.21，发布于 10/02。仓库路径用 sgl-project/sglang。TensorRT-LLM 仍是 v1.4.0rc0，已报过。LMDeploy 仍是 v0.18.0，发布于 09/28。仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2，已报过。llama.cpp 本窗口连出 b11720 和 b11721。发布时间分别是 10/18 17:36Z 和 18:04Z。上一轮水位是 b11719。b11721 的 release 正文含 CUDA 融合条目。内容是把 Qwen4Exp 的 SCALE 到 SIGMOID 链并成一个核。按 AGENTS.md 惯例，每日快照不算正式发版。正文已如实标注。arXiv 亲手复核四组查询。LLM inference 最新仍是 2610.22172。提交时间是 10/15 16:31Z。KV cache、投机解码、PD 分离三组最新也都停在 10/15 及更早批次，均已报。窗口内无新提交。周日无新批次符合惯例。HN 用 Algolia 精确窗口复核。窗口内 stories 共 80 条。serving 相关只有 Prompt Caching 一篇。发布时间是 18:35Z，落在窗口内。原文标注 2026-10-18 发布。此前简报库 grep 无 sithankanna 和该文标题。确认未报，收录并做深读。原文已亲手打开通读。块哈希、满块复用、时间戳坑均按原文核对。三轮玩具命中率 52.2% 是原文算例。不是实测，也不是计费预测。深读笔记已存深度阅读目录。含原文三张 SVG 图和中文图注。HTML 版已生成，图片已 base64 内嵌。README 索引已更新。browser.search 命中均为旧文或已报。vLLM 0.32.0 聚合稿本体 00点版已报。X 站内与 Reddit 站内零结果。中文媒体无新 serving 动态。social 搜索窗口内只有引擎对比科普。无一手信息，故不收。Latent Space 最新仍是 Leash Bio 期。日期是 2026-10-14，已报过。Simon atom 最新仍是脚本小技巧帖。发布时间是 10/17 21:11Z，与 serving 无关。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
