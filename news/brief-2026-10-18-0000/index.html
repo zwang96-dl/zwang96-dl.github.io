@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月18日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-18"/>
+<meta name="doc-ts" content="2026-10-18T07:01:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-18（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-18（00点版）</h1>
+<p>这轮有大货，别错过。 vLLM 刚发了新大版本。 就在今晚 23:50 落窗。 其他框架都还没动。 论文侧还是周末空窗。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 发 v0.32.0 了。</strong> 这是窗口内刚出的正式版。 规模有 814 个提交。 贡献者一共 363 人。 对你最香的是短请求加速。 多开几个 API 前端进程后。 请求会自动去最闲的那个。 短请求每秒处理量涨很多。 官方说涨了 43% 到 85%。 你那批请求正好偏短。 输入大约 250 个词元。 这条值得你优先实测。</p>
+<p>KV 缓存这轮全面降精度。 KV 缓存就是模型的草稿纸。 草稿纸越小，能装的人越多。 H100 这次也吃到了红利。 新格式能在 H100 上跑了。 有个格式专治一种注意力。 官方说输出吞吐最高涨 31%。 注意这只测了指定模型。 模型是 GLM-5.3-Flash。 换模型别默认有这个数。</p>
+<p>你的 AMD 卡也有份。 ROCm 就是 AMD 的软件栈。 新执行引擎成了默认项。 不再需要你手动去开。 AMD 还多了 4 位草稿纸。 密度约是 8 位的两倍。 同显存能塞下更多请求。 另有两项写在 AMD 区。 一个长题首字快约 20%。 一个解码间隔降 5% 到 15%。 前者只测了 Kimi-K3。 后者只测了 GLM 小版。 都别当成全模型通用数。</p>
+<p>多模态这边也有三件。 大图大视频传给工人时。 现在只拷一份共享内存。 以前每个工人各拷一份。 编码器输入会按类型排队。 同类扎堆，处理更顺手。 官方说每秒请求涨约 7%。 新模型还多了两个。 一个是全模态向量模型。 一个是 MiniCPM-V 4.7。 看图说话的小模型更新了。</p>
+<p>划重点，有两个坑要记。 默认不再放行所有网站。 这是跨站调用的安全收紧。 老配置升上来可能被拦。 先在测试环境验一遍。 还有 Python 3.10 被砍了。 环境太老会直接装不上。 安全修复这轮有三条。 细节我放深读笔记里了。 来源：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.32.0">https://github.com/vllm-project/vllm/releases/tag/v0.32.0</a></p>
+<p>其他框架本轮全持平。 SGLang 还是 0.5.21 版。 其余几家也都没发版。 llama.cpp 也没新快照。 最新还是上轮那个编号。</p>
+<p><strong>值得深读：vLLM v0.32.0</strong> 这版跟你三条线都相关。 短请求前端、草稿纸压缩。 还有 AMD 默认引擎切换。 深读帮你按硬件拆好了。 哪条能用、哪条别误读。 笔记里都标得清清楚楚。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 本轮还是没新批。 最新仍是 15 日那批。 那批前几轮已经报完。 周末没新批次很正常。 下个工作日再重点筛。</p>
+<p>有一篇实验值得你看看。 它把请求循环搬进内核。 内核就是系统的管家层。 想法是少让用户程序插手。 结果却几乎没省下 CPU。 两种写法每秒词元一样。 尾延迟也基本没差别。 省下的用户时间去哪了？ 全变成了系统时间补回。 真正贵的是网络协议栈。 搬家搬不走这笔过路费。 就像搬了收费站窗口。 高速本身的路还是那条。</p>
+<p>它还有一个反差发现。 常驻 GPU 的执行器很省。 每请求 CPU 只要零头。 比官方 vLLM 省十几倍。 作者说原因不在网络层。 一是调度搬到了 GPU 上。 二是只回词元编号不回文本。 这跟你的老猜想对上了。 你那次 GPU 远没吃饱。 瓶颈疑在 CPU 调度侧。 这篇给了个对照实验法。 先量成本地板再动手搬。 原文是 10 月 17 日发的。 HN 在本窗口把它顶起。 我按补收处理，不算新发。 测试只用了一台小机。 模型也只有小号那两个。 结论别直接搬到大集群。 来源：<a href="https://eunomia.dev/blog/2026/10/17/bpf-gpu-server/">https://eunomia.dev/blog/2026/10/17/bpf-gpu-server/</a></p>
+<h2>业内新闻</h2>
+<p>本轮没有新的业内新闻。 HN 窗口里共 38 条帖。 大半是闲聊和旧文重提。 有一条讲 AI 基建降温。 那是财经评论，不是技术。 跟 serving 方法无关。 中文媒体也没有新动态。 08点版那个漏洞别忘堵。 Xinference 记得设密钥。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新还是 Leash Bio 那期。 Simon 这轮也没有新帖。 X 和 Reddit 本轮零结果。 社交平台只有旧科普。 没有一手信息，不收录。</p>
+<p>*去重说明：本轮窗口是 10/17 22:00 到 10/18 00:00 PDT。对应 epoch 是 1792299600 到 1792306800。框架水位经 gh API 亲手复核。vLLM 新增 v0.32.0 版。发布时间是 10/18 06:50Z。即本地 10/17 23:50 PDT。落在窗口内，首次收录。规模 814 个提交、363 位贡献者。数字均出自官方 release notes。短请求 43% 到 85% 是官方自报。条件是 api-server-count 大于 1。31% 只限 GLM-5.3-Flash 的 fp8_ds_mla 在 SM90。SM90 即 H100 所属架构。GLM-5.x 的 FP8 默认项只限 SM100。SM100 是 Blackwell，不等于 H100。正文已分开写、没有混报。ROCm 的 ultraquant_4bit 约 2 倍于 FP8 密度。MRV2 在 ROCm 上成为默认。均出自官方 notes 的 ROCm 区。MI355X 的 mono decode 是单独机型项。正文未把它算到 MI350X 头上。SGLang 仍是 v0.5.21，发布于 10/02。仓库路径用 sgl-project/sglang。TensorRT-LLM 仍是 v1.4.0rc0，已报过。LMDeploy 仍是 v0.18.0，发布于 09/28。仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2，已报过。llama.cpp 最新仍是 b11718。发布时间是 10/18 04:42Z。属 22点版窗口，已记过。arXiv 用两组查询亲手复核。最新仍是 10/15 提交那批。含 arXiv:2610.22311 等已报条目。窗口内无新提交。HN 用 Algolia 精确窗口复核。窗口内 stories 共 38 条。eunomia 实验帖在 05:07Z 入窗。原文标注 10/17 发布、08:58Z 更新。按 HN 窗口补收并如实标日期。其余如 FT 基建评论等均无关。browser.search 命中均为旧文或已报。Reflection Beam 的谷歌云稿 02点版已报并已深读。SGLang Summit 稿 18点版已报。DeepSeek 小更新 02点版已报本体。X 站内与 Reddit 站内零结果。中文媒体无新 serving 动态。social 搜索窗口内只有旧科普视频。含训练与推理科普和 Beam 介绍。无一手信息，故不收。Spotify 已连接并复核节目。Latent Space 最新仍是 Leash Bio 期。单集日期是 2026-10-14，已报过。Simon atom 最新仍是脚本小技巧帖。发布时间是 10/17 21:11Z，与 serving 无关。本期标 vLLM v0.32.0 为值得深读。深读笔记已同步生成。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>

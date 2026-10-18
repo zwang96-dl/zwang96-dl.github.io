@@ -1,0 +1,72 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM v0.32.0：短请求与低精度 KV 精读"/>
+<meta name="doc-description" content="原文链接：https://github.com/vllm-project/vllm/releases/tag/v0.32.0"/>
+<meta name="doc-date" content="2026-10-18"/>
+<meta name="doc-ts" content="2026-10-18T07:02:00"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM v0.32.0：短请求与低精度 KV 精读</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM v0.32.0：短请求与低精度 KV 精读</h1>
+<p>原文链接：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.32.0">https://github.com/vllm-project/vllm/releases/tag/v0.32.0</a> 发布时间：2026-10-17 23:50 PDT（本轮窗口内发布） 版本规模：814 个提交，363 位贡献者（121 位新人）</p>
+<h2>人话解读</h2>
+<ul><li>vLLM 发了新大版本。</li><li>这版不是只加新模型。</li><li>serving 的三处都动了。</li><li>前端接待、草稿纸、执行器。</li><li>草稿纸就是 KV 缓存。</li><li>它记着算过的中间结果。</li><li>对你最值钱的是短请求。</li><li>还有 H100 的低精度草稿纸。</li><li>和 AMD 的默认引擎切换。</li><li>下面按你的硬件拆开讲。</li><li>不是你的卡的，我会标明。</li></ul>
+<h2>核心更新</h2>
+<h3>短请求：前端不再傻排队</h3>
+<ul><li>以前请求先进一个前端。</li><li>前端忙时，后面只能等。</li><li>现在可以多开几个前端。</li><li>参数是 --api-server-count。</li><li>设成大于 1 才生效。</li><li>新连接去最闲的那个前端。</li><li>像超市多开几个收银台。</li><li>还按哪台空着来分流。</li><li>官方说短请求涨幅不小。</li><li>每秒请求涨 43% 到 85%。</li><li>这是官方自报的数字。</li><li>没有独立复测，别当定论。</li><li>你的请求正好偏短。</li><li>输入大约 250 个词元。</li><li>这条值得你第一个实测。</li></ul>
+<h3>低精度 KV：草稿纸写小字</h3>
+<ul><li>KV 缓存很吃显存。</li><li>精度降下来，纸就变小。</li><li>同显存能装更多请求。</li><li>这版把低精度铺得更广。</li><li>NVFP4 是一种 4 位格式。</li><li>它现在能在 SM90 上跑。</li><li>SM90 就是 H100 的架构。</li><li>还能在更老的卡上跑。</li><li>也能在新消费卡上跑。</li><li>另一个格式专治稀疏注意力。</li><li>名字叫 fp8_ds_mla。</li><li>它在 SM90 上有成绩。</li><li>模型是 GLM-5.3-Flash。</li><li>输出吞吐最高涨 31%。</li><li>注意只测了这一个模型。</li><li>还有一条别误读的。</li><li>GLM-5.x 默认开 FP8 草稿纸。</li><li>这条只限 SM100 架构。</li><li>SM100 是 Blackwell 的卡。</li><li>不是你的 H100，别套用。</li><li>那条官方数是涨 2.3% 起。</li><li>最高到 5.5%，跟你无关。</li></ul>
+<h3>AMD：新执行器转正</h3>
+<ul><li>MRV2 是新一代执行器。</li><li>全名 Model Runner V2。</li><li>它在 ROCm 上成了默认。</li><li>ROCm 是 AMD 的软件栈。</li><li>以前要手动开，现在不用。</li><li>你的 MI300X 和 MI350X。</li><li>升级后默认就走新路。</li><li>行为变了，升级先测一轮。</li><li>AMD 还多了 4 位草稿纸。</li><li>名字叫 ultraquant_4bit。</li><li>密度约是 FP8 的两倍。</li><li>草稿纸更小，并发能更高。</li><li>AMD 区还有两条小账。</li><li>Kimi-K3 长题首字快约 20%。</li><li>靠的是 prefill 检查点。</li><li>GLM 小版解码间隔降了。</li><li>降幅是 5% 到 15%。</li><li>两条都只测了指定模型。</li><li>另有一条只限 MI355X。</li><li>那是比 MI350X 新的卡。</li><li>正文没把它算到你头上。</li></ul>
+<h3>投机解码：实习生上 GPU</h3>
+<ul><li>投机解码是先猜再验。</li><li>像实习生先打一版草稿。</li><li>专家只改错的地方就行。</li><li>MRV2 新增 GPU 词元猜测。</li><li>猜的长度还能变长变短。</li><li>不再是固定猜几个词。</li><li>弹性专家并行也来了。</li><li>名字叫 Elastic EP。</li><li>专家能先排空再扩缩。</li><li>流水线并行也能混搭。</li><li>能叠 prefill 上下文并行。</li><li>这给解耦部署多一种拼法。</li></ul>
+<h3>多模态：传图只拷一份</h3>
+<ul><li>大图大视频很占内存。</li><li>以前传给每个工人一份。</li><li>工人是干活的执行进程。</li><li>现在一份共享内存搞定。</li><li>名字叫共享内存张量场。</li><li>默认已经打开，不用配。</li><li>编码器输入会按类排序。</li><li>图片和视频不再乱穿插。</li><li>同类扎堆，机器更顺手。</li><li>官方说每秒请求涨约 7%。</li><li>准确说是 6.5% 到 8.2%。</li><li>新模型多了 MiniCPM-V。</li><li>版本是 4.7，看图说话。</li><li>还有全模态向量模型。</li><li>名字是 EmbeddingGemma 2。</li><li>图文音视频都能转向量。</li><li>用不上的编码器可跳过。</li><li>靠 --limit-mm-per-prompt 控制。</li></ul>
+<h3>P/D 解耦与 KV 搬运</h3>
+<ul><li>KV 连接器这轮修了多处。</li><li>NIXL 的主机拷贝会合并。</li><li>Mooncake 的搬运也会合并。</li><li>合并就是少跑几趟腿。</li><li>DeepSeek 新版有个细节。</li><li>解耦时可跳过一段重放。</li><li>前提是 KV 已经加载好。</li><li>这些都是边角优化。</li><li>没有端到端大数字公布。</li><li>别指望解耦凭这版翻盘。</li><li>你评估 SGLang 时可对照。</li><li>看它那边搬运账怎么算。</li></ul>
+<h3>安全与 breaking change</h3>
+<ul><li>默认不再放行所有来源。</li><li>CORS 是跨站调用的门禁。</li><li>以前默认谁都能来敲门。</li><li>现在默认只放行可信源。</li><li>老部署升级可能被拦。</li><li>先在测试环境验一遍。</li><li>这轮修了三个安全洞。</li><li>一是聊天模板耗尽资源。</li><li>二是分词器编号越界。</li><li>三是点对点套接字耗尽。</li><li>不可信图片只准光栅格式。</li><li>共享缓存的句柄要签名。</li><li>JSON 嵌套超 64 层拒绝。</li><li>Python 3.10 已不再支持。</li><li>环境太老会直接装不上。</li><li>级联注意力已被移除。</li><li>还有 max_tokens 语义变了。</li><li>它不再从上下文里预留。</li><li>升级前把这几条过一遍。</li></ul>
+<h2>关键数据</h2>
+<ul><li>814 个提交，363 位贡献者。</li><li>其中新人有 121 位。</li><li>短请求涨 43% 到 85%。</li><li>条件是多开 API 前端。</li><li>GLM-5.3-Flash 输出涨 31%。</li><li>条件是 SM90 加指定格式。</li><li>编码器排序涨约 7%。</li><li>HiSparse 最高涨 58%。</li><li>HiSparse 是分级稀疏缓存。</li><li>这条官方没给全测试条件。</li><li>睡眠模式能多还显存。</li><li>每卡最多约 9 个 GB。</li><li>安装还是 pip install vllm。</li><li>默认镜像是 CUDA 13.0。</li><li>另有 ROCm 和 CPU 镜像。</li></ul>
+<h2>跟你研究方向的关联</h2>
+<ul><li>你在评估 SGLang 的解耦。</li><li>vLLM 是你的对照组。</li><li>这版对照组往前走了一步。</li><li>先看短请求那一条。</li><li>你的负载输入约 250 词。</li><li>GPU 当时远没有吃饱。</li><li>你疑瓶颈在 CPU 侧。</li><li>多前端分流正打这一环。</li><li>autotuner 可加一个旋钮。</li><li>旋钮就是前端进程个数。</li><li>再看草稿纸压缩这条。</li><li>H100 和 AMD 都有新格式。</li><li>格式不同，账要分开算。</li><li>autotuner 的代价模型里。</li><li>KV 精度该是一个维度。</li><li>不是全集群一个默认值。</li><li>AMD 默认引擎切换也重要。</li><li>你在 MI300X 上测 SGLang。</li><li>对照组默认行为刚变了。</li><li>旧对比数据要标注版本。</li><li>不然容易比出假结论。</li><li>解耦搬运这轮只有小修。</li><li>没有新的解耦架构发布。</li><li>SGLang 的内置解耦仍有差。</li><li>这个判断这版没有推翻。</li></ul>
+<h2>图表说明</h2>
+<ul><li>官方 release notes 是纯文字。</li><li>全文没有关键图表。</li><li>所以本篇不配图，不硬凑。</li><li>所有数字都回指原文条目。</li><li>条目编号在原文里可查。</li></ul>
+<h2>术语表</h2>
+<ul><li>KV cache：模型的草稿纸，存算过的中间结果。</li><li>SM90：Hopper 架构代号，H100 用的就是它。</li><li>SM100：Blackwell 架构代号，B200 用的就是它。</li><li>NVFP4：英伟达的 4 位浮点格式。</li><li>FP8：8 位浮点格式，精度和体积居中。</li><li>MRV2：vLLM 新一代模型执行器。</li><li>ROCm：AMD 的 GPU 软件栈。</li><li>EP：专家并行，专家分到不同卡。</li><li>MLA：一种省草稿纸的注意力结构。</li><li>CORS：网页跨站调用的门禁规则。</li><li>NIXL：英伟达的高速数据搬运库。</li><li>Mooncake：一个 KV 搬运与缓存系统。</li></ul>
+<h2>原文链接</h2>
+<ul><li><a href="https://github.com/vllm-project/vllm/releases/tag/v0.32.0">https://github.com/vllm-project/vllm/releases/tag/v0.32.0</a></li></ul></body></html>
