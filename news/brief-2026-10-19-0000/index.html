@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月19日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-19T07:07:05"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-19（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-19（00点版）</h1>
+<p>00点版来了。 框架这轮基本没动。 论文区又补到一批漏网的。 还是 16 日提交那批。 前面几期没扫干净。 五篇全对你的口。 多模态那篇直接排第一。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发新版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 出了一个新快照。 编号是 b11724 版。 按惯例快照不算正式发版。 这里只记一笔水位。 水位我逐个用接口核过了。</p>
+<h2>新技术与论文</h2>
+<p><strong>一个模型，运行时切宽度。</strong> 模型大小以前是写死的。 大卡小卡只能各训一个。 HydraLLM 把它做成活的。 一个旋钮管模型宽度。 旋钮就是开几个注意力头。 开少了，模型变窄变快。 开满了，模型恢复全宽。 多模态那边同步变。 视觉投影跟着文本变窄。 开一半的头跑多模态。 成绩打平 7 倍大的模型。 只开四分之一的头。 生成吞吐高了 75.3%。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23455">https://arxiv.org/abs/2610.23455</a></p>
+<p><strong>找重要词，先粗选再细修。</strong> 上下文越长，解码越慢。 每步都要翻全部草稿纸。 草稿纸就是 KV 缓存。 稀疏法只翻重要的页。 难的是名单每层重算太贵。 全层共用一份又会过时。 这篇先量了层间差多少。 核心名单其实很稳。 变的只在边缘一小圈。 于是少数层先粗选候选池。 其余层在池里便宜地细修。 它是在 SGLang 里实测的。 128K 下每步快了 3.36 倍。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.22985">https://arxiv.org/abs/2610.22985</a></p>
+<p><strong>何时喊大模型，看轨迹不看单点。</strong> 协作解码是小模型主答。 大模型只偶尔出来纠错。 难点是何时喊它出来。 看单个词的置信度没用。 预测准不准几乎靠猜。 AUC 只有 0.50 到 0.53。 AUC 就是预测准不准的分。 看整段轨迹的形状就行。 同样的数据能到 0.86。 数学题上最多多对 20 分。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23613">https://arxiv.org/abs/2610.23613</a></p>
+<p><strong>草稿和正稿，共用一套比特。</strong> 投机解码要养两个模型。 草稿模型还要单独一份草稿纸。 BS-Spec 让两边共用权重。 草稿只读权重的高位比特。 低位比特省下不读。 精度按负载现场选。 忙闲不同，选的档也不同。 比普通自回归快最多 1.9 倍。 但它要配专用加速器。 不是下个软件就能用的。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.22877">https://arxiv.org/abs/2610.22877</a></p>
+<p><strong>闪存当显存，先拿模拟器算账。</strong> HBF 是新出的高带宽闪存。 它想给显存扩容到 TB 级。 但闪存天生延迟高、寿命短。 到底能不能用，没人敢拍板。 HBFSim 是个专用模拟器。 它把 HBM 和 HBF 一起模。 溢出的数据走 HBF 时。 比走主机内存快 11 到 19 倍。 草稿纸该留 HBM，别拿它当缓存。 满负荷下闪存能撑 2 到 7 年。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23503">https://arxiv.org/abs/2610.23503</a></p>
+<h2>业内新闻</h2>
+<p>本轮没有新的业内新闻。 HN 窗口里共 39 条帖。 没有一条是 serving 动态。 搜索命中的都是旧稿。 有 Mooncake 漏洞的旧梳理。 问题是 10 月 1 日报的。 修复版 8 月底就有了。 不是窗口内新事，不当警报。 中文媒体也没有新动态。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新条目还是 17 日那篇。 Spotify 上最新还是 14 日那期。 那期 22点版前已经报过。 Simon 这轮也没有新帖。 最新还是 18 日记过的两条。 X 和 Reddit 本轮零结果。 社交平台没有窗口内一手帖。</p>
+<p>本期「值得深读」有两篇。 第一篇是 HydraLLM 精读。 它给你的调参多一个维度。 模型宽度能跟解耦拼着切。 第二篇是 Prism 精读。 它直接在 SGLang 里实测。 数字能进你的解耦对照表。 笔记都做好了，链接在下面。 深度阅读：HydraLLM-一个模型运行时切宽度.html 深度阅读：PrismAttention-稀疏索引先粗选再细修.html</p>
+<p>*去重说明：本轮窗口是 10/18 22:00 到 10/19 00:00 PDT。对应 epoch 是 1792386000 到 1792393200。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z，20点版已报。TensorRT-LLM 仍是 v1.4.0rc0。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2。llama.cpp 新快照 b11724 发布于 10/19 05:44Z，在本窗口内，按惯例只记水位。arXiv 亲手复核。最新批次仍停在 10/16。本轮五篇均为 10/16 提交。此前各期未收，本轮逐篇 grep 全部 briefs 确认未报。HydraLLM 编号 2610.23455。Prism 编号 2610.22985。Trajectory 编号 2610.23613。BS-Spec 编号 2610.22877。HBFSim 编号 2610.23503。五篇数字均取自 arXiv 摘要与正文。均为作者自报，无独立复测。HN 用 Algolia 精确窗口复核。窗口内 stories 共 39 条，无 serving 动态。browser.search 命中均为旧文。Mooncake 漏洞梳理本体是 16 天前旧稿。问题 10/1 已公开，修复版 0.3.13 于 8/26 发布。故按旧闻处理，只留一句分级说明。中文媒体搜索无窗口内新稿。X 站内与 Reddit 站内零结果。social 搜索无窗口内一手帖。Simon atom 最新仍是 10/18 23:43Z 那条，已记过。Latent Space feed 最新条目仍是 10/17 的 AINews 简讯。Spotify 上该节目最新单集仍是 10/14 的 Leash Bio 期，已报过。本期深读两篇。文件是 HydraLLM-一个模型运行时切宽度。另一篇是 PrismAttention-稀疏索引先粗选再细修。README 索引已同步更新。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
