@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月19日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-19T13:03:45"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-19（06点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-19（06点版）</h1>
+<p>06点版来了。 框架还是没人发新版。 只有 llama.cpp 换了新快照。 论文区继续补漏网的。 还是 15、16 日那批。 prefill 砍专家那篇排第一。 它正对你算的 prefill 账。 业内这轮没有新事。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发新版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 出了新快照。 编号是 b11729 版。 04点版记的是 b11727。 按惯例快照不算正式发版。 这里只记一笔水位。 水位我逐个用接口核过了。</p>
+<h2>新技术与论文</h2>
+<p><strong>砍专家伤的不是答案，是格式。</strong> MoE 读题时每个词元过 8 个专家。 专家就是模型里的分工小组。 砍到 4 个，读题能便宜不少。 大家怕的是答案跟着变差。 这篇把伤害查到了词元一级。 结论是内容其实没怎么丢。 召回只掉 1.09 分。 掉的是精确率，掉了 4.87 分。 说白了答案还在，话变啰嗦了。 伤害还只集中在极少数词元。 就是答案开始前的那几个。 只保最后 2 个词元全专家。 总分损失就缩了三分之二。 真实提示只留约 4% 全专家。 预算放在任务接口处才管用。 随机撒在文档里还要差 3 分。 长提示首字快了约 14%。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.22454">https://arxiv.org/abs/2610.22454</a></p>
+<p><strong>智能体干活，强模型改当审稿人。</strong> 智能体要连着调很多次工具。 老办法是强模型一步步亲自写。 可很多步其实都是例行公事。 SpecAgent 换了个分工。 小模型先把整段草稿写完。 写的时候就真去调只读工具。 所以草稿踩在真实观察上。 强模型最后只做一件事。 一轮 prefill 审完整段草稿。 prefill 就是先把材料读完。 审过的前缀直接落定执行。 第一个错步才需要它动手修。 成功率离强模型只差 1 分内。 耗时和显存流量都约减半。 像专家不再逐字写，只批改。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.21463">https://arxiv.org/abs/2610.21463</a></p>
+<p><strong>推理集群还能帮电网调频。</strong> 这条思路有点反着来。 推理集群耗电是出了名的大。 但它的活有个特殊好处。 请求能提前，也能稍微拖后。 说白了它是个可调的大负载。 这篇就让集群去帮电网调频。 调频就是帮电网稳住频率。 调度分两层来管。 上层管请求分给哪台机器。 下层管每台的词元级资源。 再用均值场近似管大规模副本。 仿真里能跟住调频信号。 服务目标也没有被牺牲。 目前只是仿真，还没上真集群。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23532">https://arxiv.org/abs/2610.23532</a></p>
+<p><strong>查表记忆压到 2 比特。</strong> 有些模型靠查表来扩容量。 查表就是 n-gram 记忆表。 n-gram 是按词组查的索引。 麻烦是整张表必须随时待命。 表太大，光占显存就吃不消。 这篇把每行压成短码加缩放。 要用哪行，才现场拼回哪行。 2 比特下误差比老压法小。 输出分布偏差少了 41% 到 63%。 拿 DeepSeek 的表实测。 存储从 203 GB 压到 51 GB。 省下的显存能装更大的活。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.21810">https://arxiv.org/abs/2610.21810</a></p>
+<h2>业内新闻</h2>
+<p>本轮没有新的业内新闻。 HN 窗口里共 105 条帖。 没有一条是 serving 动态。 搜索命中的都是旧稿综述。 中文媒体也没有窗口内新稿。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新条目还是 17 日那篇。 Spotify 上最新还是 14 日那期。 那期早就已经报过了。 Simon 这轮也没有新帖。 最新还是 18 日记过的。 X 和 Reddit 本轮零结果。 社交平台没有窗口内一手帖。</p>
+<p>本期「值得深读」有一篇。 就是开头的砍专家精读。 它能帮你给 prefill 省钱定规矩。 全专家预算放哪里是新旋钮。 能跟你的解耦配比一起调。 笔记做好了，链接在下面。 深度阅读：Prefill砍专家-伤害只在少数词元.html</p>
+<p>*去重说明：本轮窗口是 10/19 04:00 到 06:00 PDT。对应 epoch 是 1792407600 到 1792414800。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z，20点版已报。TensorRT-LLM 仍是 v1.4.0rc0。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2。llama.cpp 新快照 b11729 发布于 10/19 11:24Z，在本窗口内。此前水位是 b11727，04点版已记。本窗口无正式发版。arXiv 亲手复核。最新批次仍停在 10/16 17:59Z。本轮四篇均为 10/15 到 10/16 提交。此前各期未收，本轮逐篇 grep 全部 briefs 确认未报。砍专家编号 2610.22454。SpecAgent 编号 2610.21463。电网调频编号 2610.23532。查表量化编号 2610.21810。四篇数字均取自 arXiv 摘要与正文。均为作者自报，无独立复测。HN 用 Algolia 精确窗口复核。窗口内 stories 共 105 条。MiniMax-M3.1-Flash 的 Artificial Analysis 分析页帖 12:48Z 入窗。无一手发布源可核，不当新发布收。四卡微调 235B 博客帖 12:35Z 入窗。属训练话题不是 serving，不收。其余均为安全、工具和杂谈帖。browser.search 其余命中已逐个分级。HF 定价聚合稿是综述不是动态。Medium 的 vLLM 对 SGLang 复盘文无新版本信息。模域 ModelSphere 已在 10/16 08点版报过，不重复收。X 站内与 Reddit 站内零结果。social 搜索无窗口内一手帖。中文媒体无窗口内 serving 新稿。Simon atom 最新仍是 10/18 23:43Z 那条，已记过。Latent Space feed 最新条目仍是 10/17 的 AINews 简讯。Spotify 已连接并复核节目。Latent Space 最新单集仍是 10/14 的 Leash Bio 期，已报过。本期深读一篇。文件是 Prefill砍专家-伤害只在少数词元。README 索引已同步更新。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
