@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月19日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-19T16:33:08"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-19（08点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-19（08点版）</h1>
+<p>08点版来了。 框架还是没人发新版。 只有 llama.cpp 换了新快照。 论文区继续补漏网的。 还是 15、16 日那批。 专家精度那篇排第一。 业内这轮有两条大的。 一家芯片公司刚融了大钱。 Meta 也晒了自家超大集群。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发新版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 出了新快照。 编号是 b11734 版。 06点版记的是 b11729。 按惯例快照不算正式发版。 这里只记一笔水位。 水位我逐个用接口核过了。</p>
+<h2>新技术与论文</h2>
+<p><strong>专家精度，运行时现调。</strong> MoE 先挑中几个专家干活。 专家就是模型里的分工小组。 挑中后精度以前是写死的。 重要的和不重要的一个样。 DPA-MoE 给精度加了旋钮。 权重切成小块，2 到 8 块。 用几块，就拼出多高精度。 离线先算每专家丢多少。 在线再看它当前多重要。 总预算不变，只换分法。 同预算下走样最多降 4.5 倍。 同质量省下 2 到 4 GB。 按同质量比，速度还更快。 代价是同预算慢 4% 到 6%。 而且还只是个原型实现。 没接进任何服务框架。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.21378">https://arxiv.org/abs/2610.21378</a></p>
+<p><strong>派活给哪个模型，先派侦察兵。</strong> 手里有好几个模型能干活。 每道题该派谁，一直难定。 老办法要训专门的门卫。 或者让大模型挨个试答。 ScoutRoute 派了个侦察兵。 侦察兵是个便宜小模型。 它先把题目完整读一遍。 读时的内部状态就能看题。 再配上它自己的置信度。 就能估出谁最擅长这题。 五个模型四个基准上测。 比只看单一信号都准。 还不用改任何底座模型。 说白了是模型级的派单员。 跟单模型内选专家不是一回事。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23443">https://arxiv.org/abs/2610.23443</a></p>
+<p><strong>难题才升级，这招分任务。</strong> 省钱常见招是大小模型搭配。 简单题留给小模型答。 难题才升级给大模型。 关键是先认出哪些是难题。 常用信号是小模型的置信度。 这篇把这招测了个透。 三种模型四个语言都测了。 阅读理解上这招是管用的。 题目分类上也同样管用。 但知识推理题上直接失灵。 小模型答错了还特别自信。 升级效果跟随机挑没区别。 还有个公平性的坑。 有的语言被升级多三成。 改成每种语言等额升级后。 差距没了，总分也没掉。 你做路由省钱先看任务类型。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23249">https://arxiv.org/abs/2610.23249</a></p>
+<h2>业内新闻</h2>
+<p><strong>Tenstorrent 刚融了 15 亿美元。</strong> 它是一家做 AI 芯片的公司。 这轮是它的 E 轮融资。 公司估值到了 62 亿美元。 领投的是两家新机构。 老股东里有 ARK 和富达。 钱主要拿去铺 Galaxy 服务器。 Galaxy 是它的整机服务器。 主打跑开放权重的大模型。 也跑视频生成这类活。 它软件栈是开源的。 路线是跟英伟达错开打。 当推理芯片格局变化看。 数字来自官方稿，先标清。 来源：<a href="https://tenstorrent.com/en/newsroom/tenstorrent-announces-series-e">https://tenstorrent.com/en/newsroom/tenstorrent-announces-series-e</a></p>
+<p><strong>Meta 晒了吉瓦级训练集群。</strong> 集群名字叫 Prometheus。 它在俄亥俄州的新奥尔巴尼。 现在有几十万张 GPU。 满规模要冲到约 100 万张。 现在跑的是 GB200 和 GB300。 下一代 Vera Rubin 也在路上。 第一阶段已经完工了。 它训出了 Muse 系列模型。 划重点，这篇只讲训练。 全文没有提推理服务。 当算力基建的风向看就行。 数字来自官方博客，先标清。 来源：<a href="https://engineering.fb.com/2026/10/19/data-center-engineering/inside-prometheus-meta-gigawatt-scale-supercluster/">https://engineering.fb.com/2026/10/19/data-center-engineering/inside-prometheus-meta-gigawatt-scale-supercluster/</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新条目还是 17 日那篇。 Spotify 上最新还是 14 日那期。 那期早就已经报过了。 Simon 这轮也没有新帖。 最新还是 18 日记过的。 X 和 Reddit 本轮零结果。 社交平台只有旧内容图卡。 讲的都是已报过的版本。 中文媒体也没有窗口内新稿。</p>
+<p>本期「值得深读」有一篇。 就是开头的 DPA-MoE 精读。 它能帮你给专家精度定规矩。 精度块数是现成的旋钮。 能跟砍专家一起进调参账。 笔记做好了，链接在下面。 深度阅读：DPA-MoE-专家精度运行时现调.html</p>
+<p>*去重说明：本轮窗口是 10/19 06:00 到 08:00 PDT。对应 epoch 是 1792414800 到 1792422000。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z，20点版已报。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2。llama.cpp 新快照 b11734 发布于 10/19 14:08Z，在本窗口内。此前水位是 b11729，06点版已记。本窗口无正式发版。arXiv 亲手复核。最新批次仍停在 10/16 17:59Z。本轮三篇均为 10/15 到 10/16 提交。此前各期未收，本轮逐篇 grep 全部 briefs 确认未报。DPA-MoE 编号 2610.21378。ScoutRoute 编号 2610.23443。Who Pays 编号 2610.23249。三篇数字均取自 arXiv 摘要与正文。均为作者自报，无独立复测。Tenstorrent 条经官方新闻稿亲手核过。E 轮 15 亿美元、投后估值 62 亿美元。领投为 Trace Capital 与 Innovation X。资金用途含 Galaxy 服务器规模部署与开放权重模型服务。Prometheus 条先经 HN 帖（10/19 14:23Z 入窗）发现。HN 给的链接已失效。经 Meta 工程师博客站内搜索找到正式稿。正式稿标题为 Inside Prometheus。发布于 10/19。内容为训练集群。含 GB200 与 GB300 两代平台。Vera Rubin 为在途平台。GPU 现为数十万张、目标约 100 万张。全文无 inference 字样。正文已如实标注只讲训练。HN 用 Algolia 精确窗口复核。窗口内 stories 共 165 条。除 Prometheus 与 Tenstorrent 两帖外。TorchNeuron 是 Trainium 训练后端，不在 serving 主线，不收。Yzma 嵌入加速与低比特 CPU 图谱是小工具帖，不收。投机解码科普文是 10/8 旧文，不收。browser.search 其余命中为聚合综述与旧对比文，不收。X 站内与 Reddit 站内零结果。social 搜索只有 vLLM 0.32.0 图卡与 Reflection Beam 帖。均为已报内容，无窗口内一手动态。中文媒体无窗口内 serving 新稿。Simon atom 最新仍是 10/18 23:43Z 那条，已记过。Latent Space feed 最新条目仍是 10/17 的 AINews 简讯。Spotify 已连接并复核节目。Latent Space 最新单集仍是 10/14 的 Leash Bio 期，已报过。本期深读一篇。文件是 DPA-MoE-专家精度运行时现调。README 索引已同步更新。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
