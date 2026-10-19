@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang v0.5.22：PD 解耦与 MI350X 精读"/>
+<meta name="doc-description" content="原文链接：https://github.com/sgl-project/sglang/releases/tag/v0.5.22"/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-19T03:00:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang v0.5.22：PD 解耦与 MI350X 精读</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang v0.5.22：PD 解耦与 MI350X 精读</h1>
+<p>原文链接：<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.22">https://github.com/sgl-project/sglang/releases/tag/v0.5.22</a> 发布时间：2026-10-18 19:55 PDT（本轮窗口内发布） 版本规模：950 个 PR，245 位贡献者</p>
+<h2>人话解读</h2>
+<ul><li>SGLang 发了新大版本。</li><li>这版正中你的评估题。</li><li>PD 解耦有实打实数字。</li><li>解耦就是分工流水线。</li><li>prefill 一批卡先读题。</li><li>decode 一批卡再答题。</li><li>你的 MI350X 也吃到了。</li><li>DeepSeek 新版能在它上跑。</li><li>还配了投机解码加速。</li><li>下面按你的硬件拆开讲。</li><li>不是你的卡的，我会标明。</li><li>数字都是官方自报。</li><li>没有独立复测，别当定论。</li></ul>
+<h2>核心更新</h2>
+<h3>PD 解耦：长题不再堵队</h3>
+<ul><li>这版有个新的可选开关。</li><li>等 prefill 全算完再分配。</li><li>分配的是 decode 的草稿纸。</li><li>草稿纸就是 KV 缓存。</li><li>它记着算过的中间结果。</li><li>以前是边算边占位置。</li><li>decode 侧一紧张就互相挤。</li><li>现在等算完再一次占满。</li><li>官方给了端到端数字。</li><li>吞吐最高涨 26.8%。</li><li>p95 首字延迟砍掉 48.9%。</li><li>p95 就是最慢那批的线。</li><li>测试模型是 GLM-5.2。</li><li>格式是 NVFP4 低精度。</li><li>条件是 decode 草稿纸吃紧。</li><li>这条默认不开，要手动开。</li><li>跟你的解耦评估直接对口。</li><li>值得你第一个上手实测。</li><li>另外还有一条搬运修正。</li><li>Mooncake 提前传 KV 改了。</li><li>要等 prefill 完成才开传。</li><li>免得传一半又白传一趟。</li></ul>
+<h3>MI350X：DeepSeek 配投机</h3>
+<ul><li>DeepSeek-V4.1 能上 AMD 了。</li><li>覆盖 MI350X 和 MI355X。</li><li>架构代号是 gfx950。</li><li>你的 MI350X 正在其中。</li><li>加速靠的是 DSpark。</li><li>DSpark 是一种投机解码。</li><li>像实习生先打一版草稿。</li><li>专家只改错的地方就行。</li><li>官方说吞吐最高 1.9 倍。</li><li>对照是普通解码的速度。</li><li>条件是 4 张 MI350X。</li><li>长题首字延迟也降了。</li><li>128K 输入从 860 毫秒。</li><li>降到 576 毫秒，快三成。</li><li>AMD 解耦也同步补上了。</li><li>FP8 统一 KV 能走解耦。</li><li>统一 KV 是新草稿纸布局。</li><li>还有 PCP 这条新并行。</li><li>它让 KV 词元多装 1.55 倍。</li><li>吞吐最高再涨 15.8%。</li><li>这两条都在 gfx950 上。</li><li>你的 MI350X 可以对照测。</li><li>H200 那边也有大数字。</li><li>每卡吞吐最高涨 2.3 倍。</li><li>注意那是 H200 不是 H100。</li><li>别直接套到你的 H100 上。</li></ul>
+<h3>投机解码：多条线一起涨</h3>
+<ul><li>MiMo-V2.6-Pro 涨得最猛。</li><li>靠 DFlash 投机解码。</li><li>decode 吞吐涨 1.85 倍。</li><li>条件是 B300，不是你的卡。</li><li>GLM-5.3-Flash 也涨了。</li><li>DFlash 让它快约 10%。</li><li>单并发从 1091.9 词元每秒。</li><li>涨到 1199.7 词元每秒。</li><li>条件是 8 张 B300。</li><li>Qwen3.8-Flash-Next 涨 12%。</li><li>条件是 B200，同样标明。</li><li>GLM 还能叠上下文并行。</li><li>名字缩写是 DCP 加 MTP。</li><li>MTP 是多词元一起预测。</li><li>DCP8 叠 MTP 快 2.1 倍。</li><li>DCP2 叠 MTP 快 1.8 倍。</li><li>条件还是 8 张 B300。</li><li>数字好看，但卡不是你的。</li><li>你这边先看 MI350X 那条。</li></ul>
+<h3>HiSparse：草稿纸放内存</h3>
+<ul><li>HiSparse 是分级稀疏缓存。</li><li>它把 KV 草稿纸分层放。</li><li>这版它支持了投机解码。</li><li>EAGLE 和 MTP 都能配。</li><li>长上下文的草稿纸放内存。</li><li>内存就是 CPU 那边的 RAM。</li><li>显存不够时靠它兜底。</li><li>还支持多步 KV 换入换出。</li><li>解耦那边也有一条小账。</li><li>DSA 索引可以少存一份。</li><li>prefill 侧 KV 容量涨 11.6%。</li><li>decode 侧涨 13.7%。</li><li>条件是 GLM-5.2 解耦部署。</li></ul>
+<h3>加载与新模型</h3>
+<ul><li>模型加载快了 10 倍。</li><li>靠新的 InstantTensor 加载器。</li><li>冷启动和扩容都会受益。</li><li>新模型名单也不短。</li><li>有 Cloudflare 的 Clef 系列。</li><li>有 Perplexity 的 Decider。</li><li>有 EmbeddingGemma 2 向量模型。</li><li>还有扩散模型好几个。</li><li>混元图像 3.0 也进来了。</li><li>苹果 Mac 也能跑 SGLang 了。</li><li>走标准 PyTorch 后端。</li><li>跟你的服务器评估无关。</li><li>多模态有一条结构改动。</li><li>GLM-V 的视觉塔能切分了。</li><li>按注意力 TP 组来切分。</li><li>TP 是张量并行，分卡算。</li><li>视觉塔就是看图的那部分。</li><li>这跟多模态分工思路同源。</li></ul>
+<h3>重要修复与 breaking change</h3>
+<ul><li>有个静默算错的坑修了。</li><li>混合线性模型会恢复错状态。</li><li>条件是投机加结构化输出。</li><li>两者同时开才会踩中。</li><li>是 Baseten 的人发现的。</li><li>升级前先把门槛过一遍。</li><li>Python 必须升到 3.11 以上。</li><li>还在 3.10 会装到旧版本。</li><li>它不会报错，只会装旧的。</li><li>DP 注意力参数换了写法。</li><li>旧参数改叫 --attn-dp-size。</li><li>老写法还能用，但会警告。</li><li>ChunkCache 已经被移除。</li><li>关掉 radix 缓存走新实现。</li><li>解耦有个参数语义翻转了。</li><li>主机接收阈值 1 是关闭。</li><li>0 反而变成总是接收。</li><li>老配置填 0 的要改成 1。</li><li>这一条最容易踩，划重点。</li></ul>
+<h2>关键数据</h2>
+<ul><li>950 个 PR，245 位贡献者。</li><li>PD 新开关吞吐涨 26.8%。</li><li>p95 首字延迟降 48.9%。</li><li>条件是 GLM-5.2 加 NVFP4。</li><li>MI350X 投机吞吐最高 1.9 倍。</li><li>条件是 4 卡加 DSpark。</li><li>128K 首字 860 降到 576 毫秒。</li><li>PCP 让 KV 多装 1.55 倍。</li><li>吞吐最高再涨 15.8%。</li><li>模型加载速度涨 10 倍。</li><li>H200 每卡吞吐最高 2.3 倍。</li><li>那是邻居卡，不是 H100。</li><li>B300 上投机涨 1.85 倍。</li><li>那也不是你的卡，先标清。</li></ul>
+<h2>跟你研究方向的关联</h2>
+<ul><li>你正在评估 SGLang 解耦。</li><li>这版给了可复现的靶子。</li><li>先测 PD 新开关这一条。</li><li>它专治 decode 草稿纸吃紧。</li><li>你的短请求负载未必吃紧。</li><li>输入约 250 词元，偏短。</li><li>官方测的是长题场景。</li><li>所以先测长题那一档。</li><li>再拿短题档做对照组。</li><li>两档都测，结论才站得住。</li><li>MI350X 那条是你独有的。</li><li>别人多在英伟达卡上测。</li><li>你手里正好有 MI350X。</li><li>DSpark 的 1.9 倍自报数。</li><li>你可以第一个独立复测。</li><li>autotuner 也多了新旋钮。</li><li>PD 分配时机是一个旋钮。</li><li>PCP 开关是另一个旋钮。</li><li>KV 精度本来就是一维。</li><li>现在旋钮又多了两个。</li><li>升级动作先别急着全量。</li><li>Python 和参数翻转先过。</li><li>再在 MI350X 上单机试跑。</li></ul>
+<h2>图表说明</h2>
+<ul><li>官方 release notes 是纯文字。</li><li>全文没有关键图表。</li><li>所以本篇不配图，不硬凑。</li><li>所有数字都回指原文条目。</li><li>条目编号在原文里可查。</li></ul>
+<h2>术语表</h2>
+<ul><li>PD 解耦：prefill 和 decode 分开用卡。</li><li>KV cache：模型的草稿纸，存算过的中间结果。</li><li>DSpark：DeepSeek 系的投机解码方案。</li><li>DFlash：另一种投机解码方案。</li><li>MTP：一次预测多个词元的技术。</li><li>DCP：decode 侧的上下文并行。</li><li>PCP：prefill 侧的上下文并行变体。</li><li>gfx950：MI350X 和 MI355X 的架构代号。</li><li>HiSparse：把 KV 分层存放的稀疏缓存。</li><li>NVFP4：英伟达的 4 位浮点格式。</li><li>TP：张量并行，一个模型分到多卡算。</li><li>radix cache：按前缀复用草稿纸的缓存。</li></ul>
+<h2>原文链接</h2>
+<ul><li><a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.22">https://github.com/sgl-project/sglang/releases/tag/v0.5.22</a></li></ul></body></html>
