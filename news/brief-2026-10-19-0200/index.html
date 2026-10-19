@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月19日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-19T09:00:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-19（02点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-19（02点版）</h1>
+<p>02点版来了。 框架这轮还是没动。 论文区继续补漏网的。 还是 15、16 日那批。 多模态那篇直接排第一。 业内有一条商汤的补收。 讲的正是 PD 分离量产账。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发新版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 llama.cpp 也没有新快照。 最新还是 b11724 版。 那是 00点版记过的水位。 其他几家也全都没动。 水位我逐个用接口核过了。</p>
+<h2>新技术与论文</h2>
+<p><strong>视觉词元删了，还能请回来。</strong> 多模态看图要算几百个词元。 老办法提前删不重要的。 删了就再也回不来。 可重要与否会随层变化。 相邻层名单平均换人三成。 到深层几乎全是新面孔。 浅层删掉，深层就抓瞎。 CatchUp 把删除改成候补。 没选上的先坐候补席。 后面哪层需要再请回来。 回来前先帮它补状态。 拿近处同伴的变化量推算。 只留 64 个活跃词元时。 词元少了 88.9%。 成绩还保住 92.17%。 延迟也降了 8.0%。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23324">https://arxiv.org/abs/2610.23324</a></p>
+<p><strong>MoE 专家放不下，别全搬 GPU。</strong> MoE 模型专家太多太占显存。 放不下的专家只能外置。 要用时再搬回 GPU。 搬运走 PCIe，慢得要命。 放 CPU 上算，又拖后腿。 这篇按专家的忙闲分工。 忙的专家搬 GPU 算。 闲的专家就地 CPU 算。 两条路同时跑，互相等齐。 prefill 最高快 51.9%。 decode 吞吐涨 39.5%。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23006">https://arxiv.org/abs/2610.23006</a></p>
+<p><strong>淘汰草稿纸，先算扰动账。</strong> 长上下文的草稿纸太占显存。 草稿纸就是 KV 缓存。 淘汰哪些，一直靠拍脑袋。 这篇把账算到了每个词元。 删谁对输出扰动最小留谁。 难题被拆成独立打分。 还能证明离最优不远。 打分内核快了 19.8 倍。 prefill 最高再快 9.9%。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.22130">https://arxiv.org/abs/2610.22130</a></p>
+<p><strong>压缩完，坐标也要重排。</strong> 稀疏保留只做了一半活。 留下的词元还带着旧坐标。 中间被删的空位还在。 位置对不齐，证据就用不好。 RoPERelay 给留下的重编号。 编号连贯紧凑，不留空位。 不用重算，也不用加预算。 记忆任务准确率明显涨。 从 23.6% 涨到 35.4%。 代价是整单慢 1% 到 3%。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.21126">https://arxiv.org/abs/2610.21126</a></p>
+<p><strong>边缘传草稿纸，先保重要的。</strong> 多智能体在边缘设备接力时。 上家算好的草稿纸要传给下家。 重算太贵，传又怕超时。 网络还不稳，说断就断。 这篇先按重要性排队传。 重要的先走，还加纠错保护。 首字截止时间越紧越占优。 说白了是给 KV 搬运排优先级。 正对你解耦里的搬运环节。 来源：<a href="https://arxiv.org/abs/2610.21390">https://arxiv.org/abs/2610.21390</a></p>
+<p><strong>复用草稿纸，小心被人下毒。</strong> 这条是安全提醒。 复用别人的推理草稿纸。 现在被当成提速的新招。 这篇证明它能被下毒。 攻击者只用聊天界面就行。 毒藏在被保留的推理痕迹里。 前置痕迹删掉，毒还在。 攻击成功率最高 79%。 检测器只抓出 1%。 你用前缀缓存要多留心。 共享缓存的隔离别省。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.22873">https://arxiv.org/abs/2610.22873</a></p>
+<h2>业内新闻</h2>
+<p><strong>商汤晒了 PD 分离的量产账。</strong> 这条是窗口边缘的补收。 商汤在峰会上讲了自家集群。 临港有万卡级异构推理集群。 它用的正是 PD 分离。 prefill 和 decode 分开跑。 再用 KV 传输把两边接上。 同等数量的高端旗舰卡下。 整体吞吐最高涨到 5 倍。 平台日均服务 6 万亿词元。 四季度目标是日均 10 万亿。 还在试跨机房的 PD 分离。 还有注意力和 FFN 的分离。 后面这些还是探索口径。 以上全是厂商自报。 没有独立实测，先标清。 来源：<a href="https://finance.sina.cn/stock/jdts/2026-10-19/detail-inivtynp6124955.d.html">https://finance.sina.cn/stock/jdts/2026-10-19/detail-inivtynp6124955.d.html</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新条目还是 17 日那篇。 Simon 这轮也没有新帖。 最新还是 18 日记过的。 X 和 Reddit 本轮零结果。 社交平台没有窗口内一手帖。 HN 窗口里共 54 条帖。 没有一条是 serving 动态。</p>
+<p>本期「值得深读」有一篇。 就是开头的 CatchUp 精读。 它给多模态剪枝留了后悔药。 视觉词元预算是现成旋钮。 能跟你的解耦配比一起调。 笔记做好了，链接在下面。 深度阅读：CatchUp-视觉词元删了还能请回来.html</p>
+<p>*去重说明：本轮窗口是 10/19 00:00 到 02:00 PDT。对应 epoch 是 1792393200 到 1792400400。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z，20点版已报。TensorRT-LLM 仍是 v1.4.0rc0。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2。llama.cpp 最新仍是 b11724，00点版已记水位。本窗口无新发布。arXiv 亲手复核。最新批次仍停在 10/16。本轮六篇均为 10/15 到 10/16 提交。此前各期未收，本轮逐篇 grep 全部 briefs 确认未报。CatchUp 编号 2610.23324。MoE 协同编号 2610.23006。DropKV 编号 2610.22130。RoPERelay 编号 2610.21126，提交于 10/15。PriorityFEC 编号 2610.21390。R2ECAP 编号 2610.22873。六篇数字均取自 arXiv 摘要原文。均为作者自报，无独立复测。商汤条为补收。该稿新浪标注 10/19 14:57 北京时间发布。换算为 10/18 23:57 PDT。在上轮窗口关闭前 3 分钟。上轮未及收录，本轮补上。内容为商汤高管峰会发言。经新浪科技转述网易智能稿。吞吐 5 倍等均为厂商自报。HN 用 Algolia 精确窗口复核。窗口内 stories 共 54 条。CacheVerifier 是应用层语义缓存工具。不是推理 serving 基础设施，不收。SemiAnalysis 数据中心帖是付费简讯预告。不含 serving 动态，不收。browser.search 其余命中均为旧文。vLLM 0.32.0 聚合稿已报。CVE-2026-41523 翻炒稿 22点版已分级处理。X 站内与 Reddit 站内零结果。中文媒体除商汤补收外无窗口内新稿。Simon atom 最新仍是 10/18 23:43Z 那条，已记过。Latent Space feed 最新条目仍是 10/17 的 AINews 简讯。本期深读一篇。文件是 CatchUp-视觉词元删了还能请回来。README 索引已同步更新。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
