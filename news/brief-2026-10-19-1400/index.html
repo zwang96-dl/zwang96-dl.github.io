@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月19日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-19T21:02:08"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-19（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-19（14点版）</h1>
+<p>14点版来了。 框架这轮还是没人发新版。 llama.cpp 又攒了两个快照。 但今天有个真金白银的案例。 Cloudflare 把推理账单砍了 68%。 省钱的大头就是前缀缓存。 跟你的共享前缀负载正对口。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发新版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 水位推进到 b11741。 这轮新增了两个快照。 按惯例快照不算正式发版。 水位我逐个用接口核过了。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没有新批次。 最新批次仍停在 10 月 16 日。 下个批次要等今晚零点 UTC。 本轮论文区暂时休息。</p>
+<p><strong>前缀缓存用对，账单砍 68%。</strong> Cloudflare 今天发了复盘长文。 讲自家 AI 代码审查员怎么省钱。 单次审查曾涨到 2.43 美元。 现在只要 0.77 美元。 中位耗时从 4 分 9 秒。 降到了 1 分 32 秒。 先说清，这些是官方自报。 钱主要烧在缓存读写上。 写缓存占 43%，读占 34%。 输出词元反而只占 23%。 坑找出来后特别朴素。 开头 1 万多词元全员相同。 本该几乎全部命中缓存。 实际首请求只命中两成左右。 原因是提示词拼成了一整块。 块里混进了目录和日期。 断点只放在整块末尾。 共享段从没被单独存过。 换个仓库就完全对不上。 修法是在共享段末尾切一刀。 给前半段单独设断点。 命中率立刻跳到九成以上。 三个审查员再共享一份前缀。 一个写缓存，两个只读。 总降幅拆开是 1.67 美元。 代码改动贡献 0.65 美元。 换模型调档贡献 1.06 美元。 质量也没被省钱吃掉。 重要发现每轮 0.28 个。 优化后 0.30 个，基本持平。 划重点：先查首请求命中率。 整体命中高，开局也可能漏。 你的负载约 250 个词元。 前约 200 个还是共享的。 这就是你的场景放大版。 深读笔记已经做好了。 含原文三张关键图。 来源：<a href="https://blog.cloudflare.com/obsessive-inference-optimization/">https://blog.cloudflare.com/obsessive-inference-optimization/</a></p>
+<h2>业内新闻</h2>
+<p>本轮没有其他大新闻。 HN 窗口内扫了 132 条。 除 Cloudflare 那篇外。 没有 serving 一手动态。 GPU 租用那篇是经验帖。 Overmind 是老仓库被重提。 两条都不够格，不收。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 播客最新还是 10 月 14 日。 Simon 这轮也没有新帖。 最新还是 18 日记过的。 X 和 Reddit 本轮零结果。 中文媒体也没有窗口内新稿。 社交平台只有科普短视频。 没有一手动态，不收。</p>
+<p>*去重说明：本轮窗口是 10/19 12:00 到 14:00 PDT。对应 epoch 是 1792436400 到 1792443600。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2。llama.cpp 窗口内新增 b11740 与 b11741，发布时间分别为 10/19 19:58:50Z 与 20:13:59Z，上轮水位是 b11739，按惯例快照不算正式发版只记水位。本窗口无正式发版。arXiv 亲手复核。KV cache、disaggregated、speculative 三方向最新提交仍为 10/16 批次（2610.23818 等），已在各期报过，窗口内无新提交。HN 用 Algolia 精确窗口复核，窗口内 stories 共 132 条。除 Cloudflare 推理账单帖外无 serving 一手动态。Overmind 经 gh 核过：仓库建于 2024 年、最后推送 2026 年 3 月、33 星，是 HN 重提旧项目，不收。GPU 租用帖是个人经验分享，不收。GPT Rosalind 与 serving 无关，不收。Cloudflare 条经 browser.open 亲手读全文核过。发布于 10/19 19:12:53Z 入窗。2.43 到 0.77 美元、4 分 9 秒到 1 分 32 秒、缓存写 43% 与读 34%、首请求命中 14–26% 修后 91–99.5%、降幅拆分 0.65 对 1.06、重要发现 0.28 对 0.30 均取自原文，已标官方自报。深读笔记已生成：深度阅读/Cloudflare前缀缓存实战-账单砍68%.md 与同名 HTML，含原文 3 张图，README 索引已更新。Latent Space 播客最新仍是 10/14 的 Leash Bio 一期。Simon atom 最新仍是 10/18 23:43Z 那条，已记过。X 站内与 Reddit 站内零结果。social 搜索窗口内只有 Ollama 对 vLLM 对 SGLang 的科普短视频，无一手动态，不收。中文媒体无窗口内 serving 新稿。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
