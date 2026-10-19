@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月19日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-19T19:02:05"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-19（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-19（12点版）</h1>
+<p>12点版来了。 框架还是没人发新版。 llama.cpp 又攒了两个快照。 扩散模型今天放了个大招。 Inception 刚发了 Mercury 3。 英伟达 Vera 架构也被拆了。 Cloudflare 还出了个不写字的模型。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发新版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 水位推进到 b11739。 这轮新增了两个快照。 按惯例快照不算正式发版。 水位我逐个用接口核过了。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没有新批次。 最新批次仍停在 10 月 16 日。 各期把那批补得差不多了。 本轮论文区暂时休息。</p>
+<h2>业内新闻</h2>
+<p><strong>扩散模型也要做百万上下文。</strong> 扩散语言模型不逐词生成。 它一次并行改整段文字。 Inception 今天发了 Mercury 3。 官方说速度每秒 1068 个词。 上下文拉到了 100 万词。 体积是 Mercury 1 的 40 多倍。 自称打平了 GPT-6 Luna 级别。 跑起来快 4 到 8 倍。 首发价格输入 0.10 美元。 输出 0.35 美元，每百万词。 以上全是厂商自报，先标清。 划重点：解码这事正在变花样。 不再只有自回归一条路。 来源：<a href="https://www.businesswire.com/news/home/20261019090400/en/Inception-Launches-Mercury-3-Setting-a-New-Pareto-Frontier-in-Speed-and-Intelligence">https://www.businesswire.com/news/home/20261019090400/en/Inception-Launches-Mercury-3-Setting-a-New-Pareto-Frontier-in-Speed-and-Intelligence</a></p>
+<p><strong>Vera 的内存底子被拆干净了。</strong> Vera 是英伟达新服务器 CPU。 它给 Rubin GPU 当搭档。 Chips and Cheese 今天发了深拆。 内存是 1024 位 LPDDR5X。 带宽最高 1.228 TB 每秒。 L3 缓存有 164MB。 双路互连 NVLink C2C。 理论带宽 1.8 TB 每秒。 实测读带宽约 587 GB 每秒。 本地延迟被管得很平。 跨插槽核间延迟是短板。 大概 660 纳秒，不太好看。 带宽密集任务它占上风。 缓存友好型还是拼不过对手。 跟你直接相关的是喂数据那侧。 prefill 的 host 端瓶颈值得对照看。 数字是博主实测，先标清。 来源：<a href="https://chipsandcheese.com/p/nvidia-veras-system-architecture">https://chipsandcheese.com/p/nvidia-veras-system-architecture</a></p>
+<p><strong>这个模型一字不写，只交答案。</strong> Cloudflare 今天发了 Clairic。 它是个抽取型小模型。 专门从文档里抠数据。 整个推理一次前向就完事。 不逐词生成，所以极快。 抽一个字段只要 0.46 秒。 同样活 LLM 要 16.1 秒。 还只收输入钱，不收输出钱。 官方还带了置信度打分。 拿不准的直接返回空。 他们实测了一条理赔流水线。 用它搭配判定模型换掉纯 LLM。 时间快了 3.2 倍，成本降一半。 以上全是厂商自报，先标清。 划重点：不是所有活都要解码。 抽取类流量可以彻底绕开自回归。 来源：<a href="https://blog.cloudflare.com/clairic-extraction-model/">https://blog.cloudflare.com/clairic-extraction-model/</a></p>
+<h2>访谈与深度</h2>
+<p>Modal 那篇混合采样器。 HN 今天又被人重提了一遍。 原文是 10 月 13 日发的。 17 日那期已决定不重复收。 这轮继续按旧规则处理。 Latent Space 没有新一期。 最新条目还是 17 日那篇。 Simon 这轮也没有新帖。 最新还是 18 日记过的。 X 和 Reddit 本轮零结果。 中文媒体也没有窗口内新稿。</p>
+<p>本期不标「值得深读」。 三条都是厂商发布或媒体拆解。 没有方法细节，宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/19 10:00 到 12:00 PDT。对应 epoch 是 1792429200 到 1792436400。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2。llama.cpp 窗口内新增 b11738 与 b11739，发布时间分别为 10/19 16:59:59Z 与 17:57:49Z，上轮水位是 b11734（10/19 14:08Z），按惯例快照不算正式发版只记水位。本窗口无正式发版。arXiv 亲手复核。KV cache、disaggregated、speculative 三方向最新提交仍为 10/16 批次。候选项 2610.23503、2610.22016、2610.23613、2610.23818、2610.23796 等全部 grep 逐篇复核，已在 00点版或 10/16 00点版报过。窗口内无新提交。HN 用 Algolia 精确窗口复核。窗口内 stories 共 146 条。除 Mercury 3、Modal 重提、Vera 架构、Clairic 四帖外无 serving 一手动态。Anthropic 5% 股份帖、Cloudflare Cyber 项与 serving 无关，不收。Mercury 3 条：BusinessWire 通稿经 browser.open 亲手核过。RuntimeWire 报道时间 17:06Z 入窗。数据为厂商自报，已标清。Nemotron 3.5 Super VL 已在 10/16 日间报过，不重复收。Vera 架构条经 browser.open 亲手读全文核过。内存 1.228TB/s、L3 164MB、NVLink C2C 理论 1.8TB/s、实测读 587GB/s、跨插槽核间延迟约 660ns 均取自原文实测段落。Clairic 条经 browser.open 亲手读全文核过。发布于 10/19 17:48Z 入窗。19.3s 对 61.7s、成本 $6032 对 $11740、抽取 0.46s 对 16.1s 均取自官方博客 cascade 对比段落，已标厂商自报。Latent Space feed 亲手核过。最新仍是 10/17 的 AINews 简讯。Simon atom 最新仍是 10/18 23:43Z 那条，已记过。X 站内与 Reddit 站内零结果。social 搜索窗口内无一手新动态，不收。中文媒体无窗口内 serving 新稿。本期不做深读笔记。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
