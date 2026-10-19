@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月19日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-19T17:25:02"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-19（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-19（10点版）</h1>
+<p>10点版来了。 框架还是没人发新版。 论文区继续补漏网的。 这轮挖到一篇硬货。 它已经接进 SGLang 实测了。 业内有三条新事。 MiniMax 发了便宜新模型。 微软退了一座英国机房。 DeepSeek 被美国政府清退。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发新版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 也没有新快照。 水位还是 b11734 版。 水位我逐个用接口核过了。</p>
+<h2>新技术与论文</h2>
+<p><strong>MLA 草稿纸，压到 2 比特。</strong> MLA 是 DeepSeek 的注意力。 它每个词元只存一份草稿。 草稿纸就是 KV cache。 查词和读值都靠这一份。 压坏一点，两边都遭殃。 RoLaQ 把它压到 2 比特。 2 比特就是每数只剩 4 档。 压之前先离线校准一遍。 先转方向，再学档位范围。 模型权重全程不用重训。 三个 MLA 模型都测了。 六个基准平均分都是第一。 服务实测接进了 SGLang。 同显存多装 3.96 倍词元。 256K 输入解码快 2.51 倍。 256 并发首字延迟降 37.8%。 测试卡是单张 A100。 不是你的 H100 和 MI350X。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.20686">https://arxiv.org/abs/2610.20686</a></p>
+<p><strong>扔草稿，先算扔哪张最亏。</strong> 上下文一长，草稿纸爆仓。 总得扔掉一部分旧词元。 老办法多半看注意力分数。 DropKV 换了个算账法。 它算扔掉后输出歪多少。 再把联合决策拆成逐个打分。 难算的组合题就绕过去了。 打分内核快了 19.8 倍。 prefill 整体快了近一成。 长文基准上同预算最准。 在同类方法里延迟也最低。 像整理书桌先扔最没用的。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.22130">https://arxiv.org/abs/2610.22130</a></p>
+<p><strong>专家装不下，CPU GPU 分着跑。</strong> MoE 的专家太多太占显存。 专家就是模型里的分工小组。 装不下的专家只能外置。 要么搬回 GPU，路上慢。 要么放 CPU 算，算得慢。 这篇按活的多少来分工。 活多的专家搬去 GPU。 活少的就留在 CPU 算。 两条路尽量同时干完。 三个 MoE 模型都测了。 prefill 最高快了 51.9%。 解码吞吐最高涨 39.5%。 显存越紧，这招越值钱。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23006">https://arxiv.org/abs/2610.23006</a></p>
+<h2>业内新闻</h2>
+<p><strong>MiniMax 发了 M3.1 Flash。</strong> 它主打智能体干活便宜。 智能体就是自己干活的 AI。 总参数 428B，激活 23B。 输入每百万词只要 0.15 美元。 输出每百万词 0.60 美元。 缓存读只要 0.015 美元。 官方说任务成本降了七成。 输出速度每秒 200 多词。 权重定在 10 月 23 日放出。 数字来自官方稿，先标清。 来源：<a href="https://www.minimax.io/blog/minimax-m31f">https://www.minimax.io/blog/minimax-m31f</a></p>
+<p><strong>微软退出英国最大 AI 机房。</strong> 机房在伦敦边的 Loughton。 开发商是英国公司 Nscale。 原计划装 23040 张 GB300。 总功率约 50 兆瓦。 卡点是电网接不上电。 供电要等到 2030 年代。 微软是这座机房的主租户。 它一退，项目就悬了。 两家都说其他合作照旧。 说白了算力先卡在电上。 来源：<a href="https://srnnews.com/microsoft-pulls-out-of-uk-data-center-deal-with-nscale-telegraph-reports/">https://srnnews.com/microsoft-pulls-out-of-uk-data-center-deal-with-nscale-telegraph-reports/</a></p>
+<p><strong>美国政府清退 DeepSeek。</strong> 下令的是国土安全部。 联邦文职机构都要执行。 已装的产品要立刻移除。 新采购也一律不许买。 连用它做的第三方服务。 这次也一并在清退范围。 理由是数据和安全风险。 军方和情报系统不在内。 开放权重模型也躲不开。 采购合规的账又多一笔。 来源：<a href="https://ktwb.com/2026/10/19/us-banning-chinese-ai-deepseek-from-government-agency-it-systems/">https://ktwb.com/2026/10/19/us-banning-chinese-ai-deepseek-from-government-agency-it-systems/</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新条目还是 17 日那篇。 Spotify 上最新还是 14 日那期。 那期早就已经报过了。 Simon 这轮也没有新帖。 最新还是 18 日记过的。 X 和 Reddit 本轮零结果。 中文媒体也没有窗口内新稿。</p>
+<p>本期「值得深读」有一篇。 就是开头的 RoLaQ 精读。 它能帮你算 MLA 的 KV 账。 比特数是现成的调参旋钮。 而且已经在 SGLang 里验过。 笔记做好了，链接在下面。 深度阅读：RoLaQ-MLA草稿纸压到2比特.html</p>
+<p>*去重说明：本轮窗口是 10/19 08:00 到 10:00 PDT。对应 epoch 是 1792422000 到 1792429200。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z，20点版已报。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2。llama.cpp 水位仍是 b11734，发布于 10/19 14:08Z，08点版已记。本窗口无正式发版，也无新快照。arXiv 亲手复核。最新批次仍停在 10/16 17:59Z。本轮三篇为 10/14 到 10/16 提交。此前各期未收，本轮逐篇 grep 全部 briefs 确认未报。RoLaQ 编号 2610.20686。DropKV 编号 2610.22130。CPU-GPU MoE 编号 2610.23006。三篇数字均取自 arXiv 摘要与正文。均为作者自报，无独立复测。MiniMax 条经官方博客亲手核过。M3.1 Flash 于 10/19 发布，HN 帖 15:38Z 入窗。06点版当时只有分析页帖、无一手源未收。本轮官方稿已出才收。参数 428B 总、23B 激活，定价输入 0.15、输出 0.60、缓存 0.015 美元每百万词元，均为厂商自报。微软 Nscale 条经 Reuters 10/19 稿核过。HN 帖 16:15Z 入窗。供电推迟到 2030 年代，站点原计划 23040 张 GB300、50 兆瓦。DeepSeek 条经 Reuters 10/19 稿核过。HN 帖 16:16Z 入窗。DHS 命令针对联邦文职机构，含移除与禁购，含第三方 DeepSeek 服务。HN 用 Algolia 精确窗口复核。窗口内 stories 共 139 条。除上述三条外无 serving 一手动态。browser.search 其余命中为综述与旧对比文，不收。X 站内与 Reddit 站内零结果。中文媒体无窗口内 serving 新稿。Simon atom 最新仍是 10/18 23:43Z 那条，已记过。Latent Space feed 最新条目仍是 10/17 的 AINews 简讯。Spotify 最新单集仍是 10/14 的 Leash Bio 期，已报过。本期深读一篇。文件是 RoLaQ-MLA草稿纸压到2比特。README 索引已同步更新。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
