@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月19日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-19T11:03:31"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-19（04点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-19（04点版）</h1>
+<p>04点版来了。 框架还是没人发新版。 只有 llama.cpp 换了新快照。 论文区继续补漏网的。 还是 15、16 日那批。 投机解码那篇排第一。 业内有希腊超算落成。 还有 vLLM 生态一个补认识。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发新版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 出了新快照。 编号是 b11727 版。 00点版记的是 b11724。 按惯例快照不算正式发版。 这里只记一笔水位。 水位我逐个用接口核过了。</p>
+<p><strong>vLLM 旁边多了个管家。</strong> 这条是补认识，不是新发布。 HN 这轮有人贴出它的官网。 它叫 vLLM Agentic API。 管家专管智能体的多轮对话。 对话状态存在服务器这边。 工具调用也由它来调度。 底层推理还是 vLLM 干。 也能接 SGLang 和 Dynamo。 它最新是 9 月底的 0.9.0 版。 仓库今天刚有新提交。 所以才被 HN 翻出来。 你拼智能体服务栈时用得上。 来源：<a href="https://vllm-project.github.io/agentic-api/">https://vllm-project.github.io/agentic-api/</a></p>
+<h2>新技术与论文</h2>
+<p><strong>扩散模型打草稿，先猜顺序。</strong> 扩散模型写字不按顺序来。 它先给整句打上马赛克。 再一格一格揭开马赛克。 投机解码搬过来会卡住。 卡点不在词猜得准不准。 上一轮预测里就有正确答案。 命中率高达 92% 到 100%。 真正缺的是先揭哪一格。 SPOT 只让小模型学顺序。 小模型才 62 万个参数。 它猜出顺序再长成候选树。 大模型一轮就能验完整棵树。 大模型轮数少了最高 6.8 倍。 吞吐最高涨到 3.2 倍。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.22543">https://arxiv.org/abs/2610.22543</a></p>
+<p><strong>草稿纸直接存进 SSD 里算。</strong> 端侧做检索问答有个大坑。 问题短，翻的资料特别长。 prefill 光读资料就读半天。 预先算好的草稿纸有好几 GB。 草稿纸就是 KV 缓存。 搬进显存的路上就堵死了。 MemLLM 干脆不搬了。 它把注意力计算搬进 SSD。 在硬盘里直接算完再回传。 还顺手砍掉一半硬盘读量。 八个数据集平均快 4.06 倍。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.22579">https://arxiv.org/abs/2610.22579</a></p>
+<p><strong>几活挤一张卡，先算谁拖累谁。</strong> 一张 GPU 很少被一个活吃满。 大家就拼车，几活挤一张卡。 挤在一起就会互相拖慢。 老办法靠经验拍脑袋估。 这篇把账算到了算子一级。 谁跟谁拼车，慢多少先算清。 预测误差只有 4.3%。 拍脑袋的老办法是 19.0%。 你做多租户拼车排班能用。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23086">https://arxiv.org/abs/2610.23086</a></p>
+<p><strong>循环模型打草稿，要看得更远。</strong> 循环模型是同一批层反复用。 像同一组人轮班干所有活。 省参数，但出词还是一步步来。 老草稿法看得不够远。 还总在错分支上浪费算力。 LoopAhead 让浅层先多猜几步。 深层负责判断哪条路值得走。 解码最高快了 7.82 倍。 输出分布跟原模型完全一致。 提醒一句，底座是小众架构。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.21594">https://arxiv.org/abs/2610.21594</a></p>
+<p><strong>量化不用乘法，只用移位加法。</strong> 推理最烧钱的是乘加运算。 2 的幂次量化想把乘法省掉。 权重变成移位加加法就行。 代价是格子太粗，精度掉得多。 这篇把格子加密了一档。 步长从 2 变成根号 2。 4 比特下精度追平整数版。 只比它差了 0.4 个百分点。 但它要配专用硬件才吃得上。 普通 GPU 上暂时用不了。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.21257">https://arxiv.org/abs/2610.21257</a></p>
+<h2>业内新闻</h2>
+<p><strong>希腊新超算今天正式落成。</strong> 它叫 Daedalus 超算。 今天在拉夫里翁办落成仪式。 实测性能是 85.69 千万亿次。 千万亿次就是每秒的运算量。 排进全球超算榜第 31 位。 总造价约 5890 万欧元。 它主要给科研和 AI 工厂用。 不是专门的推理服务集群。 当欧洲算力基建看就行。 来源：<a href="https://www.naftemporiki.gr/english/2176757/greece-launches-daedalus-supercomputer-to-boost-ai-capabilities-and-reduce-reliance-on-foreign-infrastructure">https://www.naftemporiki.gr/english/2176757/greece-launches-daedalus-supercomputer-to-boost-ai-capabilities-and-reduce-reliance-on-foreign-infrastructure</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新条目还是 17 日那篇。 Spotify 上最新还是 14 日那期。 那期早就已经报过了。 Simon 这轮也没有新帖。 最新还是 18 日记过的。 X 和 Reddit 本轮零结果。 社交平台没有窗口内一手帖。</p>
+<p>本期「值得深读」有一篇。 就是开头的 SPOT 精读。 它把投机解码的瓶颈拆干净了。 瓶颈不在草稿，像在顺序。 顺序质量能单独当旋钮调。 能跟草稿预算分开进你的账本。 笔记做好了，链接在下面。 深度阅读：SPOT-扩散模型投机解码先猜顺序.html</p>
+<p>*去重说明：本轮窗口是 10/19 02:00 到 04:00 PDT。对应 epoch 是 1792400400 到 1792407600。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z，20点版已报。TensorRT-LLM 仍是 v1.4.0rc0。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2。llama.cpp 新快照 b11727 发布于 10/19 10:23Z，在本窗口内。此前水位是 b11724，00点版已记。本窗口无正式发版。arXiv 亲手复核。最新批次仍停在 10/16 17:59Z。本轮五篇均为 10/15 到 10/16 提交。此前各期未收，本轮逐篇 grep 全部 briefs 确认未报。SPOT 编号 2610.22543。MemLLM 编号 2610.22579。PairSight 编号 2610.23086。LoopAhead 编号 2610.21594。FPoT 编号 2610.21257。五篇数字均取自 arXiv 摘要与正文。均为作者自报，无独立复测。HN 用 Algolia 精确窗口复核。窗口内 stories 共 65 条。vLLM Agentic API 帖 10:11Z 入窗。只有 1 分 0 评论，热度很低。本体经 GitHub 复核。仓库 3 月已建。最新版 v0.9.0 发布于 9/30。仓库 10/19 10:09Z 有新推送。故按生态补认识收录。正文已如实标明不是新发布。Daedalus 帖 09:16Z 入窗。落成仪式为 10/19 当天。实测 85.69 petaflops 与造价据希腊媒体报道。TOP500 第 31 位是 2026 年 6 月榜单口径。browser.search 其余命中已逐个分级。AMD 的 TurboQuant 长文元数据标注 2026/6/11 发布。是 6 月旧文被重新抓取，不收。内容本身此前也未当新闻报过。此处只留分级记录。Mistral 的 Timestral 本体发布于 10/15。HN 本轮只是转贴。且属时间序列模型，不在 serving 主线，不收。Reflection Beam 权重包稿是 10/17 已报事件的跟进。294 GB 包装细节不改变部署结论，不重复收。Corbenic 的 SSD 内存稿 10/3 与 10/6 已报，不收。Simon atom 最新仍是 10/18 23:43Z 那条，已记过。Latent Space feed 最新条目仍是 10/17 的 AINews 简讯。Spotify 已连接并复核节目。Latent Space 最新单集仍是 10/14 的 Leash Bio 期，已报过。X 站内与 Reddit 站内零结果。social 搜索无窗口内一手帖。中文媒体无窗口内 serving 新稿。本期深读一篇。文件是 SPOT-扩散模型投机解码先猜顺序。README 索引已同步更新。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
