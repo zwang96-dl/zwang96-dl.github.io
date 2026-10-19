@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月18日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-18"/>
+<meta name="doc-ts" content="2026-10-19T05:01:52"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-18（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-18（22点版）</h1>
+<p>22点版来了。 这轮框架没有新版本。 但论文区补到一批漏网的。 都是 16 日提交、刚上架的。 前面几期没赶上这批。 四篇全对你的口，先说结论。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发新版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 那是 20点版刚报的。 llama.cpp 也没有新快照。 最新还是 b11723 版。 其他几家也全都没动。 水位我逐个用接口核过了。</p>
+<h2>新技术与论文</h2>
+<p><strong>DLite 让草稿员不背历史。</strong> 投机解码就是先打草稿。 小模型先猜，大模型再验。 智能体场景下它翻车了。 上下文越长，猜得越差。 接受长度最多掉了八成。 DLite 直接借大模型的中间结果。 它只盯眼前一小段猜。 不再单独背一份历史草稿纸。 草稿纸就是 KV 缓存。 在 Qwen3 上接受长度 2 到 6。 比 DSpark 最多好七成。 DSpark 是现在最强的对手之一。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23787">https://arxiv.org/abs/2610.23787</a></p>
+<p><strong>微软把生产账本摊开了。</strong> 四条业务线，1.21 亿次调用。 它只算一笔账。 智能体的草稿纸要占多少显存。 一个大会话就要 81.6 GiB。 一张 H100 总共才 80 GB。 全留着要 501.8 TB 显存。 空闲一小时回收能砍七成。 同机复用率有 88.9%。 换台机器只剩 29.0%。 这是你 KV 预算的现成账本。 来源：<a href="https://arxiv.org/abs/2610.22863">https://arxiv.org/abs/2610.22863</a></p>
+<p><strong>FuTransformer 把两段分开省。</strong> prefill 和 decode 脾气不同。 prefill 吃算力，decode 吃带宽。 它给 prefill 用 FP8。 FP8 就是 8 位浮点数。 它给 decode 用 INT4。 INT4 就是 4 位整数。 在 H100 上实测如下。 prefill 最高快 1.48 倍。 decode 快 1.3 到 2.4 倍。 代价是 8B 困惑度变差。 从 6.24 升到 6.99 起。 数字是作者自报，先标清。 来源：<a href="https://arxiv.org/abs/2610.23796">https://arxiv.org/abs/2610.23796</a></p>
+<p><strong>接受率高，不等于真快。</strong> 这篇专拆投机解码的账。 放宽验算能多放行词元。 每轮多放行 1.34 倍。 但回答也被拉长 1.54 倍。 省下的轮次又被吃回去。 说白了是虚假繁荣。 你评投机方案时要小心。 必须同时报总长度和轮次。 来源：<a href="https://arxiv.org/abs/2610.23818">https://arxiv.org/abs/2610.23818</a></p>
+<h2>业内新闻</h2>
+<p>本轮没有新的业内新闻。 HN 窗口里共 42 条帖。 多是闲聊和个人小项目。 有一篇 Grace-Blackwell 内存科普。 本体是更早的论文转贴。 不是 serving 新动态，不收。 另有一篇 vLLM 漏洞旧闻翻炒。 漏洞编号是 CVE-2026-41523。 它在 0.22.0 前就修好了。 翻炒稿的评分和版本都对不上。 按旧闻处理，不当新警报。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新条目还是 17 日那篇。 Simon 这轮也没有新帖。 最新还是前面记过的两条。 X 和 Reddit 本轮零结果。 社交平台没有窗口内一手帖。 各家都安静，只有论文区热闹。</p>
+<p>本期「值得深读」有两篇。 第一篇是 DLite 精读。 它能帮你校准投机评估。 DSpark 不是唯一答案了。 第二篇是 KV 账本精读。 它能帮你定 KV 预算。 会话粘性值多少钱，它有数。 笔记都做好了，链接在下面。 深度阅读：DLite-草稿员不背历史只看眼前.html 深度阅读：KVResidency-微软生产账本草稿纸占多少显存.html</p>
+<p>*去重说明：本轮窗口是 10/18 20:00 到 22:00 PDT。对应 epoch 是 1792378800 到 1792386000。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z，00点版已报。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z，20点版已报。TensorRT-LLM 仍是 v1.4.0rc0。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2。llama.cpp 最新仍是 b11723，20点版已记水位。本窗口无新发布。arXiv 亲手复核。本轮四篇均为 10/16 提交。此前各期查询未见这批。本轮逐篇 grep 全部 briefs 确认未报。DLite 编号 2610.23787。KV Residency 编号 2610.22863。FuTransformer 编号 2610.23796。Acceptance 编号 2610.23818。四篇数字均取自 arXiv 摘要原文。均为作者自报，无独立复测。HN 用 Algolia 精确窗口复核。窗口内 stories 共 42 条。Grace-Blackwell 帖本体是 arXiv 2610.20354 转贴。发表更早，不收。browser.search 命中多为旧文。vLLM 0.32.0 聚合稿已报。CVE-2026-41523 经 Vulners 数据库交叉核对。该漏洞影响 0.22.0 之前版本。当前 0.32.0 不受影响。翻炒博客自称 CVSS 9.6 与影响 0.6 到 0.7.2。与数据库记录的 7.5 分与 0.22.0 前不符。故按旧闻翻炒处理，不当新警报。X 站内与 Reddit 站内零结果。social 搜索窗口内无一手帖。Simon atom 最新仍是 10/18 23:43Z 那条，已记过。Latent Space feed 最新条目仍是 10/17 的 AINews 简讯。feed 的 10/19 04:00Z 只是重建时间，无新条目。本期深读两篇。文件是 DLite-草稿员不背历史只看眼前。另一篇是 KVResidency-微软生产账本草稿纸占多少显存。README 索引已同步更新。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
