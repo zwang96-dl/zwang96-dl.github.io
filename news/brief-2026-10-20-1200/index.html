@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月20日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-20"/>
+<meta name="doc-ts" content="2026-10-20T19:00:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-20（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-20（12点版）</h1>
+<p>12点版来了。 这轮还是安静轮。 框架没有新正式版。 论文也没有新批次。 有两条新闻值得记。 一条是芯片公司拿大钱。 一条是国产调度框架补收。 本期不标「值得深读」。 按宁缺毋滥，先不做笔记。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 llama.cpp 还是 b11756。 本窗口没有新快照。 FlashInfer 正式版还是 0.7.2 版。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮还是零新批次。 最新还是 10 月 19 日那批。 那批前几期都处理过了。 论文区这轮继续休息。</p>
+<p><strong>TokenFleet：国产集群调度框架（补收）</strong> 这条是今天早些时候的稿。 量子位在北京时间下午发的。 换算到这边是凌晨零点多。 前面几期漏了，这轮补上。 是石科技在高性能大会发布。 它管的不是单机快不快。 它管请求该分给哪台机器。 像车站调度台派车一样。 三件套各管一段活。 TokenPilot 管单池内选点。 它同时算缓存收益和排队代价。 草稿纸命中高，不一定划算。 排队太久，省的时间又赔回去。 草稿纸就是 KV 缓存。 FleetMind 管跨机房调容量。 SLOMax 管混合负载排队。 数字先标清，全是厂商自报。 数据来自大会演讲材料。 模型用的是 GLM 5.3。 P95 首字延迟降 32.4%。 P50 首字延迟降 71.3%。 达标吞吐那组是测算示例。 原文自己写明了是示例。 不是实测跑出来的账。 跟 06点版的 llm-d 是同一道题。 都是机房级调度台的活。 选点账的算法可以对照看。 来源：<a href="https://finance.sina.cn/stock/jdts/2026-10-20/detail-inivwcmm7690843.d.html">https://finance.sina.cn/stock/jdts/2026-10-20/detail-inivwcmm7690843.d.html</a></p>
+<p><strong>HN 上冒出个自研小引擎</strong> 有人从零写了个 GLM 引擎。 不用 vLLM，也不用 SGLang。 内核用 Vx 语言现写的。 帖子热度只有 1 分。 仓库星标还是 0 个。 先说清它的真实进度。 现在只是 CPU 原型。 全模型跑两词要 34 分钟。 GPU 路径还没验证过。 离能用还差得很远。 只当好奇记个名字。 来源：<a href="https://github.com/vx-lang/glm-vx">https://github.com/vx-lang/glm-vx</a></p>
+<h2>业内新闻</h2>
+<p><strong>Tenstorrent 拿到 15 亿美元</strong> 这条公告是 10 月 19 日发的。 不是这两小时的新事。 HN 是这轮窗口内贴的。 前面几期没报过，补一笔。 Tenstorrent 是做推理芯片的。 CEO 是 Jim Keller。 他是芯片圈的传奇人物。 这轮是 E 轮融资。 一共融了 15 亿美元。 投后估值 62 亿美元。 领投是两家新机构。 钱主要拿去量产服务器。 服务器产品叫 Galaxy。 它家芯片走 RISC-V 路线。 RISC-V 是开源指令集。 它的软件栈也是开源的。 跟你的三台机器不直接相关。 价值在多一条非英伟达路线。 来源：<a href="https://www.unite.ai/tenstorrent-raises-1-5b-series-e-at-6-2b-valuation-to-scale-ai-compute/">https://www.unite.ai/tenstorrent-raises-1-5b-series-e-at-6-2b-valuation-to-scale-ai-compute/</a></p>
+<p><strong>DeepInfer 热度还在涨</strong> 这是 04点版头条的跟进。 不是新事件，只报个数。 星标涨到了 11174 个。 10点版时是 10409 个。 两小时又涨了约 765 个。 仓库本身没有新推送。 最近推送还是 11:03 UTC。 看思路的人还在变多。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 这轮没有新条目。 最新还是今早那期简讯。 Spotify 上也没有新单集。 最新还是 10 月 14 日那期。 Simon 这轮也没有新帖。 X 和 Reddit 没有一手新料。 社交平台全是转发帖。 都在转 DeepInfer 开源那件事。 那件事 04点版已经报过了。 PyTorch 大会今天还在开。 有现场新料下轮再报。</p>
+<p>*去重说明：本轮窗口是 10/20 10:00 到 12:00 PDT。对应 UTC 是 17:00 到 19:00。对应 epoch 是 1792515600 到 1792522800。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc5（10/20 04:30Z，窗口外），仓库路径用 flashinfer-ai/flashinfer。llama.cpp 最新快照仍是 b11756（13:48Z，08点版窗口），本窗口无新快照。llm-d 仍是 v1.0.0（06点版已深读）。arXiv 官方 API 亲手复核：cs.DC 最新提交仍是 2026-10-19T16:43Z，cs.CL 与 cs.LG 最新仍是 10/19 傍晚批次，窗口内零新提交。HN 用 Algolia 精确窗口复核，窗口内 stories 共 147 条，serving 相关只有三条：Tenstorrent 的 E 轮公告帖（17:43:51Z、2 分，公告本身为 10/19 发布、公司官方稿，经 Reuters 与 Bloomberg 交叉确认，简报已明说日期）、GLM-Vx 自研引擎帖（17:09:50Z、1 分，仓库亲读：0 星标、CPU 原型、全模型两词约 34 分钟、GPU 路径未验证，简报已明说进度）、一条 eGPU 本地推理个人博客帖（18:07Z、1 分，与生产 serving 无关，不收）。Tenstorrent 融资细节经 Unite.AI 与 dig.watch 两家转述交叉核对：15 亿美元 E 轮、投后估值 62 亿美元、Trace Capital 与 Innovation X 领投、资金用于 Galaxy 服务器量产，均为公司自报口径。TokenFleet 一条为补收：量子位稿经新浪转载，发布时间为北京时间 10/20 15:13（即 PDT 00:13，在 02点版窗口内但前几期漏收）；原文亲读核实：是石科技在 2026 CCF 全国高性能计算学术大会发布 TokenFleet，三件套为 TokenPilot（单池选点、同时估缓存收益与排队代价）、FleetMind（跨机房容量协同）、SLOMax（混合负载准入与排队）；P95 首字延迟降 32.4% 与 P50 降 71.3% 为厂商提供的 GLM5.3 大会演讲材料数据，达标吞吐提高约 29.4% 一组原文明确标注为收益测算示例而非实测，简报已逐项标清。DeepInfer 跟进经 gh API 亲核：星标 11174（10点版 10409），pushed_at 仍是 2026-10-20T11:03:36Z，本窗口无新推送，只报热度。Latent Space feed 亲手核过：最新条目仍是 10/20 05:21:52Z 的 AINews 简讯（00点版已处理），18:28Z 只是 feed 重建。Spotify 亲手核过：已连接，Latent Space 为已保存节目，最新单集仍是 10/14 的 Leash Bio 期，无窗口内新单集。Simon atom 最新仍是 10/19 23:58:25Z。social 搜索窗口内结果均为通用技能清单帖、框架对比信息图与 DeepInfer 转发帖，无一手新动态。X 站内与 Reddit 站内搜索零结果。中文媒体窗口内 serving 新稿仅 DeepInfer 跟进（04点版已报）。本期不标「值得深读」，不做深读笔记。去重以 chat.read_messages 读到的本聊天最近 6 轮简报与 briefs 目录为准。*</p></body></html>
