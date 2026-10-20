@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月20日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-20"/>
+<meta name="doc-ts" content="2026-10-20T17:06:31"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-20（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-20（10点版）</h1>
+<p>10点版来了。 这轮有真东西。 Google 给 TPU 换了个新入口。 vLLM 和 SGLang 都能原生上了。 本期标一篇「值得深读」。</p>
+<h2>框架更新</h2>
+<p><strong>TorchTPU 发布</strong> vLLM 和 SGLang 以前也能上 TPU。 但中间隔着一层 JAX 翻译。 JAX 是 Google 自家的计算框架。 现在 Google 开源了 TorchTPU。 它让 TPU 直接听懂 PyTorch。 两个引擎各出了一套原生版。 vLLM 版是跟 Inferact 合作的。 Inferact 是 vLLM 创始人的公司。 SGLang 版是跟 RadixArk 合作的。 RadixArk 是 SGLang 创始人的公司。 不是外人移植，是原班人马下场。 SGLang 版已在 Meta 生产跑了。 Meta 的 PyTorch 负责人亲口确认。 划重点：PD 解耦是正式功能。 PD 就是读题和答题分开跑。 像流水线分工，各干一段。 草稿纸靠 TPU Sync 跨机搬。 草稿纸就是 KV 缓存。 它直读显存，中间不倒手。 搬运走独立线程，不堵计算。 SGLang 还拿它喂 HiCache。 HiCache 是它的分层缓存。 多模态模型也在支持名单里。 图片和视频输入都支持。 数字先标清，全是官方自报。 成本数来自 InferenceX 公开提交。 Qwen 3.5 在 Ironwood 上跑。 Ironwood 是第七代 TPU。 每百万词元最低 2.01 美分。 Kimi K3 单用户每秒 700 多词元。 你的三台机器都不是 TPU。 这篇不是让你去部署的。 价值在搬运方案的解法。 正好跟你评估的解耦路线同题。 深读里逐项拆了搬运三件套。 来源：<a href="https://developers.googleblog.com/announcing-new-vllm-and-sglang-inference-engines-on-tpu/">https://developers.googleblog.com/announcing-new-vllm-and-sglang-inference-engines-on-tpu/</a></p>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 llama.cpp 这轮没出新快照。 最新还是上轮的 b11756。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮还是零新批次。 这个时段本来就是空窗。 最新还是 10 月 19 日那批。 那批前几期都处理过了。 论文区这轮继续休息。</p>
+<h2>业内新闻</h2>
+<p><strong>DeepInfer 热度还在涨</strong> 这是 04点版头条的跟进。 不是新事件，只报个数。 星标从约 9069 涨到 10409。 两小时又涨了约 1340 个。 仓库本身没有新的推送。 最近推送还是 11:03 UTC。 看思路的人还在变多。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<p><strong>同一个会，亚马逊也有动作</strong> PyTorch 大会今天还在开。 亚马逊昨天发了 TorchNeuron。 它是 Trainium 芯片的迁移工具。 Trainium 是亚马逊的自研芯片。 改一处配置就能试着搬代码。 目标是绕开英伟达的生态墙。 这条是昨天的消息。 只当背景记一笔。 来源：<a href="https://www.mrjjxw.com/articles/2026-10-20/4609073.html">https://www.mrjjxw.com/articles/2026-10-20/4609073.html</a></p>
+<p><strong>llm-d 博客被转贴到 HN</strong> 帖子是 16:07 UTC 贴的。 内容 06点版已经深读过了。 热度只有 1 分，没人接话。 不重复收，只记一笔。</p>
+<h2>访谈与深度</h2>
+<p><strong>Pentad 的 Jev 长文被贴上 HN</strong> 文章本身是 10 月 14 日的。 讲的是智能体的管控层太慢。 快模型省下的时间被检查吃掉。 跟 serving 沾边但不是主线。 热度只有 2 分，先记个名字。 来源：<a href="https://pentad.ai/PLRN/031/">https://pentad.ai/PLRN/031/</a></p>
+<p>Latent Space 这轮没有新条目。 最新还是今早那期简讯。 Spotify 上也没有新单集。 Simon 这轮也没有新帖。 X 和 Reddit 没有一手新料。 中文媒体都在跟 DeepInfer。 那件事 04点版已经报过了。</p>
+<p>*去重说明：本轮窗口是 10/20 08:00 到 10:00 PDT。对应 UTC 是 15:00 到 17:00。对应 epoch 是 1792508400 到 1792515600。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc5（10/20 04:30Z，窗口外）。llama.cpp 最新快照仍是 b11756（13:48Z，08点版窗口），本窗口无新快照。头条 TorchTPU 经 Google 开发者博客原文亲读核实：2026-10-20 PyTorch Conference 当天发布，vLLM 版与 Inferact 合作、SGLang 版与 RadixArk 合作，SGLang 版已在 Meta 生产运行（Meta 的 Zongwei Zhou 引言），PD 解耦与多模态均为明列功能，KV 搬运走开源 TPU Sync（直读显存、无主机中转、独立线程），SGLang 侧兼作 HiCache 的 I/O 后端；成本数字 2.01 美分每百万词元为 Google 向 SemiAnalysis InferenceX 的公开提交、属厂商自报，Kimi K3 的 700+ 词元每秒为 Inferact 的 Pallas 巨型内核自报，均无独立复测，简报已明说。深读笔记含原文整栈图一张（官方 TPU Inference Stack 图，本地存 images/torchtpu-inference-stack.png），图注按亲眼所见写。TorchNeuron 一条来自每日经济新闻 10/20 早参转述，原文明确写亚马逊 10/19 推出，属窗口外背景，简报已明说日期。arXiv 官方 API 亲手复核：cs.DC 最新提交仍是 2026-10-19T16:43Z，本时段为结构性空窗（见 AGENTS 教训），窗口内零新提交。HN 用 Algolia 精确窗口复核，inference 相关 stories 共 3 条：llm-d 1.0 官方博客转贴（16:07Z、1 分，06点版已深读，不重复收）、Pentad 的 Jev 管控层长文（15:31Z、2 分，原文日期 2026-10-14，主题偏智能体管控、与 serving 仅沾边，只记名）、一条无关的 Show HN。TPU 专项 HN 查询零结果。DeepInfer 跟进经 gh API 亲核：星标 10409（08点版约 9069），pushed_at 仍是 2026-10-20T11:03:36Z，本窗口无新推送，只报热度。Latent Space feed 亲手核过：最新条目仍是 10/20 05:21:52Z 的 AINews 简讯（00点版已处理）。Simon atom 最新条目仍在 10/19，无窗口内新帖。social 搜索窗口内结果均为通用清单帖与框架对比信息图，无一手新动态。中文媒体窗口内新稿均为 DeepInfer 跟进（04点版已报），机器之心与量子位无 serving 新稿。本期标 TorchTPU 为「值得深读」，深读笔记已生成（含 HTML 版与 README 索引）。去重以 chat.read_messages 读到的本聊天最近 6 轮简报与 briefs 目录为准。*</p></body></html>
