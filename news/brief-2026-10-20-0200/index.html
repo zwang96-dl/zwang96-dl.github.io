@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月20日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-20"/>
+<meta name="doc-ts" content="2026-10-20T09:07:07"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-20（02点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-20（02点版）</h1>
+<p>这轮没有框架发正式版。 但论文区挖到两篇漏网的。 都是前几天提交的好货。 前几期关键词检索漏掉了。 本期如实标成补报。 一篇讲跨机房共享草稿纸。 已经做成深读笔记了。 另一篇专治 prefill 显存峰值。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发正式版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 水位涨了两格。 新快照是 b11751 和 b11752。 分别在 07:18 和 08:18 UTC 发布。 按惯例快照不算正式发版。 只记水位，不单独吹。 水位我用接口亲手核过了。</p>
+<h2>新技术与论文</h2>
+<p><strong>KVCompass：草稿纸搞全球共享（补报，值得深读）</strong> 前缀缓存现在只在一家店管用。 每个机房各存各的草稿纸。 热门开头在全球被重复算。 作者回放了近百万条真实对话。 约 17% 的复用机会是跨机房的。 跨的还多是又长又热门的前缀。 KVCompass 只建目录，不搬缓存。 目录复制到每个入口节点本地。 查一次几乎不花时间。 再按省时、负载、距离打分选机器。 14 台三大洲真机上测过了。 首字延迟比基线低 1.3 到 14 倍。 吞吐最高是基线的 4.7 倍。 数字都是作者自报，先说清。 它还测了 PD 解耦场景。 用的正是 SGLang 加 Mooncake。 中位首字延迟低 1.25 到 1.69 倍。 跟你评估的解耦方案直接对口。 深读笔记已经做好，图都配齐了。 来源：<a href="https://arxiv.org/abs/2610.24179">https://arxiv.org/abs/2610.24179</a></p>
+<p><strong>TideKV：prefill 的显存峰值砍 84%（补报）</strong> 长上下文最怕 prefill 撑爆显存。 草稿纸还没建好，峰值先到了。 老办法要算完全程才开始压缩。 TideKV 换成一层一层地处理。 每层看全了，再淘汰不要的部分。 全程只留一层的完整草稿纸。 64K 上下文、A100 上面测的。 建缓存的临时显存降了 83.89%。 4090 上首字延迟只涨 1.06%。 还能硬撑起 128K 的 prefill。 原先同法在小机器上直接爆显存。 数字同样是作者自报。 跟你的多模态 prefill 很对口。 图片一多，prefill 峰值就是命门。 来源：<a href="https://arxiv.org/abs/2610.24499">https://arxiv.org/abs/2610.24499</a></p>
+<h2>业内新闻</h2>
+<p>本轮没有够格的大新闻。 HN 窗口内扫了 68 条。 最高分是 Revolut 宕机帖。 跟 serving 一条都不沾边。 有一条瑞士多模态模型的帖。 讲的是本地跑老模型 Apertus。 只有 1 分，不够格收录。 新闻搜索命中的还是旧综述。 还有上期已判过的通稿。 按老规矩，不重复收。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 这轮没有新条目。 最新还是 00点版报过的简讯。 Spotify 上也没有新单集。 最新还是 10 月 14 日那期。 Simon 这轮也没有新帖。 最新还是 19 日那篇随笔。 X 和 Reddit 站内零结果。 中文媒体没有窗口内新稿。 有一条湾区活动线索，先标清。 Threads 上有人晒了活动页截图。 帖子是 07:49 UTC 发的，在窗口内。 活动讲真实世界的 serving 落地。 SGLang 团队讲现状和四季度路线。 LinkedIn 讲大规模跑 SGLang。 还有 LMCache 讲 KV 内存管理。 截图说 278 人已报名参加。 但我没找到官方活动页核实。 只当线索，别当官宣看。 你要是感兴趣，我再深挖报名口。 来源：<a href="https://www.threads.com/@howard_1227/post/DetVZmcm7Vr">https://www.threads.com/@howard_1227/post/DetVZmcm7Vr</a></p>
+<p>*去重说明：本轮窗口是 10/20 00:00 到 02:00 PDT。对应 epoch 是 1792479600 到 1792486800。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，rc5 已在 22点版记过。llama.cpp 窗口内新增快照 b11751（2026-10-20T07:18:14Z）与 b11752（2026-10-20T08:18:15Z），上轮水位 b11750，按惯例只记水位。arXiv 官方 API 本轮返回 429 限流，改走列表页亲手核：cs.DC 的 Tue, 20 Oct 批次即 22点版已处理的那一批（DuoPD 等已报、CEMA-Router 已明确不收）。本期补报两篇同批漏网：KVCompass（2610.24179，10/16 提交，cs.DC 列表在列）与 TideKV（2610.24499，10/17 提交，cs.LG 主类、cs.DC 交叉列），均已 grep 全部 briefs 确认从未报过，摘要页与原文 PDF 均亲手打开核过。KVCompass 已录用 POMACS（2026-10-09 接受），数据均为作者自报：WildChat 跨区复用约 17%、14 worker 三大洲真机（RTX 5090、SGLang、Llama-3.1-8B）P99 TTFT 低 1.3–14 倍、吞吐最高 4.7 倍、附录 PD 解耦（SGLang＋Mooncake）中位 TTFT 低 1.25–1.69 倍；LMSYS 上 236–626 倍一组异常大，简报正文未采用并在深读里注明打折看。TideKV 数据亦作者自报（A100 64K 建缓存临时足迹降 83.89%、RTX 4090 TTFT 只涨 1.06% 并跑通 128K prefill）。HN 用 Algolia 精确窗口复核，窗口内 stories 共 68 条，无 serving 条目（最高分 10 分为 Revolut/GCP 宕机帖；Running Apertus 帖 08:24Z、1 分，讲本地运行旧多模态模型，不收）。Latent Space feed 亲手核过：最新条目仍是 10/20 05:21:52Z 的 AINews 简讯（00点版已处理），lastBuildDate 08:23:56Z 只是重建、无新条目。Spotify 亲手核过：已连接，Latent Space 为已保存节目，最新单集仍是 10/14 Leash Bio 期。Simon atom 最新仍是 10/19 23:58:25Z。X 站内与 Reddit 站内零结果，搜索命中的均为旧综述与已判过通稿。social 搜索窗口内另有 Facebook 框架对比信息图（01:22Z，窗口外且无一手数据）不收；Threads 活动帖（@howard_1227，07:49:20Z，窗口内）只有截图、无官方活动页可核，简报中已明确标为未核实线索。中文媒体无窗口内 serving 新稿。本期深读笔记：KVCompass（files/深度阅读/KVCompass-全球共享前缀缓存.md 与同名 .html，含原文 Fig. 1/7/11，README 已更新）。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
