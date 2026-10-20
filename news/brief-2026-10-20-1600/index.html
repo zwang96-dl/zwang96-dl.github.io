@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月20日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-20"/>
+<meta name="doc-ts" content="2026-10-20T23:04:03"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-20（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-20（16点版）</h1>
+<p>16点版来了。 窗口内还是安静轮。 框架没有新正式版。 论文也没有新批次。 有一条播客值得补收。 它是中午发的，前期漏了。 本期不标「值得深读」。 按宁缺毋滥，先不做笔记。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 FlashInfer 正式版还是 0.7.2 版。</p>
+<p><strong>llama.cpp 连出三个新快照</strong> 最新快照编号是 b11761。 本窗口一共出了三个。 从 b11759 连号到 b11761。 它们都是每日例行快照。 按老规矩不算正式发版。 只记一笔，不展开讲。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11761">https://github.com/ggml-org/llama.cpp/releases/tag/b11761</a></p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮还是零新批次。 最新还是 10 月 19 日那批。 那批前几期都处理过了。 新批次要等今晚才出。 论文区这轮继续休息。</p>
+<h2>业内新闻</h2>
+<p><strong>DeepInfer 热度还在涨</strong> 这是 04点版头条的跟进。 不是新事件，只报个数。 星标涨到了 11929 个。 14点版时是 11624 个。 两小时又涨了约 305 个。 仓库本身没有新推送。 最近推送还是 11:03 UTC。 看思路的人还在变多。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 发了新播客（补收）</strong> 这期中午就发了，前期漏收。 嘉宾是 Evan Conrad。 他来自 SF Compute。 SF Compute 是买卖算力的市场。 标题叫《可编程数据中心》。 录制地点在纽约的活动现场。 核心类比是软件定义网络。 当年它把网络拆成两层。 一层管调度，一层管转发。 Evan 说 GPU 也要走这条路。 以前租集群要先砸大钱。 现在能按小时买卖算力。 现货和远期价格都摆上台面。 批量推理和在线推理分开谈。 这跟你看的调度题沾边。 值得睡前听一耳朵。 原文：<a href="https://www.latent.space/p/sfcompute2">https://www.latent.space/p/sfcompute2</a> 收听：<a href="https://open.spotify.com/episode/2FH2V7r1XIBItVTh62cXue?si=L8DGuMFvSCeNcmyOgEEeNQ">https://open.spotify.com/episode/2FH2V7r1XIBItVTh62cXue?si=L8DGuMFvSCeNcmyOgEEeNQ</a></p>
+<p><strong>PyTorch 大会今晚有海报场</strong> 大会今天在圣何塞开幕。 今晚六点有海报交流环节。 有一场专讲 Trainium 芯片。 Trainium 是亚马逊的训练芯片。 讲的是 vLLM 在它上面跑推理。 用的是一个外挂插件的路子。 有现场新料下轮再报。 来源：<a href="https://www.linkedin.com/posts/raj-thakur-39756838_pytorch-vllm-aws-activity-7518158364283965440-hmvx">https://www.linkedin.com/posts/raj-thakur-39756838_pytorch-vllm-aws-activity-7518158364283965440-hmvx</a></p>
+<p>*去重说明：本轮窗口是 10/20 14:00 到 16:00 PDT。对应 UTC 是 21:00 到 23:00。对应 epoch 是 1792530000 到 1792537200。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc5（10/20 04:30Z，窗口外），仓库路径用 flashinfer-ai/flashinfer。llama.cpp 本窗口有三个新快照 b11759（21:26Z）、b11760（21:49Z）、b11761（22:14Z），按惯例每日快照不算正式发版，仅记名。llm-d 仍是 v1.0.0（06点版已深读）。arXiv 官方 API 亲手复核：cs.DC 最新仍是 2026-10-19T16:43Z，cs.CL 最新仍是 2026-10-19T17:59Z，窗口内零新提交，符合 arXiv 每日批次约 00:00 UTC 发布的节奏。HN 用 Algolia 精确窗口复核，窗口内 stories 共 103 条，serving 相关零条。DeepInfer 跟进经 gh API 亲核：星标 11929（14点版 11624，+约 305），pushed_at 仍是 2026-10-20T11:03:36Z，本窗口无新推送，只报热度。Latent Space 一条为补收：新单集《The Programmable Data Center — Evan Conrad, SF Compute》经官方 feed 亲核，发布时间为 2026-10-20T19:31:57Z（即 PDT 12:31，落在 14点版窗口内但前几期漏收），Spotify 已连接亲核同名单集（release_date 2026-10-20），内容要点取自 Spotify 官方简介：录于 AIE NYC 的 Compute Trading 专场，类比软件定义网络的控制面与数据面分离，谈 GPU 小时买卖、物理交付、现货与远期定价、批量与在线推理。Simon 本窗口无新帖：最新一帖为 19:34Z 的游戏帖（窗口外且与 serving 无关，不收）。X 站内与 Reddit 站内搜索零结果。social 搜索窗口内结果均为 DeepInfer 转发帖与通用开源宣传帖（04点版已报），无一手新动态。中文媒体窗口内无 serving 新稿。本期不标「值得深读」，不做深读笔记。去重以本聊天最近简报与 briefs 目录为准。*</p></body></html>
