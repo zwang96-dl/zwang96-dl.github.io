@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月19日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-20T00:59:56"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-19（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-19（18点版）</h1>
+<p>18点版来了。 框架还是没人发新版。 论文也没有新批次。 但芯片圈出了个大新闻。 Tenstorrent 刚拿了 15 亿美元。 它专做开源路线的推理芯片。 这钱是冲着英伟达去的。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发新版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 水位到 b11748。 窗口内多了两个快照。 分别是 b11747 和 b11748。 按惯例快照不算正式发版。 水位我用接口亲手核过了。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没有新批次。 最新批次仍停在 10 月 16 日。 下个批次要等今晚零点 UTC。 本轮论文区暂时休息。</p>
+<h2>业内新闻</h2>
+<p><strong>英伟达又多了个硬对手。</strong> Tenstorrent 今天官宣融资。 这轮是 E 轮，拿了 15 亿美元。 投后估值冲到 62 亿美元。 比 2024 年底翻了一倍多。 领投是两家新面孔机构。 一家叫 Trace Capital。 另一家叫 Innovation X。 老股东 Fidelity 也跟了。 SanDisk 和 T. Rowe Price 也在。 先说清，数字来自公司官宣。 这家公司由 Jim Keller 掌舵。 他是芯片圈的传奇设计师。 做过苹果、AMD 和特斯拉芯片。 它家的打法就一个词：开放。 芯片用开源的 RISC-V 架构。 不走英伟达的封闭路线。 主力产品叫 Galaxy 服务器。 一台塞 32 颗自研芯片。 专为开源权重模型做推理。 Keller 对媒体说了个细节。 之前有大厂想出价收购它。 出价最高摸到 50 亿美元。 团队最后决定不卖了。 底气来自一次内部验证。 Galaxy 已经能跑 DeepSeek 了。 能跑通，证明机器真能干活。 新钱主要拿去扩产能。 把 Galaxy 服务器量产铺开。 另一部分继续做芯片授权。 把设计卖给别人造芯片。 划重点：这跟你直接相关。 你手里三台机器全是英伟达和 AMD。 多一个开源推理选项是好事。 以后选 serving 硬件时。 多了一家可以认真比价的。 不过先别急着下结论。 它还没公开真实推理跑分。 收入和出货量也没披露。 等第三方实测出来再判断。 来源：<a href="https://techcrunch.com/2026/10/19/tenstorrent-hits-6-2b-valuation-to-scale-open-weight-ai-chips/">https://techcrunch.com/2026/10/19/tenstorrent-hits-6-2b-valuation-to-scale-open-weight-ai-chips/</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新条目还是 10 月 17 日。 Simon 这轮发了篇新随笔。 讲的是程序员这个职业。 跟推理服务没关系，不收。 X 和 Reddit 本轮零结果。 中文媒体也没有窗口内新稿。 社交平台全是转发融资新闻。 没有一手技术动态，不单列。 本期不标「值得深读」。 融资新闻看看就好。 宁缺毋滥，下期再看。</p>
+<p>*去重说明：本轮窗口是 10/19 16:00 到 18:00 PDT。对应 epoch 是 1792450800 到 1792458000。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2。llama.cpp 窗口内新增 b11747（10/19 23:58:12Z）与 b11748（10/20 00:23:31Z），上轮水位是 b11744，列表中未见 b11745 与 b11746，按惯例快照不算正式发版只记水位。本窗口无正式发版。arXiv 亲手复核。KV cache、disaggregated、speculative 三方向最新提交仍为 10/16 批次，窗口内无新提交，下个批次约在今晚 00:00 UTC。HN 用 Algolia 精确窗口复核，窗口内 stories 共 71 条。Tenstorrent 帖于 10/20 00:21:11Z 入窗（4 分）。经 TechCrunch、TechTarget、Reuters 电讯稿多源交叉核实：公司 10/19 官宣关闭 15 亿美元 E 轮、投后估值 62 亿美元、Trace Capital 与 Innovation X 领投、2024 年底估值约 26 亿美元、Keller 称在 Galaxy 跑通 DeepSeek 后决定保持独立、新钱用于 Galaxy 量产与芯片 IP 授权。均为公司与投资方口径，已在正文标明。HN 其余条目如 Skymizer 加速卡（1 分、无一手来源）、OpenRouter 用量平台期经验帖、DeepSeek 模型可用性帖，均不够格，不收。Latent Space feed 亲手核过，最新条目仍是 10/17 的 AINews 简讯，无新条目。Simon atom 窗口内新增随笔 My obituary for programming（10/19 23:58:25Z），与 serving 无关，不收。X 站内与 Reddit 站内零结果。social 搜索窗口内 46 条 Tenstorrent 相关帖全为二手转发与科普，无一手动态，不单列。中文媒体无窗口内 serving 新稿。本期不做深读笔记。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
