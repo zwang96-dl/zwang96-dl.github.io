@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月20日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-20"/>
+<meta name="doc-ts" content="2026-10-20T11:03:08"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-20（04点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-20（04点版）</h1>
+<p>这轮有一条大新闻。 DeepSeek 把自家引擎开源了。 它就是线上服务的同款底座。 HN 上两小时冲到约 298 分。 深读笔记已经做好了。 先说清最关键的一条。 你的三台机器都跑不了它。 下面会讲清为什么。</p>
+<h2>框架更新</h2>
+<p><strong>DeepInfer 开源（值得深读）</strong> DeepSeek 今天放出了 DeepInfer。 它是自家线上用的推理框架。 许可证是 Apache 2.0。 底子主要搭在 vLLM 上。 还借鉴了 SGLang 等框架。 现在只服务一个模型。 模型是 V4.1-Flash。 这次只放了离线推理。 在线服务还差三件套。 一是 KV 缓存系统。 KV 就是存好的草稿纸。 二是 PD 解耦没放出来。 PD 解耦是读题答题分开跑。 三是负载均衡也没放。 硬件门槛也要看清。 它只认英伟达 SM100。 那是 B200 那一代芯片。 另一个是华为昇腾 950。 你的 H100 是 SM90 那代。 MI350X 和 MI300X 是 AMD。 三台都不在名单里。 所以先看思路，别急着部署。 能借的招倒是不少。 投机解码叫 DSpark。 像实习生先打一版草稿。 它按信心决定先验哪段。 还有有界重放省重算。 只留最后 140 个词元。 批次不变性也值得看。 换批次，结果保持不变。 调参时结果不乱飘才好比。 官方图我亲手验过了。 prefill 每卡约 6 万起步。 拉大批次能到约 9 万。 单位是每秒处理的词元。 decode 每卡最高约 2.6 万。 那是每人约 103 的速度下。 数字都是官方自报。 没有独立复测，先打折看。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<p><strong>其他框架都没发新版</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 多了个新快照。 新快照编号是 b11753。 它在 09:06 UTC 发布。 按惯例快照不算正式版。 只记水位，不单独吹。 水位我用接口亲手核过了。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没有新批次。 最新还是 10 月 19 日那批。 那批前几期都处理过了。 窗口内没有新论文提交。 AbridgeKV 又被媒体翻出来。 那篇原稿是更早提交的。 16 日那期已经记过它了。 按老规矩，不重复收。</p>
+<h2>业内新闻</h2>
+<p><strong>界面新闻也报了 DeepInfer</strong> 新浪转了界面新闻的稿。 标题说框架全面开源。 发布时间在窗口内。 北京时间是 10 月 20 日。 它说新模型推理代码也会来。 后续优化都会放这个仓库。 来源：<a href="https://finance.sina.cn/stock/jdts/2026-10-20/detail-inivwiti7695958.d.html">https://finance.sina.cn/stock/jdts/2026-10-20/detail-inivwiti7695958.d.html</a></p>
+<p><strong>美国联邦机构禁用 DeepSeek</strong> HN 窗口内有一条相关帖。 说联邦民用机构要下架它。 来源是 The Register 的报道。 热度不高，只有 3 分。 只当背景信息看一眼。 跟自部署选型关系不大。 来源：<a href="https://www.theregister.com/security/2026/10/20/deepseek-deep-sixed-at-all-us-federal-civilian-agencies/5304010">https://www.theregister.com/security/2026/10/20/deepseek-deep-sixed-at-all-us-federal-civilian-agencies/5304010</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 这轮没有新条目。 最新还是 00点版报过的简讯。 Spotify 上也没有新单集。 最新还是 10 月 14 日那期。 Simon 这轮也没有新帖。 最新还是 19 日那篇随笔。 Reddit 站内这轮零结果。 社交平台全在聊 DeepInfer。 Threads 上几条帖都在窗口内。 大家盯的都是同一个问题。 没放出来的三件套才是关键。 有人直说全面开源有点夸大。 这判断跟 README 对得上。 来源：<a href="https://www.threads.com/@leilasanfordai/post/DetnvbsCGrs">https://www.threads.com/@leilasanfordai/post/DetnvbsCGrs</a></p>
+<p>*去重说明：本轮窗口是 10/20 02:00 到 04:00 PDT。对应 UTC 是 09:00 到 11:00。对应 epoch 是 1792486800 到 1792494000。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，rc5 已记过。llama.cpp 窗口内新增快照 b11753（2026-10-20T09:06:38Z），上轮水位 b11752，按惯例只记水位。头条 DeepInfer 经一手核验：gh API 查 deepseek-ai/DeepInfer 仓库，created_at 为 2026-10-16T07:47:23Z，pushed_at 为 2026-10-20T09:12:38Z 在窗口内，许可证 Apache-2.0，核验时星标约 4699；README 全文亲手读过——只支持 DeepSeek-V4.1-Flash、离线推理、硬件仅 NVIDIA SM100 与 Huawei Ascend 950、明确未包含 KV cache 系统与 VE/Prefill/Decode 解耦与数据并行负载均衡、底子主要基于 vLLM 并借鉴 SGLang 与 TensorRT-LLM、DSpark 草稿最长默认 5、有界重放默认保留 140 词元、批次不变性仅 NVIDIA。性能图两张已从仓库原文下载并亲眼读数：prefill 图 EP4DP4、131072 上下文、4 卡口径下批次 4096 约 60000 词元/秒/GPU 与约 70ms、批次 65536 约 90000 与约 730ms；decode 图 EP64DP64、64 卡口径、nextn=3、接受率 75% 平均过 3.25、每人约 103 词元/秒时每卡约 26300、每人约 325 时每卡约 2600。均为官方自报、无独立复测。HN Algolia 精确窗口：stories 共 75 条，DeepInfer 首帖 2026-10-20T09:08:54Z、约 298 分 102 评论，链接即仓库地址；另有 X 转帖 10:12:46Z（2 分）与 The Register 联邦禁用帖 09:31:24Z（3 分）。用户硬件口径：H100 为 SM90、MI350X 与 MI300X 为 AMD，均不在 DeepInfer 支持名单，简报与深读均已明说。arXiv 官方 API 本轮通畅，cs.DC 与 cs.LG 最新提交仍是 2026-10-19T17:59:59Z，窗口内零新提交；AbridgeKV（2610.20641）为更早提交、10/16 00点版去重脚注已记过其 HN 帖，本轮 aiweekly 翻炒不重复收。Latent Space feed 亲手核过：最新条目仍是 10/20 05:21:52Z 的 AINews 简讯（00点版已处理），lastBuildDate 10:23:57Z 只是重建。Spotify 亲手核过：已连接，Latent Space 为已保存节目，最新单集仍是 10/14 Leash Bio 期。Simon atom 最新仍是 10/19 23:58:25Z。中文媒体：新浪转界面新闻稿（北京时间 10/20 17:04，约 02:04 PDT，在窗口内）已收录；机器之心与量子位无窗口内 serving 新稿。social 搜索窗口内多条 Threads 与 Facebook 帖均在转 DeepInfer 发布（其中 @leilasanfordai 10:29:36Z 帖对未包含三件套的判断与 README 一致），无其他一手新动态。X 站内搜索零结果，官方 X 原帖经 HN 转帖链接核到存在，但正文未直接打开，未编造其逐字内容。本期深读笔记：DeepInfer（files/深度阅读/DeepInfer-DeepSeek自家引擎开源.md 与同名 .html，含原文 2 张 Pareto 图并配中文图注，README 已更新）。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
