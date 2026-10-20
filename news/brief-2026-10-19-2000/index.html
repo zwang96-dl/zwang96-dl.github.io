@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月19日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-20T03:09:06"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-19（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-19（20点版）</h1>
+<p>20点版来了。 框架和论文还是没动静。 但有一条安全警报要补。 是 SGLang 的一个老 bug。 这周刚被正式编了 CVE 号。 你正在评估 SGLang，先看这条。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发新版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 也没有新快照。 最新还是 b11748 号。 它赶在窗口开始前发了。 水位我用接口亲手核过了。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没查到新批次。 官方接口这次把我限流了。 搜索引擎里也只有旧文。 能看到的最新还是 16 日批次。 下一轮我再直连补核一次。</p>
+<h2>业内新闻</h2>
+<p><strong>SGLang 有个能打挂服务的洞。</strong> 先说清，这是补收的一条。 它 10 月 19 日拿到 CVE 号。 编号是 CVE-2026-112082。 CVSS 评到了 7.5 分。 说白了就是拒绝服务洞。 不用登录就能远程触发。 问题出在三个调试接口上。 它们管 MoE 的专家分布记录。 MoE 就是混合专家模型。 引擎没开专家录制模式时。 只要有人调这三个接口。 整个服务进程就会被打挂。 GitHub 上 10 月 1 日就有人报了。 issue 编号是 42071。 修复的 PR 也早就提了。 编号 42098，至今还没合并。 我刚刚亲手去仓库核过。 两个页面现在都还是开着的。 聚合站说受影响的是旧版本。 范围写的是 0.5.0 到 0.5.19 版。 你现在看的是 0.5.22 版。 不在它列的范围里面。 但官方修复还没合并。 这事还是得留个心眼。 别把服务端口暴露在公网上。 这三个接口也别对外开放。 数字来自 CVE 库和聚合站。 SGLang 官方还没发公告。 来源：<a href="https://github.com/sgl-project/sglang/issues/42071">https://github.com/sgl-project/sglang/issues/42071</a> 来源：<a href="https://www.redpacketsecurity.com/cve-alert-cve-2026-112082-sgl-project-sglang/">https://www.redpacketsecurity.com/cve-alert-cve-2026-112082-sgl-project-sglang/</a></p>
+<p>HN 窗口内扫了 58 条。 没有一条跟 serving 有关。 另有一篇 PD 解耦综述在传。 发在 dev.to，日期是 10 月 19 日。 里面讲的料咱们都报过。 Prime 平台 10 月初就报过。 几篇论文 9 月底也报过。 说白了是旧料新炒，不单列。 来源留档：<a href="http://dev.to/danielsamfdo/75-more-requests-same-gpus-why-llm-serving-runs-on-two-machines-now-4m14">http://dev.to/danielsamfdo/75-more-requests-same-gpus-why-llm-serving-runs-on-two-machines-now-4m14</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新条目还是 10 月 17 日。 Spotify 上也没有新单集。 Simon 这轮也没有新帖。 X 和 Reddit 本轮零结果。 中文媒体没有窗口内新稿。 社交平台全是科普信息图。 没有一手技术动态，不单列。 本期不标「值得深读」。 安全警报看公告就够了。 宁缺毋滥，下期再看。</p>
+<p>*去重说明：本轮窗口是 10/19 18:00 到 20:00 PDT。对应 epoch 是 1792458000 到 1792465200。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2。llama.cpp 最新仍是 b11748（10/20 00:23:31Z），在本窗口开始（01:00Z）之前，窗口内零新快照；b11747 与 b11748 已在 18点版记过水位。本窗口无正式发版。arXiv 本轮未能直连复核：官方 API 返回 429 限流与超时，按规矩不再重试；改用搜索引擎索引交叉核对，命中全是旧文（TraCT、SplitZip 等，索引抓取时间均在百日以上），结合 18点版直连水位（最新仍是 10/16 批次），本轮无新批次证据，下一轮直连补核。HN 用 Algolia 精确窗口复核，窗口内 stories 共 58 条，无 serving 条目；Triton Notes（1 分，内核笔记）与 Loop-Native Attention（1 分，架构论文帖）均不够格，不收。SGLang CVE-2026-112082 为补收：RedPacket 聚合站标注发布于 2026-10-19T05:30:22Z（即 10/18 22:30 PDT，落在 10/18 22点版窗口内，当期处理的是另一条 CVE-2026-41523，此条漏收），CVSS 7.5、CWE-404、受影响版本 0.5.0 到 0.5.19 均为聚合站与 CVE 库口径；已亲手用 gh 核过一手来源：issue 42071 于 2026-10-01 创建、至今 open，标题确认三个 expert_distribution_record 路由可在未开录制模式时打挂引擎；修复 PR 42098 同为 open、未合并。已 grep 全部 briefs 确认此前从未报过。本期按操作提醒处理，不做深读。dev.to 的 PD 解耦综述（标注 10/19，无精确时间）为旧料汇总：Prime Inference 已于 10 月 3 日 4 点版报过，HMA-Serve、SPAD、KITE 等已在 9 月 30 日 6 点版报过，不重复收录。Latent Space feed 亲手核过，lastBuildDate 虽为 10/20 03:00:08Z，最新条目仍是 10/17 的 AINews 简讯，无新条目；Spotify 亲手搜过，Latent Space 节目为已保存节目，无新单集。Simon atom 最新仍是 10/19 23:58:25Z 那条，18点版已记过。X 站内与 Reddit 站内零结果。social 搜索窗口内帖子（01:23 到 01:46Z）均为 VMAI Labs 的推理管线科普图与四框架对比图卡，无一手数据，不收。中文媒体无窗口内 serving 新稿。本期不做深读笔记。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
