@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月20日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-20"/>
+<meta name="doc-ts" content="2026-10-20T15:04:03"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-20（08点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-20（08点版）</h1>
+<p>08点版看完了。 这轮基本是安静轮。 06点版刚报完 llm-d 大件。 这两小时没有新的大件。 只有两个小线索值得记一笔。 本期不标「值得深读」。 按宁缺毋滥，先不做笔记。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 llama.cpp 多了个新快照。 新快照编号是 b11756。 它在 13:48 UTC 发布。 按惯例快照不算正式版。 只记水位，不单独吹。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没有新批次。 最新还是 10 月 19 日那批。 那批前几期都处理过了。 窗口内没有新论文提交。 论文区这轮继续休息。</p>
+<p><strong>AMD 写了篇 GEMM 优化长文</strong> HN 这轮把这篇帖顶了出来。 GEMM 就是矩阵乘法。 它是模型计算的基本功。 文章手把手写 FP16 内核。 一步一步往上加优化。 最后逼近官方调优库的水平。 先说清两个口径，别误会。 原文发布日期是 10 月 16 日。 不是这两小时的新文章。 它测的是 RDNA 消费卡。 RDNA 是 Radeon 的架构。 你的卡是 CDNA 数据中心架构。 MI350X 和 MI300X 不是一回事。 写法思路可以借鉴着看。 性能数字别直接往你的卡套。 来源：<a href="https://rocm.blogs.amd.com/software-tools-optimization/rdna-fp16-gemm/README.html">https://rocm.blogs.amd.com/software-tools-optimization/rdna-fp16-gemm/README.html</a></p>
+<h2>业内新闻</h2>
+<p><strong>DeepInfer 热度还在涨</strong> 这是 04点版头条的跟进。 不是新事件，只报个数。 星标从约 7200 涨到约 9069。 06点版到现在又涨约 1900。 仓库本身没有新的推送。 最近推送还是 11:03 UTC。 看思路的人还在变多。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<p><strong>HN 上有个跨云拼卡的新站</strong> 它叫 Overcast，今天被贴上 HN。 卖点是把多家云拼成一个集群。 哪家便宜就往哪家派活。 听着像拼车拉活的调度台。 但热度很低，只有 2 分。 它自家页面也写明了。 省钱数字是按标价推算的。 不是实测跑出来的结果。 先记个名字，不当结论看。 来源：<a href="https://getovercast.com">https://getovercast.com</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 这轮没有新条目。 最新还是 00点版报过的简讯。 Spotify 上也没有新单集。 最新还是 10 月 14 日那期。 Simon 这轮也没有新帖。 最新还是 19 日那篇随笔。 X 和 Reddit 站内零结果。 社交平台全是转发帖。 都在转 DeepInfer 和 llm-d。 没有一手新料，不单列。 中文媒体没有窗口内新稿。 机器之心和量子位都没动静。</p>
+<p>*去重说明：本轮窗口是 10/20 06:00 到 08:00 PDT。对应 UTC 是 13:00 到 15:00。对应 epoch 是 1792501200 到 1792508400。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，最新预发布仍是 v0.7.2rc5（10/20 04:30Z，窗口外）。llm-d 仍是 v1.0.0（06点版已深读）。llama.cpp 窗口内新增快照 b11756（2026-10-20T13:48:11Z），上轮水位 b11755，按惯例只记水位。arXiv 官方 API 亲手复核：cs.DC 最新提交仍是 2026-10-19T16:43Z，窗口内零新提交。HN 用 Algolia 精确窗口复核，窗口内 stories 共 213 条，serving 相关只有三条：AMD ROCm 的 FP16 GEMM 长文帖（14:37:03Z、2 分，原文发布日期为 2026-10-16，测 RDNA 3 与 RDNA 4 的 Radeon 卡，非用户 MI350X 与 MI300X 的 CDNA 架构，简报已明说口径）、Overcast 跨云集群站帖（14:50:47Z、2 分，其官网自称省钱数字为按公开标价推算、非实测，简报已明说）、以及一条限流 SSE 流的小工具帖（无 serving 增量，不收）。其余高分帖与 serving 无关。DeepInfer 跟进经 gh API 亲核：星标约 9069，pushed_at 仍是 2026-10-20T11:03:36Z（06点版窗口），本窗口无新推送，只报热度。Latent Space feed 亲手核过：最新条目仍是 10/20 05:21:52Z 的 AINews 简讯（00点版已处理），lastBuildDate 14:24:00Z 只是重建。Spotify 亲手核过：已连接，Latent Space 为已保存节目，检索到的最新单集仍是 10/14 Leash Bio 期；节目详情接口本轮返回 500，已用检索结果与 feed 交叉确认。Simon atom 最新仍是 10/19 23:58:25Z。social 搜索窗口内（13:00 到 15:00 UTC）多条帖均为 DeepInfer 与 llm-d 1.0 的转发与科普，无一手新动态；另有一条 Instagram 帖宣称 32B 模型在 16GB 卡上跑 262K 上下文，未经核实且属推广口径，不收。X 站内与 Reddit 站内搜索零结果。中文媒体无窗口内 serving 新稿；日文 Substack 日刊提到 DeepInfer 后 vLLM 有反应一说，未找到一手出处，不收。本期不标「值得深读」，不做深读笔记。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
