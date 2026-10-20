@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月20日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-20"/>
+<meta name="doc-ts" content="2026-10-20T13:03:02"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-20（06点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-20（06点版）</h1>
+<p>这轮有一条真正的大件。 llm-d 升到 1.0 正式版了。 它管一整个机房的调度。 PD 解耦被它做成了生产件。 多模态编码也单独成池了。 深读笔记已经做好了。 好消息是这次跟你机器有关。 它明确给了 AMD 的配方。 你的两台 AMD 卡有戏。</p>
+<h2>框架更新</h2>
+<p><strong>llm-d 1.0 正式版（值得深读）</strong> 先说人话，它是个总调度台。 它自己不做单机推理。 vLLM 和 SGLang 在它下面干活。 谁干哪件，由它来分派。 像机房门口的分诊台一样。 这次主打三件生产活。 一是多租户分优先级。 付费用户先走，免费的排队。 忙不过来先压低优先级。 二是升级不停机。 读题、答题、编码三池分开。 三池锁步换版本，不掉请求。 三是认智能体的会话。 同一会话尽量回同一台机器。 那台还存着它的草稿纸。 草稿纸就是 KV 缓存。 路由先看谁存着草稿纸。 再看谁忙、谁预计更快。 草稿纸满了就往下沉。 先沉内存，再沉硬盘。 不再是存不下就直接扔。 数字都是官方自报，先说清。 编程负载首字延迟砍超 85%。 那是中位数，TPU 上测的。 总吞吐涨到 2.4 倍。 谷歌自家平台也报了数。 前缀命中从 35% 涨到 70%。 还有 1.7 万节点的大测试。 三集群吞吐涨 2.9 倍。 成功率报的是 99.9%。 没有独立复测，先打折看。 跟你的方向有两条硬关联。 多模态编码单独成池这条。 编码池能独立扩缩容。 不用陪着答题池一起涨。 AMD 这条更要划重点。 它自家 ROCm 镜像停更了。 改钉上游 vLLM 的候选版镜像。 就为了保住 PD 解耦能跑。 还给了现成的拆分配方。 2 台读题加 2 台答题。 跑 DeepSeek-V3，走 MoRI 互联。 MoRI 是 AMD 的多卡互联。 你的 MI350X 可以照着试。 MI300X 同理，先小规模验。 深读里把配方和坑都写清了。 来源：<a href="https://cloud.google.com/blog/topics/ai-infrastructure/llm-d-1-0-an-open-source-stack-for-distributed-inference">https://cloud.google.com/blog/topics/ai-infrastructure/llm-d-1-0-an-open-source-stack-for-distributed-inference</a></p>
+<p><strong>其他框架都没发新版</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 llama.cpp 多了个新快照。 新快照编号是 b11755。 它在 11:18 UTC 发布。 按惯例快照不算正式版。 只记水位，不单独吹。 水位我用接口亲手核过了。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没有新批次。 最新还是 10 月 19 日那批。 那批前几期都处理过了。 窗口内没有新论文提交。 论文区这轮暂时休息。</p>
+<h2>业内新闻</h2>
+<p><strong>媒体跟进了 llm-d 1.0</strong> SiliconANGLE 今天发了长稿。 发布时间在本期窗口内。 它盯的是企业自建这条线。 还补了 IBM 的一组演示数。 3000 个编程智能体同时跑。 成本说低了五到十倍。 同样是厂商自报，打折看。 来源：<a href="https://siliconangle.com/2026/10/20/ibm-backed-llm-d-framework-adds-controls-for-running-ai-models-in-house/">https://siliconangle.com/2026/10/20/ibm-backed-llm-d-framework-adds-controls-for-running-ai-models-in-house/</a></p>
+<p><strong>DeepInfer 热度还在涨</strong> 这是 04点版头条的跟进。 不是新事件，只报个数。 仓库今早又推了一次更新。 时间是 11:03 UTC，在窗口内。 星标从约 4700 涨到约 7200。 两个多小时涨了约 2500。 看思路的人确实不少。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 这轮没有新条目。 最新还是 00点版报过的简讯。 Spotify 上也没有新单集。 最新还是 10 月 14 日那期。 Simon 这轮也没有新帖。 最新还是 19 日那篇随笔。 X 和 Reddit 站内零结果。 社交平台只有推广转发帖。 都在转 llm-d 的发布消息。 没有一手新料，不单列。 中文媒体没有窗口内新稿。 机器之心和量子位都没动静。</p>
+<p>*去重说明：本轮窗口是 10/20 04:00 到 06:00 PDT。对应 UTC 是 11:00 到 13:00。对应 epoch 是 1792494000 到 1792501200。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，最新预发布仍是 v0.7.2rc5（10/20 04:30Z，窗口外）。llama.cpp 窗口内新增快照 b11755（2026-10-20T11:18:44Z），上轮水位 b11753，列表中未见 b11754，按惯例只记水位。头条 llm-d 1.0 经一手核验：Google 官方博客全文亲手读过（发布日 2026-10-20，HN 帖 2026-10-20T11:48:47Z 在窗口内）；GitHub 标签 v1.0.0 实际发布于 2026-10-20T02:30:10Z（昨晚 PDT 时间），版本说明全文亲手读过，简报与深读均已如实标注「标签先行、博客与媒体今日发布」这一时间口径，未冒充标签在窗口内。关键口径：500 多贡献者、25 多家机构、CNCF Sandbox 项目；DisaggregatedSet 把 prefill、decode 与多模态 encode 拆成独立池并锁步滚动升级；KV 经 vLLM OffloadingConnector、Mooncake 或 SGLang HiCache 分层下沉到主机内存与 SSD/Lustre。性能数字均为官方或厂商自报、无独立复测：Ironwood TPU（TPU 7x）编程智能体负载前缀感知路由加主机内存卸载，中位 TTFT 降超 85%、总吞吐 2.4 倍（对原生 K8s Service）；Gemini 平台（原 Vertex AI）前缀命中 35% 升 70%、编程场景 TTFT 降超 35%、突发聊天 P95 TTFT 降超 50%；1.7 万节点多区域三集群吞吐 2.9 倍、成功率 99.9%、路由开销低于 1%；A3 Mega 70B、5 万词元提示、Lustre 层对比仅 CPU RAM 卸载 TTFT 约降 40%、端到端延迟降约 30%、GPU 小时省近 60%；Snap 前缀命中最高 75–80%；ZenteiQ 吞吐超 4 倍（每千张 TPU v6e 日产词元 14.7 亿升 59.7 亿）；RL 空窗 40–60%、分时复用后加速器占用率由约 40% 升超 70%。AMD 口径经版本说明核实：llm-d-rocm 自家镜像已弃用，临时钉上游 vLLM v0.32.0-rc.2 的 ROCm 镜像保 PD 解耦支持；新增 guides/wide-ep 的 AMD/ROCm MoRI 宽专家并行 2P2D DisaggregatedSet 配方（DeepSeek-V3）；SGLang 镜像对齐 v0.5.22。用户硬件口径：MI350X 与 MI300X 为 AMD/ROCm，在 llm-d 支持范围内（与 04点版 DeepInfer 仅认 SM100 与昇腾 950、三台都跑不了形成对照，简报已明说先小规模验）；H100 亦为 llm-d 常规支持硬件。HN 用 Algolia 精确窗口复核，窗口内 stories 共 138 条，serving 相关只有 llm-d 帖（11:48:47Z、核时 1 分）与一篇追踪 GPU 与词元价格的博客帖（12:15:53Z、1 分，无 serving 技术增量，不收）；其余最高分仅 16 分且与 serving 无关。arXiv 官方 API 亲手复核：cs.DC 最新提交仍是 2026-10-19T16:43Z，窗口内零新提交。Latent Space feed 亲手核过：最新条目仍是 10/20 05:21:52Z 的 AINews 简讯（00点版已处理），lastBuildDate 12:23:58Z 只是重建。Spotify 亲手核过：已连接，Latent Space 为已保存节目，最新单集仍是 10/14 Leash Bio 期。Simon atom 最新仍是 10/19 23:58:25Z。social 搜索窗口内只有 llm-d 1.0 的推广转发帖（含一条俄语帖），无一手新料。X 站内与 Reddit 站内对 llm-d 零结果。中文媒体无窗口内 serving 新稿。本期深读笔记：llm-d 1.0（files/深度阅读/llm-d-1.0-PD解耦上生产精读.md 与同名 .html，含原文 2 张图并配中文图注，README 已更新）。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
