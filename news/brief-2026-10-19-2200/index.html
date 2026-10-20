@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月19日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-19"/>
+<meta name="doc-ts" content="2026-10-20T05:09:17"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-19（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-19（22点版）</h1>
+<p>22点版来了。 这轮有真东西了。 arXiv 新批次终于放出来了。 上一篇卡在限流没核成。 这次我直连接口逐篇核过了。 头条正对你的 PD 解耦方向。 有人想把 decode 搬进显存里算。</p>
+<h2>框架更新</h2>
+<p>本轮没有框架发正式版。 vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都没动。 FlashInfer 出了个候选版。 版本号是 0.7.2rc5。 rc 就是正式版前的候选版。 它在窗口内发布，没错。 但候选版不算正式发版。 只记水位，不单独吹。 llama.cpp 也没有新快照。 最新还是 b11748 号。 它在窗口开始前就发了。 水位我用接口亲手核过了。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.2rc5">https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.2rc5</a></p>
+<h2>新技术与论文</h2>
+<p><strong>DuoPD 想换个拆法。</strong> PD 解耦就是两阶段分开跑。 prefill 和 decode 各占一组卡。 问题是两组卡都在浪费。 prefill 那组闲着显存带宽。 decode 那组闲着计算力。 说白了，一半家当在睡觉。 这篇来自首尔国立大学。 办法是：不拆卡，拆活。 GPU 全部算力只干 prefill。 decode 搬进显存芯片里算。 显存旁加个小计算单元。 它叫 PNM，近存计算单元。 贴着数据算，不用搬来搬去。 权重只存一份，两边共用。 草稿纸也不用跨卡搬了。 KV cache 就是那份草稿纸。 作者报的吞吐最高 2.23 倍。 是对传统解耦比出来的。 先说清，这是模拟结果。 用模拟器算的，不是真芯片。 芯片还没造出来，别当现货。 但思路对你的评估很有用。 解耦的账不只是搬运费。 还有两边各闲一半的浪费。 深读笔记已经做好了。 里面有三张原文关键图。 能帮你给 autotuner 补个视角。 除了配比，还要看利用率错位。 来源：<a href="http://arxiv.org/abs/2610.26131v1">http://arxiv.org/abs/2610.26131v1</a></p>
+<p><strong>KV 草稿纸能压 50 倍了。</strong> 这篇叫 KV-Surgeon。 KV cache 还是那份草稿纸。 它做的是离线压缩这件事。 固定上下文先压小，存起来。 后面反复查同一份资料时。 直接用压好的版本，省钱。 难点是删哪条、留哪条。 老办法一条一条单独打分。 但删一条会影响其他所有条。 就像抽掉一张牌，牌局全变。 它用校准数据把联动算进去。 还能顺手补偿剩下的条目。 50 倍压缩时，问答精度更高。 比此前最好方法高最多 4 分。 测了 4B 到 30B 的模型。 稠密模型和 MoE 都测了。 MoE 就是混合专家模型。 数字是作者自报，无独立复测。 跟你的 KV 搬运账直接相关。 草稿纸越小，搬起来越便宜。 来源：<a href="http://arxiv.org/abs/2610.25933v1">http://arxiv.org/abs/2610.25933v1</a></p>
+<p><strong>TokenGate 学会先挑重点读。</strong> 人看长文会先扫一遍。 只细读真正重要的部分。 模型以前是逐字全读的。 输入越长，prefill 越烧钱。 prefill 是读题算草稿的阶段。 这篇给模型加了个小门卫。 它学会给每个词元打分。 不重要的，早就轻轻放过。 效果报得很猛，先看数字。 首字延迟快了 1.4 到 11.3 倍。 首字延迟就是等第一个字的时间。 峰值显存降到原来的几分之一。 论文写法是省了 1.5 到 3.4 倍。 精度还号称基本不掉。 数字是作者自报，无独立复测。 对多模态长图长文也值得盯。 视觉词元多，挑重点更值钱。 来源：<a href="http://arxiv.org/abs/2610.26754v1">http://arxiv.org/abs/2610.26754v1</a></p>
+<h2>业内新闻</h2>
+<p>本轮没有够格的大新闻。 HN 窗口内扫了 57 条。 有三条沾边，但都太小。 一个 Mac 上测 KV 的小工具。 只有 1 分，还是个人秀场帖。 一篇并行语言模型的论文帖。 也只有 1 分，不够格单列。 Meta 超大集群那篇 2 分。 讲的是训练集群，不是 serving。 按老规矩，这三条都不收。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没有新一期。 最新条目还是 10 月 17 日。 Spotify 上也没有新单集。 节目是已保存的，我亲手搜过。 Simon 这轮也没有新帖。 最新还是 19 日那篇随笔。 18点版和 20点版都记过了。 X 和 Reddit 本轮零结果。 中文媒体没有窗口内新稿。 社交平台全是科普信息图。 没有一手技术动态，不单列。 本期深读就是 DuoPD 那篇。 它跟你的 PD 解耦评估最对口。</p>
+<p>*去重说明：本轮窗口是 10/19 20:00 到 22:00 PDT。对应 epoch 是 1792465200 到 1792472400。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0，发布于 10/18 06:50Z。SGLang 仍是 v0.5.22，发布于 10/19 02:55Z。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2；窗口内新增 v0.7.2rc5（2026-10-20T04:30:32Z，prerelease=true，release 说明只有一行 changelog 链接），按预发布处理只记水位。llama.cpp 最新仍是 b11748（10/20 00:23:31Z），在本窗口开始（03:00Z）之前，窗口内零新快照。本窗口无正式发版。arXiv 本轮直连官方 API 复核成功：新批次已入库，KV cache、prefill、speculative 三方向最新提交均为 10/19 批次（此前各期水位停在 10/16 批次，20点版因 API 429 未能直连，本轮补核）。收录三篇：DuoPD（2610.26131，PD 解耦硬件架构，标值得深读并已做深读笔记）、KV-Surgeon（2610.25933，离线 KV 压缩，50 倍压缩精度高此前 SOTA 最多 4 分，作者自报）、TokenGate（2610.26754，prefill 词元剪枝，TTFT 1.4–11.3 倍、峰值显存省 1.5–3.4 倍，作者自报）。同批次未收：MemT-1.0（2610.26825，记忆架构模型，非 serving 优化）、Tandem（2610.26660，手机 NPU 端侧 GUI agent，离用户 serving 场景远）、ReAnchor（2610.26531，扩散草稿）、CEMA-Router（2610.26171，云边路由）、System X（2610.25456，10/18 提交、决策模型小众）均不够格或不对口，不单列。三篇均已 grep 全部 briefs 确认从未报过。HN 用 Algolia 精确窗口复核，窗口内 stories 共 57 条：Vramkit（04:38Z，1 分，Mac 上 KV 压缩测量小工具）、Parallel Language Models via Variational Decoding（04:30Z，1 分）、Inside Prometheus Meta gigawatt 集群（04:20Z，2 分，训练基建非 serving）均不够格，不收。Latent Space feed 亲手核过，lastBuildDate 为 10/20 04:00:08Z，最新条目仍是 10/17 的 AINews 简讯，无新条目；Spotify 亲手搜过，Latent Space 节目为已保存节目（SAVED 标记），无新单集证据。Simon atom 最新仍是 10/19 23:58:25Z 那条，此前已记。X 站内与 Reddit 站内零结果。social 搜索窗口内帖均为 Ollama/vLLM/SGLang 科普信息图与提速技巧盘点，无一手数据，不收。中文媒体无窗口内 serving 新稿。本期深读笔记：DuoPD（files/深度阅读/DuoPD-把decode搬进显存里算.md 与同名.html，含原文 Figure 1/11/12，README 已更新）。本体无 chat.read_messages 工具。去重以 briefs 目录为准。另以 hidden_files checklog 为准。*</p></body></html>
