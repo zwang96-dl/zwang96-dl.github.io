@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月21日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-21"/>
+<meta name="doc-ts" content="2026-10-21T15:08:10"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-21（08点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-21（08点版）</h1>
+<p>08点版来了。 这轮有三条真东西。 一条是安全警报，先看它。 LiteLLM 有个版本被投毒了。 一条是 SGLang 的实测帖。 它讲推理定了也不等于结果定。 深读笔记已经做好了。 还有一条英伟达的整柜新闻。 框架正式版还是全都没动。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 FlashInfer 正式版还是 0.7.2 版。</p>
+<p><strong>llama.cpp 这轮没有新快照</strong> 最新快照还是 b11796。 它是上轮窗口里出的。 本轮两个小时一个没出。 这在它家算少见的安静。 只记一笔，不展开讲。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11796">https://github.com/ggml-org/llama.cpp/releases/tag/b11796</a></p>
+<p><strong>DeepInfer 星标涨势继续放缓</strong> 星标涨到了 17145 个。 06点版时是 16820 个。 两小时涨了约 325 个。 仓库本身没有新推送。 还是那次 DeepEP 维护。 DeepEP 是它家的通信库。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>推理定了，流水线还没定</strong> 有团队开了确定性推理。 确定性推理是同问必同答。 引擎用的是 SGLang。 模型是 Qwen3.8-27B。 单看推理层，稳得很。 800 条回答条条一致。 可整条流水线还是翻车。 同一份手册跑了四遍。 出来四套不同的清单。 丢的还是最要命那条。 凶手不是模型，是拼题环节。 每次上传新生成的编号。 无序的列表，变大的状态。 它们把题目悄悄改了。 像考题印错了一行字。 学霸答得再稳也是错的。 他们还开源了查案工具。 工具名叫 Concordance。 它专找第一处分叉点。 深读笔记已经做好了。 笔记里有原文三张图。 这篇跟你正对口。 你也在评估 SGLang 解耦。 确定性正好是一把现成尺。 数字都是作者自报。 来源：<a href="https://www.ctgt.ai/research/concordance">https://www.ctgt.ai/research/concordance</a></p>
+<p><strong>arXiv 这轮还是没有新论文</strong> 最新提交还停在昨天。 还是 10 月 20 日那批。 这个点本来就是空窗。 下轮新批次出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>LiteLLM 一个版本被投毒了</strong> 先划重点：装过的要处理。 LiteLLM 是个大模型网关。 很多推理服务拿它转发请求。 出事的是 1.107.0 版。 它的安装包被人塞了毒。 七个平台的包全中招。 毒分两件，一偷一控。 第一件专偷各类凭证。 云钥匙、SSH 钥匙它都要。 连网关里存的厂商钥匙也偷。 第二件每小时回连一次。 回连后能远程执行代码。 关键是它藏得特别深。 源码里干干净净，没毒。 毒只藏在打包好的安装包里。 只看源码审查，根本发现不了。 而且 Python 一启动它就跑。 你的程序不用它也照样中招。 官方镜像也中了招。 好消息是已经处置了。 PyPI 已经下架这个版本。 Docker 那边也撤了镜像。 攻击者的回连账号已被删。 干净版本是 1.106.2。 两个候选版也是干净的。 处置建议我写人话版。 装过 1.107.0 的机器。 一律按已经失陷处理。 先隔离，再重建环境。 能轮换的凭证全轮换。 别在中毒环境里跑 pip 修复。 一跑 Python，毒还会再触发。 两家安全公司都发了报告。 细节和自查清单在原文里。 来源：<a href="https://research.jfrog.com/post/litellm-hijacked-again/">https://research.jfrog.com/post/litellm-hijacked-again/</a> 复核：<a href="https://safedep.io/litellm-pypi-compromise-credential-stealer-backdoor/">https://safedep.io/litellm-pypi-compromise-credential-stealer-backdoor/</a></p>
+<p><strong>英伟达把数据中心装进集装箱</strong> 英伟达在柏林发布了新品。 发布场合是 GTC Berlin。 新品名叫 DSX Pod。 它是一个集装箱大的单元。 里面装七个 Rubin 整柜。 Rubin 是它家下一代平台。 每个整柜有 72 颗 GPU。 外加 36 颗 Vera CPU。 Vera 是它家服务器 CPU。 一个箱子约有 504 颗 GPU。 整箱重约 28 吨。 线缆和液冷在工厂装好。 运到现场只需三步。 放好位置，接好其他箱子。 再跑一遍最终测试就行。 像送一台装好的整机。 不用在现场攒零件拼柜。 英伟达说，上线能大幅提速。 原来要六个月才能出词元。 现在最快只要 14 天。 出词元就是开始对外服务。 合作方有富士康、联想等六家。 2027 年初才开始交付。 价格没有公布。 分析师估一柜超 700 万美元。 以上都是英伟达官方口径。 来源：<a href="https://www.cnbc.com/2026/10/21/nvidia-announces-vera-rubin-racks-that-can-be-shipped-on-a-truck-.html">https://www.cnbc.com/2026/10/21/nvidia-announces-vera-rubin-racks-that-can-be-shipped-on-a-truck-.html</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 发了新帖，但不对口</strong> 新帖讲的是 Claude Mods。 Mods 是 Claude Code 的插件。 它讲的是智能体的注意力界面。 说白了是人机交互那一层。 跟推理服务关系不大。 只记一笔，不展开讲。 来源：<a href="https://www.latent.space/p/claude-mods">https://www.latent.space/p/claude-mods</a></p>
+<p><strong>其他大V这轮没有新东西</strong> Simon 这轮也没有新帖。 他的最新帖还是证书那件事。 跟推理服务无关，不收。 Spotify 上也没有新单集。 Latent Space 还是已保存状态。</p>
+<p>*去重说明：本轮窗口是 10/21 06:00 到 08:00 PDT。对应 UTC 是 13:00 到 15:00。对应 epoch 是 1792587600 到 1792594800。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布，gh 二次核对）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc5（10/20 04:30Z）。llama.cpp 本窗口零新快照，最新仍是 b11796（12:34Z，06点版已记）。DeepInfer 经 gh API 亲核：星标 17145（06点版 16820，+约 325），pushed_at 仍是 2026-10-21T04:55:44Z，本窗口无新推送。arXiv 官方 API 亲核：cs.DC 最新提交仍是 2026-10-20T17:56:35Z，cs.LG 与 cs.CL 与 cs.CV 最新也均停在 10/20 17:59Z 前后，本窗口零新提交，符合批次空窗规律。LiteLLM 1.107.0 投毒系本窗口公开曝光：HN 窗口内三帖（SafeDep 14:00Z、GitHub issue 13:43Z、JFrog 13:43Z）；JFrog 与 SafeDep 两篇报告均亲读并交叉核对（七个 wheel 全中招、源码与 sdist 无毒、毒在 wheel 的 cook.pth 与 cook.py 与 sitecustomize.py、每小时回连远程执行、PyPI 已下架、官方 Docker 镜像已撤、干净版为 1.106.2 与 1.107.0rc1/rc2）；SafeDep 时间线显示毒包 11:39Z 上传 PyPI（06点版窗口末），13:40Z 时 PyPI 已无此版、攻击者 GitHub 账号已删，本窗口为公开曝光与处置窗口，正文按此口径写。Concordance 系本窗口新帖：HN 于 14:25Z 贴出 CTGT 研究页，原文亲读全文（SGLang 0.5.19 开发版确定性模式、Qwen3.8-27B、推理层 800/800 一致、流水线四遍义务数 32/31/33/33、74 个重复请求零变化、资产编号为唯一差异、修后五遍同为 34、DFLASH 与 EAGLE3 投机配置未开确定性时每条分叉、工具 Apache 2.0 开源），grep 全部 briefs 确认此前未报，已做深读。HN 用 Algolia 精确窗口复核，窗口内 stories 共 199 条：其余 serving 相关有 OpenAI 模型上 Google Cloud 的谷歌官方博客版（14:42Z，06点版已报本体，不重复）、LLM 部署控制面板 Show HN（14:21Z、1 分，信号弱不收）、最便宜 GPU 在睡觉的人那边帖（13:34Z、1 分，信号弱不收）；PHP 安全事件占满窗口，其余无关。英伟达 DSX Pod 系 HN 窗口内 CNBC 帖（13:18Z、2 分），browser.open 被 cnbc.com 策略拦截后已按恢复指引派 browser.browse 取原文（截至发稿未回），正文细节改由多家同日转述 CNBC 原稿的报道交叉核对（TechDefused、FreshBlogNews、Zot News、Unite.AI、WebProNews 口径一致：GTC Berlin 发布、七个 Vera Rubin NVL72 柜装进集装箱单元、约 28 吨、线缆与液冷工厂预装、现场放置加连接加测试、英伟达称部署从六个月降到最快 14 天、六家制造伙伴、2027 年初交付、未公布价格、分析师估单柜超 700 万美元），均已标为英伟达官方口径。browser.search 四组：通用组与新闻组命中均为 llm-d 1.0 与 EAGLE-4 的二次报道（均已深读，不重复）与 Spheron 厂商对比博客（不收）；论文组命中 DLite 转述（已深读，不重复）；X 站内零结果；中文组无窗口内 serving 新稿，机器之心与量子位无新稿。social 搜索（since 2026-10-21）窗口内命中均为 DeepInfer 教程与信息图等二手帖，无一手新动态。Latent Space feed 亲核：窗口内新帖 Claude Mods（13:04Z，讲 Claude Code 插件与注意力界面，与 serving 不对口，正文只记一笔）。Spotify 亲核：Latent Space 为已保存节目（SAVED 标记），无新的 serving 相关单集。Simon atom 亲核：最新仍是 2026-10-20T23:50Z 的 CA 证书帖（已判无关），无新帖。本期深读笔记：Concordance（files/深度阅读/Concordance-推理定了流水线还没定.md 与同名.html，含原文 3 张图并配中文图注，README 已更新）。去重以 briefs 目录最近几期为准；本本体无 chat 工具，聊天去重以 briefs 文件代替。*</p></body></html>
