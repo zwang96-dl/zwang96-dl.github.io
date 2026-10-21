@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月20日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-20"/>
+<meta name="doc-ts" content="2026-10-21T03:03:36"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-20（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-20（20点版）</h1>
+<p>20点版来了。 这轮有两条真东西。 一条是白天漏收的缓存新闻。 一条是刚出的深度分析。 框架还是没有新正式版。 本期不标「值得深读」。 理由写在文末了。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 FlashInfer 正式版还是 0.7.2 版。</p>
+<p><strong>llama.cpp 连出五个新快照</strong> 最新快照编号是 b11774。 本窗口一共出了五个。 从 b11769 一路到 b11774。 中间跳过了 b11771。 它们都是每日例行快照。 按老规矩不算正式发版。 只记一笔，不展开讲。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11774">https://github.com/ggml-org/llama.cpp/releases/tag/b11774</a></p>
+<h2>新技术与论文</h2>
+<p><strong>OpenAI 把缓存留存拉到 12 小时（补收）</strong> 这条白天就发了，前几期漏了。 OpenAI 给接口加了新选项。 提示缓存能留 12 小时了。 以前默认只留 30 分钟。 提示缓存就是存好的草稿纸。 草稿纸指模型算过的上下文。 下次来同样的开头就不用重算。 新选项专给全天干活的智能体。 它们反复用同一套指令和工具。 隔几小时回来还能命中缓存。 代价是写入价格翻了一倍。 写入是普通输入价的 2.5 倍。 默认档写入只要 1.25 倍。 读缓存还是 0.1 倍，很便宜。 Codex 用户还有个更大的糖。 登录用户的缓存直接永久保留。 隔多久回老对话都不吃亏。 划重点：这糖不能乱吃。 有篇实测账算得很清楚。 同一段材料至少回来三次。 而且每次间隔超过半小时。 这样设 12 小时才回本。 还有个坑千万别踩。 别把长留存设在对话最顶层。 那样每轮新词都按贵价写入。 他算的例子里账单涨了 68%。 正确姿势是只钉在复用段末尾。 这跟你看的前缀缓存是一回事。 区别只是云厂商帮你管草稿纸。 价格数字是官方定价的转述。 没有独立实测，我先标清楚。 来源：<a href="https://runtimewire.com/article/openai-12-hour-prompt-caching-api">https://runtimewire.com/article/openai-12-hour-prompt-caching-api</a> 原文帖：<a href="https://twitter.com/thsottiaux/status/2112712984644784534">https://twitter.com/thsottiaux/status/2112712984644784534</a> 算账文：<a href="https://importstatic.com/ai/openai-12-hour-prompt-caching">https://importstatic.com/ai/openai-12-hour-prompt-caching</a></p>
+<p><strong>arXiv 新批次到了，但我没看全</strong> 最新提交时间戳已经动了。 已经推进到 10 月 20 日。 说明新一批论文入库了。 但我细查时接口被限流了。 接口直接回了 429 错误。 论文标题我没能核实。 没核实的标题我不编。 下轮恢复后我再补扫。 先把这个缺口如实报你。</p>
+<h2>业内新闻</h2>
+<p><strong>DeepInfer 热度突然加速</strong> 这是 04点版头条的跟进。 不是新事件，只报个数。 星标涨到了 13653 个。 18点版时是 12430 个。 两小时涨了约 1223 个。 涨幅比前几轮明显变大。 仓库本身没有新推送。 最近推送还是 11:03 UTC。 看思路的人还在变多。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>访谈与深度</h2>
+<p><strong>一篇分析把两条旧闻接上了</strong> Forkast 刚出了一篇分析。 发稿时间是 02:36 UTC。 正好落在本轮窗口里。 它把 DeepInfer 和 llm-d 对读。 观点一句话就能说清。 DeepInfer 只给了发动机。 它没给三件套。 三件套是草稿纸系统。 还有读题和答题的分工。 再加上多副本的调度。 llm-d 1.0 恰好全给齐了。 而且它不挑发动机品牌。 它站在 vLLM 上层管调度。 SGLang 也一样能被它管。 说白了就是分工不同。 一个拼单机跑得快。 一个拼集群跑得稳。 这正对着你评估的那道题。 你看的正是 PD 分工这一层。 文末提醒一句利益关系。 出钱的云厂商在卖托管版。 分析好看，立场要留个心眼。 来源：<a href="https://forkast.news/llm-d-1-0-ships-the-serving-layer-deepseek-withheld-the-sponsors-sell-the-managed-version-2/">https://forkast.news/llm-d-1-0-ships-the-serving-layer-deepseek-withheld-the-sponsors-sell-the-managed-version-2/</a></p>
+<p><strong>本期为什么不做深读</strong> OpenAI 那条是产品公告。 它没有论文也没有原图。 Forkast 那篇是二手评论。 两条都不够格做精读。 按宁缺毋滥，先不做笔记。 等 arXiv 新批次核完再挑。</p>
+<p>*去重说明：本轮窗口是 10/20 18:00 到 20:00 PDT。对应 UTC 是次日 01:00 到 03:00。对应 epoch 是 1792544400 到 1792551600。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc5（10/20 04:30Z，窗口外），仓库路径用 flashinfer-ai/flashinfer。llama.cpp 本窗口有五个新快照 b11769（01:11Z）、b11770（01:27Z）、b11772（01:59Z）、b11773（02:15Z）、b11774（02:32Z），无 b11771，按惯例每日快照不算正式发版，仅记名；b11768（00:48Z）已在 18点版记为最新。llm-d 仍是 v1.0.0（06点版已深读）。OpenAI 12 小时提示缓存为补收：官方宣布时间为 10/20 白天（RuntimeWire 记 10/20 13:42 CT，PANews 10/21 01:14Z 跟进），前几期简报全文检索无此条，确认未报过；要点取自 RuntimeWire、PANews 与 ImportStatic 三方转述及 HN 窗口内提交的 Tibo Sottiaux 原帖链接，定价为官方口径转述、无独立实测，已在正文标明；ImportStatic 的回本测算为其本地模拟计算、非真实账单，正文已按「他算的例子」表述。arXiv 官方 API 首查成功：cs.CL 最新提交推进到 2026-10-20T17:55:44Z，证明新批次已入库；随后按关键词细查时 API 返回 429 限流，按硬停规则本轮不再请求 arXiv，标题级核查未完成，下轮补扫，缺口已在正文如实说明。HN 用 Algolia 精确窗口复核，窗口内 stories 共 51 条，serving 相关有 OpenAI 缓存帖（02:00Z、1 分，已收为补收主条的原帖）、ANE 跑 Gemma 的 Show HN（01:34Z、1 分，信号太弱不收）、Perplexity 本地版帖（02:56Z、1 分，与 serving 无关不收），其余无关。DeepInfer 跟进经 gh API 亲核：星标 13653（18点版 12430，+约 1223），pushed_at 仍是 2026-10-20T11:03:36Z，本窗口无新推送，只报热度。Forkast 分析经 browser.search 亲核：发稿 2026-10-21T02:36Z（窗口内），内容为 04点版 DeepInfer 与 06点版 llm-d 的对读评论，非新发布，正文已标明其二手性质与利益关系提醒。Latent Space 本窗口无新单集：feed 顶部 Periodic Labs 期经查为 10 月 8 日期，最新仍是 16点版已补收的 SF Compute 期。Simon 本窗口无新帖，最新仍是 23:50Z 的 CA 证书帖（上轮已判无关）。X 站内与 Reddit 站内搜索零结果。social 搜索窗口内无一手新动态，命中的 llm-d 图解帖为上轮已判的旧转发。中文媒体窗口内无 serving 新稿。本期不标「值得深读」，不做深读笔记。去重以 briefs 目录最近几期为准；本本体无 chat 工具，聊天去重以 briefs 文件代替。*</p></body></html>
