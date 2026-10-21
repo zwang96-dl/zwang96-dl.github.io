@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月21日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-21"/>
+<meta name="doc-ts" content="2026-10-21T17:06:26"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-21（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-21（10点版）</h1>
+<p>10点版来了。 这轮有一条硬货。 有人把两大引擎拉上同一台机器。 当面比了一场。 DeepInfer 单机输给了 vLLM。 但输的原因比输赢更值钱。 深读笔记已经做好了。 框架正式版还是全都没动。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 FlashInfer 正式版还是 0.7.2 版。</p>
+<p><strong>llama.cpp 出了两个新快照</strong> 最新快照编号是 b11798。 上一版是 b11797。 两个都在本轮窗口里出。 它们都是每日例行快照。 按老规矩不算正式发版。 只记一笔，不展开讲。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11798">https://github.com/ggml-org/llama.cpp/releases/tag/b11798</a></p>
+<p><strong>DeepInfer 星标还在慢慢涨</strong> 星标涨到了 17423 个。 08点版时是 17145 个。 两小时涨了约 278 个。 涨势继续放缓。 仓库本身没有新推送。 还是那次 DeepEP 维护。 DeepEP 是它家的通信库。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>单机对决：DeepInfer 输了</strong> 有团队租了一台机器实测。 机器是 8 张 B300。 B300 是英伟达最新旗舰卡。 同一个模型跑两个引擎。 模型是 DeepSeek-V4.1-Flash。 vLLM 吐字每秒 5.5 万词元。 DeepInfer 只有约一半。 读题差距更夸张。 vLLM 每秒读 65.8 万词元。 DeepInfer 每秒只读 7.2 万。 差了整整九倍。 但作者自己把话说清了。 这场对 DeepInfer 不公平。 它天生是分工流水线的料。 读题和吐字本该分开跑。 这就叫 PD 解耦。 可开源版没放出粘合剂。 草稿纸系统和解耦都没开源。 单机上只能一条龙全包。 像让长途大巴在巷里掉头。 输的不是引擎，是用法。 对你评估 PD 解耦正对口。 拓扑不对齐，结论就是错的。 深读笔记已经做好了。 笔记里有原文两张图。 还有一份冷启动账本。 数字是第三方实测。 测的团队卖快照产品。 利益关系笔记里标清了。 来源：<a href="https://warmctl.io/blog/deepseek-b300-vllm-vs-deepinfer/">https://warmctl.io/blog/deepseek-b300-vllm-vs-deepinfer/</a></p>
+<p><strong>arXiv 这轮还是没有新论文</strong> 最新提交还停在昨天。 还是 10 月 20 日那批。 这个点本来就是空窗。 下轮新批次出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没有新的业内新闻</strong> HN 上冒出两条眼熟的。 一条是 Meta 机房的旧帖。 机房名叫 Prometheus。 10月19日 08点版报过本体。 这轮只是被人重新贴出。 一条是 LiteLLM 的后续推文。 投毒事件 08点版刚报过。 没有新进展，不重复炒。 其余窗口全被安全事件占满。 跟推理服务都不挨着。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Latent Space 没有新帖。 最新还是 Claude Mods 那篇。 08点版已经记过一笔。 Simon 这轮发了个游戏帖。 跟推理服务无关，不收。 Spotify 上也没有新单集。 Latent Space 还是已保存状态。 X 和 Reddit 这轮零结果。 中文媒体也没有新稿。</p>
+<p>*去重说明：本轮窗口是 10/21 08:00 到 10:00 PDT。对应 UTC 是 15:00 到 17:00。对应 epoch 是 1792594800 到 1792602000。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc5（10/20 04:30Z）。llama.cpp 本窗口新快照 b11797（16:01Z）与 b11798（16:36Z）共两个，08点版最新为 b11796。DeepInfer 经 gh API 亲核：星标 17423（08点版 17145，+约 278），pushed_at 仍是 2026-10-21T04:55:44Z，本窗口无新推送。arXiv 官方 API 亲核：cs.DC 最新提交仍是 2026-10-20T17:56:35Z，cs.LG 最新仍是 2026-10-20T17:59:56Z，本窗口零新提交，符合批次空窗规律；搜索命中的 AbridgeKV 经官方 API 亲核提交于 10/07，为旧论文被二手站翻出，不收。warmctl 实测系本轮新收：原文亲读全文（8×B300 单机、DeepSeek-V4.1-Flash-1017、2048 并发、随机词元负载、vLLM 0.31.1rc1 官方配方对 DeepInfer 默认与官方推荐两跑取优、吐字 1.8 到 4.0 倍差、读题 8.2 到 9.2 倍差、DeepSeek 自报每卡 82K 读题未复现原因、冷启动 930 秒拆账与快照 88 秒恢复），grep 全部 briefs 确认此前未报，已做深读；利益口径已标：warmctl 卖快照恢复产品，冷启动段为其自家口径，吞吐段相对中立且主动写明对 DeepInfer 不公平。HN 用 Algolia 精确窗口复核，窗口内 stories 共 154 条：serving 相关只有 EAGLE-4 仓库重贴（16:57Z，02点版已深读）、Meta Prometheus 的 Register 报道重贴（16:43Z，10/19 08点版已报本体）、LiteLLM 投毒的 X 推文版（15:46Z，08点版已报本体），均不重复；Recursive Flint（16:31Z）为模型发布非 serving，不收；其余为 PHP 安全事件等无关条目。browser.search 四组：通用组命中 llm-d 1.0 二次报道（已深读）与 warmctl 本体（已收）；新闻组命中 Prometheus 的 Register 原稿（已报）；论文组命中 AbridgeKV 二手转述（10/07 旧稿）与 DLite 转述（已报）；中文组无窗口内 serving 新稿，机器之心与量子位无新稿。social 搜索（since 2026-10-21）窗口内只有一张西班牙语的 Ollama 与 vLLM 与 SGLang 对比信息图（15:51Z），无一手动态。X 站内与 Reddit 站内搜索均零结果。Latent Space feed 亲核：最新仍是 13:04Z 的 Claude Mods（08点版已记），无新条目。Spotify 亲核：Latent Space 为已保存节目（SAVED 标记），无新的 serving 相关单集。Simon atom 亲核：窗口内新条目为游戏类链接帖，与 serving 无关不收。本期深读笔记：warmctl 实测（files/深度阅读/warmctl实测-单机上DeepInfer输给vLLM.md 与同名.html，含原文 2 张图并配中文图注，README 已更新）。去重以 briefs 目录最近几期为准；本本体无 chat 工具，聊天去重以 briefs 文件代替。*</p></body></html>
