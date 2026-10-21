@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月20日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-20"/>
+<meta name="doc-ts" content="2026-10-21T05:02:02"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-20（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-20（22点版）</h1>
+<p>22点版来了。 这轮把上轮的缺口补上了。 20点版说 arXiv 被限流没核完。 这轮标题和摘要都核完了。 新批次里挖到一篇好论文。 已标「值得深读」，笔记做好了。 框架正式版还是全都没动。 DeepInfer 有了开源后第一次更新。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 FlashInfer 正式版还是 0.7.2 版。</p>
+<p><strong>llama.cpp 连出五个新快照</strong> 最新快照编号是 b11781。 本窗口一共出了五个。 从 b11776 一路到 b11781。 中间跳过了 b11779。 它们都是每日例行快照。 按老规矩不算正式发版。 只记一笔，不展开讲。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11781">https://github.com/ggml-org/llama.cpp/releases/tag/b11781</a></p>
+<p><strong>DeepInfer 推了第一次代码更新</strong> 这是 04点版头条的跟进。 仓库推了开源后第一个新提交。 内容是升级 DeepEP 这个组件。 DeepEP 是它家的多卡通信库。 顺手修了一个下载方式的小问题。 说白了就是一次日常维护。 不是新功能，先别过度解读。 但它说明仓库开始正常迭代了。 星标涨到了 14487 个。 20点版时是 13653 个。 两小时又涨了约 834 个。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>智能体可以自己管草稿纸了</strong> 清华和港中文发了篇新论文。 名字叫 Cache Engineering for Agents。 翻成人话就是缓存工程。 它盯上的是智能体的长历史。 智能体干活会留一长串记录。 记录越长，草稿纸就越厚。 草稿纸指 KV 缓存（存好的上下文）。 论文说缓存读取占总成本 82.4%。 钱主要烧在反复翻草稿纸上。 老办法是改文本删历史。 比如把旧对话总结成一小段。 坏处是保留部分要全部重算。 这篇说文本一个字都别动。 直接对缓存下手就行。 它给智能体两个新动作。 drop 是把某段缓存丢出注意范围。 repos 是给留下的缓存改座位号。 座位号就是位置编码。 简单策略就已经很能打。 只滚动丢掉老的工具返回。 平均成本直接降了 27.7%。 平均分数反而涨了 1.7 分。 配套引擎叫 AKV，已开源。 它还给你的调参提了个醒。 同样文本，操作顺序不同。 缓存状态就可能不一样。 只看开头相同就复用会出错。 这跟你看的 PD 解耦是上下层。 解耦管草稿纸在哪台机器算。 这篇管草稿纸到底留哪些页。 跟 20点版的长留存缓存也接得上。 那边管留多久，这边管留什么。 数字都是作者自报，先标清楚。 来源：<a href="https://arxiv.org/abs/2610.28577">https://arxiv.org/abs/2610.28577</a> 代码：<a href="https://github.com/thu-nics/AKV">https://github.com/thu-nics/AKV</a></p>
+<p><strong>猜词要猜几个，现在能自己学了</strong> 还有一篇讲多词元预测的。 多词元预测就是一次猜好几个词。 猜中了，解码就能跳步走。 难点是每次该猜几个才划算。 猜多了，被拒的浪费也多。 这篇做了个在线小控制器。 它看每轮验证的反馈学手感。 哪个长度划算就选哪个。 不用重新训练模型。 在数学题基准上最高快 4.1 倍。 这是跟普通逐词生成比的。 跟固定长度比，吞吐再涨 10%。 像老司机自己摸换挡时机。 来源：<a href="https://arxiv.org/abs/2610.28619">https://arxiv.org/abs/2610.28619</a></p>
+<p><strong>低比特模型也能一次猜多个词</strong> 第三篇把两件事捏到一起。 一件是超低比特量化（压权重）。 另一件是多词元预测（跳步解码）。 直接硬拼，效果会互相打架。 这篇做了算法和系统协同设计。 草稿和主模型共用一份权重。 在 H20 上跑出 2.2 倍加速。 边缘设备上最高也有 3.3 倍。 都是作者自报的数字。 跟你的大集群场景离得远些。 先记个名字，不展开了。 来源：<a href="https://arxiv.org/abs/2610.28500">https://arxiv.org/abs/2610.28500</a></p>
+<h2>业内新闻</h2>
+<p>这轮没有新的业内大新闻。 HN 窗口内有篇彭博的转述。 讲的还是 DeepInfer 开源那件事。 内容跟 04点版报过的重合。 还有个十分钟讲 DeepInfer 的视频。 也只是社区做的讲解内容。 两条都不单独收录了。</p>
+<h2>访谈与深度</h2>
+<p>这轮没有新访谈。 也没有新的深度长文。 Latent Space 还是 SF Compute 那期。 那期 16点版已经补收过了。 Simon 这轮也没有新帖。 他的最新帖还是证书那件事。 跟推理服务无关，不收。</p>
+<p>*去重说明：本轮窗口是 10/20 20:00 到 22:00 PDT。对应 UTC 是次日 03:00 到 05:00。对应 epoch 是 1792551600 到 1792558800。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc5（10/20 04:30Z）。llama.cpp 本窗口有五个新快照 b11776（03:04Z）、b11777（03:21Z）、b11778（03:37Z）、b11780（04:11Z）、b11781（04:36Z），无 b11779，按惯例每日快照不算正式发版，仅记名；b11774（02:32Z）已在 20点版记为最新。llm-d 仍是 v1.0.0（06点版已深读）。DeepInfer 经 gh API 亲核：星标 14487（20点版 13653，+约 834），pushed_at 推进到 2026-10-21T04:55:44Z，本窗口新提交为「Bump DeepEP to f6aa38fe and drop the SSH-&gt;HTTPS rewrite (#157)」（04:55:43Z），系开源后首个代码更新，正文已按日常维护如实定性。arXiv 补扫完成（20点版因 429 未核完的那批）：官方 API 亲核 cs.CL 最新仍是 2026-10-20T17:55:44Z、cs.DC 最新 17:56:35Z、cs.LG 最新 17:59:56Z，均为 10/20 白天批次、提交时间在窗口外，本期定位为上轮缺口的补扫而非窗口内新提交； serving 相关挑出三篇：Cache Engineering for Agents（2610.28577，17:32Z）、Adaptive Multi-Token Prediction（2610.28619，17:56Z）、BitMTP（2610.28500，16:42Z），三篇摘要均经 API 亲读、此前各期未收；同批的 KPage（2610.28096）、RACE（2610.28385）、Token-Energy Law（2610.28576）只扫了标题、未及摘要核读，本期不收，下轮可补。AbridgeKV（2610.20641）为 10/07 旧论文，10/16 00点版已记其 HN 帖、04点版已判 aiweekly 翻炒不收，本期不重复。HN 用 Algolia 精确窗口复核，窗口内 stories 共 54 条，serving 相关只有彭博 DeepSeek 稿提交帖（03:50Z、2 分，内容与 04点版头条重合）与 DeepInfer 十分钟讲解视频帖（03:13Z、1 分，社区讲解），均不单独收；其余为 Daytona 融资、UALink 词条等无关帖。browser.search 三组：通用组命中 Spheron 对比博客（厂商稿、无日期锚点，不收）与 llm-d 二次报道（已深读，不收）；X 站内零结果；Reddit 组无窗口内新帖；中文组命中均为 DeepInfer 发布日旧稿。social 搜索（since 2026-10-20）窗口内无一手新动态，命中均为科普教程帖。Latent Space feed 亲核：最新仍是 19:31:57Z 的 SF Compute 单集（16点版已补收），无新条目。Simon atom 亲核：最新仍是 23:50Z 的 CA 证书帖（上轮已判无关）。本期深读笔记：Cache Engineering for Agents（files/深度阅读/CacheEngineering-智能体直接管KV缓存.md 与同名.html，含原文 Figure 1/3 并配中文图注，README 已更新）。去重以 briefs 目录最近几期为准；本本体无 chat 工具，聊天去重以 briefs 文件代替。*</p></body></html>
