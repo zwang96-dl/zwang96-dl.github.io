@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月21日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-21"/>
+<meta name="doc-ts" content="2026-10-21T07:02:54"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-21（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-21（00点版）</h1>
+<p>00点版来了。 这轮先把欠账还上。 22点版有三篇只扫了标题。 这轮摘要全核完了。 三篇都值得一说。 其中一篇标了「值得深读」。 笔记已经做好了。 框架正式版还是全都没动。 深夜窗口本来就安静。 访谈区有一篇迟到的重磅综述。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 FlashInfer 正式版还是 0.7.2 版。</p>
+<p><strong>llama.cpp 又出两个新快照</strong> 最新快照编号是 b11785。 本窗口出了 b11784 和 b11785。 上轮收尾后还冒出一个 b11782。 一并在这里记上一笔。 它们都是每日例行快照。 按老规矩不算正式发版。 只记一笔，不展开讲。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11785">https://github.com/ggml-org/llama.cpp/releases/tag/b11785</a></p>
+<p><strong>DeepInfer 热度还在涨</strong> 星标涨到了 15279 个。 22点版时是 14487 个。 两小时又涨了约 792 个。 仓库本身没有新推送。 最近推送还是上轮报的那次。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>草稿纸能压薄，还不用现算了</strong> MIT 团队发了篇新论文。 名字叫 RACE。 它压的是 KV 缓存的维度。 草稿纸指 KV 缓存（存好的上下文）。 老办法把向量压短了存。 用的时候再拼回原长。 拼回这一步每步都要算。 省的显存被计算吃回去。 这篇让注意力直接用短向量。 关键是删的时候要整对删。 RoPE 的坐标是一对一对的。 RoPE 是给词元标座位号的办法。 删一半，座位号就全乱了。 哪对留，看 Q 和 K 的能量。 能量大的对贡献大，优先留。 挑完直接折进模型权重。 推理不用重构，不用新内核。 草稿纸只留一半时看数据。 上下文拉到 25.6 万长度。 总计算量降了 47.8%。 吞吐涨到 1.79 倍。 首字延迟降了 43.2%。 显存占用降了 28.1%。 数字都是作者自报的。 它跟驱逐、量化是正交三轴。 三个旋钮能叠着一起拧。 跟你的自动调参正好对路。 深读笔记已经做好了。 笔记里有原文两张图。 来源：<a href="https://arxiv.org/abs/2610.28385">https://arxiv.org/abs/2610.28385</a></p>
+<p><strong>每个词到底费多少电，有公式了</strong> 第二篇给解码算了本电费账。 它提出一个词元能量定律。 每个词的耗电只看两件事。 一件是活跃字节数。 就是这步要读多少数据。 另一件是实际解码耗时。 活跃字节又拆成两份。 权重是大家共读的，一份。 草稿纸是每人私读的，各一份。 人一多，权重那份就被摊薄。 历史一长，私读那份就变大。 它在 Hopper 和 Blackwell 上验过。 Hopper 是 H100 那代芯片。 Blackwell 是 B200 那代芯片。 说白了，省电先看两件事。 批够不够大，草稿纸够不够薄。 这跟上面 RACE 那篇正好接上。 也跟你调参要的成本模型对路。 数字都是作者自报的。 来源：<a href="https://arxiv.org/abs/2610.28576">https://arxiv.org/abs/2610.28576</a></p>
+<p><strong>视频稀疏注意力，空格也能塞满</strong> 第三篇叫 KPage。 它管的是视频模型的注意力。 稀疏注意力就是只看一部分词。 问题是选中的块常半空着。 硬件的砖块没塞满就开算。 算力就这么白白浪费。 它把有效的行跨块打包。 装载时直接塞进大砖块里。 不用在显存里先拼一份新的。 对英伟达的块稀疏基线比。 正向计算快了 1.35 到 2.06 倍。 半空块多的场景最占便宜。 这是内核层的活，偏视频侧。 跟你的多模态 prefill 有点关系。 先记个名字，不展开了。 数字都是作者自报的。 来源：<a href="https://arxiv.org/abs/2610.28096">https://arxiv.org/abs/2610.28096</a></p>
+<h2>业内新闻</h2>
+<p>这轮窗口内没有新的大新闻。 HN 上有个涨价帖挺热。 闹到 23 分，标题说的是阿里。 说它把 DeepSeek 托管价涨了。 我去核原文时页面打不开。 没核实的数字我不往你这儿搬。 下轮能打开再补，或者就此放下。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 给 DeepInfer 算了本账</strong> swyx 团队深夜发了新一期简讯。 主角还是 DeepInfer 开源那件事。 事件本身 04点版已经报过了。 但这篇多给了两个新角度。 第一个是 vLLM 官方的回应。 它说在 GB200 上实测对照过。 GB200 是英伟达的整柜系统。 解码吞吐只比 DeepInfer 差 6%。 配方和复现步骤都公开了。 意思是这效率不是独门绝技。 第二个角度是一本赚钱账。 账是 swyx 团队自己算的。 按 DeepSeek 披露的生产数据。 每张卡每小时能收 38 美元。 成本算下来毛利超过 80%。 整柜投入约 81 天回本。 但这本账有个大前提。 它家 96% 的输入命中了缓存。 命中就是草稿纸直接复用。 155 万亿词元的日吞吐里。 大头不是新算出来的词。 账好看，先把前提看清。 还有个细节值得你留意。 缓存管理和负载均衡两块。 这次开源仍然没有全给。 04点版说的三件套未含。 这篇把口径又确认了一遍。 来源：<a href="https://www.latent.space/p/ainews-deepseek-deepinfer-open-source">https://www.latent.space/p/ainews-deepseek-deepinfer-open-source</a></p>
+<p>*去重说明：本轮窗口是 10/20 22:00 到 10/21 00:00 PDT。对应 UTC 是 05:00 到 07:00。对应 epoch 是 1792558800 到 1792566000。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc5（10/20 04:30Z）。llama.cpp 本窗口新快照 b11784（05:44Z）、b11785（06:33Z），另 b11782（04:58Z）在 22点版收尾后出现、一并补记，b11783 未见；22点版最新为 b11781。DeepInfer 经 gh API 亲核：星标 15279（22点版 14487，+约 792），pushed_at 仍是 2026-10-21T04:55:44Z，本窗口无新推送。arXiv 补扫完成（22点版只到标题级的三篇）：KPage（2610.28096，10/20 12:12Z）、RACE（2610.28385，15:34Z）、Token-Energy Law（2610.28576，17:32Z），摘要均经官方 API 亲读，此前各期未收；arXiv cs.DC 最新提交仍是 2026-10-20T17:56:35Z，本窗口零新提交。HN 用 Algolia 精确窗口复核，窗口内 stories 共 53 条，serving 相关只有阿里托管 DeepSeek 涨价帖（05:17Z、23 分，Stork 通讯稿，browser.open 返回 404、原文未能核读，正文已如实说明不搬数字）、Kapitsa 苹果芯片引擎帖（05:03Z、4 分，Reddit 转贴、信号弱不收）、Kvleak 缓存帖（05:53Z、1 分，与 serving 仅沾边不收），其余无关。Latent Space feed 亲核：窗口内新增 AINews DeepInfer 期（06:54:09Z），正文亲读，新增角度为 vLLM 的 GB200 对照回应（decode 差 6%）与 swyx 团队自算的单位经济账（38 美元每卡小时、毛利超 80%、81 天回本，均系其按 DeepSeek 披露数据的推算、非审计数字，正文已标前提 96% 缓存命中）；SF Compute 期已在 16点版补收，不重复。Simon atom 亲核：最新仍是 23:50Z 的 CA 证书帖（已判无关），无新帖。browser.search 四组：通用组命中 llm-d 1.0 与 TorchTPU 的二次报道（06点版已深读、10点版已深读，不重复）与 Spheron 厂商对比博客（不收）；涨价组命中均为 DeepSeek 官方 API 历次调价的旧闻与 V4.1 Flash 定价页，与 HN 帖所指阿里托管涨价不是一件事，未能交叉核实；X 站内零结果；Reddit 站内零结果；中文组命中均为旧文（阿甘 vLLM/SGLang 源码系列等），机器之心与量子位窗口内无 serving 新稿。social 搜索（since 2026-10-20）窗口内无一手新动态，命中均为 10/20 白天教程与信息图帖。本期深读笔记：RACE（files/深度阅读/RACE-草稿纸压薄不用重构.md 与同名.html，含原文 Figure 1/2 并配中文图注，README 已更新）。去重以 briefs 目录最近几期为准；本本体无 chat 工具，聊天去重以 briefs 文件代替。*</p></body></html>
