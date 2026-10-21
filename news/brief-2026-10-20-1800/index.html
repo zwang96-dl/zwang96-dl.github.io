@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月20日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-20"/>
+<meta name="doc-ts" content="2026-10-21T01:13:34"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-20（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-20（18点版）</h1>
+<p>18点版来了。 这轮还是安静轮。 框架没有新正式版。 论文也没有新批次。 本期不标「值得深读」。 按宁缺毋滥，先不做笔记。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 FlashInfer 正式版还是 0.7.2 版。</p>
+<p><strong>llama.cpp 连出三个新快照</strong> 最新快照编号是 b11768。 本窗口一共出了三个。 编号是 b11765 起跳着走。 最后两个是 b11767 和 b11768。 它们都是每日例行快照。 按老规矩不算正式发版。 只记一笔，不展开讲。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11768">https://github.com/ggml-org/llama.cpp/releases/tag/b11768</a></p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮还是零新批次。 最新还是 10 月 19 日那批。 那批前几期都处理过了。 新批次应该快入库了。 下轮再亲手复核一次。 论文区这轮继续休息。</p>
+<h2>业内新闻</h2>
+<p><strong>DeepInfer 热度还在涨</strong> 这是 04点版头条的跟进。 不是新事件，只报个数。 星标涨到了 12430 个。 16点版时是 11929 个。 两小时又涨了约 501 个。 仓库本身没有新推送。 最近推送还是 11:03 UTC。 看思路的人还在变多。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>访谈与深度</h2>
+<p>这轮没有新访谈。 也没有新深度长文。 HN 有人重贴了推式 KV 文。 那篇 15 日 12点版深读过。 本期不重复收录它。 细节看那期的笔记就行。</p>
+<p>*去重说明：本轮窗口是 10/20 16:00 到 18:00 PDT。对应 UTC 是 23:00 到次日 01:00。对应 epoch 是 1792537200 到 1792544400。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc0（预发布）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc5（10/20 04:30Z，窗口外），仓库路径用 flashinfer-ai/flashinfer。llama.cpp 本窗口有三个新快照 b11765（23:19Z）、b11767（00:31Z）、b11768（00:48Z），按惯例每日快照不算正式发版，仅记名；b11763（22:58Z）落在上轮窗口尾巴，上轮水位只记到 b11761，本期一并说明、不单独展开。llm-d 仍是 v1.0.0（06点版已深读）。arXiv 官方 API 亲手复核：cs.DC 最新仍是 2026-10-19T16:43Z，cs.CL 与 cs.LG 最新仍是 2026-10-19T17:59Z，窗口内零新提交。HN 用 Algolia 精确窗口复核，窗口内 stories 共 72 条，serving 相关只有一条：AWS 推式 KV 传输博客的提交帖（23:27Z、3 分、0 评论），原文为 vLLM 博客 2026-10-14 稿，已在 10 月 15 日 12点版收录并完成深读（files/深度阅读/vLLM推式KV传输-PD解耦首字延迟砍三倍.html），本期不重复收；其余命中为 SpaceX 营收、AI 泡沫评论等无关帖。DeepInfer 跟进经 gh API 亲核：星标 12430（16点版 11929，+约 501），pushed_at 仍是 2026-10-20T11:03:36Z，本窗口无新推送，只报热度。Latent Space feed 亲核：最新仍是 19:31:57Z 的 SF Compute 单集（16点版已补收），无新条目。Simon 本窗口有一帖（23:50Z，讲 CA 证书机构事件），与 serving 无关，不收。X 站内与 Reddit 站内搜索零结果。social 搜索窗口内有一条 Facebook 的 llm-d 架构图帖（23:34Z），只是 06点版已报内容的图解转发，无一手新动态，不收；其余均为通用科普帖。中文媒体窗口内无 serving 新稿。本期不标「值得深读」，不做深读笔记。去重以 briefs 目录最近几期为准；本本体无 chat 工具，聊天去重以 briefs 文件代替。*</p></body></html>
