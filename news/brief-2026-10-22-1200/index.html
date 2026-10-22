@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月22日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-22"/>
+<meta name="doc-ts" content="2026-10-22T19:01:39"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-22（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-22（12点版）</h1>
+<p>12点版来了。 这轮主角是 Modal。 它家掌门上了 Latent Space。 聊的全是算力怎么买卖。 框架正式版还是全平。 llama.cpp 恢复出快照了。 深读这轮不硬凑。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 FlashInfer 还是 rc6 候选版。 那是02点版已经报过的。</p>
+<p><strong>llama.cpp 恢复出快照了</strong> 断档一轮后它又动了。 新快照有 b11822 和 b11823。 分别发于 17:33 和 18:02 UTC。 正好都落在本轮窗口里。 按老规矩只记水位不深读。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11823">https://github.com/ggml-org/llama.cpp/releases/tag/b11823</a></p>
+<p><strong>DeepInfer 星标涨势慢下来了</strong> 星标涨到了 19746 个。 10点版时是 19669 个。 两小时只涨了约 77 个。 比前几轮明显慢了。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong> 今天的批次昨天已经扫过。 就是 20点版处理的那批。 新批次要等明天凌晨再看。 本轮接口还一度超时。 我改用列表页交叉核过了。</p>
+<h2>业内新闻</h2>
+<p><strong>Modal 刚拿了 7.5 亿美元</strong> 这是它家的 D 轮融资。 估值冲到了 160 亿美元。 年化收入已破 10 亿美元。 五个月前估值才 50 亿。 涨得确实有点猛。 数字来自节目页的介绍。 算是厂商自报口径。 来源：<a href="https://www.latent.space/p/modal-d">https://www.latent.space/p/modal-d</a></p>
+<p><strong>它家沙箱快跑满 30 亿个了</strong> 沙箱就是给程序用的临时小房间。 程序跑完房间就拆掉。 现在沙箱占它收入约三分之一。 写代码的智能体是最大客户。 智能体要反复试代码。 每次试都要开个新房间。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 新单集聊算力买卖</strong> 嘉宾是 Modal 掌门 Erik。 标题讲算力为什么是长方形。 买算力常按固定块数签约。 画出来就是个长方形。 真实需求却整天忽高忽低。 买多了闲着烧钱。 买少了高峰又不够用。 Modal 的打法是把需求拼池。 说白了就是拼单平摊波动。 这跟你算推理成本很相关。 弹性扩容背后全是这笔账。 节目里还聊了英伟达替代品。 也聊了 GPU 价格下跌风险。 Spotify 上也能直接听。 来源：<a href="https://www.latent.space/p/modal-d">https://www.latent.space/p/modal-d</a> Spotify：<a href="https://open.spotify.com/episode/6JR67xJ6yHUXClG6fFPqLn?si=ewlGNofKQNSU4agyhHYbbw">https://open.spotify.com/episode/6JR67xJ6yHUXClG6fFPqLn?si=ewlGNofKQNSU4agyhHYbbw</a></p>
+<p><strong>Simon 这轮发了篇题外帖</strong> 讲 Agent Skills 捐给基金会。 跟推理服务不直接相关。 所以这轮只记一笔。 来源：<a href="https://simonwillison.net/2026/Oct/22/donating-agent-skills/">https://simonwillison.net/2026/Oct/22/donating-agent-skills/</a></p>
+<p><strong>这轮没有其他新访谈</strong> X 和 Reddit 这轮零结果。 社交平台只有二手科普帖。 中文媒体也没有新稿。 HN 有条 TorchTPU 转帖。 本体早已深读过不重复。</p>
+<p>*去重说明：本轮窗口是 10/22 10:00 到 12:00 PDT。对应 UTC 是 10/22 17:00 到 19:00。对应 epoch 是 1792688400 到 1792695600。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（01:38Z，20点版已报）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc6（07:58Z，02点版已报）。llama.cpp 经 gh API 亲核：窗口内新增 b11822（17:33Z）与 b11823（18:02Z），断档一轮后恢复，只记水位；核验末尾 18:56Z 又冒出 b11826，属下一轮水位。DeepInfer 经 gh API 亲核：星标 19746（10点版 19669，+约 77，涨势明显放缓），pushed_at 仍是 2026-10-21T04:55:44Z，本窗口无新推送。arXiv 官方 API 本轮多次超时，改用 arXiv 列表页交叉核对：cs.DC 最新仍是 Thu, 22 Oct 2026 批次（20点版已扫），本窗口无新批次，下一批次按规律在 10/23 00:00 UTC 前后。HN 用 Algolia 精确窗口复核，窗口内 stories 共 165 条：serving 相关只有一条 vLLM TorchTPU 帖（1 分，讲零拷贝 KV 卸载与解耦服务），本体已在 10/20 10点版深读，不重复；其余命中均为本地模型工作流等小帖，不收。browser.search 三组：通用组命中 llm-d 1.0 二次报道与 TorchTPU 二次报道（均已报，不重复）及框架对比旧文；X 站内与 Reddit 站内搜索均零结果；中文组无窗口内 serving 新稿，机器之心与量子位无新稿。social 搜索（since 2026-10-22）窗口内命中只有 DeepInfer 的 README 录屏帖（11:33Z，属更早窗口）与 vLLM 二手科普，无一手动态。Latent Space feed 亲核：窗口内新条目 17:40Z 为 Modal 掌门 Erik Bernhardsson 访谈，本期收为访谈主条；其 D 轮 7.5 亿美元、估值 160 亿、年化收入破 10 亿、沙箱近 30 亿个等数字均取自节目页介绍，属厂商自报口径，未独立核验。Spotify 亲核：Latent Space 为已保存节目（SAVED 标记），同名 Modal 单集已上架可听。Simon atom 亲核：窗口内新条目 18:09Z 为 Agent Skills 捐赠帖，与 serving 无关，只记一笔。本期无深读笔记：Modal 访谈属商业与算力经济学话题、无技术图表可精读，宁缺毋滥。去重以 briefs 目录最近几期为准；chat.list 返回本任务无聊天可读，聊天去重以 briefs 文件代替。*</p></body></html>
