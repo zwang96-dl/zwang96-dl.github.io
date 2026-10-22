@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月21日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-21"/>
+<meta name="doc-ts" content="2026-10-22T03:03:26"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-21（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-21（20点版）</h1>
+<p>20点版来了。 这轮有真东西。 框架出了一个新的候选版。 论文新批次也终于落地了。 其中一篇正中你的解耦评估。 深读笔记已经做好了。</p>
+<h2>框架更新</h2>
+<p><strong>TensorRT-LLM 出了新候选版</strong> 版本号是 1.4.0rc1。 它在本轮窗口内发布。 注意它仍是预发布版。 最大变化是草稿纸管家换代。 新管家是 KV 缓存管理器 V2。 V2 这轮起变成默认设置。 这是不兼容变更，官方标了。 跨机搬草稿纸也换了默认通道。 新通道是 Python 版收发器。 它新增了 V4.1-Flash 的支持。 模型全名是 DeepSeek-V4.1-Flash。 就是 10点版实测里那个模型。 Mooncake 这轮也接进了 V2。 Mooncake 是解耦常用的搬运工。 多模态编码器缓存做了统一。 但有个已知坑要先提醒你。 解耦模式下取消流式请求后。 草稿纸传输可能直接报错。 这个坑在 A100 上能复现。 你评估解耦时可以对照看。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.4.0rc1">https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.4.0rc1</a></p>
+<p><strong>llama.cpp 出了一个新快照</strong> 最新快照编号是 b11804。 它在本轮窗口里出。 18点版时最新还是 b11803。 它还是每日例行快照。 按老规矩不算正式发版。 只记一笔，不展开讲。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11804">https://github.com/ggml-org/llama.cpp/releases/tag/b11804</a></p>
+<p><strong>其余正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 FlashInfer 正式版还是 0.7.2 版。</p>
+<p><strong>DeepInfer 星标涨得快了</strong> 星标涨到了 18240 个。 18点版时是 17892 个。 两小时涨了约 348 个。 涨势比前几轮明显快了。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>HAWK：吐字外包给便宜芯片</strong> 这篇跟你评估的解耦正对口。 它把读题和吐字拆到不同芯片。 读题用 GPU，吐字用 NPU。 NPU 是专为 AI 造的加速芯片。 实测读题时 GPU 快 2.52 倍。 吐字差距只剩 1.16 倍。 但 NPU 吐字省电又便宜。 难点是草稿纸跨芯片搬运。 笨办法中转要慢 4 到 9 倍。 它用直达快递把延迟打平了。 整套系统性能差最多 7.88%。 成本效率最高涨到 1.72 倍。 数字都是作者自报。 硬件也不是你的那几台。 思路值得抄，数字别直搬。 这篇能帮你看搬运层怎么设计。 深读笔记已经做好了。 笔记里有原文三张图。 来源：<a href="https://arxiv.org/abs/2610.29873">https://arxiv.org/abs/2610.29873</a></p>
+<p><strong>UlaCache：草稿纸只认门牌号</strong> 长文一长，草稿纸就吃显存。 稀疏注意力只看少数历史词元。 但草稿纸还得随时能取到。 这篇给草稿纸发统一门牌号。 引擎按门牌号找，不问放哪。 草稿纸可在显卡和内存间挪。 配上投机解码一起测。 投机解码就是先猜再验。 H200 上吐字最高快 1.70 倍。 B300 上最高快了 2.51 倍。 数字都是作者自报。 来源：<a href="https://arxiv.org/abs/2610.29820">https://arxiv.org/abs/2610.29820</a></p>
+<p><strong>RISK-KV：草稿纸只补一部分</strong> 分布式服务里请求会搬家。 搬家要么带走整本草稿纸。 要么把历史词元重算一遍。 两条路都贵。 这篇只重建一部分层。 哪层能省，用质量风险来挑。 实验里省掉了 18% 到 33%。 困惑度变化不到 0.5%。 困惑度是常用的质量指标。 比全量重算快 1.51 到 3.31 倍。 作者只有一人，先当思路看。 来源：<a href="https://arxiv.org/abs/2610.29544">https://arxiv.org/abs/2610.29544</a></p>
+<p><strong>卫星上跑视觉模型，断了还能续</strong> 这篇场景很极端，先说清。 视觉语言模型搬上了卫星。 卫星会断电、会重启。 一断，草稿纸就全没了。 它按阶段存检查点续跑。 编码、读题、吐字分开存。 实测端到端最高快 4.07 倍。 跟你的机房场景离得远。 但分阶段存档的思路能借。 来源：<a href="https://arxiv.org/abs/2610.29183">https://arxiv.org/abs/2610.29183</a></p>
+<h2>业内新闻</h2>
+<p><strong>LiteLLM 官方复盘补上了细节</strong> 这是 8点版那次投毒的后续。 本体不再重复，只报新料。 官方博客补出了攻击链。 攻击者先混进了内部部署。 又从日志里捡到开发者令牌。 令牌就是登录用的凭证。 再拿令牌关掉分支保护。 最后把发布指向山寨仓库。 官方处置口径也给全了。 装过 1.107.0 的先当已中招。 版本先钉回 1.106.2 再说。 能摸到的密钥全部轮换。 HN 这轮把官方帖转了出来。 我才顺藤摸到这份复盘。 来源：<a href="https://docs.litellm.ai/blog/security-incident-oct-21-2026">https://docs.litellm.ai/blog/security-incident-oct-21-2026</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Latent Space 没有新帖。 最新还是 Claude Mods 那篇。 8点版已经记过一笔。 Simon 这轮也没有新帖。 最新还是 PHP 安全那篇。 Spotify 上也没有新单集。 Latent Space 最新还是 Tenex 期。 X 和 Reddit 这轮零结果。 社交平台只有二手科普帖。 中文媒体也没有新稿。</p>
+<p>*去重说明：本轮窗口是 10/21 18:00 到 20:00 PDT。对应 UTC 是次日 01:00 到 03:00。对应 epoch 是 1792630800 到 1792638000。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 新出 v1.4.0rc1 预发布（本窗口 01:38Z），上一个是 v1.4.0rc0；要点为 KV 缓存管理器 V2 与 Python 收发器转默认（官方标 BREAKING）、新增 DeepSeek-V4.1-Flash 支持、Mooncake 连接器接入 V2、多模态编码器缓存统一，已知问题为解耦服务在流式请求取消后可能出现 KV 传输错误（A100 上观察到）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc5（10/20 04:30Z）。llama.cpp 本窗口新快照 b11804（01:26Z）共一个，18点版最新为 b11803。DeepInfer 经 gh API 亲核：星标 18240（18点版 17892，+约 348，涨势较前几轮加快），pushed_at 仍是 2026-10-21T04:55:44Z，本窗口无新推送。arXiv 官方 API 亲核：10/21 批次在本窗口内可见，cs.DC 最新提交已推进到 2026-10-21T17:55:19Z；本期收 HAWK（2610.29873）、UlaCache（2610.29820）、RISK-KV（2610.29544）与 OrbitWeaver（2610.29183），四个编号经 grep 全部 briefs 与深读目录确认此前未报；同批的 FlashAttention 长向量改写（2610.29489）偏小众硬件，未收。HN 用 Algolia 精确窗口复核，窗口内 stories 共 57 条：serving 相关只有 LiteLLM 官方安全帖转贴（窗口内提交、10 分），本体已于 8点版报过，本期只收官方复盘新料（博客页自标最后更新 10/21 20:30Z，含攻击链与钉回 1.106.2、轮换密钥的处置口径）；其余为数据中心污染报道（11 分，非 serving）等无关条目，均不收。browser.search 三组：通用组命中 llm-d 1.0 与 DeepInfer 的二次报道（均已报或已深读，不重复）与 Spheron 厂商对比博客（不收）；X 站内与 Reddit 站内搜索均零结果；中文组只有 10/22 北京时间的政策稿（非 serving、不在窗口口径内），机器之心与量子位无窗口内 serving 新稿。social 搜索（since 2026-10-21）窗口内只有 Instagram 的面试科普轮播（02:03Z）与 DeepInfer 二手讲解帖，无一手动态。Latent Space feed 亲核：最新仍是 13:04Z 的 Claude Mods（8点版已记），无新条目。Spotify 亲核：Latent Space 为已保存节目（SAVED 标记），最新单集仍是 Tenex 期（10/21 发布），无新的 serving 相关单集。Simon atom 亲核：最新仍是 PHP 安全更新帖（18:41Z，12点版已记），无窗口内新条目。本期深读笔记：HAWK（files/深度阅读/HAWK-读题用GPU吐字交给NPU.md 与同名 .html，含原文 Table 1 与 Figure 9/10 共三图并配中文图注，README 已更新）。去重以 briefs 目录最近几期为准；chat.list 返回本任务无聊天可读，聊天去重以 briefs 文件代替。*</p></body></html>
