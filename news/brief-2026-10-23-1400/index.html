@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月23日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-23"/>
+<meta name="doc-ts" content="2026-10-23T20:58:42"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-23（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-23（14点版）</h1>
+<p>14点版来了，这轮很安静。 框架没人发新版。 只有一条测评小技巧值得记。 它专治跑分数字虚高。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也都没动。 llama.cpp 还是 b11840。 那版 10点版已经报过了。 本窗口没有新快照。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 21018 个。 12点版时是 20936 个。 两小时又涨了 82 个。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>跑分时，缓存会偷偷帮你省钱</strong> 发帖的公司叫 Induction。 Induction 是做上下文优化的。 他们发现一个测评大坑。 同一个任务跑很多轮时。 后面的轮次会蹭前面的缓存。 缓存就是提示词前缀缓存。 前缀一样，就能直接复用。 复用就便宜，数字就虚高。 说白了，第二轮不是真便宜。 它只是站在了第一轮肩膀上。 他们的解法特别简单。 给每轮塞一个假工具。 假工具的名字带本轮编号。 工具定义排在前缀最前面。 编号一变，前缀就对不上。 跨轮的缓存就自动断了。 同一轮内部还能正常命中。 这样测出的成本才算数。 这招跟你直接相关。 你常跑吞吐基准测试。 还想做自动调参系统。 调参最怕基线数字不准。 前缀命中率一虚高。 QPS 看着好，实际是假的。 测之前先想想隔离这件事。 这篇是厂商自己的博客。 他们卖的就是上下文优化。 立场要留个心眼。 但方法本身可以白嫖。 本期不标深读，宁缺毋滥。 来源：<a href="https://www.induction.ai/blog/benchmark-cache-isolation">https://www.induction.ai/blog/benchmark-cache-isolation</a></p>
+<p><strong>arXiv 这轮还是没新批次</strong> 最新还停在 22 日那批。 那批之前的期已经扫完。 新批次要等明天凌晨。 出来后下一期再认真补扫。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没有新业内消息</strong> HN 上午后有条 llm-d 帖。 标题说 1.0.0 版出了。 我去仓库亲手核过了。 它其实是 20 日发的版。 20 日那期已经讨论过它。 所以这次不算新消息。 Kimi 也有两条跟帖。 一条是评测站的解读。 一条是 Simon 的链接帖。 本体 12点版都报过了。 这里就不重复占版面了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Latent Space 没有新文章。 播客最新还是 Modal 那期。 那期之前已经报过了。 Spotify 上没有新单集。 X 和 Reddit 这轮零结果。 中文媒体没有新稿。 社交平台只有二手科普。 还是连续批处理那条老视频。 那条 6点版已经提过了。</p>
+<p>*去重说明：本轮窗口是 10/23 12:00 到 14:00 PDT。对应 UTC 是 10/23 19:00 到 21:00。对应 epoch 是 1792782000 到 1792789200。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2.post1（12点版已报，10/23 18:38Z）。llama.cpp 最新仍是 b11840（10点版已报），本窗口零新快照，仓库 pushed_at 虽有 19:37Z 的推送但未形成新 release。DeepInfer 经 gh API 亲核：星标 21018（12点版 20936，+82），pushed_at 仍是 2026-10-21T04:55:44Z。arXiv 官方 API 亲核：cs.DC 最新仍是 10/22 的 Apple Silicon 评估，cs.LG 最新亦非 serving 新批次，无新批次，下一批按规律在 10/24 00:00 UTC 前后。HN 用 Algolia 精确窗口复核，窗口内 stories 共 94 条：serving 相关仅两条——Induction 缓存隔离博客帖（20:41Z，原文亲读：博客发布于 10/23、更新 20:34Z，方法为在工具名中嵌入每轮 trial id 以断开跨轮前缀缓存、保留轮内缓存，厂商自家博客、无量化数字）；llm-d v1.0.0 帖（19:13Z，1 分）经 gh API 核实该版本实际发布于 10/20 02:30Z、10/20 20点版的 Forkast 对读已讨论 llm-d 1.0，属旧版重贴，未收。其余如 Kimi K3.1 Pro 的 modelcompare 解读帖（20:15Z，12点版已报本体）、Next-Concept Modeling 旧 arXiv 转帖（2610.14162，非新批次）均未收。Simon atom 亲核：窗口内新条目仅 19:40Z 的 Kimi K3.1 Pro 链接帖（12点版已报），其余为音乐帖。Latent Space 本轮 feed 直取遇 403 与镜像源失效，以近几期水位（最新仍是 10/23 15:19Z 数学文章与 10/22 Modal 播客）为准，未见窗口内新条目，此点为间接核验、非一手亲读。Spotify 亲核（status connected）：搜索可见已保存节目 Latent Space，未见窗口内新单集；experience 接口本轮返回 500，未能一手核单集列表，此点已如实标注。browser.search 通用组命中均为旧闻：Spheron 引擎对比、Leadsman 的 DeepInfer 分析（10/20 已报）、MiniMax M3.1 Flash 开源（已报）、EAGLE-4（已深读），不重复；X 站内与 Reddit 站内均零结果；中文组无窗口内 serving 新稿。social 搜索（since 2026-10-23）命中仍是此前已提的连续批处理讲解视频（12:10Z）与跨模型 KV cache 转换截图帖（14:30Z），无一手动态。本期不新标深读：Induction 一篇是实操小技巧而非技术论文，方法一句话可讲清，不够深读门槛，宁缺毋滥。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
