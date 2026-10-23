@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月23日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-23"/>
+<meta name="doc-ts" content="2026-10-23T15:01:14"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-23（08点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-23（08点版）</h1>
+<p>08点版来了，这轮还是偏安静。 只有一条模型侧的省钱招。 框架这边只有一个小快照。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。</p>
+<p><strong>llama.cpp 出了个新快照</strong> 最新快照是 b11838。 它在窗口内 13:37 上线。 这版只修了一个计时溢出。 改的是 ggml 的计时函数。 对推理性能没有影响。 中间的 b11837 查无此版。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11838">https://github.com/ggml-org/llama.cpp/releases/tag/b11838</a></p>
+<p><strong>DeepInfer 星标还在慢慢涨</strong> 星标涨到了 20741 个。 6点版时是 20629 个。 两小时又涨了约 112 个。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>Gemma 学会了少想一点</strong> 有家公司叫 BottleCap AI。 它专治模型想太久的毛病。 这次下手的是 Gemma-4。 全名是 Gemma-4-26B-A4B。 它是谷歌的稀疏专家模型。 总参数 26B，每步只用约 4B。 改完后思考词元明显变少。 平均少了 38.9%。 最多的一类少了 69.1%。 精度只掉了 0.15 个百分点。 一共测了 12 个基准。 打转重复也明显变少。 比例从 3.64% 降到 0.76%。 长文和多模态那类降得最多。 那类思考词元少了 54.4%。 说白了，少想就是少吐字。 吐字就是 decode，逐字往外蹦。 吐得少，账单和延迟都降。 这是从模型侧省钱。 跟你做的引擎侧优化不冲突。 两边省的钱可以叠着算。 评测跑在 vLLM 上面。 换模型就能直接替换。 数字全是厂商自报的。 还没有第三方复测。 先记一笔，别当定论。 本期不标深读，宁缺毋滥。 来源：<a href="https://bottlecapai.com/post/thinkingcap-gemma-4-26b/">https://bottlecapai.com/post/thinkingcap-gemma-4-26b/</a></p>
+<p><strong>arXiv 这轮没有新批次</strong> 最新提交还停在 22 日那批。 那批 20点版已经扫完了。 新批次要等明天凌晨。 出来下一期再认真补扫。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没有新的业内大事</strong> HN 窗口里共 161 条帖子。 跟推理沾边的只有上面那条。 其余都是无关话题。 有个 GPU 差距的转帖。 内容太虚，我没有收。 还有个路由产品在打广告。 没有实测数字，也没收。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Latent Space 最新还是那期汇总。 那期 4点版已经报过了。 播客最新还是 Modal 那期。 那期之前已经报过了。 Spotify 上也没有新单集。 Simon 最新还是音乐帖。 X 和 Reddit 这轮零结果。 社交平台只有二手科普视频。 讲的还是连续批处理老话题。 那条 6点版已经提过了。</p>
+<p>*去重说明：本轮窗口是 10/23 06:00 到 08:00 PDT。对应 UTC 是 10/23 13:00 到 15:00。对应 epoch 是 1792760400 到 1792767600。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 预发布仍是 v0.7.2rc6（10/22 07:58Z）。llama.cpp 经 gh API 亲核：窗口内新快照 b11838（10/23 13:37Z，ggml 计时溢出修复 #30969），b11837 经标签接口核查为 404、查无此版。DeepInfer 经 gh API 亲核：星标 20741（6点版 20629，+112），pushed_at 仍是 2026-10-21T04:55:44Z。arXiv 官方 API 亲核：cs.DC 与 LLM inference 最新提交仍是 2026-10-22T16:04Z 一线，无新批次，下一批按规律在 10/24 00:00 UTC 前后。HN 用 Algolia 精确窗口复核，窗口内 stories 共 161 条：唯一 serving 相关命中是 BottleCap AI 的 ThinkingCap Gemma-4-26B-A4B 帖（14:43Z），经原文亲读核数：12 个基准平均思考词元 -38.9%、最高 -69.1%（LongBench v2）、平均精度 -0.15pp、打转率 3.64% 降到 0.76%、长上下文与多模态类 -54.4%，同设置同 vLLM 栈、厂商自报、无第三方复测；其余命中如 GPU 差距转帖（内容过虚）与 Glyphh 路由产品帖（无实测）均未收。Latent Space feed 亲核：最新仍是 10/23 10:09Z 的 [AINews] Black October（4点版已报），播客最新仍是 10/22 的 Modal CEO 期（已报），Spotify 已保存节目无新单集。Simon atom 亲核：最新仍是 10/22 19:42Z 的音乐帖。browser.search 通用组、论文组与中文组命中均为旧闻：Spheron 引擎对比、llm-d 1.0（10/20 已报）、DLite 等已报论文，不重复；X 站内与 Reddit 站内均零结果。social 搜索（since 2026-10-23）窗口内命中均为二手科普：连续批处理讲解视频（12:10Z，6点版已提）、微调技巧与模型分类科普，无一手动态。本期不新标深读，宁缺毋滥。去重以 briefs 目录最近几期为准。*</p></body></html>
