@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月22日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-22"/>
+<meta name="doc-ts" content="2026-10-23T03:05:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-22（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-22（20点版）</h1>
+<p>20点版来了，这轮有货。 MiniMax 开源了新多模态模型。 arXiv 新批次也终于上线了。 18点版欠的那批今晚补齐。 还补读了一篇量化内核的。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 llama.cpp 这轮零新快照。 最新还是昨晚的 b11829。</p>
+<p><strong>DeepInfer 星标破 2 万了</strong> 星标涨到了 20037 个。 18点版时是 19878 个。 两小时涨了约 159 个。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>多模态草稿纸不能只挑一次</strong> 新论文提出了 RCR 方法。 RCR 是按需重选保留内容。 草稿纸就是 KV 缓存。 它记着算过的中间结果。 老办法在读题时挑一次。 挑完就全程不再换了。 作者发现长文生成会跑偏。 模型看的证据一直在变。 新办法盯着注意力漂移。 漂了就重挑该留的图块。 效果比 InfiniGen 高一截。 六组里五组高 1.6 到 3.8 分。 分数是 ROUGE-L 口径。 跟你做的多模态方向最贴。 来源：<a href="https://arxiv.org/abs/2610.31433">https://arxiv.org/abs/2610.31433</a></p>
+<p><strong>给智能体的草稿纸分层存</strong> 新论文 SARIA 管两层存储。 一层是内存，一层是 SSD。 SSD 就是固态硬盘。 它专治多轮智能体场景。 这种场景前缀反复复用。 它只把真会重用的写进盘。 没用的就不写，省盘寿命。 写盘量降了约 57% 到 59%。 首字延迟降 42% 到 80%。 首字延迟就是等第一个字。 它建在 LMCache 之上做的。 数字都是作者自报的。 来源：<a href="https://arxiv.org/abs/2610.31169">https://arxiv.org/abs/2610.31169</a></p>
+<p><strong>草稿纸写太勤会写坏硬盘</strong> 新论文 Gandalf 算了笔账。 生产里草稿纸写入量巨大。 大到能把 SSD 写坏。 寿命能从几年缩到几个月。 它的办法是按类型准入。 全注意力草稿纸优先进盘。 其他类型的就少写一点。 结果命中率几乎没掉。 SSD 寿命平均延长 7.3 倍。 你做 PD 解耦落盘时用得上。 来源：<a href="https://arxiv.org/abs/2610.30791">https://arxiv.org/abs/2610.30791</a></p>
+<p><strong>给猜词员的草稿纸也减肥</strong> 新论文 RIFT 盯上草稿员。 猜词员就是投机解码的小模型。 它先猜几个词，大模型再验。 像实习生打草稿专家改。 长输出时它草稿纸也膨胀。 老压缩只看读题时的信息。 生成越长，信息越过时。 RIFT 生成中途会刷新选择。 还配了一套可压缩性训练。 小模型给 122B 大模型打草稿。 草稿纸只给 8K 的预算。 接受长度还能保住 98%。 来源：<a href="https://arxiv.org/abs/2610.31098">https://arxiv.org/abs/2610.31098</a></p>
+<p><strong>另外两篇短讯</strong> BeNice 研究循环模型的共享。 同层反复跑，草稿纸成倍涨。 它让多次循环共用一份。 来源：<a href="https://arxiv.org/abs/2610.31633">https://arxiv.org/abs/2610.31633</a> 另一篇实测了苹果芯片。 投机解码搬过去反而变慢。 服务器上的招别盲目搬。 来源：<a href="https://arxiv.org/abs/2610.31479">https://arxiv.org/abs/2610.31479</a></p>
+<p><strong>HN 上有个分布式草稿纸项目</strong> 项目名字叫 HyperCache。 它想做草稿纸版 memcached。 memcached 是经典内存缓存。 别的机器算过的也能借。 还能跨节点传压缩后的 KV。 这是个人项目，今晚刚发布。 没有实测数据，先看看思路。 来源：<a href="https://github.com/SamGanYX/HyperCache">https://github.com/SamGanYX/HyperCache</a></p>
+<h2>业内新闻</h2>
+<p><strong>MiniMax 开源 M3.1 Flash</strong> 它今晚刚把权重放出来。 这是原生多模态 MoE 模型。 MoE 就是混合专家模型。 总参数 428B，激活 23B。 能吃文字、图片和视频。 上下文最长 100 万 token。 推理优化它一口气上了三招。 全模型稀疏注意力省算力。 训练时就量化，叫 QAT。 QAT 能让低精度少掉点。 还换了新的猜词方案 DSpark。 它替代了老的 MTP 方案。 MTP 是模型自带的小草稿头。 官方说上线 72 小时内。 真实用户跑了超 1 万亿 token。 这是官方自报，没独立核。 vLLM 和 SGLang 都已支持。 模型卡里直接给了部署链接。 跑分也都是官方口径。 跟竞品互有胜负，别全信。 来源：<a href="https://huggingface.co/MiniMaxAI/MiniMax-M3.1-Flash">https://huggingface.co/MiniMaxAI/MiniMax-M3.1-Flash</a> 另见：<a href="https://www.together.ai/models/minimax-m3-1-flash">https://www.together.ai/models/minimax-m3-1-flash</a></p>
+<p><strong>vLLM 的量化内核库 Humming</strong> 这篇博客 10月21日发的。 今晚被 HN 重新顶了上来。 之前只在路线图里提过它。 这次是正式开源加实测。 量化格式太多维护不动了。 它把描述标准化再拼内核。 W4A8 在 H200 上约 4.5 倍。 对比基线是 DeepGEMM。 端到端吞吐涨 14% 到 43%。 数字都是官方博客自报。 <strong>值得深读</strong>：跟你的量化选型直接相关。 它还本质是个内核级调参器。 跟你想做的自动调参撞思路。 深读笔记已做好，见站内。 来源：<a href="https://vllm.ai/blog/2026-10-21-humming">https://vllm.ai/blog/2026-10-21-humming</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Latent Space 最新还是 Modal 那期。 那期12点版已经报过了。 Spotify 上也没有新单集。 Simon 最新还是音乐帖。 X 和 Reddit 这轮零结果。 社交平台只有二手科普帖。</p>
+<p>*去重说明：本轮窗口是 10/22 18:00 到 20:00 PDT。对应 UTC 是 10/23 01:00 到 03:00。对应 epoch 是 1792717200 到 1792724400。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc6（07:58Z）。llama.cpp 经 gh API 亲核：最新仍是 b11829（23:43Z，窗口外），本窗口零新快照。DeepInfer 经 gh API 亲核：星标 20037（18点版 19878，+159，正式破 2 万），pushed_at 仍是 2026-10-21T04:55:44Z。arXiv 补扫完成：10/23 公告批次已上线（列表页公告日 Fri, 23 Oct 2026，提交截止 10/22 17:59Z），本期收的六篇均经 arxiv.org/abs 页逐篇亲核标题与摘要：RCR 2610.31433、SARIA 2610.31169、Gandalf 2610.30791、RIFT 2610.31098、BeNice 2610.31633、苹果芯片评估 2610.31479，均为 10/22 提交、作者自报数字。批次列表里另有若干条目经核是旧论文的修订版（如 ZipServ、FlashSampling 本体均为今年 3 月旧作），不冒充新论文收录。HN 用 Algolia 精确窗口复核，窗口内 stories 共 63 条：真命中为 M3.1 Flash 开源（HF 页 01:09Z 与 Together 页 02:27Z 两帖，另 ChainCatcher 01:06Z 报道交叉验证，HF 模型卡亲核规格与跑分口径）、Humming 博客重贴（01:42Z，博客本体 10/21 发布，此前仅在 10月10日版的路线图条目里提过名字，本期作为补读收录并标注日期）、HyperCache Show HN（02:56Z，个人新项目、无实测，只记思路）、TorchTPU 官方博客重贴（02:37Z，本体已深读，不重复）、Nvidia Minerva 数据中心运维帖（与 serving 无关，不收）。browser.search：X 站内与 Reddit 站内均零结果；中文组无窗口内 serving 新稿，机器之心与量子位无新稿。social 搜索（since 2026-10-22）命中均为 10/22 白天 UTC 的二手科普，无窗口内一手动态。Latent Space feed 亲核：最新仍是 17:40Z 的 Modal 期（12点版已报）。Spotify 亲核（已连接）：Latent Space 为已保存节目，最新单集仍是 Modal 那期（2026-10-22），无新单集。Simon atom 亲核：最新仍是 19:42Z 的音乐帖。本期深读一篇：Humming（vLLM 官方博客，原文 5 张图已转 PNG 内嵌 HTML）。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
