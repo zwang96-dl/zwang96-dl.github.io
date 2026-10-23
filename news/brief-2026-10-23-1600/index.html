@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月23日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-23"/>
+<meta name="doc-ts" content="2026-10-23T22:59:37"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-23（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-23（16点版）</h1>
+<p>16点版来了。 这轮有两条小而有趣的。 一条是 K8s 路由器更新。 一条是 Mac mini 硬跑大模型。</p>
+<h2>框架更新</h2>
+<p><strong>LLMKube 发了 v0.10.8（今日补报）</strong> LLMKube 是 Kubernetes 上的推理管家。 它管 GPU 模型的部署和路由。 这版路由器学聪明了。 池子不到三个副本的时候。 会话只在副本 KV 满了才搬家。 KV 是模型的草稿纸缓存。 草稿纸没写满就别乱搬。 一搬，缓存命中就全丢了。 它还给 vLLM 解析器补了类型。 解析器管工具调用和推理格式。 SGLang 这边新增 GLM 准入。 还加了离线镜像模式开关。 划重点：路由开始看 KV 压力了。 这正是缓存感知路由该有的样子。 来源：<a href="https://github.com/defilantech/LLMKube">https://github.com/defilantech/LLMKube</a></p>
+<p><strong>其余框架还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 llama.cpp 还是 b11840。 本窗口没有新快照。 DeepInfer 星标涨到 21068。 14点版是 21018，涨了 50。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>有人在 Mac mini 上跑完了 Kimi K3</strong> Kimi K3 有 2.8 万亿参数。 权重约 1.42 TiB。 权重放在外置 SSD 上。 MoE 专家一个个流式读进来。 MoE 就是一堆专家轮流上场。 机器是 M4 Pro 的 Mac mini。 内存只有 64 GB。 速度约 32 秒生成一个词元。 是秒每词，不是词每秒。 作者说适合不能上云的私密文档。 一份分析要跑三到五天。 同样的活云端只要几分钟。 先泼盆冷水：这是作者自报。 仓库零星标，没人独立复现。 视觉塔没跑，只跑了文字部分。 好玩的是这个思路本身。 专家权重也能当外存来流。 这就是把卸载做到极致。 跟你的显存账思路能对上。 本期不标深读，宁缺毋滥。 来源：<a href="https://github.com/sjdthree/kimi-k3-mlx-macmini">https://github.com/sjdthree/kimi-k3-mlx-macmini</a></p>
+<p><strong>arXiv 这轮还是没新批次</strong> 最新还停在 22 日那批。 那批之前的期已经扫完。 新批次要等明天凌晨。 出来后下一期再认真补扫。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没有新业内消息</strong> HN 窗口里共 78 条帖子。 跟 serving 沾边的就上面那条。 它就是 Mac mini 跑 K3 的帖。 其余多是安全和工具类帖子。 中文媒体没有新稿。 X 和 Reddit 这轮零结果。 社交平台还是两条老帖。 一条讲连续批处理。 一条是 KV 转换截图帖。 前几期都已经提过了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Simon 窗口内只发了个绘画工具帖。 那条跟推理服务没关系。 Latent Space 没有新文章。 Spotify 上也没有新单集。 最新还是 10 月 22 日的 Modal 那期。 那期之前已经报过了。</p>
+<p>*去重说明：本轮窗口是 10/23 14:00 到 16:00 PDT。对应 UTC 是 10/23 21:00 到 23:00。对应 epoch 是 1792789200 到 1792796400。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1（12点版已报）。llama.cpp 最新仍是 b11840（10点版已报），本窗口零新快照。DeepInfer 经 gh API 亲核：星标 21068（14点版 21018，+50），pushed_at 仍是 2026-10-21T04:55:44Z。LLMKube v0.10.8 经 gh API 亲核：发布于 10/23 20:49Z，属 14点版窗口内漏检，本期如实标为今日补报；发布说明亲读，含 router 按 KV-full 才迁移会话（池子小于 3 副本时）、vLLM 工具调用与推理解析器类型化、SGLang 准入 GLM、InferenceService 的 hubOffline 开关。HN 用 Algolia 精确窗口复核，窗口内 stories 共 78 条：serving 相关仅 Kimi K3 on Mac Mini 帖（22:19Z，仓库原文亲读：仓库建于 2026-09-02、验证数据为 2026-09-21，属旧实验今日被 HN 顶起；数字均为作者自报——2.8T 参数、约 1.42 TiB MXFP4 权重、93 层、M4 Pro 64GB、外置 SSD 逐专家流式、解码约 32.4 秒/词元、MLX 分配器峰值约 15 GiB、视觉塔未执行、仓库 0 星标无独立复现，已在正文标清）。其余如 LiteLLM 安全事件复盘（21:05Z，非 serving 性能话题）、AI 每年便宜 10 倍随笔（21:04Z，泛谈无新数据）均未收。arXiv 官方 API 亲核：cs.DC 最新仍是 10/22 的 Apple Silicon 评估，LLM inference 最新亦同，无新批次，下一批按规律在 10/24 00:00 UTC 前后。Simon atom 亲核：窗口内新条目仅 21:35Z 的绘画工具帖，与 serving 无关。Spotify 亲核（experience 接口本轮正常返回）：Latent Space 最新单集仍是 10/22 的 Modal 期，已报。browser.search 通用组命中均为旧闻：Leadsman 的 DeepInfer 分析（10/20 已报）、MiniMax M3.1 Flash 开源（已报）、EAGLE-4（已深读）、Spheron 引擎对比（旧文），不重复；X 站内与 Reddit 站内均零结果；中文组无窗口内 serving 新稿。social 搜索（since 2026-10-23）命中仍是此前已提的连续批处理讲解视频（12:10Z）与跨模型 KV cache 转换截图帖（14:30Z），均属更早窗口，无一手新动态。本期不标深读：LLMKube 是运维组件小版本，发布说明即全貌；Mac mini 跑 K3 是单作者未复现实验，数字未经独立核验，不够深读门槛，宁缺毋滥。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
