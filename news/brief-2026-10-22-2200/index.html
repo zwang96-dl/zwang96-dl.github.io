@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月22日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-22"/>
+<meta name="doc-ts" content="2026-10-23T04:58:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-22（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-22（22点版）</h1>
+<p>22点版来了，这轮有一条硬货。 信通院发了词元服务监测报告。 它把国内服务的账算清了。 框架和论文这边还是全平。 深读这轮就不硬凑了。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 llama.cpp 这轮零新快照。 最新还是 b11829 版。</p>
+<p><strong>DeepInfer 星标涨过 2 万后还在涨</strong> 星标涨到了 20156 个。 20点版时是 20037 个。 两小时又涨了约 119 个。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong> 最新提交还停在 22 日那批。 那批 20点版已经扫完了。 新批次要等明天凌晨。 出来下一期再认真补扫。</p>
+<p><strong>HN 上有个查显存的小工具</strong> 它实测了 117 个模型。 每个模型到底吃多少显存。 数据是在真硬件上跑的。 选本地模型前可以查一眼。 这是个人项目，先当参考。 来源：<a href="https://quantized.uk/">https://quantized.uk/</a></p>
+<h2>业内新闻</h2>
+<p><strong>信通院报告：词元价格涨了近一倍</strong> 词元就是 token，计费单位。 报告今晚由信通院发布。 它监测了今年前八个月。 国内归一化均价涨近一倍。 从 6.8 元涨到 13.46 元。 前两年价格战算是打完了。 国外均价约 117.8 元。 还是比国内贵很多。 来源：<a href="https://finance.sina.cn/stock/jdts/2026-10-23/detail-iniweuqp5550525.d.html">https://finance.sina.cn/stock/jdts/2026-10-23/detail-iniweuqp5550525.d.html</a></p>
+<p><strong>吞吐翻倍，首字反而变慢了</strong> 国内平均吞吐翻了一倍。 每秒输出从 38 涨到 78 个词元。 国外均值是 113 个，更高。 但首字延迟也在变长。 国内从 0.78 秒涨到 1.26 秒。 报告说这不全是退步。 模型变大、上下文变长了。 调用量也在猛涨。 今年 6 月日均调用量。 约 500 万亿词元。 是去年 12 月的近 4 倍。</p>
+<p><strong>同一个模型，平台差能差一倍</strong> 报告还点了一个关键事。 同模型在不同平台跑。 吞吐差距最大接近一倍。 差就差在推理优化上。 加速和成本控制各家不同。 说白了引擎调得好不好。 直接决定用户体感快慢。 这正是你做调参的价值点。 以上数字是报告方口径。 经 IT 之家和新浪转述。 原报告全文我还没拿到。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Latent Space 最新还是 Modal 那期。 那期12点版已经报过了。 Spotify 上也没有新单集。 Simon 最新还是音乐帖。 X 和 Reddit 这轮零结果。 社交平台只有二手科普帖。 谷歌那篇智能体算力深挖也看了。 讲的是沙箱，不是模型推理。 跟 serving 不对口，不收。</p>
+<p>*去重说明：本轮窗口是 10/22 20:00 到 22:00 PDT。对应 UTC 是 10/23 03:00 到 05:00。对应 epoch 是 1792724400 到 1792731600。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 正式版仍是 v0.7.2，预发布仍是 v0.7.2rc6（10/22 07:58Z）。llama.cpp 经 gh API 亲核：最新仍是 b11829（10/22 23:43Z），本窗口零新快照。DeepInfer 经 gh API 亲核：星标 20156（20点版 20037，+119），pushed_at 仍是 2026-10-21T04:55:44Z。arXiv 官方 API 亲核：cs.DC 最新提交仍是 2026-10-22 一线，20点版已补扫的 10/23 公告批次之外无新批次，下一批按规律在 10/24 00:00 UTC 前后。HN 用 Algolia 精确窗口复核，窗口内 stories 共 61 条：真命中仅 Show HN 的 quantized.uk 显存实测工具（03:25Z，个人项目、无同行核验，只记参考）；Google Agent Compute Engine 深挖帖（03:12Z）经 browser.open 亲读，本体讲智能体沙箱 microVM 与身份治理，不是模型推理 serving，不收；SK Hynix 子公司 IPO 搁置等其余条目与 serving 无关。browser.search：通用组命中 DeepInfer 的 Leadsman 分析（10/23，本体已多次深读，不重复）与 M3.1 Flash 开源二次报道（20点版已报）；X 站内与 Reddit 站内均零结果；中文组命中信通院《大模型词元服务性能监测报告（2026年）》（北京时间 10/23 12:05 发布，换算 21:05 PDT 落窗口内），经新浪财经页亲读全文核数：国内 TPS 8 月均值 78.23（2025 年 38.25）、国外 112.82，国内 TTFT 1.26 秒（2025 年 0.78 秒），国内归一化均价 6.8 元涨到 13.46 元、国外约 117.8 元，6 月日均词元消耗约 500 万亿（去年 12 月近 4 倍），同模型跨平台 TPS 差距最大接近一倍；均为报告方口径、二手转述，原报告 PDF 未拿到，已在正文标注。social 搜索（since 2026-10-22）窗口内（03:00Z 后）无一手动态，命中的 Xinference 帖（00:18Z）与越南语 vLLM 教程（02:00Z）均在窗口外且为二手科普。Latent Space feed 亲核：最新仍是 17:40Z 的 Modal 期（12点版已报）。Spotify 亲核（已连接）：Latent Space 为已保存节目，无新单集。Simon atom 亲核：最新仍是 19:42Z 的音乐帖。本期无深读笔记，宁缺毋滥。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
