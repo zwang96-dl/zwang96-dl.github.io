@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月23日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-23"/>
+<meta name="doc-ts" content="2026-10-23T18:59:15"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-23（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-23（12点版）</h1>
+<p>12点版来了，这轮有真东西。 一个新模型，参数大得吓人。 还有一个小版本正式落地。</p>
+<h2>框架更新</h2>
+<p><strong>FlashInfer 出了个正式小补丁</strong> 新版号是 v0.7.2.post1。 它刚在 11:38 上线。 它只改了一处地方。 改的是 MoE 的一个接口。 MoE 就是稀疏专家模型。 FP8 那条接口删了个参数。 删的参数叫 workspace_buffer。 编号是 7029 号合并请求。 说白了，就是个接口清理。 它不带新功能，也没报提速。 你升不升都不着急。 等下个大版再看也行。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.2.post1">https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.2.post1</a></p>
+<p><strong>其余各家正式版全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 llama.cpp 还是 b11840。 那版 10点版已经报过了。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 20936 个。 10点版时是 20847 个。 两小时又涨了 89 个。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>业内新闻</h2>
+<p><strong>月之暗面发了 Kimi K3.1 Pro</strong> 这是 K3 的后训练升级版。 总参数约 2.8 万亿。 它是稀疏专家模型。 稀疏就是只激活一部分参数。 上下文长达 100 万词元。 词元就是模型处理的小块。 它能吃文字，也能吃图片。 所以它算多模态模型。 官方成绩先看编码这项。 Terminal-Bench 拿到 65.7%。 它只比第一名低 0.7 分。 第一名是 Claude Opus 5.5。 第三方榜单也出来了。 Artificial Analysis 给了 55 分。 它是一家独立评测机构。 这分数在总榜排第四。 它的输出速度不算快。 实测每秒出 73.5 个词元。 首字要等约 3.2 秒。 API 价格也公布了。 输入每百万词元 2 美元。 输出每百万词元 10 美元。 还有个高速版值得注意。 名字就叫 Highspeed。 官方说它快 2 到 3 倍。 能力跟普通版完全一样。 说白了，高速版拼的是服务。 同一个脑子，吐字更快。 这正是推理优化的活。 跟你做的方向直接相关。 但先划重点，别急着部署。 完整权重还没放出来。 官方说 11 月 4 日前放。 权重出来才能自托管。 到时引擎能不能吃下它。 那才是 serving 的真考题。 KV cache 就是草稿纸。 100 万上下文就是超长草稿。 草稿越长，显存越吃紧。 成绩大多是官方自报。 评测机构那份是独立实测。 两份要分开看，别混着信。 本期不标深读，宁缺毋滥。 来源：<a href="https://www.kimi.ai/blog/kimi-k3-1-pro">https://www.kimi.ai/blog/kimi-k3-1-pro</a> 实测：<a href="https://artificialanalysis.ai/models/kimi-k3-1-pro">https://artificialanalysis.ai/models/kimi-k3-1-pro</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮还是没新批次</strong> 最新还停在 22 日那批。 那批之前的期已经扫完。 新批次要等明天凌晨。 出来后下一期再认真补扫。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Latent Space 没有新文章。 最新还是讲数学那篇。 那篇 10点版已经提过。 播客最新还是 Modal 那期。 那期之前已经报过了。 Spotify 上也没有新单集。 Simon 最新还是音乐帖。 X 和 Reddit 这轮零结果。 中文媒体没有新稿。 社交平台只有二手科普。 还是连续批处理那条老视频。 那条 6点版已经提过了。</p>
+<p>*去重说明：本轮窗口是 10/23 10:00 到 12:00 PDT。对应 UTC 是 10/23 17:00 到 19:00。对应 epoch 是 1792774800 到 1792782000。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。llama.cpp 最新仍是 b11840（10点版已报），本窗口零新快照。FlashInfer 经 gh API 亲核：窗口内新正式版 v0.7.2.post1（10/23 18:38Z，即 PDT 11:38，非预发布），上一正式版是 v0.7.2（10/15），此前各期只记到预发布 v0.7.2rc6；新版 release notes 只有一条变更——fix(moe): drop workspace_buffer from the Prims-TS FP8 per-tensor API（PR #7029），属接口清理，无新功能与提速数字。DeepInfer 经 gh API 亲核：星标 20936（10点版 20847，+89），pushed_at 仍是 2026-10-21T04:55:44Z。arXiv 官方 API 亲核：cs.DC 与 cs.LG 最新提交仍是 2026-10-22T17:59Z，LLM inference 方向最新仍是 2026-10-22T16:04Z 的 Apple Silicon 评估，无新批次，下一批按规律在 10/24 00:00 UTC 前后。HN 用 Algolia 精确窗口复核，窗口内 stories 共 112 条：serving 相关核心命中是 Kimi K3.1 Pro 两帖——官方博客帖（17:10Z，<a href="https://www.kimi.ai/blog/kimi-k3-1-pro">https://www.kimi.ai/blog/kimi-k3-1-pro</a> ）与 Artificial Analysis 模型页帖（18:24Z）；其余如 Private LLM Inference with Homomorphic Encryption 论文帖（17:47Z，偏密码学）、RMSNorm 教学帖（17:44Z）、Chroma 加入 Replit（17:10Z）均与 serving 无关，未收。Kimi 经官方博客原文亲读核数：K3.1 Pro 是 K3 的后训练升级版，自称最强 3T 级开放权重模型，总参数约 2.8 万亿（AA 页 FAQ），1M 词元上下文，文字加图片输入，Terminal-Bench 4.0 为 65.7%（GPT-6 Astra 58.2%、Claude Opus 5.5 66.4%），BenchCAD 带工具 92.7%，OfficeQA Pro v2 为 64.4，内部 Hallu Hard 的 claim 级幻觉率自报从 23.4% 降到 8.3%，Highspeed 版官方称同能力快 2 到 3 倍，今天已在 Kimi.ai、Kimi Work、Kimi Code 与 API 上线，完整权重官方承诺 11 月 4 日前发布、目前尚未发布故 AA 页仍标 proprietary 与 weights not publicly available，两处口径不冲突；AA 独立页亲核：Intelligence Index 55 分、总榜第四（据 AA 报道转述），输出 73.5 t/s，TTFT 3.20 秒，API 输入 2 美元与输出 10 美元每百万词元。去重关键点：Kimi K3.1 在 0点版仅以一条无规格预告帖出现在去重脚注里、未收录未报规格，本次是正式发布带完整规格与独立实测，不算重复。Latent Space feed 亲核：lastBuild 仍是 10/23 15:19Z，最新仍是数学文章（10点版已提，与 serving 无关），无窗口内新条目。Spotify 亲核（status connected）：已保存节目 Latent Space 最新单集仍是 10/22 的 Modal CEO 期，无新单集。Simon atom 亲核：最新仍是 10/22 19:42Z 的音乐帖。browser.search 通用组命中均为旧闻：DeepInfer 的 Leadsman 分析（10/20 已报）、Spheron 引擎对比、MiniMax M3.1 Flash 开源（20点版已报）、EAGLE-4（已深读），不重复；X 站内与 Reddit 站内均零结果；中文组无窗口内 serving 新稿（机器之心仅年度榜单启动消息）。social 搜索（since 2026-10-23）命中均为二手科普：连续批处理讲解视频（12:10Z，6点版已提）、跨模型 KV cache 转换截图帖（14:30Z，属更早窗口且仅为论文截图转述）、基础图卡，无一手动态。本期不新标深读：Kimi 是模型发布而非 serving 技术论文，FlashInfer 是单条接口修复，均不够深读门槛，宁缺毋滥。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
