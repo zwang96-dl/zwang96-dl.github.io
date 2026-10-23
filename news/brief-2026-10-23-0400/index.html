@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月23日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-23"/>
+<meta name="doc-ts" content="2026-10-23T10:59:07"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-23（4点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-23（4点版）</h1>
+<p>4点版来了，这轮有一篇正对口的。 它专治多轮智能体的 PD 解耦。 框架正式版这边还是全平。 深读笔记正在做了。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。 llama.cpp 这轮没有新快照。 最新还是 2点版报的 b11836。</p>
+<p><strong>DeepInfer 星标还在慢慢涨</strong> 星标涨到了 20545 个。 2点版时是 20432 个。 两小时又涨了约 113 个。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>AMPD：多轮对话别硬分家</strong> 智能体干活是一轮接一轮的。 每轮都要先读题再吐字。 读题这一步叫 prefill。 吐字这一步叫 decode。 PD 解耦就是把两步分给不同机器。 像流水线分工，各干一段。 难点在后面每一轮的读题。 新读题很短，叫增量 prefill。 它该送去专门的读题机器吗。 还是在吐字机器上顺手做掉。 送远了要搬草稿纸，费时间。 草稿纸就是 KV cache。 本地做又会打断吐字节奏。 AMPD 的办法是看余量再决定。 首字还有空就送专门机器。 吐字不忙就本地顺手做掉。 它还给读题队列排了个序。 快超时的任务先往前挪。 实测服务达标率大幅提升。 提升幅度是 67% 到 340%。 这是相对提升，不是百分点。 基线包括 vLLM 和 Dynamo。 它自己就搭在 Dynamo 上面。 模型测了 32B 到 70B 三款。 负载是工具调用和问答类。 这篇是 ICML 2026 的论文。 2月就挂上 arXiv 了。 今早被 Latent Space 重新点名。 你评估 SGLang 的 PD 解耦时。 这篇的路由思路可以直接借。 深读笔记我已经在做了。 来源：<a href="https://arxiv.org/abs/2602.14516">https://arxiv.org/abs/2602.14516</a></p>
+<p><strong>arXiv 这轮没有新批次</strong> 最新提交还停在 22 日那批。 那批 20点版已经扫完了。 新批次要等明天凌晨。 出来下一期再认真补扫。</p>
+<h2>业内新闻</h2>
+<p><strong>RunInfra 把缓存输入改免费了</strong> RunInfra 是个开源模型服务商。 它今早在 HN 上发了帖。 缓存命中的输入暂时不要钱。 免费期到 10月31日为止。 它挂了 8 个开源模型。 缓存命中率报到 95% 以上。 最高的一个报了 99.8%。 说白了，前缀缓存就是钱。 谁命中率高，谁成本就低。 数字是商家页面自报的。 先当促销消息看就行。 来源：<a href="https://runinfra.ai">https://runinfra.ai</a></p>
+<p><strong>Rubin 速度新说法，先打个问号</strong> Latent Space 今早的新闻汇总里。 转述了 SemiAnalysis 的一个说法。 说 Rubin NVL72 跑 GLM 5.3。 单用户速度到了每秒 862 个词元。 还说靠内核优化八天翻了一倍。 这条只有二手转述。 我没找到一手原文核对。 先记个线索，别当实测用。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 出了新一期汇总</strong> 新一期叫 Black October。 今早 10:09 上线，正好在窗口内。 这期主线是 AI 安全事件。 跟推理服务关系不大。 里面的服务类干货就两条。 一条是上面说的 AMPD。 一条是 Rubin 的二手说法。 都已经单独拆出来报了。 播客最新还是 Modal 那期。 那期 12点版已经报过了。 Spotify 上也没有新单集。 Simon 最新还是音乐帖。 X 和 Reddit 这轮零结果。 社交平台只有二手科普帖。 讲的还是 AKV 那篇旧论文。 那篇 10月21日已经深读过了。</p>
+<p>*去重说明：本轮窗口是 10/23 02:00 到 04:00 PDT。对应 UTC 是 10/23 09:00 到 11:00。对应 epoch 是 1792746000 到 1792753200。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 预发布仍是 v0.7.2rc6（10/22 07:58Z）。llama.cpp 经 gh API 亲核：最新仍是 b11836（10/23 08:20Z，2点版已报），本窗口零新快照。DeepInfer 经 gh API 亲核：星标 20545（2点版 20432，+113），pushed_at 仍是 2026-10-21T04:55:44Z。arXiv 官方 API 亲核：cs.DC、cs.LG、cs.CL 最新提交仍是 2026-10-22T17:59Z 一线，无新批次。HN 用 Algolia 精确窗口复核，窗口内 stories 共 80 条：唯一 serving 命中是 RunInfra 的 Free Cached Input 帖（10:28Z），经官网亲读核数：8 个模型、缓存输入免费至 10/31、页面自报缓存命中率 95.0%–99.8%；其余条目与推理服务无关。Latent Space feed 亲核：窗口内新条目为 [AINews] Black October（10/23 10:09Z），经亲读全文提取 serving 相关两条——AMPD（ICML 2026，arXiv:2602.14516，2026-02-16 提交、07-21 修订，此前各期未报；经 arXiv API 与论文结论亲核：SLO 达成率相对基线 vLLM、vLLM-Continuum、Dynamo 平均提升 67.29%–339.74%，实现基于 Dynamo、KV 传输走 NIXL 懒读）与 Rubin NVL72 跑 GLM 5.3 每用户 862 tok/s 的 SemiAnalysis 二手转述（无一手原文，正文已标注存疑）；该期其余 serving 内容为 M3.1 Flash（20点版已报）与 AKV（10/21 已深读），不重复。browser.search 通用组命中均为旧闻：Spheron 引擎对比、DeepInfer 的 Leadsman 分析、M3.1 Flash 开源、EAGLE-4，均已报过；中文组命中均为信通院词元报告的二次解读（22点版已报本体），不重复；X 站内零结果。social 搜索（since 2026-10-23）窗口内命中为德语 vLLM 科普视频与 AKV 论文解说视频（10:00Z，二手、论文已深读），无一手动态。Spotify 本轮未见已保存节目新单集。Simon atom 亲核：最新仍是 10/22 19:42Z 的音乐帖。本期深读：AMPD 精读笔记制作中，完成后随后续期次发布上站。去重以 briefs 目录最近几期为准。*</p></body></html>
