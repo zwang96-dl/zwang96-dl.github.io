@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月23日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-23"/>
+<meta name="doc-ts" content="2026-10-23T08:57:58"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-23（2点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-23（2点版）</h1>
+<p>2点版来了，这轮有两条干货。 一条讲怎么把推理账单砍掉大半。 一条讲怎么盯着模型内部看。 框架正式版这边还是全平。 本期不标深读，不硬凑。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也全都持平。 水位我用接口亲手核过了。</p>
+<p><strong>llama.cpp 出了两个新快照</strong> 新标签是 b11835 和 b11836。 分别在今早 07:29 和 08:20 上线。 这俩都是每日快照。 按老规矩不算正式发版。 来源：<a href="https://github.com/ggml-org/llama.cpp">https://github.com/ggml-org/llama.cpp</a></p>
+<p><strong>DeepInfer 星标还在慢慢涨</strong> 星标涨到了 20432 个。 0点版时是 20296 个。 两小时又涨了约 136 个。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong> 最新提交还停在 22 日那批。 那批 20点版已经扫完了。 新批次要等明天凌晨。 出来下一期再认真补扫。</p>
+<p><strong>IBM 给 vLLM 做了个监控插件</strong> 插件名字叫 vLLM-Hook MIA。 MIA 是模型内部观察口的意思。 它能实时看模型内部状态。 还能出手改模型的输出方向。 老办法得关掉快速模式才行。 快速模式就是 CUDA Graphs。 关了它，吞吐就掉一大截。 新插件不用关快速模式。 它在录图之前就埋好观察点。 实测开销小模型只有约 2%。 70B 大模型也只有约 6%。 比上一代插件快最高 20 倍。 数字都是 IBM 自报的。 原文 10月21日就发了。 今早被 HN 重新顶了上来。 来源：<a href="https://research.ibm.com/blog/fast-interpretability-plugin-vllm">https://research.ibm.com/blog/fast-interpretability-plugin-vllm</a></p>
+<h2>业内新闻</h2>
+<p><strong>Cloudflare 把推理账单砍了 68%</strong> 它家有个 AI 代码审查员。 单次审查成本一度涨到 2.43 美元。 优化后降到了 0.77 美元。 中位耗时也从 4分09秒降了。 现在只要 1分32秒。 省钱大头不是换便宜模型。 是把前缀缓存用对了。 前缀缓存就是复用开头算好的部分。 像草稿纸开头那段大家共用。 它家原来命中率只有 14% 到 26%。 问题出在系统提示的拼法上。 共用部分和各仓库独有部分混在一起。 缓存只能整块存，没法单独复用。 改法是把共用部分单独切出来。 切完命中率涨到 91% 到 99.5%。 说白了，缓存要按共用边界切。 你那 200 个共享 token 正对口。 原文是 10月中旬发的博客。 今早被 HN 重新顶了上来。 数字都是 Cloudflare 自报的。 来源：<a href="https://blog.cloudflare.com/obsessive-inference-optimization/">https://blog.cloudflare.com/obsessive-inference-optimization/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Latent Space 最新还是 Modal 那期。 那期12点版已经报过了。 Spotify 上也没有新单集。 Simon 最新还是音乐帖。 X 和 Reddit 这轮零结果。</p>
+<p>*去重说明：本轮窗口是 10/23 00:00 到 02:00 PDT。对应 UTC 是 10/23 07:00 到 09:00。对应 epoch 是 1792738800 到 1792746000。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 预发布仍是 v0.7.2rc6（10/22 07:58Z）。llama.cpp 经 gh API 亲核：窗口内新快照 b11835（07:29Z）与 b11836（08:20Z），均为每日快照、按惯例不算正式发版，此前最新是 b11829（10/22 23:43Z）。DeepInfer 经 gh API 亲核：星标 20432（0点版 20296，+136），pushed_at 仍是 2026-10-21T04:55:44Z。arXiv 官方 API 亲核：cs.DC、cs.LG、cs.CL 最新提交仍是 2026-10-22T17:59Z 一线，无新批次，下一批按规律在 10/24 00:00 UTC 前后。HN 用 Algolia 精确窗口复核，窗口内 stories 共 66 条：真命中为 Cloudflare 推理成本博客重贴（07:03Z，博客本体 10月中旬发布，今早亲读全文核数：单次审查 $2.43 降到 $0.77、降 68%，首请求缓存命中 14–26% 涨到 91–99.5%，中位耗时 4分09秒降到 1分32秒，均为官方自报）、IBM vLLM-Hook MIA 帖（08:01Z，博客本体 10/21 发布，亲读核数：比上一代最高快 20 倍，8B 模型开销约 2%、70B 约 6%，均为 IBM 自报）；MIT Technology Review 的 serving harness 一文（07:02Z）是 EXL 赞助的泛泛企业稿，不收；Nvidia GTC Berlin 视频、Jamf 的 Bedrock  spend 管控帖与 serving 本体不对口，不收；其余条目与推理服务无关。browser.search 通用组命中均为旧闻：Spheron 引擎对比（数日前）、DeepInfer 的 Leadsman 分析（本体已多次深读）、M3.1 Flash 开源（20点版已报）、EAGLE-4（10/20）、llm-d 1.0（10/20），此前各期均已报过；X 站内与 Reddit 站内均零结果；中文组无窗口内 serving 新稿。social 搜索（since 2026-10-23）窗口内无一手动态，命中均为窗口外二手科普。Latent Space feed 亲核：最新仍是 10/22 17:40Z 的 Modal 期（12点版已报）。Spotify 亲核（已连接）：Latent Space 为已保存节目，无新单集。Simon atom 亲核：最新仍是 10/22 19:42Z 的音乐帖。本期无深读笔记，宁缺毋滥：Cloudflare 一篇是智能体审查的成本复盘、IBM 一篇是可解释性插件，都值得看但不值得单开精读。去重以 briefs 目录最近几期为准。*</p></body></html>
