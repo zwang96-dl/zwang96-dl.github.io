@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月23日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-23"/>
+<meta name="doc-ts" content="2026-10-24T02:58:02"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-23（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-23（20点版）</h1>
+<p>20点版来了。 这轮整体还是安静。 只有一条路由小更新值得看。 它是上一窗口漏检的，本期补报。</p>
+<h2>框架更新</h2>
+<p><strong>LLMKube 发了 v0.10.9（补报）</strong> LLMKube 是 K8s 上的推理管家。 它管 GPU 模型的部署和路由。 这版给路由器加了亲和调度。 亲和就是尽量把请求送近一点。 它还加了拓扑感知铺开。 拓扑就是机器和机架的摆放关系。 滚动更新时不再多占一台机器。 硬约束下也能平稳换版本。 它还能代理 Anthropic 的接口。 就是 Messages API 那套格式。 客户端不用改就能接进来。 还有一个连接修复值得记。 旧的长连接坏了会自动重试。 某个副本连坏两次才隔离。 以前坏一次就隔离，太敏感了。 划重点：路由越来越像调度员了。 不光看负载，还看位置和亲疏。 这跟缓存感知路由是一条路。 来源：<a href="https://github.com/defilantech/LLMKube">https://github.com/defilantech/LLMKube</a></p>
+<p><strong>其余主框架还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也都没动。 FlashInfer 还是那个小补丁版。 那版 12点版已经报过了。</p>
+<p><strong>llama.cpp 连出三个快照</strong> 最新快照是 b11849。 三个都是日常构建，不算发版。 b11847 修了 AMD 显卡编译。 它管 RDNA3 和 RDNA4 的构建。 b11848 让多进程能并发下载。 b11849 给 Hexagon 加了算子。 Hexagon 是高通的手机芯片。 加的是 SGN 符号算子。 说白了，全是边角修复。 没有新功能，也没有提速。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11849">https://github.com/ggml-org/llama.cpp/releases/tag/b11849</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 21201 个。 18点版时是 21130 个。 两小时又涨了 71 个。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮还是没新批次</strong> 最新还停在 22 日那批。 那批之前的期已经扫完。 新批次出来后认真补扫。 本期不标深读，宁缺毋滥。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没有新业内消息</strong> HN 窗口里共 42 条帖子。 跟 serving 沾边的只有两条。 两条都是 Modular MAX 的帖。 MAX 开源那事 10点版报过了。 这里的口径还是源码可见。 它不是严格意义的开源。 中文媒体没有新稿。 X 和 Reddit 这轮零结果。 社交平台还是那几条老帖。 连续批处理那条已经提过。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Simon 窗口内没有新帖。 最新还是那个绘画工具帖。 那条跟推理服务没关系。 Latent Space 没有新文章。 Spotify 上也没有新单集。 最新还是 10 月 22 日那期。 那期之前已经报过了。</p>
+<p>*去重说明：本轮窗口是 10/23 18:00 到 20:00 PDT。对应 UTC 是 10/24 01:00 到 03:00。对应 epoch 是 1792803600 到 1792810800。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1（12点版已报）。llama.cpp 本窗口新快照经 gh API 亲读发布说明：b11847（10/24 02:19Z，HIP bf16 WMMA 操作数类型修复，管 RDNA3/RDNA4 构建，#30885）、b11848（02:35Z，多进程并发下载，#29312）、b11849（02:56Z，Hexagon 新增 SGN 算子，#30346），均属日常快照，无功能与性能变化。LLMKube v0.10.9 经 gh API 亲核：发布于 10/24 00:19Z，实际落在 18点版窗口内但上期漏检，本期如实标为补报；发布说明亲读，含 router proxy 的 affinity 与 topology spread、硬放置下无 surge 滚动、代理 Anthropic Messages API、stale keep-alive 重试且两次失败才隔离 pod。DeepInfer 经 gh API 亲核：星标 21201（18点版 21130，+71），pushed_at 仍是 2026-10-21T04:55:44Z。HN 用 Algolia 精确窗口复核，窗口内 stories 共 42 条：serving 相关仅 Modular MAX 两帖（01:54Z 官方博客帖、02:54Z 解读帖），MAX 源码可见一事 10点版已报，不重复。其余多为安全、工具与泛 AI 帖。arXiv 官方 API 亲核：cs.DC 与 LLM inference 检索最新仍是 10/22 批次（如 Apple Silicon 推理优化评估 2610.31479），无新批次入库。Simon atom 亲核：最新仍是 21:35Z 的绘画工具帖，窗口内无新条目。browser.search 通用组命中均为旧闻：Spheron 引擎对比（旧文）、LLMKube v0.10.8 解读（16点版已报）、EAGLE-4（已深读）、TorchTPU（10/20 旧闻），均不重复；X 站内与 Reddit 站内均零结果；中文组无窗口内 serving 新稿。social 搜索（since 2026-10-23）命中仍是此前已提的连续批处理讲解视频（12:10Z）等老帖，无一手新动态。Spotify 未见窗口内新单集，Latent Space 最新仍是 10/22 的 Modal 期（已报，此点沿用近几期水位）。本期不标深读：LLMKube 是运维组件小版本，发布说明即全貌；llama.cpp 快照均为边角修复，不够深读门槛，宁缺毋滥。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
