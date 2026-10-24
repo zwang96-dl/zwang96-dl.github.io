@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月23日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-23"/>
+<meta name="doc-ts" content="2026-10-24T00:58:05"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-23（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-23（18点版）</h1>
+<p>18点版来了，这轮很安静。 主框架没有一家发新版。 只有一个日常快照落地。 内容不多，但水位都核清了。</p>
+<h2>框架更新</h2>
+<p><strong>各家正式版还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也都没动。 FlashInfer 还是那个小补丁版。 那版 12点版已经报过了。</p>
+<p><strong>llama.cpp 出了新快照 b11846</strong> 快照是每天的日常构建。 不算正式发版，别当大事。 这版只改了一处地方。 CUDA 量化内核加了个断言。 断言就是一道编译期检查。 它管 DP4A 矩阵乘的块高。 块高必须是 warp 的倍数。 warp 是 GPU 的基本线程组。 说白了，只是把规矩写死。 没有新功能，也没有提速。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11846">https://github.com/ggml-org/llama.cpp/releases/tag/b11846</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 21130 个。 16点版时是 21068 个。 两小时又涨了 62 个。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮还是没新批次</strong> 最新还停在 22 日那批。 那批之前的期已经扫完。 新批次要等明天凌晨。 出来后下一期再认真补扫。 本期不标深读，宁缺毋滥。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没有新业内消息</strong> HN 窗口里共 44 条帖子。 没有一条跟 serving 沾边。 中文媒体没有新稿。 X 和 Reddit 这轮零结果。 社交平台还是那几条老帖。 连续批处理那条已经提过。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Simon 窗口内没有新帖。 最新还是那个绘画工具帖。 那条跟推理服务没关系。 Latent Space 没有新文章。 Spotify 上也没有新单集。 最新还是 10 月 22 日那期。 那期之前已经报过了。</p>
+<p>*去重说明：本轮窗口是 10/23 16:00 到 18:00 PDT。对应 UTC 是 10/23 23:00 到 10/24 01:00。对应 epoch 是 1792796400 到 1792803600。框架水位经 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1（12点版已报）。llama.cpp 本窗口新快照 b11846（10/24 00:01Z）经 gh API 亲读发布说明：仅 ggml-cuda 的 DP4A MMQ tile 高度静态断言（#30837），无功能与性能变化，按惯例日常快照不算正式发版。DeepInfer 经 gh API 亲核：星标 21130（16点版 21068，+62），pushed_at 仍是 2026-10-21T04:55:44Z。HN 用 Algolia 精确窗口复核，窗口内 stories 共 44 条，无 serving 相关帖（多为安全、工具与泛 AI 帖）。arXiv 官方 API 亲核：cs.DC 与 LLM inference 检索最新仍是 10/22 批次（如 BeNice! KV-Sharing、Apple Silicon 评估等，均属已扫批次），无新批次，下一批按规律在 10/24 凌晨 UTC。Simon atom 亲核：最新仍是 21:35Z 的绘画工具帖，窗口内无新条目。browser.search 通用组命中均为旧闻：LLMKube v0.10.8 解读（16点版已报）、llm-d 1.0（已报）、vLLM 0.32.0 与 DeepInfer 旧汇总，均不重复；X 站内零结果；中文组无窗口内 serving 新稿。social 搜索（since 2026-10-23）命中仍是此前已提的连续批处理讲解视频（12:10Z）等老帖，无一手新动态。Spotify 未见窗口内新单集，Latent Space 最新仍是 10/22 的 Modal 期（已报，此点沿用近几期水位）。本期不标深读：窗口内无够门槛的新论文或新版本，宁缺毋滥。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
