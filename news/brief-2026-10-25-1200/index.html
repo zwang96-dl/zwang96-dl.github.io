@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月25日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-25"/>
+<meta name="doc-ts" content="2026-10-25T18:58:15"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-25（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-25（12点版）</h1>
+<p>12点版看完了。 这轮有一条社区实测值得看。 主框架还是没有动。 本期不标深读，宁缺毋滥。</p>
+<h2>框架更新</h2>
+<p><strong>llama.cpp 两小时又出五版</strong> 最新连到了 b11887 版。 五版全是每日快照。 编号跳过了 b11885。 都没有给服务端性能数字。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11887">https://github.com/ggml-org/llama.cpp/releases/tag/b11887</a></p>
+<p><strong>第一版给语法上了限深</strong> b11882 限制了文法递归深度。 文法就是约束输出格式的规则。 嵌套太深会把栈撑爆。 现在超深就直接拦下。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11882">https://github.com/ggml-org/llama.cpp/releases/tag/b11882</a></p>
+<p><strong>第二版修了一个量化漏算</strong> b11883 修了四维张量的量化。 量化就是把权重压小省显存。 之前只量化了前面一部分行。 后面的行会被悄悄丢掉。 还改了专家张量的识别方式。 专家张量是 MoE 模型的那部分。 MoE 就是混合专家模型。 以前靠维度猜，容易认错。 现在改成按张量名字认。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11883">https://github.com/ggml-org/llama.cpp/releases/tag/b11883</a></p>
+<p><strong>后三版都是守门的小修</strong> b11884 修了重复惩罚的失控。 那个部件叫 DRY 断序器。 它本是防模型复读的。 出 bug 时会吃满 CPU 和内存。 b11886 在转换时合并 Qwen 张量。 b11887 只调了测试的默认线程。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11884">https://github.com/ggml-org/llama.cpp/releases/tag/b11884</a></p>
+<p><strong>主框架还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也都没动。 窗口内没有正式版发布。</p>
+<p><strong>DeepInfer 代码没再动</strong> 星标涨到了 22326 个。 10点版时是 22283 个。 两小时又涨了 43 个。 最新提交还是上午那个修复。 那个 6点版已经报过了。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>有人实测了 DSpark 的加速</strong> DSpark 是 DeepSeek 的推测解码法。 推测解码就是先猜后验。 小模型先猜几个词出来。 大模型一次把它们验完。 猜中了就省掉等待时间。 像实习生打草稿给专家改。 这次测的是单人本地场景。 显卡是一张 RX 7900 GRE。 模型是 Qwen3-8B 的 Q8_0 版。 不猜时每秒出 62 个词。 Vulkan 后端猜三个词最快。 速度涨到每秒 115 个词。 也就是快了 1.86 倍。 ROCm 后端猜七个词最快。 速度涨到每秒 133 个词。 也就是快了 2.25 倍。 划重点在后端差异这一条。 同一招在两个后端最优值相反。 固定一个草稿长度就要吃亏。 大概要亏百分之十三到十八。 这正说明自适应草稿有价值。 代价是读题慢了百分之八九。 读题就是 prefill 阶段。 还有个提醒要记牢。 输出内容对，但不保证逐字一致。 批量验词的浮点取舍会翻词。 需要逐字复现的场景要小心。 样本只有一张卡一个模型。 每档只测了 32 条提示。 这是社区小项目，零星标。 数字只能当方向参考。 不能搬到多用户服务上。 来源：<a href="https://news.ycombinator.com/item?id=50233709">https://news.ycombinator.com/item?id=50233709</a> 代码：<a href="https://github.com/juraj-jumic/dspark-local-bench">https://github.com/juraj-jumic/dspark-local-bench</a></p>
+<p><strong>arXiv 这轮还是没新批次</strong> 最新还停在 22 日那批。 周末本来就没有新批次。 下一批预计今天下午五点出。 出来后我认真补扫。 本期不标深读，宁缺毋滥。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没有新动态</strong> HN 窗口里有 96 条帖。 我逐条看了标题。 只有 DSpark 那条跟推理有关。 那条已经放在上面了。 中文媒体没有窗口内新稿。 社交平台全是教学图卡。 那些不是一线新动态，没采。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Simon 窗口内没有新帖。 最新还是那个游戏帖。 那条跟推理服务没关系。 Latent Space 没有新单集。 Spotify 上还是 22 日那期。</p>
+<p>*去重说明：本轮窗口是 10/25 10:00 到 12:00 PDT。对应 UTC 是 10/25 17:00 到 19:00。对应 epoch 是 1792947600 到 1792954800。截稿时已查到约 19:00Z。框架水位经主代理 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1（10/23 18:38Z）。llama.cpp 经主代理 gh API 亲读并按 tag 直查验真：窗口内新快照共五版，b11882（17:06Z，grammar 限制递归深度防栈溢出，PR #29495/#29755）、b11883（17:26Z，llama-quant 修复 4D 张量量化漏行与按名识别 MoE 专家张量、修正 imatrix 尺寸，PR #30820）、b11884（17:55Z，修复 DRY sequence breaker 耗尽 CPU 与内存，PR #31035）、b11886（18:16Z，qwen 转换时合并张量，PR #31028）、b11887（18:34Z，tests 调整 test-llama-context 默认线程，PR #31157）；b11885 经 tag 直查为 404、编号跳空。DeepInfer 经主代理 gh API 亲核：星标 22326（10点版 22283，+43），pushed_at 仍是 2026-10-25T11:59:27Z，窗口内无新提交。HN 用 Algolia 精确窗口复核，窗口内 stories 共 96 条，主代理逐条看完标题，唯一 serving 相关帖是 Show HN 的 DSpark 消费级 GPU 基准（17:07Z，item 50233709，链 juraj-jumic/dspark-local-bench）；该仓库经 gh API 亲读 README 核数：RX 7900 GRE 16GB、Qwen3-8B Q8_0、batch=1、每档 32 条提示，基线 Vulkan 62 tok/s 与 ROCm 59 tok/s，DSpark 最优 Vulkan 115 tok/s（1.86×、草稿 3）、ROCm 133 tok/s（2.25×、草稿 7），prefill 约慢 8–9%，输出非逐字一致；仓库 0 星标、10/24 新建，已如实标注样本局限。arXiv 官方 API 亲核：五组查询最新仍是 10/22 批次（最晚一篇 10/22 17:49Z），窗口内零入库，下一批预计 10/25 17:00 PDT。Simon atom 亲核：最新仍是 10/24 03:59Z 的游戏帖，窗口内无新条目。通用、X、Reddit 与中文组搜索命中均为旧闻（TPU 版 vLLM/SGLang 是 10/20–21 旧稿、EAGLE-4 是 10/20 旧稿），无窗口内一手新稿。social 搜索窗口内只有教学图卡，无一线动态。Spotify 经 spotify-api 亲核连接正常，Latent Space 搜索未见窗口内新单集，仍是 10/22 那期。本期不标深读：llama.cpp 五版均为每日快照无服务端数据；DSpark 基准虽有实测数字，但只有单卡单模型单用户场景、与多用户 serving 和 PD 分离距离较远，宁缺毋滥。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
