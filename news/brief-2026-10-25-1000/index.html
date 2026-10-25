@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月25日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-25"/>
+<meta name="doc-ts" content="2026-10-25T16:59:42"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-25（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-25（10点版）</h1>
+<p>10点版看完了。 这轮还是只有端侧小活。 主框架还是没有动。 本期不标深读，宁缺毋滥。</p>
+<h2>框架更新</h2>
+<p><strong>llama.cpp 两小时又出四版</strong> 最新连到了 b11881 版。 四版全是每日快照。 都没有给性能数字。 第一版动的是多模态位置。 b11878 融合了 Qwen 的 MRoPE。 MRoPE 是多模态旋转位置编码。 说白了就是给图文对齐坐标。 还顺手融合了写行这个操作。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11878">https://github.com/ggml-org/llama.cpp/releases/tag/b11878</a></p>
+<p><strong>第二版把两步合成一步</strong> b11879 融合了 FFN 的两个矩阵乘。 FFN 是每层里的前馈网络。 gate 和 up 本来要分开算。 现在一次启动就算完。 激活函数也在写回时顺手做。 这招主要利好读题阶段。 读题就是 prefill 阶段。 量化格式覆盖了 Q4_K 等五种。 英伟达图灵以后的卡能用。 但作者没给提速数字。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11879">https://github.com/ggml-org/llama.cpp/releases/tag/b11879</a></p>
+<p><strong>后两版都是守门的小修</strong> b11880 拒绝合并残缺的模型文件。 GGUF 是它用的模型文件格式。 数据被截断就直接拦下。 b11881 让缓存尊重禁分配开关。 no_alloc 就是不许再申请内存。 开关打开时缓存不再乱占内存。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11881">https://github.com/ggml-org/llama.cpp/releases/tag/b11881</a></p>
+<p><strong>主框架还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也都没动。 窗口内没有正式版发布。</p>
+<p><strong>DeepInfer 代码没再动</strong> 星标涨到了 22283 个。 08点版时是 22245 个。 两小时又涨了 38 个。 最新提交还是上午那个修复。 那个 06点版已经报过了。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮还是没新批次</strong> 最新还停在 22 日那批。 周末本来就没有新批次。 下一批预计今天下午五点出。 出来后我认真补扫。 本期不标深读，宁缺毋滥。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没有新动态</strong> HN 窗口里有 107 条帖。 我逐条看了标题。 没有一条跟推理服务有关。 中文媒体没有窗口内新稿。 社交平台全是教学图卡。 那些不是一线新动态，没采。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Simon 窗口内没有新帖。 最新还是那个游戏帖。 那条跟推理服务没关系。 Latent Space 没有新单集。 Spotify 上还是 22 日那期。</p>
+<p>*去重说明：本轮窗口是 10/25 08:00 到 10:00 PDT。对应 UTC 是 10/25 15:00 到 17:00。对应 epoch 是 1792940400 到 1792947600。截稿时已查到约 17:00Z。框架水位经主代理 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1（10/23 18:38Z）。llama.cpp 经主代理 gh API 亲读并按 tag 直查验真：窗口内新快照共四版，b11878（15:16Z，ggml-cuda 融合 Qwen MRoPE 与 set-rows，PR #31025）、b11879（16:12Z，CUDA 在 MMQ 中融合 FFN gate/up 矩阵乘与 GLU，PR #29948，覆盖 Q4_K、Q5_K、Q6_K、Q8_0、IQ4_XS，图灵及更新架构，无性能数字）、b11880（16:30Z，tools 在 merge 时拒绝截断的 GGUF 张量数据，PR #31044）、b11881（16:48Z，llama 让全部 memory caches 尊重 no_alloc，PR #31087）。DeepInfer 经主代理 gh API 亲核：星标 22283（08点版 22245，+38），pushed_at 仍是 2026-10-25T11:59:27Z，窗口内无新提交。HN 用 Algolia 精确窗口复核，窗口内 stories 共 107 条，主代理逐条看完标题，vllm 关键词唯一命中是红队评测帖、与 serving 无关，无 serving 相关帖。arXiv 官方 API 亲核：五组查询最新仍是 10/22 批次（最晚一篇 10/22 17:49Z），窗口内零入库，下一批预计 10/25 17:00 PDT。Simon atom 亲核：最新仍是 10/24 03:59Z 的游戏帖，窗口内无新条目。通用、X、Reddit 与中文组搜索命中均为旧闻，无窗口内一手新稿；X 站内搜索无结果、无法核验原帖，如实标注。social 搜索窗口内只有教学图卡，无一线动态。Spotify 经 spotify-api 亲核连接正常，Latent Space 最新单集仍是 10/22 那两期，窗口内无新单集。本期不标深读：四版均为每日快照，b11879 的融合虽与 prefill 相关但无性能数据，宁缺毋滥。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
