@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月26日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-26"/>
+<meta name="doc-ts" content="2026-10-26T23:00:08"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-26（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-26（16点版）</h1>
+<p>16点版来了。 这轮有一条大货。 它正砸在你评估的方向上。 Cloudflare 今天公开了串话事故。 根源就在 SGLang 的 PD 解耦。 本期已做深读，务必看完。</p>
+<h2>框架更新</h2>
+<p><strong>主框架正式版还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 TensorRT-LLM 还是预发布版。 LMDeploy 还是 0.18.0 版。 几家正式版都没动。</p>
+<p><strong>llama.cpp 又出三版快照</strong> 窗口内出了三版快照。 编号是 b11909 到 b11912。 中间缺了一版编号。 一版修了 OpenCL 的 KV 恢复。 OpenCL 是跨平台计算接口。 一版给 MoE 加了缩放支持。 MoE 是混合专家架构。 都没有给出性能数字。 按惯例，快照不算正式发版。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11912">https://github.com/ggml-org/llama.cpp/releases/tag/b11912</a></p>
+<p><strong>vLLM 主线在补解耦零件</strong> 它升了 NIXL 到 1.5.1 版。 NIXL 是跨机传 KV 的库。 KV cache 是模型的草稿纸。 还给 Mooncake 传参加了合并。 Mooncake 也是传草稿的引擎。 推测解码换了 Triton 内核。 推测解码是先猜再验。 这些都还没进正式版。</p>
+<p><strong>SGLang 主线修长前缀</strong> 它优化了 prefill 索引器。 prefill 是读题算草稿阶段。 长缓存前缀下它更快了。 还补了两个新模型的部署例。 都没有进正式版，先记一笔。</p>
+<p><strong>DeepInfer 星标小涨</strong> 星标涨到了 23007 个。 14点版时是 22996 个。 两小时涨了 11 个。 代码还是 10 月 25 号那条。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>值得深读：SGLang 串话披露</strong> Cloudflare 今天协同披露了事故。 别人的回答混进了你的内容。 受影响的是 GLM-5.3 模型。 平台是 Workers AI。 一共 155 条回答中招。 全是超长提示触发的。 根源是两个错叠在一起。 一是 KV 池比上限小一截。 二是被拒请求穿过了解耦交接。 decode 读了上个用户的旧草稿。 说白了，草稿纸没换干净。 SGLang 还披露了姊妹问题。 请求中途断开也会串话。 已发出的直抄撤不回来。 修复叫延迟释放。 先扣住格子，等排空确认。 实测吞吐几乎没有变慢。 你升到 0.5.22 才有完整保护。 这篇能帮你列解耦自查清单。 深读：<a href="https://zwang96-dl.github.io/news/deep-20261026-sglang-pd-kv/">https://zwang96-dl.github.io/news/deep-20261026-sglang-pd-kv/</a> 来源：<a href="https://blog.cloudflare.com/kv-cache-exposure-remediation/">https://blog.cloudflare.com/kv-cache-exposure-remediation/</a> 来源：<a href="https://www.lmsys.org/blog/2026-10-26-cf-security">https://www.lmsys.org/blog/2026-10-26-cf-security</a></p>
+<p><strong>arXiv 还是停在 23 号</strong> 五组关键词都亲查过了。 最新还是停在 10 月 23 号。 新批次预计今晚才出。 到时再帮你补扫一轮。</p>
+<h2>业内新闻</h2>
+<p><strong>HN 上有两条旧稿重提</strong> 一条是 Qwen 量化跑分帖。 原文是 10 月 12 号的。 一条是 Broadcom 融资稿。 路透原文在窗口外发布。 两条都不是新内容。 这里只记一笔，不展开。</p>
+<h2>访谈与深度</h2>
+<p><strong>本期深读就是上面那篇</strong> 它有 Cloudflare 的事故账本。 也有 SGLang 的修复细节。 两篇原文今天一起发布。 HN 在窗口内收录了它。 Simon 窗口内没有新帖。 Latent Space 没有新单集。</p>
+<p>*去重说明：本轮窗口是 10/26 14:00 到 16:00 PDT。对应 UTC 是 10/26 21:00 到 23:00。对应 epoch 是 1793048400 到 1793055600。框架经 gh API 亲查：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。TensorRT-LLM 仍是 v1.4.0rc1 预发布。LMDeploy 仍是 v0.18.0，仓库用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1，窗口内主线仅 1 条基准修复提交。llama.cpp 窗口内 published 三版快照：b11909（21:00Z，Hexagon MUL_MAT_ID 行跳过优化）、b11910（21:20Z，OpenCL 在 set_tensor 写 KV 视图修状态恢复）、b11912（22:30Z，为 Laguna 开 MoE amax rescaling），编号中未见 b11911，均无性能数字、按快照惯例不算正式发版。vLLM 窗口内主线 12 条，含 NIXL 升 1.5.1 #63817、Mooncake 合并 descending block ids #63142、Spec Decode 草稿预算换 Triton 内核 #63421、Kimi-K3 的 FP8 分块 KV 走 FlashInfer #61527；SGLang 窗口内 4 条，含 QSA 长缓存前缀 prefill indexer 优化 #45791；TensorRT-LLM 窗口内 4 条（含 KVCMv2 host tier 并行填充），LMDeploy 窗口内零提交；均未进 release，只作背景。DeepInfer 星标 23007（14点版 22996，+11），pushed_at 仍是 2026-10-26T05:30:52Z。本期头条为协同披露：Cloudflare 博客与 LMSYS／SGLang 帖均标注 2026-10-26 协同发布，HN 于 22:41Z 在窗口内收录 Cloudflare 原文（item 50252159）；事故本身发生在 8/27–9/9（GLM-5.3 上线即带病、155 条超 681280 token 回答串话），今天才公开，故按披露日计为新内容。深读笔记已存深度阅读目录，含原文 4 张图（Cloudflare 事故示意图 1 张、LMSYS 竞态／传输栈／延迟释放 3 张）。arXiv 亲查五组：最新仍停在 10/23（多模态组停在 10/16）。HN 用 Algolia 精确窗口复核，窗口内 stories 至少 100 条（hitsPerPage 上限）：serving 直击只有上述披露一条；Qwen3.8-Flash-Next NVFP4 184 tok/s 帖（22:17Z）原文 meshapplied 博客发布于 10/12、属重提未采；Broadcom 为 Anthropic 买芯片的 630 亿美元融资稿（HN 21:48Z）路透原文 20:32Z 在窗口外、未采为新闻；OpenAI 智能体经 CPU cache 互通与 Apple 端侧模型两帖与 serving 弱相关未采。Simon atom 亲核：最新仍是 19:00:25Z 那帖（窗口外、与 serving 无关）；Latent Space feed 本轮未直查到新单集。X／Reddit／中文媒体／社交渠道由子代理核查，结果见本期运行记录；本轮未直查 Spotify 站内，如实注明。*</p></body></html>
