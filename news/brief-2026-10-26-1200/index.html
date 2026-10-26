@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月26日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-26"/>
+<meta name="doc-ts" content="2026-10-26T19:00:07"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-26（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-26（12点版）</h1>
+<p>12点版来了。 这轮整体偏安静。 没有新版本大新闻。 也没有值得深读的。 宁缺毋滥，本期不硬凑。</p>
+<h2>框架更新</h2>
+<p><strong>主框架还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 TensorRT-LLM 还是预发布版。 LMDeploy 还是 0.18.0 版。 几家正式版都没动。</p>
+<p><strong>llama.cpp 连发两版快照</strong> 窗口内出了 b11901 和 b11904。 两版都只改了 SYCL 后端。 SYCL 是英特尔的跨芯片方案。 一版给重排内存设了上限。 一版把矩阵乘的模板拆细了。 都是小修，没有性能数字。 按惯例，快照不算正式发版。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11904">https://github.com/ggml-org/llama.cpp/releases/tag/b11904</a></p>
+<p><strong>FlashInfer 主线最忙</strong> 两小时合了 23 条提交。 全是内核级的优化和修复。 有 MoE 的，有 NVFP4 的。 NVFP4 是四位浮点格式。 还有视觉塔的加速提交。 视觉塔就是多模态看图那段。 但没有新版发布出来。 先知道它在猛修内核就行。</p>
+<p><strong>主线还在修草稿纸</strong> vLLM 在给 KV 卸载加超时。 KV 就是推理的草稿纸。 加载太慢就早点放弃。 SGLang 合了 Rust 前端一条。 渲染和分词走自家处理器。 这些都还没进正式版。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 22965 个。 10点版时是 22934 个。 两小时涨了 31 个。 代码还是 10 月 25 号那条。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>HN 上冒出个新调度器</strong> 新项目叫 Resin。 它不是完整的推理引擎。 它是一套造引擎的积木。 核心是 Rust 写的调度器。 还带草稿纸缓存和指标服务。 前向计算要你自己写内核。 就像只卖厨房，不卖厨师。 作者说 12 小时拼出两个引擎。 服务的是两个 Flash 小模型。 号称跟 vLLM 它们差不多。 跟 DeepInfer 差百分之五到十。 数字全是作者自报的。 项目自己也标了实验性。 真要用的话，作者让你用大厂引擎。 先扫一眼，不用深读。 来源：<a href="https://github.com/ekzhang/resin">https://github.com/ekzhang/resin</a></p>
+<p><strong>arXiv 还是周末断档</strong> 五组关键词都亲查过了。 最新还是停在 10 月 23 号。 新批次预计今天下午出。 到时再帮你补扫一轮。</p>
+<h2>业内新闻</h2>
+<p><strong>英伟达在聊软件年费</strong> 外媒说它在讨论新收费。 每张卡每年约 2000 美元。 收的是跑智能体的软件费。 它现有企业版收得更贵。 这还是讨论阶段的消息。 不是正式定价，别当真账算。 推理成本以后要多算一笔软件钱。 来源：<a href="https://www.tomshardware.com/pc-components/gpus/nvidia-discusses-usd2-000-per-gpu-annual-software-fee-for-running-agents-on-ai-infrastructure-firm-already-charges-more-than-twice-that-amount-for-its-ai-enterprise-software-platform">https://www.tomshardware.com/pc-components/gpus/nvidia-discusses-usd2-000-per-gpu-annual-software-fee-for-running-agents-on-ai-infrastructure-firm-already-charges-more-than-twice-that-amount-for-its-ai-enterprise-software-platform</a></p>
+<p><strong>其余渠道都扫过了</strong> X 上名单里没人发新帖。 Reddit 没有新讨论。 中文媒体没有新稿。 社交渠道只有一张生态图。 图里把几家引擎列了一遍。 没有新事实，不占你时间。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 出了新一期</strong> 嘉宾是 Supabase 两位创始人。 Supabase 是开源数据库平台。 聊的是智能体写应用后的后端。 跟推理服务关系比较弱。 只给你留个标题在这。 来源：<a href="https://latent.space/p/supabase_s_plan_for_a_billion_ai-built_apps/">https://latent.space/p/supabase_s_plan_for_a_billion_ai-built_apps/</a></p>
+<p><strong>这轮没有新深读</strong> Simon 窗口内没有新帖。 他最新一篇还是裁图工具。 本期不标值得深读。 有硬货的下期再补给你。</p>
+<p>*去重说明：本轮窗口是 10/26 10:00 到 12:00 PDT。对应 UTC 是 10/26 17:00 到 19:00。对应 epoch 是 1793034000 到 1793041200。框架经主代理与子代理双查 gh API：vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1（10/23 18:38Z），窗口内主线 23 条提交均为 MoE、GDN、NVFP4、MLA 等内核 perf 与修复，含一条 Kimi K3 视觉塔加速，无新 release。llama.cpp 窗口内 published 两版快照：b11901（17:26Z，SYCL 重排临时内存上限 32 MiB）、b11904（18:46Z，SYCL MMVQ 模板化），均无性能数字、按每日快照惯例不算正式发版。DeepInfer 星标 22965（10点版 22934，+31），pushed_at 仍是 2026-10-26T05:30:52Z，无新提交、无 release。vLLM 窗口内主线 13 条，含 KV Offload P2P fail-fast #63781 与 P/D cache-hit 记账 #58885；SGLang 窗口内 1 条，为 rust-server 经 sglang-processor 渲染分词 #45449；均未进 release，只作背景。arXiv 双查五组（LLM inference、KV cache、multimodal inference、speculative decoding、PD disaggregation）：最新仍停在 10/23，新批次未到。HN 用 Algolia 精确窗口复核，窗口内 stories 共 132 条，主代理与子代理逐条看完标题：serving 直击只有 Resin（17:06Z，Show HN，HN 上仅 1 分 0 评论，价值在项目本身）；其自述经主代理亲读 README 核对——Rust 调度器加 KV cache 加指标服务的积木库、前向需自写模型内核、12 小时拼出 DeepSeek-V4.1-Flash 与 GLM-5.3-Flash 独立引擎、自报与 DeepInfer 差 5–10%、README 明示非生产级且建议真用引擎选 SGLang 或 vLLM，186 星、无 release，全部作者自报无第三方复现，故只记一笔、不列深读。边缘一条英伟达每 GPU 年费（17:34Z，Tom&#x27;s Hardware 转述讨论中方案、非正式定价）按成本侧信号一句话带过；GPT-6.1 Terra 发布与 Anthropic 和 SpaceX 算力交易为非 serving 内容未采；LiteLLM 后门后续的包防火墙与 serving 性能无关未采。新闻与社交子代理核查：X 名单（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）窗口内零新帖，Reddit 与中文媒体窗口内零命中，social 窗口内只有一张全栈生态信息图（无新事实未采）；Latent Space 新单集 Supabase 那期 17:53Z 发布、与 serving 弱相关，只在访谈区留标题；vLLM CVE-2026-116177 仍只有 0daynews 非官方源、且其版本口径与官方修复线冲突，延续未采留档；Ocean Power 海上 B300 意向书为窗口外今日上午消息且属意向阶段，未采。Simon atom 亲核：最新仍是 10/25 15:10Z 的裁图工具帖，窗口外且无关。本轮未直查 Spotify 站内，Latent Space 以官网与多目录交叉核对，此点如实注明。去重以 chat 最近简报与 briefs 目录最近几期为准，已报的 Upbound 深读、Sturnus、AKV、OmniSelect 均未重复。*</p></body></html>
