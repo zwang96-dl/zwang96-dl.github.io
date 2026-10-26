@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月26日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-26"/>
+<meta name="doc-ts" content="2026-10-26T09:00:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-26（02点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-26（02点版）</h1>
+<p>02点版看完了。 这轮没啥值得报的。 周一凌晨，圈里还是安静。</p>
+<h2>框架更新</h2>
+<p><strong>主框架还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也都没动。 FlashInfer 也没新版。</p>
+<p><strong>llama.cpp 出了 b11890</strong> 这是每日快照，不是正式版。 内容是 DeepSeek V4.1 的收尾。 草稿纸回填换了种拷贝法。 草稿纸就是 KV cache。 它存着模型看过的内容。 这版没给任何性能数字。 跟你的服务器关系不大。 扫一眼标题就够了。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11890">https://github.com/ggml-org/llama.cpp/releases/tag/b11890</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 22702 个。 00点版时是 22634 个。 两小时涨了 68 个。 代码还是昨天那条提交。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 还是周末断档</strong> 10月23号之后零新稿。 周一新批次还没到。 预计今天下午才会出。 到时再帮你补扫一轮。</p>
+<p><strong>HN 有条旧论文被重贴</strong> TokenGate 今晚又上了 HN。 它教模型先挑重点读。 挑完再做 prefill 计算。 这篇10月19号就报过了。 当时数字也都核过了。 这次只是帖子被重贴。 不重复占你的时间。</p>
+<h2>业内新闻</h2>
+<p><strong>AKV 被外媒又报了一遍</strong> MarkTechPost 今晚发了 AKV。 AKV 让智能体自己管草稿纸。 该删的删，该挪的挪。 论文10月20号就出了。 这边10月21号做过深读。 外媒这篇只是迟到报道。 没有新增任何数字。 不重复收录了。 来源：<a href="https://www.marktechpost.com/2026/10/26/tsinghua-akv-kv-cache-engineering-llm-agents/">https://www.marktechpost.com/2026/10/26/tsinghua-akv-kv-cache-engineering-llm-agents/</a></p>
+<p><strong>其余渠道都没货</strong> HN 窗口里有 63 条帖子。 我逐条看完了标题。 除重贴外没 serving 内容。 X 和 Reddit 也没新帖。 中文媒体没有新稿。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Simon 窗口内没有新帖。 他最新一篇还是裁图工具。 Latent Space 没有新单集。 最新还是 22 号那期。 本期不标深读。 宁缺毋滥，空着就空着。</p>
+<p>*去重说明：本轮窗口是 10/26 00:00 到 02:00 PDT。对应 UTC 是 10/26 07:00 到 09:00。对应 epoch 是 1792998000 到 1793005200。框架水位经主代理 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1（10/23 18:38Z）。llama.cpp 窗口内新发 b11890（10/26 08:54Z，每日快照）：DeepSeek V4.1 后续评审修复，含 kv-cache 用 ggml_backend_tensor_copy 回填 DSV4 K 镜像等改动，无性能数字，按快照惯例只记一笔；该 tag 在 20点版直查时还不存在，本轮已真实发布。DeepInfer 经 API 亲核：星标 22702（00点版 22634，+68），pushed_at 仍是 2026-10-26T05:30:52Z（00点版已记的后台动作），main 与 nv-dev 两分支最新提交仍是 5537415（2026-10-25T11:59:27Z），无新提交。arXiv 经主代理直查五组（LLM inference、KV cache、multimodal inference、speculative decoding、PD disaggregation）：最新仍停在 10/23（LLM inference 最新为 InferSlice 2610.32638，10/23 13:51Z，20点版已报）；日期区间对照：abs 含 LLM 的投稿 10/23 为 91 条、10/24 为 0、10/25 为 0、10/26 为 0，周末断档延续。HN 用 Algolia 精确窗口复核，窗口内 stories 共 63 条，主代理逐条看完标题：serving 相关只有 TokenGate 的 Show HN 帖（07:52Z，仓库 <a href="https://github.com/token-gate-llms/TokenGate），其论文">https://github.com/token-gate-llms/TokenGate），其论文</a> arXiv 2610.26754 发布于 10/19、已在 10/19 22点版报过并核过数字（TTFT 1.4–11.3 倍等，作者自报），本轮属重贴，去重略过；其余如 Nvidia 软件收入文、Blackwell NUMA 博客、RTX 4000 SFF 跑 Qwen 文均与 serving 主线关系弱，未采。AKV 经主代理亲读 MarkTechPost 原文核实：文章发布于 2026-10-26T07:56:45Z 落在窗口内，但 AKV 论文 arXiv 2610.28577 发布于 10/20、官方仓库 thu-nics/AKV 建于 9/28 且最后推送 10/21，本站已于 10/21 做过深读（深度阅读/CacheEngineering-智能体直接管KV缓存），文中数字（平均成本降 27.7%、分数涨 1.7 分）均为论文原有结果、无新增，去重略过。Simon atom 亲核：最新仍是 10/25 15:10Z 的裁图工具帖，窗口外且无关。子代理扫查新闻、Reddit、X、中文媒体与 social，除 AKV 迟到报道外窗口内零命中；Spotify 经子代理核查连接正常，Latent Space 无新单集。本期无深读。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
