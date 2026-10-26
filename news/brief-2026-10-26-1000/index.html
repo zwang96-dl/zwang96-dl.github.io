@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月26日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-26"/>
+<meta name="doc-ts" content="2026-10-26T17:01:43"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-26（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-26（10点版）</h1>
+<p>10点版来了。 这轮有一篇真材实料。 有人把 PD 解耦实测翻车了。 翻车原因跟你评估正相关。 我已经做成深读了。</p>
+<h2>框架更新</h2>
+<p><strong>主框架还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也都没动。 连每日快照都没新的。 llama.cpp 还是 b11900。 那版 8点版已经报过了。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 22934 个。 8点版时是 22888 个。 两小时涨了 46 个。 代码还是 10 月 25 号那条。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<p><strong>主线还在修草稿纸</strong> vLLM 合了 KV 卸载的修复。 修的是 LRU 批次丢前缀。 LRU 就是先扔最久没用的。 SGLang 在修 HiCache 传输。 HiCache 是分层草稿纸缓存。 修的是空传输白跑一趟。 这些都还没进正式版。 先知道有这回事就行。</p>
+<h2>新技术与论文</h2>
+<p><strong>值得深读：PD 解耦输给了网线</strong> Upbound 给自家工程师供模型。 模型是 GLM-5.3 写代码用的。 他们想从 10 人扩到 15 人。 于是 8 套配方挨个实测。 配方就是引擎加参数组合。 每套只改一个地方。 同硬件换 SGLang 涨最多。 轻用户容量直接翻倍还多。 轻用户就是提示短的那档。 他们子智能体多，在飞请求多。 PD 解耦那套直接翻车。 连几个轻会话都扛不住。 每个请求都要搬草稿纸。 搬运走的是普通 TCP。 TCP 就是普通网线协议。 作者原话说得很直白。 拆解耦需要 RDMA 级的网。 RDMA 是显卡直连的高速网。 HiCache 也没测出增益。 草稿纸峰值还不到半满。 缓存没满，分层就没活干。 双 SGLang 最后撑住 20 人。 每人每小时不超过 2.88 美元。 但按词元算 vLLM 更便宜。 口径一换，结论就翻。 数字均为作者自报。 平台还是作者自家的。 深读理由很直接。 你正在评估 SGLang 的 PD 解耦。 这篇给了第一个否决条件。 先查搬运网，再谈拆不拆。 笔记已存进深读目录。 原文：<a href="https://www.upbound.io/blog/drinking-our-own-champagne-part-5-what-does-it-take-to-grow-a-self-hosted-coding-model-from-pilot-to-team">https://www.upbound.io/blog/drinking-our-own-champagne-part-5-what-does-it-take-to-grow-a-self-hosted-coding-model-from-pilot-to-team</a></p>
+<p><strong>HN 上还有个小网关</strong> Sturnus 是个调度小工具。 它按延迟给请求选供应商。 哪家快就往哪家送。 像个看路况的分流员。 它是一个单独的小程序。 不用再搭数据库之类。 项目还很新，先扫一眼。 来源：<a href="https://github.com/sturnus-dev/sturnus">https://github.com/sturnus-dev/sturnus</a></p>
+<p><strong>arXiv 还是周末断档</strong> 五组关键词都亲查过了。 最新还是停在 10 月 23 号。 新批次预计今天下午出。 到时再帮你补扫一轮。</p>
+<h2>业内新闻</h2>
+<p><strong>Fireworks 锁了一批新卡</strong> Forum Edge 跟它签了大单。 合同约 9440 万美元。 锁的是达拉斯的 B300 产能。 B300 是英伟达的新旗舰卡。 租期一共 36 个月。 卡要年底到明年初才装。 这是公司通稿的口径。 推理云还在抢卡囤产能。 来源：<a href="https://www.morningstar.com/news/pr-newswire/20261026fl80790/forum-edge-ai-announces-944-million-definitive-ai-cloud-services-compute-agreement-with-fireworks">https://www.morningstar.com/news/pr-newswire/20261026fl80790/forum-edge-ai-announces-944-million-definitive-ai-cloud-services-compute-agreement-with-fireworks</a></p>
+<p><strong>其余渠道都扫过了</strong> X 和 Reddit 没新帖。 中文媒体没有新稿。 社交渠道只有 AKV 扩散帖。 AKV 这边早就深读过了。 不重复占你的时间。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Simon 窗口内没有新帖。 他最新一篇还是裁图工具。 Latent Space 没有新单集。 最新还是 22 号那期。 本期深读就是上面那篇。 一线实测，比论文更解渴。</p>
+<p>*去重说明：本轮窗口是 10/26 08:00 到 10:00 PDT。对应 UTC 是 10/26 15:00 到 17:00。对应 epoch 是 1793026800 到 1793034000。框架水位经主代理 gh API 亲手复核（框架子代理首轮失败后，其重跑结果与主代理一致）：vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1（10/23 18:38Z）。llama.cpp 窗口内无新快照，仍是 b11900（10/26 14:00Z，8点版已报）。DeepInfer 经 API 亲核：星标 22934（8点版 22888，+46），pushed_at 仍是 2026-10-26T05:30:52Z，最新提交仍是 5537415（2026-10-25T11:59:27Z），无新提交、无 release。vLLM 窗口内主线提交约 13 条，含 KV Offload 的 LRU 前缀保留修复 #61050 与 DCP NIXL 交错尺寸修复 #62330；SGLang 窗口内 3 条，含 HiCache 空传输跳过 #45673 与多模态预计算输入哈希保留 #44160；均未进任何 release，只作背景一笔。arXiv 经主代理与子代理双查五组（LLM inference、KV cache、multimodal inference、speculative decoding、PD disaggregation）：最新仍停在 10/23，新批次未到。HN 用 Algolia 精确窗口复核，窗口内 stories 共 155 条，主代理与子代理逐条看完标题：serving 直击 2 条——Upbound 实测博客（15:12Z，本期深读）与 Sturnus 延迟型 LLM 负载均衡 Show HN（15:20Z，12 星新项目，只记一笔）；边缘一条 Parallel Language Models via Variational Decoding（arXiv:2610.26693）是旧批次论文被提交到 HN，非新稿未采；其余大半是 Anthropic 上市文件与 Gemini 4 Argon 模型卡等非 serving 内容。Upbound 关键数字经主代理亲读原文全文核对：硬件 2 节点 16×RTX PRO 6000（Nebius，每节点约 14.4 美元/小时）、GLM-5.3、真实流量提示中位 59K 词元与前缀命中 67%、回放 SemiAnalysis AgentX 公开轨迹（闭环、正文为哈希占位）；及格线 P90 TTFT ≤5.3 秒、P90 每人 ≥10 词元/秒、错误 &lt;2%（含被拒轮次），目标 15 并发会话；配方 0 vLLM 约 10 会话（$2.88/人时、$0.63/百万词元），配方 1 SGLang 约 11（轻用户档 10–11 对 vLLM 约 4），配方 4 PD 解耦（SGLang，1 prefill 加 2 decode）连几个轻会话都扛不住、作者归因 KV 搬运走普通 TCP 且拆解耦需要 RDMA 或接近条件，配方 5 加 HiCache 约 10（KV 峰值不到半满、无可测增益、每节点约 0.8TB 钉住内存），配方 7 双 SGLang 四机 ≥20（≤$2.88/人时、$0.78/百万词元），配方 3 双 vLLM 约 14（区间碰线算没定论、$4.03/人时）；SGLang 正式版跨两节点跑 GLM-5.3 启动崩溃（原文引 sglang#43580）故用 nightly；均为作者自报、平台 Modelplane 为作者自家产品、无第三方复现。深读笔记：files/深度阅读/Upbound实测-PD解耦输给普通TCP.md 与同名 .html，含原文 Figure 1/2/5 共三图并配中文图注，README 已更新。Fireworks 一条经新闻子代理核查：PR Newswire 通稿标注 2026-10-26（PALM BEACH），无具体发布钟点、不能断言落在窗口内，本期按当天新闻一句话带过并标明通稿口径；合同 36 个月约 9440 万美元、达拉斯 B300 容量、预计 2026 年 12 月底至 2027 年 1 月初部署。Simon atom 亲核：最新仍是 10/25 15:10Z 的裁图工具帖，窗口外且无关。子代理扫查新闻、X、Reddit、中文媒体、social 与播客：X 定向检索零命中、Reddit 与中文媒体窗口内零命中；social 窗口内只有 AKV 俄语图卡（09:17 PDT）与 vLLM DeepSeek 图卡等已报旧题扩散，不收录；AKV 的 MarkTechPost 成文源（10/26）只是已深读事件的英文成文版，不当新新闻重复报；Tensormesh 经子代理澄清原稿是 10/14 发布、10/26 只是转载，未采；vLLM CVE-2026-116177 仍只有 0daynews 非官方源、无官方 advisory，延续未采留档。Latent Space 播客经子代理用多个播客目录交叉核对，最新仍是 10/22 的 Modal CEO 那期；本轮未直查 Spotify 站内，此点如实注明。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
