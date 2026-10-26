@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月25日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-25"/>
+<meta name="doc-ts" content="2026-10-26T01:00:14"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-25（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-25（18点版）</h1>
+<p>18点版来了。 这轮有两件小事。 一件是端侧快照更新。 一件是安全补报。 补报不是本窗口新发的。 我把时间标清楚了。</p>
+<h2>框架更新</h2>
+<p><strong>llama.cpp 连发两版快照</strong> 新版到了 b11889。 窗口里连发了两版。 先是 b11888，后是 b11889。 都是每日快照，不算正式发版。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11889">https://github.com/ggml-org/llama.cpp/releases/tag/b11889</a></p>
+<p><strong>b11888 修了语法采样的老毛病</strong> 语法采样就是按规则筛词。 以前长词会被误杀。 比如 512 个空格的长词。 现在改成逐字走，不再递归。 官方说采样比之前更快。 但没给具体数字。 涉及 GLM、Qwen 和 Gemma。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11888">https://github.com/ggml-org/llama.cpp/releases/tag/b11888</a></p>
+<p><strong>b11889 只是代码清理</strong> 它把 CUDA 里的老写法换掉。 功能没变，性能也没变。 就是消掉一个编译警告。</p>
+<p><strong>主框架还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也都没动。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 22394 个。 16点版时是 22375 个。 两小时又涨了 19 个。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>业内新闻</h2>
+<p><strong>安全补报：vLLM 今天爆出五个洞</strong> 这批洞今天凌晨已披露。 披露时间是 13:20 UTC。 换成你那边是早上 6:20。 不在本窗口，是我补报。 前面几期只记了没采。 这次查全了，正式报你。</p>
+<p>第一条最冲着多租户来。 编号 CVE-2026-116180。 它的评分是 7.7 分。 低权限用户能打崩引擎。 同一引擎的其他人全断。 手法是钻前缀缓存的空子。 受影响是 0.31.0 之前的版。 来源：<a href="https://www.redpacketsecurity.com/cve-alert-cve-2026-116180-vllm-project-vllm/">https://www.redpacketsecurity.com/cve-alert-cve-2026-116180-vllm-project-vllm/</a> 官方公告：<a href="https://github.com/vllm-project/vllm/security/advisories/GHSA-rhcx-5729-88vg">https://github.com/vllm-project/vllm/security/advisories/GHSA-rhcx-5729-88vg</a></p>
+<p>第二条冲着解耦接口来。 编号 CVE-2026-116178。 它的评分是 8.2 分。 它打的是多模态元数据。 元数据对不上就能崩引擎。 打的正是解耦生成的接口。 这条跟你的方向最贴。 受影响是 0.30.0 之前的版。</p>
+<p>其余三条也都是高危。 116176 是请求伪造，8.8 分。 116177 是图片撑爆内存。 它有 8.7 分。 116179 是视频帧数绕过。 它也有 8.7 分。 五条的修复版都已发布。 升到 0.31.0 以上就堵上。 你看的 0.32.0 已修复。 清单来源：<a href="https://theworldofai.org/ai-news/">https://theworldofai.org/ai-news/</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新批次还没出来</strong> 16点版时大家都在等。 预计五点出新批次。 我六点前又查了五组。 最新还是 22 日那批。 API 里还没见新论文。 20点版我再补扫一次。 本期不标深读，宁缺毋滥。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Simon 窗口内没有新帖。 Latent Space 没有新单集。 Spotify 上还是 22 日那期。 HN 有它一篇数学文章。 那篇讲数学，不讲推理。 跟 serving 无关，没采。</p>
+<p>*去重说明：本轮窗口是 10/25 16:00 到 18:00 PDT。对应 UTC 是 10/25 23:00 到 10/26 01:00。对应 epoch 是 1792969200 到 1792976400。框架水位经主代理 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1（10/23 18:38Z）。llama.cpp 经 gh API 亲读：窗口内新发 b11888（10/25 23:28Z，语法采样去掉递归深度限制、长 token 不再被误拒，官方称 GLM-4.7、Laguna、Qwen3.6、gemma-4 上采样更快但无具体数字）与 b11889（10/25 23:44Z，CUDA archName 改用 std::string 的代码清理，无功能变化），b11890 经 tag 直查为 404。DeepInfer 经 API 亲核：星标 22394（16点版 22375，+19），pushed_at 仍是 2026-10-25T11:59:27Z，窗口内无新提交。安全补报说明：vLLM 五条 CVE（116176 SSRF 8.8、116177 图片内存耗尽 8.7、116178 多模态元数据崩解耦接口 8.2、116179 视频帧数绕过 8.7、116180 跨租户 DoS）于 10/25 13:20Z 起公开，属窗口外；16点版去重脚注曾注明该批 CVE 在窗口外未采，正文从未报过，本期经 RedPacket Security 单条页与 The World of AI 当日 CVE 清单交叉核对后补报，并已标清披露时间，不冒充本窗口新闻；116180 的 CVSS 以 RedPacket 所载 3.1 口径 7.7 为准（另一聚合站记 8.3，口径不一）。窗口内社交平台只有二次传播：Threads 西语账号 00:35Z 转述这批 CVE、Instagram 00:25Z 的 vLLM 仓库推广帖，均无新闻增量，未当首发。arXiv 官方 API 亲核：五组查询（LLM inference、KV cache、multimodal inference、prefill decode、speculative decoding）最新仍是 10/22 批次，另以 cat:cs.CL 与 cat:cs.LG 全类核对，最新提交仍是 10/22T17:59Z；预计 17:00 PDT 的新批次到截稿（约 00:57Z）尚未出现在 API 里，20点版补扫。HN 用 Algolia 精确窗口复核，窗口内 stories 共 43 条，主代理逐条看完标题，无 serving 相关帖；Latent Space 数学文章（23:30Z）非 serving，未采。Simon atom 亲核：最新仍是 10/24 03:59Z 的游戏帖，窗口内无新条目。X 与 Reddit 定向搜索无结果，如实标注。中文媒体无窗口内 serving 新稿。Spotify 经 spotify-api 亲核连接正常，Latent Space 最新单集仍是 10/22 那两期，窗口内无新单集。本期不标深读：窗口内只有端侧边角修复，CVE 是公告清单不是新方法，宁缺毋滥。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
