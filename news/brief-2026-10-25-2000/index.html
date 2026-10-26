@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月25日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-25"/>
+<meta name="doc-ts" content="2026-10-26T03:06:29"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-25（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-25（20点版）</h1>
+<p>20点版来了。 这轮论文批次终于到了。 等了好几期的新批次露面了。 有三篇值得你扫一眼。 其中一篇我做了深读。</p>
+<h2>框架更新</h2>
+<p><strong>主框架还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 其他几家也都没动。 llama.cpp 还是 b11889。 18点版刚报过那两版。</p>
+<p><strong>DeepInfer 星标涨得快了</strong> 星标涨到了 22501 个。 18点版时是 22394 个。 两小时涨了 107 个。 涨势比前几轮明显快。 仓库本身没有新推送。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>新批次到了，先说最贴你的一篇</strong> KVStream 治的是取草稿纸。 草稿纸就是 KV cache。 长对话的草稿纸装不下。 只能往硬盘和共享存储搬。 老办法只走本地盘一条道。 来源：<a href="https://arxiv.org/abs/2610.31827">https://arxiv.org/abs/2610.31827</a></p>
+<p><strong>KVStream：多开几个取件窗口</strong> 它让每层存储都存一份。 哪层先空，哪层领下一块。 离线吞吐比 LMCache 高 1.49 倍。 突发时首字延迟降到六分之一。 它跟 SGLang 的 HiCache 也比了。 达标率 84% 对 34%，它赢。 深读理由很直接。 你有 200 个共享前缀词元。 前缀取件快慢就是你的首字延迟。 笔记已存进深读目录。</p>
+<p><strong>SAKURA：手机修图先送草稿纸</strong> 修图模板的草稿纸放云端。 手机要用时再往下送。 它按网速现场挑压缩档位。 延迟比对照低 1.82 倍。 比手机本地生成快 3.27 倍。 测试机是骁龙 8 Elite。 这是多模态边缘侧的玩法。 来源：<a href="https://arxiv.org/abs/2610.29733">https://arxiv.org/abs/2610.29733</a></p>
+<p><strong>InferSlice：推理服务铺到运营商网上</strong> 英国电信牵头做了个架构。 推理节点分散在广域网上。 靠网络切片和显存切分调度。 目标是达标率，不是峰值速度。 这是参考架构，没有跑分大战。 来源：<a href="https://arxiv.org/abs/2610.32638">https://arxiv.org/abs/2610.32638</a></p>
+<h2>业内新闻</h2>
+<p><strong>HN 热帖：套壳跑 vLLM 几乎不亏</strong> Flame 把 vLLM 嵌进自己框架。 大家担心套壳会拖慢速度。 实测中位吞吐只低 0.55%。 带前缀复用时只低 0.86%。 原文是 10 月 24 日发的。 今晚被 HN 顶进了窗口。 还有个细节值得你看。 让同前缀回同一张卡后。 缓存命中从 53% 涨到 75%。 这就是前缀亲和的威力。 来源：<a href="https://xflops.io/blog/flame-vllm-serving/">https://xflops.io/blog/flame-vllm-serving/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Simon 窗口内没有新帖。 Latent Space 没有新单集。 Spotify 上还是 22 日那期。 中文媒体没有窗口内新稿。</p>
+<p>*去重说明：本轮窗口是 10/25 18:00 到 20:00 PDT。对应 UTC 是 10/26 01:00 到 03:00。对应 epoch 是 1792976400 到 1792983600。框架水位经主代理 gh API 亲手复核。vLLM 仍是 v0.32.0（10/18 06:50Z）。SGLang 仍是 v0.5.22（10/19 02:55Z）。TensorRT-LLM 仍是 v1.4.0rc1 预发布（10/22 01:38Z）。LMDeploy 仍是 v0.18.0，仓库路径用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1（10/23 18:38Z）。llama.cpp 经 gh API 亲读：最新仍是 b11889（10/25 23:44Z），子代理一度报 b11890，主代理按 tag 直查 404 已作废。DeepInfer 经 API 亲核：星标 22501（18点版 22394，+107），pushed_at 仍是 2026-10-25T11:59:27Z，窗口内无新提交。arXiv 本轮有重大变化：预计的新批次已在官方列表露面（最新提交到 10/23），主代理逐条直查 cs.DC、cs.CL、cs.AR、cs.PF 官方 recent 列表与摘要页核实。论文子代理报的一批标题与编号（所谓 Cell、ArborKV、GreenLLM、Hyperion、Niyama 及 2610.24xxx 编号）经主代理按编号直查全是无关论文、按标题在官方列表查无此文，整批作废不采。本期收录均为主代理亲核：KVStream（2610.31827，10/22 提交，此前各期从未报过）、SAKURA（2610.29733，10/21 提交、v2 10/23，从未报过）、InferSlice（2610.32638，10/23 提交，从未报过）；同批的 HAWK（2610.29873）与 UlaCache（2610.29820）已于 10/21 20点版报过且 HAWK 已做深读，本期不重复。HN 用 Algolia 精确窗口复核，窗口内 stories 共 29 条，serving 相关只有 Flame 博客帖（原文 10/24 发布、窗口内被提交到 HN），其余无关；Flame 数据（中位吞吐低 0.55%/0.86%、前缀亲和后缓存词元 53.13% 到 74.86%）经主代理亲读原文核实，均为作者自报、短突发负载。Simon atom 亲核：最新仍是 10/24 03:59Z 的游戏帖，窗口内无新条目。新闻子代理核查 X、Reddit、中文媒体与 social 均无窗口内一手内容；Spotify 经其核查 Latent Space 无新单集。本期深读：KVStream（files/深度阅读/KVStream-前缀KV别只堵一条道.md 与同名.html，含原文 Figure 5/12 两图并配中文图注，README 已更新）。去重以 chat 最近简报与 briefs 目录最近几期为准。*</p></body></html>
