@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月26日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-26"/>
+<meta name="doc-ts" content="2026-10-27T05:02:55"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-26（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-26（22点版）</h1>
+<p>22点版来了。 这轮整体还是安静。 正式版一家都没动。 但主线有一条对你胃口。 是 AMD 卡上的 PD 解耦。 论文是补扫同批漏网的一篇。 本期不标值得深读。</p>
+<h2>框架更新</h2>
+<p><strong>主框架正式版还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 TensorRT-LLM 还是预发布版。 LMDeploy 还是 0.18.0 版。 llama.cpp 也没出新快照。 几家正式版都没动。</p>
+<p><strong>vLLM 主线给 AMD 加了 PD 解耦</strong> 这条跟你的机器正对口。 PD 解耦就是读题吐字分家。 像流水线一样各干一段。 它给 DeepSeek-V4-Pro 铺了路。 草稿纸走 MORI 通道搬运。 草稿纸就是 KV cache。 KV cache 是存好的注意力结果。 MORI 是 AMD 的搬运组件。 你的 MI350X 能吃这条线。 MI300X 大概率也能吃。 但先说清楚口径。 这只是主线合入的提交。 还没有进任何正式版。 也没有附带性能数字。 你评估时可以先盯着它。 等正式版出来再实测不迟。 来源：<a href="https://github.com/vllm-project/vllm/commit/3d81a510f9ebc802a7864ced38832182295f4cad">https://github.com/vllm-project/vllm/commit/3d81a510f9ebc802a7864ced38832182295f4cad</a></p>
+<p><strong>其余主线都是小修</strong> SGLang 给分层缓存提了速。 分层缓存就是 HiCache。 它让主机内存池分配更快。 FlashInfer 合了十五条提交。 全是内核层面的性能小修。 其中 GEMM 调用开销降了。 从 200 微秒降到 59 微秒。 这些都还没进正式版。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23119 个。 20点版时是 23074 个。 两小时涨了 45 个。 代码还是 10 月 26 号那条。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>补扫 — 换机房前先算草稿纸的账</strong> 这篇是 10 月 26 号那批的。 20点版那批里漏了它。 这轮补扫才捞回来。 它讲多轮对话怎么选机房。 换个机房，电是更绿了。 但历史草稿纸不在新机房。 换过去就得把历史重算。 对话越长，重算越贵。 贵到能吃掉省下的碳。 它的做法叫 CarbonRouter。 选机房时把重算成本算进去。 还会把会话钉在原机房。 免得来回搬家反复重算。 作者自报碳排降了 16.1%。 长会话降幅到了 23.1%。 长会话指超过 30 轮的。 但这是轨迹模拟的结果。 不是线上服务的实测。 跟 KVCompass 是一条线。 都是先看草稿纸在哪。 再决定请求往哪送。 来源：<a href="https://arxiv.org/abs/2610.35230">https://arxiv.org/abs/2610.35230</a></p>
+<p><strong>同批还有六篇只记标题</strong> 一篇讲量化智能体的纠错。 它说生成和草稿纸是瓶颈。 来源：<a href="https://arxiv.org/abs/2610.35303">https://arxiv.org/abs/2610.35303</a> 一篇是三值加速器设计。 它按阶段分开优化数据流。 边缘硬件，跟你关系不大。 来源：<a href="https://arxiv.org/abs/2610.34824">https://arxiv.org/abs/2610.34824</a> 一篇讲 Blackwell 上的 FP8 训练。 它用 vLLM 和 SGLang 做 rollout。 rollout 是强化学习的采样环节。 测的是训练，不是服务。 来源：<a href="https://arxiv.org/abs/2610.34915">https://arxiv.org/abs/2610.34915</a> 余下三篇更边缘。 一篇是注意力复杂度的理论。 一篇是 CPU 上的 GEMM 建模。 一篇是语音长会话的退化。 都不展开，不占你时间。</p>
+<p><strong>窗口内没有新论文入库</strong> 五组关键词都亲查过了。 窗口内提交的新论文是零篇。 多模态组还是停在旧批次。 PD 解耦组也没有新货。 下期再帮你补扫一轮。</p>
+<h2>业内新闻</h2>
+<p><strong>HN 窗口内没有 serving 硬货</strong> 窗口内 35 条帖子逐条看完。 有推理服务商的汇总帖。 还有英伟达的云厂商杂谈。 都跟推理服务没关系。 不展开，不占你时间。</p>
+<p><strong>其余渠道都扫过了</strong> X 上名单里没人发新帖。 Simon 窗口内也没有新帖。 Reddit 没有新讨论出来。 中文媒体只有旧闻转载。 社交渠道只有个人折腾帖。 没有新事实可以收录。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Latent Space 没有新单集。 名单里的博客也没更新。 本期不标值得深读。 宁缺毋滥，下期有货再补。</p>
+<p>*去重说明：本轮窗口是 10/26 20:00 到 22:00 PDT。对应 UTC 是 10/27 03:00 到 05:00。对应 epoch 是 1793070000 到 1793077200。框架经 gh API 亲查：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。TensorRT-LLM 仍是 v1.4.0rc1 预发布。LMDeploy 仍是 v0.18.0，仓库用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1。llama.cpp 最新仍是 b11913（10/27 00:19Z，属更早窗口），本窗口零提交、无新快照。窗口内主线提交共 28 条：vLLM 5 条，含 AMD 上 DeepSeek-V4-Pro 经 MORI IO 做 PD 解耦 #48989；SGLang 3 条，含 HiCache 主机池并行分配 #43978；FlashInfer 15 条，含 GEMM 分发开销 200 降到 59 微秒 #4674；TensorRT-LLM 4 条；LMDeploy 1 条；均未进 release，只作背景。DeepInfer 星标 23119（20点版 23074，+45，主代理与子代理双查一致），pushed_at 仍是 2026-10-26T05:30:52Z。arXiv 经 API 五组关键词亲查（首轮两组被限流、重试后拿到完整结果）：窗口内 published 为零篇；补扫出 10/26 同批未报论文 7 篇，已 grep 往期 briefs 与深读目录核对，其中 CarbonRouter（2610.35230）摘要经主代理亲开 arXiv 页核对，数字为作者自报的轨迹驱动模拟、非生产实测；其余 6 篇只记标题或略过。HN 用 Algolia 精确窗口复核，窗口内 stories 共 35 条逐条看完，无 serving 直击，未采。Simon atom 亲核：最新仍是 10/26 23:53Z 的 Terra 帖（18点版已报），窗口内无新帖。X 名单、Reddit、机器之心与量子位窗口内零命中；social 窗口内只有个人折腾帖与教学视频，无新事实。Latent Space 经节目列表核对无新单集；本轮未直查 Spotify 站内，如实注明。本期无深读，宁缺毋滥。*</p></body></html>
