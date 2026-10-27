@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月27日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-27"/>
+<meta name="doc-ts" content="2026-10-27T09:01:10"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-27（02点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-27（02点版）</h1>
+<p>02点版来了。 深夜窗口，正式版还是全平。 但主线这轮很热闹。 一共落了 51 条提交。 SGLang 一家就占 16 条。 最对口你的是 KVShard。 它把 PD 和分层缓存接上了。 本期不标值得深读。 理由写在文末了。</p>
+<h2>框架更新</h2>
+<p><strong>正式版一家都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 TensorRT-LLM 还是预发布版。 LMDeploy 还是 0.18.0 版。 llama.cpp 连发 5 个快照。 最新是 b11923 版。 快照按惯例不算正式发版。 而且里面只有 CI 改动。 没有内核和量化新东西。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11923">https://github.com/ggml-org/llama.cpp/releases/tag/b11923</a></p>
+<p><strong>SGLang 把 PD 和 HiCache 接上了</strong> 这条跟你评估的口径正对上。 新东西叫 KVShard。 它是给 GLM 模型用的。 PD 就是读题吐字分工。 HiCache 是分层存草稿纸。 草稿纸就是 KV cache。 这次三样东西归一处管。 稀疏注意力也一起接进来。 MTP 草稿模型也一起接进来。 MTP 就是先猜几个词再验。 说白了，归属不再打架。 不过还有个前置没合并。 先记一笔，别急着上手。 来源：<a href="https://github.com/sgl-project/sglang/pull/42973">https://github.com/sgl-project/sglang/pull/42973</a></p>
+<p><strong>SGLang 还修了个 PD 衔接坑</strong> 批次正从 HiCache 搬草稿纸。 这时候别抢先发缓存前缀。 不然两边会互相打架。 现在主线已经修好了。 同样还没进正式版。 来源：<a href="https://github.com/sgl-project/sglang/pull/44081">https://github.com/sgl-project/sglang/pull/44081</a></p>
+<p><strong>vLLM 给 PD 通道补了仪表盘</strong> NIXL 是 PD 传草稿纸的通道。 之前它的统计读不出来。 Rust 前端现在能正确解码。 PD 部署盯状态更方便了。 另外 MTP 草稿模型也有进展。 它现在能配流水线并行。 两个加速手段不再互斥。 来源：<a href="https://github.com/vllm-project/vllm/pull/60856">https://github.com/vllm-project/vllm/pull/60856</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/60234">https://github.com/vllm-project/vllm/pull/60234</a></p>
+<p><strong>其余几家也在动</strong> FlashInfer 在调 NVFP4 量化。 NVFP4 是 4 比特浮点存法。 调的是 Blackwell 卡的内核。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7516">https://github.com/flashinfer-ai/flashinfer/pull/7516</a> TensorRT-LLM 只补了文档。 写清 PD 模式下束搜索的要求。 束搜索就是多留几条候选。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20474">https://github.com/NVIDIA/TensorRT-LLM/pull/20474</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23214 个。 00点版时是 23169 个。 两小时涨了 45 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>窗口内没有新论文入库</strong> 五组关键词都亲查过了。 最新一篇还停在 26 号。 这个窗口结构性没货。 arXiv 每天凌晨统一放货。 26 号那批都报过了。</p>
+<h2>业内新闻</h2>
+<p><strong>补扫一条：vLLM 的路由模型升级了</strong> 这条是昨晚发的。 前几期漏收了，这期补上。 新模型叫 d3-ultra。 它是给路由器用的大脑。 路由器先看请求再分流。 这回是个多模态版本。 27B 参数，能看图看视频。 输入只读一遍就够了。 一次能答 255 个问题。 一个问题只要 0.3 秒。 255 个问题要 2.16 秒。 数字是官方模型卡自报。 测的是一张 MI325X。 问得越多，单问越便宜。 路由这层开始多模态化了。 来源：<a href="https://huggingface.co/vllm-sr/d3-ultra">https://huggingface.co/vllm-sr/d3-ultra</a></p>
+<p><strong>HN 窗口内没有 serving 硬货</strong> 窗口内 64 条帖子逐条看完。 没有一条讲推理服务的。 不展开，不占你时间。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Spotify 站内亲查过了。 Latent Space 没有新单集。 最新一集还是 26 号的。 名单里的博客也没更新。 Latent Space 只有一篇日报。 讲的是 Anthropic 上市文件。 跟 serving 不沾边，不收。 本期不标值得深读。 KVShard 还带未合并的前置。 等它落进正式版再深读。</p>
+<p>*去重说明：本轮窗口是 10/27 00:00 到 02:00 PDT。对应 UTC 是 10/27 07:00 到 09:00。对应 epoch 是 1793084400 到 1793091600。框架经 gh API 亲查，子代理与主代理双查一致：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。TensorRT-LLM 仍是 v1.4.0rc1 预发布。LMDeploy 仍是 v0.18.0，仓库用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1。llama.cpp 窗口内连发 5 个快照：b11918、b11919、b11921、b11922、b11923（b11920 跳号未发布），按惯例不算正式发版；窗口内提交按 API 口径只有 2 条且均为 CI，无内核改动。窗口内主线提交共 51 条：vLLM 14 条、SGLang 16 条、TensorRT-LLM 8 条、FlashInfer 11 条、llama.cpp 2 条；LMDeploy、TGI、DeepInfer 均零提交。SGLang 亮点：KVShard 把 GLM 的 DSA 稀疏注意力与 MTP 接进 PD 分离加 CPU HiCache（#42973，主代理亲读 PR 正文确认，前置 #43778 尚未合并）；PD 与 HiCache 回载冲突修复 #44081。vLLM 亮点：NIXL 连接器统计解码 #60856、MTP 草稿模型支持流水线并行 #60234。特别注明：本窗口 SGLang 的 AMD 条目落在 gfx1250 新架构和测试侧，没有 gfx950/MI350 的新提交，不误报。DeepInfer 星标 23214（00点版 23169，+45，双查一致），pushed_at 仍是 2026-10-26T05:30:52Z。arXiv 经 API 五组关键词亲查：窗口内 published 为零篇，最新 submitted 全在 10/26 或更早，符合该窗口结构性零入库的预期；2610.34914 等已报编号不重复。HN 用 Algolia 精确窗口复核，窗口内 stories 共 64 条，逐条看完无 serving 直击，未采。X 名单、Reddit、Simon、机器之心与量子位窗口内零命中；Simon 最新仍是 10/26 23:53Z 的 Terra 帖（00点版已报）。Latent Space 窗口内只有 AINews 的 Anthropic S-1 期（10/27 07:24:59Z），非 serving 主题，不收；Spotify 站内本轮已直查（status connected），Latent Space 最新单集日期为 2026-10-26，窗口内无新单集。social 窗口内约 6 条均为小账号科普，无官方发布，未采。补扫 d3-ultra：X 首发是 10/27 03:01Z（即 10/26 20:01 PDT），属上一时段，22点版与 00点版均未收录；本期经主代理亲开 HF 模型卡核对后补收，文中数字均为模型卡自报、无独立实测。本期无深读：KVShard 只是主线 PR 且带未合并前置、无图表无基准，宁缺毋滥。*</p></body></html>
