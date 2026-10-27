@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月27日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-27"/>
+<meta name="doc-ts" content="2026-10-27T23:05:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-27（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-27（16点版）</h1>
+<p>16点版来了。 正式版还是全平。 这轮 AMD 的料特别足。 一条静默算错正中你的卡。 一条在线量化也对你的卡。 PD 那边有个版本别乱升。 NIXL 刚把新版召回了。 本期有一篇值得深读。 就是那条静默算错。</p>
+<h2>框架更新</h2>
+<p><strong>正式版一家都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 TensorRT-LLM 还是预发布。 llama.cpp 也没出新快照。 窗口内的活全在主线里。</p>
+<p><strong>vLLM 把 NIXL 新版退回去了</strong> NIXL 是 PD 传草稿的通道。 PD 解耦就是读题吐字分工。 草稿纸就是 KV cache。 它记着算过的中间结果。 新版 1.5.1 被团队召回。 它误带了一个新版网络库。 会坑到用 AWS 云网卡的人。 vLLM 干脆退回 1.5.0 版。 代价是丢一个分配修复。 但总比传输出问题强。 划重点，先别手动升新版。 等他们重新发版再说。 这次验证没在 GPU 上跑。 只验了依赖能不能装上。 来源：<a href="https://github.com/vllm-project/vllm/pull/64085">https://github.com/vllm-project/vllm/pull/64085</a></p>
+<p><strong>Kimi-K3 在 AMD 上静默算错</strong> 静默算错就是不报错直接错。 这条已做成深读，文末看。 中招的是融合解码那条快路。 它把真实位置传进了内核。 内核却没按假设夹住它。 第一个词之后全算错了。 错的草稿还存进了缓存。 小批次时中招最严重。 并发高了反而自动绕开。 修法意外地简单。 位置直接传全零就行。 因为它的旋转是恒等变换。 评测分从 0.74 回到 0.988。 细节和图都在深读笔记里。 来源：<a href="https://github.com/vllm-project/vllm/pull/63409">https://github.com/vllm-project/vllm/pull/63409</a></p>
+<p><strong>SGLang 给 AMD 在线量化提速</strong> 模型是 Qwen3.5 那个大 MoE。 检查点里两处投影还是高精度。 加载时一次性压成 MXFP4。 MXFP4 是 4 位浮点格式。 压完就走 AMD 的快内核。 硬件是 8 张 MI355X。 正是你手里的那张卡。 12 种形状取了几何平均。 每词元耗时中位降 5.1%。 这是带投机解码的数字。 不带投机时降 4.0%。 输出吞吐涨 5.9% 和 4.2%。 默认就开，环境变量能关。 数字都是 PR 作者口径。 来源：<a href="https://github.com/sgl-project/sglang/pull/43839">https://github.com/sgl-project/sglang/pull/43839</a></p>
+<p><strong>vLLM 的 MoE 投影换了搬运法</strong> 换的是 TMA 搬运方式。 TMA 是显卡的自动搬运工。 模型是 GLM-5.3，卡是 H200。 端到端吞吐涨了约 3%。 并发 4 时涨 3.4%。 并发 16 时涨 3.1%。 首字延迟也降了一点。 内核微测快 15% 到 20%。 先泼盆冷水再记这条。 作者说并发 1 的数据丢了。 没卡重测，请别人验证。 所以这是作者口径待复核。 来源：<a href="https://github.com/vllm-project/vllm/pull/63820">https://github.com/vllm-project/vllm/pull/63820</a></p>
+<p><strong>草稿模型的草稿纸也改 FP8</strong> DSpark 是投机解码的草稿员。 投机解码就是先猜再验。 像实习生打草稿专家改。 草稿员自己的草稿纸也占显存。 现在它改存 FP8 格式。 每卡号称省 5.38 GB。 同预算多装约 11% 的槽位。 但这笔账要打个问号。 省多少是按公式推出来的。 正文自己标了 AI 推算。 精度那组数也别当真。 0.87 对 0.77 看着涨很多。 样本误差就有正负 0.06。 作者只说性能基本不变。 来源：<a href="https://github.com/vllm-project/vllm/pull/63841">https://github.com/vllm-project/vllm/pull/63841</a></p>
+<p><strong>SGLang 把专家计数融成一个内核</strong> 场景是专家并行加负载均衡。 均衡器每步都要数专家用量。 老做法一步付八个小算子。 还被录进图里每轮重跑。 一张图白付约 0.6 到 1 毫秒。 作者说收益常被这笔账吃掉。 新做法融成一个内核搞定。 但新路的收益数字没给。 给的全是老路的成本账。 只能记一句：账算清了。 到底快多少，等后续实测。 来源：<a href="https://github.com/sgl-project/sglang/pull/46497">https://github.com/sgl-project/sglang/pull/46497</a></p>
+<p><strong>其余几条一句话带过</strong> SGLang 把主机活塞进了图里。 低延迟解码少等主机干活。 但新路默认关，要手动开。 分项数字是全栈口径待拆。 来源：<a href="https://github.com/sgl-project/sglang/pull/45474">https://github.com/sgl-project/sglang/pull/45474</a> SGLang 的 prefill 少拷一份。 作者只给了两张分析截图。 没有延迟和吞吐数字。 来源：<a href="https://github.com/sgl-project/sglang/pull/45753">https://github.com/sgl-project/sglang/pull/45753</a> FlashInfer 补了状态传输布局。 vLLM 的 PD 传输要这个布局。 是使能型的活，没性能数字。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7132">https://github.com/flashinfer-ai/flashinfer/pull/7132</a> llama.cpp 能跑 LiquidAI 新模型。 其中一个是多模态向的。 但支持还只是部分。 视频输入要等后续版本。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31275">https://github.com/ggml-org/llama.cpp/pull/31275</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23389 个。 14点版时是 23378 个。 两小时涨了 11 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>窗口内没有新论文入库</strong> 五组关键词都亲查过了。 最新一篇还停在 26 号。 这个时段结构性没货。 arXiv 每天凌晨统一放货。 下一批要等今晚那轮。</p>
+<p><strong>HN 和 Reddit 这轮也空</strong> HN 窗口内 88 条全扫完。 没有一条讲推理服务的。 Reddit 也没查到新帖证据。 聚合页冒充原帖的不算数。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有新新闻</strong> 云厂商和芯片线都查过了。 今天的大稿全在白天。 窗口内没有第二波跟进。</p>
+<p><strong>补一条上午漏收的</strong> 英伟达给 DGX Spark 发了优化包。 Spark 是它的桌面小钢炮。 包装了三招推理优化。 量化和投机解码都在内。 解码速度号称涨 185%。 这是合成测试的厂商自报。 没有第三方复现，别当真。 发布时间是上午 9 点 55。 严格说不在本期窗口内。 上午那几期漏了，这期补记。 来源：<a href="https://Blockchain.News/news/nvidia-three-inference-optimizations-dgx-spark">https://Blockchain.News/news/nvidia-three-inference-optimizations-dgx-spark</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V集体安静</strong> 名单里的人都逐个查过。 窗口内没有新帖新文。 Simon 写了篇徽章黑客杂记。 跟推理服务完全不沾边。 Latent Space 也没出新集。 最新还是 14点版报的那集。</p>
+<p><strong>值得深读：Kimi-K3 静默算错</strong> 这篇能帮你补一块评估拼图。 你的 MI355X 正跑这类模型。 坑只在小批次低并发露头。 只测高并发会完美错过。 它跟前两例静默算错连成串。 EPLB 副本没加载权重算一例。 SWA 恢复读错草稿算一例。 三例凑齐了精度门检查清单。 笔记里有误差和评测分对照图。 链接：Kimi-K3-MLA静默算错精读.html（深度阅读目录）</p>
+<p>*去重说明：本轮窗口是 10/27 14:00 到 16:00 PDT。对应 UTC 是 10/27 21:00 到 23:00。对应 epoch 是 1793134800 到 1793142000。框架经子代理 gh API 全查、主代理亲核 vLLM #63409 正文全文与 #64085、#63841、#43839、#46497 的合并时间（依次 21:08Z、22:07Z、21:09Z、22:27Z、22:28Z）和 DeepInfer 星标 23389（14点版 23378，+11，pushed_at 仍为 2026-10-26T05:30:52Z）：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。TensorRT-LLM 仍是 v1.4.0rc1 预发布，窗口内 2 条提交均为小众正确性修复与内部重构，未采。LMDeploy 仍是 v0.18.0，仓库用 InternLM/lmdeploy，窗口内零提交。TGI 仍是 v3.3.7，零提交。FlashInfer 仍是 v0.7.2.post1，窗口内 35 条提交多为 Cake 内核微优化。llama.cpp 窗口内 3 条提交、最新快照仍是 b11936（窗口前、14点版已报）。窗口内主线提交：vLLM 9 条、SGLang 8 条。vLLM #63409 经主代理亲读 PR 正文核对：DCP 关闭时融合 decode q-prep 传真实 position、AITER v0.1.26 的 seg kernel 只在 DCP 路径 clamp，MI355X 微测 q_pe max err 2.9–3.8 且全零比例 1.00，传全零后 ≤0.125；端到端 Kimi-K3 MXFP4 TP8、408 例工具调用评测 0.740→0.988，第二配方 0.7819→0.9926，均为 PR 作者口径；已转深读笔记。vLLM #64085 经子代理核对：NIXL 团队召回 1.5.1（误带 libfabric 2.7.0 影响 AWS EFA），回退至 1.5.0，验证只有依赖解析、明确 No GPU run。vLLM #63820 经核对：H200、GLM-5.3 TP8、GuideLLM 合成数据下吞吐 +3.1~3.4%，作者自承并发 1 数据丢失待他人验证，正文已标注。vLLM #63841 经核对：省 5.38 GiB/rank 为正文标注的 AI Analysis 推算，AIME25 0.8667 对 0.7667 在 ±0.06 样本误差内，正文已如实标注不当精度提升证据。SGLang #43839 经核对：8×MI355X、Qwen3.8-2.4T-A95B MXFP4、12 种 shape 几何平均，中位 TPOT 带 MTP −5.1%、不带 −4.0%，作者口径。SGLang #46497 经核对：正文只给旧路径每 forward +763~1069 µs 的成本账，无融合后新路径端到端收益数字，正文已标注。SGLang #45474 的分项数字为全栈单独去掉该项的损失口径、#45753 只有 nsys 截图无数字、#46093 无具体数字且 CI 多项失败，均只作一句话带过。FlashInfer #7132 为 vLLM NIXL PD 传输所需的 DS conv-state 布局使能，无性能数字。arXiv 经子代理五组亲查：窗口内 published 为零篇，各组最新全在 10/26 或更早，符合结构性零入库预期。HN 用 Algolia 精确窗口查得 stories 共 88 条逐条扫完，推理 serving 相关为零条。Reddit 两组定向搜索无结果，放宽搜索只有聚合页、无原帖 URL 与时间证据，未采。业内新闻经子代理核对：窗口内无新稿；DGX Spark 优化稿标注 16:55 UTC（09:55 PDT）为窗口前发布、今天各期未报，本期作补报并标注厂商自报口径；General Compute 已在 10点版补报、Akamai 已在 04点版报过、NVIDIA 与 Meta 的 Muse 稿不涉推理服务，均去重。大V经子代理逐个核查：@lmsysorg、vLLM 官方、@karpathy、@jimfan、Latent Space newsletter、The Batch、机器之心、量子位窗口内均无新帖新文；Simon Willison 10/27 新帖为会议徽章玩模拟器杂记，与 serving 无关未采。Spotify 经子代理直查（status connected）：Latent Space 最新单集仍为 14点版已报的 2026-10-27 Anthropic 集，无其后新集。social 窗口内仅 2 条，均为旧闻复述与教学内容，未采。14点版的 vLLM Mooncake 向量化、PD 图捕获显存、SGLang DFlash MLA 与 EPLB 静默算错、TensorRT-LLM gRPC 图片输入均已去重不重复。本期深读 1 篇：vLLM #63409 Kimi-K3 MLA 静默算错（含按 PR 表格数据绘制的对照图，图注已注明数据来源）。*</p></body></html>
