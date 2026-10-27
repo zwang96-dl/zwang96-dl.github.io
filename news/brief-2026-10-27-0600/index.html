@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月27日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-27"/>
+<meta name="doc-ts" content="2026-10-27T13:00:26"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-27（06点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-27（06点版）</h1>
+<p>06点版来了。 正式版还是全平。 但主线有条 PD 的真修复。 SGLang 修了一个白吃显存的坑。 vLLM 给 AMD 补了 PD 配方。 业内还有一条自动调参的融资。 本期不标值得深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版一家都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 llama.cpp 发了两个快照。 最新是 b11928 版。 快照按惯例不算正式发版。 窗口内主线共 21 条提交。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11928">https://github.com/ggml-org/llama.cpp/releases/tag/b11928</a></p>
+<p><strong>SGLang 修了 PD 的显存坑</strong> PD 解耦就是读写分工流水线。 坑出在发草稿纸的线程上。 草稿纸就是 KV cache。 线程干活前没先选好卡。 结果它跑去 0 号卡建了上下文。 白占人家约 1GB 显存。 更麻烦的是占的时机。 KV 池刚按空闲显存定完尺寸。 这 1GB 就挤掉了激活的余量。 触发条件也挺具体。 prefill 的卡不是 0 号卡。 又碰上带缓存前缀的请求。 Mooncake 和 Mori 都中招。 Mori 是 AMD 那边的传输后端。 修复办法是给线程绑卡。 让传输线程先认准自己的卡。 这条只进了主线，还没发版。 你评估 PD 解耦，这条值得记。 来源：<a href="https://github.com/sgl-project/sglang/pull/45678">https://github.com/sgl-project/sglang/pull/45678</a></p>
+<p><strong>vLLM 给 AMD 刷新了 PD 配方</strong> 刷新的是 Kimi-K3 的配方。 跑的硬件是 MI355X。 跟你的 MI350X 是同代亲戚。 配方给了三种拆法。 一片读配一片写，是 1P1D。 还有 1P2D 和 1P3D。 KV 搬运走 RDMA 高速网。 用的是 MoRIIO 后端。 KV 本身用 FP8 存，省显存。 注意，这次是配方文档更新。 不是运行时代码提速。 数字要等你自己上卡实测。 来源：<a href="https://github.com/vllm-project/vllm/pull/63726">https://github.com/vllm-project/vllm/pull/63726</a></p>
+<p><strong>其余几条一句话带过</strong> vLLM 给 AMD 的 prefill 调了块大小。 调的是 Kimi-K3 的卷积内核。 来源：<a href="https://github.com/vllm-project/vllm/pull/63342">https://github.com/vllm-project/vllm/pull/63342</a> SGLang 给 AMD 升了通信库。 RCCL 升到 2.32.3 版。 对应 ROCm 10.1 那一代。 来源：<a href="https://github.com/sgl-project/sglang/pull/45576">https://github.com/sgl-project/sglang/pull/45576</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23289 个。 04点版时是 23261 个。 两小时涨了 28 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>窗口内没有新论文入库</strong> 五组关键词都亲查过了。 最新一篇还停在 26 号中午。 这个时段结构性没货。 arXiv 每天凌晨统一放货。 26 号那批都报过了。 下一批要等今晚那轮。</p>
+<p><strong>HN 窗口内 95 条扫完</strong> 没有一条框架直击。 有个小工具叫 llmrun。 它帮你看本地卡能跑啥模型。 热度只有 3 分，先不展开。</p>
+<h2>业内新闻</h2>
+<p><strong>英伟达投了一家自动调参公司</strong> 这家公司叫 Simplismart。 在印度班加罗尔做推理软件。 它刚拿到 1400 万美元融资。 是 B 轮，估值约 1 亿美元。 英伟达是跟投方之一。 它卖的正是自动调参。 按你的延迟线和成本线找平衡。 说白了，没人需要最快或最便宜。 大家要的是刚好够用的那档。 这话跟你的调参痛点是一个题。 你想做的就是 SLA 内找最优。 它已经把这事做成了生意。 客户里有视频生成平台。 一家说 GPU 成本降了 56%。 这是客户自报的数字。 它还在跟英伟达做技术对接。 对接的是 Dynamo 推理软件。 这篇发布在窗口起点那一刻。 HN 是窗口内转过来的。 来源：<a href="https://techcrunch.com/2026/10/27/nvidia-backs-indian-startup-helping-companies-run-ai-models-with-fewer-gpus/">https://techcrunch.com/2026/10/27/nvidia-backs-indian-startup-helping-companies-run-ai-models-with-fewer-gpus/</a></p>
+<p><strong>LiteLLM 有个安全提醒</strong> LiteLLM 是常用的模型网关。 它出了个供应链攻击事件。 起因是主密钥暴露了。 原文是 26 号发的。 HN 这轮又转了一次。 用它做路由的团队该查一查。 来源：<a href="https://www.theregister.com/security/2026/10/26/litellm-supply-chain-attack-started-with-an-exposed-master-key/5305544">https://www.theregister.com/security/2026/10/26/litellm-supply-chain-attack-started-with-an-exposed-master-key/5305544</a></p>
+<p><strong>Cloudflare 那事不重复报</strong> 今早又冒出几篇复盘文。 讲的还是 GLM 串话那件事。 本体 26 号 16点版深读过了。 二手复盘就不占你时间了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Spotify 站内亲查过了。 Latent Space 最新还是 26 号那集。 讲的是 AI 科学家评测。 跟推理服务不沾边。 Simon 窗口内也没有新帖。 最新还是 Terra 那篇，已报。 本期不标值得深读。 PD 修复还没进正式版。 等落版了再深读不迟。</p>
+<p>*去重说明：本轮窗口是 10/27 04:00 到 06:00 PDT。对应 UTC 是 10/27 11:00 到 13:00。对应 epoch 是 1793098800 到 1793106000。框架经主代理 gh API 亲查：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。TensorRT-LLM 仍是 v1.4.0rc1 预发布。LMDeploy 仍是 v0.18.0，仓库用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1。llama.cpp 窗口内两个快照：b11927（11:08Z）、b11928（12:30Z）。窗口内主线提交共 21 条：vLLM 7 条、SGLang 5 条、llama.cpp 5 条、TensorRT-LLM 2 条、FlashInfer 2 条；LMDeploy、TGI 均零提交。SGLang 的 PD 修复 #45678 经主代理亲读 PR 正文核对：非 GPU0 的 prefill rank 首次为缓存前缀发 KV 时，Mooncake 与 Mori 的传输线程未选设备，在 GPU0 误建 CUDA context，白占约 0.6 到 1 GiB，且发生在 KV 池按空闲显存定尺寸之后；修复为传输线程绑设备。vLLM 的 #63726 经亲读确认是 MI355X 上 Kimi-K3 的 PD 配方文档刷新（1P1D、1P2D、1P3D，MoRIIO RDMA，FP8 KV），非运行时改动。DeepInfer 星标 23289（04点版 23261，+28），pushed_at 仍是 2026-10-26T05:30:52Z。arXiv 经主代理与子代理双查五组：窗口内 published 为零篇，各组最新全在 10/26 或更早（KV cache 组最新为 10/26 12:08Z），符合结构性零入库预期。HN 用 Algolia 精确窗口双查，窗口内 stories 共 95 条逐条看完：无 vLLM、SGLang、KV cache、投机解码等直击；边缘只有 llmrun 小工具（3 分）与 LiteLLM 供应链帖（原文 10/26，窗口内重贴，正文已注明）。Simplismart 经主代理亲开 TechCrunch 原稿核对：发布字段为 2026-10-27T11:00:00Z（窗口起点），HN 于 12:29Z 转入窗口；B 轮 1400 万美元、估值约 1 亿美元、英伟达跟投、按 SLA 与 TCO 自动调参、InVideo 称 GPU 服务成本降 56%（客户自报）、与英伟达 Dynamo 做技术对接，均为原稿口径。Cloudflare GLM 串话的今日多篇二手复盘（Medium、DEV 等）本体已在 10/26 16点版深读，去重不收。Simon 经主代理 atom 亲核：最新仍是 10/26 23:53Z 的 Terra 帖（已报），窗口内无新帖。Spotify 经子代理直查（status connected）：Latent Space 最新单集为 2026-10-26 的评测主题，与 serving 无关，窗口内无新单集。X、Reddit、中文媒体窗口内未查到一手实质内容；social 窗口内只有本地跑分与科普帖，未采。本期无深读，宁缺毋滥。*</p></body></html>
