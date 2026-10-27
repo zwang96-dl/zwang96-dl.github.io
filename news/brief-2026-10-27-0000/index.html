@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月27日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-27"/>
+<meta name="doc-ts" content="2026-10-27T07:05:15"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-27（00点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-27（00点版）</h1>
+<p>00点版来了。 这轮是深夜窗口。 整体还是安静。 正式版一家都没动。 主线有两条 AMD 修复。 都跟你的卡有关。 本期不标值得深读。</p>
+<h2>框架更新</h2>
+<p><strong>主框架正式版还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 TensorRT-LLM 还是预发布版。 LMDeploy 还是 0.18.0 版。 llama.cpp 没出新快照。 最新还是 b11913 版。 几家正式版都没动。</p>
+<p><strong>SGLang 主线修了 AMD 的 FP8 坑</strong> 这条跟你的卡正对口。 gfx950 就是 MI350 这代。 你的 MI350X 正是这代。 坑出在 FP8 的草稿纸上。 草稿纸就是 KV cache。 KV cache 是存好的注意力结果。 校准尺度配了也会出垃圾。 说白了，答案会胡说八道。 现在主线已经修好了。 还没进正式版，先记一笔。 来源：<a href="https://github.com/sgl-project/sglang/pull/46528">https://github.com/sgl-project/sglang/pull/46528</a></p>
+<p><strong>SGLang 还顺手给 AMD 提了速</strong> 优化的是 Qwen3-Next 模型。 它把两个小步骤融成一步。 跑的还是 gfx950 这代卡。 少跑一趟，速度就快一点。 具体快多少没给数字。 同样还没进正式版。 来源：<a href="https://github.com/sgl-project/sglang/pull/45739">https://github.com/sgl-project/sglang/pull/45739</a></p>
+<p><strong>另外两家主线也有动作</strong> TensorRT-LLM 在做 Helix 缓存。 这是给聚合部署用的新缓存。 聚合部署就是不拆 PD。 读题吐字放在同一组卡。 这期只落了第一部分。 是 prefill 阶段的分配逻辑。 prefill 就是读题那一段。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20759">https://github.com/NVIDIA/TensorRT-LLM/pull/20759</a> FlashInfer 加了一批新程序。 是给 Blackwell 卡用的。 做的是分页注意力计算。 一共加了二十套程序。 也都还没进正式版。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7512">https://github.com/flashinfer-ai/flashinfer/pull/7512</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23169 个。 22点版时是 23119 个。 两小时涨了 50 个。 代码还是没更新。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>窗口内没有新论文入库</strong> 五组关键词都亲查过了。 最新一篇还停在 26 号。 窗口内提交是零篇。 这跟 arXiv 的节奏对得上。 它每天约凌晨统一放一批。 这个窗口结构性没货。 补扫也没捞到新东西。 26 号那批都报过了。</p>
+<h2>业内新闻</h2>
+<p><strong>HN 窗口内没有 serving 硬货</strong> 窗口内 43 条帖子逐条看完。 没有一条讲推理服务的。 不展开，不占你时间。</p>
+<p><strong>其余渠道都扫过了</strong> X 上名单里没人发新帖。 Reddit 没有新讨论出来。 Simon 窗口内也没有新帖。 中文媒体只有旧闻转载。 社交渠道窗口内是零条。 最近一条还在窗口外。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Latent Space 没有新单集。 名单里的博客也没更新。 本期不标值得深读。 宁缺毋滥，下期有货再补。</p>
+<p>*去重说明：本轮窗口是 10/26 22:00 到 10/27 00:00 PDT。对应 UTC 是 10/27 05:00 到 07:00。对应 epoch 是 1793077200 到 1793084400。框架经 gh API 亲查，子代理与主代理双查一致：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。TensorRT-LLM 仍是 v1.4.0rc1 预发布。LMDeploy 仍是 v0.18.0，仓库用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1。llama.cpp 最新仍是 b11913（10/27 00:19Z，属更早窗口），窗口内 10 条提交多为界面与 OpenCL，无新快照。窗口内主线提交共 27 条：SGLang 6 条，含 AMD 的 FP8 KV 校准尺度垃圾输出修复 #46528 与 gfx950 上 Qwen3-Next 融合范数优化 #45739；TensorRT-LLM 6 条，含 Helix KV cache 第一部分 #20759；FlashInfer 5 条，含给 Blackwell 的二十套分页注意力程序 #7512；vLLM、LMDeploy、TGI 均零提交；均未进 release，只作背景。DeepInfer 星标 23169（22点版 23119，+50，双查一致），pushed_at 仍是 2026-10-26T05:30:52Z。arXiv 经 API 五组关键词亲查：窗口内 published 为零篇，五组最新 submitted 全在 10/26 或更早，符合该窗口结构性零入库的预期；补扫按编号 grep 未命中的三篇（Waypoint 2610.34914、注意力复杂度 2610.35020、语音长会话退化 2610.34991），22点版已按描述提过并明确不展开，不重复收录。HN 用 Algolia 精确窗口复核，窗口内 stories 共 43 条，子代理与主代理双查一致，逐条看完无 serving 直击，未采。Simon 亲核：最新仍是 10/26 23:53Z 的 Terra 帖（18点版已报），窗口内无新帖。X 名单、Reddit、机器之心与量子位窗口内零命中；social 窗口内零条，最近一条是 04:46Z 的教学 reel，在窗口外。Latent Space 经公开目录核对无新单集；本轮未直查 Spotify 站内，如实注明。本期无深读，宁缺毋滥。*</p></body></html>
