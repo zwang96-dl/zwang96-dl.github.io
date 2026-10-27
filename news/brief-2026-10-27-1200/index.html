@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月27日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-27"/>
+<meta name="doc-ts" content="2026-10-27T19:03:19"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-27（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-27（12点版）</h1>
+<p>12点版来了。 这轮主线特别集中。 三家框架同时在修同一件事。 就是 PD 解耦时 KV 怎么传。 PD 解耦就是读写分工流水线。 KV cache 就是模型的草稿纸。 SGLang 让解码端别再干等草稿。 vLLM 把重复传的草稿砍了三成。 英伟达给传草稿的通道补了并行。 全是主线，还没进正式版。 本期不标值得深读。 理由在文末，数字都还没坐实。</p>
+<h2>框架更新</h2>
+<p><strong>正式版一家都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 llama.cpp 只多了个新快照。 最新是 b11935 版。 快照按惯例不算正式发版。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11935">https://github.com/ggml-org/llama.cpp/releases/tag/b11935</a></p>
+<p><strong>SGLang 修了 PD 解码的一个堵点</strong> 场景是解码机先把 KV 存主机。 KV 就是传过来的草稿纸。 要用时再拷回显卡里。 老做法是拷完之前先硬等。 等的时候，推理流只能空转。 新做法是提前把拷贝排上队。 然后每步只轻轻问一句好了没。 各卡问完再对一次答案。 保证大家接的是同一批请求。 划重点，这条没有提速数字。 作者明说速度测试没做。 精度测试这条也没跑。 只有单卡单测过了 53 项。 机制值得学，收益先别信。 来源：<a href="https://github.com/sgl-project/sglang/pull/46689">https://github.com/sgl-project/sglang/pull/46689</a></p>
+<p><strong>vLLM 把 PD 重复传的字节砍了三成</strong> 问题出在混合结构的模型上。 有的层用注意力，有的用 SSM。 SSM 是另一类序列建模层。 老做法是每组都传全部区域。 别人独有的层也被重复传。 作者说重复字节约占 38%。 新做法是每组只读自己的区域。 在两台 GB300 上实测了一把。 三万二上下文时字节降 34%。 传输耗时约 8.4 毫秒降到 5.2。 十万上下文时字节降 38%。 传输耗时约 20.5 降到 12.4。 精度基本没动，在波动范围内。 数字都是 PR 作者自测口径。 跟你评估 PD 搬运账正对口。 来源：<a href="https://github.com/vllm-project/vllm/pull/62317">https://github.com/vllm-project/vllm/pull/62317</a></p>
+<p><strong>SGLang 还修了一个 KV 串话隐患</strong> 这条是正确性问题，不是性能。 滑动窗口的旧页恢复算错了起点。 它会碰到请求根本不拥有的页。 这些页被误放回空闲池里。 下一个请求就可能读到别人的 KV。 说白了，草稿纸会串到别人桌上。 修复就是恢复起点加一道钳制。 本地 CPU 单测过了 518 项。 GPU 套件还没本地跑，交给 CI。 来源：<a href="https://github.com/sgl-project/sglang/pull/46700">https://github.com/sgl-project/sglang/pull/46700</a></p>
+<p><strong>TensorRT-LLM 给 KV 通道补了并行</strong> 它的 V2 版 KV 连接器升级了。 原来假设一条通道一个领队。 现在支持注意力数据并行。 每个并行组跑自己的调度适配。 请求和传输记账都各管各的。 但有个硬脾气要先知道。 传输超时是全队致命的。 默认等 600 秒就必须重启进程。 作者说 DMA 没法安全中止。 反复失败会把页和槽位钉死。 验证也只是 CPU 用例为主。 作者明说不是原生 GPU 验证。 还有个 B200 超时根因没查明。 选用前先把这几条看清楚。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19369">https://github.com/NVIDIA/TensorRT-LLM/pull/19369</a></p>
+<p><strong>vLLM 在 AMD 上又省了一笔</strong> 这次还是 FP8 补头的老坑。 FP8 是把数字压小的算精度。 头数不够 16 就要补齐。 每卡只有 8 个头时等于白补一倍。 补完反而比不用 FP8 还慢。 新做法是头少时直接回落 bf16。 在 MI355X 上实测了一把。 单层 prefill 从 442 微秒降到 213。 平均首字延迟降了 7.9%。 从 849 毫秒降到 782 毫秒。 跟你的 MI350X 是同代亲戚。 来源：<a href="https://github.com/vllm-project/vllm/pull/61863">https://github.com/vllm-project/vllm/pull/61863</a></p>
+<p><strong>其余几条一句话带过</strong> FlashInfer 把 Rubin 的 MoE 计划补全了。 计划空间从 8 个涨到 32 个。 8192 个 token 时快了约 17%。 小批量基本没变化。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7027">https://github.com/flashinfer-ai/flashinfer/pull/7027</a> FlashInfer 的 W4A16 量化 MoE 也快了点。 整体约快 4% 到 5%。 Kimi K3 的 prefill 快了 12%。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7196">https://github.com/flashinfer-ai/flashinfer/pull/7196</a> llama.cpp 给 LFM3 又加了两个型号。 一个专攻音频，一个是全模态版。 但全模态版的视频输入还没合入。 现在还吃不了视频，别被名字骗了。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31257">https://github.com/ggml-org/llama.cpp/pull/31257</a> vLLM 把 RDNA3 的推理内核补齐了。 消费级老卡也能正经跑新模型了。 作者没给性能数字。 来源：<a href="https://github.com/vllm-project/vllm/pull/52970">https://github.com/vllm-project/vllm/pull/52970</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23359 个。 10点版时是 23344 个。 两小时涨了 15 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>窗口内没有新论文入库</strong> 五组关键词都亲查过了。 最新一篇还停在 26 号。 这个时段结构性没货。 arXiv 每天凌晨统一放货。 下一批要等今晚那轮。</p>
+<p><strong>HN 这轮只有一条沾边</strong> 146 条帖子逐条扫完了。 只有 LFM3 的官方博客热了点。 36 分，不算大热门。 这模型 10点版已经报过了。 框架落地和手册都讲完。 这轮就不重复炒了。 来源：<a href="https://www.liquid.ai/blog/lfm3">https://www.liquid.ai/blog/lfm3</a></p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有新新闻</strong> 云厂商和芯片线都查过了。 今早的甲骨文大单已经报过。 窗口内没有第二波跟进稿。 英伟达和 Meta 的合作是今晨稿。 严格在窗口外，也不碰推理服务。 本期就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Spotify 站内亲查过了。 Latent Space 最新还是 26 号那集。 讲的是 AI 科学家评测。 跟推理服务不沾边。 大V名单这轮也没有新帖。 Simon 窗口内也没有新文。 本期不标值得深读。 SGLang 那条 PD 修复最贴你。 但作者明说速度测试没做。 没数字的机制，先记一笔就好。 vLLM 那条数字只来自两台 GB300。 还是作者自测，等更多复现再说。</p>
+<p>*去重说明：本轮窗口是 10/27 10:00 到 12:00 PDT。对应 UTC 是 10/27 17:00 到 19:00。对应 epoch 是 1793120400 到 1793127600。框架经子代理 gh API 全查、主代理亲核四条关键 PR 的标题与合并时间：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。TensorRT-LLM 仍是 v1.4.0rc1 预发布。LMDeploy 仍是 v0.18.0，仓库用 InternLM/lmdeploy，窗口内零提交。TGI 仍是 v3.3.7，零提交。FlashInfer 仍是 v0.7.2.post1。llama.cpp 窗口内一个新快照 b11935（17:15Z）。窗口内主线提交：vLLM 7 条、FlashInfer 6 条、SGLang 4 条、llama.cpp 4 条、TensorRT-LLM 3 条。SGLang 的 #46689 经框架子代理亲读 PR 正文核对：PD decode 的 host 接收 KV 恢复改提前启动 H2D 拷贝加非阻塞 query 与 TP/CP 组 MIN all-reduce，PP 退回同步等待；作者明确 Speed Tests 为 Not included、Accuracy 为 Not run，只有单 GPU 单测 53 passed/1 skipped，正文已如实标注无提速数字。vLLM 的 #62317 经亲读核对：merged_at 为 18:02Z，NIXL 混合 attention 加 SSM 传输只读本组区域，GB300 两节点、P TP2 到 D TP2、pull、fp8 KV，GLM-5.3-Flash 在 32k 时每请求字节 859,615,744 降到 565,391,872（−34%）、传输约 8.4 降到约 5.2 毫秒，100k 时字节 −38%、传输约 20.5 降到约 12.4 毫秒，GSM8K 81.8% 到 80.6% 在作者给的波动内，均为 PR 作者口径。SGLang 的 #46700 是 SWA tombstone 恢复未按受保护前缀钳制导致 FULL 页双重释放、后续请求可能读到他人 KV，修复起点改为 max(evicted_seqlen, prev_prefix_len)，CPU 单测 518 passed/59 skipped。TensorRT-LLM 的 #19369 经亲读核对：V2 KV 连接器支持 attention DP，每 owner 独立 adapter 与 worker；致命超时 transfer_timeout_sec 默认 600 秒、control_grace_sec 默认 60 秒、到期需重启；验证为 192 个 source-isolated CPU 用例加 6 个双卡 H100 用例，作者明示非原生/GPU 验证且 B200 eviction 超时根因未明，正文已带上。vLLM 的 #61863 经亲读核对：MI355X、Kimi-K2.6-MXFP4 TP8，FP8 prefill 在每 rank 1 到 8 头时回落 bf16，prefill attention 442 降到 213 微秒每层，平均 TTFT 849.01 降到 782.15 毫秒（−7.9%），作者口径。DeepInfer 星标经主代理亲查为 23359（10点版 23344，+15），pushed_at 仍是 2026-10-26T05:30:52Z。arXiv 经子代理五组亲查且有更正记录：窗口内 published 为零篇，各组最新全在 10/26 或更早，子代理首版摘要里 2610.23749 等条目已作废、以两次实测为准，符合结构性零入库预期。HN 用 Algolia 精确窗口查得 stories 共 146 条逐条扫完：强相关只有 LFM3 官方博客（36 分，17:04Z），该模型已在 10点版报过框架落地，本期只记热度不重复；最高热度是地缘政治帖（48 分与 45 分），与 serving 无关未采。业内新闻经子代理核对：窗口内无新稿，Oracle 系列与 General Compute 均已报且在窗口前；NVIDIA 与 Meta 扩大 Muse 合作并投 30 亿美元股权的 GlobeNewswire 稿为 06:32Z 今晨稿，在窗口外且不涉推理服务，未采。大V经子代理逐个核查：@lmsysorg、vLLM 官方、@karpathy、@jimfan、Simon Willison、Latent Space newsletter、The Batch、机器之心、量子位窗口内均无新帖新文。Spotify 经子代理直查（status connected）：Latent Space 最新单集仍为 2026-10-26 的评测主题，窗口内无新单集。Reddit 定向搜索窗口内无结果；social 窗口内（17 到 19Z）零条回传，均为旧闻复述未采。10点版的 vLLM ROCm MLA 融合、TensorRT-LLM 视觉 RoPE 与投机融合、Oracle 推理菜单均已去重不重复。本期无深读，宁缺毋滥：PD 两条主线 PR 均未进正式版，一条无速度测试、一条只有作者两台 GB300 自测。*</p></body></html>
