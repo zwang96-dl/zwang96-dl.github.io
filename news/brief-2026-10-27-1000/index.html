@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月27日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-27"/>
+<meta name="doc-ts" content="2026-10-27T17:02:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-27（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-27（10点版）</h1>
+<p>10点版来了。 正式版还是全平。 主线这轮是 AMD 的主场。 vLLM 在 ROCm 上连融了好几个内核。 多模态那边也有条实在的。 TensorRT-LLM 把看图的开销压了一截。 业内是甲骨文的主场。 它一口气把推理菜单拉宽了。 本期不标值得深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版一家都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 llama.cpp 发了两个新快照。 最新是 b11934 版。 快照按惯例不算正式发版。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11934">https://github.com/ggml-org/llama.cpp/releases/tag/b11934</a></p>
+<p><strong>vLLM 在 AMD 上把两次乘法合成一次</strong> 说的是 Kimi-K3 的解码路径。 解码就是一个字一个字往外吐。 吐字时每层要算两次投影。 两次启动，GPU 有一半在等。 新做法是先把两份权重离线拼好。 运行时一次乘法全搞定。 单层耗时从 12.25 微秒降到 9.20。 配套的 prefill 融合也一起进了。 prefill 就是先读完你的输入。 原来每块上下文要跑四个内核。 现在一个 gather 内核全包了。 两个 PR 都是 ROCm 路径的活。 跑的是 MI355X 那一代卡。 跟你的 MI350X 是同代亲戚。 数字都是 PR 作者自测口径。 还没进正式版，先记一笔。 来源：<a href="https://github.com/vllm-project/vllm/pull/60110">https://github.com/vllm-project/vllm/pull/60110</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/53166">https://github.com/vllm-project/vllm/pull/53166</a></p>
+<p><strong>TensorRT-LLM 把看图的旋转算了个并账</strong> 对象是 Qwen 系列的视觉模型。 模型看图前要给特征转个方向。 这步叫 RoPE，旋转位置编码。 原来 Q 和 K 要分两次转。 Q、K 就是注意力里的两份数据。 现在相邻时一次调用转完。 每次编码的启动数从 54 降到 27。 四卡 GB200 上实测了一把。 单图编码从 25.90 毫秒降到 22.76。 降幅是 12.1%。 但八张大图时基本没变化。 作者也说得很实在。 端到端的总收益还没测出来。 别把单图这一档当整机提速。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20932">https://github.com/NVIDIA/TensorRT-LLM/pull/20932</a></p>
+<p><strong>TensorRT-LLM 的投机解码也融了一大把</strong> 投机解码就是先猜再验。 像实习生打草稿，专家来改。 这轮融了三处活。 选词那步改成按词表分卡并行。 DSpark 的猜词链融成一个内核。 草稿模型也加了张量并行融合。 细节很密，进正式版再细看。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20940">https://github.com/NVIDIA/TensorRT-LLM/pull/20940</a></p>
+<p><strong>新模型 LFM3 两边同时落地</strong> llama.cpp 新增了 LFM3 支持。 含纯文本版和视觉版两个型号。 SGLang 同步发了份使用手册。 手册里还提了 PD 解耦的玩法。 PD 解耦就是读写分工流水线。 两家同一天接一个新模型。 说明这模型最近热度不低。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31252">https://github.com/ggml-org/llama.cpp/pull/31252</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/46859">https://github.com/sgl-project/sglang/pull/46859</a></p>
+<p><strong>其余几条一句话带过</strong> FlashInfer 给 GB300 加了个实验内核。 专治一种新模型结构的边界融合。 还标着实验性，了解即可。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6789">https://github.com/flashinfer-ai/flashinfer/pull/6789</a> vLLM 修了个投机解码的启动崩溃。 Eagle 配量化输出头时会直接挂。 现在补回了漏掉的属性检查。 来源：<a href="https://github.com/vllm-project/vllm/pull/53104">https://github.com/vllm-project/vllm/pull/53104</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23344 个。 08点版时是 23313 个。 两小时涨了 31 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>窗口内没有新论文入库</strong> 五组关键词都亲查过了。 最新一篇还停在 26 号。 这个时段结构性没货。 arXiv 每天凌晨统一放货。 下一批要等今晚那轮。</p>
+<p><strong>有人把两台 5090 的草稿纸连起来了</strong> 一篇个人博客，HN 上只有 3 分。 两台机器各插一张 5090。 他让两边共用一份 KV cache。 KV cache 就是模型的草稿纸。 草稿纸走以太网在两机间传。 小玩家在土法拼多机推理。 思路跟正经的 PD 解耦是一路的。 当个社区风向看看就好。 来源：<a href="https://viiwork.pulu.app/blog/kv-share-two-5090-hosts/">https://viiwork.pulu.app/blog/kv-share-two-5090-hosts/</a></p>
+<h2>业内新闻</h2>
+<p><strong>甲骨文把英伟达新旗舰摆上货架了</strong> Vera Rubin 在它的云上正式可用。 NVL72 整机柜今天就能租。 不是路线图，是已经上架。 还要扩到多吉瓦规模。 吉瓦是给数据中心算电的单位。 配套的 Vera CPU 也一起上了。 理由很实在，值得你琢磨。 Agent 两次调模型之间要跑工具。 跑工具、取数据，都是 CPU 的活。 CPU 慢了，GPU 就只能干等。 来源：<a href="https://www.morningstar.com/news/globe-newswire/9853667/nvidia-and-oracle-expand-nvidia-vera-rubin-to-multi-gigawatt-scale-and-bring-nvidia-vera-cpu-to-oracle-cloud-infrastructure">https://www.morningstar.com/news/globe-newswire/9853667/nvidia-and-oracle-expand-nvidia-vera-rubin-to-multi-gigawatt-scale-and-bring-nvidia-vera-cpu-to-oracle-cloud-infrastructure</a></p>
+<p><strong>甲骨文的推理菜单一下变宽了</strong> 它第一次开始提供谷歌的 TPU。 TPU 是谷歌自研的 AI 芯片。 还拉来了 Cerebras 做快速推理。 Cerebras 是整块晶圆做一颗芯片。 它主打长链推理时吐字快。 不过这项要 2027 年才可用。 现在只是宣布了计划。 另外还有 SambaNova 也在名单上。 Reuters 的点评一针见血。 训练市场英伟达一家独大。 推理市场的竞争者多得多。 连英伟达方案里的网络芯片。 甲骨文都要换成自研的 Acceleron。 来源：<a href="https://www.globenewswire.com/news-release/2026/10/27/3389429/0/en/cerebras-and-oracle-team-up-to-bring-cerebras-ai-inference-to-oracle-cloud-infrastructure.html">https://www.globenewswire.com/news-release/2026/10/27/3389429/0/en/cerebras-and-oracle-team-up-to-bring-cerebras-ai-inference-to-oracle-cloud-infrastructure.html</a> 来源：<a href="https://www.reuters.com/business/oracle-expands-chip-supply-deal-with-nvidia-adds-google-cerebras-offerings-2026-10-27/">https://www.reuters.com/business/oracle-expands-chip-supply-deal-with-nvidia-adds-google-cerebras-offerings-2026-10-27/</a></p>
+<p><strong>补一条今晨的融资</strong> 这条严格说在窗口外。 是今晨六点那档的边缘料。 一家叫 General Compute 的公司。 刚融了 1 亿美元，估值 8 亿。 它专做非英伟达芯片的推理云。 已经签了 4 亿美元的采购单。 买的是 SambaNova 的推理芯片。 跟你的自动调参是两条路。 人家赌的是换芯片省钱。 来源：<a href="https://techcrunch.com/2026/10/27/general-compute-raises-100-million-series-a-countering-the-neocloud-disaster-narrative/">https://techcrunch.com/2026/10/27/general-compute-raises-100-million-series-a-countering-the-neocloud-disaster-narrative/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Spotify 站内亲查过了。 Latent Space 最新还是 26 号那集。 讲的是 AI 科学家评测。 跟推理服务不沾边。 Simon 窗口内也没有新帖。 大V名单这轮也没有新帖。 有一篇离线编程的长文值得瞄一眼。 讲的是断网用本地小模型写代码。 严格说它发在窗口外 19 分钟。 只当边缘推荐，不算本期新货。 来源：<a href="https://latent.space/p/offline-coding/">https://latent.space/p/offline-coding/</a> 本期不标值得深读。 多模态那条 PR 还没进正式版。 端到端收益作者自己都没测。 等落版了再深读不迟。</p>
+<p>*去重说明：本轮窗口是 10/27 08:00 到 10:00 PDT。对应 UTC 是 10/27 15:00 到 17:00。对应 epoch 是 1793113200 到 1793120400。框架经子代理 gh API 全查、主代理亲核关键 PR 正文：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。TensorRT-LLM 仍是 v1.4.0rc1 预发布。LMDeploy 仍是 v0.18.0，仓库用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1。llama.cpp 窗口内两个快照：b11933（15:27Z）、b11934（15:50Z）。窗口内主线提交：vLLM 9 条、FlashInfer 5 条、TensorRT-LLM 4 条、SGLang 3 条、llama.cpp 1 条；LMDeploy、TGI 均零提交。vLLM 的 #60110 经主代理亲读 PR 正文核对：ROCm/AITER 解码路径把 q_b_proj 与 W_UK 离线折叠成一份权重，单层 12.25µs 降到 9.20µs，merged_at 为 16:34Z；#53166 是配套的 prefill 侧 gather 融合，MI355X 上验证。TensorRT-LLM 的 #20932 经主代理亲读核对：merged_at 为 16:20Z，Qwen2.5-VL/Qwen3-VL 视觉 RoPE 一次启动，启动数 54 降到 27，四卡 GB200、Qwen3-VL-235B 单图编码 25.90ms 降到 22.76ms（−12.1%），8 张大图基本不变，且 PR 正文明确说合并后的端到端收益尚未确立，均为 PR 作者口径。#20940 是投机解码三处融合（词表并行选择、DSpark Markov 融合、草稿模型 TP 融合）。FlashInfer 的 #6789 是实验性 mhc_fused_post_pre，仅 SM103/GB300。DeepInfer 星标经主代理亲查为 23344（08点版 23313，+31），pushed_at 仍是 2026-10-26T05:30:52Z。arXiv 经子代理五组全查：窗口内 published 为零篇，各组最新全在 10/26 或更早，符合结构性零入库预期。HN 用 Algolia 精确窗口查得 stories 共 153 条逐条扫完：直击只有双 5090 共享 KV cache 博客（3 分）与 Cerebras×Oracle 公告（5 分，后者在业内新闻里以原稿为准）；最高热度是 Genie 4 世界模型（153 分），与 serving 无关未采。业内新闻经子代理核对发布时间：Cerebras×Oracle 的 GlobeNewswire 原稿 Published 为 16:00Z，正中窗口，且明确是计划 2027 年内可用、非已上线；Vera Rubin 的 NVL72 与 Vera CPU 在 OCI 已 GA，HGX Rubin NVL8 只是计划引入，正文已区分；Reuters 综合稿点明 Oracle 首次提供 Google TPU、另加 SambaNova 与 Cerebras、英伟达方案部分改用自研 Acceleron 网络。General Compute 融资的 TechCrunch 原稿 Published 为 13:00Z，严格在窗口外，属 06点版时段边缘漏收，正文已明确标注为补报。Latent Space 离线编程文 Published 为 14:41Z，在窗口外 19 分钟，正文已标注。大V经子代理逐个核查：Simon 最新仍是 10/26 三篇（Terra 等，已报），@lmsysorg、@karpathy 本人、@jimfan、vLLM 官方账号窗口内均无新帖（窗口内只有一篇第三方评论 Karpathy 旧帖的 Medium 文，未采）。Spotify 经子代理直查（status connected）：Latent Space 最新单集仍为 2026-10-26 的评测主题，与 serving 无关，窗口内无新单集。Reddit、X 定向搜索窗口内无结果；机器之心、量子位窗口内无推理报道；social 窗口内回帖时间全部不晚于 14:00Z，均为旧闻复述，未采。08点版的 TensorRT-LLM FP8 GEMM 与苹果 M6、06点版的 Simplismart 与 SGLang PD 修复、04点版的 Akamai 均已去重不重复。本期无深读，宁缺毋滥。*</p></body></html>
