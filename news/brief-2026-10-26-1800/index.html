@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月26日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-26"/>
+<meta name="doc-ts" content="2026-10-27T00:59:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-26（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-26（18点版）</h1>
+<p>18点版来了。 这轮整体偏安静。 没有新正式版出来。 也没有新论文入库。 Simon 窗口内有一帖。 本期不标值得深读。</p>
+<h2>框架更新</h2>
+<p><strong>主框架正式版还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 TensorRT-LLM 还是预发布版。 LMDeploy 还是 0.18.0 版。 几家正式版都没动。</p>
+<p><strong>llama.cpp 出了一版快照</strong> 新快照编号是 b11913。 只给 Hexagon 加了个参数。 Hexagon 是手机端 AI 芯片。 跟服务器推理关系不大。 也没有给出性能数字。 按惯例，快照不算正式发版。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11913">https://github.com/ggml-org/llama.cpp/releases/tag/b11913</a></p>
+<p><strong>vLLM 主线在补 Kimi 优化</strong> 它给 Kimi K3 加了可选加速。 FP8 的 MLA 解码更省草稿纸。 MLA 是省草稿纸的注意力。 KV cache 就是模型的草稿纸。 还给推测解码分了草稿分片。 推测解码是先猜再让专家验。 文档补了三加一的解耦预设。 这些都还没进正式版。</p>
+<p><strong>SGLang 主线修了多模态</strong> 它修了截断提示的填充对齐。 短提示被截断时不再错位。 还给推测解码加了新抓法。 不用草稿模型也能抓状态。 这些都还没进正式版。</p>
+<p><strong>FlashInfer 还在修内核</strong> 两小时合了七条提交。 有 MoE 和 NVFP4 的优化。 MoE 是混合专家架构。 但没有新版发布出来。</p>
+<p><strong>DeepInfer 星标小涨</strong> 星标涨到了 23022 个。 16点版时是 23007 个。 两小时涨了 15 个。 代码还是 10 月 25 号那条。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新批次还没到</strong> 五组关键词都亲查过了。 最新还是停在 10 月 23 号。 多模态组停在 10 月 18 号。 新批次可能后半夜才出。 下期再帮你补扫一轮。</p>
+<p><strong>HN 只有一条旧事重提</strong> LMSYS 的串话复盘被提上 HN。 就是 16点版深读那件事。 内容上期已经讲透了。 这里只记一笔，不展开。 来源：<a href="https://www.lmsys.org/blog/2026-10-26-cf-security">https://www.lmsys.org/blog/2026-10-26-cf-security</a></p>
+<h2>业内新闻</h2>
+<p><strong>其余渠道都扫过了</strong> X 上名单里没人发新帖。 Reddit 没有新讨论出来。 中文媒体只有模型转载。 社交渠道没有新事实。 没有新货，不占你时间。</p>
+<h2>访谈与深度</h2>
+<p><strong>Simon 点评了 OpenAI 新模型</strong> 他窗口内发了 Terra 点评。 Terra 是 OpenAI 的新中档模型。 它主打看图和操作电脑。 输入是一美元每百万词元。 输出是五美元每百万词元。 价格约是上一档的一半。 这是模型发布，不是服务更新。 只记一笔，方便你算成本。 来源：<a href="https://simonwillison.net/2026/Oct/26/gpt-61-terra/">https://simonwillison.net/2026/Oct/26/gpt-61-terra/</a> 来源：<a href="https://finance.sina.cn/stock/jdts/2026-10-27/detail-iniwrkkw2112560.d.html">https://finance.sina.cn/stock/jdts/2026-10-27/detail-iniwrkkw2112560.d.html</a></p>
+<p><strong>Latent Space 新单集不对口</strong> 新一期聊 AI 科学家评测。 跟推理服务没有关系。 本期不标值得深读。 有硬货的下期再补给你。</p>
+<p>*去重说明：本轮窗口是 10/26 16:00 到 18:00 PDT。对应 UTC 是 10/26 23:00 到 10/27 01:00。对应 epoch 是 1793055600 到 1793062800。框架经 gh API 亲查：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。TensorRT-LLM 仍是 v1.4.0rc1 预发布。LMDeploy 仍是 v0.18.0，仓库用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1。llama.cpp 窗口内 published 一版快照 b11913（10/27 00:19Z，Hexagon VTCM 参数 #31221），无性能数字、按快照惯例不算正式发版。vLLM 窗口内主线 6 条，含 Kimi-K3 的 FP8 MLA 解码可选优化 #63638、推测解码草稿分片 #63554、3P1D 解耦预设文档 #63852；SGLang 窗口内 4 条，含多模态截断填充修复 #46638 与无草稿抓隐藏状态 #43449；TensorRT-LLM 窗口内 3 条；FlashInfer 窗口内 7 条；LMDeploy 与 TGI 窗口内零提交；均未进 release，只作背景。DeepInfer 星标 23022（16点版 23007，+15），pushed_at 仍是 2026-10-26T05:30:52Z，主代理亲核一致。arXiv 经子代理与主代理双查五组（LLM inference、KV cache、multimodal inference、speculative decoding、PD disaggregation）：最新仍停在 10/23（多模态组停在 10/18），期待的 00:00 UTC 新批次截至 00:57Z 仍未落地。HN 用 Algolia 精确窗口复核，窗口内 stories 共 74 条逐条看完：serving 直击只有 LMSYS 串话复盘帖（item 50252391，23:02Z），与 16点版已深读的 Cloudflare 协同披露是同一事件、深读已含 LMSYS 三图，去重不重复展开；其余为中国 AI 泡沫、Anthropic 蒸馏防御等泛新闻，未采。Simon atom 亲核：窗口内新帖 GPT-6.1 Terra（23:53Z）为模型发布点评，Terra 本体今日白天已发布、12点版已判定非 serving 未采，本期只记 Simon 点评与定价一笔；新浪财经转载（00:24Z）在窗口内。X 名单、Reddit、机器之心与量子位窗口内零命中；social 窗口内零实质内容。AKV 的 MarkTechPost 稿今日已在 2点版判定为 10/21 已深读旧内容，本轮子代理再次命中、延续去重不报。vLLM CVE 批次仍只有非官方源、版本口径冲突，延续未采留档。Latent Space 今日新单集为 Leash Bio 评测主题、非 serving，只记标题。本轮未直查 Spotify 站内，如实注明。本期无深读，宁缺毋滥。*</p></body></html>
