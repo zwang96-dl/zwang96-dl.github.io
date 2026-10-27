@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月27日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-27"/>
+<meta name="doc-ts" content="2026-10-27T15:00:58"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-27（08点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-27（08点版）</h1>
+<p>08点版来了。 正式版还是全平。 主线一共落了 19 条提交。 最实的一条在 TensorRT-LLM。 它给解码阶段补了个 FP8 内核。 业内有一条苹果的新芯片。 本期不标值得深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版一家都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 llama.cpp 发了三个快照。 最新是 b11932 版。 快照按惯例不算正式发版。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b11932">https://github.com/ggml-org/llama.cpp/releases/tag/b11932</a></p>
+<p><strong>TensorRT-LLM 给解码补了 FP8 内核</strong> 解码就是一个字一个字往外吐。 吐字时批量小，矩阵乘法吃不饱。 新内核专治这种小批量场景。 它走的是 FP8 分块量化。 FP8 就是 8 比特浮点存法。 对象是 Blackwell 这代卡。 也就是 SM100 和 SM103。 这是 Kimi-K3 优化的第一波。 后面还有七波在路上。 PR 里给了实测口径。 部分形状耗时降到原来的三到九成。 数字是 PR 作者在 GB300 上测的。 还没进正式版，先记一笔。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20942">https://github.com/NVIDIA/TensorRT-LLM/pull/20942</a></p>
+<p><strong>vLLM 这轮都在补仪表盘</strong> 一共落了 8 条提交。 三条都跟看数据有关。 投机解码能按请求看指标了。 投机解码就是先猜再验。 前缀缓存的用量也能分组报了。 还新建了多少缓存，都能看到。 多模态那边修了个小错。 本地媒体被禁用时返回 400。 以前这块的报错不对路。 都是主线提交，还没发版。 来源：<a href="https://github.com/vllm-project/vllm/pull/61877">https://github.com/vllm-project/vllm/pull/61877</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/63292">https://github.com/vllm-project/vllm/pull/63292</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/64032">https://github.com/vllm-project/vllm/pull/64032</a></p>
+<p><strong>SGLang 只有一条通信修复</strong> 修的是多节点全规约的限制。 全规约就是各卡汇总数据。 有道多余的门被拆掉了。 跟多机部署沾边，不算 PD 本身。 来源：<a href="https://github.com/sgl-project/sglang/pull/46853">https://github.com/sgl-project/sglang/pull/46853</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23313 个。 06点版时是 23289 个。 两小时涨了 24 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>窗口内没有新论文入库</strong> 五组关键词都亲查过了。 最新一篇还停在 26 号。 这个时段结构性没货。 arXiv 每天凌晨统一放货。 下一批要等今晚那轮。</p>
+<p><strong>HN 窗口内 166 条扫完</strong> 没有一条框架直击。 热度最高的还是苹果新机。 那条放在业内新闻里说。</p>
+<h2>业内新闻</h2>
+<p><strong>苹果发了 M6 芯片的新机</strong> 新款 MacBook Pro 用上了 M6。 iMac 也一起换了芯。 苹果说 AI 性能比 M5 快 25%。 iMac 的端侧 AI 比 M4 快 5 倍。 端侧 AI 就是在本机跑模型。 数字都是苹果官方口径。 MacBook Pro 起价 1999 美元。 iMac 起价 1499 美元。 明天开始预订，11 月 6 号上市。 本地跑模型的人会关心这代。 HN 上这条冲到了 94 分。 是窗口内热度最高的一条。 来源：<a href="https://www.reuters.com/business/retail-consumer/apple-launches-m6-macbook-pro-imac-pitches-faster-on-device-ai-2026-10-27/">https://www.reuters.com/business/retail-consumer/apple-launches-m6-macbook-pro-imac-pitches-faster-on-device-ai-2026-10-27/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Spotify 站内亲查过了。 Latent Space 最新还是 26 号那集。 讲的是 AI 科学家评测。 跟推理服务不沾边。 Simon 窗口内也没有新帖。 最新还是 Terra 那篇，已报。 大V名单这轮也没有新帖。 本期不标值得深读。 主线动态都还没进正式版。 等落版了再深读不迟。</p>
+<p>*去重说明：本轮窗口是 10/27 06:00 到 08:00 PDT。对应 UTC 是 10/27 13:00 到 15:00。对应 epoch 是 1793106000 到 1793113200。框架经主代理与子代理 gh API 双查：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。TensorRT-LLM 仍是 v1.4.0rc1 预发布。LMDeploy 仍是 v0.18.0，仓库用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1，主线窗口内零提交（14:28Z 的 pushed_at 是非主线分支推送，子代理已复核）。llama.cpp 窗口内三个快照：b11929（13:03Z）、b11930（13:42Z）、b11932（14:04Z）。窗口内主线提交共 19 条：vLLM 8 条、TensorRT-LLM 6 条、llama.cpp 3 条、SGLang 2 条；LMDeploy、TGI、FlashInfer 均零提交。TensorRT-LLM 的 #20942 经主代理亲读 PR 正文核对：FP8 分块低行数 GEMM，面向 SM100/103 的解码投影，属 Kimi-K3 优化八波中的第一波，PR 内实测部分非 Kimi 形状在 GB300 上耗时为原 fp8_swap_ab_gemm 的 0.34 到 0.91 倍，均为 PR 作者口径、无第三方复现。vLLM 三条均经 pulls API 核 merged_at 在窗口内：#61877 投机解码分请求指标、#63292 前缀缓存用量分组上报、#64032 多模态本地媒体禁用返回 400，均为 Rust 前端可观测性与小修复，非运行时机制改动。SGLang 的 #46853 是多节点 custom-all-reduce 的 VMM 门控移除，正文已注明不算 PD 本身。DeepInfer 星标 23313（06点版 23289，+24），pushed_at 仍是 2026-10-26T05:30:52Z。arXiv 经子代理与主代理双查五组：窗口内 published 为零篇，各组最新全在 10/26 或更早（VLM serving 组最新 2610.35309 与 KV cache 组 BellowsKV 均已在 10/26 20点版报过，grep 往期 briefs 已核，不重复）。HN 用 Algolia 精确窗口双查，窗口内 stories 共 166 条逐条看完：无 vLLM、SGLang、KV cache、投机解码等直击；边缘只有 carmen（GPU 内核测试工具，1 分）、Zest（本地 LLM 界面，1 分）、Valen 多模态展示（2 分），均未采。苹果 M6 经主代理亲查 Reuters 原稿核对：发布字段为 2026-10-27T13:39:16Z，落在窗口内；MacBook Pro 起价 1999 美元、iMac 起价 1499 美元、10/28 起预订、11/6 上市、M6 版 AI 性能较 M5 快 25%、iMac 端侧 AI 较 M4 快 5 倍，均为苹果官方口径；HN 主帖 94 分（13:01Z 入窗）。Simon 经主代理 atom 亲核：最新仍是 10/26 23:53Z 的 Terra 帖（已报），窗口内无新帖。Spotify 经子代理直查（status connected）：Latent Space 最新单集仍为 2026-10-26 的评测主题，与 serving 无关，窗口内无新单集。X、Reddit、中文媒体窗口内未查到一手实质内容；social 窗口内只有周报汇总与科普帖，未采；Cloudflare GLM 的今日二手复盘因 10/26 16点版已深读而去重。本期无深读，宁缺毋滥。*</p></body></html>
