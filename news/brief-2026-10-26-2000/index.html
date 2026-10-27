@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月26日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-26"/>
+<meta name="doc-ts" content="2026-10-27T03:02:08"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-26（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-26（20点版）</h1>
+<p>20点版来了。 这轮有真货。 arXiv 新批次终于落地了。 有六篇新论文值得看。 其中一篇跟 PD 交界最对口。 本期标一篇值得深读。</p>
+<h2>框架更新</h2>
+<p><strong>主框架正式版还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 TensorRT-LLM 还是预发布版。 LMDeploy 还是 0.18.0 版。 llama.cpp 也没出新快照。 几家正式版都没动。</p>
+<p><strong>主线都在修小地方</strong> vLLM 窗口内合了五条提交。 有 KV 拷贝的对齐修复。 还有推测解码的草稿长度修复。 推测解码是先猜再让专家验。 SGLang 窗口内合了十条提交。 多模态重构开始动第一步了。 扩散模型的解耦拓扑也修了。 这些都还没进正式版。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23074 个。 18点版时是 23022 个。 两小时涨了 52 个。 代码还是 10 月 26 号那条。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>值得深读 — MCF：搬问题不搬仓库</strong> 长上下文跨机器读题时很慢。 慢在草稿纸要跨机器传。 草稿纸就是 KV cache。 KV cache 是存好的注意力结果。 MCF 读题时先给热门草稿发副本。 哪台机器要用，近处就有。 读完题，副本全部撤掉。 吐字时草稿纸一步都不动。 只把当前问题送过去算。 问题比草稿纸小得多。 16K 读题、16 台机器时很猛。 首字延迟只要 0.62 秒。 对手 Ring 要 1.91 秒。 快了约 3.1 倍。 但先泼一盆冷水。 实验跑在 FPGA 芯片上。 FPGA 是可编程硬件芯片。 对手也是作者复刻的版本。 不是原装的 vLLM 或 SGLang。 它还承认短提示反而会亏。 你约 250 词元大概率在亏损区。 能借的是布局渐变这个思路。 深读里把账和图都拆好了。 来源：<a href="https://arxiv.org/abs/2610.34731">https://arxiv.org/abs/2610.34731</a></p>
+<p><strong>BellowsKV：多层共用一份草稿</strong> 相邻层的草稿长得很不一样。 但它们的输入却长得很像。 这篇就让多层共用一份潜变量。 潜变量是压缩后的共享表示。 用的时候每层再各自还原。 3.6 倍压缩时准确率保住 99%。 13 到 14 倍时还有 97% 到 98%。 最强的跨层老办法只有 84%。 那是它在 16 倍压缩时的成绩。 而且这招不用重新训练。 代码也已经开源出来了。 来源：<a href="https://arxiv.org/abs/2610.35023">https://arxiv.org/abs/2610.35023</a> 来源：<a href="https://github.com/MorrisZJ/BellowsKV">https://github.com/MorrisZJ/BellowsKV</a></p>
+<p><strong>HiLO：微软给过载准备的降级梯子</strong> 流量爆了的时候怎么办。 微软这篇讲的是优雅降级。 先把产品状态排成一张梯子。 过载时沿梯子一级级往下降。 每级都提前验证过质量。 已经用在 Bing 的线上服务。 它管的是产品层，不是内核层。 跟你做容量规划时能对上。 来源：<a href="https://arxiv.org/abs/2610.34844">https://arxiv.org/abs/2610.34844</a></p>
+<p><strong>还有三篇只记标题</strong> 一篇讲 MoE 模型的推测解码。 MoE 是混合专家架构。 它算草稿长度到底取多少最划算。 来源：<a href="https://arxiv.org/abs/2610.34440">https://arxiv.org/abs/2610.34440</a> 一篇讲 MoE 解码时的专家预取。 它让缓存决定选哪个专家。 来源：<a href="https://arxiv.org/abs/2610.34721">https://arxiv.org/abs/2610.34721</a> 一篇讲视觉动作模型的推理复用。 它说复用和剪枝要一起上。 来源：<a href="https://arxiv.org/abs/2610.34519">https://arxiv.org/abs/2610.34519</a></p>
+<h2>业内新闻</h2>
+<p><strong>HN 窗口内没有 serving 硬货</strong> 窗口内 64 条帖子逐条看完。 有 Cohere 告状 Qwen 的新闻。 还有 Groq 模型残留的统计帖。 都跟推理服务没关系。 不展开，不占你时间。</p>
+<p><strong>其余渠道都扫过了</strong> X 上名单里没人发新帖。 Simon 窗口内也没有新帖。 Reddit 没有新讨论出来。 中文媒体只有旧闻转载。 社交渠道全是科普短视频。 没有新事实可以收录。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong> Latent Space 没有新单集。 名单里的博客也没更新。 有硬货的下期再补给你。 本期深读就是上面那篇 MCF。</p>
+<p>*去重说明：本轮窗口是 10/26 18:00 到 20:00 PDT。对应 UTC 是 10/27 01:00 到 03:00。对应 epoch 是 1793062800 到 1793070000。框架经 gh API 亲查：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。TensorRT-LLM 仍是 v1.4.0rc1 预发布。LMDeploy 仍是 v0.18.0，仓库用 InternLM/lmdeploy。TGI 仍是 v3.3.7。FlashInfer 仍是 v0.7.2.post1。llama.cpp 最新仍是 b11913（10/27 00:19Z，属上个窗口），本窗口无新快照。vLLM 窗口内主线 5 条，含 KV 视图拷贝修复 #55112 与推测解码草稿长度修复 #63853；SGLang 窗口内 10 条，含多模态重构第一步 #43420 与扩散解耦拓扑修复 #46144；FlashInfer 窗口内 4 条，均为测试与小修复；TensorRT-LLM 窗口内 6 条，均为接口与基建修复；均未进 release，只作背景。DeepInfer 星标 23074（18点版 23022，+52），pushed_at 仍是 2026-10-26T05:30:52Z。arXiv 前几期一直停在 10/23 的新批次本窗口落地：经 API 五组关键词亲查，10/26 提交的新论文含 MCF（2610.34731）、BellowsKV（2610.35023）、HiLO（2610.34844）、MoE 推测解码（2610.34440）、Prefetch-Steered Routing（2610.34721）、TRIAGE（2610.34519）等，均未在往期简报出现（已 grep 往期 briefs 与深读目录核对）。MCF 已做深读：数字均为作者自报，实验在 FPGA compute-NIC 与 INT4 上、基线是 dataflow-equivalent 复刻版，简报与深读均已标注口径。HN 用 Algolia 精确窗口复核，窗口内 stories 共 64 条逐条看完，无 serving 直击，未采。Simon atom 亲核：最新仍是 10/26 23:53Z 的 Terra 帖（18点版已报），窗口内无新帖。X 名单、Reddit、机器之心与量子位窗口内零命中；social 窗口内只有引擎对比科普短视频，无新事实。本轮未直查 Spotify 站内，如实注明。*</p></body></html>
