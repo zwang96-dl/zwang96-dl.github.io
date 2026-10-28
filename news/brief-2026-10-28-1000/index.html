@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月28日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-28"/>
+<meta name="doc-ts" content="2026-10-28T17:04:23"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-28（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-28（10点版）</h1>
+<p>10点版来了。 这轮主角换成了英伟达。 TensorRT-LLM 发了预发布版。 PD 分离还塞进一坨大打包。 静默失效又添了三例。 本期标一篇深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 FlashInfer 还是 0.7.2.post1。 llama.cpp 窗口内只有快照。 快照号是 b11963 和 b11966。 按惯例不算正式发版。 窗口内合并一共 23 条。</p>
+<p><strong>TensorRT-LLM 发了 rc2 预发布</strong> 版本号是 v1.4.0rc2。 注意这是预发布，不是正式版。 分离式 serving 支持 FP4 MLA 了。 MLA 是 DeepSeek 的注意力法。 KV 管理换上了 V2 的保留策略。 草稿纸能跨轮次留着复用。 Mooncake 存储改成零拷贝。 零拷贝就是传数据不复制。 这一条官方标了破坏性变更。 多模态编码器能按块调度了。 还有一条官方自报的已知问题。 张量并行加 RPC 编排时。 模型初始化可能会卡死。 发布说明没给统一跑分。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.4.0rc2">https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.4.0rc2</a></p>
+<p><strong>TensorRT-LLM 的 PD 大打包落地</strong> 这条跟你评估的 PD 最相关。 PD 就是把读题和答题拆开。 像流水线一样分工干活。 新加了前缀等待机制。 后面的请求可以先等等。 等正在跑的预填充产出草稿纸。 产出的块就能直接复用了。 路由器也学会按内容放请求。 聊过的话题尽量送回老地方。 分离部署的过期传输收紧了。 已送出内容就不再重试生成。 免得同一段话生成两遍。 划重点，正文没给性能数字。 评审自评覆盖还要跟进。 只能先记机制，别当收益。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20938">https://github.com/NVIDIA/TensorRT-LLM/pull/20938</a></p>
+<p><strong>静默失效这轮有三例</strong> 第一例在 SGLang 的图像侧。 ComfyUI 适配器会静默吞参数。 你设了注意力掩码也没用。 它被万能参数口袋吃掉了。 参考图条件也一样被吞。 工作流会悄悄退化成文生图。 修法是直接报错说不支持。 来源：<a href="https://github.com/sgl-project/sglang/pull/46286">https://github.com/sgl-project/sglang/pull/46286</a> 第二例跟多模态直接相关。 TensorRT-LLM 用 MX 格式加载时。 视觉模型拿到纯文本处理器。 图片提示词根本处理不了。 而且全程不报错。 修法是 MX 和 HF 走同一条路。 真机对照后结果完全一致。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20762">https://github.com/NVIDIA/TensorRT-LLM/pull/20762</a> 第三例是 FlashInfer 的竞态。 两个小程序读缩放系数太早。 可能读到上一个内核的旧值。 结果可能错，还不报错。 修法是等同步信号后再读。 顺带还微涨了一点点速度。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7738">https://github.com/flashinfer-ai/flashinfer/pull/7738</a></p>
+<p><strong>vLLM 给 P2P 传 KV 又补了安全阀</strong> 这条是 6点版那条的续集。 P2P 是两台机器直传草稿纸。 会话拆除时有个竞态坑。 在途的写入可能还没停。 源数据却已经被解绑了。 新做法是先把句柄留住。 等传输确认停了再释放。 最长留 120 秒就强制放。 作者明说没在 GPU 上验。 只有 CPU 复现脚本和单测。 338 个测试全过。 来源：<a href="https://github.com/vllm-project/vllm/pull/64250">https://github.com/vllm-project/vllm/pull/64250</a></p>
+<p><strong>vLLM 的共享专家能逐层开关了</strong> MoE 是专家混合架构。 共享专家是每层都有的专家。 以前融合版只能全开全关。 现在可以逐层挑着开。 不敏感的层用低精度融合版。 敏感的层保留高精度独立版。 但划重点，作者自己说了。 性能和精度都还没验证。 只有单测从 105 涨到 166。 先记能力，别记收益。 来源：<a href="https://github.com/vllm-project/vllm/pull/61457">https://github.com/vllm-project/vllm/pull/61457</a> 还有一条 KV 搬运的铺路活。 vLLM 的新存储连接器落地了。 GPU 草稿纸直连主机内存搬。 不再绕道自己的中转拷贝。 这一片没给跑分数字。 来源：<a href="https://github.com/vllm-project/vllm/pull/61793">https://github.com/vllm-project/vllm/pull/61793</a></p>
+<p><strong>llama.cpp 在 ARM 上预填充快了</strong> 新内核用上了 SVE 指令。 SVE 是 ARM 的向量指令集。 机器是 AWS 的 Graviton3。 测的是提示处理速度。 也就是预填充那一段。 4 线程快了约 45%。 32 线程快了约 28%。 困惑度跟旧版几乎一样。 数字是作者自测口径。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/27472">https://github.com/ggml-org/llama.cpp/pull/27472</a> 还有一条 DeepSeek V4 的修复。 旧的批次切分法有个毛病。 会逼着计算图反复重建。 删掉后固定三词元解码。 在 A6000 上快了 8.4%。 336 组输出逐字节一致。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31300">https://github.com/ggml-org/llama.cpp/pull/31300</a></p>
+<p><strong>FlashInfer 其余都是内核微调</strong> Kimi-K3 的解码尾巴快了。 靠的是提前把数据预取进缓存。 幅度是 1.01 到 1.165 倍。 只限少词元的解码尾段。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7742">https://github.com/flashinfer-ai/flashinfer/pull/7742</a> FP4 矩阵乘在 GB300 上。 中等批量快了约 4% 到 7%。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7739">https://github.com/flashinfer-ai/flashinfer/pull/7739</a> Mamba 的预填充内核也快了。 Rubin 上几何平均约 2%。 这些都是单内核延迟口径。 不是端到端吞吐，别混。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7740">https://github.com/flashinfer-ai/flashinfer/pull/7740</a></p>
+<p><strong>其余几条一句话带过</strong> vLLM 新增了语音转写模型。 是英伟达的 Nemotron 转写版。 来源：<a href="https://github.com/vllm-project/vllm/pull/64282">https://github.com/vllm-project/vllm/pull/64282</a> vLLM 移除了两个多模态模型。 Keye-VL 两个版本被下架。 下载量九成来自它自己的 CI。 来源：<a href="https://github.com/vllm-project/vllm/pull/64287">https://github.com/vllm-project/vllm/pull/64287</a> TensorRT-LLM 有个测试被跳过。 Qwen3.5 多卡权重更新有未修失败。 现在靠跳过测试过 CI。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21193">https://github.com/NVIDIA/TensorRT-LLM/pull/21193</a> LMDeploy 这轮还是零合并。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23799 个。 8点版时是 23739 个。 两小时涨了 60 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>值得深读 — HiCache 把草稿纸搬进主机内存</strong> 发帖的是 SemiAnalysis。 他们放了自家 InferenceX 数据。 测的是 744B 的 GLM 大模型。 跑在 B200 上，用 SGLang。 负载是智能体的长对话。 并发低时草稿纸几乎全命中。 显存里的命中率约 98%。 并发涨到 16 就撑不住了。 显存命中率掉到 54.8%。 开了 HiCache 就不一样了。 HiCache 是把草稿纸分层放。 放不下的就卸到主机内存。 16 并发时主机层接住 40.3%。 能缓存的词元多出两到四成。 说白了，显存不够内存来凑。 这跟你看的 KV 分层是一回事。 深读：<a href="https://zwang96-dl.github.io/news/deep-20261028-hicache-prefix/">https://zwang96-dl.github.io/news/deep-20261028-hicache-prefix/</a> 来源：<a href="https://www.threads.com/@semianalysis/post/DfCtc1jlPE6">https://www.threads.com/@semianalysis/post/DfCtc1jlPE6</a></p>
+<p><strong>arXiv 窗口内还是零篇</strong> 五组关键词全查过了。 最新还是 10 月 27 日那批。 窗口在批次发布的空档里。 零篇是节奏问题，不是漏查。 HN 窗口内 162 条全扫了。 没有一条讲推理服务。 Reddit 没查到原帖证据。 聚合页冒充原帖的不算。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有其他实质新稿</strong> 芯片和云服务都扫过了。 SK 海力士三季报是今晨的。 发布时间在本窗口之前。 窗口前的事按惯例不报。 微软和谷歌今晚盘后发财报。 AI 账单谁买单要晚上才知道。 社交上还有一条窗口内帖子。 是通用科普图，没有新信息。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> 名单里的人都逐个查过。 窗口内没有新帖新文。 Simon Willison 今天有新帖。 讲的是用 AI 做游戏的拐点。 跟推理服务无关，不收录。 Latent Space 也没出新集。 Spotify 已亲查过了。 最新还是 10 月 27 日那集。 讲 Anthropic 怎么安全发模型。</p>
+<p>*去重说明：本轮窗口是 10/28 08:00 到 10:00 PDT。对应 UTC 是 10/28 15:00 到 17:00。对应 epoch 是 1793199600 到 1793206800。框架经子代理初查（GitHub Search API 按 merged 时间查，能抓老编号晚合并）加主代理用 gh 亲核头条：TensorRT-LLM v1.4.0rc2 经亲核为 15:51:34Z 发布、prerelease=true，wheel 实际版本为 1.4.0rc2.post1，正文已标明是预发布；#20938 经亲核 16:25:51Z 合并，正文为自动生成综述、无任何吞吐或延迟数字、QA 自评 coverage 为 needs follow-up，正文已带保留；#20762 经亲核 16:28:43Z 合并，MX 格式加载多模态模型静默降级纯文本处理器，306 个测试全过、真机 Qwen3.5-9B 图片结果与 HF 基线一致。vLLM #64250 经亲核 15:09:06Z 合并，保留上限 120 秒、338 个测试全过，作者明说未在 GPU 验证，正文已标注；#61457 作者在 Limitations 明说前向执行、图回放、模型评估和性能均未验证，正文只报能力不报收益，单测 105 到 166 passed 为 MI350 口径。SGLang #46286 经亲核 15:14:48Z 合并，范围是 ComfyUI 扩散适配层、非 LLM serving 主路径，正文已注明。FlashInfer #7738 为 PDL 竞态读旧 alpha；#7742/#7739/#7740 均为 Cake 系列单内核延迟口径（作者自测、基线为上一版 Cake 程序），正文已标明不是端到端吞吐。llama.cpp #27472 为 Graviton3 上 prompt eval 口径（prefill，1.2756 到 1.4508 倍），#31300 为 8×A6000 上固定 3 词元 decode +8.4%、336 组 logits 逐字节一致，均为作者口径。窗口内 merged 合计 23 条（vLLM 7、SGLang 3、TensorRT-LLM 3、FlashInfer 7、llama.cpp 3、LMDeploy 0）。正式版经主代理 gh 亲核全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、FlashInfer 仍 v0.7.2.post1；llama.cpp 窗口内快照 b11963（15:05:22Z）与 b11966（16:47:02Z）按惯例不算正式版。DeepInfer 星标经主代理 gh 亲查为 23799（8点版 23739，+60），pushed_at 仍为 2026-10-26T05:30:52Z。arXiv 五组 API 全查成功、窗口内零入库，最新仍为 10/27 的 2610.37432 与 DCKV（2610.36950）。HN 经 Algolia 精确窗口亲查 162 条，serving 相关零条（vLLM 关键词 3 条全为模糊匹配误报）。Reddit 五组搜索无原帖 URL 证据。SemiAnalysis HiCache 帖经主代理亲开原帖核对：发于 08:03:38 PDT（窗口内），数据为其自家 InferenceX，GLM 744B、B200、SGLang FP4，HBM 命中率并发 1 到 4 约 98%、8 时 90.3%、12 时 76.5%、16 时 54.8%，主机层占比 8 时 6.0%、12 时 19.2%、16 时 40.3%，原帖图未给直链、深读图按帖中数据重绘。业内新闻：SK hynix 三季报为今晨亚洲时段发布（窗口前）、摩尔线程三季报为 11:26 UTC（窗口前），均按惯例不报；Broadcom 与 Anthropic 融资 10/28 只有分析跟进、无新事实，不报。大V经子代理逐个核查窗口内 serving 相关为零；Simon Willison 10/28 新帖主题无关已剔除。Spotify 经子代理直查 status connected：Latent Space 最新单集仍为 2026-10-27 Anthropic 集。本期深读 1 篇：SemiAnalysis 的 HiCache 前缀复用数据（原帖数据重绘图 1 张）。*</p></body></html>
