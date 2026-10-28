@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月27日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-27"/>
+<meta name="doc-ts" content="2026-10-28T03:04:09"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-27（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-27（20点版）</h1>
+<p>20点版来了。 正式版还是全平。 这轮头条是 PD 的雪崩坑。 请求在等候区等太久。 前缀被当垃圾淘汰了。 吞吐直接崩掉不恢复。 SGLang 已经把坑填上。 本期有一篇值得深读。 就是这条 PD 雪崩。</p>
+<h2>框架更新</h2>
+<p><strong>正式版一家都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 TensorRT-LLM 还是预发布。 llama.cpp 出了三个新快照。 最新是 b11946 版。 快照按惯例不算正式发版。 窗口内的活全在主线里。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases">https://github.com/ggml-org/llama.cpp/releases</a></p>
+<p><strong>PD 等候区的前缀被淘汰，吞吐雪崩</strong> 这条已做成深读，文末看。 PD 解耦就是读题吐字分工。 请求先在等候区排队。 等 decode 那边腾出座位。 老代码续命只管正式队列。 等候区的请求没人管。 它们的前缀就被淘汰了。 前缀就是能复用的老草稿。 轮到执行时只能重搬重算。 越重算越慢，队排得越长。 队越长，淘汰得越多。 作者在 GB300 上复现了崩塌。 本机命中从 65% 掉到两成。 吞吐崩住，再也回不来。 修法是等候区也续命。 定期碰一下它们的前缀。 崩塌工况吞吐涨了 59%。 健康工况基本没变化。 细节和图都在深读笔记里。 来源：<a href="https://github.com/sgl-project/sglang/pull/46812">https://github.com/sgl-project/sglang/pull/46812</a></p>
+<p><strong>Kimi-K3 在 AMD 上启动直接崩</strong> 这次是响亮地崩，不是静默错。 昨天那个折叠优化有个后续坑。 折叠权重建在文本模型那边。 但加载器只喊根模型干活。 根模型没这个活，权重就是空的。 中招配置有三个条件。 开 AITER 的 MLA 注意力。 KV 用 FP8 存，再关 DCP。 每次启动抓图时必崩。 作者在 8 张 MI355X 上复现。 修法是根模型转喊文本模型。 你那张 MI350 同系，要留意。 等正式版带上这个修复再升。 来源：<a href="https://github.com/vllm-project/vllm/pull/64158">https://github.com/vllm-project/vllm/pull/64158</a></p>
+<p><strong>投机解码的内核别等到上线才编译</strong> 有三个 Triton 内核漏了预热。 它们上线后才现编译。 现编译那一步延迟会尖刺。 开严格模式还会直接报错。 场景是 DSpark 和 DFlash。 两者都是投机解码的草稿员。 投机解码就是先猜再验。 像实习生打草稿专家改。 修后预热阶段一次编译完。 顺带解码内核快了约 3 倍。 输出逐位一致，作者口径。 验证是在 B300 上做的。 来源：<a href="https://github.com/vllm-project/vllm/pull/63819">https://github.com/vllm-project/vllm/pull/63819</a></p>
+<p><strong>HiSparse 又一坑，这次是越界读崩</strong> 18点版报过它的读表竞态。 这次是另一个独立的坑。 FlashInfer 的内核有个毛病。 它不管缓存实际有多大。 上来先读约两百行再说。 暂存区按 exact 大小开。 开小了就读到没映射的页。 表现是随机非法显存访问。 服务会莫名其妙崩掉。 修法是暂存区至少垫 256 行。 代价每层不到 168 KB。 B200 上验证过，作者口径。 来源：<a href="https://github.com/vllm-project/vllm/pull/61659">https://github.com/vllm-project/vllm/pull/61659</a></p>
+<p><strong>SGLang 的 MegaMoE 预算被除了两次</strong> 这是个配置校验算错账。 每卡的 prefill 预算算一遍。 校验时又除了一遍并行度。 算出来的上限只有真实一半。 小上限就这么蒙混过关。 上线后要么抓图时断言崩。 要么悄悄退出 MegaMoE 快路。 快路是 MoE 的融合大内核。 修法是校验别再除第二次。 16384 除以 2 的例子很直白。 真实每卡是 8192。 旧校验却算成 4096。 来源：<a href="https://github.com/sgl-project/sglang/pull/46267">https://github.com/sgl-project/sglang/pull/46267</a></p>
+<p><strong>其余几条一句话带过</strong> SGLang 的 DSpark 又补了两刀。 都是接着 18点版那条去同步。 这次管其他设备和未来配置。 还顺手少了一次主机同步。 来源：<a href="https://github.com/sgl-project/sglang/pull/46897">https://github.com/sgl-project/sglang/pull/46897</a> SGLang 能装拆开存的 MXFP4 专家了。 以前这种检查点直接报键错。 现在能装上且不丢词元。 来源：<a href="https://github.com/sgl-project/sglang/pull/41289">https://github.com/sgl-project/sglang/pull/41289</a> TensorRT-LLM 窗口内全是基建活。 没有值得单独报的功能更新。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23442 个。 18点版时是 23400 个。 两小时涨了 42 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>窗口内没有新论文入库</strong> 五组关键词都亲查过了。 最新一篇还停在白天。 白天那批是 15 点 43 分的。 下一批要等下一轮看看。</p>
+<p><strong>HN 这轮基本空</strong> 窗口内 48 条全扫完。 只有一条讲 LLM 压缩的。 它只有 1 分 0 评论。 没有讨论价值，不收了。 Reddit 也没查到新帖证据。 聚合页冒充原帖的不算数。</p>
+<h2>业内新闻</h2>
+<p><strong>印度又落一笔算力大单</strong> OneQode 拿下 14 兆瓦容量。 地点在印度 Chennai。 合作方是 AdaniConneX。 这是它在印度的首个大部署。 后面还谈扩到 114 兆瓦。 文中说合同额可能超 60 亿美元。 方案延续它跟 AMD 的合作。 规划用 Instinct 加 Helios 机架。 Helios 是 AMD 的机架级方案。 这条是供给侧的消息。 跟 serving 软件无关。 扫一眼知道有这事就行。 来源：<a href="https://www.prnewswire.com/apac/news-releases/oneqode-signs-14-mw-ai-capacity-agreement-with-adaniconnex-with-a-path-to-114-mw-302920290.html">https://www.prnewswire.com/apac/news-releases/oneqode-signs-14-mw-ai-capacity-agreement-with-adaniconnex-with-a-path-to-114-mw-302920290.html</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V集体安静</strong> 名单里的人都逐个查过。 窗口内没有新帖新文。 Latent Space 也没出新集。 最新还是 14点版报的那集。 Spotify 连接正常，已亲查。</p>
+<p><strong>值得深读：PD 排队前缀雪崩</strong> 这篇能帮你补 PD 评估一档。 你的负载前缀共享比例高。 雪崩专挑 decode 先堵死时。 还要前缀总量撑满缓存池。 常规压测很难凑齐条件。 作者用了 7480 个并发会话。 报警信号是命中率跳水。 本机命中从 65% 掉到两成。 只看总吞吐会发现得太晚。 笔记里有触发条件清单。 链接：SGLang-PD排队前缀被淘汰-吞吐崩塌精读.html（深度阅读目录）</p>
+<p>*去重说明：本轮窗口是 10/27 18:00 到 20:00 PDT。对应 UTC 是 10/28 01:00 到 03:00。对应 epoch 是 1793149200 到 1793156400。框架经子代理初查、主代理用 gh search 按 merged-at 亲核窗口内全部合并记录并逐条亲读头条 PR 正文：初查清单里有若干条经亲核不在窗口内或未合并，已剔除不采，下列均为亲核结果。vLLM 窗口内合并 14 条、SGLang 12 条：SGLang #46812 经主代理亲读 PR 正文全文核对，GB300、DeepSeek-V4.1-Flash FP4、9 个 DEP2 prefill 加 1 个 DEP16 decode、7480 个智能体多轮会话、Mooncake L3，崩塌工况吞吐 347197 涨到 551223 tok/s/GPU（+59%）、radix 命中 20.5% 回到 73%、L3 占比 74% 降到 22%、TTFT p90 147 秒降到 59.8 秒，健康工况吞吐负 2.5% 在噪声内，每臂单次运行但换基线复跑结果一致（361815 到 560412），接受长度 3.51 为模拟值，均为 PR 作者口径；已转深读笔记。vLLM #64158 经亲核：#60110 的折叠权重只在文本模型钩子里建、加载器只调根模型，AITER MLA 加 FP8 KV 加无 DCP 时每次启动在首次抓图必崩，8 张 MI355X 复现，为响亮崩溃非静默算错，与 16点版 #63409、18点版 #59392 是不同 bug。vLLM #63819 经亲核：三个 Triton 内核在 MRV2 投机解码路上线后 JIT 编译造成延迟尖刺、严格模式直接失败，修后预热编译完、解码内核约快 3 倍为附带效果、输出逐位一致，B300 验证，作者口径。vLLM #61659 经亲核：FlashInfer trtllm-gen 稀疏 MLA 内核无视缓存大小先读约 170 到 250 行，暂存区垫到 256 行、每层代价不超过 168 KB，B200 验证；与 18点版 #62739 的读表竞态是不同 bug。SGLang #46267 经亲核：MegaMoE 校验把已除过并行度的每卡预算又除一次，16384 除 2 真实 8192 被算成 4096，小上限蒙混过关后运行时断言崩或静默退快路。SGLang #46897（01:00）与 #46777（02:24）是 18点版 #46891 去主机长度的后续，未重复报旧条。SGLang #41289 经亲核：拆开存的 MXFP4 MoE 检查点此前 KeyError 装不上，修后零词元丢失能装。正式版经亲核全平：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。LMDeploy 仍是 v0.18.0，窗口内零合并。TensorRT-LLM 仍是 v1.4.0rc1 预发布，窗口内 9 条全为基建、测试与内部项。TGI 仍是 v3.3.7。llama.cpp 窗口内发布快照 b11944、b11945、b11946（最新 01:58Z）。DeepInfer 星标经主代理 gh 亲查两次均为 23442（18点版 23400，+42），pushed_at 仍为 2026-10-26T05:30:52Z。arXiv 经子代理五组亲查：窗口内 published 为零篇，各组最新停在 10/27 白天（最晚 15:43Z），白天那批未在本窗口重复报。HN 用 Algolia 精确窗口查得 stories 共 48 条逐条扫完，唯一沾边的是 SIGARCH 的 LLM 压缩博客帖（02:53Z），仅 1 分 0 评论，未收。Reddit 两组定向搜索无带原帖 URL 与窗口内时间证据的新帖。业内新闻经子代理核对：窗口内确证新稿仅 OneQode 与 AdaniConneX 的 14 MW 通稿一条（PR Newswire 标 01:00Z 发布），为算力供给侧；NVIDIA 参投 Simplismart 那条原文为 10/27 白天、AMD 在 MI350X 上训 EAGLE3 那条无发布时间戳证据，均未冒充窗口内新稿。大V经子代理逐个核查：@lmsysorg、vLLM 官方、@karpathy、@jimfan、Latent Space newsletter、The Batch（最新仍 Issue 376）、机器之心、量子位窗口内均无新帖新文；Simon Willison 最新仍为徽章杂记，无其后新文。Spotify 经子代理直查（status connected）：Latent Space 最新单集仍为 14点版已报的 2026-10-27 Anthropic 集，无更新一集。social 窗口内仅一条个人自研引擎实测帖（9 个赞）与一条教学清单帖，均未达收录门槛。本期深读 1 篇：SGLang #46812 PD 排队前缀雪崩（含按 PR 表格数据绘制的吞吐命中图与延迟队列图共 2 张）。*</p></body></html>
