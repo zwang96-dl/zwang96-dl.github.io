@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月28日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-28"/>
+<meta name="doc-ts" content="2026-10-28T22:59:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-28（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-28（16点版）</h1>
+<p>16点版来了。 这轮没有新版本，也没有新论文。 主角是一个 PD 脏数据修复。 跟你的 PD 评估直接相关，先看这条。 本期不标深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 FlashInfer 还是 0.7.2.post1。 TensorRT-LLM 预发还是 v1.4.0rc2。 llama.cpp 只有每日快照，不算正式版。 窗口内合并一共 34 条。</p>
+<p><strong>vLLM 修了 PD 解码的脏数据 bug</strong> 这条跟你的 PD 评估最贴。 HiSparse 是一种省显存的解码方式。 它上面有个竞态问题。 异步加载可能盖掉正在读的显存页。 结果就是请求后半段全吐乱码。 修法很直接：等这一步跑完再加载。 代价是加载晚一步，换来正确性。 来源：<a href="https://github.com/vllm-project/vllm/pull/63827">https://github.com/vllm-project/vllm/pull/63827</a></p>
+<p><strong>vLLM 新版运行器省了点主机开销</strong> 小模型单步解码快了约一成。 B=1 时从 1217 微秒降到 1078 微秒。 B=8 时从 1342 微秒降到 1215 微秒。 注意，这是在小模型上测的。 这时瓶颈在主机，不在显卡。 大模型上未必有同样收益。 来源：<a href="https://github.com/vllm-project/vllm/pull/62748">https://github.com/vllm-project/vllm/pull/62748</a></p>
+<p><strong>vLLM 投机解码补了两个缺口</strong> 投机解码就是小模型先打草稿，大模型再改。 第一，独立草稿能用自己的加载配置。 以前它只能继承大模型的配置。 实测里 64 个 token 全对上了。 第二，Transformers 后端能用 MTP 草稿了。 MTP 是一次多猜几个 token 的头。 来源：<a href="https://github.com/vllm-project/vllm/pull/61699">https://github.com/vllm-project/vllm/pull/61699</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/61270">https://github.com/vllm-project/vllm/pull/61270</a></p>
+<p><strong>SGLang 把大门路由放回预填充</strong> DeepSeek V4.1 有套叫 MegaGate 的路由。 MegaGate 就是给专家挑路的大门。 之前因为图捕获报错被撤回过。 这次修了图捕获，才敢重新放回来。 开关默认还是关的，不用它没变化。 没给端到端数字，别当提速。 来源：<a href="https://github.com/sgl-project/sglang/pull/47148">https://github.com/sgl-project/sglang/pull/47148</a></p>
+<p><strong>SGLang 修了一个启动崩溃</strong> DeepSeek V4.1 开链接器时可能崩。 链接器会在后台跨服务搬数据。 它一干扰，首次捕获就直接崩掉。 现在改成线程本地捕获，各跑各的流。 崩溃只在首次捕获时出现。 来源：<a href="https://github.com/sgl-project/sglang/pull/47146">https://github.com/sgl-project/sglang/pull/47146</a></p>
+<p><strong>其余一句话带过</strong> SGLang 只更新了大内核的 Docker 钉选。 TensorRT-LLM 只有一条测试补强。 llama.cpp 修了两处越界写。 FlashInfer 这轮 17 条，全是 Cake 内核调优。 Cake 是它的一套实验内核。 LMDeploy 这轮零条。 来源：<a href="https://github.com/sgl-project/sglang/pull/47145">https://github.com/sgl-project/sglang/pull/47145</a> 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21215">https://github.com/NVIDIA/TensorRT-LLM/pull/21215</a> 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31336">https://github.com/ggml-org/llama.cpp/pull/31336</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7771">https://github.com/flashinfer-ai/flashinfer/pull/7771</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23905 个。 14点版时是 23883 个。 两小时涨了 22 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> arXiv 查过了，窗口内零入库。 最新还是 10 月 27 日那批。 arXiv 每天一批在 UTC 凌晨发。 窗口正好在批次的空档里。 零篇是节奏问题，不是漏查。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有实质新稿</strong> 蚂蚁 560B 那篇是 10 月 15 日的旧事。 今天的英文文章只是重新讲了一遍。 FlashMap 也是 10 月 17 日的论文。 按惯例都不重复报。 Hacker News 和 Reddit 也没翻到新帖。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> 名单里的人都逐个查过。 窗口内没有讲推理服务的新帖新文。 Simon Willison 今天的新帖讲的是游戏。 跟推理服务无关，不收录。 Latent Space 也没出新集。 最新还是 10 月 27 日那集。</p>
+<p>*去重说明：本轮窗口是 10/28 14:00 到 16:00 PDT。对应 UTC 是 10/28 21:00 到 23:00。对应 epoch 是 1793221200 到 1793228400。框架经主代理用 GitHub Search API 按 merged 时间亲查、再用 gh 逐条亲读头条 PR 正文：窗口内 merged 合计 34 条（vLLM 10、SGLang 4、TensorRT-LLM 1、FlashInfer 17、llama.cpp 2、LMDeploy 0）。vLLM #63827 经亲核：HiSparse 解码器异步加载会盖掉在读页、致后半段乱码，修法为推迟一步加载。vLLM #62748 经亲核：MRV2 去掉空闲采样 staged 写与每步 pinned 分配，B300 上小模型单步降约 10% 到 11%，作者明说步长受主机约束。vLLM #61699 经亲核：独立草稿用自有加载配置，GB10 上 45/51 草稿 token 被接受、64 输出 token 全对上。vLLM #61270 经亲核：Transformers 后端支持 MTP 草稿，需 transformers 5.20.0 的 MtpModel 助手。SGLang #47148 经亲核：MegaGate 路由重回预填充，此前因图捕获失败被撤回，现靠记录图断点修复，仍需显式开开关。SGLang #47146 经亲核：回放尾捕获改线程本地模式，修链接器线程干扰致崩。SGLang #47145 仅更新大内核 Docker 钉选。TensorRT-LLM #21215 仅为重复抢占后重预填充测试补强。llama.cpp #31336 修控制向量与 M-RoPE 越界写，有效输入行为不变。FlashInfer 17 条均为 Cake 单内核调优与测试搬迁，无端到端数字。正式版经 gh 亲核全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、FlashInfer 仍 v0.7.2.post1、TensorRT-LLM 预发仍 v1.4.0rc2；llama.cpp 窗口内快照 b11970 到 b11972 按惯例不算正式版。DeepInfer 星标经 gh 亲查为 23905（14点版 23883，+22），pushed_at 仍为 2026-10-26T05:30:52Z。arXiv 经 API 亲查窗口内零入库，最新仍为 10/27 的一批。蚂蚁 Ling-3.1-flash 560B 为 10 月 15 日发布，10 月 28 日英文文章为旧事重讲，不重复报；FlashMap 论文为 10 月 17 日 arXiv:2610.24365，6点版已定为窗口外，不重复报。大V逐个核查窗口内 serving 相关为零；Simon Willison 10/28 新帖主题为游戏已剔除；Latent Space 最新单集仍为 10/27 Anthropic 集。本期不标深读：窗口内无够分量的新方法或新数据，脏数据修复与路由回归已在正文讲清口径。*</p></body></html>
