@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月28日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-28"/>
+<meta name="doc-ts" content="2026-10-28T15:03:18"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-28（8点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-28（8点版）</h1>
+<p>8点版来了。 这轮没有大新闻。 正式版一家都没动。 但藏着两条静默失效。 都是不报错、悄悄变慢。 本期不标深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版全平，快照不算数</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 FlashInfer 还是 0.7.2.post1。 llama.cpp 窗口内只有快照。 快照号是 b11962。 按惯例不算正式发版。 窗口内合并一共 17 条。 FlashInfer 占了 8 条。 LMDeploy 还是零合并。</p>
+<p><strong>vLLM 的快路被版本号关了</strong> 这条是静默失效第一例。 DeepSeek V4.1 有个快解码。 快路要 FlashInfer 恰好 0.7.2。 依赖升到 0.7.2.post1 后。 四条快路全被关掉了。 服务只打一条警告日志。 然后默默走普通慢路。 连数值测试都被跳过了。 这次改成按真实条件判断。 快路在新版上恢复运行。 GB300 上测试由跳过变通过。 内核测试 18 条全过。 但正文没给提速数字。 只能确认快路回来了。 来源：<a href="https://github.com/vllm-project/vllm/pull/63914">https://github.com/vllm-project/vllm/pull/63914</a></p>
+<p><strong>vLLM 的安装包也会静默丢配置</strong> 这是静默失效第二例。 没有 .git 目录时打的包。 会丢两类调优配置。 一类是 Mamba 的状态更新。 一类是 Helion 内核配置。 包能装能跑，不报错。 只是悄悄用默认参数。 作者说在 Blackwell 上。 图捕获曾慢约 8 倍。 8 倍是受害现象的描述。 不是这条 PR 的实测对比。 修法是把配置写进包清单。 来源：<a href="https://github.com/vllm-project/vllm/pull/64063">https://github.com/vllm-project/vllm/pull/64063</a></p>
+<p><strong>llama.cpp 的 MoE 预填充快了</strong> MoE 是专家混合架构。 预填充就是先读完问题。 以前专家要分三步算。 门控、上投影、激活函数。 现在合成一次内核跑完。 DGX Spark 上实测。 Qwen3-30B 快了 17.2%。 每秒从 2911 涨到 3411。 那是处理提示词的速度。 RTX 5090 上快约 6%。 三个模型困惑度逐位一致。 数字是 PR 作者口径。 注意这是预填充，不是解码。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31188">https://github.com/ggml-org/llama.cpp/pull/31188</a></p>
+<p><strong>FlashInfer 补上 Rubin 的预编译漏项</strong> Rubin 是英伟达新一代卡。 预编译缓存漏了三个模块。 MoE 和 FP8 的模块在内。 装了缓存也要现编译。 vLLM 跑 DeepSeek 评测时。 光编译 MoE 就花 789 秒。 总启动撞穿 1200 秒上限。 补上注册后初始化 433 秒。 GSM8K 准确率 78.47%。 1319 道题的口径。 这修的是启动，不是吞吐。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6795">https://github.com/flashinfer-ai/flashinfer/pull/6795</a></p>
+<p><strong>FlashInfer 其余都是内核微调</strong> 稀疏 MLA 在 GB300 上。 197 个形状里 89 个变快。 没有一个变慢。 典型幅度只有 1.0 到 1.03 倍。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7729">https://github.com/flashinfer-ai/flashinfer/pull/7729</a> 还有一条主机端的小优化。 两种形状交替调用时。 准备时间省约 45 微秒。 作者明说这不算服务提速。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7720">https://github.com/flashinfer-ai/flashinfer/pull/7720</a> Mamba 的状态更新快了 5%。 只限 B200 上的单一批次。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7724">https://github.com/flashinfer-ai/flashinfer/pull/7724</a></p>
+<p><strong>其余几条一句话带过</strong> SGLang 窗口内只合 1 条。 是 AMD 的 CI 缓存优化。 命中时安装从 136 秒降到 98 秒。 每周省时是作者的预估。 来源：<a href="https://github.com/sgl-project/sglang/pull/46703">https://github.com/sgl-project/sglang/pull/46703</a> TensorRT-LLM 合了 3 条。 全是测试和基建改动。 没有运行时新功能。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21123">https://github.com/NVIDIA/TensorRT-LLM/pull/21123</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23739 个。 6点版时是 23678 个。 两小时涨了 61 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> 五组关键词全查过了。 最新还是 10 月 27 日那批。 窗口在批次发布的空档里。 零篇是节奏问题，不是漏查。</p>
+<p><strong>HN 只有一条弱相关</strong> 窗口内 175 条全扫了。 只有一条沾 KV 的边。 叫 ContextWatcher 的小工具。 只有 1 分，不值得深读。 Reddit 没查到原帖证据。 聚合页冒充原帖的不算。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有实质新稿</strong> 芯片和云服务都扫过了。 Oracle 扩芯片菜单是昨天的。 General Compute 融资也在窗口前。 窗口前的事不重复报。 社交上有 5 条窗口内帖子。 全是转述、科普和推广。 没有一条是首发消息。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> 名单里的人都逐个查过。 窗口内没有新帖新文。 Latent Space 也没出新集。 Spotify 已亲查过了。 最新还是 10 月 27 日那集。 讲 Anthropic 怎么安全发模型。</p>
+<p>*去重说明：本轮窗口是 10/28 06:00 到 08:00 PDT。对应 UTC 是 10/28 13:00 到 15:00。对应 epoch 是 1793192400 到 1793199600。框架经子代理初查加主代理用 gh 逐条亲读头条 PR 正文与 mergedAt：窗口内 merged 合计 17 条（vLLM 2、SGLang 1、TensorRT-LLM 3、FlashInfer 8、llama.cpp 3、LMDeploy 0），子代理用 Search API 补回 gh pr list 漏掉的 3 条老编号晚合并 PR（SGLang #46703、FlashInfer #6795、llama.cpp #31110）。vLLM #63914 经主代理亲核：DSv4.1 latency_specialized 的 4 条 FlashInfer 路径因版本须恰好等于 0.7.2 的门控，在 #63466 升 0.7.2.post1 后被静默关闭，本 PR 改为按路径真实条件门控，GB300 上 numerics 由 skip 变 pass、kernel 测试 18 passed，正文无性能数字，正文已标明。vLLM #64063 经子代理摘录：无 .git 构建的 wheel 静默丢失 Mamba SSU 与 Helion 调优配置，SOURCES 7198 到 3513 文件，约 8 倍图捕获变慢是作者描述的受害现象、非本 PR 实测，正文已标注。llama.cpp #31188 经主代理亲核：MoE gate/up 加 GLU 融合，llama-bench 提示处理口径，DGX Spark 上 Qwen3-30B-A3B Q4_K_M 2911.4 到 3410.8（+17.2%）、RTX 5090 约 +5.7% 到 6.1%，三模型困惑度逐位一致，作者口径，正文已标明是 prefill 非 decode。FlashInfer #6795 经主代理亲核：SM107 预编译缓存漏注册 fused_moe_100 等三模块，vLLM DeepSeek FP8 GSM8K 曾因现编译约 789 秒撞穿 1200 秒启动截止线，修后初始化 433.32 秒、准确率 78.47%（1319 题），不改内核实现。FlashInfer #7720 作者明确声明不构成 GPU 或 serving 提速，正文已带限定；#7729 为 DSv4 稀疏 MLA 微调（SM103 89 个更快、0 个变慢）；#7724 为 Mamba SSU 单批次 1.054 倍。SGLang #46703 为 AMD CI 缓存，每周省时为作者预估。TensorRT-LLM 3 条全为测试与基建。正式版经主代理 gh 亲核全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、FlashInfer 仍 v0.7.2.post1；llama.cpp v0.8.0 已在 6点版报过（12:47:51Z 发布），窗口内快照 b11962 按惯例不算正式版。DeepInfer 星标经主代理 gh 亲查为 23739（6点版 23678，+61），pushed_at 仍为 2026-10-26T05:30:52Z。arXiv 五组 API 全查成功、窗口内零入库，最新仍为 10/27 的 2610.37432 与 DCKV（2610.36950）。HN 经 Algolia 精确窗口亲查 175 条，仅 ContextWatcher 一条弱相关（1 分、无外部链接）。Reddit 两组搜索无结果、无原帖证据。业内新闻窗口内无实质新稿：Oracle 扩芯片为 10/27 事件、General Compute 融资 AI Insider 版发于 07:13Z，均在窗口外不重复报。social 窗口内 5 条全为转述科普推广，无首发。大V经子代理逐个核查窗口内 serving 相关为零；Latent Space 当日 newsletter 发于 08:50Z 在窗口前且非 serving 主题。Spotify 经子代理直查 status connected：Latent Space 最新单集仍为 2026-10-27 Anthropic 集。本期不标深读：窗口内无够分量的新方法或新数据，两条静默失效已在正文讲清口径。*</p></body></html>
