@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月28日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-28"/>
+<meta name="doc-ts" content="2026-10-28T07:02:29"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-28（0点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-28（0点版）</h1>
+<p>0点版来了。 正式版还是全平。 这轮没有大新闻。 看点在 AMD 这条线。 SGLang 给 AMD 补了 PD 解码。 PD 解耦就是读题吐字分工。 还顺手修了个多模态音频坑。 长音频以前能把预算撑爆。 本期不标深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版一家都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 TensorRT-LLM 还是预发布。 FlashInfer 还是 0.7.2.post1。 llama.cpp 最新还是 b11946。 那是上个窗口发的快照。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases">https://github.com/ggml-org/llama.cpp/releases</a></p>
+<p><strong>AMD 上的 PD 解码补齐了一块</strong> SGLang 升级了 AMD 专用包。 新包给 DeepSeek-V4-Pro 用。 它带上了 MoRI 的 PD 解码支持。 MoRI 是 AMD 的跨机搬运库。 PD 解码就是吐字那一侧。 搬运库到位，解耦才跑得起来。 同包还带了两个小修复。 一个是 GLM-5.3-Flash 的看门狗。 划重点，这条验证很薄。 只过了配置解析和格式检查。 没有真卡端到端数字。 跟你的 MI350X 和 MI300X 同线。 先记名，等正式版再验。 来源：<a href="https://github.com/sgl-project/sglang/pull/46951">https://github.com/sgl-project/sglang/pull/46951</a></p>
+<p><strong>Engram 查表后的重排快了三倍多</strong> DeepSeek-V4.1 有个 Engram 表。 查完表要跨卡汇总结果。 汇总完还要换个排列顺序。 老写法这步跑得很慢。 新写法换了个 Triton 内核。 内核就是 GPU 上干活的小程序。 每卡 3.2 万词元时实测。 GB300 上从 441 降到 128 微秒。 B300 上从 452 降到 124 微秒。 H200 上从 483 降到 197 微秒。 整步查表也跟着变快。 两卡时从 2843 降到 2426 微秒。 四卡时从 2765 降到 2436 微秒。 输出跟老写法逐位一致。 数字是 PR 作者口径。 你的卡不在实测名单里。 但重排这类账可以借。 来源：<a href="https://github.com/sgl-project/sglang/pull/46925">https://github.com/sgl-project/sglang/pull/46925</a></p>
+<p><strong>vLLM 修了流水线并行的启动崩</strong> 流水线并行就是多卡接力算。 不同段用的注意力后端不同。 它们支持的 KV 布局就不同。 KV 布局就是草稿纸的排版。 老代码要求各段清单全等。 对不上就断言报错退出。 多模态模型特别容易中招。 因为视觉塔和文本层不一样。 修法是把各段清单合并取交集。 验证用的是 MiniMax-M3 的截断版。 它带视觉塔，是多模态模型。 两张 B200 上能启动能答题。 作者也老实交代了一句。 截断版是他自己重拼的。 不保证跟原报告那份全等。 来源：<a href="https://github.com/vllm-project/vllm/pull/61294">https://github.com/vllm-project/vllm/pull/61294</a></p>
+<p><strong>长音频以前能把 vLLM 撑爆</strong> 这条是多模态的安全修复。 FunAudioChat 是个语音聊天模型。 它按每条音频 300 秒做预算。 预算是 1500 个语音词元。 但运行时根本没人查时长。 超长音频能冲破这个预算。 短音频也白白浪费显存。 每条都按 300 秒补满特征。 几条就能吃掉几百 MB 到几 GB。 修法是超预算直接拒绝。 补齐只补到本批最长那条。 单元测试都过了。 你做多模态服务要留意。 编码器侧的输入上限要真查。 别只在算预算时查一遍。 来源：<a href="https://github.com/vllm-project/vllm/pull/57411">https://github.com/vllm-project/vllm/pull/57411</a></p>
+<p><strong>SGLang 的权重能走 NIXL 发了</strong> 这是给强化学习训练用的。 rollout 引擎把权重挂出来。 NIXL 是跨机直传的那套通道。 训练端可以直接写进权重。 引擎自己保持被动就行。 以前这条路只有 Mooncake。 现在多了一个 NIXL 选项。 H200 上 11 个测试全过。 还跑通了一个端到端例子。 模型是 Qwen3-30B-A3B。 权重更新后逐项核对一致。 反方向从 NIXL 装权重还没做。 数字是 PR 作者口径。 来源：<a href="https://github.com/sgl-project/sglang/pull/35712">https://github.com/sgl-project/sglang/pull/35712</a></p>
+<p><strong>其余几条一句话带过</strong> SGLang 省掉一次对齐好的拷贝。 每步省约 1 微秒，作者说测不出端到端差别。 来源：<a href="https://github.com/sgl-project/sglang/pull/46835">https://github.com/sgl-project/sglang/pull/46835</a> TensorRT-LLM 的 Helix 改了交换顺序。 MLA 的 V 先升维再跨卡交换。 换的数据少了，但没给端到端数字。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20939">https://github.com/NVIDIA/TensorRT-LLM/pull/20939</a> FlashInfer 这轮全是内核微调。 Kimi-K3 的 MoE 内核局部快 1 到 1.65 倍。 都是单内核数字，没有端到端。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7673">https://github.com/flashinfer-ai/flashinfer/pull/7673</a></p>
+<p><strong>FlashInfer 补了一道内存栅栏</strong> 这条跟正确性沾边，先说清。 W4A16 的 MoE 内核有个隐患。 先到的计算块没把结果发全。 就急着宣布自己到齐了。 修法是宣布前加一道 GPU 栅栏。 作者明确说了一句。 老代码没观察到算错案例。 所以这不算静默算错新例。 只是把理论隐患提前堵上。 PTX 层面的回归测试修前失败修后过。 H100 上屏障测试 3 个全过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7654">https://github.com/flashinfer-ai/flashinfer/pull/7654</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23517 个。 22点版时是 23474 个。 两小时涨了 43 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>窗口内没有新论文入库</strong> 五组关键词都亲查过了。 最新还停在 10 月 27 日白天。 最晚一篇是 15 点 43 分的。 那篇 22点版已经补报过。 下一批要等下一轮看看。</p>
+<p><strong>HN 和 Reddit 这轮都空</strong> HN 窗口内 31 条全扫完。 没有一篇讲推理服务的。 Reddit 也没查到新帖证据。 聚合页冒充原帖的不算数。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有实质新稿</strong> 芯片和云服务都扫过了。 没有够分量的新消息。 窗口外旧稿不冒充新闻。 扫一眼知道全平就行。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> 名单里的人都逐个查过。 窗口内没有新帖新文。 Simon Willison 发了篇小工具记。 跟推理服务无关，不展开。 Latent Space 也没出新集。 Spotify 本轮查询报错。 未能亲查站内单集列表。 但官网和 X 上都没新集证据。</p>
+<p><strong>本期不标深读</strong> 这轮全是小步优化。 AMD 那条只有版本升级。 验证太薄，不值得整篇读。 等有硬货再做深读。</p>
+<p>*去重说明：本轮窗口是 10/27 22:00 到 10/28 00:00 PDT。对应 UTC 是 10/28 05:00 到 07:00。对应 epoch 是 1793163600 到 1793170800。框架经子代理初查加主代理用 gh search 按 merged 范围亲核，并逐条亲读头条 PR 正文与 mergedAt：子代理框架初查混入两条窗口外旧 PR（SGLang #46893 为 10/27 23:15Z、#46481 为 10/26）且漏掉数条，主代理已剔除旧条并补入亲核的 #46951、#46925、#46835、TensorRT-LLM #20939、FlashInfer #7654、#7673，正文只用亲核结果。SGLang #46951 经亲核：bump sgl-amd-mono db7adb7 到 90c2355，含 sgl-amd-mono #67 的 MoRI PD decode 支持（DeepSeek-V4-Pro）、FlyDSL dispatch 复用与 GLM-5.3-Flash watchdog 修复，PR 验证仅 TOML 解析与 pre-commit，正文已标注验证薄。SGLang #46925 经亲核：Triton 重排内核，32K 词元每卡时 GB300 441 到 128、B300 452 到 124、H200 483 到 197 微秒，DP 查表 auto 在 DP2 2843 到 2426、DP4 2765 到 2436 微秒，144 个形状中 all_to_all 最快占 134 个，输出逐位一致，作者口径。vLLM #61294 经亲核：PP 各段 KV 布局清单改为合并取交集，2 张 B200 上 MiniMax-M3-MXFP8 10 层截断版（作者自拼、不保证与报告版全等）可启动并答题，选 LBHNC 布局。vLLM #57411 经亲核：FunAudioChat 画像预算 300 秒等于 7500 语音帧与 480 万采样，运行时此前不设限，长音频可超预算、短音频按 300 秒补特征耗几百 MiB 到数 GiB，修后超预算拒绝、按批内最长补齐，单元测试覆盖。SGLang #35712 经亲核：rollout 权重经 NIXL 发布供对端直写，H200 上 11 测试 52 子测试过，经 miles 的 Qwen3-30B-A3B p2p 端到端权重核对一致，从 NIXL seed 装载未实现。FlashInfer #7654 经亲核：W4A16 栅栏缺 GPU 作用域发布，作者明说无已观察数值失败，正文未计入静默算错清单。TensorRT-LLM #20939 的 PR 正文为自动生成评审、无端到端数字，正文已标注。正式版经主代理 gh 亲核全平：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。LMDeploy 仍是 v0.18.0。TensorRT-LLM 仍是 v1.4.0rc1 预发布。FlashInfer 仍是 v0.7.2.post1。llama.cpp 最新快照 b11946 为 01:58Z，属上个窗口。DeepInfer 星标经主代理 gh 两次亲查均为 23517（22点版 23474，+43），pushed_at 仍为 2026-10-26T05:30:52Z；子代理框架初查报的 23474 是旧时点数，已弃用。arXiv 经主代理 API 五组亲查加子代理复核：窗口内 published 为零篇，各组最新停在 10/27 白天（最晚 15:43Z 的 Morph 已于 22点版补报）。HN 经主代理 Algolia 精确窗口亲查：stories 共 31 条逐条扫完，无实质相关帖。Reddit 定向搜索无带原帖 URL 与窗口内时间证据的新帖。业内新闻经子代理核查：窗口内无带可验发布时间的实质新稿，AMD commodity DDR5 与 OpenAI 购 TPU 等均为窗口外或日期不符，未采。大V经子代理逐个核查：@lmsysorg、vLLM 官方、@karpathy、@jimfan、Latent Space、The Batch、机器之心、量子位窗口内均无新帖新文；Simon Willison 于 06:37Z 发 Datasette Agent 小记，与 serving 无关未收。Spotify 本轮子代理站内搜索返回 HTTP 400 未能亲查，如实标注；Latent Space 官网与 X 均无新集证据。social 窗口内均为常青科普与推广，未达收录门槛。22点版的 SGLang AMD Kimi-K3 零拷贝、vLLM MLA 紧凑行、FlashInfer 图重放静默算错、TensorRT-LLM PD 编译池挂死均已去重不重复。本期深读 0 篇。*</p></body></html>
