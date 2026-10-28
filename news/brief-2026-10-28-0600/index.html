@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月28日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-28"/>
+<meta name="doc-ts" content="2026-10-28T13:05:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-28（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-28（6点版）</h1>
+<p>6点版来了。 这轮有个久违的大事。 正式版终于不再全平。 llama.cpp 发了 v0.8.0。 SGLang 还推倒重搭了 KV 池。 本期标一篇深读。</p>
+<h2>框架更新</h2>
+<p><strong>llama.cpp 发正式版 v0.8.0</strong> 这版等了很久才转正。 以前它只有每日快照。 这次是正式版本号。 主角是 LFM3 全家桶。 LFM3 是 LiquidAI 的小模型。 文本、视觉、音频全齐了。 还能一个模型管语音聊天。 新架构也一口气进了一批。 DeepSeek V4.1 Flash 在内。 稀疏注意力被重做了一遍。 QSA 和 DSA 合到一个算子。 MoE 专家住主机内存时。 新加了 SLRU 缓存管淘汰。 SLRU 是一种分段淘汰法。 服务器多了实时音频接口。 能直接收流式音频输入。 发布说明没给统一跑分。 别自己脑补提速数字。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/v0.8.0">https://github.com/ggml-org/llama.cpp/releases/tag/v0.8.0</a></p>
+<p><strong>值得深读 — SGLang 重搭统一 KV 池</strong> KV 就是算好的草稿纸。 不同模型的草稿纸不一样。 以前每种组合一套代码。 这次 22 条 PR 一起落地。 15 分钟内整栈合并完。 换成一个路由器管所有池。 分配器也合并成一个。 容量和准入从此统一管。 PD 传输以后都走这套池。 HiCache 的主机层也走它。 验证数字看着很干净。 回放零分歧，传输零差异。 准入 4608 个决定不变。 PD 精度基本守住了。 gpt-oss 是 96.5 到 96.5。 Qwen 是 97.0 到 96.5。 但划重点，作者自己说了。 数字是变基前跑的。 新代码没重跑 GPU 和 PD。 等 0.5.23 出来先复测。 深读：<a href="https://zwang96-dl.github.io/news/deep-20261028-sglang-kv/">https://zwang96-dl.github.io/news/deep-20261028-sglang-kv/</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/46984">https://github.com/sgl-project/sglang/pull/46984</a></p>
+<p><strong>栈里藏着一条 AMD 写错修复</strong> ROCm 的融合写入有个坑。 滑窗视图需要翻译地址时。 它会把 KV 写错地方。 写错还不报错，最阴。 修法是这种情况关融合写。 改由缓存池自己来写。 旧实现 3 个用例失败。 修后 7 个用例全过。 但 AMD 硬件没实测。 只验了路由和资格判断。 来源：<a href="https://github.com/sgl-project/sglang/pull/46983">https://github.com/sgl-project/sglang/pull/46983</a></p>
+<p><strong>SGLang 的 Rust 前端补了课</strong> Rust 前端以前只管一个 rank。 清缓存只清自己那个。 别的 rank 还留着旧数据。 操作看着成功，其实是假的。 这次控制请求扇出到全员。 每个 DP rank 都要回话。 少一个回话就算失败。 DP 是数据并行，多卡分请求。 来源：<a href="https://github.com/sgl-project/sglang/pull/46181">https://github.com/sgl-project/sglang/pull/46181</a> 还有一条多模态的小钩子。 处理器能在调度前看结果。 动机明说是给 PD 的 decode 侧。 它要提前拿到展开后的编号。 来源：<a href="https://github.com/sgl-project/sglang/pull/46946">https://github.com/sgl-project/sglang/pull/46946</a></p>
+<p><strong>vLLM 给 KV 分层加了安全阀</strong> 这条跟 P2P 传 KV 有关。 P2P 是两台机器直传草稿纸。 传超时了，请求要立刻失败。 但内存还不能马上释放。 远端可能还在往里写。 早放就会写坏别人的 KV。 新 API 把两件事拆开了。 失败立刻报，释放慢慢等。 等对方确认写不到才放。 还加了两个指标盯着看。 目前还没有层真用上它。 是给后续 P2P PR 铺路。 只有测试计数，没跑分。 来源：<a href="https://github.com/vllm-project/vllm/pull/63779">https://github.com/vllm-project/vllm/pull/63779</a></p>
+<p><strong>FlashInfer 先量化再发专家</strong> MoE 发激活以前发原稿。 原稿是 BF16，字节大。 现在发送前先量化。 量化就是先压缩再发。 NVFP4 只剩约三分之一字节。 准确说是约 1 除以 3.5。 接收端不用再量化一遍。 顺手把四阶段计时拆开了。 哪段慢一眼就能看见。 正文没给端到端加速。 只有字节量这一个口径。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7426">https://github.com/flashinfer-ai/flashinfer/pull/7426</a></p>
+<p><strong>其余几条一句话带过</strong> SGLang 在昇腾 NPU 上修调度。 三个同步算子曾钉住线程。 单轮最长白等 32.5 毫秒。 改成设备上算，零同步。 那是被去掉的等待成本。 不是端到端加速比。 来源：<a href="https://github.com/sgl-project/sglang/pull/46805">https://github.com/sgl-project/sglang/pull/46805</a> TensorRT-LLM 拆了模型库。 新模型的内核单独成库。 用哪个家族才加载哪个。 全量编译的负担小了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20896">https://github.com/NVIDIA/TensorRT-LLM/pull/20896</a> FlashInfer 有条训练侧优化。 确定性训练后端最高 1.289 倍。 是训练用的，不是 serving。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7721">https://github.com/flashinfer-ai/flashinfer/pull/7721</a> LMDeploy 这轮零合并。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23678 个。 4点版时是 23616 个。 两小时涨了 62 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> 五组关键词全查过了。 最新还是 10 月 27 日那批。 窗口在批次发布的空档里。 零篇是节奏问题，不是漏查。 HN 窗口内 116 条全扫了。 没有一条讲推理服务。 Reddit 没查到原帖证据。 聚合页冒充原帖的不算。</p>
+<h2>业内新闻</h2>
+<p><strong>本地显卡能变全球 API 了</strong> OrcaRouter 今天发了新功能。 叫 Orca Connect。 你本地跑的模型接上去。 外面就能当 API 调用。 不用公网 IP，不用转发端口。 vLLM、SGLang 它都支持。 本地推理不收平台费。 云端兜底要你显式开才收费。 具体发布时间没到小时。 只能确认是今天发的稿。 来源：<a href="https://www.prnewswire.com/news-releases/orcarouter-launches-orca-connect-turning-any-local-gpu-into-a-free-globally-accessible-ai-api-302921695.html">https://www.prnewswire.com/news-releases/orcarouter-launches-orca-connect-turning-any-local-gpu-into-a-free-globally-accessible-ai-api-302921695.html</a></p>
+<p><strong>社区在传 DeepInfer 的边界</strong> 有条短视频在介绍 DeepInfer。 它特意说明一个边界。 这版只有离线推理。 不含 KV 缓存系统。 也不含 PD 解耦。 你评估 PD 时记住这点。 别拿它当 PD 的选项。 来源：<a href="https://www.instagram.com/reel/DfCYdodkTqv/">https://www.instagram.com/reel/DfCYdodkTqv/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> 名单里的人都逐个查过。 窗口内没有新帖新文。 Simon Willison 今天有新帖。 但讲的是 AI 工具帮不上忙。 跟推理服务无关，不收录。 Latent Space 也没出新集。 Spotify 已亲查过了。 最新还是 10 月 27 日那集。 讲 Anthropic 怎么安全发模型。</p>
+<p>*去重说明：本轮窗口是 10/28 04:00 到 06:00 PDT。对应 UTC 是 10/28 11:00 到 13:00。对应 epoch 是 1793185200 到 1793192400。框架经子代理初查加主代理用 gh 逐条亲读头条 PR 正文与 mergedAt：llama.cpp v0.8.0 经主代理亲核，发布于 12:47:51Z、prerelease=false，是窗口内唯一正式版变化，上一版口径里它只有每日快照（窗口内快照 b11960 在 12:45:39Z）；版本 PR 是 #31309（11:30:39Z）。SGLang 统一 KV 栈 #46970–#46991 共 22 条，11:49:58Z 到 12:04:44Z 合并；代表条 #46984 经亲核：历史验证在 87c5858f 上、四链回放 0 分歧、准入 4608 个决定不变、transfer 0 差异、Mooncake TP1 PD GSM8K-200 为 gpt-oss-120b 96.5 到 96.5、Qwen3.8-27B 97.0 到 96.5，作者明说 GPU/PD 未在变基后 HEAD 重跑，正文已标明。#46970 的分配器轨迹 73 runs、12968 ops 零分歧，布局 28 配置 418 值一致、4 个植入 mutation 全被抓。收尾 #47071（12:17:23Z）修 DFLASH 前缀提交，20 加 8 个测试全过、8×B300 E2E 未重跑。栈内 #46983 经主代理亲核：ROCm 融合 KV 写在滑窗翻译视图下会写错存储，旧实现 3 失败、修后 7 全过，AMD 硬件与 ROCm 内核未实测，正文已标注。SGLang #46181 为 Rust 控制面扇出到每个 DP rank；#46946 经主代理亲核，多模态处理器 processed 钩子动机明说供分离部署 decode 侧在调度前拿 expanded ids 与布局，cargo 397 tests pass。vLLM #63779 经主代理亲核：tiering 的 deferred_release 是 #61667 第 1 步、尚无 tier 真实使用，594 加 120 个测试通过、无端到端跑分，正文已标注。FlashInfer #7426 经亲核：发送端先量化 NVFP4/MXFP8，NVFP4 约为 BF16 的 1/3.5 字节，无端到端加速数字。SGLang #46805 的 3.9/32.5/31.4 ms 是被去掉的 host 同步等待成本、非加速比，正文已标明。TensorRT-LLM #20896 为 modeling_v2 按家族拆库、无性能数字。FlashInfer #7721 是确定性 Gated DeltaNet 训练后端 host 侧优化，B200 上 fwd+bwd 最高 1.289 倍、属训练侧。正式版其余全平（主代理 gh 亲核）：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、FlashInfer 仍 v0.7.2.post1、TensorRT-LLM 预发仍 v1.4.0rc1。窗口内 merged 合计 44 条：vLLM 3、SGLang 28、TRT-LLM 4、FlashInfer 6、llama.cpp 3、LMDeploy 0。DeepInfer 星标经主代理 gh 亲查为 23678（4点版 23616，+62），pushed_at 仍为 2026-10-26T05:30:52Z。arXiv 五组 API 全查成功、窗口内零入库，最新为 10/27 的 2610.37432 与 DCKV（2610.36950），窗口外不重复报。HN 经 Algolia 精确窗口亲查 116 条、实质相关零条。Reddit 五组搜索无原帖 URL 与时间证据。业内新闻：Oracle 扩芯片菜单是 10/27 已报事件，本轮子代理误列已剔除不重复；Orca Connect 只有日期证据、无小时级发布时间，正文已标注只确认今日发布；General Compute 融资、FlashMap 均在窗口外不报。social 窗口内 DeepInfer 短视频（12:00:48 UTC）只是社区转述其不含 PD/KV 的边界，项目本身此前已报、正文只作边界提醒。大V经子代理逐个核查窗口内 serving 相关为零；Simon Willison 10/28 新帖主题无关已剔除。Spotify 经子代理直查 status connected：Latent Space 最新单集仍为 2026-10-27 Anthropic 集。本期深读 1 篇：SGLang 统一 KV 缓存重构栈（#46970–#46991，含按 PR 数据重绘图 2 张，原 PR 无配图）。*</p></body></html>
