@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月28日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-28"/>
+<meta name="doc-ts" content="2026-10-28T11:01:44"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-28（4点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-28（4点版）</h1>
+<p>4点版来了。 这轮是 SGLang 的 AMD 专场。 正式版还是全平。 但主线合并了 35 条。 头条全跟你的卡有关。 还有一条 PD 静默出垃圾。 本期标一篇深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版一家都没动</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 FlashInfer 还是 0.7.2.post1。 llama.cpp 只有每日快照。 窗口内出了 b11954。 按惯例不算正式发版。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases">https://github.com/ggml-org/llama.cpp/releases</a></p>
+<p><strong>值得深读 — AMD 上 DSA 打开了 DCP</strong> DCP 是解码上下文并行。 说白了几张卡分摊草稿纸。 KV 就是算好的草稿纸。 以前 AMD 这条路开不了。 这次 SGLang 把它补齐了。 测试卡是 MI355X。 模型是 GLM-5.2 的 MXFP4 版。 KV 容量涨到 3.1 倍。 从 283 万涨到 881 万词元。 并发 24 时吞吐涨 2.2 倍。 并发 40 时涨 4.8 倍。 但并发 16 时没收益。 并发 48 时交互反而塌了。 只剩基线的 0.41 倍。 原因是缓存池满了。 DCP 现在还配不了 HiCache。 HiCache 是主机内存那层缓存。 被淘汰的前缀只能重算。 GSM8K 分数前后不变。 都是 0.953，作者口径。 划重点，它肯报负收益段。 你压测照它四档并发扫。 深读：<a href="https://zwang96-dl.github.io/news/deep-20261028-amd-dsa-dcp/">https://zwang96-dl.github.io/news/deep-20261028-amd-dsa-dcp/</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/44322">https://github.com/sgl-project/sglang/pull/44322</a></p>
+<p><strong>确定性推理又快了一截</strong> 这是 2点版那条的续集。 2点版换的是矩阵乘参数。 这轮融合的是归一化内核。 确定性就是同输入同结果。 MI350X 上单请求实测。 解码吞吐涨了 56% 到 73%。 并发 16 时涨 12% 到 22%。 原来每层要跑约 10 次启动。 现在融成一个内核跑完。 省下的正是那段空转。 逐位一致的校验全过了。 数字是 PR 作者口径。 来源：<a href="https://github.com/sgl-project/sglang/pull/46159">https://github.com/sgl-project/sglang/pull/46159</a></p>
+<p><strong>PD 在 AMD 上出过垃圾输出</strong> 这条跟你评估 PD 直接相关。 SGLang 在 AMD 上跑 PD 分离。 decode 端直接吐垃圾。 还没有任何传输报错。 GSM8K 精度掉到 0.005。 门槛是 0.7，等于全错。 锅在 K 和 V 合并分配。 合并是给英伟达快路准备的。 却没做平台隔离就全开了。 二分证据很干净。 合并前 9 次测试全过。 合并后 9 次全挂。 修法是 ROCm 上关掉合并。 K 和 V 恢复分开分配。 作者说速度没有变化。 但他还没在 MI35x 亲跑。 靠的是 AMD 的 PD 测试流水线。 你上 AMD 跑 PD 先验精度。 别只看传输有没有报错。 来源：<a href="https://github.com/sgl-project/sglang/pull/46861">https://github.com/sgl-project/sglang/pull/46861</a></p>
+<p><strong>一行改动，单次调用快 128 倍</strong> SGLang 修了 EAGLE 的预填充。 EAGLE 是先猜后验的草稿法。 挪词元时每趟只挪 8 个。 16K 词元要串行跑 2048 趟。 改成每趟 4096 个就好了。 单次调用 824 微秒降到 6.4。 输出跟以前逐位一致。 H100 上测的，作者口径。 只影响开多层 EAGLE 的配方。 比如 MiMo 和 Step 系列。 来源：<a href="https://github.com/sgl-project/sglang/pull/46639">https://github.com/sgl-project/sglang/pull/46639</a></p>
+<p><strong>vLLM 这轮全是小修</strong> 一条修 KV 卸载的计数。 漏算会让缓存副本不存在。 后续请求白白 miss 掉。 一条修 PD 的连接关闭。 关错顺序会卡死控制面。 之后所有查询等满 30 秒。 一条修 DeepSeek-OCR 崩溃。 半白半黑图被误判成空图。 改看元素个数就修好了。 都只有单测，没有跑分。 来源：<a href="https://github.com/vllm-project/vllm/pull/64229">https://github.com/vllm-project/vllm/pull/64229</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/63207">https://github.com/vllm-project/vllm/pull/63207</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/64091">https://github.com/vllm-project/vllm/pull/64091</a></p>
+<p><strong>其余几条一句话带过</strong> SGLang 的 HiCache 打通端到端。 新布局支持 GPU 和主机互搬。 正文没给吞吐数字。 来源：<a href="https://github.com/sgl-project/sglang/pull/39728">https://github.com/sgl-project/sglang/pull/39728</a> MoRI 能过 V4.1 的 PD 校验了。 这是 0点版那条的续报。 只是放行，不是新功能。 来源：<a href="https://github.com/sgl-project/sglang/pull/42457">https://github.com/sgl-project/sglang/pull/42457</a> TensorRT-LLM 修了多前端指标。 8 个前端时计数碎成一片。 现在统一归到启动器汇总。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19394">https://github.com/NVIDIA/TensorRT-LLM/pull/19394</a> FlashInfer 合了 16 条内核微调。 一条 Gated DeltaProduct 快 2.3 倍。 那是几何均值，H100 上测的。 其余多没给端到端数字。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7713">https://github.com/flashinfer-ai/flashinfer/pull/7713</a> LMDeploy 这轮零合并。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23616 个。 2点版时是 23566 个。 两小时涨了 50 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 恢复了，还是零篇</strong> 2点版时接口超时又限流。 这轮五组全查成功了。 窗口内零新论文入库。 最新是昨天的 DCKV。 它讲 KV 的压缩编码。 不在本窗口，不重复报。 零篇是批次节奏问题。 每日批次在 UTC 零点发完。</p>
+<p><strong>HN 和 Reddit 都空</strong> HN 窗口内 67 条全扫完。 没有一篇讲推理服务的。 Reddit 没查到原帖证据。 聚合页冒充原帖的不算。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有实质新稿</strong> 芯片和云服务都扫过了。 昨天那批大新闻不重复报。 比如 Oracle 扩芯片菜单。 那是 10 月 27 日宣布的。 有一条推理云融资在窗口外。 General Compute 融了 1 亿美元。 它专做推理的 neocloud。 neocloud 就是新型云厂商。 发布时间是 0 点 13 分。 差两小时，不算本窗口。 来源：<a href="https://theaiinsider.tech/2026/10/28/general-compute-secures-100m-series-a-for-inference-focused-neocloud-at-800m-valuation/">https://theaiinsider.tech/2026/10/28/general-compute-secures-100m-series-a-for-inference-focused-neocloud-at-800m-valuation/</a></p>
+<p><strong>一个小工具一句带过</strong> MeshLLM 把多台机器拼成池。 GPU 和显存凑一起用。 对外是一个兼容接口。 号称小卡也能跑 70B。 只有帖子截图，没跑分。 来源：<a href="https://www.threads.com/@simplifyinai/post/DfCN01Xm_de">https://www.threads.com/@simplifyinai/post/DfCN01Xm_de</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> 名单里的人都逐个查过。 窗口内没有新帖新文。 Latent Space 也没出新集。 Spotify 已亲查过了。 最新还是 10 月 27 日那集。 它家 newsletter 差 10 分钟。 发在窗口前，不算这轮。</p>
+<p>*去重说明：本轮窗口是 10/28 02:00 到 04:00 PDT。对应 UTC 是 10/28 09:00 到 11:00。对应 epoch 是 1793178000 到 1793185200。框架经子代理初查加主代理用 gh 逐条亲读头条 PR 正文与 mergedAt：SGLang #44322 经亲核，MI355X 上 GLM-5.2-MXFP4、TP4/EP4、FP8 KV、DCP4，KV 容量 2.83M 到 8.81M 词元、passkey 三档全过、GSM8K 0.953 不变、接受长度 3.11 到 3.47，智能体回放并发 24 每卡 10872 到 23416 tok/s（2.2 倍）、并发 40 为 5144 到 24740（4.8 倍）、并发 16 为 0.99 倍、并发 48 吞吐 2.3 倍但 P90 交互只剩 0.41 倍且池满命中 82.6%，因 DCP 拒绝 HiCache，作者口径，已做深读（含 PR 原图）。SGLang #46159 经亲核：MI350X 确定性模式融合 add 加 RMSNorm，单请求 decode 吞吐加 56% 到 73%、并发 16 加 12% 到 22%，与 2点版 #44045 是同方向不同内核，正文已标续集。SGLang #46861 经亲核：ROCm 上下文 K/V 融合分配（#32272）让 MI35x Mooncake 同节点 PD 测试 GSM8K 掉到 0.005（门槛 0.7），二分前后各 9 次全过与全挂，修法是 ROCm 关融合、无速度变化，作者未在 MI35x 亲跑、靠 AMD disaggregation CI 验证，正文已标注。SGLang #46639 经亲核：多层 EAGLE prefill 的 rotate 每趟 8 改 4096，H100 PCIe 上 16K 词元单次 824 到 6.4 微秒、逐位一致，作者口径。vLLM #64229、#63207、#64091 均为单测级修复、无端到端跑分。SGLang #39728 无吞吐数字；#42457 与 0点版 MoRI PD 同主题、仅 V4.1 DSpark 校验放行，正文已标续报不作头条。TensorRT-LLM #19394 为多前端指标归一化修复。FlashInfer 窗口内 16 条 merged，#7713 的 2.255 倍为 H100 内核几何均值、作者口径，其余多无端到端数字。LMDeploy 窗口内零合并。正式版经主代理 gh 亲核全平：vLLM 仍是 v0.32.0（10/18）。SGLang 仍是 v0.5.22（10/19）。LMDeploy 仍是 v0.18.0。FlashInfer 仍是 v0.7.2.post1。llama.cpp 窗口内快照 b11954（10:28Z）为主代理亲查。DeepInfer 星标经主代理 gh 亲查为 23616（2点版 23566，+50），pushed_at 仍为 2026-10-26T05:30:52Z。arXiv 本轮恢复：子代理五组 API 全查成功，窗口内零入库，最新为 KV cache 组 10/27 的 DCKV（2610.36950v1），窗口外不重复报，2点版没查成的缺口本轮已补上。HN 经子代理 Algolia 精确窗口亲查 67 条零相关。Reddit 无带原帖 URL 与窗口内时间证据的新帖。业内新闻经子代理核查窗口内无实质新稿：Oracle 扩芯片菜单、OpenAI 买 TPU 均为 10/27 事件已剔除；General Compute 融资 1 亿美元发布于 00:13 PDT、属窗口外，正文已标明时间不冒充本窗口。social 窗口内 MeshLLM 帖仅截图无跑分，只一句带过。大V经子代理逐个核查窗口内全零；Latent Space newsletter 发于 01:50 PDT、差 10 分钟在窗口外。Spotify 经子代理直查 status connected：Latent Space 最新单集仍为 2026-10-27 Anthropic 集。本期深读 1 篇：SGLang AMD DSA 打开 DCP（#44322）。*</p></body></html>
