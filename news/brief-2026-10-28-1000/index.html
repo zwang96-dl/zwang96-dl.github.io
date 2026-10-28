@@ -2,7 +2,7 @@
 <meta name="doc-title" content="多模态推理简报 · 10月28日 10:00"/>
 <meta name="doc-description" content=""/>
 <meta name="doc-date" content="2026-10-28"/>
-<meta name="doc-ts" content="2026-10-28T17:04:23"/>
+<meta name="doc-ts" content="2026-10-28T17:08:35"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>多模态大模型推理服务简报 · 2026-10-28（10点版）</title><style>
@@ -55,7 +55,7 @@ img{border-color:#30363d}
 <p><strong>其余几条一句话带过</strong> vLLM 新增了语音转写模型。 是英伟达的 Nemotron 转写版。 来源：<a href="https://github.com/vllm-project/vllm/pull/64282">https://github.com/vllm-project/vllm/pull/64282</a> vLLM 移除了两个多模态模型。 Keye-VL 两个版本被下架。 下载量九成来自它自己的 CI。 来源：<a href="https://github.com/vllm-project/vllm/pull/64287">https://github.com/vllm-project/vllm/pull/64287</a> TensorRT-LLM 有个测试被跳过。 Qwen3.5 多卡权重更新有未修失败。 现在靠跳过测试过 CI。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21193">https://github.com/NVIDIA/TensorRT-LLM/pull/21193</a> LMDeploy 这轮还是零合并。</p>
 <p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23799 个。 8点版时是 23739 个。 两小时涨了 60 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
 <h2>新技术与论文</h2>
-<p><strong>值得深读 — HiCache 把草稿纸搬进主机内存</strong> 发帖的是 SemiAnalysis。 他们放了自家 InferenceX 数据。 测的是 744B 的 GLM 大模型。 跑在 B200 上，用 SGLang。 负载是智能体的长对话。 并发低时草稿纸几乎全命中。 显存里的命中率约 98%。 并发涨到 16 就撑不住了。 显存命中率掉到 54.8%。 开了 HiCache 就不一样了。 HiCache 是把草稿纸分层放。 放不下的就卸到主机内存。 16 并发时主机层接住 40.3%。 能缓存的词元多出两到四成。 说白了，显存不够内存来凑。 这跟你看的 KV 分层是一回事。 深读：<a href="https://zwang96-dl.github.io/news/deep-20261028-hicache-prefix/">https://zwang96-dl.github.io/news/deep-20261028-hicache-prefix/</a> 来源：<a href="https://www.threads.com/@semianalysis/post/DfCtc1jlPE6">https://www.threads.com/@semianalysis/post/DfCtc1jlPE6</a></p>
+<p><strong>值得深读 — HiCache 把草稿纸搬进主机内存</strong> 发帖的是 SemiAnalysis。 他们放了自家 InferenceX 数据。 测的是 744B 的 GLM 大模型。 跑在 B200 上，用 SGLang。 负载是智能体的长对话。 并发低时草稿纸几乎全命中。 显存里的命中率约 98%。 并发涨到 16 就撑不住了。 显存命中率掉到 54.8%。 开了 HiCache 就不一样了。 HiCache 是把草稿纸分层放。 放不下的就卸到主机内存。 16 并发时主机层接住 40.3%。 能缓存的词元多出两到四成。 说白了，显存不够内存来凑。 这跟你看的 KV 分层是一回事。 深读：<a href="https://zwang96-dl.github.io/news/deep-20261028-hicache-glm/">https://zwang96-dl.github.io/news/deep-20261028-hicache-glm/</a> 来源：<a href="https://www.threads.com/@semianalysis/post/DfCtc1jlPE6">https://www.threads.com/@semianalysis/post/DfCtc1jlPE6</a></p>
 <p><strong>arXiv 窗口内还是零篇</strong> 五组关键词全查过了。 最新还是 10 月 27 日那批。 窗口在批次发布的空档里。 零篇是节奏问题，不是漏查。 HN 窗口内 162 条全扫了。 没有一条讲推理服务。 Reddit 没查到原帖证据。 聚合页冒充原帖的不算。</p>
 <h2>业内新闻</h2>
 <p><strong>窗口内没有其他实质新稿</strong> 芯片和云服务都扫过了。 SK 海力士三季报是今晨的。 发布时间在本窗口之前。 窗口前的事按惯例不报。 微软和谷歌今晚盘后发财报。 AI 账单谁买单要晚上才知道。 社交上还有一条窗口内帖子。 是通用科普图，没有新信息。</p>
