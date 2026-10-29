@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-29T21:07:06"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（14点版）</h1>
+<p>14点版来了，这轮关键词是&quot;租&quot;。 vLLM 给 PD 搬运工 Mooncake 加了续租机制。 EPLB 搬权重也提速了，GB300 上 decode 快 25%。 SGLang 修了个 LoRA 槽位饿死的坑。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM：Mooncake 的 KV 租约可以续了</strong> Mooncake 是 vLLM 的 KV 搬运工。 管 prefill 和 decode 之间传草稿纸。 以前 prefill 做完的 KV，480 秒没人取就作废。 忙的时候解码器排队，KV 等不到就被清，请求白做。 现在加了个 opt-in 的租约：解码器活着就续租，死了就早释放。 跟你评估 PD 直接相关，搬运超时这笔账要重算。 来源：<a href="https://github.com/vllm-project/vllm/pull/64193">https://github.com/vllm-project/vllm/pull/64193</a></p>
+<p><strong>vLLM：EPLB 搬权重提速，decode 快 25%</strong> EPLB 是专家负载均衡，忙的专家把活分给闲的。 这次加了 symm_mem 后端，权重直接推到对面显存。 不用中转 buffer，跨节点拷贝约 800 GB/s。 在 GB300 NVL72 上测的。 V4.1-Flash 的 decode 快了 12% 到 26%。 跟你精度门清单里&quot;EPLB 副本未加载&quot;那条对得上。 来源：<a href="https://github.com/vllm-project/vllm/pull/62009">https://github.com/vllm-project/vllm/pull/62009</a></p>
+<p><strong>vLLM：Engram 宿主表换大页，DP 各 rank 共享</strong> Engram 是 V4.1 的主机内存草稿纸方案。 两层表 2×94.4 GiB，以前各 DP rank 一份。 改走 host-NUMA 的 cuMem，GPU 按 2M 大页映射。 GB200 上随机查表吃 TLB miss，大页正好治这个。 失败自动回落到老路，不会 OOM。 来源：<a href="https://github.com/vllm-project/vllm/pull/62359">https://github.com/vllm-project/vllm/pull/62359</a></p>
+<p><strong>vLLM：ROCm 两条，DSv4.1 在 AMD 卡上</strong></p>
+<p>#63816：NaN 的路由分数排最后，不再选错专家。</p>
+<p>以前单核模式加自适应校验，CUDA graph 抓取直接 fault。</p>
+<p>#62481：warmup 后监控 FlyDSL 的 JIT 编译。</p>
+<p>来源：</p>
+<ul><li><a href="https://github.com/vllm-project/vllm/pull/63816">https://github.com/vllm-project/vllm/pull/63816</a></li><li><a href="https://github.com/vllm-project/vllm/pull/62481">https://github.com/vllm-project/vllm/pull/62481</a></li></ul>
+<p><strong>SGLang：LoRA 槽位饿死修了</strong> 多 adapter 抢槽位时，冷门的 adapter 永远排不上。 实测 1% 的请求首词元要等 90 秒，中位数才 77 毫秒。 新 LoRADrainer 会主动腾退快完事的 adapter。 来源：<a href="https://github.com/sgl-project/sglang/pull/46500">https://github.com/sgl-project/sglang/pull/46500</a></p>
+<p><strong>SGLang：调度器少发点统计消息</strong> per-request 的输出统计只在可能变化时才发。 第一次输出、被撤回后、结束时，三次就够。 中间行不再重复带，tokenizer 那边也更省。 来源：<a href="https://github.com/sgl-project/sglang/pull/47178">https://github.com/sgl-project/sglang/pull/47178</a></p>
+<p><strong>SGLang：投机解码的重构</strong> ragged-verify 的 graph tier 推导收敛到一处。 以前三处各算各的，靠注释保持一致。 纯重构，行为没变。 来源：<a href="https://github.com/sgl-project/sglang/pull/34038">https://github.com/sgl-project/sglang/pull/34038</a></p>
+<p><strong>TRT-LLM：KVCM2 加了稀疏注意力</strong> KVCM2 是新一代 KV 缓存管理器。 这次加了稀疏注意力的 arena 和主机内存池。 跟你关注的稀疏注意力方向对得上。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21129">https://github.com/NVIDIA/TensorRT-LLM/pull/21129</a></p>
+<p><strong>TRT-LLM：Nemotron VL 的 batch 等价改比 logits</strong> 图像 batch 和单张跑，结果要对得上。 以前比自由生成的 token ID 和概率。 现在改比 teacher-forced 的 logits，阈值 1.0。 想起今早那篇&quot;温度设 0 还飘&quot;：batch 一变结果就飘。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20330">https://github.com/NVIDIA/TensorRT-LLM/pull/20330</a></p>
+<p><strong>FlashInfer：cake 又烤了四炉</strong></p>
+<p>#7870：MXFP8 权重量化从 51 毫秒压到 1.57 毫秒。</p>
+<p>是训练向的 MoE kernel，跟你 serving 关系不大。</p>
+<p>#7879：fmha 的 context JIT 修了个路由 bug。</p>
+<p>#7880：SM100/SM103 的反向 band-path 微调。</p>
+<p>#6893：kda 的 CuTe 解码路径接受 2-D dt_bias。</p>
+<p>这 bug 是下游 SGLang #45018 踩出来的。 来源：</p>
+<ul><li><a href="https://github.com/flashinfer-ai/flashinfer/pull/7870">https://github.com/flashinfer-ai/flashinfer/pull/7870</a></li><li><a href="https://github.com/flashinfer-ai/flashinfer/pull/7879">https://github.com/flashinfer-ai/flashinfer/pull/7879</a></li><li><a href="https://github.com/flashinfer-ai/flashinfer/pull/7880">https://github.com/flashinfer-ai/flashinfer/pull/7880</a></li><li><a href="https://github.com/flashinfer-ai/flashinfer/pull/6893">https://github.com/flashinfer-ai/flashinfer/pull/6893</a></li></ul>
+<p><strong>版本全平，快照又滚了两版</strong> vLLM 还是 0.32.0，SGLang 还是 0.5.22。 LMDeploy 还是 0.18.0，TGI 还是 v3.3.7。 TRT-LLM 预发还是 v1.4.0rc2。 llama.cpp 滚了 b11986 和 b11988 两个快照。 按惯例每日快照不算正式版。 DeepInfer 星标到了 24230 个，12点版时是 24212。 两小时涨 18 个，代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> 窗口是 19:00 到 21:00 UTC，结构性零入库。 最新还是 10 月 27 日那批，不冒充查无。</p>
+<h2>业内新闻</h2>
+<p><strong>LMSYS 发了 Miles 博客，SGLang 上 AMD 卡实战</strong> Miles 是 LMSYS 的异步 RL 训练框架。 这次用它在 AMD MI355X 上训 SWE agent。 SWE-bench 从 7.3% 涨到 27.5%。 rollout 吞吐快了 4 倍。 跟你最相关的是 KV 那段：一条 64K 轨迹吃 6.3 GB 草稿纸。 几条失控生成冲到 186K token，把缓存直接挤爆。 其他 99 个请求排队超时，限 64K 上下文后解决。 你在 MI350X 上评估 SGLang，这坑值得提前记一笔。 来源：<a href="https://www.lmsys.org/blog/2026-10-22-miles-mi355x-agentic-rl">https://www.lmsys.org/blog/2026-10-22-miles-mi355x-agentic-rl</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没标深读</strong> Miles 博客是工程复盘，serving 新方法不多。 Mooncake 续租是单个 PR，够不上单开精读。 大V（vLLM 官方、karpathy、jimfan）窗口内没发新帖。 Reddit、HN 也无实质新话题。</p>
+<p>*去重说明：本轮窗口是 10/29 12:00 到 14:00 PDT。对应 UTC 是 10/29 19:00 到 21:00。框架经 GitHub Search API 按 merged 时间亲查：窗口内实质合入合计 16 条（vLLM 5、SGLang 3、TRT-LLM 3、FlashInfer 4 条实质加 1 条测试；LMDeploy、llama.cpp、TGI 零合入）。正式版经亲核全平：vLLM 仍 v0.32.0（2026-10-18）、SGLang 仍 v0.5.22（2026-10-19）、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7、TRT-LLM 预发仍 v1.4.0rc2（2026-10-28）；llama.cpp b11986（20:16 UTC）、b11988（20:53 UTC）为每日快照，按惯例不计正式版。vLLM #64193 经亲读 PR 全文：opt-in 的 kv_lease_duration 替代固定 480 秒超时（VLLM_MOONCAKE_ABORT_REQUEST_TIMEOUT），decoder 每 lease/6 续租一次；D 崩溃后 P 在一个租期内释放其 KV，D 过载排队时 KV 一直保留，P 已释放的 late pull 立刻失败；沿用 NIXL 的 lease 设计（#41383，RFC #60523 第 6 项）。vLLM #62009 经亲读：opt-in 的 symm_mem 权重迁移后端，把 EPLB 逻辑到物理的 replica 映射并入 DeepGEMM MegaMoE 的 staging kernel；GB300 NVL72 上 V4.1-Flash decode 涨 12.0%（DEP16）、25.0%（DEP32，72 req/rank）、26.2%（DEP32，128 req/rank），跨节点 peer copy 约 800 GB/s（NIXL 约 88 GB/s），40 层重排 0.3 到 0.6 秒。vLLM #62359 经亲读：dp_shared_memory 下 Engram host tables（V4.1-Flash 2 层乘 94.4 GiB）改 host-NUMA cuMem，GPU 按 2M 大页映射（原来 /dev/shm 是 64K 页，GB200 上随机行读吃 GPU TLB miss）；rank0 在其 NUMA 节点按 2GiB chunk 分配、留 5% 余量，失败回落 /dev/shm；另修 /dev/shm 孤儿表两处。vLLM #63816 经亲读：gfx942 上 V4.1-Flash 单核模式加自适应 DSpark 校验，CUDA graph capture 时 profile 回放了没写过的 KV 块，draft FFN 见到 NaN 的路由分数，stage_route 的 fx.max 保留 NaN 导致同一专家被选两次、gather 越界 fault；修法是 NaN 排最后、winner ballot 忽略超 expert 数的 lane；MI325X 4 卡验证通过。SGLang #46500 经亲读：LoRADrainer 重构，4 个 adapter 抢 3 个槽位时 p99 首词元 90 秒（中位数 77 毫秒），超 --lora-drain-wait-threshold 后主动 drain 最快退出的 adapter 腾槽。SGLang #47178 经亲读：RequestOutputStats（prompt/cached token 数、retraction 计数、多模态 token 数、调度耗时）只在首次输出、retraction 后首次输出、结束行发送，其余行为空。SGLang #34038 经亲读：纯重构，_resolve_verify_tier 单点推导 ragged-verify 的 graph tier，无行为变化。TRT-LLM #21129：KVCM2 稀疏注意力 arena 加主机内存池、Batch 拥有 arena（coderabbit 自动 review，无独立验证数字）。TRT-LLM #20330 经亲读：Nemotron VL 的 image batch-equivalence 改比 teacher-forced logits（阈值 1.0，去掉强制 token 列），不再比 free-running 的 token ID 和 logprob，image 的 waiver 移除，H200 上 44 个测试通过。FlashInfer 4 条：#7870 cake_mok_bf16 训练向（融合单 launch 的 MXFP8 权重量化，51.04 毫秒降到 1.57 毫秒每层，Rubin EP8 comm-SM 默认 60:60 或 72:60，MoE 训练更新快 1.99 到 2.67 倍）；#7879 cake_fmha 的 context JIT 在无可见 key 的 tile 上路由 complete；#7880 cake_gated_act_mxfp8 的 SM100/SM103 反向 band-path；#6893 kda 的 CuTe decode 路径接受 2-D dt_bias、拒绝非 bf16 state（下游 SGLang #45018 暴露）；#7840 为 kda 测试 helper，不计实质。DeepInfer 星标亲核 24230（12点版 24212，加 18），pushed_at 仍 2026-10-26T05:30:52Z，无代码更新。arXiv 窗口内零入库（结构性：每日批次约 00:00 UTC 发布），最新仍为 10/27。Miles 博客（lmsys.org，今日发布，往期简报未覆盖）亲读全文：Qwen3-30B-A3B-Instruct 在 AMD MI355X（288GB HBM3E）上全异步 agentic RL（Miles、SGLang、Megatron-LM、Harbor，ROCm 7.2），SWE-bench Verified 100 任务子集 pass@1 从 7.3% 到 27.5%；rollout 从 860 到 3480 轨迹每小时（1 到 3 个 8 卡推理节点加云沙箱加去并发上限），训练步从 850 秒到 284 秒（限轨迹长度）；KV 相关：每 token 96KB，64K 轨迹 6.3GB，若干 113K 到 186K 的失控生成占满 150 万 token 的 KV 缓存、其余 99 个请求排队超时，engine 侧限 64K 上下文解决；长尾：84% 轨迹跑满 turn 上限，32% 的 rollout 时间发生在 90% 轨迹完成后；384 并发时 KV 只用 23%，瓶颈在沙箱并发。Latent Space 无新一期（仍是 10/27 那期，10点版已报）。大V（vLLM 官方、karpathy、jimfan、swyx）窗口内无新帖；Reddit、HN、中文媒体窗口内无实质新内容。Spotify 未查（窗口内新单集概率低，沿用近几期水位）。本期无深读（宁缺毋滥）。*</p></body></html>
