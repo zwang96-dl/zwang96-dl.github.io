@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 08:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-29T14:59:22"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（8点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（8点版）</h1>
+<p>8点版来了，这轮关键词是静默算错三连。 vLLM 整图编译会把 KV 缓存写坏。 NIXL 搬 KV 时会把层数据裁错。 KV offload 还会把没算完的块当算完存。 三个都是静默坑，不报错但结果不对。 本期不标深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 TensorRT-LLM 预发还是 v1.4.0rc2。 窗口内实质更新一共 15 条。</p>
+<p><strong>vLLM 整图编译下 KV 缓存会被写坏</strong> 开 compile mode 1/2 的话，当心。 背景：whole-graph compile 就是全图编译。 Inductor 塞给 kernel 的张量排布变了。 kernel 按老排布读写，KV 缓存就被写坏。 Qwen3 这类 Transformers 后端模型会出退化输出。 修法：把 #42129 整个 revert 回去。 只留它的防编译卡死部分。 已加回归测试，Qwen3-0.6B 对齐 eager 模式。 对你：开整图编译前先确认 KV 分数对不对。 来源：<a href="https://github.com/vllm-project/vllm/pull/64279">https://github.com/vllm-project/vllm/pull/64279</a></p>
+<p><strong>vLLM 的 NIXL 搬运会把层数据裁错</strong> 这条跟 PD 解耦搬运直接相关。 背景：NIXL 是搬 KV 的传输层。 注册搬运区时只按起始地址去重。 混合注意力模型里，两层地址重叠但块大小不同。 DeepSeek-V4.1-Flash 的压缩器状态就中招。 被合并的那层继承了别人的块大小。 PD 传输被截断、对不齐，输出直接乱掉。 关键还是静默的，不报错。 修法：去重键改成地址加块大小。 对你：混合注意力模型跑 PD，升级必看。 来源：<a href="https://github.com/vllm-project/vllm/pull/57662">https://github.com/vllm-project/vllm/pull/57662</a></p>
+<p><strong>vLLM 的 KV offload 会把没算完的块当算完存</strong> 请求在 prefill 一半时报错退出。 它算到一半的块，却按整块的哈希存了。 下个带同样前缀的请求命中它。 加载的 KV 里混着从没算过的 token。 静默算错，又一个。 修法：只存真正算完的整块。 来源：<a href="https://github.com/vllm-project/vllm/pull/63937">https://github.com/vllm-project/vllm/pull/63937</a></p>
+<p><strong>FlashInfer 的 NVFP4/MXFP4 宽加载会算错</strong> weight-only 量化加载有个解码 bug。 主干上 32 组诊断挂了 24 组。 包括 SM100 的 FP16 路径。 这不是调优，是正确性修复。 对你：跑 NVFP4/MXFP4 的话，升级必看。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7845">https://github.com/flashinfer-ai/flashinfer/pull/7845</a></p>
+<p><strong>vLLM 的 KV offload 双边握手更快了</strong> peer 握手卡住时，消费端自己先算 prefill。 不用再傻等 30 秒超时。 作者口径：中位数从 16 秒降到 22 毫秒。 对你：PD 链路故障恢复更快了。 来源：<a href="https://github.com/vllm-project/vllm/pull/64501">https://github.com/vllm-project/vllm/pull/64501</a></p>
+<p><strong>vLLM 的 P2P 源端卡死能被判死了</strong> 源端 WRITE 卡 20 秒没进展。 以前没人管，新写不断往里塞。 现在直接判对端故障，结束会话。 来源：<a href="https://github.com/vllm-project/vllm/pull/64251">https://github.com/vllm-project/vllm/pull/64251</a></p>
+<p><strong>GLM 在 B200 上的瘦矩阵更快了</strong> GLM-5.2/5.3 的 BF16 低延迟 GEMM 补了 B200 表。 作者口径：比 cuBLAS 快 1.14 到 2.35 倍。 GLM-5.3-Flash 还修了自适应校验的图捕获。 投机解码走 CUDA graph 不再翻车。 来源：<a href="https://github.com/vllm-project/vllm/pull/64481">https://github.com/vllm-project/vllm/pull/64481</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/60229">https://github.com/vllm-project/vllm/pull/60229</a></p>
+<p><strong>Qwen3.5 的 GDN 又挤出几毫秒</strong> 两个小 GEMM 换到辅助流并行跑。 作者口径：解码每步省 2.7% 到 4.4%。 59 种配置全测过，从不拖慢。 来源：<a href="https://github.com/vllm-project/vllm/pull/64425">https://github.com/vllm-project/vllm/pull/64425</a></p>
+<p><strong>SGLang 修了 Qwen-Image-2.1-Turbo 的接缝</strong> 单卡 VAE 分块解码会有彩色细缝。 分块各自算注意力再拼接，边界就对不上。 这次换了等价算法，拼缝没了。 做多模态 serving 的话值得更新。 来源：<a href="https://github.com/sgl-project/sglang/pull/47092">https://github.com/sgl-project/sglang/pull/47092</a></p>
+<p><strong>其余一句话带过</strong> vLLM 的 Nemotron 3.5 Super VL 不用 trust-remote-code 也能跑。 LMDeploy 的 MoE 分发跳过填充 token。 vLLM 的 offload 少扫一遍哈希前缀。 llama.cpp 把 DSA 投机解码扩展到新模型。 SGLang 的 GLM5 补了每层 MLA key buffer 绑定。 AMD quark 跳过 MXFP4 量化后的无拷贝加载。 来源：<a href="https://github.com/vllm-project/vllm/pull/64506">https://github.com/vllm-project/vllm/pull/64506</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标到了 24175 个。 6点版时是 24152 个。 两小时涨了 23 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> arXiv 查过了，窗口内零入库。 最新还是 10 月 27 日那批。 10 月 28 日提交的批次还没出现在 API 里。 零篇先记为未见新批，不冒充查无。</p>
+<h2>业内新闻</h2>
+<p><strong>英特尔出了个至强推理微服务</strong> 容器先检测你的 CPU 型号和核心数。 再自动选一组调好的 vLLM 参数。 用户只选模型，调参的事容器包了。 首批基于 vLLM，支持 BF16。 对你：至强 CPU 跑推理，省了人肉调参。 来源：<a href="https://www.qudong.com/article/526113.html">https://www.qudong.com/article/526113.html</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> lmsysorg、vLLM 官方、karpathy 这轮都没发新帖。 Latent Space 最新还是 10/27 那期。 Reddit 和 HN 窗口内也无实质新话题。 社交渠道两条都是科普向，无实质新料。</p>
+<p>*去重说明：本轮窗口是 10/29 06:00 到 08:00 PDT。对应 UTC 是 10/29 13:00 到 15:00。框架经 GitHub Search API 按 merged 时间亲查：窗口内实质更新合计 15 条（vLLM 11、SGLang 2、llama.cpp 1、FlashInfer 1；LMDeploy、TensorRT-LLM 窗口内各 1 条小更新，无正式版变化）。正式版经亲核全平：vLLM 仍 v0.32.0（2026-10-18）、SGLang 仍 v0.5.22（2026-10-19）、LMDeploy 仍 v0.18.0、TensorRT-LLM 预发仍 v1.4.0rc2（2026-10-28 15:51 UTC，窗口外）。vLLM #64279 经亲读：compile mode 1/2（或 mode 3 配 splitting_ops: []）下，Inductor 给 vllm:: 自定义算子传的张量排布与 kernel 假设不一致，Transformers 后端模型（Qwen3、Kolibri-1）KV cache 被写坏、输出退化；修法 revert #42129，torch≥2.13 只在 INFO 日志下构建 slow log 保留防卡死；新增 test_whole_graph_compile（Qwen3-0.6B，compile mode 2 vs eager，check_logprobs_close）。vLLM #57662 经亲读：NIXL 区域注册只按 base_addr 去重，混合注意力模型里不同 block_len 的层（DeepSeek-V4.1-Flash 的 compressor state_cache/indexer k_cache 叠在 swa_cache 上）被静默折叠、继承首个区域的块几何，PD 传输被截断错位、输出乱码无报错；修法去重键改成 (base_addr, block_len)。vLLM #63937 经亲读：FINISHED_ERROR 中断 prefill 的请求会把只算了一半的块按整块哈希存下，后续同前缀请求命中后加载了从没算过的 token 的 KV；修法只存真正算完的整块。FlashInfer #7845 经亲读：NVFP4/MXFP4 weight-only 宽加载走字节显式提取之前会算错，主干 32 组诊断挂 24 组（含 SM100 FP16 tactics），属正确性修复非调优扩展。vLLM #64501 经亲读：对称 P2P 消费端在握手 pending 时本地 prefill 而非等待，停机/删源场景 p50 15.7–17.0s→22ms（最坏 30.1s→4.7s），PD 路径（remote_prefiller）未动。vLLM #64251 经亲读：源端 WRITE 在 VLLM_P2P_TRANSFER_STALL_TIMEOUT_S（默认 20s）后仍 PROC/PEND 则判对端故障、结束会话，不释放 pins。vLLM #64481 经亲读：B200 上 GLM-5.2/5.3 BF16 低延迟 decode GEMM 查表，M≤8 下每 projection 比 cuBLAS 快 1.14–2.35x（冷热 L2 都过 5% 才路由）。vLLM #60229 经亲读：GLM-5.3-Flash GDN 自适应校验兼容 CUDA graph 重放（可变校验长度+padding 行安全丢弃）。vLLM #64425 经亲读：Qwen3.5 NVIDIA 路径把 in_proj_ba 放 aux stream 与 in_proj_qkvz 重叠，decode TPOT −2.7~−4.4%（59 种配置全测从不更慢）。SGLang #47092 经亲读：Qwen-Image-2.1-Turbo 单卡 VAE 分块解码产生彩色接缝，换等价算法后消除，多卡 spatial_shard 路径未动。DeepInfer 星标亲核 24175（6点版 24152，+23），pushed_at 仍 2026-10-26T05:30:52Z，无代码更新。arXiv 两组 API 查成功、窗口内零入库，最新仍为 10/27 那批；10/28 提交批次尚未出现在 API 中，先记未见新批。英特尔至强推理微服务为本期首报（qudong 2026-10-29 18:40 +08:00 发布，即 PDT 10/29 03:40，窗口前但往期未覆盖）：基于 vLLM、BF16、Docker/K8s，自动检测 CPU 代数/核心/NUMA/加速器后选调优配置。21经济网 Clover 落户深圳篇为 4点版已报事件的补充角度，不重复报。大V（lmsysorg、vLLM 官方、karpathy、Simon Willison）、Reddit、HN、中文媒体窗口内无实质新内容；social.search 两条均为科普帖（IG 推理引擎入门 reel、FB LLM 推理图解），无实质新料。Spotify 未查（窗口内新单集概率低，往期已连续多轮无更新）。本期不标深读：三笔头条均为单 PR 级正确性修复，口径已在正文讲清，无配图，够不上单开精读。*</p></body></html>
