@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月28日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-28"/>
+<meta name="doc-ts" content="2026-10-29T01:00:14"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-28（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-28（18点版）</h1>
+<p>18点版来了。 这轮没有新版本，也没有新论文。 主角是 vLLM 的一处 KV 瘦身。 跟你的 PD 评估直接相关，先看这条。 本期不标深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 FlashInfer 还是 0.7.2.post1。 TensorRT-LLM 预发还是 v1.4.0rc2。 llama.cpp 只有每日快照，不算正式版。 窗口内合并一共 24 条。</p>
+<p><strong>vLLM 给 Mooncake 搬运瘦了身</strong> 这条跟你的 PD 评估最贴。 Mooncake 是 vLLM 的 KV 搬运仓库。 说白了，它是 PD 两边传草稿纸的快递站。 以前它按整页搬，连没用的边角也搬。 混合模型里各组层数不一样。 大组占 29 层，小组只用 23 层。 结果每份 KDA 数据里三成是废字节。 修法很直接：只登记本组用的层。 只搬每块真正用到的字节。 Kimi K3 的例子算得很清楚。 单份数据从 14.97 MB 降到 10.53 MB。 一组完整状态从 359 MB 降到 253 MB。 省下来的全是搬运量，不是算力。 注意，这只是 PR 里算的账。 还没给端到端提速数字。 你的 PD 评估可以先记下这笔账。 来源：<a href="https://github.com/vllm-project/vllm/pull/63513">https://github.com/vllm-project/vllm/pull/63513</a></p>
+<p><strong>SGLang 给大专家路由省了一步</strong> Mega MoE 就是超大专家并行那套。 以前缩放权重和搬运权重是两步。 现在搬运时顺手乘上缩放系数。 结果逐位一致，GSM8K 也没变。 作者只说解码小有提升。 提升是和另一处改动一起测的。 没法单独算到它头上。 来源：<a href="https://github.com/sgl-project/sglang/pull/46090">https://github.com/sgl-project/sglang/pull/46090</a></p>
+<p><strong>SGLang 给 LoRA 图捕获瘦了网格</strong> LoRA 就是给大模型贴小补丁。 图捕获会按最大批量预留网格。 以前每张图都按满格发程序。 现在按实际词元数发，够用就行。 只改了发射量，没改算子本身。 来源：<a href="https://github.com/sgl-project/sglang/pull/46743">https://github.com/sgl-project/sglang/pull/46743</a></p>
+<p><strong>TensorRT-LLM 继续打磨 Kimi-K3</strong> KDA 预填充能预留计算单元了。 MTP 校验加了两种新内核。 MTP 就是一次多猜几个词元。 专家预取从固定两槽改成可配槽数。 注意，这篇是自动生成的综述。 端到端数字属于整套八连发。 不属于这一条，别单独引用。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20941">https://github.com/NVIDIA/TensorRT-LLM/pull/20941</a></p>
+<p><strong>其余一句话带过</strong> vLLM 另外三条全是 CI 基建。 SGLang 另外三条是前端和指标补齐。 其中一条还明说行为完全不变。 llama.cpp 两条是测试和文档。 FlashInfer 十条全是 Cake 内核调优。 Cake 是它的一套实验内核。 LMDeploy 这轮零条。 来源：<a href="https://github.com/sgl-project/sglang/pull/34031">https://github.com/sgl-project/sglang/pull/34031</a> 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31330">https://github.com/ggml-org/llama.cpp/pull/31330</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23924 个。 16点版时是 23905 个。 两小时涨了 19 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> arXiv 查过了，窗口内零入库。 最新还是 10 月 27 日那批。 arXiv 每天一批在 UTC 凌晨发。 这轮窗口正好跨过发批时刻。 但截至查时新一批还没出现。 零篇先记为未见新批，不冒充查无。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有实质新稿</strong> Cloudflare 那事是 10 月 26 日披露的。 10 月 26 日 16点版已经深读过。 今天的二手解读只是旧事重讲。 SGLang 峰会主讲名单 14点版已报过。 按惯例都不重复报。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> 名单里的人都逐个查过。 窗口内没有讲推理服务的新帖新文。 Latent Space 也没出新集。 最新还是 10 月 27 日那集。</p>
+<p>*去重说明：本轮窗口是 10/28 16:00 到 18:00 PDT。对应 UTC 是 10/28 23:00 到 10/29 01:00。对应 epoch 是 1793228400 到 1793235600。框架经主代理用 GitHub Search API 按 merged 时间亲查、再用 gh 逐条亲读头条 PR 正文：窗口内 merged 合计 24 条（vLLM 4、SGLang 6、TensorRT-LLM 2、FlashInfer 10、llama.cpp 2、LMDeploy 0）。vLLM #63513 经亲核，合并于 00:18:23Z：Mooncake 仓库此前按整页登记与拷贝，Kimi-K3 的 DCP8 下 KDA 组只用 23 个层槽却背了 29 个槽的页，单份 14.97 MB 里约 30% 为他组层槽与页内填充，修后单份 10.53 MB、一组完整状态约 359 MB 降到 253 MB，PR 内无端到端提速数字。SGLang #46090 经亲核，合并于 00:46:44Z：把路由缩放系数并入 Mega MoE 预分发拷贝，逐位一致、GSM8K 不变，作者明说小幅解码提升与另一改动合测、无法单独归因。SGLang #46743 经亲核，合并于 23:12:16Z：图捕获下 LoRA 内核网格按词元数定界而非按满格元数据发程序，H200 上测的是发射量改动、无端到端数字摘录。TensorRT-LLM #20941 经亲核，合并于 00:42:38Z：正文为自动生成综述，KDA 预填充 SM 预留、MTP 校验新内核与 DWDP 可配预取槽，端到端数字明属整套八连发、不属本条。SGLang #34031 明说行为不变；#46949 为 Rust 前端补传自定义信息；#47114 为 Rust 模式补启动指标。vLLM 其余 3 条均为 CI。TensorRT-LLM #20912 仅为测试里关 KV 块复用。llama.cpp #31330 为测试防抖、#31178 为文档。FlashInfer 10 条均为 Cake 单内核调优与测试。正式版经 gh 亲核全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、FlashInfer 仍 v0.7.2.post1、TensorRT-LLM 预发仍 v1.4.0rc2；TGI 仍 v3.3.7。DeepInfer 星标经 gh 亲查为 23924（16点版 23905，+19），pushed_at 仍为 2026-10-26T05:30:52Z。arXiv 经 API 亲查窗口内零入库，各组最新仍为 10/27 的一批（KV cache 组最晚为 10/27 15:43Z）。Cloudflare GLM-5.3 串话的今日二手解读（meetcyber 等）本体为 10/26 协同披露，10/26 16点版已深读，去重不重复报；SGLang 峰会主讲名单通稿 14点版已报过，去重不重复报。大V逐个核查窗口内 serving 相关为零；Latent Space 最新单集仍为 10/27 Anthropic 集。本期不标深读：头条是单条 PR 级优化、有搬运量账但无端到端数字，口径已在正文讲清，够不上单开精读。*</p></body></html>
