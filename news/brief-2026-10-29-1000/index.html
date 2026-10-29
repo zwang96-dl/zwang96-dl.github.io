@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-29T17:10:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（10点版）</h1>
+<p>10点版来了，这轮关键词是&quot;飘&quot;。 Thinking Machines 发长文，讲清了温度设 0 结果还乱飘的真凶。 框架侧窗口内 22 条实质更新，KV offload 又连修三处。 SGLang 的投机解码 DSpark 登上了 Hopper 卡。</p>
+<h2>框架更新</h2>
+<p><strong>Hopper 也能玩投机解码 DSpark 了</strong> 投机解码就是先让小模型打草稿、大模型来审核改错。 SGLang 给 MiniMax-M3.1-Flash 打通了 Hopper 支持。 8 张 H200 上，并发为 1 时输出吞吐从 200 涨到 459 词/秒。 快了 2.3 倍，GSM8K 精度纹丝不动。 以前这功能只认 Blackwell 卡。 来源：<a href="https://github.com/sgl-project/sglang/pull/46868">https://github.com/sgl-project/sglang/pull/46868</a></p>
+<p><strong>vLLM 堵上一个模板注入的口子</strong> structured decisions 是 vLLM 的结构化决策输出功能。 /v1/systemone 接口以前没检查请求模板信任开关。 攻击者塞个自定义 chat_template 就能改提示词渲染。 现在没开信任开关的请求直接返回 400。 来源：<a href="https://github.com/vllm-project/vllm/pull/64503">https://github.com/vllm-project/vllm/pull/64503</a></p>
+<p><strong>vLLM 的 KV offload 连打三张牌</strong> KV offload 就是把草稿纸从显存搬到内存或硬盘。 第一张：两个请求同时命中同一块正在搬运的 KV，第二个不再重复提交任务。 第二张：多节点引擎开了二级 offload 层，启动直接报错，以前会静默跑错。 第三张：纯 P2P 引擎闲下来不再空转，暂停响应从 10 秒超时降到 22 毫秒。 来源：<a href="https://github.com/vllm-project/vllm/pull/64400">https://github.com/vllm-project/vllm/pull/64400</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/62930">https://github.com/vllm-project/vllm/pull/62930</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/63618">https://github.com/vllm-project/vllm/pull/63618</a></p>
+<p><strong>TRT-LLM 给视频生成模型加了分页 KV 缓存</strong> VisualGen 是英伟达的视频生成模型家族。 这次加了分页块因果 KV 缓存和缓存注意力。 视频生成的草稿纸也能按页复用了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19938">https://github.com/NVIDIA/TensorRT-LLM/pull/19938</a></p>
+<p><strong>FlashInfer 给稀疏注意力加了 MQA 解码</strong> token 稀疏注意力就是每个 token 只看自己挑出的 key。 以前 trtllm-gen 这套只给 MLA 做了。 这次 MQA 也能用，SDSA 系列第 1 篇。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6420">https://github.com/flashinfer-ai/flashinfer/pull/6420</a></p>
+<p><strong>vLLM 接上了 Meta 的新模型 Muse Spark</strong> Muse Spark 是 Meta 的新模型家族。 这次落地了 NVFP4 的混合 MegaMoE/TRT-LLM 执行支持。 NVFP4 是英伟达主推的 4 位浮点量化格式。 来源：<a href="https://github.com/vllm-project/vllm/pull/64525">https://github.com/vllm-project/vllm/pull/64525</a></p>
+<p><strong>其余一句话带过</strong> vLLM 的 MRV2 修了投机解码的广播问题。 OpenVLA 补了聊天模板兜底。 Nemotron VL 的图像归一化搬到了 GPU 上。 Kimi K2.5 的视觉 helper 不再急着做 torch.compile。 SGLang 那条是 AMD 的 CI 流程调整。 来源：<a href="https://github.com/vllm-project/vllm/pull/64458">https://github.com/vllm-project/vllm/pull/64458</a></p>
+<p><strong>正式版全平，DeepInfer 星标还在涨</strong> vLLM 还是 0.32.0，SGLang 还是 0.5.22。 LMDeploy 还是 0.18.0，TRT-LLM 预发还是 v1.4.0rc2。 DeepInfer 星标到了 24194 个，8点版时是 24175。 两小时涨 19 个，代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> arXiv 查过了，窗口内零入库。 最新还是 10 月 27 日那批。 零篇先记为未见新批，不冒充查无。</p>
+<p><strong>Latent Space 新一期有三条 serving 料</strong> 这是 10 月 27 日那期之后的首更。 第一条：SemiAnalysis 实测了 SGLang 的 HiCache。 KV 卸到 CPU 内存后，可缓存词元明显变多。 B200 上 12 到 16 并发时，多出 20% 到 40%。 第二条：NF12 是一种无损的 12 位浮点格式。 Qwen3-32B 生成提速 1.23 倍。 第三条：MLX 的新 kernel 让批量解码快 2 到 3 倍。 融合的 SDPA 也快了 1.4 倍。 来源：<a href="https://latent.space/p/ainews-gemini-4-carbon/">https://latent.space/p/ainews-gemini-4-carbon/</a></p>
+<h2>业内新闻</h2>
+<p><strong>这轮业内新闻没什么新料</strong> 中文媒体窗口内没有新的推理 serving 稿件。 GPU 解锁那些是前几天的旧闻，不重复报。</p>
+<h2>访谈与深度</h2>
+<p><strong>Thinking Machines 长文：温度设 0，结果为什么还飘</strong>「值得深读」 Thinking Machines Lab 刚发了首篇长文。 作者是 PyTorch 核心开发者 Horace He。 核心结论一句话：真凶不是浮点并发，是 batch 大小在变。 服务器忙时你的请求跟 100 个请求拼一批，闲时跟 10 个拼。 算子按 batch 大小换切分策略，结果就飘了。 实测很扎眼：Qwen3-235B 同一个问题跑 1000 次，蹦出 80 种答案。 前 102 个词全一样，第 103 个词开始分叉。 他们做了 batch 不变的 kernel 三件套，代码已开源。 代价是慢约一倍，但 RL 训练和采样能做到数值完全一致。 推荐理由：你要在 PD 解耦评估里锁精度口径。 这篇告诉你 batch 一变、切分一换，结果就会飘。 精度门得按 batch 档位设，不然锁了个寂寞。 来源：<a href="https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/">https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/</a></p>
+<p><strong>大V这轮基本安静</strong> lmsysorg、vLLM 官方、karpathy 窗口内都没发新帖。 Reddit 和 HN 也无实质新话题。</p>
+<p>*去重说明：本轮窗口是 10/29 08:00 到 10:00 PDT。对应 UTC 是 10/29 15:00 到 17:00。框架经 GitHub Search API 按 merged 时间亲查：窗口内实质更新合计 22 条（vLLM 15、SGLang 1、TRT-LLM 3、FlashInfer 3；LMDeploy、llama.cpp、TGI 窗口内零合并）。正式版经亲核全平：vLLM 仍 v0.32.0（2026-10-18）、SGLang 仍 v0.5.22（2026-10-19）、LMDeploy 仍 v0.18.0、TRT-LLM 预发仍 v1.4.0rc2（2026-10-28 15:51 UTC，窗口外）。vLLM #64503 经亲读：/v1/systemone 的结构化决策路由强制执行请求模板信任开关，未开信任时带自定义 chat_template 的请求返回 400。vLLM #64400 经亲读：partial-tail key 正在异步往 GPU 搬时，并发命中同一 key 的请求等待已有传输，不再重复提交搬运任务。vLLM #62930 经亲读：TieringOffloadingSpec 带二级层且 worker 跨节点时启动直接抛 NotImplementedError，以前会静默跑错 KV；2×DGX Spark 实测验证。vLLM #63618 经亲读：纯 P2P offload 引擎用 tier-poll 线程上报真实 pending，无活就 park；H100 A/B 实测暂停响应从 10 秒超时降到 22 毫秒。SGLang #46868 经亲读：MiniMax-M3.1-Flash 的 DSpark 投机解码打通 Hopper，8×H200、GSM8K：并发 1 输出 200.4→459.4 词/秒（2.3 倍、接受长度 4.37），并发 64 开 block verification 到 4035.5，精度不变。TRT-LLM #19938 经亲读：VisualGen 加 CausalKVCacheManager，分页块因果 KV 缓存加缓存注意力，cuDNN 与 TRTLLM 后端走分页缓存路径。FlashInfer #6420 经亲读：trtllm-gen 的 trtllm_batch_decode_with_kv_cache 加 sparse_top_k，给 MQA 做 token 稀疏解码，SDSA 系列第 1 篇。vLLM #64525 经亲读：新增 vllm/models/muse_spark/nvidia/ 目录，Muse Spark 模型的 NVFP4 混合 MegaMoE/TRT-LLM 执行支持。DeepInfer 星标亲核 24194（8点版 24175，+19），pushed_at 仍 2026-10-26T05:30:52Z，无代码更新。arXiv 两组 API 查成功、窗口内零入库，最新仍为 10/27 那批。Thinking Machines 长文亲读全文（588 行）：首篇长文、Horace He 主笔，核心是 batch 不变性；Qwen3-235B-A22B 温度 0 跑 1000 次出 80 种 completion、前 102 词一致、第 103 词分叉；batch-invariant-ops 已开源、基于 vLLM FlexAttention；Qwen3-8B 单卡 26 秒→55 秒（优化 attention 后 42 秒）；RL 侧 KL 散度恒 0。Latent Space 新一期（ainews-gemini-4-carbon，约 16 小时前发布）亲读：serving 相关三条收录（HiCache DRAM offload、NF12、MLX）；AKV 已于 10-26 报过、Nemotron 3.5 Transcribe 已于今晨 6点版报过、Modular MAX 全开源已于 10-23 报过、Gemini 4 Carbon 与 H-Net v2 非 serving 口径不收。大V（lmsysorg、vLLM 官方、karpathy）、Reddit、HN 窗口内无实质新内容。中文媒体：woshipm 的 DeepInfer 追平稿为 3 天前旧闻、Humming 已于 10-22/10-28 报过、21 经济网 Clover 篇 8点版已报，窗口内无新稿。Spotify 未查（窗口内新单集概率低，沿用近几期水位）。本期标 1 篇深读：Thinking Machines 确定性长文（有配图、方法完整、跟 PD 解耦精度门直接相关）。*</p></body></html>
