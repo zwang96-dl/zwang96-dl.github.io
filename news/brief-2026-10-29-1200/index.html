@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-29T19:02:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（12点版）</h1>
+<p>12点版来了，这轮关键词是&quot;磨&quot;。 SGLang 一口气合了 13 个，PD 搬运线连修四处。 FlashInfer 更狠，32 个 kernel 微调打包落地。 DeepSeek V4.1 在 vLLM 里的预填充又瘦了一圈。</p>
+<h2>框架更新</h2>
+<p><strong>SGLang 13 个合入，PD 搬运是主线</strong> PD 解耦就是 prefill 和 decode 分两拨卡干活，中间传草稿纸。</p>
+<p>#47124：decode 侧接草稿纸改走统一主机池，收得更顺。</p>
+<p>#47015：prefill 等前向结果的功夫，顺手轮询已完成的 KV 传输，不空转。</p>
+<p>#46592：多节点先把 P2P 传输链路热起来，开跑不冷启动。</p>
+<p>#45434：CP 模式的 KV 布局加钩子，显存按补齐后算账。</p>
+<p>来源：</p>
+<ul><li><a href="https://github.com/sgl-project/sglang/pull/47124">https://github.com/sgl-project/sglang/pull/47124</a></li><li><a href="https://github.com/sgl-project/sglang/pull/47015">https://github.com/sgl-project/sglang/pull/47015</a></li><li><a href="https://github.com/sgl-project/sglang/pull/46592">https://github.com/sgl-project/sglang/pull/46592</a></li><li><a href="https://github.com/sgl-project/sglang/pull/45434">https://github.com/sgl-project/sglang/pull/45434</a></li></ul>
+<p><strong>SGLang 顺手小料三条</strong> /start_profile 和 /stop_profile 上线了，抓火焰图不用重启服务。 前端线程绑到同一个 CPU 集合，不再一线程占一核。 多模态模型的生成要等 MM 处理器装好才放行，防抢跑。 来源：</p>
+<ul><li><a href="https://github.com/sgl-project/sglang/pull/46968">https://github.com/sgl-project/sglang/pull/46968</a></li><li><a href="https://github.com/sgl-project/sglang/pull/47161">https://github.com/sgl-project/sglang/pull/47161</a></li><li><a href="https://github.com/sgl-project/sglang/pull/47108">https://github.com/sgl-project/sglang/pull/47108</a></li></ul>
+<p><strong>vLLM：DeepSeek V4.1 预填充少搬 34 次</strong> V4.1-Flash 的压缩草稿纸只存在第 2、8、14、20 层。 其他 34 个压缩层都是读这 4 个源头的，搬一次就行。 以前 mega-attention 预填充每层都全量搬：一步 38 次 gather。 现在每组每 chunk 只搬一次。 4×B200 上显存还是 66.3 GiB，一点没多占。 跟你之前那篇 V4.1 深读直接对得上，评估 PD 时可以少算这笔账。 来源：<a href="https://github.com/vllm-project/vllm/pull/59131">https://github.com/vllm-project/vllm/pull/59131</a></p>
+<p><strong>vLLM 其余：OLMoE 搬家 + ROCm 大扫除</strong></p>
+<p>#63384：OLMoE 迁到 transformers 后端，MoE LoRA 的 bug 顺手修了。</p>
+<p>#61939：ROCm 的 CI 镜像分层合并，构建管线统一。</p>
+<p>#62996 和 #62976：AITER MXFP4 的测试覆盖补上。</p>
+<p>#60899 和 #38741：文档类，k8s 部署集成和 V1 架构调度器章节。</p>
+<p>来源：</p>
+<ul><li><a href="https://github.com/vllm-project/vllm/pull/63384">https://github.com/vllm-project/vllm/pull/63384</a></li><li><a href="https://github.com/vllm-project/vllm/pull/61939">https://github.com/vllm-project/vllm/pull/61939</a></li></ul>
+<p><strong>FlashInfer 一口气合了 32 个 kernel 微调</strong> 这批叫 &quot;cake&quot;，全是按卡按形状调出来的小 kernel 优化。 跟你相关的挑四条。 Kimi-K3 的 LatentMoE 解码头尾都加速了（#7843）。 Muse Spark 的归一化 kernel 重调了（#7844）。 覆盖 GB300、B200 和 R200 三档卡。 NVFP4 MLA 解码在 GB200 上把长行计划倒了个序（#7861）。 B200 的 prefill 加了持久化 stage，请求少时不空转（#7842）。 剩下 28 条全是同类微调，细节甩链接自己翻。 来源：</p>
+<ul><li><a href="https://github.com/flashinfer-ai/flashinfer/pull/7843">https://github.com/flashinfer-ai/flashinfer/pull/7843</a></li><li><a href="https://github.com/flashinfer-ai/flashinfer/pull/7844">https://github.com/flashinfer-ai/flashinfer/pull/7844</a></li><li><a href="https://github.com/flashinfer-ai/flashinfer/pull/7861">https://github.com/flashinfer-ai/flashinfer/pull/7861</a></li><li><a href="https://github.com/flashinfer-ai/flashinfer/pull/7842">https://github.com/flashinfer-ai/flashinfer/pull/7842</a></li></ul>
+<p><strong>TRT-LLM 四个：KV 池、可观测、视频模型</strong></p>
+<p>#21269：KV 池重平衡的配置桩先占位。</p>
+<p>#21034：OpenEngine 的 Prometheus 指标对外暴露。</p>
+<p>#20797：runtime 钩子，模型可以自己选 engine 快路径。</p>
+<p>#18111：LTX-2.3 的文生视频和重拍 pipeline 落地。</p>
+<p>来源：</p>
+<ul><li><a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21269">https://github.com/NVIDIA/TensorRT-LLM/pull/21269</a></li><li><a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21034">https://github.com/NVIDIA/TensorRT-LLM/pull/21034</a></li><li><a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20797">https://github.com/NVIDIA/TensorRT-LLM/pull/20797</a></li><li><a href="https://github.com/NVIDIA/TensorRT-LLM/pull/18111">https://github.com/NVIDIA/TensorRT-LLM/pull/18111</a></li></ul>
+<p><strong>llama.cpp 三个：FP8 量化是头条</strong></p>
+<p>#27512：OCP FP8 E4M3 量化支持落地。</p>
+<p>E4M3 是推理最常用的 8 位浮点格式，训练用的是 E5M2。 这是个堆栈的第一块，后面还有 KV cache、CUDA、Vulkan 排队。</p>
+<p>#31373：ROCm 支持 gfx1170/1171。</p>
+<p>代号 RDNA4_M，新 AMD 卡有名字了。</p>
+<p>#30881：ggml 加了批量 tensor 拷贝 API。</p>
+<p>来源：</p>
+<ul><li><a href="https://github.com/ggml-org/llama.cpp/pull/27512">https://github.com/ggml-org/llama.cpp/pull/27512</a></li><li><a href="https://github.com/ggml-org/llama.cpp/pull/31373">https://github.com/ggml-org/llama.cpp/pull/31373</a></li><li><a href="https://github.com/ggml-org/llama.cpp/pull/30881">https://github.com/ggml-org/llama.cpp/pull/30881</a></li></ul>
+<p><strong>版本全平，DeepInfer 星标还在涨</strong> vLLM 还是 0.32.0，SGLang 还是 0.5.22。 LMDeploy 还是 0.18.0，TRT-LLM 预发还是 v1.4.0rc2。 TGI 还是 v3.3.7，是去年 12 月的版本。 llama.cpp 出了 b11985 快照（10:10 PDT）。 按惯例这是每日快照，不算正式版。 DeepInfer 星标到了 24212 个，10点版时是 24194。 两小时涨 18 个，代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> 两组 API 查都成功了，窗口内零入库。 最新还是 10 月 27 日那批，不冒充查无。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮业内新闻没新料</strong> 中文媒体和英文科技媒体窗口内都没新的推理 serving 稿件。 SGLang Summit 的演讲阵容是昨天的旧闻，不重复报。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没标深读</strong> 大V（lmsysorg、vLLM 官方、karpathy）窗口内都没发新帖。 Reddit、HN 也无实质新话题。 vLLM 那条 V4.1 优化是单个 PR，方法完整度不够深读标准，这轮空缺。</p>
+<p>*去重说明：本轮窗口是 10/29 10:00 到 12:00 PDT。对应 UTC 是 10/29 17:00 到 19:00。框架经 GitHub Search API 按 merged 时间亲查：窗口内实质合入合计 60 条（vLLM 8、SGLang 13、TRT-LLM 4、llama.cpp 3、FlashInfer 32；LMDeploy、TGI 零合入）。正式版经亲核全平：vLLM 仍 v0.32.0（2026-10-18）、SGLang 仍 v0.5.22（2026-10-19）、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7、TRT-LLM 预发仍 v1.4.0rc2（2026-10-28）；llama.cpp b11985 为每日快照（17:10 UTC 发布），按惯例不计正式版。vLLM #59131 经亲读 PR 全文：V4.1-Flash 压缩 KV 只存在 kv-source 层（2/8/14/20），其余 34 个压缩层复用；mega-attention prefill 原来每层全量 dequant+gather（38 次/步），现在每 source-group 每 chunk gather 一次、保留在 workspace 尾部；4×B200 TP4 实测显存占用不变（66.3 GiB），PD 侧 2P1D 16×B200 测试计划未见完整数字。llama.cpp #27512 经亲读：OCP FP8 E4M3 saturating mode 落地 ggml，堆栈后续还有 KV cache（#28392）、CUDA（#28413）、Vulkan（#29791）。FlashInfer 32 条经逐条扫标题：全部为 cake_ 系列 kernel 微调，与用户直接相关的 4 条已挑出（Kimi-K3 LatentMoE #7843、Muse Spark norm #7844、NVFP4 MLA decode #7861、B200 prefill persistent stage #7842）。DeepInfer 星标亲核 24212（10点版 24194，+18），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 两组 API 成功、窗口内零入库，最新仍为 10/27T15:43:30Z。Latent Space 无新一期（仍是 10/27 那期，10点版已报）。SGLang Summit 演讲阵容公告为 10/28 旧闻，不重复。大V、Reddit、HN、中文媒体窗口内无实质新内容。Spotify 未查（窗口内新单集概率低，沿用近几期水位）。本期无深读（宁缺毋滥）。*</p></body></html>
