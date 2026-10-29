@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月28日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-28"/>
+<meta name="doc-ts" content="2026-10-29T02:59:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-28（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-28（20点版）</h1>
+<p>20点版来了。 这轮 PD 搬运有条硬货。 跟你在 AMD 卡上跑 PD 直接相关。 先看头条。 本期不标深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版还是全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 FlashInfer 还是 0.7.2.post1。 TensorRT-LLM 预发还是 v1.4.0rc2。 llama.cpp 只有每日快照，不算正式版。 窗口内合并一共 30 条。</p>
+<p><strong>vLLM 给 PD 搬运换了条快路</strong> 这条就是头条，先讲清楚。 NIXL 是 vLLM 的 KV 搬运层。 说白了，它是 PD 两边传草稿纸的快递。 以前它的 UCX 后端只开默认模式。 默认模式只认能检错的链路。 结果在 MI355X 单机上走了软件模拟。 GPU 间读 KV 只有 3.4 Gbps。 改法是加一个传参口子。 用户能把检错模式设成 none。 UCX 于是改走零拷贝直连。 同一份 74 MB 数据跑到 483.7 Gbps。 快了约 142 倍。 划重点：这是单机单次读的数。 不是整机服务的提速数字。 而且默认不开，设了才生效。 你的 PD 评估可以先记一笔。 默认配置可能正在悄悄走慢路。 来源：<a href="https://github.com/vllm-project/vllm/pull/62905">https://github.com/vllm-project/vllm/pull/62905</a></p>
+<p><strong>vLLM 给小批量量化并了一步</strong> MXFP8 就是一种 8 位浮点量化。 以前小批量要先量化再算矩阵乘。 现在量化并进矩阵乘里了。 单次调用快 1.14 到 1.64 倍。 只限行数 1 到 16 的小批量。 整机实测就老实多了。 P90 单词延迟只快 1.011 倍。 说白了，微观快不等于整机快。 来源：<a href="https://github.com/vllm-project/vllm/pull/63915">https://github.com/vllm-project/vllm/pull/63915</a></p>
+<p><strong>vLLM 修了一个 NVFP4 坏输出</strong> NVFP4 是英伟达的 4 位浮点量化。 以前有处缩放系数没初始化。 结果对数概率会出 NaN。 输出就成了垃圾。 修法就是给它正确初始化。 这是正确性修复，别当性能新闻。 来源：<a href="https://github.com/vllm-project/vllm/pull/63382">https://github.com/vllm-project/vllm/pull/63382</a></p>
+<p><strong>SGLang 给 FP8 长上下文补了精度</strong> Hopper 卡上的 FP8 路径以前精度会丢。 长上下文输出会慢慢变差。 修法是换两级累加的注意力实现。 测试 2017 项全过。 跟你那份精度门清单对得上。 来源：<a href="https://github.com/sgl-project/sglang/pull/46770">https://github.com/sgl-project/sglang/pull/46770</a></p>
+<p><strong>SGLang 给 AMD 解码并了几步</strong> Qwen3 解码以前要跑好几步。 归一化、旋转位置编码、写缓存各算各的。 现在 FP8 缓存也能走融合核了。 一步就把这几件事做完。 覆盖 Qwen3-VL 等一串模型。 注意，PR 里没给端到端数字。 来源：<a href="https://github.com/sgl-project/sglang/pull/46832">https://github.com/sgl-project/sglang/pull/46832</a></p>
+<p><strong>SGLang 其余一句话带过</strong> 12 条里其余多是修复和文档。 HiCache 给 MLA 视图补了个默认值。 还有 MI355X 的 MoE 配置和菜谱文档。 AMD 用户可以顺手扫一眼。 来源：<a href="https://github.com/sgl-project/sglang/pull/46731">https://github.com/sgl-project/sglang/pull/46731</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/46825">https://github.com/sgl-project/sglang/pull/46825</a></p>
+<p><strong>TensorRT-LLM 给视频补了时间信息</strong> MiniMax-M3 VL 以前会丢视频元数据。 模型就不知道事件发生在第几秒。 现在把帧率和帧序号传过去了。 时间戳才能写对。 多模态视频问答会受益。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20695">https://github.com/NVIDIA/TensorRT-LLM/pull/20695</a></p>
+<p><strong>TensorRT-LLM 给置信解码补了图支持</strong> DSpark 就是带置信度头的投机解码。 这条给它加了参差形状的图捕获。 只影响开了置信度调度的执行。 没开的还是走老路。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20072">https://github.com/NVIDIA/TensorRT-LLM/pull/20072</a></p>
+<p><strong>FlashInfer 给稀疏 MLA 加了新模式</strong> GLM-5.3 的稀疏解码走上现有入口。 不用学新接口。 冷编译 28 秒，热加载 0.9 秒。 其余 4 条是测试和清理。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6536">https://github.com/flashinfer-ai/flashinfer/pull/6536</a></p>
+<p><strong>llama.cpp 只有一条</strong> Hexagon 芯片的并行优化。 跟服务器关系不大。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31050">https://github.com/ggml-org/llama.cpp/pull/31050</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 23966 个。 18点版时是 23924 个。 两小时涨了 42 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> arXiv 查过了，窗口内零入库。 最新还是 10 月 27 日那批。 零篇先记为未见新批，不冒充查无。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有实质新稿</strong> 搜到的都是几天前的综述旧文。 没有值得单报的新消息。 按惯例不重复报。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> 名单里的人都逐个查过。 窗口内没有讲推理服务的新帖新文。 Latent Space 也没出新集。 最新还是 10 月 27 日那集。</p>
+<p>*去重说明：本轮窗口是 10/28 18:00 到 20:00 PDT。对应 UTC 是 10/29 01:00 到 03:00。对应 epoch 是 1793235600 到 1793242800。框架经主代理用 gh 拉取各仓 closed PR 列表、按 merged_at 亲滤窗口：窗口内 merged 合计 30 条（vLLM 7、SGLang 12、TensorRT-LLM 5、FlashInfer 5、llama.cpp 1、LMDeploy 0）。vLLM #62905 经亲核，合并于 02:41:43Z：NIXL 默认 ucx_error_handling_mode=peer 时 MI355X 单机走 tcp 软件模拟，74 MiB KV 读 3.4 Gbps；设为 none 后走 rocm_ipc 零拷贝，483.7 Gbps；PR 明说验证用的是等效的树外改动、单机单次读，无整机端到端数字，且默认行为不变。vLLM #63915 经亲核，合并于 02:40:12Z：MI355X 上 MXFP8 量化并入 GEMM，单次调用 1.14-1.64 倍（M=1-16），MiniMax-M3.1 TP4 整机 P90 TPOT 仅 1.011 倍。vLLM #63382 经亲核：NVFP4 未初始化融合量化缩放系数致 NaN logits，属正确性修复。SGLang #46770 经亲核：sgl-attn 升到含 FP8 两级累加的版本，H100 上 FP8 用例测试 2017 项全过，修长上下文精度退化。SGLang #46832 经亲核：AMD 上 Qwen3 解码融合核扩展到 FP8 KV 缓存，PR 内无端到端数字摘录。SGLang 其余：#47168 为 HiCache MLA 视图补默认值、#46969 为 CI 权限、#45837 为 diffusion LoRA 修复、#45295 为混合 SWA 识别、#47041 为文档、#46731 为 MI355X MoE 配置、#47166 为可观测性、#46825 为 GLM-5.3 MI355X 菜谱文档、#45996 为 Rust 端口、#46882 为 gRPC 媒体输入。vLLM 其余：#61529 为 ROCm Qwen4Exp FP8 KV、#64064 为 AITER 统一注意力、#51012 为 Qwen3.5 弃用 torch.compile、#64013 为 Ascend 惩罚修复。TensorRT-LLM #20695 经亲核：MiniMax-M3 VL 转发视频元数据，fps 与帧序号缺失时回落为不写时间戳；#20072 为 DSpark 参差图捕获与运行时集成，仅置信度调度路径。TensorRT-LLM 其余：#21057 为 MoE 路径输入修复、#20693 为索引 K 缓存层推导、#20662 为 GLM-5.2 NVFP4 目标。FlashInfer #6536 经亲核：DSA 稀疏 MLA D576 模式复用现有入口，无新公开接口，plan 冷 28 秒、热 0.9 秒；其余 4 条为 Cake 测试与清理、GDN 分页循环状态。llama.cpp #31050 为 Hexagon 并行优化。正式版经 gh 亲核全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、FlashInfer 仍 v0.7.2.post1、TensorRT-LLM 预发仍 v1.4.0rc2。DeepInfer 星标经 gh 亲查为 23966（18点版 23924，+42），pushed_at 仍为 2026-10-26T05:30:52Z。arXiv 经 API 亲查四组关键词窗口内零入库，各组最新仍为 10/27 的一批。搜到的业内综述与 HN 旧文均为窗口外内容，去重不重复报。大V逐个核查窗口内 serving 相关为零；Latent Space 最新单集仍为 10/27 Anthropic 集，18点版已提过。本期不标深读：头条是单条 PR 级配置修复、单次读微基准、无端到端数字，口径已在正文讲清，够不上单开精读。*</p></body></html>
