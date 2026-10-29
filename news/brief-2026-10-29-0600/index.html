@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-29T13:03:49"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（6点版）</h1>
+<p>6点版来了，夜里这轮的关键词是静默算错。 SGLang 的 PD 这次修的是 prefill 侧的结论共识。 vLLM 那边，sleep 加 Mooncake 组合有个 0/8 的静默坑。 本期不标深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 FlashInfer 还是 0.7.2.post1。 TensorRT-LLM 预发还是 v1.4.0rc2。 SGLang 的 v0.5.23 tag 还没打。 llama.cpp 只有每日快照，不算正式版。 窗口内实质更新一共 13 条。</p>
+<p><strong>SGLang 给 PD 的 prefill 侧补了结论共识</strong> 4点版报的是 decode 侧，这次是 prefill 侧的孪生修复。 背景：PD 解耦就是 prefill 和 decode 分开跑。 再加 PP（流水线并行），模型按层切成几段。 坑在这：请求传到一半被客户端取消。 0 号段觉得传成了，后面的段觉得没成。 各段按自己的判断去释放前缀缓存。 结果各段的前缀缓存开始分叉。 后续请求在各段匹配出不同前缀，实测直接崩溃。 行数凑巧对上时不崩，静默地用错 hidden states 算 KV。 hidden states 就是每层算出来的中间结果。 修法：所有段先达成一致，再一起释放。 好比几个工段先对口径，再统一拆包装。 对你：PD+PP 组合又一个静默坑，评估清单可添一条。 来源：<a href="https://github.com/sgl-project/sglang/pull/47045">https://github.com/sgl-project/sglang/pull/47045</a></p>
+<p><strong>vLLM 修了 sleep 加 Mooncake 的静默算错</strong> 先说组合：sleep 是让 GPU 休眠省显存。 Mooncake 是 KV 缓存的搬运和存储组件。 之前这俩一起用，启动直接被拒绝。 修完能启动了，但作者实测发现了个静默坑。 wake 后 store 还在读写旧的物理页。 A 自己和 B 读到的 KV 全错，8 次里 0 次对。 关键是没有任何错误日志。 修法：sleep 前先注销 buffer，wake 后重新注册。 失败就全量回滚，保证不带病上线。 好比仓库换班前先把旧货架牌摘掉。 对你：PD 解耦搬运链路如果用 Mooncake，这笔必看。 数字是作者实测，没独立复测。 来源：<a href="https://github.com/vllm-project/vllm/pull/59934">https://github.com/vllm-project/vllm/pull/59934</a></p>
+<p><strong>vLLM 修了 KV offload 的 CPU 缓存淘汰顺序</strong> KV offload 就是把 KV 缓存溢出到 CPU 内存。 eager 模式下，一直走 GPU 前缀命中的前缀很吃香。 它的 CPU 拷贝 LRU 位置却从不动。 结果这些热前缀反而最先被 CPU 缓存淘汰。 修法：admission 时把对应 CPU 拷贝挪到 MRU 端。 MRU 就是最近最常用那一端。 作者口径：Kimi-K3 的 agentic 负载跑 PD 解耦。 2 节点 8 张 MI355X，TP8 加 DCP8。 KV 用的是 FP8 格式。 每卡总吞吐涨 8.7%，首词元延迟从 8.58 秒降到 5.27 秒。 重算的 prefill token 少 15.9%。 数字是作者口径，没独立复测。 来源：<a href="https://github.com/vllm-project/vllm/pull/62444">https://github.com/vllm-project/vllm/pull/62444</a></p>
+<p><strong>vLLM 给 Qwen3.8-Flash-Next 补了 SM100 的 skinny GEMM</strong> skinny GEMM 就是又瘦又长的矩阵乘法。 瘦长矩阵乘法 cuBLAS 跑不爽，定制核更顺。 这次是 B200 上 TP=1 的 BF16 线性层。 作者口径：每个 projection 比 cuBLAS 快。 快 1.35 到 2.24 倍，是冷 L2 下的数字。 decode 每步约省 0.6 毫秒，无端到端数字。 Qwen3.8 系列在 B200 上跑值得更新。 来源：<a href="https://github.com/vllm-project/vllm/pull/64482">https://github.com/vllm-project/vllm/pull/64482</a></p>
+<p><strong>SGLang 修了 MiniMax-M3.1-Flash 投机解码的崩溃</strong> DSpark 是 SGLang 的投机解码实现。 投机解码就是先让小模型打草稿，大模型再改。 坑在 attn-DP 下第一个 decode 步。 draft 做集合通信时，卡的切分方式对不上。 直接报 Mismatched shape 崩溃。 修法：把那步的 commit_hidden 包进 draft 上下文。 作者口径：4 张 GB300 上 GSM8K 从崩溃到 96.36。 同一天 vLLM 也在修这模型的适配，双框架都在跟进。 来源：<a href="https://github.com/sgl-project/sglang/pull/46851">https://github.com/sgl-project/sglang/pull/46851</a></p>
+<p><strong>vLLM 修了多模态的一个 400 拒绝 bug</strong> 多模态请求里混了 image 和 embedding 两种输入。 embedding 的占位 ID 超出了词表范围。 结果请求直接被 400 拒绝。 SmolVLM-256M、Gemma 4 这些小模型都复现了。 修法：预处理阶段先把占位 ID 消费掉。 不用改 runner，改动很小。 来源：<a href="https://github.com/vllm-project/vllm/pull/64367">https://github.com/vllm-project/vllm/pull/64367</a></p>
+<p><strong>其余一句话带过</strong> vLLM 的 175GB KV 池改 torch.empty，启动省掉全量清零。 作者声明这只是微基准优化，不能外推成 serving 加速。 AMD 那边复用已编译的 launcher，host 开销降 88%。 SGLang 修了 reasoning token 统计越界的 bug。 SGLang 还修了 GDN 空状态路由的小 bug。 vLLM 的 RADIO 视觉编码器对齐了新版权重。 llama.cpp 加载模型时复用中转 buffer，省掉反复分配。 vLLM Rust 版 bench 传 0 并发不再永远卡死。 来源：<a href="https://github.com/vllm-project/vllm/pull/64345">https://github.com/vllm-project/vllm/pull/64345</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标到了 24152 个。 4点版时是 24129 个。 两小时涨了 23 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> arXiv 查过了，窗口内零入库。 最新还是 10 月 27 日那批。 10 月 28 日提交的批次还没出现在 API 里。 零篇先记为未见新批，不冒充查无。</p>
+<h2>业内新闻</h2>
+<p><strong>NVIDIA 开源了个语音转写模型</strong> 名字叫 Nemotron 3.5 Transcribe。 30B 的 MoE（混合专家模型），每次只激活约 4B。 支持 40 种语言的语音转文字。 权重给了 BF16、FP8、NVFP4 三种精度。 还有 GGUF 版，方便本地跑。 商用许可 OpenMDW-1.1。 vLLM 0.32.0 和 SGLang-Omni 0.2.0 直接能跑。 跟你相关：做多模态 serving 又多一个现成组件。 来源：<a href="https://www.marktechpost.com/2026/10/28/nvidia-nemotron-3-5-transcribe-open-speech-llm/">https://www.marktechpost.com/2026/10/28/nvidia-nemotron-3-5-transcribe-open-speech-llm/</a></p>
+<p><strong>投机解码来了个新 drafter：FlashMap</strong> drafter 就是投机解码里负责打草稿的小模型。 FlashMap 用连续流映射代替离散扩散。 一次前向能起草 16 个 token。 作者口径：Qwen3-8B 上 6.14 倍无损加速。 给了 vLLM 和 SGLang 的插件。 权重 Apache-2.0，代码 MIT。 来源：<a href="https://www.marktechpost.com/2026/10/28/flashmap-flow-map-speculative-decoding/">https://www.marktechpost.com/2026/10/28/flashmap-flow-map-speculative-decoding/</a></p>
+<p><strong>LG Uplus 的手机端 token 优化论文进了 NeurIPS</strong> 两篇论文入选 NeurIPS 2026 的端侧智能 workshop。 公司口径：处理速度约 4.5 倍，电池消耗降 77%。 跟你关系不大，手机端小模型的事。 来源：<a href="https://en.sedaily.com/technology/2026/10/29/lg-uplus-token-optimization-papers-accepted-at-neurips-2026">https://en.sedaily.com/technology/2026/10/29/lg-uplus-token-optimization-papers-accepted-at-neurips-2026</a></p>
+<p><strong>模型圈八卦：DeepSeek 和月之暗面被曝蒸馏 GPT-6</strong> 两家被曝用 OpenAI 的 GPT-6 蒸馏训新模型。 受益的是 Kimi K3.1 Pro 和 DeepSeek 新版。 这条是模型背景，不是 infra 本体。 来源：<a href="https://northlandnewsradio.com/2026/10/28/deepseek-moonshot-used-openais-gpt-6-astra-to-train-latest-models-the-information-reports/">https://northlandnewsradio.com/2026/10/28/deepseek-moonshot-used-openais-gpt-6-astra-to-train-latest-models-the-information-reports/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> lmsysorg、vLLM 官方、karpathy 这轮都没发新帖。 Simon Willison 最新是 10/28 的游戏帖，无关。 Latent Space 今天没出新集，最新还是 10/27 那期。 Reddit 和中文媒体窗口内也无实质新内容。</p>
+<p>*去重说明：本轮窗口是 10/29 04:00 到 06:00 PDT。对应 UTC 是 10/29 11:00 到 13:00。框架经 GitHub Search API 按 merged 时间亲查：窗口内实质更新合计 13 条（vLLM 8、SGLang 4、llama.cpp 1；FlashInfer、LMDeploy、TensorRT-LLM 窗口内无实质更新）。正式版经亲核全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、FlashInfer 仍 v0.7.2.post1、TensorRT-LLM 预发仍 v1.4.0rc2；llama.cpp 每日快照 b11982（按规矩不报）。SGLang #47045 经亲读：PD prefill server 开 PP 时，各 stage 对某请求 KV 传输结论可能各执一词（client abort 恰好卡在 stage0 发完、后续 stage 未发完的中间时刻），各 stage 走不同路径释放 radix cache，前缀缓存在各段分叉，后续请求各段匹配出不同前缀，实测在 PP stage1 的 DSA indexer 报 shape assertion 崩溃，行数凑巧对上则静默用错 hidden states；改后全 stage 先达成共识再释放；与 4点版已报的 #47063（decode 侧）是配对修复。vLLM #59934 经亲读：sleep+Mooncake 组合此前启动被拒绝，修后能启动但作者实测 wake 后 store 仍读写旧物理页，A 与 B 读到的 KV 全错（0/8）且无错误日志；修法 sleep 前 unregister_buffer、wake 后重新注册，失败全量回滚。vLLM #62444 经亲读：eager SimpleCPUOffload 下 GPU 前缀命中热的条目其 CPU 拷贝 LRU 从不动、反而最先被淘汰，改后 admission 时挪到 MRU；作者口径 Kimi-K3 agentic PD 解耦在 2 节点 8×MI355X（TP8+DCP8、FP8 KV）上总 tok/s/GPU +8.7%（9783→10638）、TTFT mean 8.58→5.27s、重算 prefill tokens -15.9%。vLLM #64482 经亲读：Qwen3.8-Flash-Next 在 B200 上 TP=1 的 BF16 线性层补 SM100 skinny GEMM 计划，作者口径每个 projection 比 cuBLAS 快 1.35–2.24x（冷 L2）、decode 每步约省 0.6ms，无端到端数字。SGLang #46851 经亲读：attn-DP 下 MiniMax-M3.1-Flash 的 DSpark 在第一个 decode step 崩溃（M3.1 draft 的 fc 做 all-gather 时 TP placement 对不上，Mismatched mW.shape[0]），修法把 decode-step 的 commit_hidden 包进 _draft_context()；作者口径 4×GB300 上 GSM8K 从 crash 到 96.36。vLLM #64367 经亲读：prompt-embedding 占位 ID 超出词表时，混 image+embedding 的 chat 请求被 400 拒绝（SmolVLM-256M、Gemma 4、Nemotron 3 Nano Omni 均复现），修法预处理阶段先消费掉占位 ID。其余：vLLM #64345（175GB CPU KV 池 torch.zeros 改 torch.empty，作者口径 256MiB 微基准 3.6ms→0.75µs，作者声明不可外推 serving 加速）、vLLM #64008（AMD gfx950 复用 FlyDSL host launcher，作者口径 host enqueue 开销降 88–89%）、vLLM #58468（RADIO vision encoder 对齐 Transformers 新版权重）、SGLang #47116（usage 统计 reasoning tokens 超出 stop 截断边界，夹住）、SGLang #47127（GDN recurrent 空 layer map 的 IndexError）、llama.cpp #31321（复用 tensor staging buffer、去掉 direct-io bounce buffer）、vLLM #64390（Rust vllm-bench --max-concurrency 0 卡死改拒绝）。DeepInfer 星标亲核 24152（4点版 24129，+23），pushed_at 仍 2026-10-26T05:30:52Z，无代码更新。arXiv 两组 API 查成功、窗口内零入库，最新仍为 10/27 那批（2610.37432、2610.36950）；结构性零入库（每日批次约 00:00 UTC 发布），Oct-28 提交批次在 API 中尚未出现，不冒充查无。HN 窗口内无新话题（搜到的均为旧帖：四引擎 benchmark 对比 1 天前、Anthropic serving 28 天前、vLLM MLA 5 天前、DeepInfer 10/20）。业内新闻：NVIDIA Nemotron 3.5 Transcribe（10/28）、FlashMap（10/28）、LG Uplus NeurIPS 论文（10/29）、The Information 蒸馏爆料（10/29）为本期首报，发布时间在窗口之前、但往期简报未覆盖；General Compute 融资、Cerebras+Oracle（10/27）为已报旧稿，不重复报。大V/Reddit/中文媒体/Spotify 窗口内无实质新内容（Latent Space 最新仍 10/27 Anthropic 集）。本期不标深读：三笔头条均为单 PR 级正确性/性能修复，口径已在正文讲清，无配图，够不上单开精读。*</p></body></html>
