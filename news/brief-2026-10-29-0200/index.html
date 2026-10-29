@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-29T09:01:44"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（2点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（2点版）</h1>
+<p>2点版来了，夜里这轮比较安静。 头条是 SGLang 给 AMD 上的 DSV4.1 省了笔通信费。 投机解码里，草稿模型不再每步都广播全词表了。 实测吞吐涨 3% 到 9%。 本期不标深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 FlashInfer 还是 0.7.2.post1。 TensorRT-LLM 预发还是 v1.4.0rc2。 SGLang 的 v0.5.23 分支在，tag 还没打。 llama.cpp 只有每日快照，不算正式版。 窗口内合并一共 36 条。</p>
+<p><strong>SGLang 给 AMD 的投机解码省了全词表搬运</strong> 这是今晚的头条。 先说背景：投机解码里草稿模型每步都要交卷。 以前交的是全词表 logits（每个词的得分），所有卡人手一份。 词表几十万维，每步都全量广播，纯属浪费。 现在各卡只留自己负责的那片词表。 校验改成 shard 版拒绝采样，只交换几个统计量。 拒绝采样就是草稿和专家对答案的规则。 好比以前每步都发全员传真，现在只对几个数。 开关叫 SGLANG_DSPARK_SHARDED_ACCEPT。 AMD 上默认开，其他平台要手动开。 实测在 DSV4.1 上跑，tp2 就是 2 张卡做张量并行。 8k 输入、1k 输出，不开前缀缓存。 并发 16 时吞吐涨 8.7%，交互延迟降 4.9%。 AgentX 负载并发 64 时，单卡吞吐涨 3.5%。 P90 交互速度涨 6.6%。 对你：你在 AMD 上跑投机解码，这笔直接省通信。 提醒一句：数字是 PR 自带的基准，没独立复测。 来源：<a href="https://github.com/sgl-project/sglang/pull/44465">https://github.com/sgl-project/sglang/pull/44465</a></p>
+<p><strong>SGLang 接了个新硬件：T-HEAD SAIL</strong> 平头哥的一款 AI 芯片，叫 SAIL。 它暴露了兼容 CUDA 的 torch 后端。 这笔让 MLA 模型在它上面跑起来。 DeepSeek 和 GLM 家的 MLA 都行。 fa3 和 flashmla 两个 attention 后端一起接上。 MTP 和 EAGLE 投机解码也带上了。 CUDA graph 也能用。 跟你手里的 AMD 卡没关系，一句带过。 来源：<a href="https://github.com/sgl-project/sglang/pull/45946">https://github.com/sgl-project/sglang/pull/45946</a></p>
+<p><strong>SGLang 其余一句话带过</strong> NPU 上修了 Kimi-K3 一个融合核的编译问题。 diffusion 方向 AMD 有两笔 gfx1250 优化。 bf16 的 scale-shift 换成 Triton 核，结果逐位一致。 另一笔是 Wan VAE 解码优化。 还有给 GFX942 和 GFX950 加 diffusion 量化 attention 后端。 hicache 修了个测试隔离，剩下两个是文档。 来源：<a href="https://github.com/sgl-project/sglang/pull/47061">https://github.com/sgl-project/sglang/pull/47061</a></p>
+<p><strong>vLLM 只有一条</strong> Intel XPU 上给 mrope 换了 XPU 内核。 mrope 是多模态的位置编码。 跟你没关系，一句带过。 来源：<a href="https://github.com/vllm-project/vllm/pull/59938">https://github.com/vllm-project/vllm/pull/59938</a></p>
+<p><strong>llama.cpp 14 条</strong> HIP 和 CUDA 在 CDNA 卡上开了稀疏 attention。 sparse attention 就是只算重要的注意力位置。 qwen4exp A3B Q4_K 在 ROCm 上小幅正向。 prefill 从 760 涨到 782 tok/s。 decode 从 35.8 涨到 36.4 tok/s。 涨幅不大，别指望太多。 metal 上 MXFP4 的矩阵乘提速了，苹果的。 其余是 UI、opencl、hexagon 的杂活。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31259">https://github.com/ggml-org/llama.cpp/pull/31259</a></p>
+<p><strong>TensorRT-LLM 和 FlashInfer</strong> TRT-LLM 4 条全是 infra 和测试杂活。 FlashInfer 5 条里 4 条是 Cake 内核调优。 加一条 ReplaySSM checkpoint 索引的修。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6496">https://github.com/flashinfer-ai/flashinfer/pull/6496</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 24095 个。 0点版时是 24054 个。 两小时涨了 41 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> arXiv 查过了，窗口内零入库。 最新还是 10 月 27 日那批。 零篇先记为未见新批，不冒充查无。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有实质新稿</strong> 搜到的都是窗口外的旧文。 按惯例不重复报。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> 公开搜索里没看到新帖。 窗口内没有讲推理服务的新内容。 Latent Space 也没出新集。</p>
+<p>*去重说明：本轮窗口是 10/29 00:00 到 02:00 PDT。对应 UTC 是 10/29 07:00 到 09:00。对应 epoch 是 1793257200 到 1793264400。框架经 GitHub API 按 merged 时间亲查：窗口内 merged 合计 36 条（vLLM 1、SGLang 12、TensorRT-LLM 4、FlashInfer 5、llama.cpp 14、LMDeploy 0）。正式版经亲核全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、FlashInfer 仍 v0.7.2.post1、TensorRT-LLM 预发仍 v1.4.0rc2；SGLang release/v0.5.23 分支亲核存在，tag 未打。SGLang #44465 经亲核：DSV4.1 TP-only 下 draft head 按 vocab 切片，各卡只算自己片的 logits；原 verify 在全词表上做拒绝采样，每步 draft 都要 all-gather 全量 logits；改后 logits 留 shard，sharded 拒绝采样只交换每行少量统计量；开关 SGLANG_DSPARK_SHARDED_ACCEPT，HIP 默认开；实测 tp2、in/out 8k/1k、无前缀缓存：real 模式并发 16 TTT +8.7%、ITL -4.9%，并发 4/64 TTT +2.1%/+2.8%；AgentX 并发 64 TTT/GPU +3.5%、P90 交互 +6.6%（均为 PR 自带基准，未独立复测）。SGLang #45946 经亲核：T-HEAD SAIL 的 CUDA 兼容 torch 后端（hardware_backend/sail），为 MLA 模型（DeepSeek/GLM）接 fa3 与 flashmla，MTP/EAGLE 与 CUDA graph 可用，属新硬件后端。SGLang #47061 为 NPU 上 kimi-k3 fused_sigmoid_gating_delta_rule 的 triton 编译修；#46723/#46722 为 AMD gfx1250 diffusion 两笔（bf16 scale-shift 换 bit-exact Triton 核、Wan VAE decode 优化）；#35151 为 GFX942/GFX950 diffusion 量化 attention 后端；#47197 为 hicache NIXL 存储测试隔离；其余为文档。vLLM #59938 为 XPU 上 multimodal_rotary_embedding 换 XPU 内核。llama.cpp #31259 经亲核：在 CDNA 上开 sparse fattn 路径，qwen4exp A3B Q4_K（ROCm）pp512@d16384 760.52→782.11、tg64 35.81→36.43，d32768 下类似，小幅正向；#31075 为 metal MXFP4 mat-vec 提速；其余为 UI/opencl/hexagon/测试。TensorRT-LLM 4 条均为 infra/测试杂活（waive/unwaive/cleanup）。FlashInfer 5 条：4 条 Cake 内核调优（tinygemm2/kimi_k3_fused_router/rubin-megamoe/mega_moe_v3），#6496 为 gdn ReplaySSM commit checkpoint 按 Int64 flat slot 索引的修。DeepInfer 星标亲核 24095（0点版 24054，+41），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 一组关键词 API 查成功、窗口内零入库，最新仍为 10/27 那批。业内新闻与大V窗口内无实质新内容。本期不标深读：头条为单条 PR 级通信优化，数字与口径已在正文讲清，无配图，够不上单开精读。*</p></body></html>
