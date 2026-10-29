@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-29T23:04:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（16点版）</h1>
+<p>16点版来了，这轮关键词是&quot;猜&quot;和&quot;万亿&quot;。 Mistral 扔出万亿参数大模型，权重自带投机解码的小抄。 SGLang 给投机解码加了水印，猜答案也能留下名。</p>
+<h2>框架更新</h2>
+<p><strong>SGLang：投机解码也能盖水印了</strong> 水印是给 AI 输出留的暗号，用来证明&quot;这是机器写的&quot;。 投机解码是让小模型先打草稿、再让大模型批改。 以前两者合用，水印信号会被草稿打乱。 这次修成 verify 侧强制：验证行直接定死为水印 token。 实测检测 z 值 2.73，接近不投机时的 3.06。 代价是首词延迟涨 3.7%，吞吐掉 2.3%。 跟你有关：以后评估投机解码，不用为了水印关掉草稿了。 来源：<a href="https://github.com/sgl-project/sglang/pull/44200">https://github.com/sgl-project/sglang/pull/44200</a></p>
+<p><strong>SGLang：多模态处理器大装修（9 连发）</strong> sglang-miles 分支上连合 9 个重构 PR。 把多模态预处理搬到 token 空间。 Qwen VL 的处理器逐轮只展开新 turn。 加了 --enable-token-space-processor 开关。 纯重构，多模态 serving 的内部架构在动。 来源：<a href="https://github.com/sgl-project/sglang/pull/46769">https://github.com/sgl-project/sglang/pull/46769</a></p>
+<p><strong>SGLang：DSv4.1 的评测胶水去掉了</strong> 模拟路由加 EPLB 时，每层 MoE 跑 6 个生产没有的小 kernel。 评测的 decode 步时因此被高估了。 这次模拟直接写物理 id，胶水 kernel 全删。 生产路径没变，只是基线更准了。 来源：<a href="https://github.com/sgl-project/sglang/pull/47304">https://github.com/sgl-project/sglang/pull/47304</a></p>
+<p><strong>vLLM：DSv4.1 的单核 decode 上到 TP8</strong> mono decode 是把整层塞进一个 kernel 的激进写法。 以前只支持 TP2 和 TP4。 这轮把 gfx950（MI355X）上的 TP8 修通了。 修了个 head 分块取整 bug：原来 TP8 下 attention 循环发不出 MFMA，会静默算错。 MI355X 的用户（比如你）以后 decode 基线可以看 TP8 档了。 来源：<a href="https://github.com/vllm-project/vllm/pull/64101">https://github.com/vllm-project/vllm/pull/64101</a></p>
+<p><strong>TRT-LLM：MiniMax-M3.1-Flash 自带 DSpark 草稿员</strong> MiniMax 新旗舰多模态模型，权重里捆了 DSpark draft 头。 TRT-LLM 这轮加上架构路由和权重映射，能直接 serve。 MXFP8 权重转换、Gemma norm 处理都包了。 跟你关注的 DSpark 生态对得上：自带草稿头的模型越来越多了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20922">https://github.com/NVIDIA/TensorRT-LLM/pull/20922</a></p>
+<p><strong>FlashInfer：稀疏注意力的第二步 + QSA 吃上 FP8</strong></p>
+<p>#6421 是 SDSA（稀疏注意力）6 部曲的第 2 部。</p>
+<p>做法：相邻 query 的 key 取并集，再按 bitmask 分。 稠密 kernel 也能跑 token 稀疏，设计文档重写成人话了。</p>
+<p>#7794：QSA kernel 的 KV 缓存从只认 NVFP4，扩展到 FP8 和 BF16。</p>
+<p>SM80 到 SM90 通吃，NVFP4 路径也提速。 跟你关注的稀疏注意力方向直接相关。 来源：</p>
+<ul><li><a href="https://github.com/flashinfer-ai/flashinfer/pull/6421">https://github.com/flashinfer-ai/flashinfer/pull/6421</a></li><li><a href="https://github.com/flashinfer-ai/flashinfer/pull/7794">https://github.com/flashinfer-ai/flashinfer/pull/7794</a></li></ul>
+<p><strong>版本全平</strong> vLLM 还是 0.32.0，SGLang 还是 0.5.22。 LMDeploy 还是 0.18.0，TGI 还是 v3.3.7。 TRT-LLM 预发还是 v1.4.0rc2。 llama.cpp 只有 1 个 SYCL 修补，LMDeploy 和 TGI 零合入。 DeepInfer 星标 24234，14点版时 24230。 两小时涨 4 个，代码还是没动。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> 窗口是 21:00 到 23:00 UTC，结构性零入库。 最新还是 10 月 27 日那批。 10/27 的几篇（UlaCache、RISK-KV 等）往期已报过，不重复。</p>
+<h2>业内新闻</h2>
+<p><strong>Mistral 扔出万亿参数模型，权重自带投机解码草稿头</strong> Mistral Large 4，代号 Le Chonk。 1 万亿参数的 MoE，每个 token 只激活 490 亿。 128 个专家、每次 4 个干活，1M 上下文，原生多模态。 在 3800 张 Grace Blackwell 上训了两个月。 最有意思的是 serving：权重里直接捆了 DSpark draft 头。 3 层 MLA 小头，一次猜 3 个 token，官方测吞吐最高涨 1.9 倍。 vLLM 官方 recipe 一行配置就开，NVFP4 量化版走 Blackwell。 SGLang 也有官方 cookbook。 许可证是改过的 MIT：自己部署随便用，开 MaaS 卖服务要另谈。 来源：</p>
+<ul><li><a href="https://huggingface.co/mistralai/Mistral-Large-4-1T-A52B">https://huggingface.co/mistralai/Mistral-Large-4-1T-A52B</a></li><li><a href="https://techcrunch.com/2026/10/29/">https://techcrunch.com/2026/10/29/</a></li></ul>
+<h2>访谈与深度</h2>
+<p><strong>这轮没标深读</strong> Mistral 那篇是模型卡，内容够不上单开精读。 多模态 refactor 还在分支上，不是主线行为。 大V（lmsysorg、vLLM 官方、karpathy、jimfan）窗口内没发新帖。 Reddit、HN、中文媒体也无实质新话题。 Instagram 上 Mistral Large 4 倒是刷屏了，当个热度参考。</p>
+<p>*去重说明：本轮窗口是 10/29 14:00 到 16:00 PDT。对应 UTC 是 10/29 21:00 到 23:00。GitHub Search API 按 merged 时间亲查：窗口内实质合入合计 30 条左右（vLLM 3 条含 2 条纯 CI、SGLang 18 条含 9 个多模态重构连发、TRT-LLM 2 条、FlashInfer 15 条以 cake 系列为主、llama.cpp 1 条 SYCL 修补；LMDeploy、TGI 零合入）。正式版经亲核全平：vLLM 仍 v0.32.0（2026-10-18）、SGLang 仍 v0.5.22（2026-10-19）、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7、TRT-LLM 预发仍 v1.4.0rc2（2026-10-28）。DeepInfer 星标亲核 24234（14点版 24230，加 4），pushed_at 仍 2026-10-26T05:30:52Z，无代码更新。arXiv 窗口内零入库（结构性：每日批次约 00:00 UTC 发布），最新仍为 10/27。SGLang #44200 经亲读 PR 全文：DSPARK 验证线性草稿链，verify 侧强制行（目标分布 one-hot），检测契约不变（单/双 key 同理）；DeepSeek-V4.1-Flash 8×H200 TP8/EP8 block 5 实测：DSPARK 中位 z 2.73（16/40 p&lt;1e-3）对无投机 3.06（18/40），GSM8K-100 99% 通过，TPOT +3.73%、输出吞吐 -2.25%、接受长度 -3.27%；顺带修 EAGLE/NEXTN 的 fused verify-commit 回归。vLLM #64101 经亲读：mono decode 在 gfx950 的 TP8 修通，head_tiles 改向上取整（8//16=0 导致 split-attention 循环零 MFMA、静默错输出），MI355X 4 卡验证。TRT-LLM #20922 经亲读（coderabbit 自动 review）：MiniMax-M3.1-Flash 的 DSpark drafter 走 GQA DSpark 路径，架构路由、MXFP8 权重转换、Gemma norm 处理；131k+ prompt 在 draft KV 上下文 resize 时可能失败。FlashInfer #6421 经亲读：SDSA 2/6，group_union_masks 让稠密 kernel 跑 token 稀疏注意力（组内 key 取并集、每 token 一份 bitmask），设计文档重写成人话。FlashInfer #7794 经亲读：qsa_sparse_paged_attention 的默认 kernel 扩展到 FP8 e4m3 和 BF16 KV 缓存（NVFP4 仍走 Cake），BF16 用 32-token tile 避开 bank 冲突。SGLang #47304 经亲读：模拟路由加 EPLB 时删掉 6 个生产没有的胶水 kernel，缓存 int32 dispatch map，生产无数值变化。SGLang #46753/#46769 经亲读：sglang-miles 分支上的 MM refactor 6/9 与 9/9，token-space 处理器，Qwen VL 逐 turn 展开。本期无深读（宁缺毋滥）。*</p></body></html>
