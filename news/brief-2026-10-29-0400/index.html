@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-29T10:59:26"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（4点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（4点版）</h1>
+<p>4点版来了，夜里这轮有点料。 头条是 SGLang 给 PD 加 PP 又补了个静默坑。 加上 vLLM 给 GDN 模型砍了一批多余内核。 本期不标深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 FlashInfer 还是 0.7.2.post1。 TensorRT-LLM 预发还是 v1.4.0rc2。 SGLang 的 v0.5.23 tag 还没打。 llama.cpp 只有每日快照，不算正式版。 窗口内合并一共 16 条。</p>
+<p><strong>SGLang 给 PD 加 PP 补了个&quot;口径统一&quot;</strong> 这是今晚的头条。 先说背景：PD 解耦就是 prefill 和 decode 分开跑。 PP 是流水线并行，模型按层切成几段。 decode 这边，每一段收自己那几层的 KV。 问题出在结论对不上：一段说传成了，另一段说传败了。 以前各段只信自己的轮询结果。 结果就是：0 号段把请求放进队列，后面几段却把它 abort 了。 各段排的 batch 从此对不上，流水线直接散架。 更糟的是，失败请求的 KV 和槽位永远占着不还。 修法是环上多传一个布尔量。 任何一段失败，所有段统一判失败。 失败的请求走统一的失败路径，KV 正常释放。 好比流水线上几个工段，对&quot;这单成没成&quot;必须统一口径。 对你：你正在评估 PD 解耦，这笔跟 PP 混用的静默坑直接相关。 提醒一句：成功路径的输出不变，开销几乎为零。 来源：<a href="https://github.com/sgl-project/sglang/pull/47063">https://github.com/sgl-project/sglang/pull/47063</a></p>
+<p><strong>SGLang 还修了个 PP 下的卡死</strong> 首 rank 的输出接收发得太早。 它占着一个 SM 空转等数据。 SM 就是显卡上的流处理器。 flashinfer 的 MLA 内核要全部 SM 才能开工。 于是 PP0 每步都被卡住，严重时两段互相死锁。 好比一个人占着电梯不出来，后面全堵死。 默认关着，想用自己开。 环境变量名很长，单独贴一行： SGLANG_ENABLE_PP_OUTPUT_RECV_AFTER_FORWARD 作者实测 tp8pp2，两套 8 卡 A100。 从卡死变成 TPOT 23.9 毫秒。 数字是作者口径，没独立复测。 来源：<a href="https://github.com/sgl-project/sglang/pull/46027">https://github.com/sgl-project/sglang/pull/46027</a></p>
+<p><strong>vLLM 给 GDN 模型砍了一批多余内核</strong> GDN 是门控 DeltaNet，一种线性注意力。 以前每层 decode 都要先清零再写。 现在直接复用空 buffer，省掉清零和拷贝。 decode 每步少 48 个内核。 首词元延迟 c1 降 1.9%。 prefill 在 1k 以内快 4% 到 11%。 实测是 Qwen3.8-27B，跑在 GB300 和 B300 上。 GSM8K 分数没变，精度没掉。 数字是作者口径，没独立复测。 来源：<a href="https://github.com/vllm-project/vllm/pull/64419">https://github.com/vllm-project/vllm/pull/64419</a></p>
+<p><strong>vLLM 投机解码修了个重复编译</strong> MRV2 是投机解码的一种采样器。 它的 Triton 内核按词表数整除 16 特化。 预热只覆盖了一种情况，另一种运行时现编。 现在不特化了，serving 中不再重复编译。 输出不变，纯属省编译时间。 来源：<a href="https://github.com/vllm-project/vllm/pull/64137">https://github.com/vllm-project/vllm/pull/64137</a></p>
+<p><strong>SGLang 多模态：Joy 图像 MLP 提速</strong> Joy Image Edit 是个图像编辑模型。 它的图像 MLP 在 Blackwell 卡上融合了 GELU。 GELU 是常用的激活函数。 只动图像那条路，文本 MLP 不动。 质量选 high 档，结果逐位一致。 来源：<a href="https://github.com/sgl-project/sglang/pull/47022">https://github.com/sgl-project/sglang/pull/47022</a></p>
+<p><strong>其余一句话带过</strong> FlashInfer 的 Ulysses NVLink 全交换提速了。 8 张 H20 上比 NCCL 快 1.5 到 1.7 倍。 FlashInfer 还修了 MoE Frost 的 MXFP4 路由。 无效路由的 NaN 分数以前会污染输出。 LMDeploy 统一了 recurrent 和 conv 状态管理。 CUDA 的 Qwen3.5 和 GLM-5.3 Flash 直接用。 llama.cpp server 修了投机解码长草稿的回滚。 SGLang NPU 接了 Qwen3.6-35B-A3B-FP8。 TRT-LLM 只有一条 C++ 测试重构。 vLLM 还有一条 ROCm 的 CI 修。 SGLang 剩下的是 CI 和 PyO3 升级。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7015">https://github.com/flashinfer-ai/flashinfer/pull/7015</a> 来源：<a href="https://github.com/InternLM/lmdeploy/pull/5057">https://github.com/InternLM/lmdeploy/pull/5057</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标到了 24129 个。 2点版时是 24095 个。 两小时涨了 34 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> arXiv 查过了，窗口内零入库。 最新还是 10 月 27 日那批。 10 月 28 日提交的批次还没出现在 API 里。 零篇先记为未见新批，不冒充查无。</p>
+<h2>业内新闻</h2>
+<p><strong>DiffuSpace 发了个扩散语言模型</strong> 名字叫 Clover-35B-A3B-Preview。 底子是 Qwen3.6-35B-A3B。 35B 总参数，每步激活 3B。 一次并行填 32 个 token 的块。 上下文 128K，Apache 2.0 开源。 官方推荐用 SGLang 部署和评测。 速度分都是官方口径，没独立验证。 来源：<a href="https://huggingface.co/Diffuspace/Clover-35B-A3B-Preview">https://huggingface.co/Diffuspace/Clover-35B-A3B-Preview</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> 公开搜索里没看到新帖。 窗口内没有讲推理服务的新内容。 Latent Space 也没出新集。</p>
+<p>*去重说明：本轮窗口是 10/29 02:00 到 04:00 PDT。对应 UTC 是 10/29 09:00 到 11:00。框架经 GitHub Search API 按 merged 时间亲查：窗口内 merged 合计 16 条（vLLM 3、SGLang 8、TensorRT-LLM 1、FlashInfer 2、llama.cpp 1、LMDeploy 1）。正式版经亲核全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、FlashInfer 仍 v0.7.2.post1、TensorRT-LLM 预发仍 v1.4.0rc2；SGLang tags 列表最新仍是 v0.5.22，v0.5.23 的 tag 未打。SGLang #47063 经亲读：PD 解耦 decode 侧加 PP 时，各 stage 本地 poll 对传输结论各说各话（stage 0 成功、后面失败），共识只管&quot;结束了&quot;不管&quot;成没成&quot;，导致各段 batch 对不上、失败请求 KV 槽位泄漏；改后环上传 {rid: failed}，任一段失败则全段判失败，失败走统一路径释放。SGLang #46027 经亲读：首 rank 的输出 irecv 在 forward 后立刻发出，空转占 SM；flashinfer MLA 要全 SM 才能开工，PP0 每步卡住，#44453 之后两段还可能互相死锁；新环境变量默认关，tp8pp2 两套 8 卡 A100 上从 hang 到 TPOT 23.9ms（作者口径）。vLLM #64419 经亲读：GDN core 输出改 torch.empty、FlashInfer prefill 原地写，Qwen3.8-27B 上 decode 每步少 48 kernel、TPOT c1 -1.9%、prefill ≤1k 快 4–11%，GSM8K 不变（作者口径、GB300/B300）。vLLM #64137 经亲读：MRV2 两个 Triton 内核的 num_logits 去特化，serving 中不再按整除 16 重复 JIT，输出不变。SGLang #47022 经亲读：Joy Image Edit 的 BF16 图像 MLP 在 SM120 上用现有 fused GEMM/GELU（quality=high），文本 MLP 不动，结果逐位一致。FlashInfer #7015 经亲读：portable Ulysses NVLink all-to-all 重写，8×H20 上 scatter/gather 比 NCCL 快 1.5–1.7 倍（作者口径）。FlashInfer #7838 经亲读：Frost 低延迟 MoE 路径修三处正确性（无效路由 NaN/Inf 污染、NVFP4 未写行、MXFP4 FFMA 解码错）。LMDeploy #5057 经亲读：统一 recurrent/conv 运行时状态与 checkpoint 的物理池，CUDA Qwen3.5 与 GLM-5.3 Flash 默认用 compact state，PD/MemDecode 不支持。llama.cpp #31350 经亲读：server 投机解码 draft 长于 n_rs_seq 时的回滚用 draft 时 checkpoint，12 个测试从坏 2 个到剩 1 个（与 master 同源差异）。TRT-LLM #21022 为 C++ 测试重构；vLLM #63053 为 ROCm Elastic DP + AITER 的 CI 修；SGLang #46737 为 cuda_graph 释放空 break 输入显存；#46212 为 NPU 上 Qwen3.6-35B-A3B-FP8（block FP8 MoE）；#44316/#47230/#47162 为 PyO3 0.29（Python 3.14）与 CI。DeepInfer 星标亲核 24129（2点版 24095，+34），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 两组 API 查成功、窗口内零入库，最新仍为 10/27 那批；Oct-28 提交批次在 API 中尚未出现。业内新闻：General Compute 融资、Cerebras 上 Oracle、SGLang Summit 议程均为已报过的窗口外旧稿，不重复报；DiffuSpace Clover-35B-A3B-Preview 为 10/29 新发布（HF 页面亲核存在，数字为官方口径）。HN/中文媒体/大V窗口内无实质新内容。本期不标深读：两笔头条均为单 PR 级正确性/性能修复，口径已在正文讲清，无配图，够不上单开精读。*</p></body></html>
