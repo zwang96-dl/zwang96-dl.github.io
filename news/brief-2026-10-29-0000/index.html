@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-29T07:03:18"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（0点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（0点版）</h1>
+<p>0点版来了。 头条跟两件事有关：SGLang 0.5.23 和 vLLM 的静默算错。 都是你评估部署时会踩到的那种。 本期不标深读。</p>
+<h2>框架更新</h2>
+<p><strong>正式版全平</strong> vLLM 还是 0.32.0 版。 SGLang 还是 0.5.22 版。 LMDeploy 还是 0.18.0 版。 FlashInfer 还是 0.7.2.post1。 TensorRT-LLM 预发还是 v1.4.0rc2。 llama.cpp 只有每日快照，不算正式版。 窗口内合并一共 41 条。</p>
+<p><strong>SGLang 0.5.23 开始切版了</strong> 这就是今晚的头条。 证据是 cherry-pick 任务 #47198。 它把新功能往 release/v0.5.23 分支回捡。 这个分支我亲查过，真实存在。 对你来说，意味着久等的一笔可以结了。 统一 KV 池重构后没重跑的 GPU 和 PD 数字。 等 0.5.23 发布，拿它复测一遍再信。 来源：<a href="https://github.com/sgl-project/sglang/pull/47198">https://github.com/sgl-project/sglang/pull/47198</a></p>
+<p><strong>vLLM 修了流水并行的一处静默算错</strong> DeepSeek-V3.2 和 GLM-5.x 这类模型中招。 PR 里叫它们 DSA 模型。 张量并行和流水并行同时开时触发。 阶段交接时漏了一次 all-reduce。 all-reduce 就是各卡把结果加总同步。 结果是激活值全错，但一声不吭。 GLM-5.3 的 GSM8K 直接掉 7 到 9 分。 输出长度还暴涨了 7.6 倍。 修法是把 all-reduce 搬到发送端做。 不再传没同步过的 residual。 流水线交班没对账，半成品就递过去了。 这笔跟你的精度门清单是一类坑。 验证用的是 2 节点 16 卡 B200。 来源：<a href="https://github.com/vllm-project/vllm/pull/60477">https://github.com/vllm-project/vllm/pull/60477</a></p>
+<p><strong>vLLM 给你的 MI355X 铺了条快径</strong> 这条就是为你手里的卡写的。 DeepSeek-V4.x 的 MXFP8 线性层。 解码小批量时，量化和矩阵乘各 launch 一次。 现在融成一次，省一次启动开销。 顺带修了 lm_head 的瘦矩阵调度。 权重远大于 L2 时不走专用核。 这是 DSV4.1-Flash 在 MI355X 上的系列之一。 兄弟几笔还在路上，都是独立 PR。 PR 里没给端到端提速数字。 先记为已修未验，别直接上生产。 来源：<a href="https://github.com/vllm-project/vllm/pull/63179">https://github.com/vllm-project/vllm/pull/63179</a></p>
+<p><strong>vLLM 开始接 MiniMax-M3.1-Flash</strong> M3.1-Flash 是 MiniMax 10 月 19 日发的 428B 模型。 号称推理快 3 倍、智能体任务成本降 70%。 这笔只是第一批：模型代码加内核。 运行器和采样改动后续分拆跟上。 面向 Blackwell 卡，KV 用 NVFP4 格式。 自带 DSpark 草稿模型，跑投机解码。 来源：<a href="https://github.com/vllm-project/vllm/pull/64111">https://github.com/vllm-project/vllm/pull/64111</a></p>
+<p><strong>vLLM 给 KV 卸载链又拧了两笔</strong> P2P 搬运超时那笔先判失败再回收。 以前要等 15 秒，现在 10 秒就报失败。 槽位先留着不释放，等对端确认写完。 草稿纸回收又严了一笔，防脏数据。 另一笔是 AMD 上的卸载容错。 GPU 和 CPU 间搬运出错，以前直接拖垮引擎。 现在改为上报故障，缓存降级不宕机。 两笔都是搬运链路的正确性加固。 来源：<a href="https://github.com/vllm-project/vllm/pull/64256">https://github.com/vllm-project/vllm/pull/64256</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/52838">https://github.com/vllm-project/vllm/pull/52838</a></p>
+<p><strong>SGLang 其余一句话带过</strong> GPTQ Marlin 的 MoE 修了两处算错。 BF16 模型的 scale 被写死成 FP16。 另一处是 w2 scale 形状错。 用量化 MoE 的注意检查一下。 DSpark 那笔是验证成本的模拟修正。 还有一条 CI 删了 nightly 镜像。 来源：<a href="https://github.com/sgl-project/sglang/pull/35955">https://github.com/sgl-project/sglang/pull/35955</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/46840">https://github.com/sgl-project/sglang/pull/46840</a></p>
+<p><strong>TensorRT-LLM 11 条多为基建</strong> Attention DP 加了 KV 均衡准入。 默认关着，状态还是原型。 排队叫号时也看各卡手里的 KV 量。 DSpark/DFlash 草稿 KV 池修了页大小。 其余是 CI 授权、文档、Helix 分支合并。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21073">https://github.com/NVIDIA/TensorRT-LLM/pull/21073</a></p>
+<p><strong>FlashInfer 还是 Cake 调优</strong> 13 条里 12 条是 Cake 单内核微调。 B200、GB300、B300 三代卡都有份。 唯一功能向的是 #6445。 head_dim 512 时 NVFP4 KV 没内核。 自动转成 FP8 再算，Gemma 4 全局层用得上。 没有端到端数字，就不展开了。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6445">https://github.com/flashinfer-ai/flashinfer/pull/6445</a></p>
+<p><strong>llama.cpp 四条</strong> SYCL 给 Intel Xe2 卡加了新内核。 量化 KV 上直接跑 flash attention。 覆盖 B580、B570 等，解码和小批量。 其余是 hexagon 修复和测试。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31125">https://github.com/ggml-org/llama.cpp/pull/31125</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标涨到了 24054 个。 22点版时是 24005 个。 两小时涨了 49 个。 代码还是一行没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内还是零篇</strong> arXiv 查过了，窗口内零入库。 最新还是 10 月 27 日那批。 零篇先记为未见新批，不冒充查无。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有实质新稿</strong> 搜到的都是几天前的旧文。 Cloudflare、Orca Connect 今天都报过。 FlashMap、vLLM-Omni 也是今天报过的。 按惯例不重复报。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮大V基本安静</strong> 名单里的人都逐个查过。 窗口内没有讲推理服务的新帖新文。 Latent Space 也没出新集。 最新还是 10 月 27 日那集。</p>
+<p>*去重说明：本轮窗口是 10/28 22:00 到 10/29 00:00 PDT。对应 UTC 是 10/29 05:00 到 07:00。对应 epoch 是 1793250000 到 1793257200。框架经 GitHub Search API 按 merged 时间亲查、gh 逐条亲读头条 PR 正文：窗口内 merged 合计 41 条（vLLM 5、SGLang 4、TensorRT-LLM 11、FlashInfer 13、llama.cpp 4、LMDeploy 0）。SGLang release/v0.5.23 分支经 gh 亲核真实存在，#47198 为自动回捡任务，主 branch 尚未打 tag，0.5.22 仍为最新正式版。vLLM #60477 经亲核：DSA 模型（deepseek_v32 目录，服务 DeepSeek-V3.2 与 GLM-5.x）流水并行阶段边界漏 all-reduce（last layer 未归约的 MLP/MoE 输出直接送走），GLM-5.3 BF16 TP8PP2 对 TP16 在 GSM8K 前 100 例掉 7 到 9 分、生成 token 约 7.6 倍，验证用 2 节点 8×B200、vLLM 0.30.0 上数值等价变体。vLLM #63179 经亲核：MI355X（gfx950）上 DSV4.1-Flash fastpath 系列之一，把 tiny-M（M≤8 解码形状）MXFP8 量化核融进 block32 GEMM（一 launch 变一次），lm_head 瘦 GEMM 按权重大小守门（远大于 L2 走通用回退），siblings #63180/#63181/#63182 独立可合，无端到端数字。vLLM #64111 经亲核：MiniMax-M3.1-Flash 第一批 PR（#63232 拆分），模型代码（NVIDIA+ROCm）与内核全到，Blackwell NVFP4 MoE、KV 与 index-K 走 CUTLASS Q8KV4，自带 dspark/ 草稿；运行器/采样/KV 管理后续分拆。vLLM #64256 经亲核：P2P 加载超时立即判失败（对称 10 秒替代 15 秒，PD 侧 30 秒替代 35 秒），目标块在 AbortAck/TransferDone/会话结束前不回收，防对端 WRITE 晚到写脏。vLLM #52838 经亲核：AMD OffloadingConnector 下 GPU-CPU 搬运 fault 原先经 STD_TORCH_CHECK 抛错拖垮引擎，改后上报故障不抛异常，缓存降级。SGLang #35955 经亲核：gptq_marlin MoE 的 w13/w2 scales 被写死 torch.half 违反 BF16 要求致断言，w2 scale 形状在 TP act-order 下错，两处皆为正确性修复。SGLang #46840 为 dspark 真实 verify 接受成本在模拟接受率下的修正；#47194 为 CI 删 ROCm 7.2.4 MI35X nightly 镜像构建。TensorRT-LLM #21073 经亲核：Attention DP 的 KV 均衡准入，加进 DefaultADPRouter，默认关、原型状态，需显式开 attention_dp_config.enable_kv_balanced_admission；#21046 为 standalone DSpark/DFlash 草稿 KV 池目标页大小，其余为 CI/文档/infra。FlashInfer #6445 经亲核：trtllm-gen NVFP4 KV context 内核只到 head_dim 256，512 时（Gemma 4 全局层）自动把 NVFP4 页转 FP8 再跑现有 FP8 内核（CuTe DSL，SM100+），无端到端数字；其余 12 条均为 Cake 单内核调优。llama.cpp #31125 经亲核：SYCL DPAS flash attention 直接跑在 q4_0/q8_0 量化 KV 上（Xe2：B580/B570/B70/Lunar Lake/Panther Lake），解码与小批量，head 64 到 512，GGML_SYCL_FA_DPAS=0 可关；其余为测试与 hexagon 修复。正式版经 gh 亲核全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、FlashInfer 仍 v0.7.2.post1、TensorRT-LLM 预发仍 v1.4.0rc2（10/28 发布的 v1.4.0rc2 已在 16 点版窗口）；llama.cpp 快照 b11978/b11979 按惯例不算正式版。DeepInfer 星标经 gh 亲查为 24054（22点版 24005，+49），pushed_at 仍为 2026-10-26T05:30:52Z。arXiv 两组关键词 API 全查成功、窗口内零入库，最新仍为 10/27 那批。业内新闻窗口内无实质新稿；Cloudflare、Orca Connect、FlashMap、vLLM-Omni 均为今日已报或窗口外事件，不重复报。大V逐个核查窗口内 serving 相关为零；Latent Space 最新单集仍为 10/27 Anthropic 集。本期不标深读：头条是 release 分支信号与单条 PR 级正确性修复，无配图与端到端数字，口径已在正文讲清，够不上单开精读。*</p></body></html>
