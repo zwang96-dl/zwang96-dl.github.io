@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月30日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-30"/>
+<meta name="doc-ts" content="2026-10-30T23:06:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-30（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-30（16点版）</h1>
+<p>16点版来了，这轮 SGLang 动了把大手术。 PD multiplexing 整个被删掉了。 这跟你正在评估的 PD 解耦直接相关。 vLLM 那边，稀疏注意力的采样又省了一笔显存。 还有个 AMD 的数字，值得你看一眼。</p>
+<h2>头条</h2>
+<p><strong>SGLang 删掉了 PD multiplexing</strong> PD multiplexing 是一种 PD 部署模式。 prefill 和 decode 跑在同一组卡上。 靠多路复用分时共享算力。 官方说用的人太少，连 CI 都没覆盖。 这轮直接删了，以后可能重做再加回来。 你在评估 PD 解耦，部署模式少了一个选项。 团队在收敛 PD 路线，做的是减法不是加法。 来源：<a href="https://github.com/sgl-project/sglang/pull/43898">https://github.com/sgl-project/sglang/pull/43898</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM：稀疏注意力采样省掉 FP32 拷贝</strong> DSA 是 DeepSeek 稀疏注意力，长上下文降本用的。 原理是先让 indexer 打分，挑出重要的 token。 再只对挑出的子集做注意力计算。 这笔动的是 persistent top-k 采样。 改成直接读 BF16 的 indexer 分数。 以前要先转一份完整的 FP32 logits。 在 B200/B300 上做 decode，这份拷贝直接省了。 跑 DeepSeek-V4.1 这类稀疏模型，显存账更好看。 来源：<a href="https://github.com/vllm-project/vllm/pull/64138">https://github.com/vllm-project/vllm/pull/64138</a></p>
+<p><strong>vLLM：RL 权重同步后多出几 GiB 显存</strong> RL 训练时，trainer 用 NCCL 推送新权重。 推完之后，torch 的缓存分配器还攥着内存不放。 这笔在同步结束时调一次 empty_cache，全还回去。 Qwen3-30B-A3B-FP8、两卡 TP、GB200 上实测。 每张卡多出 3.7 到 4.4 GiB 空闲显存。 代价是下次同步要重新分配，慢 7%。 权重、精度、吞吐、KV 大小都不变。 你在 MI355X 上跑 agentic RL，这笔跟你同温。 来源：<a href="https://github.com/vllm-project/vllm/pull/64691">https://github.com/vllm-project/vllm/pull/64691</a></p>
+<p><strong>vLLM：AITER 升到 v0.1.27</strong> AITER 是 AMD 的 kernel 库。 ROCm 上的加速弹药，版本号常规跟进。 来源：<a href="https://github.com/vllm-project/vllm/pull/63774">https://github.com/vllm-project/vllm/pull/63774</a></p>
+<p><strong>SGLang：embedding 和打分路径提速</strong> prefill-only scoring 就是只算分不生成。 典型场景是排序和 rerank。 这笔保留原生精度的 embedding 输出。 砍掉多余的元数据和 padding 开销。 跑 embedding 类 serving 的，直接受益。 来源：<a href="https://github.com/sgl-project/sglang/pull/42248">https://github.com/sgl-project/sglang/pull/42248</a></p>
+<p><strong>SGLang：bench 的 KV 容量检查更准了</strong> attention-DP 是把注意力按数据并行拆开。 bench 扫配置时，会跳过 KV 装不下的点。 以前只看总量，现在按最重的 rank 算。 排布不均时，重的那个 rank 会先爆。 修的就是这个误判。 来源：<a href="https://github.com/sgl-project/sglang/pull/47130">https://github.com/sgl-project/sglang/pull/47130</a></p>
+<p><strong>SGLang：排队取消原地收尾</strong> 还在排队的请求被取消，以前收尾绕一圈。 现在弹出队列当场 finish。 各解耦模式统一走这一套。 内部重构，外部无感。 来源：<a href="https://github.com/sgl-project/sglang/pull/43897">https://github.com/sgl-project/sglang/pull/43897</a></p>
+<p><strong>SGLang rust-server 两笔小修</strong></p>
+<p>#47160：native /generate 的计时从 HTTP 层开始算。</p>
+<p>#47112：/generate 的 hook 能拿到请求和结果。</p>
+<p>都是新前端的统计口径活。 来源：<a href="https://github.com/sgl-project/sglang/pull/47160">https://github.com/sgl-project/sglang/pull/47160</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/47112">https://github.com/sgl-project/sglang/pull/47112</a></p>
+<p><strong>FlashInfer 六笔：kernel 牙膏继续挤</strong></p>
+<p>#8036：实验性验证 Qwen3.8-27B 的 dense 注意力形状。</p>
+<p>Qwen3.8-27B 是个新模型名，先把形状对上。</p>
+<p>#8044：Ulysses 序列并行通信，world-8 的 BF16 更快了。</p>
+<p>说白了就是卡之间搬 attention 头，快了一截。</p>
+<p>#8040：SM120 上 NVFP4 变长注意力的规划更快。</p>
+<p>#8037：修 sm90 单 token CuTe prefill 编译不过。</p>
+<p>#7964：top-k 的中间状态按流缓存，不用每次清零。</p>
+<p>#6422：稀疏注意力 indexer 的 paged MQA logits。</p>
+<p>六笔全是 kernel 层，持续抠。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8036">https://github.com/flashinfer-ai/flashinfer/pull/8036</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8044">https://github.com/flashinfer-ai/flashinfer/pull/8044</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8040">https://github.com/flashinfer-ai/flashinfer/pull/8040</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8037">https://github.com/flashinfer-ai/flashinfer/pull/8037</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7964">https://github.com/flashinfer-ai/flashinfer/pull/7964</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6422">https://github.com/flashinfer-ai/flashinfer/pull/6422</a></p>
+<p><strong>其余一句话带过</strong> TRT-LLM 两笔都是文档和回归测试合并，无实质。 LMDeploy、TGI、llama.cpp 本轮零合入。</p>
+<p><strong>正式版全平</strong> vLLM 仍 v0.32.0。 SGLang 仍 v0.5.22，v0.5.23 还是裸 tag。 llama.cpp 快照到 b12017，按惯例不算正式版。 LMDeploy 仍 v0.18.0，TGI 仍 v3.3.7。 TRT-LLM 仍 v1.4.0rc2 预发布。 FlashInfer 仍 v0.7.2.post1。 v0.7.3rc1 在 8点版已报过。</p>
+<p><strong>DeepInfer 星标 24,488</strong> 14点版时 24,481，两小时涨了 7 个。 代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内零入库</strong> 新批次每天 00:00 UTC 才发。 下一批 10/31 00:00 UTC，还没到。</p>
+<h2>业内新闻</h2>
+<p><strong>AMD 一年给 vLLM 贡献了 12.4% 的提交</strong> FourWeekMBA 数了 vLLM 一年的 git 记录。 2025-10-30 到 2026-10-30，共 13360 个提交。 AMD 邮箱占了 1652 个，比例 12.4%。 NVIDIA 只有 628 个，AMD 是它的 2.6 倍。 AMD 的份额还在涨，从 9.5% 涨到 14.3%。 而且 AMD 的提交里，67.3% 动的是 ROCm 之外的代码。 这篇是 10/30 凌晨发的，之前几期漏了，补上。 跟你的 AMD 卡评估线直接相关。 vLLM 的 AMD 支持是 AMD 自己在重金投入。 来源：<a href="https://fourweekmba.com/ai-amd-made-12-4-of-vllms-commits-in-a-year-2-6x-nvidias/">https://fourweekmba.com/ai-amd-made-12-4-of-vllms-commits-in-a-year-2-6x-nvidias/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮广域零新料</strong> HN、Reddit、X 关键人物都没 serving 新帖。 机器之心、量子位无新稿。 Latent Space 最新还是 10/30 那期，已报过。 Spotify 上 Latent Space 无新单集。</p>
+<h2>值得深读</h2>
+<p>这轮没有标深读。 SGLang 删 PD multiplexing 是删代码，不是新方法。 框架侧也都是合入和修复。 宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/30 14:00 到 16:00 PDT，对应 UTC 10/30 21:00 到 23:00（截查约 23:10 UTC）。GitHub Search API 按 merged 时间亲查：7 仓库共 22 个 merged PR，其中 4 个为文档/测试/CI/内部杂项（vLLM 1、SGLang 2、TRT-LLM 1）已略去；LMDeploy、TGI、llama.cpp 零合入。实质：vLLM 3（#64138、#64691、#63774）、SGLang 5（#43898、#42248、#47130、#43897、#47160/#47112）、FlashInfer 6（#8036、#8044、#8040、#8037、#7964、#6422）、TRT-LLM 1（#21351，回归测试合并，无实质）。正式版全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22（v0.5.23 仍裸 tag、无 release 页）、llama.cpp 快照 b12017（按惯例不算）、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7、TRT-LLM 仍 v1.4.0rc2 预发布（10/28 已报）、FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 在 8点版已报）。DeepInfer 星标亲核 24,488（14点版 24,481，+7），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：abs:&quot;LLM inference&quot; 最新仍是 10/29 17:18 UTC 那篇，本窗口零入库（结构性，下一批 10/31 00:00 UTC）。广域经子代理扫：HN（Algolia 窗口内 0 条）、Reddit（r/LocalLLaMA、r/MachineLearning 零新帖）、X（lmsysorg、vLLM 官方、karpathy、jimfan、swyx 零新帖）、机器之心/量子位（零新稿）、Latent Space newsletter（最新仍是 10/30 期，已报过）、Spotify（Latent Space 最新单集仍是 10/27 Anthropic 期）——窗口内全零新料。FourWeekMBA 的 AMD 提交统计（约 10/30 00:00 UTC 发布）经主代理用 browser.search 核实正文与数字后补报，此前各期未报过。本轮无深读。*</p></body></html>
