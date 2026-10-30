@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-30T03:23:33"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（20点版）</h1>
+<h2>头条</h2>
+<p><strong>阿里把 P-D 分离搬上生产线：72B 实例 -24%、P99 -78%</strong> 阿里智能引擎团队在 InfoQ 发了篇实战长文。 讲他们在 RTP-LLM 上做 P-D 分离的全过程。 72B 模型全量上线：机器少了 24%。 平均时延降 48%，P99 直接降 78%。 核心招数是 KV 按层边算边传。 单请求约 5GB 的&quot;草稿纸&quot;，不等算完再搬。 每算完一层发一层，摊进几秒的 prefill 时间里。 传输用 RDMA 单边操作，控制走 gRPC Stream。 还有个对你胃口的：多模态 VIT 可单独成第三个角色。 三个角色互不干扰，各自按特性优化。 这正是你的多模态资源分离方向。 本期已做深读，笔记见文末。 来源：<a href="https://www.infoq.cn/article/70zucQxBJc72NOWggR5u">https://www.infoq.cn/article/70zucQxBJc72NOWggR5u</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM：DSv4.1 在 MI355X 上又抠出 1.75%</strong> ROCm 上跑 DSv4.1 的 decode。 每步要建 8 次 SWA 元数据。 SWA 是滑动窗口注意力，省 KV 的老办法。 这版把 8 次 kernel launch 合成 1 次。 MI355X 上 ITL p50 降约 1.75%，精度无损。 来源：<a href="https://github.com/vllm-project/vllm/pull/63885">https://github.com/vllm-project/vllm/pull/63885</a></p>
+<p><strong>vLLM：GLM-5.3-Flash 的多模态 EPD 提速</strong> Python EPD 路径下，传的东西变少了。 GLM-5.3-Flash 只传图/视频元数据。 EPD 是 encoder/prefill/decode 三角色分离。 decoder 不再重跑视觉预处理。 多模态 EPD 的链路又短一截。 来源：<a href="https://github.com/vllm-project/vllm/pull/64071">https://github.com/vllm-project/vllm/pull/64071</a></p>
+<p><strong>vLLM：修了个投机解码的竞态</strong> PP 加投机解码加结构化输出，一起开会翻车。 DraftTokensHandler 有竞态，接受长度悄悄回退。 旧 mask 方案治标还伤性能，这次根治。 来源：<a href="https://github.com/vllm-project/vllm/pull/63219">https://github.com/vllm-project/vllm/pull/63219</a></p>
+<p><strong>vLLM：MI300X 长上下文崩溃修了</strong> Triton W4A16 GEMM 换了个数据类型。 行偏移从 int32 换成 int64。 长上下文在 ROCm 上不再崩，MI300X 实测通过。 来源：<a href="https://github.com/vllm-project/vllm/pull/63054">https://github.com/vllm-project/vllm/pull/63054</a></p>
+<p><strong>SGLang：LoRA 热刷新不用先卸载了</strong> /load_lora_adapter 加了 upsert 参数。 同名 adapter 目录可直接热刷新。 异步 RL 每步重发 adapter，不再报&quot;已加载&quot;死锁。 来源：<a href="https://github.com/sgl-project/sglang/pull/47135">https://github.com/sgl-project/sglang/pull/47135</a></p>
+<p><strong>SGLang v0.5.23：release notes 还没发</strong> tag 昨晚 17:13 就打了，说明页还是 404。 统一 KV 池的复测继续等正式版。 来源：<a href="https://github.com/sgl-project/sglang/releases">https://github.com/sgl-project/sglang/releases</a></p>
+<p><strong>TRT-LLM：Kimi K3 的 NVFP4 KV 通了</strong> hybrid KV cache 管理器打通 NVFP4。 之前会被静默降级到 FP8。 含 disaggregated serving 下的 KV 传输角色。 Kimi-K3 的 MLA 精度线直接相关。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20888">https://github.com/NVIDIA/TensorRT-LLM/pull/20888</a></p>
+<p><strong>FlashInfer：Kimi-K3 prefill 快 1.11 倍</strong> LatentMoE TP8 prefill 的前后投影提速。 tile 从 256 调到 224，尾部融合 norm 加 GEMM。 输出 bitwise 一致，约 1.11 到 1.12 倍。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7948">https://github.com/flashinfer-ai/flashinfer/pull/7948</a></p>
+<p><strong>版本全平</strong> vLLM 还是 0.32.0，SGLang 还是 0.5.22。 LMDeploy 还是 0.18.0，TGI 还是 v3.3.7。 TRT-LLM 预发还是 v1.4.0rc2。 FlashInfer 还是 0.7.2.post1。 llama.cpp、LMDeploy、TGI 窗口内零合入。 DeepInfer 星标 24273（18点版 24250，加 23）。 代码还是 10 月 26 日那条，没动。</p>
+<h2>新技术与论文</h2>
+<p><strong>FlatCake：KV 缓存不分层了</strong> 扁平化 KV 存储架构，生产级设计。 击穿 DRAM 到 SSD 分层的老假设。 跟你的 KV 搬运账单直接相关。 原文：<a href="https://arxiv.org/abs/2610.38355">https://arxiv.org/abs/2610.38355</a></p>
+<p><strong>GAAC：用指数位冗余压 KV</strong> 利用浮点指数位的冗余做无损 KV 压缩。 省存储，还能加速 attention。 KV 压缩家族又添一员。 原文：<a href="https://arxiv.org/abs/2610.38210">https://arxiv.org/abs/2610.38210</a></p>
+<p><strong>WAKMan：看流量配 KV 策略</strong> 针对单轮、多轮、agent 混合流量的 KV 管理器。 工作负载感知，按流量类型调策略。 agent 场景的缓存管理参考。 原文：<a href="https://arxiv.org/abs/2610.36355">https://arxiv.org/abs/2610.36355</a></p>
+<p><strong>GAUSS：serving 仿真器</strong> workload-aware 的 LLM serving 仿真器。 解析模型加蒙特卡洛。 跟你想做的 AI 自动调参系统很配。 可当离线评估的底座。 原文：<a href="https://arxiv.org/abs/2610.37989">https://arxiv.org/abs/2610.37989</a></p>
+<h2>业内新闻</h2>
+<p><strong>FuriosaAI 融到 6.2 亿美元</strong> 韩国推理芯片公司，Series D 拿下 6.2 亿美元。 估值 29 亿美元，Cisco、Naver 都投了。 主打降推理电费和算力成本。 推理芯片这条赛道越来越挤。 来源：<a href="https://techstartups.com/2026/10/29/startup-funding-news-today-october-29-2026-braid-casap-furiosaai-upwind-foundry-robotics-plato-more/">https://techstartups.com/2026/10/29/startup-funding-news-today-october-29-2026-braid-casap-furiosaai-upwind-foundry-robotics-plato-more/</a></p>
+<p><strong>新浪科技聊 DeepSeek 开源 DeepInfer</strong> 转载澎湃的评论：推理框架是把模型变成服务的能力。 提到单集群一天跑 155 万亿 Tokens。 SGLang 的直接对照组，又添一笔中文解读。 来源：<a href="https://news.sina.cn/znl/2026-10-29/detail-iniwwtuv8786373.d.html">https://news.sina.cn/znl/2026-10-29/detail-iniwwtuv8786373.d.html</a></p>
+<h2>访谈与深度</h2>
+<p><strong>llm-d v1.0.0：P-D 解耦的 K8s 标准件</strong> beri.net 写了篇对比分析。 llm-d v1.0.0 新增了 DisaggregatedSet。 prefill 和 decode 副本当一个单元滚动升级。 KServe 的推理服务底层跑的就是 llm-d。 spec.prefill 可声明独立 prefill 池。 K8s 上做 P-D 解耦，这就是标准件。 来源：<a href="https://www.beri.net/article/llm-d-vs-kserve-vs-ray-serve-kubernetes-llm-serving-2026">https://www.beri.net/article/llm-d-vs-kserve-vs-ray-serve-kubernetes-llm-serving-2026</a></p>
+<p><strong>这轮没新料的</strong> 大V 名单窗口内无新帖。 Latent Space 播客最新还是 10/27 那期。 机器之心、量子位无 serving 专稿。</p>
+<h2>值得深读</h2>
+<p>本期深读：阿里 RTP-LLM 的 P-D 分离生产实测。 理由很直接：72B 线上真实数字，是 P-D 评估的对照组。 多模态 VIT 第三个角色，跟你的研究方向对得上。 笔记已存深度阅读目录（RTP-LLM-PD分离生产实测-阿里精读）。</p>
+<p>*去重说明：本轮窗口是 10/29 18:00 到 20:00 PDT。对应 UTC 是 10/30 01:00 到 03:00。GitHub Search API 按 merged 时间亲查：vLLM 9 条（实质 5 条）、SGLang 7 条（实质 1 条）、TRT-LLM 2 条、FlashInfer 4 条以上，llama.cpp、LMDeploy、TGI 零合入。版本全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7、TRT-LLM 预发仍 v1.4.0rc2、FlashInfer 仍 0.7.2.post1；SGLang v0.5.23 的 release 说明页仍未发布（tag 18点版已报）。DeepInfer 星标亲核 24273（18点版 24250，+23），pushed_at 仍为 2026-10-26T05:30:52Z，无代码更新。arXiv 亲查：10/30 00:00 UTC 批次已落地，本轮收录 FlatCake、GAAC、WAKMan、GAUSS 四篇新论文；2610.34440（MoE 投机解码）10/26 已报、Cloudflare/LMSYS 串话披露 10/26 已深读，均去重。Cerebras 上 Oracle、General Compute 融资为 10/27 已报旧稿，不重复。X 名单、Reddit、HN、机器之心与量子位窗口内均无新帖新文；Spotify 直查 Latent Space 最新单集仍为 10/27 的 Anthropic 那期。深读 1 篇：阿里 RTP-LLM P-D 分离生产实测。*</p></body></html>
