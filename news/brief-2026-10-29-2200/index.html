@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-30T05:06:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（22点版）</h1>
+<h2>头条</h2>
+<p><strong>SGLang 修了 PD 重启时&quot;草稿纸缩水&quot;的 bug</strong> PD 重启是 decode 请求被抢占、prefill 重算前缀的情形。 旧代码重启前会把最后一个输出 id 先弹出去。 弹出去的那段时间，客户端看到的完成 token 数会变小。 重发时 logprob 还会再推一遍给客户端。 这版改成保留最后一个输出 id。 prefill 采样出的 token 照例丢弃。decode 侧采样不受影响。 KV 大小不变，commit 时不重复推 logprob。 对你评估 PD 有用：这是 decode 侧状态机的坑。 来源：<a href="https://github.com/sgl-project/sglang/pull/47366">https://github.com/sgl-project/sglang/pull/47366</a></p>
+<h2>框架更新</h2>
+<p><strong>SGLang v0.5.23 的页面能打开了</strong> 20 点版报的 404，现在变成 200 了。 但正文只有一句&quot;Bump v0.5.23&quot;，说明还没写。 继续等正式 release notes。 来源：<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.23">https://github.com/sgl-project/sglang/releases/tag/v0.5.23</a></p>
+<p><strong>SGLang：MI300X 系上的 attention 提速</strong> gfx942 就是 MI300X/MI325X 那档卡。 AITER 的 FAv3 varlen kernel 扩展到这些卡。 FAv3 是 AMD 上优化过的注意力 kernel。 来源：<a href="https://github.com/sgl-project/sglang/pull/47062">https://github.com/sgl-project/sglang/pull/47062</a></p>
+<p><strong>SGLang：DSv4.1 的 dispatch 网格修了</strong> amax8_varlen 和 mega MoE 的预派发网格。 修在 1024 线程 SM 上的配置。 来源：<a href="https://github.com/sgl-project/sglang/pull/47149">https://github.com/sgl-project/sglang/pull/47149</a></p>
+<p><strong>TRT-LLM：Kimi K3 的 DSpark 解码修好了</strong> 今晚的 nightly dev 版装不上 Kimi K3。 两个地方断了：checkpoint 加载缺字段。DSpark 首步参数也对不上。 都是新改动打破了旧契约，紧急修复。 跑 Kimi-K3 的人，得等这个修复。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21261">https://github.com/NVIDIA/TensorRT-LLM/pull/21261</a></p>
+<p><strong>TRT-LLM：MoE 的 LoRA 支持原生 FP8 了</strong> 路由专家层的 FP8 E4M3 LoRA adapter。 adapter 权重省一半显存，MoE LoRA 更便宜了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/18555">https://github.com/NVIDIA/TensorRT-LLM/pull/18555</a></p>
+<p><strong>TRT-LLM：多模态 KV 事件带上 UUID 了</strong> V2 KV 事件协议里，多模态 token 的 UUID 会丢。 路由观察者认不出这是哪个请求的事件。 这版把 UUID 透传到底，多模态缓存可观测性补齐。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19529">https://github.com/NVIDIA/TensorRT-LLM/pull/19529</a></p>
+<p><strong>TRT-LLM：OpenEngine 的 gRPC 支持音频输入了</strong> 多模态入口又加一个：音频。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20655">https://github.com/NVIDIA/TensorRT-LLM/pull/20655</a></p>
+<p><strong>TRT-LLM：serve 默认 frontend 改成 8 个</strong> 这是个 BREAKING 变更。 单 frontend 时会自动回退。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19379">https://github.com/NVIDIA/TensorRT-LLM/pull/19379</a></p>
+<p><strong>FlashInfer 0.7.3 在路上了</strong> 刚合入了&quot;bump version to 0.7.3&quot;。 rc1 会从这条分支切出来。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7963">https://github.com/flashinfer-ai/flashinfer/pull/7963</a></p>
+<p><strong>FlashInfer：A4W4 优化对齐 A8W4</strong> 给 Rubin 的 megamoe 做性能优化。 W4A4 比 W8A4 压得更狠，kernel 也得跟上。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7913">https://github.com/flashinfer-ai/flashinfer/pull/7913</a></p>
+<p><strong>FlashInfer：prims-ts 的 attention 加宽了</strong> 还加了运行时 split-KV。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6925">https://github.com/flashinfer-ai/flashinfer/pull/6925</a></p>
+<p><strong>llama.cpp：OpenCL 上支持 q2_0 量化了</strong> 小改动，OpenCL 后端添一种量化格式。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31340">https://github.com/ggml-org/llama.cpp/pull/31340</a></p>
+<p><strong>版本全平</strong> vLLM 还是 0.32.0，SGLang 还是 0.5.22。 LMDeploy 还是 0.18.0，TGI 还是 v3.3.7。 llama.cpp 还是 v0.8.0，TRT-LLM 还是预发线。 FlashInfer 最新正式版还是 0.7.2.post1。0.7.3 还没发出来。 vLLM 窗口内只有 2 条 CI 合入，实质为零。 LMDeploy、TGI 窗口内零合入。 DeepInfer 星标 24301，比 20 点版加 28。代码没动。</p>
+<h2>新技术与论文</h2>
+<p>注：arXiv 本窗口零入库，下面两篇是 10/30 00:00 批次的补拾。</p>
+<p><strong>Raincheck：多轮多模态里，视觉预处理可以&quot;先欠着&quot;</strong> 多轮对话里，前面的图片问题一直在上下文里占位置。 每轮都把图片全量 prefill，首 token 等太久。 Raincheck 把多模态 prefill 推迟。先留 30% 的 token 顶上。 没算完的用 decode 时的空闲算力慢慢补上。 SGLang 实现，首轮 TTFT 最高降 24.1%。 decode 速度几乎不掉，TPOT 只涨不到 0.5%。 跟你的多模态资源分离方向直接对口。 原文：<a href="https://arxiv.org/abs/2610.39562">https://arxiv.org/abs/2610.39562</a></p>
+<p><strong>PDScope：MoE 在本地 CPU-GPU 节点上的跷跷板</strong> 显存不够，大部分 expert 只能躺在 CPU 内存里。 prefill 是算力瓶颈，想多往 GPU 里塞。 decode 是 PCIe 搬运瓶颈，想少塞点。 一个策略伺候不了两边，这是跷跷板。 这篇想打破它，跟 PD 解耦是同一条账。 原文：<a href="https://arxiv.org/abs/2610.39216">https://arxiv.org/abs/2610.39216</a></p>
+<h2>业内新闻</h2>
+<p><strong>美司法部盯上英伟达 129 亿收购 Hugging Face</strong> 路透 10/28 独家、CNBC 跟进确认。 问的是这桩交易对 AI 竞争的影响。 这是英伟达史上第二大并购。 来源：<a href="https://www.siliconreport.com/doj-asks-how-nvidia-s-12-9b-hugging-face-deal-affects-ai-competition">https://www.siliconreport.com/doj-asks-how-nvidia-s-12-9b-hugging-face-deal-affects-ai-competition</a></p>
+<p><strong>英伟达 30 亿美元入股 Meta，Vera Rubin 上 Oracle Cloud</strong> Meta 250 亿美元股权融资，英伟达认了 30 亿。 Vera Rubin NVL72 先在 Oracle Cloud 上线。再扩到多吉瓦级。 来源：<a href="https://theinference.org/article/nvidia-bought-3-billion-of-meta-s-25-billion-stock-sale-as-meta-expands-its-nvidia-orders">https://theinference.org/article/nvidia-bought-3-billion-of-meta-s-25-billion-stock-sale-as-meta-expands-its-nvidia-orders</a></p>
+<p><strong>GLM-5.3 自部署为啥要 8 卡不是 4 卡</strong> Medium 上的技术深潜，10/29 新的。 vLLM 里 GLM-5.3 有个特点。它的 KV cache 不随 TP 切分。 4 卡显存装不下长会话的 KV，只能 8 卡起步。 附了一个 69 行的自查脚本。 来源：<a href="https://medium.com/@chewloongnian/why-self-hosted-glm-5-3-needs-8-gpus-not-4-for-long-coding-sessions-b5b38fa3d143">https://medium.com/@chewloongnian/why-self-hosted-glm-5-3-needs-8-gpus-not-4-for-long-coding-sessions-b5b38fa3d143</a></p>
+<p><strong>NVIDIA 论坛实测：Qwen3.8-27B 在 DGX Spark 上跑 vLLM</strong> 38 tok/s，DFlash2 加持。 MTP 在并发下会反超，Ollama 默认开 MTP，对比容易失真。 来源：<a href="https://forums.developer.nvidia.com/t/qwen3-8-27b-on-one-dgx-spark-38-tok-s-with-vllm-dflash2-why-mtp-wins-under-load-and-why-your-ollama-comparison-is-probably-skewed/387338">https://forums.developer.nvidia.com/t/qwen3-8-27b-on-one-dgx-spark-38-tok-s-with-vllm-dflash2-why-mtp-wins-under-load-and-why-your-ollama-comparison-is-probably-skewed/387338</a></p>
+<h2>访谈与深度</h2>
+<p><strong>SGLang Dev Meeting 讲了 PD 的 RDMA 环形缓冲</strong> 今晚 18:00 PT 那场，Baseten 的 Alex Korte 主讲。 主题是&quot;用环形缓冲在主机内存上做 P-D 解耦（RDMA/EFA）&quot;。 正好是你的方向，但会已开完、没公开回放。 记录一下，等有没有回放放出。 来源：<a href="https://www.linkedin.com/company/sgl-project?trk=public_post-text">https://www.linkedin.com/company/sgl-project?trk=public_post-text</a></p>
+<p><strong>这轮没新料的</strong> X、Reddit、HN 窗口内无 serving 新帖。 机器之心、量子位 10/29 无 serving 专稿。 大V 名单、Spotify 播客窗口内无实质新内容。</p>
+<h2>值得深读</h2>
+<p>无。本轮宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/29 20:00 到 22:00 PDT。对应 UTC 是 10/30 03:00 到 05:00。GitHub Search API 按 merged 时间亲查：vLLM 2 条（全是 CI，实质 0）、SGLang 5 条（实质 3）、TRT-LLM 8 条（实质 5）、FlashInfer 12 条（实质 4，另有一批训练 kernel 合入）、llama.cpp 1 条、LMDeploy、TGI 零合入。版本全平：SGLang v0.5.23 tag 页 20 点版报 404、本轮已可打开但正文只有 Bump 一句；FlashInfer 0.7.3 刚打版本 bump、rc1 未出。DeepInfer 星标亲核 24301（20 点版 24273，加 28），pushed_at 仍为 10/26，无代码更新。arXiv 本窗口零入库；Raincheck、PDScope 是 10/30 00:00 批次的补拾，20 点版已扫过该批次、这 2 篇当时未收录，本轮首次报，无重复。DOJ/HF 反垄断、NVIDIA-Meta 30 亿、GLM-5.3 八卡、DGX Spark 实测为 10/29 当天新闻，非严格窗口内，已标注。SGLang Dev Meeting 10/29 18:00 PT 已开完无回放，只做记录。本轮无深读笔记。*</p></body></html>
