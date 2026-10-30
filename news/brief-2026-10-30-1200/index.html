@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月30日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-30"/>
+<meta name="doc-ts" content="2026-10-30T19:09:45"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-30（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-30（12点版）</h1>
+<p>12点版来了，这轮最大的事是万亿参数模型权重开放了。 Mistral Large 4昨天开放权重，代号Le Chonk。 1.05T 参数、只激活 52B，上下文 1M token。 FP8 版 1.06TB，NVFP4 版 610GB。 NVFP4 是英伟达的 4 位浮点格式。 SGLang 宣布首日支持，还第一个把它跑上 Vera Rubin。 Vera Rubin 是英伟达下一代 AI 芯片平台。 10/29 的 SGLang Dev Meeting 讲 PD 解耦。 主题是 Ring Buffers 搬运方案。 Baseten 的 Alex Korte 主讲，用主机内存做解耦搬运。 跟你正在评估的 PD 解耦方向直接对口。</p>
+<h2>头条</h2>
+<p><strong>万亿模型权重开放，serving 生态首日就跟上了</strong> 这是 Mistral 官方 10/29 的公告。 Le Chonk 是史上最大的开放权重模型。 自托管意味着推理 serving 生态马上要有新活干。 SGLang 第一时间宣布 Day-0 支持。 还是第一个把它跑上 Vera Rubin 的框架。 Dev Meeting 同一天还讲了 PD 解耦。 主题是 Ring Buffers 搬运。 搬运账本正是你评估 PD 时最关心的部分。 来源：<a href="https://mistral.ai/news/mistral-large-4-oss/">https://mistral.ai/news/mistral-large-4-oss/</a> 来源：<a href="https://www.linkedin.com/company/sgl-project">https://www.linkedin.com/company/sgl-project</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM #46370：MoE 部署加了断臂求生</strong> 容错框架以前只会 retry，默认所有 DP rank 都活着。 DP 是数据并行，把请求分摊到多卡跑。 EP 是专家并行，把 MoE 专家分摊到多卡跑。 现在某张卡彻底挂了，可以下发 scale-down 指令。 死的 rank 直接摘掉，专家重新排布，服务不整站停摆。 生产部署 MoE 的人，这个开关值得记住。 来源：<a href="https://github.com/vllm-project/vllm/pull/46370">https://github.com/vllm-project/vllm/pull/46370</a></p>
+<p><strong>vLLM #63886：DSpark 采样不再重复算</strong> DSpark 是 DeepSeek 自家的投机解码方案。 以前每个 rank 把全 batch 的草稿 logits 都算一遍。 算完只保留自己负责的那几份，剩下的全扔掉。 现在每个 rank 只跑自己那份请求的打草稿循环。 换句话说：以前每人抄全班作业再扔别人的。 现在只做自己那份，省的全是白算的算力。 来源：<a href="https://github.com/vllm-project/vllm/pull/63886">https://github.com/vllm-project/vllm/pull/63886</a></p>
+<p><strong>vLLM #63205：推测解码可以插自己的插件了</strong> Model Runner V2 现在支持自定义 speculator。 speculator 是推测解码里负责打草稿的小模块。 以前想换打草稿的算法，得改 vLLM 核心代码。 现在注册一个配置类，写上名字就能选上。 想自己折腾推测解码算法的人，这扇门开了。 来源：<a href="https://github.com/vllm-project/vllm/pull/63205">https://github.com/vllm-project/vllm/pull/63205</a></p>
+<p><strong>TRT-LLM #19646：专家排班多了逐层动态档</strong> EPLB 是专家并行负载均衡，给 MoE 专家排班的。 以前只有 offline 和 online 两种模式。 现在加了第三种：per-layer dynamic，逐层动态调。 用一行配置就能开启。 你在评估 EPLB，这个新档可以放进对比清单。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19646">https://github.com/NVIDIA/TensorRT-LLM/pull/19646</a></p>
+<p><strong>TRT-LLM #21042：第一时间接入 Muse Spark</strong> Muse Spark 是 Meta 新开的开放模型。 TRT-LLM 把解码器、视觉塔、音频编码器一次接全。 多模态输入处理和 checkpoint 加载也都备好了。 新模型支持信号：生态跟进速度很快。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21042">https://github.com/NVIDIA/TensorRT-LLM/pull/21042</a></p>
+<p><strong>TRT-LLM #21104：适配 V4.1 的工具调用</strong> V4.1 的 checkpoint 自带 encoder。 它用命名空间来定义工具。 TRT-LLM 现在按 checkpoint 自带的格式展开工具名。 不再硬套自己的扁平化规则。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21104">https://github.com/NVIDIA/TensorRT-LLM/pull/21104</a></p>
+<p><strong>SGLang 五笔：两个生产排障值得看</strong></p>
+<p>#47319 修了多节点 DP 下的负载查询接口。</p>
+<p>以前每个节点都返回 503，路由以为全网都没负载。 路由和自动扩缩容全看错了表，现在修了。</p>
+<p>#46937 修了 Anthropic 兼容接口的缓存污染。</p>
+<p>cache_salt 在校验时被默默丢掉，不同请求串了缓存。 现在 salt 原样透传，隔离回来了。 其余三笔：#47106 是 logprob 输出的性能小修。</p>
+<p>#47113 修 metrics 竞态，#46277 是视频生成解码六小修。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47319">https://github.com/sgl-project/sglang/pull/47319</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/46937">https://github.com/sgl-project/sglang/pull/46937</a></p>
+<p><strong>FlashInfer 两笔性能核</strong></p>
+<p>#8023：SM107 上 MXFP8 的 SwiGLU 融合 kernel 优化。</p>
+<p>SwiGLU 是大模型里常用的激活函数结构。 小单量走专用小灶，不用开大锅。</p>
+<p>#8018：B200 上小矩阵乘新增 4 个路由窗口。</p>
+<p>属于 B200 kernel 持续打磨系列。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8023">https://github.com/flashinfer-ai/flashinfer/pull/8023</a></p>
+<p><strong>llama.cpp #31341：OpenCL 初步支持 IQ1</strong> IQ1 是 1.x bit 的超低比特量化。 手机、核显、NPU 这类弱算力设备跑大模型更省了。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31341">https://github.com/ggml-org/llama.cpp/pull/31341</a></p>
+<p><strong>其余一句话带过</strong> LMDeploy、TGI 本轮零合入。</p>
+<p><strong>正式版全平</strong> vLLM 仍 v0.32.0，v0.33.0rc3 还没出。 rc2 的 tag 依然没有 release 页面。 SGLang 仍 v0.5.22，v0.5.23 还是裸 tag。 release notes 没写出来，正式复测继续等。 FlashInfer v0.7.3 在准备中，正在补 API 文档。 llama.cpp 仍 v0.8.0。 LMDeploy 仍 v0.18.0。 TGI 仍 v3.3.7，TRT-LLM 仍 v1.2.1。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标到了 24,471 个，10点版时 24,463。 两小时涨了 8 个，代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内零入库</strong> 结构性原因：新批次每天 00:00 UTC 才发。 下一批 10/31 00:00 UTC 还没到。</p>
+<h2>业内新闻</h2>
+<p><strong>Cohere 融资：目标 70 亿加元</strong> 加拿大独角兽 Cohere 宣布 E 轮融资首轮交割。 目标 70 亿加元，约 334 亿人民币。 英伟达等老股东跟投，还计划一年内并购两家 AI 公司。 推理服务商的弹药又多了，跟 serving 主线间接相关。 金额和领投细节以 Cohere 官方口径为准。 这条是媒体编译，供参考。 来源：<a href="https://k.sina.cn/article_7857201856_1d45362c001908t21q.html">https://k.sina.cn/article_7857201856_1d45362c001908t21q.html</a></p>
+<h2>访谈与深度</h2>
+<p><strong>SGLang Dev Meeting 讲 PD 解耦</strong> 10/29 18:00 PT 那场。 Baseten 的 Alex Korte 主讲。 主题是用主机内存做解耦服务的 Ring Buffers。 RDMA 是网卡直通内存的高速传输技术。 EFA 是 AWS 的弹性网卡，干的也是高速互联。 这正是 PD 解耦的搬运账本问题。 跟你评估直接相关，回放值得找来看。 入口在 SGLang 官方 LinkedIn。 来源：<a href="https://www.linkedin.com/company/sgl-project">https://www.linkedin.com/company/sgl-project</a></p>
+<p><strong>这轮大V和播客都安静</strong> X 上的几个关键人物都没新帖。 lmsysorg、karpathy、jimfan、swyx 都安静。 Reddit 两个版块都零新帖。 r/LocalLLaMA、r/MachineLearning 都安静。 HN 无新 serving 帖子。 量子位、机器之心无推理基础设施新稿。 Spotify 上 Latent Space 无新单集。 最新仍是 10/27 那期。 Simon Willison 最新几篇都是 agents 话题。 serving 相关的一篇没有。</p>
+<h2>值得深读</h2>
+<p>这轮没有标深读。 Mistral Large 4 的公告是模型发布，不是技术方法。 框架侧都是合入和修复，够不上深读标准。 宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/30 10:00 到 12:00 PDT，对应 UTC 10/30 17:00 到 19:00（截查约 19:00 UTC）。GitHub Search API 按 merged 时间亲查：7 仓库共 22 个 merged PR，其中 8 个为文档/测试/内部重命名杂项（vLLM 3、FlashInfer 4、TRT-LLM 1）已略去；LMDeploy、TGI 零合入。实质：vLLM 3（#46370、#63886、#63205）、SGLang 5（#47319、#47113、#47106、#46937、#46277）、FlashInfer 2（#8023、#8018）、TRT-LLM 3（#21104、#21042、#19646）、llama.cpp 1（#31341）。正式版全平：vLLM 仍 v0.32.0（v0.33.0rc3 未出，rc2 tag 仍无 release 页面）、SGLang 仍 v0.5.22（v0.5.23 仍裸 tag、无 release notes）、llama.cpp 仍 v0.8.0、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7、FlashInfer 仍 v0.7.2.post1（v0.7.3 在准备）、TRT-LLM 仍 v1.2.1。DeepInfer 星标亲核 24,471（10点版 24,463，+8），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：abs:&quot;LLM inference&quot; 最新仍是 10/29 17:18 UTC 那篇，本窗口零入库（结构性）。广域：Mistral Large 4 权重开放（10/29 官方公告，FP8 1.06TB / NVFP4 610GB，角度取 serving 生态首日跟进）、SGLang 官方 LinkedIn（Day-0 支持 + 首上 Vera Rubin + 10/29 Dev Meeting PD Ring Buffers）、Cohere E 轮融资（新浪/智东西编译，金额以官方为准）；HN/Reddit/X 关键人物/中文 AI 媒体/播客/YouTube 均无 serving 新料；Simon Willison 无 serving 内容；Spotify 已核验无新单集。陷阱已排除：SGLang vs DeepInfer 对比博客（10/24 旧文）、Inception Mercury 3（10/19）、&quot;AMD 10/29 收购 Taalas&quot;（2026-08-06 旧闻）、新浪科技面壁智能 ForgeKernel（10点版已报）、SGLang Trainium 插件 Beta（10/22，时效弱）。本轮无深读。*</p></body></html>
