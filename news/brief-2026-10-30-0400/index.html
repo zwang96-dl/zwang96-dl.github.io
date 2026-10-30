@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月30日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-30"/>
+<meta name="doc-ts" content="2026-10-30T10:59:12"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-30（4点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-30（4点版）</h1>
+<p>4点版来了，深夜这轮比2点版热闹点。 头条跟你的 PD 评估直接相关。 本期不标深读。</p>
+<h2>头条</h2>
+<p><strong>vLLM 的 Mooncake 搬运线会跨 TP 拼车了</strong> Mooncake 是 vLLM 里搬 KV 的仓库。 KV 就是解码用的草稿纸。 PD 就是 prefill 和 decode 分开跑那套流水线。 TP 是张量并行，多卡分摊模型。 以前跨 TP 共享只支持纯 attention 模型。 这轮 hybrid 模型也打通了。 hybrid 就是 attention 加 Mamba 的混搭。 只要实例的 TP 尺寸能整除公共尺寸。 不同 TP 的实例就能共享同一份 KV。 Mamba 的循环状态也一起共享。 PD 部署里 P 和 D 常配不同并行度。 这下搬运更灵活，不用迁就统一 TP。 来源：<a href="https://github.com/vllm-project/vllm/pull/54307">https://github.com/vllm-project/vllm/pull/54307</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM 滚出 v0.33.0rc2</strong> tag 是 2 点 10 分打的，落在窗口内。 rc 就是候选版，正式版前的试水。 rc0 在 10 月 26 日，rc1 在 10 月 28 日。 两天一版，发布节奏明显加速。 这次只打了 tag，release notes 还没写。 来源：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.33.0rc2">https://github.com/vllm-project/vllm/releases/tag/v0.33.0rc2</a></p>
+<p><strong>多模态图片缓存的驱逐坑填上了</strong></p>
+<p>#64495 修的是多模态图片缓存。</p>
+<p>场景：请求里的图太多，超过缓存容量。 以前会直接抛断言错误崩掉。 现在先把要用的图片引用留住。 缓存淘汰时不会误伤后面的命中。 跟你的多模态推理优化直接相关。 来源：<a href="https://github.com/vllm-project/vllm/pull/64495">https://github.com/vllm-project/vllm/pull/64495</a></p>
+<p><strong>LMDeploy 给 hybrid 模型加了存档点</strong></p>
+<p>#5076，针对 GLM-5.3-Flash 这类 hybrid 模型。</p>
+<p>新策略叫 save-first：prompt 一结束就存。 存的是 decode 期的 prefix 检查点。 prefix 就是能复用的公共前缀。 多轮对话里，对齐或多模态边界常挡住存档。 下一轮就得重算 prompt 尾巴。 现在少重算，本地和 Mooncake 两路都支持。 来源：<a href="https://github.com/InternLM/lmdeploy/pull/5076">https://github.com/InternLM/lmdeploy/pull/5076</a></p>
+<p><strong>SGLang 的投机解码上了昇腾 950</strong></p>
+<p>#39947，DSpark 开始支持昇腾 950。</p>
+<p>DSpark 是 SGLang 的投机解码实现。 投机解码就是先让小模型打草稿再让大模型改。 之前只支持 CUDA 和老 NPU。 新卡要换稀疏注意力算子。 权重加载和数值兼容也得重做。 你在 AMD 卡上评估，这条先知道有这事。 来源：<a href="https://github.com/sgl-project/sglang/pull/39947">https://github.com/sgl-project/sglang/pull/39947</a></p>
+<p><strong>TRT-LLM 给 DSA 补了参考实现</strong></p>
+<p>#16309，纯 PyTorch 写的 DSA 参考实现。</p>
+<p>DSA 是动态稀疏注意力，DeepSeek 稀疏 MLA 那套。 跟 TRT 后端同契约，方便对照验证。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/16309">https://github.com/NVIDIA/TensorRT-LLM/pull/16309</a></p>
+<p><strong>TRT-LLM 的缓存复用细化到 SSM 层</strong></p>
+<p>#21088，KV 缓存管理器的复用策略升级。</p>
+<p>SSM 就是 Mamba 那类循环状态。 以前只管 attention 层，循环状态一刀切。 现在 attention 和 SSM 能各定各的策略。 prefix 复用更细，hybrid 模型受益。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21088">https://github.com/NVIDIA/TensorRT-LLM/pull/21088</a></p>
+<p><strong>FlashInfer 8 条，清一色性能核</strong></p>
+<p>#7992 给 Kimi-K3 的 FP8 投影做融合解码。</p>
+<p>#7994 给 sm_107a 的 NVFP4 和 FP8 提速。</p>
+<p>NVFP4 是 4 位浮点量化。</p>
+<p>#7991 给 B200 的变长注意力做双流调度。</p>
+<p>#7995、#7988、#7989、#7998 是解码和采样的优化。</p>
+<p>#7983 是实验性的：Qwen 3.8 的新索引器。</p>
+<p>长 prompt 切段后走 serving 缓存那套。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7992">https://github.com/flashinfer-ai/flashinfer/pull/7992</a></p>
+<p><strong>vLLM 其余一句话带过</strong></p>
+<p>#62613 给 Mamba 组发自描述 offload 事件。</p>
+<p>懂 KV 的路由器能看清前缀复用位置。 Rust 前端四笔：日志、路径、token 统计对齐。 剩下是 CI 分片和 SleepMode 杂活。 来源：<a href="https://github.com/vllm-project/vllm/pull/62613">https://github.com/vllm-project/vllm/pull/62613</a></p>
+<p><strong>llama.cpp 和 TGI</strong> llama.cpp 5 条全是 CI 和构建杂活。 TGI 本轮零合入。 来源：<a href="https://github.com/ggml-org/llama.cpp">https://github.com/ggml-org/llama.cpp</a></p>
+<p><strong>正式版全平，rc 倒是在跑</strong> vLLM 正式版还是 0.32.0。 v0.33.0rc2 只是候选版 tag。 SGLang 正式版还是 0.5.22。 0.5.23 的 release notes 还是没发。 tag 在那，API 查还是 404。 正式复测继续等。 来源：<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.23">https://github.com/sgl-project/sglang/releases/tag/v0.5.23</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标到了 24,409 个。 2点版时是 24,383 个。 两小时涨了 26 个。 代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内零入库</strong> 结构性原因：新批次每天 00:00 UTC 才发。 上一批 20点版和22点版已扫过。 下一批 10/31 00:00 UTC 还没到。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内无实质新稿</strong> 深夜窗口，中文媒体和业内都没新料。 vLLM 的 rc2 已在框架更新里报过。</p>
+<h2>访谈与深度</h2>
+<p><strong>大V和播客这轮都安静</strong> X、Reddit、HN 都没 serving 相关新帖。 Latent Space 最新还是 10/27 那期。 Simon Willison 和 The Batch 也没新东西。</p>
+<h2>值得深读</h2>
+<p>无。这轮都是框架合入，宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/30 02:00 到 04:00 PDT。对应 UTC 是 10/30 09:00 到 11:00。GitHub Search API 按 merged 时间亲查：vLLM 合入 10 条实质 5 到 6 条、SGLang 合入 3 条实质 2 条、TRT-LLM 合入 8 条实质 3 条、FlashInfer 合入 8 条实质 7 到 8 条、LMDeploy 合入 1 条实质 1 条、llama.cpp 合入 5 条实质 0 到 1 条；TGI 零合入。vLLM v0.33.0rc2 的 tag 在 02:10 PDT 打出（commit 61cbf54，2026-10-30T09:10:43Z），rc0/rc1 分别在 10/26 和 10/28，发布节奏两天一版。正式版全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7、llama.cpp 仍 v0.8.0、FlashInfer 仍 v0.7.2.post1。SGLang v0.5.23 的 release API 仍 404，notes 未写。DeepInfer 星标亲核 24,409（2点版 24,383，+26），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 本窗口零入库（结构性：00:00 UTC 日更批次已被 20点版和22点版扫过，下一批 10/31 00:00 UTC 未到）。广域（X/Reddit/HN/中文媒体/播客/大V）：窗口内唯一实质新料是 vLLM v0.33.0rc2；SGLang v0.5.23 窗口内无变化（tag 和 PyPI 包都是 10/29 窗口外的）；其余渠道无 serving 实质新料。本轮无深读笔记。*</p></body></html>
