@@ -1,0 +1,83 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月29日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-29"/>
+<meta name="doc-ts" content="2026-10-30T01:11:48"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-29（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-29（18点版）</h1>
+<h2>头条</h2>
+<p><strong>1. SGLang v0.5.23 打 tag 了</strong> 等了好几期的新版本，17:13 切出来了。 v0.5.23 的 tag 指向发布分支头。 打包人是 Baizhou Zhang。 release 说明页还没发布，更新日志暂时看不到。 划重点：统一 KV 池的验证数字，说好等它再复测，现在可以排上了。</p>
+<p><strong>2. vLLM 修了个 PD 搬运的静默坑（#64582）</strong> PD 搬运时，Mamba 模型的状态会被悄悄传错，全程不报错。 NIXL 是 PD 解耦里搬运 KV 的高速传输后端。 翻车条件是把 KV 布局设成 BLHNC。 对应的环境变量是 VLLM_KV_CACHE_LAYOUT。 Qwen3-Next 和 Nemotron-H 这两类混合模型会翻车。 GDN 是前者用的循环注意力。 Mamba2 是后者用的状态空间结构。 默认布局不受影响，MLA 系的 Kimi-Linear 也没事。 作者补了 14 组真机布局测试，逐字节比对才抓到它。 这条进你的静默算错清单。 PD 加 Mamba 加非默认布局，这个组合要多留个心眼。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM（4 条）</strong> 头条的 #64582 已讲。</p>
+<p>#64535：GLM-4.7 的工具参数流式解析修了一处。</p>
+<p>#64544：Mistral Large 4 的 ROCm 部署文档，含 MI355X 上 TP4 启动示例。</p>
+<p>#64342：CI 修 mypy，属于基建。</p>
+<p><strong>SGLang（8 条）</strong> 这轮 8 条，性能向居多。</p>
+<p>#44457：k_scale 是 1.0 时，MLA 的 K 重缩放直接跳过，省一次 triton 核。</p>
+<p>#47328：deep_select 加 3-CTA 档，分页 top-k 索引更快。</p>
+<p>#46024：mHC 的 MXFP8 行按 batch 切分，padding 的 scale 在核内清零。</p>
+<p>#46456：paged-experts 精确 pin 显存大小。</p>
+<p>#46601：扩散方向，LingBot 的 QKV 共享加因果 RoPE。</p>
+<p>#43896 与 #47338：调度器和 detokenizer 重构。</p>
+<p>#47300：TensorMatcher 的设备与类型修正。</p>
+<p><strong>TensorRT-LLM（3 条）</strong></p>
+<p>#20764：Qwen3.5 的稠密视觉语言模型过了 MX 量化认证，多模态相关。</p>
+<p>#21219：GPU 生命周期启动预算放宽。</p>
+<p>#20331：测试基建。</p>
+<p><strong>FlashInfer（15 条）</strong> cake 性能批 12 条，覆盖 Rubin Mega mHC。 GB300 的 NVFP4 MLA decode 也在里面。 MiniMax H3 的 SM120 FP8 也是。</p>
+<p>#7908：moe_ep 接上 Blackwell 的 MXFP4/MXFP8 标准支持。</p>
+<p>#3859：MTP 的 q_len=2 的 decode 改走 XQA。</p>
+<p>#6282：FP4/MXFP8 的 CUTLASS GEMM 不再重复初始化。</p>
+<p><strong>llama.cpp（1 条）</strong></p>
+<p>#31374：prompt 里出现推理结束标签，推理预算就停。</p>
+<p><strong>LMDeploy</strong> 窗口内零合入。</p>
+<p>版本：vLLM 0.32.0、LMDeploy 0.18.0 全平。 FlashInfer 还是 0.7.2.post1。 TRT-LLM 还是 v1.4.0rc2 预发布。 SGLang 打出 v0.5.23 的 tag。 release notes 还没发。 DeepInfer 星标 24250（+16），代码没动。</p>
+<h2>新技术与论文</h2>
+<p><strong>DISCO：投机解码的通信减肥</strong> 端侧和服务器协同做投机解码，最大的开销是每步传全词表的概率分布。 DISCO 的办法是在服务器侧也放一份小的 draft 模型。 校验时只传 token 编号和几个标量概率，分布在本地算。 数学上目标分布严格不变，加速不打折。 类比：以前每步都要复印整本词典传过去，现在只传页码。 跟 2点版的 sharded accept 是同一类思路。 提交于 10/25，arXiv 索引延迟到今天才抓到，算补报。 原文：<a href="http://arxiv.org/abs/2610.35957v1">http://arxiv.org/abs/2610.35957v1</a></p>
+<h2>业内新闻</h2>
+<p>这轮没有新的业内新闻。 Mistral Large 4 是 16点版报过的。</p>
+<h2>访谈与深度</h2>
+<p>大V、Reddit、HN、中文媒体、播客这轮都没新料。 Latent Space 最新还是 10/27 那期。</p>
+<h2>值得深读</h2>
+<p>本期不标深读。</p>
+<p>#64582 是单 PR 修复，口径正文已讲清。</p>
+<p>DISCO 跟你的 PD 解耦主线关系不算直接。</p>
+<p>*去重说明：本轮窗口是 10/29 16:00 到 18:00 PDT。对应 UTC 是 10/29 23:00 到 10/30 01:00。框架经 GitHub API 按 merged 时间亲查：vLLM 4 条、SGLang 8 条、TensorRT-LLM 3 条、FlashInfer 15 条、llama.cpp 1 条，LMDeploy 为零。版本：vLLM 仍是 v0.32.0、LMDeploy 仍是 v0.18.0、FlashInfer 仍是 v0.7.2.post1、TensorRT-LLM 仍是 v1.4.0rc2 预发布；SGLang v0.5.23 的 tag 于 17:13 PDT 打出（tagger 时间 00:13:59Z，经 git ref 亲核），release 说明页尚未发布。llama.cpp 每日快照按惯例不报。DeepInfer 星标亲核 24250（16点版 24234，+16），pushed_at 仍为 2026-10-26T05:30:52Z，无代码更新。arXiv 经 API 亲查：本轮抓到的是 10/27 提交、00:00 UTC 公告的那批（索引延迟约 22 小时），其中 Morph、MCF、HiLO、Waypoint 往期已报，DISCO（2610.35957）为本期补报，EdgePace 为端侧调度、与主线关系不大未收录。X 名单、Reddit、HN、机器之心与量子位窗口内均无新帖新文；Spotify 直查 Latent Space 最新单集仍为 10/27 的 Anthropic 那期（10点版已报）。本期无深读。*</p></body></html>
