@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月30日 06:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-30"/>
+<meta name="doc-ts" content="2026-10-30T13:01:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-30（6点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-30（6点版）</h1>
+<p>6点版来了，这轮是 AMD 卡的好消息。 vLLM 在 MI325X 上把 Kimi-K3 启动压到 3 分半。 本期不标深读。</p>
+<h2>头条</h2>
+<p><strong>MI325X 上 Kimi-K3 启动从 22 分钟压到 3 分半</strong> vLLM #64004，修的是模型启动时的权重量化转换。 MXFP4 是 4 位浮点量化格式，Kimi-K3 的权重用的它。 转成 int4 后，老流程单机 8 卡要跑 19 分钟。 现在 25 秒搞定，整机启动从 22.5 分钟降到 3.5 分钟。 转换后的权重字节完全一样，精度不受影响。 实测是 8 张 MI325X，ROCm 10.0。 你在 AMD 卡上评估，重启 serving 的账本可以直接抄。 来源：<a href="https://github.com/vllm-project/vllm/pull/64004">https://github.com/vllm-project/vllm/pull/64004</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM 修了 KV 搬运的事件顺序坑</strong> 这是 #63249。KV 就是解码用的草稿纸。 搬运时父块和子块的事件顺序可能乱。 懂 KV 的路由器会漏掉子块。 现在父块一定排在子块前面。 来源：<a href="https://github.com/vllm-project/vllm/pull/63249">https://github.com/vllm-project/vllm/pull/63249</a></p>
+<p><strong>vLLM 修了 HiSparse 的调度器死锁</strong> 这是 #62979。HiSparse 是分层搬运 KV 的方案。 场景：两个搬运任务互相占着内存页。 谁都不让步，调度器永远卡住。 现在入学时就把要用的页先预留。 来源：<a href="https://github.com/vllm-project/vllm/pull/62979">https://github.com/vllm-project/vllm/pull/62979</a></p>
+<p><strong>SGLang 的确定性模式查得更严了</strong> 这是 #44438。deterministic 就是结果可复现那档。 以前只检查总的 attention 后端开关。 prefill 和 decode 各用各的后端时，漏查了。 现在两个阶段的后端都要过一遍。 举例：MI350X 上 AITER 的 decode 核不在白名单里。 以前能悄悄跑过，现在会告警。 来源：<a href="https://github.com/sgl-project/sglang/pull/44438">https://github.com/sgl-project/sglang/pull/44438</a></p>
+<p><strong>TRT-LLM 的 KV 指标不再张冠李戴</strong> 这是 #21131。attention-DP 是注意力做数据并行。 以前各 rank 的 KV 指标全抄 rank 0 的。 监控看的就是一本糊涂账。 现在 28 类指标都加了 dp_rank 标签。 每个 rank 的账分开记，复用和 miss 分得清。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21131">https://github.com/NVIDIA/TensorRT-LLM/pull/21131</a></p>
+<p><strong>TRT-LLM 修了 Kimi-K3 的工具调用</strong> 这是 #21072。Responses 接口的 detokenize 对齐了。 detokenize 是把词元转回文字那步。 以前特殊 token 被丢掉还加了空格。 Kimi-K3 的工具解析器认不出来。 工具调用全部失败。现在修好了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21072">https://github.com/NVIDIA/TensorRT-LLM/pull/21072</a></p>
+<p><strong>vLLM 的 Rust 前端补了个小功能</strong> 这是 #64526。支持 return_prompt_text。 跟 Python 前端对齐，返回模板渲染后的 prompt。 来源：<a href="https://github.com/vllm-project/vllm/pull/64526">https://github.com/vllm-project/vllm/pull/64526</a></p>
+<p><strong>TRT-LLM 把 Kimi-K3 建模拆成独立库</strong> 这是 #21200。纯内部重构。 K3 的 CUDA 核和绑定单独打包。 跟主库解耦，加载走标准流程。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21200">https://github.com/NVIDIA/TensorRT-LLM/pull/21200</a></p>
+<p><strong>其余一句话带过</strong> SGLang #44725：MiniMax H3 的去噪允许外部平台。 vLLM #60218：硬件无关层注册公开给外部插件。 SGLang #47464：cookbook 文档同步 InferenceX 主线。 来源：<a href="https://github.com/sgl-project/sglang/pull/44725">https://github.com/sgl-project/sglang/pull/44725</a></p>
+<p><strong>正式版全平</strong> vLLM 正式版还是 0.32.0。 SGLang 正式版还是 0.5.22。 v0.5.23 的说明文档还没写出来。 正式复测继续等。 来源：<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.23">https://github.com/sgl-project/sglang/releases/tag/v0.5.23</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标到了 24,421 个。 4点版时是 24,409 个。 两小时涨了 12 个。 代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内零入库</strong> 结构性原因：新批次每天 00:00 UTC 才发。 10/30 的批次 20点版和22点版已扫过。 下一批 10/31 00:00 UTC 还没到。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内无实质新稿</strong> 广域五路亲查：HN 零命中。 新闻搜索、Reddit、Simon Willison、Latent Space。 都没 serving 相关的实质新料。</p>
+<h2>访谈与深度</h2>
+<p><strong>大V和播客这轮都安静</strong> Simon Willison 博客 10/30 无新帖。 Latent Space 最新还是 10/27 那期。 Spotify connector 这轮没走通，走公开 feed 交叉确认。</p>
+<h2>值得深读</h2>
+<p>无。这轮都是框架合入，宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/30 04:00 到 06:00 PDT。对应 UTC 是 10/30 11:00 到 13:00。GitHub Search API 按 merged 时间亲查：vLLM 合入 5 条、SGLang 合入 3 条、TRT-LLM 合入 4 条、FlashInfer 合入 1 条（纯 benchmark 表格，略过）；LMDeploy、llama.cpp、TGI 零合入。正式版全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7、llama.cpp 仍 v0.8.0、FlashInfer 仍 v0.7.2.post1、TRT-LLM 最新正式版 v1.2.1。DeepInfer 星标亲核 24,421（4点版 24,409，+12），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：最新仍是 10/29 17:18 UTC 那篇（10/30 批次已扫过），本窗口零入库。广域（子代理并行亲查）：HN Algolia 窗口内 vLLM/SGLang/inference 等 9 组关键词全部零命中；news vertical 无 10/30 新 serving 稿；Reddit 近 24 小时无 serving 帖；Simon Willison 10/30 无新帖；Latent Space 最新单集仍是 10/27。腾讯阿里 Hy4/Qwen4 模型新闻（窗口内但属模型发布，非 serving，未收）。两条窗口外候选未收：aiweekly 的 TAO 论文报道（10/29 发表，今日各期未报）和野村/Together AI 中文报道（10/29 23:12 PDT，今日各期未报），主代理定夺是否补。本轮无深读笔记。*</p></body></html>
