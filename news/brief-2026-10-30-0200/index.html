@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月30日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-30"/>
+<meta name="doc-ts" content="2026-10-30T09:01:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-30（2点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-30（2点版）</h1>
+<p>2点版来了，深夜这轮挺安静。 这轮没出大新闻，头条就挑最贴你方向的一条。 本期不标深读。</p>
+<h2>头条</h2>
+<p><strong>vLLM 的 Rust 前端补上了 PD 搬运账本</strong> PD 就是 prefill/decode 解耦那套分工流水线。 UMBP 是 vLLM 里搬 KV 的连接器。 KV 就是解码用的草稿纸。 这次 Rust 前端把 UMBP 的传输指标导出来了。 跟 Python 侧对齐，搬了多少、丢了多少都有数。 你评估 PD 的时候，这类指标就是账本。 不过只是指标对齐，不是新功能。 来源：<a href="https://github.com/vllm-project/vllm/pull/64512">https://github.com/vllm-project/vllm/pull/64512</a></p>
+<h2>框架更新</h2>
+<p><strong>正式版全平</strong> vLLM 还是 0.32.0。 SGLang 还是 0.5.22。 LMDeploy 还是 0.18.0。 TGI 还是 v3.3.7。 llama.cpp 还是 v0.8.0。 FlashInfer 正式版还是 0.7.2.post1。 v0.5.23 的 tag 能打开了。 但 release notes 还是空的。 文档安装版已经升到 0.5.23。 正式版应该快了，继续等。 来源：<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.23">https://github.com/sgl-project/sglang/releases/tag/v0.5.23</a></p>
+<p><strong>vLLM：Rust 前端开始管数据并行</strong> 三笔连发，都是 DP 负载均衡那套。 DP 就是数据并行，多卡分摊请求。</p>
+<p>#64451 支持混合和外部 DP 负载均衡。</p>
+<p>#64450 让握手 owner 负责一段 DP rank。</p>
+<p>#64449 修了协同 DP 初始化的会合消息。</p>
+<p>背景：vLLM 在把 Python 前端往 Rust 迁。 DP 相关能力也在一个个搬过去。 来源：<a href="https://github.com/vllm-project/vllm/pull/64451">https://github.com/vllm-project/vllm/pull/64451</a></p>
+<p><strong>vLLM 其余一句话带过</strong> MoE prefill 的 tile 调整了。 1024 token 以上，tile 改用 32 行。 NVFP4 量化核加了个尺寸开关。 generate 响应信封跟 Python 对齐。 剩下是 CI 分片、XPU、编译缓存等杂活。 来源：<a href="https://github.com/vllm-project/vllm/pull/64467">https://github.com/vllm-project/vllm/pull/64467</a></p>
+<p><strong>SGLang：解码侧的拆词器提速两笔</strong> detokenizer 就是把 token 翻回文字的部件。</p>
+<p>#47415 把每步输出 id 压成一列发。</p>
+<p>行偏移另算，通信量小了。</p>
+<p>#47260 让每请求的解码输入只发一次。</p>
+<p>两笔都是给 decode 减负。 来源：<a href="https://github.com/sgl-project/sglang/pull/47415">https://github.com/sgl-project/sglang/pull/47415</a></p>
+<p><strong>SGLang 其余一句话带过</strong></p>
+<p>#47381 修了个调度器小 bug。</p>
+<p>被中止的 leader，它的 beam 组现在能回收。</p>
+<p>#47419 把文档安装版升到 0.5.23。</p>
+<p>剩下是 CI、测试、docker 镜像和文档。 来源：<a href="https://github.com/sgl-project/sglang/pull/47381">https://github.com/sgl-project/sglang/pull/47381</a></p>
+<p><strong>TRT-LLM 3 条实质</strong></p>
+<p>#21041 是个 BREAKING。</p>
+<p>删了旧的 TensorRT 后端兼容层。 升级前先看迁移说明。</p>
+<p>#21105 让 Mamba2 的 MTP 更新少搬整池 SSM。</p>
+<p>#21268 给 beam search 减客户端开销。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21041">https://github.com/NVIDIA/TensorRT-LLM/pull/21041</a></p>
+<p><strong>FlashInfer 5 条，全是性能核</strong> cake 系列内核调优，清一色 perf。</p>
+<p>#7979 让 Kimi-K3 的 LatentMoE 解码尾更快。</p>
+<p>#7984 给稀疏 MLA 的头排了个序。</p>
+<p>#7978 给 B200 做了 BF16 的 KDA prefill 构建。</p>
+<p>#7985 和 #7975 是卷积和 MoE GEMM 的小优化。</p>
+<p>KDA 和 cake 都是 FlashInfer 自家的内核系列。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7979">https://github.com/flashinfer-ai/flashinfer/pull/7979</a></p>
+<p><strong>llama.cpp 3 条</strong></p>
+<p>#31073 把 KV-cache 的旋转常数留在 GPU 上。</p>
+<p>少一次搬运，KV 优化的老套路。</p>
+<p>#31368 给 ubatch 快照加了回滚保护。</p>
+<p>#31394 调了 Gemma 的 embedding 顺序。</p>
+<p>绑权重前先建 token embedding。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31073">https://github.com/ggml-org/llama.cpp/pull/31073</a></p>
+<p><strong>LMDeploy 和 TGI</strong> LMDeploy 只有一笔：多模态 VL 处理器配置读 utf-8。 TGI 本轮零合入。 来源：<a href="https://github.com/InternLM/lmdeploy/pull/5058">https://github.com/InternLM/lmdeploy/pull/5058</a></p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标到了 24,383 个。 0点版时是 24,350 个。 两小时涨了 33 个。 代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内零入库</strong> 查过关键词空间，最新还是 10/29 15:42 UTC。 属 10/30 00:00 批次，20 点版和 22 点版已扫过。 下一批 10/31 00:00 UTC 还没到。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内无实质新稿</strong> 深夜窗口，中文媒体和业内都没新料。 Mistral Large 4 是 16 点版报过的，不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>大V和播客这轮都安静</strong> X、Reddit、HN 都没 serving 相关新帖。 Latent Space 最新还是 10/27 那期。 Simon Willison 也没新东西。 The Batch 本周新刊还没出。</p>
+<h2>值得深读</h2>
+<p>无。这轮都是常规合入，宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/30 00:00 到 02:00 PDT。对应 UTC 是 10/30 07:00 到 09:00。GitHub Search API 按 merged 时间亲查：vLLM 合入 25 条实质 8 条、SGLang 合入 10 条实质 4 条、TRT-LLM 合入 5 条实质 3 条、FlashInfer 合入 5 条实质 5 条、LMDeploy 合入 2 条实质 1 条、llama.cpp 合入 3 条实质 2 到 3 条；TGI 零合入。正式版全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7、llama.cpp 仍 v0.8.0、FlashInfer 仍 v0.7.2.post1。SGLang v0.5.23 的 tag 存在，release API 仍 404，release notes 未写；文档安装版已 bump 到 0.5.23，正式版临近。DeepInfer 星标亲核 24,383（0点版 24,350，+33），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 关键词空间最新 2026-10-29T15:42:05Z（属 10/30 00:00 UTC 批次，已被 20 点版和 22 点版扫过），本窗口零入库；下一批 10/31 00:00 UTC 未到。广域（X、Reddit、HN、中文媒体、播客、大V）窗口内无 serving 实质新料；Mistral Large 4 已在 16 点版报过，不重复。本轮无深读笔记。*</p></body></html>
