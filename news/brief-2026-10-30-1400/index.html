@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月30日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-30"/>
+<meta name="doc-ts" content="2026-10-30T21:19:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-30（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-30（14点版）</h1>
+<p>14点版来了，这轮最硬的是一组实测数字。 OpenRouter 重写了供应商路由算法。 2400 万真实请求跑下来，首 token p50 快了 16.9%。 429 限流错误少了 46%，成本只涨 6%。 另一篇 LMSYS 博客跟你的 AMD 线直接相关。 他们在 MI355X 上用 SGLang 跑 agentic RL。 KV 缓存的账算得很细，值得你看一眼。</p>
+<h2>头条</h2>
+<p><strong>OpenRouter 重写路由，不再唯价格论</strong> OpenRouter 是个模型 API 聚合平台。 以前选供应商只看谁便宜。 现在算的是真实路由成本。 价格、排队等待、重试期望全算进去。 还保持缓存粘性，热缓存的请求不乱跳。 2400 万请求实测：首 token p50 快 16.9%。 吞吐涨 16.3%，429 错误少 46%。 代价是成本涨 6%，换来稳定性大涨。 你在搭 serving 的路由层，这套算法值得抄。 来源：<a href="https://openrouter.ai/blog/announcements/how-we-rebuilt-provider-routing/">https://openrouter.ai/blog/announcements/how-we-rebuilt-provider-routing/</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM #57770：DSpark 打草稿又省了一笔</strong> DSpark 是 DeepSeek 自家的投机解码方案。 投机解码是先让小模块打草稿、大模型改。 12点版报过它消掉了重复计算。 这轮继续抠：贪心打草稿的 argmax 换了。 以前全词表 torch.argmax 一把梭。 现在换成两段式 Triton 归约。 每个 decode 步要连选 5 次草稿。 省的算力直接翻 5 倍。 来源：<a href="https://github.com/vllm-project/vllm/pull/57770">https://github.com/vllm-project/vllm/pull/57770</a></p>
+<p><strong>vLLM #63761：Qwen3.5 注意力修了个溢出</strong> Qwen3.5 的 prefill 路径上有个 int32 溢出。 Triton 核里 token 索引乘行步长，爆了上限。 长上下文跑 Qwen3.5 的人，这个修复对你有用。 来源：<a href="https://github.com/vllm-project/vllm/pull/63761">https://github.com/vllm-project/vllm/pull/63761</a></p>
+<p><strong>SGLang #47445：多模态 IPC 的精度保住了</strong> IPC 是进程间通信，SGLang 内部传数据用的。 msgpack 是一种序列化格式，比 pickle 快。 切到 msgpack 后，多模态 payload 会丢精度。 dtype 来回转一圈就对不上了。 hidden states 和权重更新也一样。 现在修了，来回转不再丢精度。 你在做多模态推理，这个修复跟你直接相关。 来源：<a href="https://github.com/sgl-project/sglang/pull/47445">https://github.com/sgl-project/sglang/pull/47445</a></p>
+<p><strong>SGLang #47333：推测解码崩了会自己降级</strong> ragged-verify 是推测解码的一种验证排布。 层级超过捕获网格时，以前直接抛错。 整个 scheduler 被炸掉，服务停摆。 现在自动回退到 eager 模式。 说白了：高速档挂了，自动切回慢速档保命。 来源：<a href="https://github.com/sgl-project/sglang/pull/47333">https://github.com/sgl-project/sglang/pull/47333</a></p>
+<p><strong>SGLang #46454：混元图 3 加了前缀缓存</strong> HunyuanImage-3 是腾讯的图像生成模型。 这笔给它加了 prefix K/V cache。 KV cache 是解码时的草稿纸，存了算过的键值。 前缀缓存就是草稿纸复用，不用每次重算。 还顺手加了可选的 FA3 注意力和 think-prompt。 跑图像生成的 serving，这笔是纯加速。 来源：<a href="https://github.com/sgl-project/sglang/pull/46454">https://github.com/sgl-project/sglang/pull/46454</a></p>
+<p><strong>SGLang #46963：每个请求的账单更细了</strong> rust-server 是 SGLang 的新前端。 以前 native /generate 返回里没有单请求统计。 现在 meta_info 里补上了 scheduler 的统计。 调优排队和延迟的人，看板又多了一块表。 来源：<a href="https://github.com/sgl-project/sglang/pull/46963">https://github.com/sgl-project/sglang/pull/46963</a></p>
+<p><strong>FlashInfer 四笔：量化 kernel 继续抠</strong></p>
+<p>#8031：Kimi-K3 的 fused MoE router 提速了。</p>
+<p>在 GB300 上，单 token 路由一次 launch 搞定。 896 个专家里选 16 个。</p>
+<p>#7976：NVFP4 量化延迟又降了一截。</p>
+<p>NVFP4 是英伟达的 4 位浮点格式。</p>
+<p>#5982：MXFP8 量化跟 GEMM 初始化重叠跑。</p>
+<p>MXFP8 是另一种 8 位浮点量化。</p>
+<p>#8029：SM120 的 MQA-logits，更多形状走调优 kernel。</p>
+<p>MQA-logits 是注意力输出层的分块计算。 四笔全是 kernel 层的牙膏，持续挤。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8031">https://github.com/flashinfer-ai/flashinfer/pull/8031</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7976">https://github.com/flashinfer-ai/flashinfer/pull/7976</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/5982">https://github.com/flashinfer-ai/flashinfer/pull/5982</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8029">https://github.com/flashinfer-ai/flashinfer/pull/8029</a></p>
+<p><strong>TRT-LLM #20702：解耦 worker 的取消不卡了</strong> PD 解耦里，取消的请求以前会卡住。 worker 在等 peer 就绪或 KV 接收，取消指令排后面。 现在空闲时直接推进取消，不用等下一批。 内存照样保留，等传输方确认安全再退。 跟你评估的 PD 解耦是同一条线。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20702">https://github.com/NVIDIA/TensorRT-LLM/pull/20702</a></p>
+<p><strong>其余一句话带过</strong> llama.cpp 只有一笔内部清理，略过。 LMDeploy、TGI 本轮零合入。</p>
+<p><strong>正式版全平</strong> vLLM 仍 v0.32.0。 v0.33.0rc3 还没出。 SGLang 仍 v0.5.22。 v0.5.23 还是裸 tag。 release notes 没写，正式复测继续等。 llama.cpp 仍 v0.8.0。 LMDeploy 仍 v0.18.0。 TGI 仍 v3.3.7，TRT-LLM 仍 v1.2.1。 FlashInfer 仍 v0.7.2.post1。 v0.7.3 还在准备中。</p>
+<p><strong>DeepInfer 星标还在涨</strong> 星标到了 24,481 个，12点版时 24,471。 两小时涨了 10 个，代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内零入库</strong> 结构性原因：新批次每天 00:00 UTC 才发。 下一批 10/31 00:00 UTC 还没到。</p>
+<h2>业内新闻</h2>
+<p><strong>Show HN 新玩家：Spinf-serve</strong> 专为批量打分和决策设计的推理服务器。 打分就是给一批输入批量出结果，不聊天。 正好呼应一个趋势：SGLang 的 /v1/decisions。 还有 vLLM 的 /v1/systemone。 推理 serving 正在分化出决策专用赛道。 仓库：<a href="https://github.com/spinfinc/spinf-serve">https://github.com/spinfinc/spinf-serve</a> 来源：<a href="https://news.ycombinator.com/item?id=50306815">https://news.ycombinator.com/item?id=50306815</a></p>
+<h2>访谈与深度</h2>
+<p><strong>LMSYS 博客：MI355X 上用 SGLang 跑 agentic RL</strong> 这篇是 10/22 的，之前几期漏了，补上。 跟你的 AMD 硬件线直接相关。 模型是 Qwen3-30B-A3B，卡是 MI355X。 跑的是全异步 agentic RL。 SWE-bench 子集测下来。 pass@1 从 7.3% 干到 27.5%。 rollout 吞吐从 860 干到 3480 条轨迹每小时。 KV 缓存的账算得很实在。 每 token 约 96KB，64K 轨迹要吃 6.3GB KV。 有次没设上限，几条 100K+ 的生成把缓存撑爆。 99 个请求排队超时，一个都没跑出来。 教训：engine 侧必须设 64K 上下文上限。 长尾也是坑：84% 的轨迹跑满 turn 上限。 decode 时 batch 接近 1，GPU 大片空转。 你在 MI350X 上评估 SGLang，这篇的账本能直接抄。 来源：<a href="https://www.lmsys.org/blog/2026-10-22-miles-mi355x-agentic-rl">https://www.lmsys.org/blog/2026-10-22-miles-mi355x-agentic-rl</a></p>
+<p><strong>Latent Space AI 新闻 10/30：几个新数字</strong> swyx 的 AI 新闻又更了，10点版报过推理速度专题。 这期新料先说 Cline 那笔。 Cline 拿 Nemotron 3.5 Super VL 开刀。 单张 GB300 吞吐从 6058 干到 11840 tok/s。 翻了近一倍。先说好，这是厂商自报。 SkyPilot 的数据：128 机架的 NVL72。 平均每 5 小时掉一个节点。 大规模推理的故障率，这就是现实。 还有 Altman 的言论：本地推理是浪费 DRAM。 本地和云端推理的路线之争，又吵起来了。 来源：<a href="http://latent.space/p/ainews-building-aie-code-the-top-coding-agent-conference/">http://latent.space/p/ainews-building-aie-code-the-top-coding-agent-conference/</a></p>
+<p><strong>这轮大V动态不多</strong> X 上几个关键人物都没 serving 新帖。 lmsysorg、karpathy、jimfan 都安静。 vLLM 官方账号也没新动态。 Reddit 两个版块零新讨论。 机器之心、量子位无推理基础设施新稿。 Spotify 上 Latent Space 无新单集。</p>
+<h2>值得深读</h2>
+<p>这轮没有标深读。 LMSYS 那篇博客信息量够，但它是 infra 实战记录。 不是技术方法，够不上深读标准。 框架侧也都是合入和修复。 宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/30 12:00 到 14:00 PDT，对应 UTC 10/30 19:00 到 21:00（截查约 21:10 UTC）。GitHub Search API 按 merged 时间亲查：7 仓库共 21 个 merged PR，其中 10 个为文档/测试/CI/内部杂项（vLLM 5、SGLang 2、FlashInfer 2、llama.cpp 1）已略去；LMDeploy、TGI 零合入。实质：vLLM 2（#57770、#63761）、SGLang 4（#47445、#47333、#46454、#46963）、FlashInfer 4（#8031、#7976、#5982、#8029）、TRT-LLM 1（#20702）。正式版全平：vLLM 仍 v0.32.0（v0.33.0rc3 未出）、SGLang 仍 v0.5.22（v0.5.23 仍裸 tag、无 release notes）、llama.cpp 仍 v0.8.0、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7、FlashInfer 仍 v0.7.2.post1（v0.7.3 在准备）、TRT-LLM 仍 v1.2.1。DeepInfer 星标亲核 24,481（12点版 24,471，+10），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：abs:&quot;LLM inference&quot; 最新仍是 10/29 17:18 UTC 那篇，本窗口零入库（结构性）。广域：OpenRouter 路由重写博客（10/30，2400 万请求实测）、Show HN Spinf-serve（10/30 17:03 UTC）、LMSYS MI355X agentic RL 博客（URL 日期 10/22，此前各期未报过，AMD 线相关补上）、Latent Space AI 新闻 10/30（Cline/Nemotron、SkyPilot、Altman 辩论；megakernels 部分 10点版已报）；HN 其余 serving 帖热度低未收；Reddit 零新讨论；X 关键人物/中文 AI 媒体/Spotify/Simon Willison 均无 serving 新料。陷阱已排除：InfoQ 趋势报告（lavx.hu 聚合站，无官方直链）、Dynamic Beads Nested Run（厂商新闻稿，纯单方口径无验证）、ForgeKernel 后续进展（10点版已报本体）、vLLM-Omni 10/28（聚合站）、Ling-3.1-flash 10/28（聚合站）、SGLang Summit 讲者阵容 10/28（出窗口）、ModelPlane 推理工程指南 10/29（厂商博客，时效弱）。本轮无深读。*</p></body></html>
