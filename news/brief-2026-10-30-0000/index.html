@@ -1,0 +1,90 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月30日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-30"/>
+<meta name="doc-ts" content="2026-10-30T07:06:52"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-30（0点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-30（0点版）</h1>
+<h2>头条</h2>
+<p><strong>SGLang 深夜合入 18 个，你的 MI350X 连中好几枪</strong> 这 2 小时 SGLang 合入 18 个 PR，实质 12 个。 AMD 相关占了大头。 全是 MI350X 那档卡（gfx950）用的东西。 比如 attention 缩放因子按层修正、共享专家槽位错位修复。 你评估用的就是 MI350X，升版前值得瞟一眼这批。 v0.5.23 说明文档还是没写。 正式复测继续等。 来源：<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.23">https://github.com/sgl-project/sglang/releases/tag/v0.5.23</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM 4 条实质，Qwen4Exp 甩掉 FA 依赖</strong> Qwen4Exp 稀疏注意力不再绑 FlashAttention。</p>
+<p>#62424 是 Rust 前端原生支持 GLM-5.3 对话渲染。</p>
+<p>#64567：修 gfx950 大矩阵 GEMM 溢出。</p>
+<p>MI350X 用户直接受益。 来源：<a href="https://github.com/vllm-project/vllm/pull/64110">https://github.com/vllm-project/vllm/pull/64110</a></p>
+<p><strong>SGLang：dspark 接入原生采样验证核</strong></p>
+<p>#46278，NPU 侧的 dspark 采样走原生验证 kernel。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46278">https://github.com/sgl-project/sglang/pull/46278</a></p>
+<p><strong>SGLang：DSv4 解码器尾部重放修复</strong></p>
+<p>#46676，解码器尾部空闲重放时保留协同 verify rank。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46676">https://github.com/sgl-project/sglang/pull/46676</a></p>
+<p><strong>SGLang：HiCache 修了 KDA 等待绑定</strong></p>
+<p>#45839，KDA 等待绑到真实的 load 事件上。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/45839">https://github.com/sgl-project/sglang/pull/45839</a></p>
+<p><strong>SGLang：rust-server 上报缓存命中层级</strong></p>
+<p>#46961：/generate 按缓存层级上报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46961">https://github.com/sgl-project/sglang/pull/46961</a></p>
+<p><strong>TRT-LLM：TriAttention 显存设上限</strong></p>
+<p>#20871：限制 TriAttention 驱逐内存。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20871">https://github.com/NVIDIA/TensorRT-LLM/pull/20871</a></p>
+<p><strong>TRT-LLM：GB300 和 Vera Rubin 的加速路径</strong></p>
+<p>#21143：瞄准 GB300 与 Vera Rubin 的加速路径。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21143">https://github.com/NVIDIA/TensorRT-LLM/pull/21143</a></p>
+<p><strong>FlashInfer 9 条实质，给新卡铺路</strong> 一堆 cake_* kernel，全为新卡准备。 sm_107a 就是 R200 那档。</p>
+<p>#7106 让 attention kernel 跨 Q/KV 长度复用。</p>
+<p>0.7.3 的 rc 还没切出来，正式版继续等。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7106">https://github.com/flashinfer-ai/flashinfer/pull/7106</a></p>
+<p><strong>版本全平</strong> vLLM 还是 0.32.0，SGLang 还是 0.5.22。 LMDeploy 还是 0.18.0，TGI 还是 v3.3.7。 llama.cpp 还是 v0.8.0。 FlashInfer 正式版还是 0.7.2.post1。 LMDeploy、TGI、llama.cpp 本轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 本轮零入库</strong> 10/30 00:00 那批 20 点版和 22 点版已经扫过。 下一批 10/31 00:00 UTC 还没到，不必深挖。</p>
+<h2>业内新闻</h2>
+<p><strong>EAGLE3 在 MI350X 上跑通训练全链路</strong> Quark 团队用原生栈训草稿模型。 栈是 ROCm 加 vLLM 加 TorchSpec。 并发 128 时加速比回落到 1.40x，重载下增益缩水。 硬件就是你的 MI350X，推测解码评估可以参考。 来源：<a href="https://aidailypost.com/news/eagle3-training-amd-mi350x-lifts-per">https://aidailypost.com/news/eagle3-training-amd-mi350x-lifts-per</a></p>
+<p><strong>推理把 CPU 拉回数据中心</strong> Lisa Su 说推理占未来市场约六成。 AMD 把 2030 年 CPU 市场预测上调到超 2000 亿美元。 TrendForce 预计服务器 CPU 出货 2027 年增 43%。 来源：<a href="https://tech-insider.org/amd-200b-cpu-market-inference-60-percent-server-cpu-shipments-2026/">https://tech-insider.org/amd-200b-cpu-market-inference-60-percent-server-cpu-shipments-2026/</a></p>
+<p><strong>Oracle 引入 AMD Helios 机架</strong> OCI E7 用第六代 EPYC Venice，单路 256 核。 Helios 机架配 72 张 MI455X 和 31TB HBM4。 ROCm 官方支持 vLLM 和 SGLang。 来源：<a href="https://www.securities.io/amd-epyc-cpus-and-pensando-dpus-to-power-new-oracle-cloud-instances/">https://www.securities.io/amd-epyc-cpus-and-pensando-dpus-to-power-new-oracle-cloud-instances/</a></p>
+<p><strong>谷歌云的 Vera Rubin 实例 11 月上线</strong> Vera Rubin NVL72 加 ConnectX-9 网卡。 目标容量最高 96 万张 Rubin GPU。 来源：<a href="https://www.trendhubai.com/news/google-cloud-plans-november-launch-of-vera-rubin-a5x-ai-instances/">https://www.trendhubai.com/news/google-cloud-plans-november-launch-of-vera-rubin-a5x-ai-instances/</a></p>
+<p><strong>推理云融资三则</strong> General Compute 拿 1 亿美元 A 轮，建推理云。 Simplismart 1400 万美元 B 轮，NVIDIA 参投。 TensorX 1000 万美元，做欧洲 GDPR 合规推理。 来源：<a href="https://www.vcaonline.com/news/2026102704/general-compute-raises-100m-series-a-to-build-the-inference-cloud-for-ultra-fast-tokens/">https://www.vcaonline.com/news/2026102704/general-compute-raises-100m-series-a-to-build-the-inference-cloud-for-ultra-fast-tokens/</a></p>
+<p><strong>Altman：端侧推理只用了 5% 硬件</strong> 他说个人设备跑 AI 推理是浪费，该集中到数据中心。 这是观点不是产品新闻，仅供一听。 来源：<a href="https://wisevoter.com/world/2026/10/29/openai-ceo-critiques-personal-device-ai-inference">https://wisevoter.com/world/2026/10/29/openai-ceo-critiques-personal-device-ai-inference</a></p>
+<p><strong>中文媒体两则</strong> 有文章说 SGLang prefill 反超 DeepInfer。 测的是 B300 和 GB300 上的表现。 机器之心：有人算出 DeepSeek 开源推理框架毛利 82%。 来源：<a href="https://www.woshipm.com/ai/6484717.html">https://www.woshipm.com/ai/6484717.html</a></p>
+<p><strong>纠偏：AMD 收购 Taalas 是 8 月的旧闻</strong> 有聚合站写成 10/29 新闻，我去 AMD 官网核了。 交易 2026 年 8 月 6 日就官宣了，预计今年 Q4 交割。 不是本轮新闻，这里只做记录、不展开。 来源：<a href="https://ir.amd.com/news-events/press-releases/detail/1296/amd-acquires-taalas-to-advance-compute-solutions-for-rapidly-growing-ai-inference-market">https://ir.amd.com/news-events/press-releases/detail/1296/amd-acquires-taalas-to-advance-compute-solutions-for-rapidly-growing-ai-inference-market</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 10/29 AI News 日报</strong> AKV 来自清华加港中大。 它给 serving 引擎加了两个 KV-cache 新操作。 agent 场景成本降 27.7%，P95 快 1.51 倍。 SGLang HiCache 也有新数据。 B200 上 agent 会话可缓存 token 增两到四成。 Modular MAX 完整开源了。 MLX 新 kernel 让解码快 2 到 3 倍。 来源：<a href="https://latent.space/p/ainews-gemini-4-carbon/">https://latent.space/p/ainews-gemini-4-carbon/</a></p>
+<p><strong>播客和大V本轮无新料</strong> Latent Space 最新是 10/27 那期。 硅谷101 最新是 10/28 那期。 都没有 serving 相关的新内容。 Simon Willison 那边也没有。 The Batch 本周新刊还没出。</p>
+<h2>值得深读</h2>
+<p>无。本轮宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/29 22:00 到 10/30 00:00 PDT，对应 UTC 是 10/30 05:00 到 07:00。GitHub Search API 按 merged 时间亲查：vLLM 合入 7 条实质 4 条、SGLang 合入 18 条实质 12 条、TRT-LLM 合入 5 条实质 2 条、FlashInfer 合入 10 条实质 9 条；LMDeploy、TGI、llama.cpp 零合入。窗口尾端 06:55 到 07:00 UTC 补查无新增。去重清单里的 PR 本轮均未重现。SGLang v0.5.23 的 release API 亲查 404，release 列表最新仍为 v0.5.22（10/19），notes 未写。DeepInfer 星标亲核 24,350（22 点版 24,301，加 49），pushed_at 仍为 10/26，代码无更新。arXiv 本窗口无新批次。业内新闻 URL 多来自二三线聚合站，事实强度有限，请按&quot;据报道&quot;理解。X、Reddit、HN、Spotify、量子位、大V 名单本轮无 serving 实质内容。本轮无深读笔记。*</p></body></html>
