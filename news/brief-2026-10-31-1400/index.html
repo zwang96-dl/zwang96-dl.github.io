@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月31日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-31"/>
+<meta name="doc-ts" content="2026-10-31T21:03:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-31（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-31（14点版）</h1>
+<p>14点版来了，这轮是维护窗口。</p>
+<h2>头条</h2>
+<p><strong>MiniCPM-OCR 开源：文档解析的新视觉前端</strong> MiniCPM-OCR 系列今天开源了。 ModelBest 和 OpenBMB 联合发布的。 1.0 版 1.3B 参数，Jev 版 2B 参数。 专门干文档解析这活。 官方说支持 vLLM 和 SGLang。 llama.cpp 和 Ollama 也在列。 对你意味着：多模态 serving 链条多了个开源视觉前端。 跟你研究的 OCR 文档场景直接相关。 提醒一句：这是 PR 通稿口径，实测数据没见。 来源：<a href="https://www.morningstar.com/news/pr-newswire/20261031cn86192/modelbest-and-openbmb-open-source-minicpm-ocr-series-delivering-high-performance-document-parsing-and-ai-powered-quality-control">https://www.morningstar.com/news/pr-newswire/20261031cn86192/modelbest-and-openbmb-open-source-minicpm-ocr-series-delivering-high-performance-document-parsing-and-ai-powered-quality-control</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM：投机解码修了个 bug</strong></p>
+<p>#64751 修的是 MRV2 独立草稿模型。</p>
+<p>草稿模型是投机解码里先打草稿的小模型。 说白了就是 draft 的 MoE 和注意力后端覆盖被忽略了。 这笔把它补上。 跑投机解码的人，这笔跟你有关。 来源：<a href="https://github.com/vllm-project/vllm/pull/64751">https://github.com/vllm-project/vllm/pull/64751</a></p>
+<p><strong>SGLang：HiCache 记账小修补</strong></p>
+<p>#47557 修 HiCache 的 page-cache 信用扣账。</p>
+<p>HiCache 是 SGLang 的分层 KV 缓存。 以前扣账把受保护的字节也算进去了。 现在只扣该扣的部分。 KV 这本账又准了一点。 来源：<a href="https://github.com/sgl-project/sglang/pull/47557">https://github.com/sgl-project/sglang/pull/47557</a></p>
+<p><strong>SGLang 另一笔</strong></p>
+<p>#47551 是纯 CI 测试改动。</p>
+<p>gloo 测试改走文件存储做 rendezvous。 无业务关联，一句话带过。 来源：<a href="https://github.com/sgl-project/sglang/pull/47551">https://github.com/sgl-project/sglang/pull/47551</a></p>
+<p><strong>FlashInfer：8 笔全是 cake</strong></p>
+<p>#8136：SM120 的 paged FP8 MQA logits。</p>
+<p>RTX 5090 的九组形状走原生原子程序。</p>
+<p>#8131：Qwen 3.5 GDN 的 decode 和 MTP 校验。</p>
+<p>MTP 是多 token 预测。 SM100 的 CuTe DSL 后端。 其余 6 笔全是 cake 内核的性能和修 bug。 全是 NVIDIA 侧，跟你手里的 AMD 卡没关系。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8136">https://github.com/flashinfer-ai/flashinfer/pull/8136</a></p>
+<p><strong>其余一句话带过</strong> TRT-LLM、llama.cpp、LMDeploy、TGI：零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0。 v0.33.0rc3 还是裸 tag。 SGLang 还是 v0.5.22。 v0.5.23 裸 tag 快两天了，说明还没写出来。 FlashInfer v0.7.3rc1 还在 pre-release。 TRT-LLM 还是 v1.4.0rc2。 llama.cpp 还是快照节奏，b12023 在窗口内发布。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,649</strong> 12点版时 24,642，两小时涨了 7 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 最新还是 10/29 那批。 周末不发公告，这是结构性空档。 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X、HN、Reddit、中文媒体都没动静。 Karpathy 发了个 HackerTube。 他用 Opus 5.5 给 HN 推荐的 6,454 个视频做了个个性化首页。 跟 serving 无关，不展开。 Simon Willison、Latent Space、The Batch 都没更新。 YouTube 三个频道也没新视频。 Spotify 亲查：Latent Space 10/31 还是那两个金融主题单集。 跟 serving 不沾边，不收录。</p>
+<h2>值得深读</h2>
+<p>这轮没有。 MiniCPM-OCR 是 PR 通稿口径，没实测细节。</p>
+<p>#64751 和 #47557 都是小修补。</p>
+<p>单看都撑不起一篇精读，宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/31 12:00 到 14:00 PDT，对应 UTC 10/31 19:00 到 21:00。GitHub 按 merged 时间亲查：7 仓库共 11 个 merged PR（vLLM 1：#64751；SGLang 2：#47557、#47551；FlashInfer 8：#8136、#8134、#8131、#8129、#8128、#8123、#8116、#8114；TRT-LLM、llama.cpp、LMDeploy、TGI 零合入）。正式版水位全平：vLLM 仍 v0.32.0（v0.33.0rc3 仍裸 tag）；SGLang 仍 v0.5.22（v0.5.23 仍裸 tag，release notes 仍没写出来）；FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 仍 pre-release）；TRT-LLM 仍 v1.4.0rc2；llama.cpp 仍快照节奏（b12023 于窗口内发布）；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer（deepseek-ai/DeepInfer）星标亲核 24,649（12点版 24,642，+7），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：最新时间戳仍为 10/29 批次，本轮零入库（周末结构性空档），下一批北京时间 11/2 早 8 点。业内新闻：MiniCPM-OCR 系列（ModelBest + OpenBMB，10/31 北京时间 PRNewswire 通稿）开源，含 1.3B 的 1.0 版与 2B 的 Jev 版，官方支持 vLLM/SGLang/llama.cpp/Ollama——本轮头条，通稿口径未验证。广域（子代理并行亲查）：X（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）、HN、Reddit（r/LocalLLaMA）、机器之心/量子位、Simon Willison、Latent Space newsletter、The Batch、SGLang/Latent Space/MLOps World YouTube 频道，窗口内零新料（Karpathy 的 HackerTube 在窗口内但与 serving 无关；NVIDIA 在 HF 的 DeepSeek-V4.1-Flash-1017-NVFP4 是 10/30 的，窗口外）；Spotify 亲查：Latent Space 10/31 最新两集均为金融主题，与 serving 不沾边，未收录。深读：本轮无（宁缺毋滥）。*</p></body></html>
