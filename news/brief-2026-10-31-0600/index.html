@@ -2,7 +2,7 @@
 <meta name="doc-title" content="多模态推理简报 · 10月31日 06:00"/>
 <meta name="doc-description" content=""/>
 <meta name="doc-date" content="2026-10-31"/>
-<meta name="doc-ts" content="2026-10-31T13:03:07"/>
+<meta name="doc-ts" content="2026-10-31T13:05:48"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>多模态大模型推理服务简报 · 2026-10-31（6点版）</title><style>
@@ -42,7 +42,7 @@ img{border-color:#30363d}
 </head><body>
 <div class="backlink"><a href="..">← 全部资讯</a></div>
 <h1>多模态大模型推理服务简报 · 2026-10-31（6点版）</h1>
-<p>6点版来了，深夜窗口货不多。 7 个框架这轮一共 10 个合入。 arXiv 零入库，广域全线零新料。</p>
+<p>6点版来了，深夜窗口货不多。 7 个框架这轮一共 12 个合入。 arXiv 零入库，广域全线零新料。</p>
 <h2>头条</h2>
 <p><strong>vLLM #64733：M3.1 prefill 搬运换新路</strong> 这笔给 M3.1 的流水线并行做优化。 PP prefill 阶段走 NIXL 直接拉数据。 NIXL 是 NVIDIA 的高速搬运库。 prefill workspace 用 Q8KV4，低比特 KV 压缩。 Q8KV4 省显存，跑得也轻。 跑在 SM10x 的 Blackwell 卡上。 SM10x 就是 Blackwell 这一代。 跟你评估 PD 的搬运账是同一条线。 prefill 阶段 KV 怎么搬，细节看 PR。 来源：<a href="https://github.com/vllm-project/vllm/pull/64733">https://github.com/vllm-project/vllm/pull/64733</a></p>
 <h2>框架更新</h2>
@@ -53,24 +53,27 @@ img{border-color:#30363d}
 <p>CUDA 图是把算子预排好，启动更快。</p>
 <p>#8104 是卷积算子的反向优化，可选项。</p>
 <p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8105">https://github.com/flashinfer-ai/flashinfer/pull/8105</a></p>
-<p><strong>SGLang：6 笔，全是 diffusion 的</strong> 这轮没有 LLM serving 核心合入。 6 笔全是视频/图像生成相关的。</p>
+<p><strong>SGLang：8 笔，7 个实质</strong> 这轮没有 PD 相关的合入。</p>
+<p>#44168：采样用上 Cake softmax。</p>
+<p>Cake 是 FlashInfer 的算子库。 跑在 Blackwell SM100 上。</p>
 <p>#47570：MiniMax-H3 的 VAE 解码提速了。</p>
 <p>跑在 AMD 的 GPU 软件栈 ROCm 上。</p>
 <p>#47565 和 #47567：Ulysses 注意力做流水线。</p>
 <p>Ulysses 是分布式注意力的一种分工。</p>
 <p>#47378 加了 Pika-H3-Flex 新模型支持。</p>
-<p>#47646 是注释修正，#47571 是热身修。</p>
-<p>你评估的 PD 那块，这轮没动静。 来源：<a href="https://github.com/sgl-project/sglang/pull/47570">https://github.com/sgl-project/sglang/pull/47570</a></p>
+<p>#47301 是 Blackwell 注意力选择修。</p>
+<p>#47571 是 diffusion 热身修，#47646 是注释。</p>
+<p>你评估的 PD 那块，这轮没动静。 来源：<a href="https://github.com/sgl-project/sglang/pull/44168">https://github.com/sgl-project/sglang/pull/44168</a></p>
 <p><strong>vLLM 其余：零新料</strong> 头条那笔是本轮唯一的实质合入。</p>
 <p><strong>其余一句话带过</strong> TRT-LLM、llama.cpp、LMDeploy、TGI：零合入。</p>
 <p><strong>版本水位：正式版全没动</strong> vLLM 仍 v0.32.0，v0.33.0rc2 还是裸 tag。 SGLang 仍 v0.5.22，v0.5.23 还是裸 tag。 FlashInfer 仍 v0.7.2.post1。 v0.7.3rc1 还是 pre-release。 TRT-LLM 仍 v1.4.0rc2。 llama.cpp 仍 v0.8.0。 LMDeploy 仍 v0.18.0，TGI 仍 v3.3.7。</p>
 <p><strong>DeepInfer 星标 24,591</strong> 4点版时 24,579，两小时涨了 12 个。 代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
 <h2>新技术与论文</h2>
-<p><strong>arXiv：这轮零入库</strong> 10/31 批次 27 篇，2点版已全收。 下一批北京时间 11/1 早 8 点才开。</p>
+<p><strong>arXiv：这轮零入库</strong> 10/31 批次 27 篇，2点版已全收。 下一批北京时间 11/2 早 8 点才开。 arXiv 周末不发公告，这是结构性空档。</p>
 <h2>业内新闻</h2>
 <p>这轮零新料。</p>
 <h2>访谈与深度</h2>
 <p><strong>广域全线零新料</strong> X、HN、Reddit、中文媒体都没动静。 Simon Willison 和 Latent Space 也没新内容。 Spotify 亲查：Latent Space 无新单集。</p>
 <h2>值得深读</h2>
 <p>这轮没有。 单笔 PR 撑不起一篇精读，宁缺毋滥。</p>
-<p>*去重说明：本轮窗口是 10/31 04:00 到 06:00 PDT，对应 UTC 10/31 11:00 到 13:00。GitHub Search API 按 merged 时间亲查：7 仓库共 10 个 merged PR（vLLM 1：#64733；SGLang 6：#47646、#47571、#47570、#47567、#47565、#47378，其中 #47646 注释修正、#47571 热身修，其余 4 笔为 diffusion 相关；FlashInfer 3：#8105、#8104、#8100；TRT-LLM、llama.cpp、LMDeploy、TGI 零合入）。实质合入 4 个：vLLM #64733、FlashInfer #8105/#8104/#8100；SGLang 这轮无 LLM serving 核心合入。正式版水位全平：vLLM 仍 v0.32.0（v0.33.0rc2 仍裸 tag）、SGLang 仍 v0.5.22（v0.5.23 仍裸 tag）、FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 仍 pre-release，发布说明 4点版已报）、TRT-LLM 仍 v1.4.0rc2、llama.cpp 仍 v0.8.0（b12020 滚动构建在之前窗口已出）、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7。DeepInfer（deepseek-ai/DeepInfer）星标亲核 24,591（4点版 24,579，+12），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。陷阱已排除：之前briefs 里 DeepInfer 的 lmsysorg 路径是错的，真实路径为 deepseek-ai/DeepInfer，本期已纠正。arXiv 亲查（5 关键词 × submittedDate 倒序）：最新时间戳仍为 10/29 批次，即 2点版已收的 27 篇，本轮零入库；11/01 批次尚未开启。广域（子代理并行亲查）：X（lmsysorg、vllm_project、karpathy、jimfan、swyx）、HN、Reddit（r/LocalLLaMA、r/MachineLearning）、机器之心/量子位、Simon Willison、Latent Space newsletter、SGLang/Latent Space YouTube 频道，窗口内零新料；Spotify 亲查：Latent Space 无 10/31 之后的新单集。深读：本轮无（宁缺毋滥）。*</p></body></html>
+<p>*去重说明：本轮窗口是 10/31 04:00 到 06:00 PDT，对应 UTC 10/31 11:00 到 13:00。GitHub 按 merged 时间亲查：7 仓库共 12 个 merged PR（vLLM 1：#64733；SGLang 8：#47565、#47571、#47570、#47567、#47378、#47301、#44168、#47646，其中 #47646 注释已略；FlashInfer 3：#8105、#8104、#8100；TRT-LLM、llama.cpp、LMDeploy、TGI 零合入）。实质合入 6 个：vLLM #64733、FlashInfer #8105/#8104/#8100、SGLang #44168（采样启用 Cake softmax，SM100）；SGLang 其余 6 笔为 diffusion 相关。正式版水位全平：vLLM 仍 v0.32.0（v0.33.0rc2 仍裸 tag）、SGLang 仍 v0.5.22（v0.5.23 仍裸 tag）、FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 仍 pre-release，发布说明 4点版已报）、TRT-LLM 仍 v1.4.0rc2、llama.cpp 仍 v0.8.0（b12020 滚动构建在之前窗口已出）、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7。DeepInfer（deepseek-ai/DeepInfer）星标亲核 24,591（4点版 24,579，+12），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。陷阱已排除：之前briefs 里 DeepInfer 的 lmsysorg 路径是错的，真实路径为 deepseek-ai/DeepInfer，本期已纠正。arXiv 亲查（5 关键词 × submittedDate 倒序）：最新时间戳仍为 10/29 批次，即 2点版已收的 27 篇，本轮零入库；11/01 批次尚未开启。广域（子代理并行亲查）：X（lmsysorg、vllm_project、karpathy、jimfan、swyx）、HN、Reddit（r/LocalLLaMA、r/MachineLearning）、机器之心/量子位、Simon Willison、Latent Space newsletter、SGLang/Latent Space YouTube 频道，窗口内零新料；Spotify 亲查：Latent Space 无 10/31 之后的新单集。深读：本轮无（宁缺毋滥）。*</p></body></html>
