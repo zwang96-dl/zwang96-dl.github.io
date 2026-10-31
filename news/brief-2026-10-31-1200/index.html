@@ -1,0 +1,89 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月31日 12:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-31"/>
+<meta name="doc-ts" content="2026-10-31T19:07:27"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-31（12点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-31（12点版）</h1>
+<p>12点版来了，PD 那条线又有新动静。</p>
+<h2>头条</h2>
+<p><strong>SGLang：PD 解耦又修了个竞态小毛病</strong> SGLang 的 PD 解耦又修了个竞态小毛病。</p>
+<p>#47652 修的是迟到的 STAGING_REQ。</p>
+<p>STAGING_REQ 是 PD 两边要 KV 的信。 chunk 已经分发完，迟到的信还会到。 到了可能写错地方，等于捣乱。 这笔直接忽略这种迟到的信。 跟 10点版 #47638 是同一条协议线。 你评估 PD 解耦时，底盘又干净了一点。 来源：<a href="https://github.com/sgl-project/sglang/pull/47652">https://github.com/sgl-project/sglang/pull/47652</a></p>
+<h2>框架更新</h2>
+<p><strong>SGLang：统一内存的淘汰策略合一了</strong></p>
+<p>#46827 让 Full KV 和 SWA KV 共用一套 LRU。</p>
+<p>SWA 是滑动窗口注意力，省显存的招。 LRU 是最久没用的先淘汰。 以前两套 KV 各扔各的。 现在一张淘汰名单，账本更统一。 这是 8点版统一 KV 池那条线的续集。 来源：<a href="https://github.com/sgl-project/sglang/pull/46827">https://github.com/sgl-project/sglang/pull/46827</a></p>
+<p><strong>SGLang 其余两笔</strong></p>
+<p>#47532：abort 请求能送到每个 attention-DP rank。</p>
+<p>attention-DP 是注意力并行。 以前 abort 可能漏掉某些 rank。 现在全覆盖，还发布了监听者映射。</p>
+<p>#44990：DeepSeek V4 的显存池描述重构。</p>
+<p>纯工程整理，不影响行为。 来源：<a href="https://github.com/sgl-project/sglang/pull/47532">https://github.com/sgl-project/sglang/pull/47532</a></p>
+<p><strong>vLLM：ModelRunner V2 省内存</strong></p>
+<p>#64841 削 chunked prompt logprobs 的峰值内存。</p>
+<p>logprobs 是每个 token 的概率输出。 算它的时候内存会冲高。 这笔把峰值压下来。 大 batch 跑 logprobs 的人能松口气。 来源：<a href="https://github.com/vllm-project/vllm/pull/64841">https://github.com/vllm-project/vllm/pull/64841</a></p>
+<p><strong>llama.cpp：3 笔小修补</strong></p>
+<p>#30922：Gemma 4 图片缩放不再留黑边。</p>
+<p>多模态图片预处理更干净。</p>
+<p>#30959：/v1/responses 接口现在收 extra_params。</p>
+<p>extra_params 是透传的额外参数。</p>
+<p>#30710：共享决策前缀在第一个输出处截断。</p>
+<p>server 的小逻辑修补。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30922">https://github.com/ggml-org/llama.cpp/pull/30922</a></p>
+<p><strong>TRT-LLM：1 笔内存修补</strong></p>
+<p>#20017 修了个悬垂引用。</p>
+<p>util_convert_type 现在返回自己持有的内存。 小而关键的内存安全修补。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20017">https://github.com/NVIDIA/TensorRT-LLM/pull/20017</a></p>
+<p><strong>FlashInfer：5 笔全是 cake</strong></p>
+<p>#8133、#8132、#8125、#8126、#8124。</p>
+<p>全是 cake 内核的性能和修 bug。 sm_103a、sm_107a 都是新卡架构。 纯 NVIDIA 侧，跟你手里的 AMD 卡没关系。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8133">https://github.com/flashinfer-ai/flashinfer/pull/8133</a></p>
+<p><strong>其余一句话带过</strong> LMDeploy、TGI：零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0。 v0.33.0rc3 还是裸 tag。 SGLang 还是 v0.5.22。 v0.5.23 裸 tag 快两天了，说明还没写出来。 FlashInfer v0.7.3rc1 还在 pre-release。 TRT-LLM 还是 v1.4.0rc2。 llama.cpp 还是 v0.8.0。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,642</strong> 10点版时 24,631，两小时涨了 11 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 最新还是 10/29 那批。 周末不发公告，这是结构性空档。 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X、HN、Reddit、中文媒体都没动静。 Simon Willison 没新文章。 Latent Space、The Batch 也没更新。 YouTube 三个频道也没新视频。 Spotify 亲查：Latent Space 最新两集都是金融主题。 跟 serving 不沾边，不收录。</p>
+<h2>值得深读</h2>
+<p>这轮没有。</p>
+<p>#47652 是 PD 协议的边角修补。</p>
+<p>#46827 是统一内存工程的一块砖。</p>
+<p>单看都撑不起一篇精读，宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/31 10:00 到 12:00 PDT，对应 UTC 10/31 17:00 到 19:00。GitHub 按 merged 时间亲查：7 仓库共 14 个 merged PR（vLLM 1：#64841；SGLang 4：#47652、#46827、#47532、#44990；TRT-LLM 1：#20017；llama.cpp 3：#30922、#30959、#30710；FlashInfer 5：#8133、#8132、#8126、#8125、#8124；LMDeploy、TGI 零合入）。正式版水位全平：vLLM 仍 v0.32.0（v0.33.0rc3 仍裸 tag）；SGLang 仍 v0.5.22（v0.5.23 仍裸 tag，快两天了）；FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 仍 pre-release）；TRT-LLM 仍 v1.4.0rc2；llama.cpp 仍 v0.8.0（Releases API 亲验，子代理报的 b12021 快照口径已纠正）；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer（deepseek-ai/DeepInfer）星标亲核 24,642（10点版 24,631，+11），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：最新时间戳仍为 10/29 批次，本轮零入库（周末结构性空档），下一批北京时间 11/2 早 8 点。广域（子代理并行亲查）：X（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）、HN、Reddit（r/LocalLLaMA、r/MachineLearning）、机器之心/量子位、Simon Willison、Latent Space newsletter、The Batch、SGLang/Latent Space/MLOps World YouTube 频道，窗口内零新料（Latent Space AIE CODE 那期 newsletter 是 10/30 的，10/30 的几期已报过，不重复）；Spotify 亲查：Latent Space 10/31 最新两集均为金融主题（Using Agents for Long-Horizon Financial Work、Building ChatGPT for Finance），与 serving 不沾边，未收录。深读：本轮无（宁缺毋滥）。*</p></body></html>
