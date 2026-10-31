@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月30日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-30"/>
+<meta name="doc-ts" content="2026-10-31T05:15:41"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-30（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-30（22点版）</h1>
+<p>22点版来了，这轮是框架合入撑场面。 SGLang 6 笔、vLLM 2 笔、FlashInfer 3 笔。 头条是 NVIDIA 的 Dynamo 运维新配方。 arXiv 零入库，DeepInfer 星标又涨了 16 个。</p>
+<h2>头条</h2>
+<p><strong>NVIDIA 给 Dynamo 配了套 Kubernetes 运维配方</strong> NVIDIA 10/30 发了篇技术博客。 Dynamo 1.4.2 配上了 AICR。 AICR 是 Kubernetes 上部署推理的验证配方。 说白了，推理端点要稳，光框架好不够。 GPU 驱动、调度、网络、可观测性都得对齐。 配方把这些打包成可重复的部署流程。 两个路由拓扑都用 worker 上报的 KV 事件。 哪个 worker 的草稿纸（KV cache）最对味，请求就去哪。 博文还提到 PD 分离：prefill 池和 decode 池分开。 跟你正在评估的 PD 解耦，运维侧直接对得上。 这条是 10/30 当天的补报。 来源：<a href="https://developer.nvidia.com/blog/build-a-validated-kubernetes-runtime-for-nvidia-dynamo/">https://developer.nvidia.com/blog/build-a-validated-kubernetes-runtime-for-nvidia-dynamo/</a></p>
+<h2>框架更新</h2>
+<p><strong>SGLang：6 笔合入，KV 和多模态各来一条</strong></p>
+<p>#47387：DeepSeek v4.1 的 decode 索引分块。</p>
+<p>SM90 上长上下文的步不再被独占。</p>
+<p>#47542：SWA 尾页绑定去掉 host 同步。</p>
+<p>#47543：hicache 的 pinned 内存加锁防回收。</p>
+<p>#44442：给 GLM-4.1V 做 W8A8S 量化。</p>
+<p>专为 NPU 上的多模态 serving 优化。 跟你多模态线直接相关。</p>
+<p>#47337：UE8M0（一种量化格式）的修补。</p>
+<p>#47408：修了 AMD 量化工具 Quark 的崩溃。</p>
+<p>EP 大于 1 时，MXFP4 的 MoE 会挂。 其余 11 个 CI、文档、RL 相关，已略。 来源：<a href="https://github.com/sgl-project/sglang/pull/47387">https://github.com/sgl-project/sglang/pull/47387</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/44442">https://github.com/sgl-project/sglang/pull/44442</a></p>
+<p><strong>vLLM：2 笔，一个 PD 相关</strong></p>
+<p>#63098：DeepSeek v4.1 启用 PCP。</p>
+<p>PCP 是流水线分块 prefill，一种并行策略。 还支持 PP 和 DP 组合，部署更灵活。</p>
+<p>#61614：FlashKDA 给 GLM-5.3-Flash 升级。</p>
+<p>QKV 直接吃行跨步布局，省一次转置。 KV 搬运又顺了一点。 来源：<a href="https://github.com/vllm-project/vllm/pull/63098">https://github.com/vllm-project/vllm/pull/63098</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/61614">https://github.com/vllm-project/vllm/pull/61614</a></p>
+<p><strong>FlashInfer：3 笔，两个性能优化</strong></p>
+<p>#8084：sm_107a 上 kernel 尾程序加速。</p>
+<p>#8073：MoE finalize 和 allreduce 融合。</p>
+<p>#8061 是纯重构，这轮略。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8084">https://github.com/flashinfer-ai/flashinfer/pull/8084</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8073">https://github.com/flashinfer-ai/flashinfer/pull/8073</a></p>
+<p><strong>其余一句话带过</strong> TRT-LLM、LMDeploy、TGI 本轮零合入。 llama.cpp 只有一条 chat 模板小修。</p>
+<p><strong>版本水位：正式版全没动</strong> vLLM 仍 v0.32.0，v0.33.0rc2 在路上。 SGLang 仍 v0.5.22，v0.5.23 还是裸 tag。 FlashInfer 仍 v0.7.2.post1。 v0.7.3rc1 在路上。 TRT-LLM v1.4.0rc2 在路上。 llama.cpp 仍 v0.8.0。 LMDeploy 仍 v0.18.0。 TGI 仍 v3.3.7，release 还停在去年 12 月。</p>
+<p><strong>DeepInfer 星标 24,530</strong> 20点版时 24,514，两小时涨了 16 个。 代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 零入库</strong> 10/31 日批次（周六）还没发出来。 10/30 那批已在 10/29 晚间几期扫过。 这轮无新论文。</p>
+<h2>业内新闻</h2>
+<p><strong>SageMaker 推理端点支持 GPU 切片</strong> AWS 10/30 宣布，SageMaker AI 实时端点。 现在支持 MIG 硬件级 GPU 切分。 MIG 是 NVIDIA 把一张卡切成隔离分区的技术。 一张卡最多切 7 个分区。 小模型、embedding、reranker 可以合租一张卡。 创建端点时配好，应用代码不用改。 这是聚合站转述 AWS 公告，10/30 补报。 来源：<a href="https://aws-news.com/article/2026-10-30-amazon-sagemaker-ai-inference-now-supports-gpu-partitioning-for-real-time-endpoints">https://aws-news.com/article/2026-10-30-amazon-sagemaker-ai-inference-now-supports-gpu-partitioning-for-real-time-endpoints</a></p>
+<p><strong>Mistral Large 4 的 serving 数据补一笔</strong> Latent Space AI 新闻 10/30 那期里的新料。 12点版报过权重开放，这次是 serving 数字。 vLLM 首日支持 FP8 和 NVFP4 两个版本。 NVFP4 版 610GB，比 FP8 的 1.06TB 小不少。 加上 DSpark 推测解码，吞吐涨 1.92 到 2.23 倍。 35 层之后不用位置编码（NoPE），KV cache 直接共享。 数字是厂商侧自报，仅供参考。 来源：<a href="https://lspace.beehiiv.com/p/ainews-building-aie-code-the-top-coding-agent-conference">https://lspace.beehiiv.com/p/ainews-building-aie-code-the-top-coding-agent-conference</a></p>
+<h2>访谈与深度</h2>
+<p><strong>PD 解耦综述，评估前值得一读</strong> dev.to 有篇 10/19 的 PD 综述。 从 Splitwise 一路讲到 Prime Inference。 还覆盖了 HMA-Serve 的跨厂商方案。 还讲了 P、D 用不同精度、不同硬件的玩法。 你评估 PD 解耦，这篇当背景读物正好。 来源：<a href="https://dev.to/danielsamfdo/75-more-requests-same-gpus-why-llm-serving-runs-on-two-machines-now-4m14">https://dev.to/danielsamfdo/75-more-requests-same-gpus-why-llm-serving-runs-on-two-machines-now-4m14</a></p>
+<p><strong>这轮广域还是零新料</strong> HN、Reddit、X 关键人物都没新帖。 机器之心、量子位、InfoQ 无新稿。 SGLang 官方 YouTube 无新视频。 Spotify 亲查：Latent Space 还是 10/28 那期。</p>
+<h2>值得深读</h2>
+<p>这轮没有标深读。 框架侧全是合入和修补，没有新方法。 宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/30 20:00 到 22:00 PDT，对应 UTC 10/31 03:00 到 05:05（截查约 05:10 UTC）。GitHub Search API 按 merged 时间亲查：7 仓库共 12 个 merged PR，实质 10 个（vLLM 2：#63098、#61614；SGLang 6：#47387、#47337、#47542、#47543、#47408、#44442，其余 11 个 CI/文档/diffusion/RL 已略；FlashInfer 3：#8084、#8073、#8061；llama.cpp 1：#31380 chat 模板小修）；TRT-LLM、LMDeploy、TGI 零合入。正式版水位：vLLM 仍 v0.32.0（v0.33.0rc2 在路上）、SGLang 仍 v0.5.22（v0.5.23 仍裸 tag、release 页 404）、FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 在路上）、TRT-LLM v1.4.0rc2、llama.cpp 仍 v0.8.0、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7。DeepInfer 星标亲核 24,530（20点版 24,514，+16），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：10/31 日批次截至 05:10 UTC 未发布；10/30 批次已在 10/29 晚间几期扫过（FlatCake、GAAC、WAKMan、GAUSS）；三个方向交叉查无新货。广域：NVIDIA Dynamo AICR 技术博客（10/30 官方博客，Dynamo 1.4.2 + KV 事件路由 + PD 分离部署，补报）、SageMaker MIG（10/30 AWS 公告，aws-news.com 聚合站转述，补报）、Latent Space AINews 10/30（Mistral Large 4 vLLM serving 数据补报，其余段 14点版已报）、dev.to PD 综述（10/19 背景补报）；HN、Reddit、X 关键人物（lmsysorg、vllm 官方、karpathy、jimfan、swyx）窗口内零 serving 新帖；机器之心/量子位/InfoQ 零新稿；SGLang 官方 YouTube 无新视频；Spotify 亲查 Latent Space 最新仍为 10/28《Why Agents Love Supabase》。陷阱已排除：Dynamic Beads Nested Run（14点版已排除，厂商新闻稿）、LMSYS Miles/MI355X 博客（亲核 URL 为 2026-10-22-miles-mi355x-agentic-rl，即 14点版已报的 KV 账那篇，同文）、Bedrock GPT-5.6 GovCloud（20点版已排除聚合站）、Anthropic 收购 MatX（8 月旧闻）、SGLang Summit 议程（出窗口）、llama.cpp 快照 tag（tags API 无此 tag，不采用）。本轮无深读。*</p></body></html>
