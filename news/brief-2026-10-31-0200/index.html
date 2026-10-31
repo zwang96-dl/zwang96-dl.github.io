@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月31日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-31"/>
+<meta name="doc-ts" content="2026-10-31T09:07:51"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-31（2点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-31（2点版）</h1>
+<p>2点版来了，这轮是 arXiv 补货专场。 10/31 批次终于发布，之前两轮零入库的缺口一次补上。 扫出 27 篇推理 serving 新论文。 PD 解耦的 FluidPD 已做深读。 框架侧 11 个实质合入，版本水位全平。</p>
+<h2>头条</h2>
+<p><strong>FluidPD：PD 解耦里，两拨人手不够就原地换角</strong> IBM Research 的新论文。 PD 解耦下读题/吐字需求比忽上忽下，固定配比一错配就违约。 SLO 是服务等级目标，这里指延迟达标线。 这篇给两个旋钮：瞬时把读题计算卸给有余量的吐字 worker。 持续不平衡就让 worker 原地换角色，不重启、不重载模型。 压力指数 PPI/DPI 在违约前先报警。 正好是你 autotuner 缺的提前量信号。 Azure trace 上回放。 SLO 达成率最高提升 94.6 个百分点。 6 卡 FluidPD 打赢 8 卡的 Dynamo 自动扩缩。 数字全是作者自报。 SLO 口径是 3000ms 首字、150ms 吐字。 这篇已做深读笔记，见文末。 来源：<a href="https://arxiv.org/abs/2610.06917">https://arxiv.org/abs/2610.06917</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM：2 笔，一快一通信</strong></p>
+<p>#64650：Qwen3.8 在 Blackwell 上加瘦高 GEMM 计划。</p>
+<p>瘦高 GEMM 是细长矩阵乘法，专治 TP=1 的小批量。</p>
+<p>#61361：MORI 专家并行升到 V2。</p>
+<p>MORI 是 AMD 平台的 MoE 通信库。 来源：<a href="https://github.com/vllm-project/vllm/pull/64650">https://github.com/vllm-project/vllm/pull/64650</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/61361">https://github.com/vllm-project/vllm/pull/61361</a></p>
+<p><strong>SGLang：9 笔合入，5 笔实质</strong></p>
+<p>#47545：watermark 没开时打日志。</p>
+<p>client watermark key 自动脱敏。</p>
+<p>#47516：扩散模型的 Nomas KV 预算，把已释放的缓存内存也算进去。</p>
+<p>#46724：MoE 收尾阶段跟 all-reduce 融成一个 kernel。</p>
+<p>all-reduce 是多卡求和同步，融了省一次访存。</p>
+<p>#43110：hicache 修 derived sidecars 的解析。</p>
+<p>hicache 是分层缓存，草稿纸溢出到主机内存。</p>
+<p>#37367：按 AITER 的 activation 契约解析 MoE 调度。</p>
+<p>其余 4 笔是 CI 和文档，这轮略。 来源：<a href="https://github.com/sgl-project/sglang/pull/46724">https://github.com/sgl-project/sglang/pull/46724</a></p>
+<p><strong>FlashInfer：5 笔合入，4 笔实质</strong></p>
+<p>#8095：GPU 抢占时 cake_mega_moe_v3 会 hang 死。</p>
+<p>这笔把它修了。</p>
+<p>#8094：在 GB300/B200/R200 上重调了几条 MoE 路线的参数。</p>
+<p>#8092：mHC autograd 后端加了非确定性版本的可选项。</p>
+<p>#8059：chunked LM-head 加 loss 后端的确定性命名。</p>
+<p>#8055 纯重构，这轮略。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8095">https://github.com/flashinfer-ai/flashinfer/pull/8095</a></p>
+<p><strong>其余一句话带过</strong> TRT-LLM：#21036 纯 refactor，删了没用的请求字段。 llama.cpp、LMDeploy、TGI：本轮零合入。</p>
+<p><strong>版本水位：正式版全没动</strong> vLLM 仍 v0.32.0。 v0.33.0rc2 连 release 页都还没有。 SGLang 仍 v0.5.22，v0.5.23 还是裸 tag。 FlashInfer 仍 v0.7.2.post1。 v0.7.3rc1 在路上。 TRT-LLM v1.4.0rc2。 llama.cpp 仍 v0.8.0。 LMDeploy 仍 v0.18.0。 TGI 仍 v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,564</strong> 0点版时 24,544，两小时涨了 20 个。 代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 10/31 批次终于发布</strong> 之前两轮亲查都没出，这轮约 09:00 UTC 可见。 cs.CL 一天 108 篇。 推理 serving 相关的扫出 27 篇新的。 下面按主题挑重点，其余速览，全部作者自报、仅供参考。</p>
+<p><strong>推测解码专场：草稿长度、能耗账、训练纠偏</strong> TableTune：实测 vLLM 每种 batch 下的最优草稿长度。 几分钟算出一张表，在线跟踪接受率自我修正。 手写 draft-length 表的可以直接换。 vLLM 插件形式，开箱即用。 来源：<a href="https://arxiv.org/abs/2610.38968">https://arxiv.org/abs/2610.38968</a></p>
+<p>Only Accepted Tokens Count：推测解码的能耗账本。 被拒的草稿 token 全是白耗电，这篇在延迟目标下算清每笔账。 数据中心按每 token 能耗算账时会用上。 来源：<a href="https://arxiv.org/abs/2610.40287">https://arxiv.org/abs/2610.40287</a></p>
+<p>Multi-Token Prediction Done Right：标准多词元预测训练有毛病。 残差梯度同时干扰下词元和多词元学习，规模越大越重。 分解出 KL 自蒸馏项后，下游涨、推测解码也利好。 来源：<a href="https://arxiv.org/abs/2610.38331">https://arxiv.org/abs/2610.38331</a></p>
+<p>Speculative Acceptance Does Not Decay with Position：打脸行业叙事。 之前都说接受率随 CoT 变长衰减，这篇全长度实测说纯位置效应不存在。 之前的证据用的草稿器训练长度太短，量错了尺子。 来源：<a href="https://arxiv.org/abs/2610.30644">https://arxiv.org/abs/2610.30644</a></p>
+<p>其余速览： T2D（2610.34103）：把草稿模型构建写成剪枝加适配的优化问题。 RCSD（2610.29527）：用 RL 直接对齐接受率，不硬拟合 target 分布。 ValuSpec（2610.31338）：树形推测解码先给候选分支打分再验证。 Understanding Target Probability Reuse（2610.29210）：验证时顺手拿到的分布能不能复用。</p>
+<p><strong>KV 缓存与量化：压缩、量化、对齐</strong> RAQ-MLA：专为 MLA 缓存设计的量化。 MLA 的 latent 和窄位置 key，跟标准 K/V 不一样。 得按角色区别对待。 你关心 MLA 精度，这篇值得翻。 来源：<a href="https://arxiv.org/abs/2610.33625">https://arxiv.org/abs/2610.33625</a></p>
+<p>ZipFusion：attention 直接吃压缩态的 KV。 以前无损压缩要先解压回显存再算，这篇省掉重复读和解压。 来源：<a href="https://arxiv.org/abs/2610.33719">https://arxiv.org/abs/2610.33719</a></p>
+<p>FAD-KV：用自适应字典把 KV 表成稀疏基组合。 面向长输出推理的 KV 压缩。 来源：<a href="https://arxiv.org/abs/2610.37921">https://arxiv.org/abs/2610.37921</a></p>
+<p>其余速览： KV Cache Quantization for Diffusion LMs（2610.39853）：扩散语言模型的 KV 量化。 DeferKV（2610.06286）：一次性 KV 压缩别急着驱逐，等 decode 初期的真实信号。 AlignQuant（2610.07457）：混合精度量化的精度边界跟 GPU 单元对齐。</p>
+<p><strong>部署与扩缩：serverless、K8s、模拟器</strong> GearUp：serverless 推理是函数 DAG。 按关键路径的 slack 做预加载。 省掉权重和 kernel 的加载等待。 来源：<a href="https://arxiv.org/abs/2610.38196">https://arxiv.org/abs/2610.38196</a></p>
+<p>InferScale：K8s 原生预测式扩缩。 推理感知信号加短期需求预测，不替换默认调度器。 来源：<a href="https://arxiv.org/abs/2610.34006">https://arxiv.org/abs/2610.34006</a></p>
+<p>Simulate Before You Scale：上 GPU 集群试参太贵。 高保真模拟器做硬件布局和调度选型，不用真卡。 来源：<a href="https://arxiv.org/abs/2610.14255">https://arxiv.org/abs/2610.14255</a></p>
+<p>Evaluating Inference Compute（2610.07094）：agent 时代 batch=1。 吐字间隔成了主导成本。 用 roofline 加闭式延迟模型论证该选什么加速器。</p>
+<p><strong>其他速览</strong> CopyLoop（2610.38822）：循环 Transformer 免训练加速，上下文拷贝加浅层筛查。 GPU-Resident Speculative Decoding（2610.39761）：浏览器里整套推测解码做成 GPU 常驻循环。 SPECMEM（2610.31840）：agent 工具调用的记忆库做草稿源。 Speculative Diffusion is a Tale of Two Tradeoffs（2610.31819）：扩散 LLM 的加速是拿质量换的。 Cord（2610.39372）：masked 扩散 LM 先揭哪块的顺序策略。 Multi-Draft On-Policy Distillation（2610.37778）：扩散草稿器的多草稿在线蒸馏。 One Call Ahead（2610.33379）：一次前向同时完成草稿与验证。 RIPE（2610.34436）：循环 LM 里深层对前缀 KV 扰动更敏感，按层定缓存。</p>
+<h2>业内新闻</h2>
+<p><strong>The Century Report 10/30 版：Akamai 下场做推理托管</strong> Akamai 上线 Akamai Inference。 OpenAI 兼容的托管推理。 首发 12 个开源模型，CDN 厂商也来分推理的蛋糕了。 来源：<a href="https://sharedsapience.com/century-report/the-century-report-october-30-2026/">https://sharedsapience.com/century-report/the-century-report-october-30-2026/</a></p>
+<p><strong>FlashMap：0.5B 的投机解码小草稿器</strong> Princeton 和 Polymathic AI 联合发布。 Apache-2.0 开源。 单 forward 写 16 个 token。 Qwen3-8B 上号称无损 6.14 倍加速。 带 vLLM/SGLang 插件，数字是作者自报。 跟你之前看的 EAGLE、Medusa 是同一条赛道。</p>
+<h2>访谈与深度</h2>
+<p><strong>Simon Mo 的 PyTorch Conf keynote：vLLM 支持 5000+ 模型架构</strong> Simon Mo 是 vLLM 联创，现任 Inferact CEO。 约 6 天前的 keynote。 讲 vLLM 生态和 Day-0 支持。 还有 agentic serving 路线。 来源：<a href="https://www.youtube.com/watch?v=jMC7t-EVfF8">https://www.youtube.com/watch?v=jMC7t-EVfF8</a></p>
+<p><strong>这轮广域还是零新料</strong> X 关键人物、HN、Reddit、中文媒体、Spotify：窗口内零 serving 新帖。 Latent Space 最新还是 10/28 那期。</p>
+<h2>值得深读</h2>
+<p><strong>FluidPD：PD 解耦里，两拨人手不够就原地换角</strong> IBM Research 的论文。 arXiv:2610.06917，10/02 提交。 这篇能帮你解决 PD 评估里的配比难题。 压力指数 PPI/DPI 是 autotuner 现成的提前量信号。 FluidToken 和 FluidRole 是两个现成旋钮。 跟 DolphinRouting、AMPD 互补。 精读笔记已生成，HTML 版图片已内嵌。</p>
+<p>*去重说明：本轮窗口是 10/31 00:00 到 02:00 PDT，对应 UTC 10/31 07:00 到 09:00。GitHub Search API 按 merged 时间亲查：7 仓库共 17 个 merged PR，实质 11 个（vLLM 2：#64650、#61361；SGLang 5：#47545、#47516、#46724、#43110、#37367，其余 #47625/#45293 CI、#47623/#47615 文档已略；TRT-LLM 1：#21036 纯 refactor 已略；FlashInfer 4：#8095、#8094、#8092、#8059，其余 #8055 refactor 已略；llama.cpp、LMDeploy、TGI 零合入）。正式版水位全平：vLLM 仍 v0.32.0（v0.33.0rc2 连 release 页都还没有，只有裸 tag）、SGLang 仍 v0.5.22（v0.5.23 仍裸 tag、release 页 404）、FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 在路上）、TRT-LLM v1.4.0rc2、llama.cpp 仍 v0.8.0、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7。DeepInfer 星标亲核 24,564（0点版 24,544，+20），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：10/31 批次约 09:00 UTC 发布（cs.CL 108 篇，覆盖 10/29 18:00Z–10/30 18:00Z）；本轮收录 27 篇推理 serving 新论文（grep briefs/ 逐篇去重，FluidPD 已做深读）。广域：X/HN/Reddit/中文媒体/Spotify/Simon Willison/SGLang YouTube 窗口内零 serving 新料；捡漏 The Century Report 10/30 版（Akamai Inference、FlashMap，未报过）与 Simon Mo PyTorch Conf keynote（约 6 天前，未报过）。陷阱已排除：Nemotron 3.5 Super and Lightning 论文版（10/15 简报已报新闻版，同一发布不重复收）、EdgePace（18点版已评估不收）、Raincheck（10/29 22点版已报）、Latent Space AIE CODE 期（14点版已报）、EAGLE-4（10/20 旧）、Cloudflare GLM-5.3 串话（10/26 已覆盖）、Beri.net vLLM 安全复盘（10/26 CVE 线已覆盖）。深读 1 篇：FluidPD 精读笔记 + HTML（2 张原图已内嵌）+ README 已更新。*</p></body></html>
