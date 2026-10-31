@@ -1,0 +1,72 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月31日 10:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-31"/>
+<meta name="doc-ts" content="2026-10-31T17:00:41"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-31（10点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-31（10点版）</h1>
+<p>10点版来了，这轮货不多。SGLang 那边有一笔 PD 小修补，跟你评估的方向直接相关。</p>
+<h2>头条</h2>
+<p><strong>SGLang：又修了一处 PD 注册的小毛病</strong> SGLang 又修了一处 PD 注册的协议小毛病。</p>
+<p>#47638 是 #40107 的续集。</p>
+<p>注册帧像信封里的格子。 格子按顺序认位置。 之前 aux_item_lens 这帧被塞在最后。 而且只有开了定制传输才出现。 开关一变，格子就对不上了。 这笔把它挪到 aux_ptrs 旁边。 以后永远发送，不用就发空帧。 Mooncake 和 NIXL 两边都改了。 Mooncake 和 NIXL 是两套 PD 传输后端。 你评估 PD 解耦时，这块协议底盘更干净了。 来源：<a href="https://github.com/sgl-project/sglang/pull/47638">https://github.com/sgl-project/sglang/pull/47638</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM：批量接口的 token 账单修好了</strong></p>
+<p>#64757 修 prompt_tokens_details 上报。</p>
+<p>prompt_tokens_details 是 token 用量明细。 之前批量 chat 接口漏报了。 现在缓存命中、多模态的量都分别记。 做批量调用计费的人用得上。 来源：<a href="https://github.com/vllm-project/vllm/pull/64757">https://github.com/vllm-project/vllm/pull/64757</a></p>
+<p><strong>SGLang 另一笔：推理参数的校验</strong></p>
+<p>#47662 拒绝非法的 reasoning_effort。</p>
+<p>reasoning_effort 是控制模型想多深的参数。 写错了直接报错，不再默默跑。 来源：<a href="https://github.com/sgl-project/sglang/pull/47662">https://github.com/sgl-project/sglang/pull/47662</a></p>
+<p><strong>FlashInfer：一口气 6 笔，NVIDIA 侧内核调优</strong> 5 笔性能优化，1 笔测试修补。 Kimi-K3 是月之暗面的新模型。 SM100a 是 Blackwell 那代卡。 Kimi-K3 的 FP8 投影 GEMM 加了尾部切分。 GEMM 就是矩阵乘法。 融合 QK-RoPE 内核加了 PDL 启动开关。 PDL 是内核的灵活启动方式。 DeepGEMM 的 MQA 路径加了并行 logits 调度。 DeepGEMM 是 DeepSeek 的 GEMM 库。 MQA 是多查询注意力。 Kimi-K3 的注意力内核重调了。 覆盖 B200、B300、GB300 三张卡。 还有一笔是 GDN 训练侧的反向加速。 纯 NVIDIA 侧的工程，跟你手里的 AMD 卡没关系。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8111">https://github.com/flashinfer-ai/flashinfer/pull/8111</a></p>
+<p><strong>其余一句话带过</strong> TRT-LLM、LMDeploy、llama.cpp、TGI：零合入。</p>
+<p><strong>版本水位</strong> vLLM 还是 v0.32.0。 v0.33.0rc3 还是裸 tag。 SGLang 还是 v0.5.22。 v0.5.23 裸 tag 快两天了，说明还没写出来。 FlashInfer v0.7.3rc1 还在 pre-release。 TRT-LLM 还是 v1.4.0rc2。 llama.cpp 还是 v0.8.0。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,631</strong> 8点版时 24,609，两小时涨了 22 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 最新还是 10/29 那批。 周末不发公告，这是结构性空档。 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 出了个新单集，但不沾边</strong> 节目叫 Building ChatGPT for Finance。 嘉宾是 OpenAI 的金融服务负责人。 讲 ChatGPT 在金融服务企业怎么落地。 推理 serving 几乎没提。 感兴趣可以自己点进去听。 来源：<a href="https://open.spotify.com/show/2p7zZVwVF6Yk0Zsb4QmT7t?si=wl-Ig-kVTRejwA3a2kxTVw">https://open.spotify.com/show/2p7zZVwVF6Yk0Zsb4QmT7t?si=wl-Ig-kVTRejwA3a2kxTVw</a></p>
+<p><strong>广域其余：零新料</strong> X 上的几个账号都没动静。 HN、Reddit 没新帖。 机器之心、量子位没新报道。 Simon Willison、Latent Space、The Batch 都没更新。 YouTube 三个频道也没新视频。</p>
+<h2>值得深读</h2>
+<p>这轮没有。</p>
+<p>#47638 是 PD 协议的小修补。</p>
+<p>单看撑不起一篇精读，宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/31 08:00 到 10:00 PDT，对应 UTC 10/31 15:00 到 17:00。GitHub 按 merged 时间亲查：7 仓库共 9 个 merged PR（vLLM 1：#64757；SGLang 2：#47638、#47662；FlashInfer 6：#8121、#8120、#8117、#8113、#8112、#8111；TRT-LLM、LMDeploy、llama.cpp、TGI 零合入）。正式版水位：vLLM 仍 v0.32.0（v0.33.0rc3 仍裸 tag）；SGLang 仍 v0.5.22（v0.5.23 仍裸 tag，release notes 未出）；FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 仍 pre-release）；TRT-LLM 仍 v1.4.0rc2；llama.cpp 仍 v0.8.0（b12020 为每日快照，按惯例不算正式版）；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer（deepseek-ai/DeepInfer）星标亲核 24,631（8点版 24,609，+22），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：最新时间戳仍为 10/29 批次，本轮零入库（周末结构性空档），下一批北京时间 11/2 早 8 点。广域（子代理并行亲查）：X（lmsysorg、vLLM 官方、karpathy、jimfan、swyx）、HN、Reddit（r/LocalLLaMA、r/MachineLearning）、机器之心/量子位、Simon Willison、Latent Space newsletter、The Batch、SGLang/Latent Space/MLOps World YouTube 频道，窗口内零新料；Spotify 亲查：Latent Space 出了一个 10/31 新单集 Building ChatGPT for Finance（金融主题，与推理 serving 边缘相关，备选收录）。深读：本轮无（宁缺毋滥）。*</p></body></html>
