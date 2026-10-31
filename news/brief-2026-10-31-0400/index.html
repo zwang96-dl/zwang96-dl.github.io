@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月31日 04:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-31"/>
+<meta name="doc-ts" content="2026-10-31T10:59:10"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-31（4点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-31（4点版）</h1>
+<p>4点版来了，深夜档照样有货。 7 个框架仓库这轮一共 15 个合入。 FlashInfer 的 v0.7.3rc1 发布说明也落地了。 arXiv 和广域继续零新料。</p>
+<h2>头条</h2>
+<p><strong>FlashInfer v0.7.3rc1：发布说明落地，Kimi-K3 和 Rubin 是主角</strong> 之前几期只见 tag 不见说明，这回 80 多条变更一次放出。 Kimi-K3 的 latent MoE 有专属优化。 跑在 Blackwell 上。 latent MoE 是压缩版专家混合，省显存那套。 Rubin 是 NVIDIA 下一代卡，代号 SM107，支持也进来了。 DeepSeek-V4-Flash 的 NVFP4 解码在里面。 NVFP4 是 4 位浮点量化，省显存还快。 MiniMax-H3 的全 MLP 融合也在。 注意：这版要求 CUDA 13.4，老环境升级前先看一眼。 数字全是官方自报。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.3rc1">https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.3rc1</a></p>
+<h2>框架更新</h2>
+<p><strong>SGLang：4 笔，PD 那条最相关</strong> PD 解耦是读题和吐字分开跑。</p>
+<p>#40107：PD 解耦下采样器的自定义信息会丢，这笔把它保住。</p>
+<p>采样器是决定下一个词怎么选的模块。 你在评估 PD，这类小坑早知道早好。</p>
+<p>#46028：cosmos3 的条件哈希搬到 GPU 上算，BLAKE3 加速。</p>
+<p>#47321：rust-server 的 abort 请求按 Python 的口径收尾。</p>
+<p>#47630 是 hicache 的测试修，这轮略。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/40107">https://github.com/sgl-project/sglang/pull/40107</a></p>
+<p><strong>vLLM：3 笔，推测解码和多模态各一</strong></p>
+<p>#64368：ROCm 上 DSpark 草稿模型的 lm_head 也能量化了。</p>
+<p>lm_head 是最后输出词的那层，量化省显存。</p>
+<p>#63415：RADIO/NaViT 视觉编码器的编译修好了。</p>
+<p>#64869 是权重映射的小改动，这轮略。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64368">https://github.com/vllm-project/vllm/pull/64368</a></p>
+<p><strong>FlashInfer：7 笔，全是 cake 性能活儿</strong></p>
+<p>#8098：Kimi-K3 的 LatentMoE 在 GB300 上更快了。</p>
+<p>专治 TP=1 时解码尾巴拖时间。 解码尾巴是最后几个 token 慢的那段。</p>
+<p>#7911：Rubin 的 MegaMoE 变体可以用 autotune v2 选了。</p>
+<p>autotune 是自动挑最快 kernel 的。</p>
+<p>#8099：给 RTX 5090 和 PRO 6000 加了新调度。</p>
+<p>跑的是 FP8 MQA logits 那套 kernel。</p>
+<p>#8101 和 #8102：FP8 分页注意力和 MoE all-reduce 的调优。</p>
+<p>all-reduce 是多卡求和同步。</p>
+<p>#8097 和 #8088：两个算子的自动求导后端做成可选项。</p>
+<p>非确定性版本跑得更快，但结果每次可能差一点。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8098">https://github.com/flashinfer-ai/flashinfer/pull/8098</a></p>
+<p><strong>TRT-LLM：1 笔</strong></p>
+<p>#20306：MiniMax-M3 跑上 Blackwell 了，NVFP4 低延迟解码。</p>
+<p>NVFP4 是 4 位浮点量化，省显存还快。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20306">https://github.com/NVIDIA/TensorRT-LLM/pull/20306</a></p>
+<p><strong>其余一句话带过</strong> llama.cpp、LMDeploy、TGI：本轮零合入。</p>
+<p><strong>版本水位：正式版全没动</strong> vLLM 仍 v0.32.0，v0.33.0rc2 还是裸 tag。 SGLang 仍 v0.5.22。 v0.5.23 亲查 API，确认还是裸 tag。 FlashInfer 仍 v0.7.2.post1，rc1 说明刚落地。 TRT-LLM 仍 v1.4.0rc2。 llama.cpp 仍 v0.8.0。 LMDeploy 仍 v0.18.0，TGI 仍 v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,579</strong> 2点版时 24,564，两小时涨了 15 个。 代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 10/31 批次 2点版已全收。 下一批 11/01 00:00 UTC 才开，先跳过。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 出了 10/31 新单集，但跟 serving 关系不大</strong> 《Building ChatGPT for Finance》。 聊的是金融场景怎么做产品。 serving 干货这期没有，路过提一句。 来源：<a href="https://open.spotify.com/episode/2zbXUekUkJZyNkj8KgV0fJ">https://open.spotify.com/episode/2zbXUekUkJZyNkj8KgV0fJ</a></p>
+<p><strong>这轮广域还是零新料</strong> X 关键人物、HN、Reddit：窗口内零新帖。 中文媒体、Simon Willison 也一样。</p>
+<h2>值得深读</h2>
+<p>这轮没有。框架合入和发布说明都不够做一篇精读的料，宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/31 02:00 到 04:00 PDT，对应 UTC 10/31 09:00 到 11:00。GitHub Search API 按 merged 时间亲查：7 仓库共 15 个 merged PR，实质 13 个（vLLM 2：#64368、#63415，其余 #64869 杂项已略；SGLang 3：#40107、#46028、#47321，其余 #47630 测试已略；FlashInfer 7：#8098、#7911、#8099、#8101、#8102、#8097、#8088；TRT-LLM 1：#20306；llama.cpp、LMDeploy、TGI 零合入）。正式版水位全平：vLLM 仍 v0.32.0（v0.33.0rc2 仍裸 tag）、SGLang 仍 v0.5.22（v0.5.23 经 Releases API 亲查 404，确认仍是裸 tag）、FlashInfer 仍 v0.7.2.post1、TRT-LLM 仍 v1.4.0rc2、llama.cpp 仍 v0.8.0、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7。FlashInfer v0.7.3rc1 的 release notes 本轮首次收录（published 2026-10-30T05:42:23Z，之前各期只见 tag 未见正文）。DeepInfer 星标亲核 24,579（2点版 24,564，+15），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：10/31 批次 2点版已全收（27 篇），下一批 11/01 00:00 UTC 才开，本轮零入库。广域（子代理并行亲查）：X/HN/Reddit/中文媒体/Simon Willison/Latent Space newsletter 窗口内零 serving 新帖；Spotify 亲查：Latent Space 10/31 新单集《Building ChatGPT for Finance》为金融产品向，非 serving 干货，仅一句话带过。陷阱已排除：v0.5.23 与 v0.33.0rc2 的 200 页面只是 tag 页（Releases API 404），不是正式 release。深读：本轮无（宁缺毋滥）。*</p></body></html>
