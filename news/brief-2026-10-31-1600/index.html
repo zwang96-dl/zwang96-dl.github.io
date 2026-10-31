@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月31日 16:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-31"/>
+<meta name="doc-ts" content="2026-10-31T23:07:29"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-31（16点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-31（16点版）</h1>
+<p>16点版来了，这轮是维护窗口的下半场。</p>
+<h2>头条</h2>
+<p><strong>vLLM 给 AMD MI355X 补了三份调参菜谱</strong> 三笔全是 ROCm 文档。</p>
+<p>#64792：Mistral Large 4 的配方，加 TP4 和最低延迟预设。</p>
+<p>#64804 和 #64805：DeepSeek-V4.1-Flash、MiniMax-M3.1-Flash 的 MI355X 预设。</p>
+<p>名字里都挂着 AgentX 那个评测。 说白了，是在 AMD 卡上跑这三款模型的参数模板。 对你意味着：你在 MI350X 上评估，这三份能当调参起点。 但先泼盆冷水：只是文档，代码没动。 而且你手里是 MI350X，不是 MI355X。 照抄之前，先在你这张卡上验证一遍。 来源：</p>
+<ul><li><a href="https://github.com/vllm-project/vllm/pull/64792">https://github.com/vllm-project/vllm/pull/64792</a></li><li><a href="https://github.com/vllm-project/vllm/pull/64804">https://github.com/vllm-project/vllm/pull/64804</a></li><li><a href="https://github.com/vllm-project/vllm/pull/64805">https://github.com/vllm-project/vllm/pull/64805</a></li></ul>
+<h2>框架更新</h2>
+<p><strong>FlashInfer：9 笔全是 cake 内核</strong></p>
+<p>#8147：mega_moe 在 SM90 三个 BF16 形状上调优。</p>
+<p>#8146：mhc_det 加两个 H 维度，4096 那档在负载下更快。</p>
+<p>#8122：给 MSA 做了兼容的索引器，支持 TP2/TP4。</p>
+<p>#8143：Kimi K3 的 attention 在 B200/B300 上重调。</p>
+<p>#8145、#8142、#8140、#8139、#8138：FP8、FP4、sparse-MLA 的内核调优。</p>
+<p>SM90 是 Hopper，H100 那代；SM100 起是 Blackwell。 说白了，全是 NVIDIA 两代卡的厨房活儿。 跟你手里的 AMD 卡没关系。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8147">https://github.com/flashinfer-ai/flashinfer/pull/8147</a></p>
+<p><strong>llama.cpp：4 笔</strong></p>
+<p>#31406：共享 KV 的层，attention 张量旋转修了个 bug。</p>
+<p>共享 KV 就是几层合用一份草稿纸。 这笔是把拿歪的纸摆正。</p>
+<p>#31431：LFM3 开了 tensor split。</p>
+<p>#31401：Gemma 4 进了测试架构列表。</p>
+<p>#31459：miniaudio 依赖升级，音频库的，跟推理无关。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31406">https://github.com/ggml-org/llama.cpp/pull/31406</a></p>
+<p><strong>其余一句话带过</strong> SGLang、TRT-LLM、LMDeploy、TGI：零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0，v0.33.0rc3 还是裸 tag。 SGLang 还是 v0.5.22。 v0.5.23 裸 tag 第三天，release notes 还没写出来。 FlashInfer 还是 v0.7.2.post1，v0.7.3rc1 还在 pre-release。 TRT-LLM 还是 v1.4.0rc2。 llama.cpp 还是快照节奏。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,651</strong> 14点版时 24,649，两小时涨了 2 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 最新还是 10/29 那批。 周末不发公告，这是结构性空档。 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。 两条边界线说清楚： xAI 给 Grok API 加了隐形文本水印。 11 月 7 日起默认带统计水印。 这是模型厂商的政策，不是推理优化，不收录。 来源：<a href="https://cryptobriefing.com/xai-grok-text-watermarking-api/">https://cryptobriefing.com/xai-grok-text-watermarking-api/</a> NVIDIA 开发者论坛有人把 vLLM 原生搬上 RTX Spark。 Windows ARM64 上 Qwen3.8-Flash-Next 跑到 70.44 tok/s。 时间戳大概率在窗口外，社区移植，不收录。 来源：<a href="https://forums.developer.nvidia.com/t/native-vllm-on-rtx-spark-windows-arm64-2x-faster-than-nvidias-llama-cpp-recipe/387530">https://forums.developer.nvidia.com/t/native-vllm-on-rtx-spark-windows-arm64-2x-faster-than-nvidias-llama-cpp-recipe/387530</a></p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X、HN、Reddit、中文媒体都没动静。 Simon Willison、Latent Space、The Batch 都没更新。 YouTube 三个频道也没新视频。 Spotify 亲查：Latent Space 10/31 还是那两个金融主题单集。 跟 serving 不沾边，不收录。</p>
+<h2>值得深读</h2>
+<p>这轮没有。 三份 ROCm 预设是文档不是代码。</p>
+<p>#31406 是小 bug 修补。</p>
+<p>FlashInfer 全是 NVIDIA 内核调优。 单看都撑不起一篇精读，宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/31 14:00 到 16:00 PDT，对应 UTC 10/31 21:00 到 23:00。GitHub 按 merged 时间亲查：7 仓库共 16 个 merged PR（vLLM 3：#64792、#64805、#64804；SGLang 0；FlashInfer 9：#8147、#8146、#8122、#8143、#8145、#8142、#8140、#8139、#8138；llama.cpp 4：#31401、#31431、#31459、#31406；TRT-LLM、LMDeploy、TGI 零合入）。正式版水位全平：vLLM 仍 v0.32.0（v0.33.0rc3 仍裸 tag）；SGLang 仍 v0.5.22（v0.5.23 裸 tag 第三天，release notes 仍未写出）；FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 仍 pre-release）；TRT-LLM 仍 v1.4.0rc2（pre-release）；llama.cpp 仍快照节奏；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer（deepseek-ai/DeepInfer）星标亲核 24,651（14点版 24,649，+2），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv：本轮零入库（周末结构性空档），下一批北京时间 11/2 早 8 点。广域（子代理并行亲查+我亲核 X/HN/Reddit）：lmsysorg/vLLM 官方/karpathy/jimfan/swyx、HN、r/LocalLLaMA、机器之心/量子位、Simon Willison、Latent Space newsletter、The Batch、SGLang/Latent Space/MLOps World YouTube、Spotify，窗口内零 serving 强相关新料。边界项：xAI Grok API 隐形文本水印（cryptobriefing，窗口内但属厂商政策）与 NVIDIA 论坛 vLLM-on-RTX-Spark（时间戳大概率窗口外、社区移植），均不收录。深读：本轮无（宁缺毋滥）。*</p></body></html>
