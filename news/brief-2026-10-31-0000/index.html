@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月31日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-31"/>
+<meta name="doc-ts" content="2026-10-31T07:04:55"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-31（0点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-31（0点版）</h1>
+<p>0点版来了，这轮是 PD 解耦专场。 SGLang 修了 decode 传输的准入。 vLLM 把 NIXL 的 KV 搬运按层配对。 再加一篇南京大学的选路论文。 三条都跟你正在评估的 PD 解耦直接相关。</p>
+<h2>头条</h2>
+<p><strong>PD 解耦三连：修准入、顺搬运、学选路</strong> SGLang #46898：decode 传输时，第一次被拒就停准入。 说白了，交接时别再给注定失败的请求占坑。 vLLM #63416：NIXL 的 KV 传输按层配对。 草稿纸按层打包再搬，PD 搬运又顺了一点。 论文 DolphinRouting：离线学出一张查表。 请求一来就查表，决定本地读题还是远程读题。 实测相对 Dynamo 首字延迟降 5.7–7.9%。 来源：<a href="https://github.com/sgl-project/sglang/pull/46898">https://github.com/sgl-project/sglang/pull/46898</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/63416">https://github.com/vllm-project/vllm/pull/63416</a> 来源：<a href="https://arxiv.org/abs/2610.40292">https://arxiv.org/abs/2610.40292</a></p>
+<h2>框架更新</h2>
+<p><strong>SGLang：6 笔，PD 那条最值钱</strong></p>
+<p>#45876：DFLASH 在 GB300 上走调优分发。</p>
+<p>DFLASH 是 SGLang 的推测解码实现。</p>
+<p>#44718：AMD 的 mamba 走 hicache。</p>
+<p>hicache 是分层缓存，草稿纸溢出到主机内存。 checkpoint 不用再占 GPU 槽位。</p>
+<p>#43899：调度器重构，在跑请求改挂 owner 列表。</p>
+<p>#47489：rust-server 也支持 SIGTERM 优雅关闭。</p>
+<p>#47603 是 CI 清理，这轮略。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/45876">https://github.com/sgl-project/sglang/pull/45876</a></p>
+<p><strong>vLLM：4 笔，覆盖 RL、语音、KV、运维</strong></p>
+<p>#64336：RL 在线权重热加载。</p>
+<p>checkpoint 的张量直接写进正在跑的模型。</p>
+<p>#64215：新增 NVIDIA Canary 语音转文字。</p>
+<p>#63416：NIXL KV 按层配对（头条已讲）。</p>
+<p>#62967：gRPC 关机时排空在飞请求。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64336">https://github.com/vllm-project/vllm/pull/64336</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/64215">https://github.com/vllm-project/vllm/pull/64215</a></p>
+<p><strong>TRT-LLM：2 笔</strong></p>
+<p>#21142：KV cache reset 事件不再等推理。</p>
+<p>#20787：Sol-Attn 给视频模型 Wan 加 Z-order 排 token。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21142">https://github.com/NVIDIA/TensorRT-LLM/pull/21142</a></p>
+<p><strong>FlashInfer：2 笔实质</strong></p>
+<p>#8089：cake_mega_moe 在 SM90 上支持 BF16 压缩专家权重。</p>
+<p>专治 MoE 的 decode 轮次。</p>
+<p>#8087：修了一个 cuBLAS kernel 的问题。</p>
+<p>#8054 是纯重构，这轮略。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8089">https://github.com/flashinfer-ai/flashinfer/pull/8089</a></p>
+<p><strong>其余一句话带过</strong> llama.cpp：#31434，OpenCL 初始支持 fwht。 LMDeploy、TGI 本轮零合入。</p>
+<p><strong>版本水位：正式版全没动</strong> vLLM 仍 v0.32.0，v0.33.0rc2 在路上。 SGLang 仍 v0.5.22，v0.5.23 还是裸 tag。 release 页面还是 404，notes 没上线。 FlashInfer 仍 v0.7.2.post1。v0.7.3rc1 在路上。 TRT-LLM v1.4.0rc2 加 rc2.post1 在路上。 llama.cpp 仍 v0.8.0。LMDeploy 仍 v0.18.0。 TGI 仍 v3.3.7，release 还停在去年 12 月。</p>
+<p><strong>DeepInfer 星标 24,544</strong> 22点版时 24,530，两小时涨了 14 个。 代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 10/31 批次还没发布</strong> 截至 07:10 UTC，API 顶部最新还是 10/29 的。 这轮补扫 10/29–10/30 批次的漏网之鱼。 下面几篇都没在近期简报出现过。</p>
+<p><strong>DolphinRouting：给 PD 解耦做查表选路</strong> 南京大学 10/29 的论文，arXiv:2610.40292。 请求按四个特征分簇：原始长度、P/D 两侧有效长度、预估输出长度。 每个簇离线学一个二元动作：本地读题还是远程读题。 在线只查表，不打分，几乎零开销。 相对 Dynamo，混合负载 P90 首字延迟降 5.7–7.9%。 数字是作者自报，仅供参考。 这篇已做深读笔记，见文末。 来源：<a href="https://arxiv.org/abs/2610.40292">https://arxiv.org/abs/2610.40292</a></p>
+<p><strong>ConfluxServe：P/D 两端的资源账一起算</strong> arXiv:2610.37810，10/27 提交。 prefill 和 decode 的资源利用率、并行效率一起协调。 跟你评估 P/D 配比直接相关。 来源：<a href="https://arxiv.org/abs/2610.37810">https://arxiv.org/abs/2610.37810</a></p>
+<p><strong>长度预测的根本极限</strong> arXiv:2610.40541，10/29 提交。 研究 prefill 阶段预测输出长度的理论上限。 做调度、做 autotuner 都绕不开这个问题。 来源：<a href="https://arxiv.org/abs/2610.40541">https://arxiv.org/abs/2610.40541</a></p>
+<p><strong>P/D 两阶段的算力与能耗账</strong> arXiv:2610.39621，10/29 提交。 预测 prefill 和 decode 各自的计算时间与能耗。 部署前做容量规划的参考。 来源：<a href="https://arxiv.org/abs/2610.39621">https://arxiv.org/abs/2610.39621</a></p>
+<p><strong>MoE 上推测解码为何比预期好</strong> arXiv:2610.38981，10/28 提交。 稀疏 MoE 的推测解码效果超出理论预期。 跟 DFLASH、EAGLE 这条线能对上。 来源：<a href="https://arxiv.org/abs/2610.38981">https://arxiv.org/abs/2610.38981</a></p>
+<p><strong>DeepInfer-Mac：24GB 笔记本跑 750B MoE</strong> arXiv:2610.36564，10/27 提交。 把 DeepInfer 的思路搬到 Mac 笔记本上。 用户关注的 DeepInfer repo 的衍生论文。 来源：<a href="https://arxiv.org/abs/2610.36564">https://arxiv.org/abs/2610.36564</a></p>
+<h2>业内新闻</h2>
+<p><strong>钛媒体：英伟达 1.2 万行代码优化 Kimi K3</strong> 钛媒体 10/31 的报道，复盘 vLLM 10/16 的官方博客。 作者是英伟达 CentML 的 Benjamin Chislett。 他用 1.2 万行 CuTe DSL 写了个 Megakernel。 Megakernel 是算子融合的超级内核。 把解码阶段散落的内核合成一个。 SemiAnalysis 测：GB300 上每用户 423 词元/秒。 性能提升 1.68 倍，数字是第三方测算。 vLLM 自报 batch 1 超 840 词元/秒。 解码吞吐提升 1.5 到 2 倍。 最有意思的是博客里一句话，原文照录： &quot;Agent-optimized inference code is outpacing our review and maintenance workflow.&quot; 翻译过来：AI 写的推理代码，人类已经审不过来了。 Kimi K3 有 896 个专家，每次只激活 16 个。 这种极端稀疏的 MoE，推理全是工程活。 来源：<a href="https://news.china.com/socialgd/10000169/20261031/49830213.html">https://news.china.com/socialgd/10000169/20261031/49830213.html</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮广域还是零新料</strong> Spotify 查：Latent Space 还是 10/28 那期。 Simon Willison 无 serving 新帖。 SGLang 官方 YouTube 无新视频。 HN、Reddit、X 关键人物窗口内零 serving 新帖。 机器之心、量子位、InfoQ 无新稿。</p>
+<h2>值得深读</h2>
+<p><strong>DolphinRouting：PD 解耦下，每个请求该走哪条路</strong> 南京大学 arXiv:2610.40292，10/29 提交。 这篇能帮你解决 PD 评估里的选路问题。 跟之前深读的 AMPD 是姐妹篇。 AMPD 每轮在线算，这篇离线学好、在线只查表。 簇数和特征都是 autotuner 现成的旋钮。 精读笔记已生成，HTML 版图片已内嵌。</p>
+<p>*去重说明：本轮窗口是 10/30 22:00 到 10/31 00:00 PDT，对应 UTC 10/31 05:05 到 07:10（截查约 07:10 UTC）。GitHub Search API 按 merged 时间亲查：7 仓库共 16 个 merged PR，实质 14 个（vLLM 4：#64336、#64215、#63416、#62967；SGLang 6：#46898、#45876、#44718、#43899、#47489，其余 #47603 CI 已略；TRT-LLM 2：#21142、#20787；FlashInfer 3：#8089、#8087，其余 #8054 refactor 已略；llama.cpp 1：#31434 OpenCL fwht；LMDeploy、TGI 零合入）。正式版水位：vLLM 仍 v0.32.0（v0.33.0rc2 在路上）、SGLang 仍 v0.5.22（v0.5.23 仍裸 tag、release 页 404）、FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 在路上）、TRT-LLM v1.4.0rc2+rc2.post1、llama.cpp 仍 v0.8.0、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7。DeepInfer 星标亲核 24,544（22点版 24,530，+14），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：10/31 日批次截至 07:10 UTC 未发布；本轮补扫 10/29–10/30 批次漏网（grep briefs/ 逐篇去重）：DolphinRouting（已做深读）、ConfluxServe、2610.40541、2610.39621、2610.38981、DeepInfer-Mac；其余弱相关或已报过。广域：钛媒体 Kimi K3 Megakernel（10/31 今日新稿，未报过，亲核原文）、Spotify Latent Space 最新仍 10/28《Why Agents Love Supabase》、Simon Willison 无 serving 新帖、SGLang 官方 YouTube 无新视频、HN/Reddit/X 关键人物（lmsysorg、vllm 官方、karpathy、jimfan、swyx）窗口内零 serving 新帖、机器之心/量子位/InfoQ 零新稿。陷阱已排除：TAO 论文（06点版已定夺不收）、Latent Space AIE CODE 期（14点版已报）、Mistral Large 4 serving 数据（22点版已报）、Cloudflare GLM-5.3 串话（10/26 已覆盖）、EAGLE-4（10/20 旧）、Simon Willison Kimi 定价（API 定价类不收）、Beri.net vLLM 安全复盘（10/26 CVE 线已覆盖）。深读 1 篇：DolphinRouting 精读笔记 + HTML（图已内嵌）+ README 已更新。*</p></body></html>
