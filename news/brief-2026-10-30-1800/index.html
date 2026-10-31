@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月30日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-30"/>
+<meta name="doc-ts" content="2026-10-31T01:13:42"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-30（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-30（18点版）</h1>
+<p>18点版来了，SGLang 这轮还在磨 PD 搬运。 两笔合入都动了 P 到 D 的交接逻辑。 跟你正在评估的 PD 解耦直接相关。 vLLM 那边，Qwen3.5 的推理又省了一笔显存搬运。</p>
+<h2>头条</h2>
+<p><strong>SGLang：PD 交接又打了两块补丁</strong> PD 解耦就是 prefill 和 decode 分工流水线。</p>
+<p>#47544 把交接的 token 统一走 commit 通道。</p>
+<p>说白了就是交接单据走同一套账本。 KV 搬运的并发 bug 以后好查了。</p>
+<p>#47177 则省掉一次全局停顿。</p>
+<p>最后一个 chunk 的状态页索引回传主机。 不用再等 scheduler 同步的那一下。 两笔都是 PD 搬运账本的修补。 你评估时可以照着看。 来源：<a href="https://github.com/sgl-project/sglang/pull/47544">https://github.com/sgl-project/sglang/pull/47544</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/47177">https://github.com/sgl-project/sglang/pull/47177</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM：Qwen3.5 推理 fuse 掉两步显存搬运</strong> fuse 就是把几步算子合成一步。 norm+量化、gate+量化两步并成一个算子。 少在显存里倒一手，跑得更快。 这笔只动了 NVIDIA 卡。 来源：<a href="https://github.com/vllm-project/vllm/pull/64509">https://github.com/vllm-project/vllm/pull/64509</a></p>
+<p><strong>vLLM：Step-5-Preview 登上 ROCm</strong> Step-5-Preview 是个新模型。 ROCm 是 AMD 卡的软件栈。 这笔让 AMD 卡也能直接跑它。 跟你的 AMD 评估线相关。 来源：<a href="https://github.com/vllm-project/vllm/pull/61837">https://github.com/vllm-project/vllm/pull/61837</a></p>
+<p><strong>vLLM：多层 MTP 选模块修错位</strong> MTP 是多 token 预测，一次猜好几个词。 Qwen3.5 和 Qwen3-Next 之前选错了模块。 修的是推测解码的准确性。 来源：<a href="https://github.com/vllm-project/vllm/pull/62111">https://github.com/vllm-project/vllm/pull/62111</a></p>
+<p><strong>vLLM：离线 DP 的集合通信对齐</strong> DP 是数据并行，多卡各干各的。 异步调度下，各 rank 的集合通信之前对不齐。 修的是&quot;卡片之间等不到一起&quot;的问题。 来源：<a href="https://github.com/vllm-project/vllm/pull/64457">https://github.com/vllm-project/vllm/pull/64457</a></p>
+<p><strong>SGLang：多卡采样确定性修复</strong> TP 是张量并行，一张卡的活儿拆多张干。 TP 大于 1 时，top-p 和 top-k 的归一化各卡不一致。 这笔修的就是这个，输出确定性保住了。 跟你 10/29 深读的确定性账本是一个账。 来源：<a href="https://github.com/sgl-project/sglang/pull/38565">https://github.com/sgl-project/sglang/pull/38565</a></p>
+<p><strong>SGLang：多模态图片&quot;解压炸弹&quot;直接拒收</strong> 解压炸弹是故意做大的恶意图片。 解压能把内存撑爆。 这笔遇到就直接回 400，不让它进 serving。 来源：<a href="https://github.com/sgl-project/sglang/pull/43866">https://github.com/sgl-project/sglang/pull/43866</a></p>
+<p><strong>SGLang：抢占重算不回来就直接终止</strong> 请求被抢占后，KV 丢了要重算。 重算也算不回来的，现在直接终止。 以前是卡在那儿不动。 来源：<a href="https://github.com/sgl-project/sglang/pull/47521">https://github.com/sgl-project/sglang/pull/47521</a></p>
+<p><strong>SGLang：H20 的 Qwen3-30B-A3B 加了 FP8 调优</strong> MoE 是混合专家模型，按需激活一部分专家。 H20 上这款模型的块 FP8 加了 Triton 内核配置。 国产卡跑 MoE 更顺了。 来源：<a href="https://github.com/sgl-project/sglang/pull/47070">https://github.com/sgl-project/sglang/pull/47070</a></p>
+<p><strong>SGLang：CUDA graph 首次启动不卡了</strong> CUDA graph 是把算子排好一次性发射。 可执行体上传改用独立 stream。 首次启动的卡顿没了。 来源：<a href="https://github.com/sgl-project/sglang/pull/47295">https://github.com/sgl-project/sglang/pull/47295</a></p>
+<p><strong>SGLang：HiCache 的 prefill 等待更短</strong> HiCache 是 SGLang 的层级 KV 缓存。 offload 拷贝的完成信号发得更早了。 prefill 少等一会儿。 来源：<a href="https://github.com/sgl-project/sglang/pull/46884">https://github.com/sgl-project/sglang/pull/46884</a></p>
+<p><strong>SGLang：GLM-5.3 恢复 decode 融合</strong> CP 是上下文并行，prefill 拆长上下文用。 这笔在 CP prefill 下恢复 TP decode 的算子融合。 graph 尺寸也调回来了。 来源：<a href="https://github.com/sgl-project/sglang/pull/46857">https://github.com/sgl-project/sglang/pull/46857</a></p>
+<p><strong>SGLang：一句话三笔</strong></p>
+<p>#45834：diffusion 的 LoRA 合并缓存修 key 判等。</p>
+<p>缓存不再打错。</p>
+<p>#45683：Muse Spark 自动推硬件启动参数。</p>
+<p>cookbook 更好写了。</p>
+<p>#47353：性能计时器支持多监听器。</p>
+<p>监控更方便。 来源：<a href="https://github.com/sgl-project/sglang/pull/45834">https://github.com/sgl-project/sglang/pull/45834</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/45683">https://github.com/sgl-project/sglang/pull/45683</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/47353">https://github.com/sgl-project/sglang/pull/47353</a></p>
+<p><strong>TRT-LLM：DeepSeek-V4.1-Flash 登上桌面卡</strong> SM120 是 RTX 50 系列桌面卡的架构代号。 这笔让它能在桌面卡上跑。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20769">https://github.com/NVIDIA/TensorRT-LLM/pull/20769</a></p>
+<p><strong>FlashInfer 三笔：kernel 牙膏继续挤</strong></p>
+<p>#8049：B200 级 decode 内核换更优的 launch 配置。</p>
+<p>#8047：RTX 50 系的 FP8 group-128 提速。</p>
+<p>#8032：bf16 GEMM 的 PDL 变体加 autotune。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8049">https://github.com/flashinfer-ai/flashinfer/pull/8049</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8047">https://github.com/flashinfer-ai/flashinfer/pull/8047</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8032">https://github.com/flashinfer-ai/flashinfer/pull/8032</a></p>
+<p><strong>其余一句话带过</strong> LMDeploy、TGI、llama.cpp 本轮零合入。</p>
+<p><strong>正式版全平</strong> vLLM 仍 v0.32.0。 SGLang 仍 v0.5.22，v0.5.23 还是裸 tag。 llama.cpp 仍 v0.8.0。 LMDeploy 仍 v0.18.0。 TGI 仍 v3.3.7。 FlashInfer 仍 v0.7.2.post1。</p>
+<p><strong>DeepInfer 星标 24,501</strong> 16点版时 24,488，两小时涨了 13 个。 代码还是没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 窗口内零入库</strong> 10/31 的日批次到 00:58 UTC 还没发出来。 下一批出来再补扫。</p>
+<p><strong>小米开源了个 0.8B 的文档 OCR 小模型</strong> Xiaomi-OCR-0，专啃文档扫描件。 Apache 2.0 协议，本地用 SGLang 或 vLLM 就能跑。 技术报告已上 arXiv，文档解析分数很能打。 多模态小模型又添一员，你的多模态线可以留意。 来源：<a href="https://arxiv.org/pdf/2609.36136v1.pdf">https://arxiv.org/pdf/2609.36136v1.pdf</a> 来源：<a href="https://pasqualepillitteri.it/en/news/28641/xiaomi-ocr-0-open-source-ocr-model-documents">https://pasqualepillitteri.it/en/news/28641/xiaomi-ocr-0-open-source-ocr-model-documents</a></p>
+<h2>业内新闻</h2>
+<p><strong>SageMaker 推理支持 GPU 切分</strong> MIG 是把一张 GPU 切成最多 7 个隔离分区。 SageMaker 实时推理端点现在支持这个。 多个小模型可以拼一张卡，代码不用改。 说白了是把大卡的边角料利用起来。 这条是当天消息，信源是 AWS 新闻镜像站。 官方公告为准。 来源：<a href="https://aws-news.com/article/2026-10-30-amazon-sagemaker-ai-inference-now-supports-gpu-partitioning-for-real-time-endpoints">https://aws-news.com/article/2026-10-30-amazon-sagemaker-ai-inference-now-supports-gpu-partitioning-for-real-time-endpoints</a></p>
+<p><strong>英国推理芯片 Fractile 拿下近 7.7 亿美元</strong> 存算一体就是把计算塞进内存旁边做。 Fractile 做这个，C 轮约 5.77 亿英镑。 Anthropic 还给了它 2.5 亿美元订单。 芯片还没量产，计划 2027 年进数据中心。 推理芯片军备赛又加一注。 来源：<a href="https://dailyaibrief.com/news/fractile-raises-577-million-ai-inference-chips-6DE1TnRp">https://dailyaibrief.com/news/fractile-raises-577-million-ai-inference-chips-6DE1TnRp</a></p>
+<p><strong>国产推理芯片 Nano-core Chip 连融两轮</strong> 超 10 亿人民币 C2 轮，上个月刚拿完 C1。 做近存计算加 RISC-V 的推理芯片。 三个芯片已流片，2027 年初送样量产。 来源：<a href="https://technode.com/2026/10/30/ai-inference-chip-startup-nano-core-chip-raises-over-rmb-1-billion-in-series-c2-funding/">https://technode.com/2026/10/30/ai-inference-chip-startup-nano-core-chip-raises-over-rmb-1-billion-in-series-c2-funding/</a></p>
+<p><strong>Epoch AI：芯片季度新增算力增速放缓</strong> Q2 2026 每季度新增约 630 万张 H100 等效卡。 每 9.1 个月翻一番。 但增速从年化 6 倍掉到 2.5 倍。 芯片还在扩产，只是没以前那么猛了。 来源：<a href="https://pivotnews.ai/five/ai-chip-capacity-added-each-quarter-now-doubles-every-9">https://pivotnews.ai/five/ai-chip-capacity-added-each-quarter-now-doubles-every-9</a></p>
+<p><strong>OpenAI 给企业 API 加了隐私推理</strong> Zero Data Retention 就是请求数据不留存。 Private Inference 走机密计算，现在 preview。 企业客户的合规账更好算了。 来源：<a href="https://fourweekmba.com/ai-openai-offers-zero-retention-and-private-inference-to-firms/">https://fourweekmba.com/ai-openai-offers-zero-retention-and-private-inference-to-firms/</a></p>
+<p><strong>Mistral Large 4 在 vLLM 上有个小坑</strong> 12点版报过它放开放权重。 有人 10/30 实测。 chat template 在 vLLM 上直接挂掉。 大模型发版，推理引擎适配永远差一口气。 来源：<a href="https://medium.com/@mcthkayaa/mistral-large-4-review-what-the-open-weight-licence-allows-what-it-costs-and-where-it-stands-7dc69bee8146">https://medium.com/@mcthkayaa/mistral-large-4-review-what-the-open-weight-licence-allows-what-it-costs-and-where-it-stands-7dc69bee8146</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮广域零新料</strong> HN、Reddit、X 关键人物都没 serving 新帖。 机器之心、量子位无新稿。 Latent Space newsletter 10/30 那期。 已在 14点版报过。 Spotify 上 Latent Space 无新单集。</p>
+<h2>值得深读</h2>
+<p>这轮没有标深读。 框架侧全是合入和修补，没有新方法。 宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/30 16:00 到 18:00 PDT，对应 UTC 10/30 23:00 到 10/31 01:00（截查约 01:10 UTC）。GitHub Search API 按 merged 时间亲查：7 仓库共 31 个 merged PR，其中 11 个为文档/测试/CI/内部杂项（vLLM 3、SGLang 4、TRT-LLM 1、FlashInfer 3）已略去；LMDeploy、TGI、llama.cpp 零合入。实质 20 个：vLLM 4（#64509、#64457、#62111、#61837）、SGLang 12（#47544、#47177、#47521、#38565、#45834、#43866、#47070、#47295、#46884、#46857、#45683、#47353）、TRT-LLM 1（#20769）、FlashInfer 3（#8049、#8047、#8032）。正式版全平：vLLM 仍 v0.32.0、SGLang 仍 v0.5.22（v0.5.23 仍裸 tag、无 release 页）、llama.cpp 仍 v0.8.0、LMDeploy 仍 v0.18.0、TGI 仍 v3.3.7、FlashInfer 仍 v0.7.2.post1。DeepInfer 星标亲核 24,501（16点版 24,488，+13），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv 亲查：abs:&quot;LLM inference&quot; 最新仍是 10/29 17:18 UTC 那篇，本窗口零入库（10/31 日批次截至 00:58 UTC 未发布，下一批再补扫）。广域经子代理扫：HN（10/30 当天 serving 相关零新帖）、Reddit（r/LocalLLaMA、r/MachineLearning 零新帖）、X（lmsysorg、vLLM 官方、karpathy、jimfan、swyx 窗口内零 serving 新帖）、机器之心/量子位/InfoQ 中文站（零新稿）、Latent Space newsletter（10/30 期已在 14点版报过）、Simon Willison（无 serving 内容）、The Batch（万圣节特刊，无 serving）、SGLang 官方 YouTube（无新视频）、Spotify（Latent Space 最新单集仍是 10/27 Anthropic 期）——窗口内全零新料。业内新闻 7 条皆为 10/30 当天消息（窗口外，首次收录）：SageMaker GPU 分区（MIG，信源为 AWS 新闻镜像站非官网）、Fractile C 轮、Nano-core Chip C2 轮、Epoch AI 算力分析、Xiaomi-OCR-0 开源（技术报告 arXiv:2609.36136）、OpenAI Private Intelligence、Mistral Large 4 vLLM chat template 小坑（12点版的后续）。陷阱已排除：Dynamic Beads Nested Run（厂商单方口径无验证）、Darkbloom（londontribune 单线非主流媒体）、聚合营销站（peterindia.net、wally.network、spheron.network、5min-ai.com 等）。本轮无深读。*</p></body></html>
