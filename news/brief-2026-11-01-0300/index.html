@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月1日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-01"/>
+<meta name="doc-ts" content="2026-11-01T10:59:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-01（3点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-01（3点版）</h1>
+<p>3点版来了，周日凌晨继续安静。 15 个合入，分属三个仓库。 头条跟 prefill 提速有关，带了实测数字。</p>
+<h2>头条</h2>
+<p><strong>SGLang：prefill 终于能用可打断的 CUDA 图了</strong></p>
+<p>#38943：在解码上下文并行（把解码拆到多卡跑）下支持可打断的 prefill CUDA 图。</p>
+<p>CUDA 图是把一串 GPU 操作录下来反复回放，省掉每次调度开销。 之前这个组合会直接启动崩溃，只能回退到 eager 模式。 现在 Kimi-K3 上 2 节点实测。首 token 时间从 404ms 降到 133ms。 吞吐 +14%，解码速度不变。 前缀命中的请求还是回退 eager，后续再做。 跟你研究的 P/D 分离直接相关。这是在把 prefill 和 decode 各自优化玩到极致。 来源：<a href="https://github.com/sgl-project/sglang/pull/38943">https://github.com/sgl-project/sglang/pull/38943</a></p>
+<h2>框架更新</h2>
+<p><strong>SGLang：P/D 解耦又修了个初始化 bug</strong></p>
+<p>#47727：finalize_bootstrap 被包在 assert 里。</p>
+<p>Python 的 -O 优化模式会把 assert 整句删掉。 结果请求带着没初始化好的发送器就跑了。 现在改成先执行、再断言结果。 跟你评估的 P/D 解耦是同一块代码。 来源：<a href="https://github.com/sgl-project/sglang/pull/47727">https://github.com/sgl-project/sglang/pull/47727</a></p>
+<p><strong>SGLang：kv_events 修了两个小毛病</strong></p>
+<p>#47732：ipc 端点按 DP rank 加后缀，多卡不再起冲突。</p>
+<p>DP 是数据并行（同一份模型复制多份跑）。 关闭时队列满了会抛异常，现在忽略它正常退出。 来源：<a href="https://github.com/sgl-project/sglang/pull/47732">https://github.com/sgl-project/sglang/pull/47732</a></p>
+<p><strong>SGLang：视频扩散的相机注意力小优化</strong></p>
+<p>#47686：Nomas 相机注意力在单块时直接读每帧的 value。</p>
+<p>省掉一层中间搬运。 视频生成方向的，不是大模型 serving 主线。 来源：<a href="https://github.com/sgl-project/sglang/pull/47686">https://github.com/sgl-project/sglang/pull/47686</a></p>
+<p><strong>SGLang：LoRA 测试只是 CI 整理</strong></p>
+<p>#45981：简化 LoRA 测试，加了重跑分组。</p>
+<p>纯 CI 活儿，无功能变化。 来源：<a href="https://github.com/sgl-project/sglang/pull/45981">https://github.com/sgl-project/sglang/pull/45981</a></p>
+<p><strong>vLLM：KV offload 删掉没人用的 touch 钩子</strong></p>
+<p>#63900：CachePolicy 和 OffloadingManager 里的 touch 方法全删。</p>
+<p>KV offload 是把草稿纸（KV cache）搬到 CPU 或磁盘。 之前版本已把&quot;最近使用&quot;逻辑搬到了 on_request_finished。 这笔是收尾清理，LRU 和 ARC 行为不变。 第三方自己写的缓存策略注意。以后必须实现 on_request_finished。 来源：<a href="https://github.com/vllm-project/vllm/pull/63900">https://github.com/vllm-project/vllm/pull/63900</a></p>
+<p><strong>FlashInfer：7 笔全是 cake 内核</strong> cake 是 FlashInfer 的新内核生成框架。 全是 NVIDIA SM100/SM107 侧的厨房活儿。 RMSNorm、GDN、KDA、MSA indexer 都有调优。 跟你手里的 AMD 卡没关系。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8177">https://github.com/flashinfer-ai/flashinfer/pull/8177</a></p>
+<p><strong>其余一句话带过</strong> TRT-LLM、LMDeploy、llama.cpp、TGI：零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0，v0.33.0rc3 还是裸 tag。 SGLang 还是 v0.5.22，v0.5.23 的 notes 第七天还没出。 FlashInfer 还是 v0.7.2.post1，v0.7.3rc1 还在预发布。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。 llama.cpp 照旧每日快照。</p>
+<p><strong>DeepInfer 星标 24,739</strong> 1点版时 24,725，两小时涨了 14 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 周末不发公告，这是结构性空档。 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X 四位大V、HN、Reddit 都没动静。 机器之心、量子位、InfoQ 没更新。 Simon Willison 没更新。 Latent Space、The Batch 也没更新。 YouTube 三个频道没新视频。 Spotify 亲查：Latent Space 仍停在 10/31 的两期金融主题。 跟 serving 不沾边，不收录。</p>
+<h2>值得深读</h2>
+<p>这轮没有。</p>
+<p>#38943 有实测数字，但只是框架内的工程优化。</p>
+<p>不是论文也不是架构级变化，宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 11/01 01:00 到 03:00 PDT，对应 UTC 11/01 08:00 到 10:00。GitHub 按 merged 时间亲查：7 仓库共 15 个 merged PR（vLLM 1：#63900 KV offload 删掉无用的 touch 钩子；SGLang 5：#38943 解码上下文并行下支持可打断 prefill CUDA 图、#47727 解耦 finalize_bootstrap 移出 assert、#47732 kv_events 按 DP rank 偏移 ipc 端点并修队列满关闭异常、#47686 扩散 Nomas 相机注意力小优化、#45981 LoRA 测试 CI 整理；FlashInfer 7 全 cake 内核：#8172 GDN 非确定性上下文并行 chunked autograd 后端、#8178 rmsnorm_silu_gate 路由与反向内核、#8185 文档、#8174 KDA 精益本地 arena、#8180 BF16 KDA prefill bin-mix、#8175 MHC 反向满 SM 负载、#8177 MSA indexer sm_107a 解码早取指；TRT-LLM、LMDeploy、llama.cpp、TGI 零合入）。注意 FlashInfer 另有 5 笔（#8181、#8176、#8183、#8184、#8187）在 UTC 10:00 之后合入，留给 5点版窗口（UTC 10:00–12:00），本轮不计。版本水位全平：vLLM 仍 v0.32.0（v0.33.0rc3 仍裸 tag）；SGLang 仍 v0.5.22（v0.5.23 仍裸 tag，notes 第七天未出）；FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 仍预发布）；TRT-LLM 仍 v1.4.0rc2；llama.cpp 仍每日快照；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer 星标亲核 24,739（1点版 24,725，本轮 +14），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 零入库（周末结构性空档），下一批北京时间 11/2 早 8 点。广域（子代理并行亲查 + Spotify connector 亲核）：X 四位大V、HN、Reddit、中文三家、Simon Willison/Latent Space/The Batch、YouTube 三频道，窗口内零 serving 强相关新料（@karpathy 10/31 是 QwenPU 玩法、不相关；Latent Space 10/31 两期金融播客超窗且不收录）。深读：这轮无（宁缺毋滥）。*</p></body></html>
