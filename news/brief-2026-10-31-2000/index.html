@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月31日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-31"/>
+<meta name="doc-ts" content="2026-11-01T03:12:55"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-31（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-31（20点版）</h1>
+<p>20点版来了，这轮终于不是维护窗口了。 冒出一条全新的多模态技术线，值得你花三分钟。</p>
+<h2>头条</h2>
+<p><strong>SGLang 接了百度的百页文档 OCR 模型</strong> 百度 10/27 开源了 Unlimited-OCR 2。 专门一次读完几百页文档的 OCR 模型。 核心招叫 SR-SWA（稀疏引用滑动窗口注意力）。 说白了：注意力只盯着固定的 512 个引用词元。 像人抄书只看正在抄的那段，不来回翻。 结果：文档越长，每步解码成本几乎不变。 模型 3.3B 参数、MIT 协议，单卡 BF16 能跑。 SGLang 这边 #47196 加了新后端、模型和处理器。 长文档还能按页窗口切分，页之间复用 KV。 KV 就是解码时的草稿纸，复用等于少写几遍。 跟你的方向对口：多模态长序列的 KV 效率。 做 PD 解耦评估时，prefill 的 KV 账可以跟它对表。 来源：<a href="https://github.com/sgl-project/sglang/pull/47196">https://github.com/sgl-project/sglang/pull/47196</a> 论文：<a href="https://arxiv.org/abs/2610.39308">https://arxiv.org/abs/2610.39308</a> 注意：模型 10/27 发布、论文 10/29 上 arXiv。 此前各期没报过，这次作为新技术线补报。</p>
+<h2>框架更新</h2>
+<p><strong>SGLang：GB300 上的 PD 解耦菜谱</strong></p>
+<p>#47699 补了一份 cookbook。</p>
+<p>MiniMax-M3.1-Flash 在 GB300 上的 PD 解耦配置。 Dynamo 加 SGLang，6 个 DEP2 prefill worker。 prefill 那边开 HiCache，decode 那边 DEP8。 说白了：P 和 D 怎么配人的实战参数。 平台是 NVIDIA GB300，不是你手里的 AMD。 数字可以参考，照搬前先在你卡上验证。 来源：<a href="https://github.com/sgl-project/sglang/pull/47699">https://github.com/sgl-project/sglang/pull/47699</a></p>
+<p><strong>SGLang 其余三笔，一句话带过</strong></p>
+<p>#46860：diffusion 输出布局重构，行为不变。</p>
+<p>#47563：CI 健康检查加重试，防网络抖动误杀。</p>
+<p>#47566：训练侧对齐加速，跟推理没关系。</p>
+<p><strong>FlashInfer：5 笔全是 Blackwell 侧内核</strong> B300 上 FP8 mega_mhc 调优。 B200/B300 上 Kimi-K3 的 attn_res 路由。 sm_103a 上 mega_moe_v3 的 TP 调度。 B200 上 FP4 的 MQA logits 覆盖更多形状。 还有一个 host 侧竞态修，数值逐比特一致。 全是 NVIDIA 厨房活儿，跟你 AMD 卡没关系。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8156">https://github.com/flashinfer-ai/flashinfer/pull/8156</a></p>
+<p><strong>TRT-LLM：1 笔纯基建</strong></p>
+<p>#20494：构建产物从自建站迁到 AWS Artifactory。</p>
+<p>跟推理性能没关系。</p>
+<p><strong>其余一句话带过</strong> vLLM、llama.cpp、LMDeploy、TGI：零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0，v0.33.0 正式版还没影。 SGLang 还是 v0.5.22，v0.5.23 仍是裸 tag。 FlashInfer 还是 v0.7.2.post1。 TRT-LLM 预发布还是 v1.4.0rc2。 llama.cpp 还是 v0.8.0 快照节奏。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,677</strong> 18点版时 24,656，两小时涨了 21 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 最新还是 10/29 那批。 周末不发公告，这是结构性空档。 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。 FuriosaAI 的 6.2 亿美元融资 10/29 的 20点版报过。 不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X 的五位大V、HN、Reddit 都没动静。 机器之心、量子位没更新。 Simon Willison、Latent Space、The Batch 也没更新。 YouTube 三个频道没新视频。 播客这轮也没 serving 相关的新单集。</p>
+<h2>值得深读</h2>
+<p><strong>百度 Unlimited OCR Works 2</strong> arXiv 2610.39308，10/29 提交。 推荐理由：这篇给&quot;多模态长文档解码太贵&quot;开了副狠药。 引用集锁死，KV 常数级，跟你评估的 KV 成本账直接对口。 SGLang 侧按页窗口切分、跨页复用 KV 的手法。 跟 HiCache、prefix caching 是同一条复用账。 精读笔记已生成，见深度阅读目录。</p>
+<p>*去重说明：本轮窗口是 10/31 18:00 到 20:00 PDT，对应 UTC 11/01 01:00 到 03:00。GitHub 按 merged 时间亲查：7 仓库共 11 个 merged PR（vLLM 0；SGLang 5：#47196、#47699、#46860、#47563、#47566；FlashInfer 5：#8156、#8155、#8154、#8152、#8153；TRT-LLM 1：#20494；llama.cpp、LMDeploy、TGI 零合入）。正式版水位全平：vLLM 仍 v0.32.0（v0.33.0 正式版未出）；SGLang 仍 v0.5.22（v0.5.23 仍裸 tag）；FlashInfer 仍 v0.7.2.post1；TRT-LLM 预发布仍 v1.4.0rc2；llama.cpp 仍 v0.8.0；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer 星标亲核 24,677（18点版 24,656，+21），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 零入库（周末结构性空档），下一批北京时间 11/2 早 8 点。广域（子代理并行亲查）：lmsysorg/vLLM 官方/karpathy/jimfan/swyx、HN、r/LocalLLaMA、r/MachineLearning、机器之心/量子位/新浪科技、Simon Willison/Latent Space newsletter/The Batch、SGLang/Latent Space/MLOps World YouTube、播客，窗口内零 serving 强相关新料。边界项：kimkj.com 的 11/1 中国 AI 简报（内容为 10/31 白天新闻，不在窗口内）不收录；FuriosaAI 6.2 亿美元融资（10/28）已于 10/29 的 20点版报过，不重复。深读：Unlimited OCR Works 2（arXiv 2610.39308），精读笔记已生成。*</p></body></html>
