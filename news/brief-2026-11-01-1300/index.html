@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月1日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-01"/>
+<meta name="doc-ts" content="2026-11-01T21:06:18"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-01（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-01（13点版）</h1>
+<p>13点版来了。周日下午，GitHub 上有几笔实在货。 头条跟你手里的 AMD 卡直接相关，多看两眼。</p>
+<h2>框架更新</h2>
+<p><strong>SGLang：在 AMD 路线上砍掉一大笔冗余通信 #47180</strong> MI 卡跑 DeepSeek 系模型，decode 和长上下文更快。 DCP 是解码阶段的上下文并行，多卡分摊注意力计算。 DSA 是稀疏 MLA 后端，用 triton 内核。 每层 MLA 开工前，全组先 all-gather 一遍 query。 这笔改成每张卡本地存整套投影权重，自己算自己的。 相当于每人手里都有一套图纸，不用再传来传去。 合并阶段也瘦了身：a2a（卡间全互联通信）数据量减半。 实测在 MI355X 上跑的。 配置是 TP4/EP4 加 DCP4，KV 用 FP8。 12K extend：1267ms 降到 1007ms，快 21%。 131K 全新 prefill：12.87 秒降到 10.30 秒。 24 并发 decode，每用户快 3.4%。 正确性没动：passkey 全过，GSM8K 基本持平。 DeepSeek 家族默认就开这个优化，不用你手动配。 来源：<a href="https://github.com/sgl-project/sglang/pull/47180">https://github.com/sgl-project/sglang/pull/47180</a></p>
+<p><strong>vLLM：修了个调度器卡顿的毛病 #63927</strong> KV 往下层 offload，就是显存装不下、暂存到内存。 这时候 Python 垃圾回收每轮停调度器 100 毫秒以上。 元凶是 OffloadingEventsTracker。 每个 offload 块，它都记一条元数据。 每条都被 Python 的循环 GC 盯着，堆越大卡得越狠。 修法很直接：让这些元数据退出循环 GC 的视线。 类比一下：仓库每全盘点一次，流水线就停一次。 现在把常驻货架的标签从盘点清单里剔掉了。 你测 QPS 时如果开 KV offload，延迟毛刺可能就来自这。 来源：<a href="https://github.com/vllm-project/vllm/pull/63927">https://github.com/vllm-project/vllm/pull/63927</a></p>
+<p><strong>vLLM：一笔 1 行小修 #64999</strong> 昨天改 CUDA 分发时，顺手把一个计算重叠优化关掉了。 影响的是 Qwen3.5 的 GDN 模块。 这笔把它恢复，还加了个回归测试防再犯。 来源：<a href="https://github.com/vllm-project/vllm/pull/64999">https://github.com/vllm-project/vllm/pull/64999</a></p>
+<p><strong>SGLang：MiniMax-M3 的权重同步 bug #47612</strong> 稀疏 attention 层把 qkv 融成大矩阵，老位置变空壳。 RL（强化学习）在线更新权重时，往空壳里写，第一轮就崩。 10 行小修，跟你的评估线关系不大。 来源：<a href="https://github.com/sgl-project/sglang/pull/47612">https://github.com/sgl-project/sglang/pull/47612</a></p>
+<p><strong>一句话带过</strong> FlashInfer 8 笔，全是英伟达新卡的 cake 内核调优。 SM107 的 DV-split prefill 最高 3.01 倍。 B200 的 FP8 上下文切分也有加速。 跟你的 AMD 卡没关系。 TRT-LLM、llama.cpp、LMDeploy、TGI 零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0。 v0.33.0 的 release 页还是 404。 SGLang 还是 v0.5.22。 v0.5.23 的 notes，第十天还没影。 FlashInfer 稳定版还是 v0.7.2.post1。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。 llama.cpp 还是每日快照。</p>
+<p><strong>DeepInfer 星标 24,805</strong> 11点版时 24,799，两小时涨了 6 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末零入库</strong> 还是结构性空档，下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p><strong>无</strong> 芯片、云厂商都没动静。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X 大V、HN、Reddit 都没窗口内动静。 机器之心、量子位、InfoQ 没更新。 Simon Willison 没新文章。 Latent Space、The Batch 也没新文章。 Spotify 亲核了。 Latent Space 最新还是 10/31 两期金融主题。</p>
+<h2>值得深读</h2>
+<p><strong>无</strong> 这轮宁缺毋滥，没做深读。 SGLang 那笔 AMD 优化，数据都在上面了，直接看就行。</p>
+<p>*去重说明：本轮窗口是 UTC 11/01 17:50 到 20:15（上一轮 11点版结束于 18:00 UTC，前后各含 10 分钟兜底）。GitHub 用 search API 按 merged 时间精确过滤（gh API 实际返回）：窗口内 12 个 merged PR——vLLM 2 个（#64999 18:27Z，GDN in_proj_ba 重叠恢复，1 行+回归测试；#63927 18:27Z，KV Offload 元数据退出循环 GC，修调度器 100ms+ 停顿）；SGLang 2 个（#47180 19:17Z，AMD DSA DCP 路径干掉 query all-gather、a2a 减半，MI355X 实测 extend -13%~-21%、131K prefill -20%、24 并发 decode +3.4%，passkey/GSM8K 无回归；#47612 19:51Z，MiniMax-M3 融合 qkv 的在线权重更新 IndexError）；FlashInfer 8 个（#8219 18:09Z、#8220 18:39Z、#8222 18:48Z、#8223 19:02Z、#8225 19:56Z、#8202 19:42Z、#8198 19:41Z、#8191 19:41Z，全是英伟达 cake 内核调优 SM107/SM103a/B200，最高 3.01x）；TRT-LLM、llama.cpp、LMDeploy、TGI 零合入。版本水位全平：vLLM 仍 v0.32.0（v0.33.0 tag 在、release 页 404 未发）；SGLang 仍 v0.5.22（v0.5.23 裸 tag，notes 第十天未出）；FlashInfer 仍 v0.7.2.post1；TRT-LLM 仍 v1.4.0rc2；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7；llama.cpp 每日快照。DeepInfer 星标亲核 24,805（11点版 24,799，+6），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 官方 API 实时确认零入库（最新仍 10/29 批次），下一批北京时间 11/2 早 8 点。广域亲查：X 一线人物无窗口内可验证新帖；HN 两条结果均为 5 天/32 天前旧帖；Reddit 无结果；中文三家、Simon Willison、Latent Space、The Batch 均无窗口内新料；Spotify 亲核 Latent Space 无新单集（最新仍 10/31 两期金融主题）。*</p></body></html>
