@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月31日 18:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-31"/>
+<meta name="doc-ts" content="2026-11-01T01:05:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-31（18点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-31（18点版）</h1>
+<p>18点版来了，这轮是夜班开场。 GitHub 亲查 12 个合入，PD 那条线又拧了一颗螺丝。</p>
+<h2>头条</h2>
+<p><strong>SGLang #46373：PD 流水线又拧紧一颗螺丝</strong> decode 这边想复用旧 KV 时，上一轮 forward 还在飞。 这时候就把新地址告诉 prefill，旧 forward 可能写错地方。 这笔让新地址等在飞的 forward 落地再公布。 跟 10点版的 #47638、12点版的 #47652 是同一条协议线。 你评估 PD 解耦时，底盘又稳了一点。 来源：<a href="https://github.com/sgl-project/sglang/pull/46373">https://github.com/sgl-project/sglang/pull/46373</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM：MiniMax 预设加了 GB200/GB300 两档</strong> 16点版 MI355X 那三份菜谱的续集，这次是 GB 两档。</p>
+<p>#64910 更新 GB300，#64909 更新 GB200。</p>
+<p>源头都是 SemiAnalysis 的 InferenceX 评测线。 说白了：NVIDIA 新卡的调参模板，跟你手里 AMD 卡没关系。 来源：<a href="https://github.com/vllm-project/vllm/pull/64910">https://github.com/vllm-project/vllm/pull/64910</a></p>
+<p><strong>SGLang #47691：启动时先查监听表</strong> 这笔修的是 SGLang 的监听配置检查。 监听表里 DP 的 rank 可能漏写，也可能写重。 监听 0.0.0.0 的还可能报出一个连不上的 IPv6 地址。 现在启动时直接拦下，配置不对就报错。 鲁棒性小修补，跟推理性能没关系。 来源：<a href="https://github.com/sgl-project/sglang/pull/47691">https://github.com/sgl-project/sglang/pull/47691</a></p>
+<p><strong>SGLang #47586：diffusion 的 attention 走 cuDNN</strong> 这笔是 diffusion 生图方向的，跟你没关系。 Cosmos3 的 GQA 层在 B200 上没走上 cuDNN。 GQA 是 query 头比 KV 头多的注意力变体。 判断逻辑把头数不同的都拦了，这笔把拦错的放行。 来源：<a href="https://github.com/sgl-project/sglang/pull/47586">https://github.com/sgl-project/sglang/pull/47586</a></p>
+<p><strong>FlashInfer：5 笔全是 cake 内核</strong></p>
+<p>#8148：mhc 非确定性列板的双尺寸尾调度。</p>
+<p>#8151 和 #8150：sm_100a/sm_103a 上 deepgemm MQA 的 FP4 路径。</p>
+<p>#8149：QK-RoPE 融合内核在 Blackwell 上 decode 启动更快。</p>
+<p>#7910：SM107 量化 combine 跳过 masked 的槽位。</p>
+<p>全是 NVIDIA 侧的内核调优，跟你的 AMD 卡没关系。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8148">https://github.com/flashinfer-ai/flashinfer/pull/8148</a></p>
+<p><strong>llama.cpp #30886：InternVL 的位置表摆正了</strong> InternViT 的位置表是 CLS 在前、图片块在后。 CLS 就是每张图开头那颗特殊 token。 llama.cpp 的图却把 CLS 塞在图片块后面。 结果每块图都拿错了位置，CLS 的位置给了第 0 块。 这笔把 CLS 放回最前面，多模态图片嵌入更准了。 跟 9 月 llava 那笔 #25844 是同一个坑。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30886">https://github.com/ggml-org/llama.cpp/pull/30886</a></p>
+<p><strong>llama.cpp #31442：Hexagon DMA 大步长修</strong> Hexagon 是高通的 DSP，DMA 步长超过 24 位就传错。 小众硬件的修补，跟你没关系。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31442">https://github.com/ggml-org/llama.cpp/pull/31442</a></p>
+<p><strong>其余一句话带过</strong> TRT-LLM、LMDeploy、TGI：零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0，v0.33.0rc3 还是裸 tag。 SGLang 还是 v0.5.22，v0.5.23 还没写说明。 FlashInfer 还是 v0.7.2.post1。 llama.cpp 还是快照节奏。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,656</strong> 16点版时 24,651，两小时涨了 5 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 最新还是 10/29 那批。 周末不发公告，这是结构性空档。 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X、HN、Reddit、中文媒体、博客都扫了。 YouTube、Spotify 也扫了，无窗口内新料。 Latent Space 两期新单集都是金融话题，不沾边。</p>
+<h2>值得深读</h2>
+<p>这轮没有。</p>
+<p>#46373 是 PD 协议线的小修补，之前两期已当头条讲过。</p>
+<p>#30886 是多模态位置小 bug，单看撑不起一篇精读。</p>
+<p>宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/31 16:00 到 18:00 PDT，对应 UTC 10/31 23:00 到 11/01 01:00。GitHub 按 merged 时间亲查：7 仓库共 12 个 merged PR（vLLM 2：#64910、#64909；SGLang 3：#46373、#47691、#47586；FlashInfer 5：#8148、#8151、#8150、#8149、#7910；llama.cpp 2：#30886、#31442；TRT-LLM、LMDeploy、TGI 零合入）。正式版水位全平：vLLM 仍 v0.32.0（v0.33.0rc3 仍裸 tag）；SGLang 仍 v0.5.22（v0.5.23 的 release notes 仍未写出）；FlashInfer 仍 v0.7.2.post1；TRT-LLM 预发布仍 v1.4.0rc2；llama.cpp 仍快照节奏；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer（deepseek-ai/DeepInfer）星标亲核 24,656（16点版 24,651，+5），pushed_at 仍 2026-10-26T05:30:52Z，代码无更新。arXiv：本轮零入库（周末结构性空档，最新仍 10/29 批次），下一批北京时间 11/2 早 8 点。广域（子代理并行亲查）：lmsysorg/vLLM 官方/karpathy/jimfan/swyx、HN、r/LocalLLaMA、机器之心/量子位/新浪科技、Simon Willison/Laojin Frontier Daily、Latent Space newsletter、The Batch、SGLang/Latent Space/MLOps World YouTube、Spotify（Latent Space 两期 10/31 新单集皆为金融 agent 主题，serving 弱相关，小时级发布时间无法确认），窗口内零 serving 强相关新料。Cloudflare KV 泄漏复盘（explainx.ai，10/26 披露后续分析）子代理建议补报，但 10/26 的 16点版已报过并做了深读（deep-20261026-sglang-pd-kv），不重复。深读：本轮无（宁缺毋滥）。*</p></body></html>
