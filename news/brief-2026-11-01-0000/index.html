@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月1日 00:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-01"/>
+<meta name="doc-ts" content="2026-11-01T07:00:14"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-01（0点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-01（0点版）</h1>
+<p>0点版来了，周六深夜最后一轮。 17 个合入，全是维护节奏。 头条是 Qwen3.5 的 AgentX 优化合回主干。</p>
+<h2>头条</h2>
+<p><strong>Qwen3.5 的 AgentX 优化合回 TRT-LLM 主干</strong> 接 22点版那条 Qwen3.5-397B-A17B。 这轮是 NVIDIA 侧的续集。</p>
+<p>#20815 把 AgentX 分支的优化合回了主干。</p>
+<p>AgentX 就是测 Agent 场景速度的评测口径。 调优集中在 SM103 这代芯片上。 动的是 attention、GEMM、MoE 三件套。 AllReduce 是多卡通信，也一起调了。 B200 那边是 vLLM 的菜谱，GB300 这边是内核调优。 这套模型快成各家秀肌肉的赛场了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20815">https://github.com/NVIDIA/TensorRT-LLM/pull/20815</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM：流水线并行的小 bug 修了</strong></p>
+<p>#59961：各 PP stage 复用同一份 indexer top-k。</p>
+<p>GLM-5.x 和 DeepSeek-V3.2 风格的模型因此 GSM8K 掉分。 PP 就是把模型切几层分给不同卡接力跑。 这笔把拿错的候选名单摆正了。 掉分修好了。 来源：<a href="https://github.com/vllm-project/vllm/pull/59961">https://github.com/vllm-project/vllm/pull/59961</a></p>
+<p><strong>SGLang：多模态多节点传输保住共享内存</strong></p>
+<p>#44574：多节点 PP 下，多模态特征传输走共享内存。</p>
+<p>之前退化到 pickle 序列化，慢一个数量级。 Pickle 是 Python 自带的打包方式。 这笔让多模态特征继续走快道。 来源：<a href="https://github.com/sgl-project/sglang/pull/44574">https://github.com/sgl-project/sglang/pull/44574</a></p>
+<p><strong>SGLang：torch.compile 下 K/V 分开记账</strong></p>
+<p>#47670：torch.compile 下 K 和 V 用独立内存分配。</p>
+<p>K/V 就是注意力机制的草稿纸。 避免合并分配的 fused buffer 出问题。 说白了，分开记账，省得糊到一起。 来源：<a href="https://github.com/sgl-project/sglang/pull/47670">https://github.com/sgl-project/sglang/pull/47670</a></p>
+<p><strong>SGLang：扩散那条线两条修补</strong></p>
+<p>#45065：非 OOM 的不可恢复 CUDA 错误，worker 直接退出。</p>
+<p>别硬撑着浪费时间。</p>
+<p>#46871：逐层 offload 时 tied vocab 表留在设备上。</p>
+<p>Tied vocab 是输入输出共用词表。 Offload 就是把用不着的先搬出显存。 修 LingBot-Video-MoE 在 H100 上文本编码崩溃。 来源：<a href="https://github.com/sgl-project/sglang/pull/45065">https://github.com/sgl-project/sglang/pull/45065</a></p>
+<p><strong>SGLang：CI 与文档一笔带过</strong></p>
+<p>#47619：CUDA 测试按重要性重新分档，PR gate 只跑核心。</p>
+<p>#47723：CI 技能指南文档更新。</p>
+<p>#46685：AMD monokernels 的 pin 每日自动更新，纯例行。</p>
+<p><strong>llama.cpp：OpenCL 首度支持 IQ3</strong></p>
+<p>#31338：OpenCL 后端第一次支持 IQ3 量化。</p>
+<p>IQ3 是压得很狠的 3 bit 量化。 Intel 和 AMD 集显路线能吃到了。</p>
+<p>#31076：SYCL 后端修编译探测，不影响运行。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31338">https://github.com/ggml-org/llama.cpp/pull/31338</a></p>
+<p><strong>FlashInfer：6 笔全是 cake 内核</strong></p>
+<p>#8171：Kimi K3 的 attn 算子在 B300/B200 上换更快内核。</p>
+<p>#8168：MoE grouped GEMM 反向提速。</p>
+<p>#8166：SM120 上 5090 的 FP8 MQA 换更快路由。</p>
+<p>#8167、#8164、#8163：RMSNorm 门、确定性 loss、mega_mhc 的调优。</p>
+<p>全是 NVIDIA 侧厨房活儿。 SM120 是 5090 那代消费卡的代号。 跟你手里的 AMD 卡没关系。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8171">https://github.com/flashinfer-ai/flashinfer/pull/8171</a></p>
+<p><strong>其余一句话带过</strong> LMDeploy、TGI：零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0，v0.33.0rc3 还是裸 tag。 SGLang 还是 v0.5.22，v0.5.23 的 notes 第五天还没出来。 FlashInfer 还是 v0.7.2.post1，v0.7.3rc1 还在预发布。 TRT-LLM 还是 v1.4.0rc2。 llama.cpp 照旧每日快照。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,705</strong> 22点版时 24,687，两小时涨了 18 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 最新还是 10/29 那批。 周末不发公告，这是结构性空档。 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X 五位大V、HN、Reddit 都没动静。 机器之心、量子位、InfoQ 没更新。 Simon Willison、Latent Space、The Batch 都没更新。 YouTube 三个频道也没新视频。 Spotify 亲查：Latent Space 10/31 有两期新单集。 但都是金融主题，跟 serving 不沾边，不收录。</p>
+<h2>值得深读</h2>
+<p>这轮没有。 17 个合入都是修补、CI、文档和内核调优。 单看都撑不起一篇精读，宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 10/31 22:00 到 11/01 00:00 PDT，对应 UTC 11/01 05:00 到 07:00。GitHub 按 merged 时间亲查：7 仓库共 17 个 merged PR（vLLM 1：#59961 流水线并行共享 indexer top-k 跨 stage 复用；SGLang 7：#44574 多模态多节点 PP 保留共享内存传输、#47670 torch.compile 下 K/V 独立分配、#45065 diffusion worker 不可恢复错误退出、#46871 diffusion 逐层 offload tied vocab 留设备、#47619 CUDA 测试分档、#47723 CI 文档、#46685 AMD pin 每日例行；TRT-LLM 1：#20815 Qwen3.5 GB300 AgentX 分支优化合回主干；llama.cpp 2：#31076 SYCL LevelZero 编译探测、#31338 OpenCL 首支持 IQ3；FlashInfer 6 全 cake 内核：#8171/#8168/#8166/#8167/#8164/#8163；LMDeploy、TGI 零合入）。版本水位全平：vLLM 仍 v0.32.0（v0.33.0rc3 仍裸 tag）；SGLang 仍 v0.5.22（v0.5.23 仍裸 tag，notes 第五天未出）；FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 仍预发布）；TRT-LLM 仍 v1.4.0rc2；llama.cpp 仍每日快照；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer 星标亲核 24,705（22点版 24,687，+18），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 零入库（周末结构性空档），下一批北京时间 11/2 早 8 点。广域（子代理并行亲查 + Spotify 亲核）：X 五位（lmsysorg/vllm_project/karpathy/jimfan/swyx）、HN、Reddit（r/LocalLLaMA）、机器之心/量子位/InfoQ、Simon Willison/Latent Space/The Batch、YouTube 三频道，窗口内零 serving 强相关新料（Latent Space 两期金融播客不收录）。深读：这轮无（宁缺毋滥）。*</p></body></html>
