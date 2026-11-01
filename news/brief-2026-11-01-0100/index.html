@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月1日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-01"/>
+<meta name="doc-ts" content="2026-11-01T08:59:04"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-01（1点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-01（1点版）</h1>
+<p>1点版来了，周六凌晨这轮很安静。 7 个合入，全在 GitHub 上。 头条跟你评估的 P/D 解耦（把预处理和生成分开跑）直接相关。</p>
+<h2>头条</h2>
+<p><strong>SGLang 修了个误伤健康 prefill 的 bug</strong> 接头人出事，旁边看热闹的也被开了。</p>
+<p>#47704：清故障连接时用了地址前缀匹配。</p>
+<p>host:3000 挂了，host:30001 和 host:30002 也被清掉。 后者都是健康的 prefill 节点，纯属误伤。 现在改成全地址匹配，误伤没了。 说白了，杀鸡儆猴，结果把看热闹的鸡也宰了。 来源：<a href="https://github.com/sgl-project/sglang/pull/47704">https://github.com/sgl-project/sglang/pull/47704</a></p>
+<h2>框架更新</h2>
+<p><strong>SGLang：P/D 解耦启动时的清理修补</strong></p>
+<p>#47725：bootstrap 先起线程、后初始化 loop。</p>
+<p>中途 close 会直接抛 AttributeError。 __init__ 里先把字段置空，没起来的就不清。 bootstrap 是 prefill 和 decode 传 KV 的接头人。 这个修的是启动失败时的清理逻辑。 来源：<a href="https://github.com/sgl-project/sglang/pull/47725">https://github.com/sgl-project/sglang/pull/47725</a></p>
+<p><strong>SGLang：视频扩散模型去噪快 1.7 倍</strong></p>
+<p>#47121：Wan-Animate-2 去噪提速 1.7 倍。</p>
+<p>Wan-Animate-2 是做视频生成的扩散模型。 之前短视频也要为填充帧付注意力计算的钱。 换成精确 FA3 路径，不再为填充帧买单。 FP8 参考 K/V 可选，进一步省显存。 来源：<a href="https://github.com/sgl-project/sglang/pull/47121">https://github.com/sgl-project/sglang/pull/47121</a></p>
+<p><strong>vLLM：MoE 路由跳过凑数填充</strong></p>
+<p>#64955：grouped 路由和 Muse 的 NVFP4 路径跳过 padding。</p>
+<p>padding 是为了凑整塞进来的占位符，不参与计算。 现在把跳过逻辑融进 CUDA top-k 内核。 省掉几次单独的 CUDA 启动。 MoE 是专家混合模型，每次只激活几个专家。 来源：<a href="https://github.com/vllm-project/vllm/pull/64955">https://github.com/vllm-project/vllm/pull/64955</a></p>
+<p><strong>vLLM：KV offload 事件带上请求上下文</strong></p>
+<p>#63695：存储事件带上请求的上下文。</p>
+<p>KV offload 就是把草稿纸搬到 CPU 或磁盘上。 之前事件里不知道这块数据是谁的。 现在 CPU、文件、对象存储全链带上。 这是大重构拆出来的第一步，纯传输层改动。 来源：<a href="https://github.com/vllm-project/vllm/pull/63695">https://github.com/vllm-project/vllm/pull/63695</a></p>
+<p><strong>FlashInfer：两笔全是 cake 内核</strong></p>
+<p>#8173：B200 上 FP8 MQA 换了更快的内核程序。</p>
+<p>MQA 是省显存的多查询注意力。</p>
+<p>#8169：反向计算里，乘加换乘法，哪里快用哪里。</p>
+<p>全是 NVIDIA 侧厨房活儿。 跟你手里的 AMD 卡没关系。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8173">https://github.com/flashinfer-ai/flashinfer/pull/8173</a></p>
+<p><strong>其余一句话带过</strong> TRT-LLM、LMDeploy、llama.cpp、TGI：零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0，v0.33.0rc3 还是裸 tag。 SGLang 还是 v0.5.22，v0.5.23 的 notes 第六天还没出。 FlashInfer 还是 v0.7.2.post1，v0.7.3rc1 还在预发布。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。 llama.cpp 照旧每日快照。</p>
+<p><strong>DeepInfer 星标 24,725</strong> 0点版时 24,705，两小时涨了 20 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 周末不发公告，这是结构性空档。 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X 五位大V、HN、Reddit 都没动静。 机器之心、量子位、InfoQ 没更新。 Simon Willison 没更新。 Latent Space、The Batch 也没更新。 YouTube 三个频道没新视频。 Spotify 亲查：Latent Space 10/31 两期都是金融主题。 跟 serving 不沾边，不收录。</p>
+<h2>值得深读</h2>
+<p>这轮没有。 两个 P/D 解耦修补对你评估方向相关，但都是小修补。 宁缺毋滥。</p>
+<p>*去重说明：本轮窗口是 11/01 00:00 到 01:00 PDT，对应 UTC 11/01 07:00 到 08:00。GitHub 按 merged 时间亲查：7 仓库共 7 个 merged PR（vLLM 2：#64955 MoE grouped 与 Muse NVFP4 路由融合 padding 跳过、#63695 KV offload 存储事件带上请求上下文；SGLang 3：#47704 故障清理全地址匹配防误伤健康 prefill、#47725 bootstrap 先初始化 loop/runner 再启动线程、#47121 Wan-Animate-2 精确 FA3 去噪 1.7 倍加速；FlashInfer 2 全 cake 内核：#8173 B200 FP8 MQA 四级 TMEM ring bucket、#8169 conv1d 确定性反向按实测换乘法；TRT-LLM、LMDeploy、llama.cpp、TGI 零合入）。版本水位全平：vLLM 仍 v0.32.0（v0.33.0rc3 仍裸 tag）；SGLang 仍 v0.5.22（v0.5.23 仍裸 tag，notes 第六天未出）；FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 仍预发布）；TRT-LLM 仍 v1.4.0rc2；llama.cpp 仍每日快照；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer 星标亲核 24,725（0点版 24,705，本轮 +20），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 零入库（周末结构性空档），下一批北京时间 11/2 早 8 点。广域（子代理并行亲查 + Spotify connector 亲核）：X 五位、HN、Reddit、中文三家、Simon Willison/Latent Space/The Batch、YouTube 三频道，窗口内零 serving 强相关新料（Latent Space 10/31 两期金融播客超窗且不收录）。深读：这轮无（宁缺毋滥）。*</p></body></html>
