@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 10月31日 22:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-10-31"/>
+<meta name="doc-ts" content="2026-11-01T05:06:20"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-10-31（22点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-10-31（22点版）</h1>
+<p>22点版来了，周六深夜档。 15 个合入，但没一个够深读的份量。 头条是个新面孔：Qwen3.5-397B-A17B。</p>
+<h2>头条</h2>
+<p><strong>vLLM 给 Qwen3.5-397B-A17B 写了份 B200 菜谱</strong> 先报个新模型：Qwen3.5-397B-A17B。 397B 总参数、17B 激活的 MoE 大块头。 NVIDIA 给它写了份双 B200 的调参菜谱。 NVFP4 量化，MTP 一次猜 3 个 token。 MTP 就是一次多猜几个 token 的投机解码。 KV 草稿纸用 FP8，显存不够就往 CPU 搬 160G。 场景是长上下文的 agentic coding。 菜谱里还带了 mamba-ssm-cache 选项。 说明这是个混合架构模型。 说白了：AgentX 评测菜谱又添一员。 之前是 MiniMax 和 DeepSeek 的菜谱。 来源：<a href="https://github.com/vllm-project/vllm/pull/64607">https://github.com/vllm-project/vllm/pull/64607</a></p>
+<h2>框架更新</h2>
+<p><strong>SGLang：HiCache 添了本地 NVMe 后端</strong></p>
+<p>#39880 给 HiCache 加了个 fast_file 后端。</p>
+<p>之前那个 HiCacheFile 是演示玩具。 读串行、写不原子、磁盘用量没上限。 fast_file 换成向量 IO、并行读。 跟演示版共用磁盘格式。 L3 本地层终于有生产可用的了。 KV 三级缓存这条线可以跟一下。 来源：<a href="https://github.com/sgl-project/sglang/pull/39880">https://github.com/sgl-project/sglang/pull/39880</a></p>
+<p><strong>SGLang：统一内存池重构又添两块砖</strong></p>
+<p>#47705：索引键命名从按模型改成按内存排布。</p>
+<p>#40916：QSA 索引器的 host 池改从 buffer 构建。</p>
+<p>纯重构，无行为变化。 这是 8点版统一 KV 池那条线的续集。 来源：<a href="https://github.com/sgl-project/sglang/pull/47705">https://github.com/sgl-project/sglang/pull/47705</a></p>
+<p><strong>SGLang：AMD 侧一条性能小涨</strong></p>
+<p>#40708：Qwen3.5 的专家路由换 aiter 实现。</p>
+<p>512 个专家里每层挑 10 个，之前是 vLLM 自带的实现。 8 张 MI355X 上每秒多吐 1.27% 的 token。 开 MTP 能到 2.22%。 你手里是 MI350X，同代架构，大概率也能吃到。 PR 正文里把模型名写成了 Qwen3.8，疑似笔误。 来源：<a href="https://github.com/sgl-project/sglang/pull/40708">https://github.com/sgl-project/sglang/pull/40708</a></p>
+<p><strong>SGLang：其余一笔，一句话带过</strong></p>
+<p>#47029：extend attention 的 KV 偏移改 int64，正确性小修。</p>
+<p><strong>FlashInfer：6 笔全是 cake 内核</strong> GB300 的 RMSNorm 路由重调。 SM100/SM103 的 GDN、alpha_moe 内核也调了。 全是 NVIDIA 厨房活儿，跟你 AMD 卡没关系。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8162">https://github.com/flashinfer-ai/flashinfer/pull/8162</a></p>
+<p><strong>TRT-LLM：2 笔</strong></p>
+<p>#20900：FORCE_CHUNK 微批调度加了上限检查。</p>
+<p>context 上限配小了，创建时就报错。 不再等调度循环里炸。 混合线性注意力模型开 KV 复用时容易踩这个坑。</p>
+<p>#21378：纯基建，waive 一个失败的测试用例。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20900">https://github.com/NVIDIA/TensorRT-LLM/pull/20900</a></p>
+<p><strong>其余一句话带过</strong> llama.cpp、LMDeploy、TGI：零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0，v0.33.0rc3 仍是裸 tag。 SGLang 还是 v0.5.22。 v0.5.23 的 release notes 第四天还没写出来。 其余全没动：FlashInfer v0.7.2.post1。 TRT-LLM 那个 post1 tag 是 10/28 的旧货。 llama.cpp 还是 v0.8.0。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,687</strong> 20点版时 24,677，两小时涨了 10 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 最新还是 10/29 那批。 周末不发公告，这是结构性空档。 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X 的五位大V、HN、Reddit 都没动静。 机器之心、量子位没更新。 Simon Willison 那边没更新。 Latent Space、The Batch 也没动静。 YouTube 三个频道没新视频，播客也没 serving 相关单集。 周六深夜，社区也在睡觉。</p>
+<h2>值得深读</h2>
+<p>这轮无。 15 个合入里，菜谱是文档、重构没行为变化、后端是工程实现。 都够不上深读的线。</p>
+<p>*去重说明：本轮窗口是 10/31 20:00 到 22:00 PDT，对应 UTC 11/01 03:00 到 05:00。GitHub 按 merged 时间亲查：7 仓库共 15 个 merged PR（vLLM 1：#64607 Qwen3.5-397B-A17B B200 NVFP4 TP2 agentic preset；SGLang 5：#47705 memory-pool index key 重命名、#39880 hicache fast_file 本地后端、#40916 QSA indexer host pools、#47029 extend attention KV offsets int64、#40708 AMD qwen3.5 aiter topk_gating；FlashInfer 6：#8162/#8157/#8161/#8160/#8159/#8158 全 cake 内核；TRT-LLM 2：#21378 infra、#20900 FORCE_CHUNK 上限检查；llama.cpp、LMDeploy、TGI 零合入）。正式版水位全平：vLLM 仍 v0.32.0（v0.33.0rc3 仍裸 tag）；SGLang 仍 v0.5.22（v0.5.23 仍裸 tag，release notes 第四天未出）；FlashInfer 仍 v0.7.2.post1；TRT-LLM 预发布仍 v1.4.0rc2.post1（10/28 旧 tag）；llama.cpp 仍 v0.8.0；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer 星标亲核 24,687（20点版 24,677，+10），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 零入库（周末结构性空档），下一批北京时间 11/2 早 8 点。广域（子代理并行亲查）：X 五位（lmsysorg/vllm_project/karpathy/jimfan/swyx）、HN、r/LocalLLaMA、r/MachineLearning、机器之心/量子位、Simon Willison/Latent Space newsletter/The Batch、SGLang/Latent Space/MLOps World YouTube、播客、social 补充，窗口内零 serving 强相关新料。深读：这轮无。*</p></body></html>
