@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月1日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-01"/>
+<meta name="doc-ts" content="2026-11-01T15:00:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-01（7点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-01（7点版）</h1>
+<p>7点版来了，周日早晨继续安静。 10 个合入，SGLang 占了 4 个。 头条跟你评估的 P/D 解耦正相关，值得多看两眼。</p>
+<h2>头条</h2>
+<p><strong>SGLang：P/D 解耦补上了一个漏水点 #46395</strong> P/D 解耦就是把推理拆成两道工序。 prefill 负责读题算草稿，decode 接着写答案。 以前有个小缺口：decode 写出的字，它的 KV（草稿纸）不进共享仓库。 下一轮 prefill 只能恢复旧问题，上轮生成的字得重算一遍。</p>
+<p>#46395 让 decode 也把 KV 写进 linker（共享的 KV 仓库）。</p>
+<p>prefill 存过的前缀页自动跳过，不重复上传。 说白了：两道工序终于共用一本草稿纸了。 你评估 P/D 解耦时，这个补丁正相关。 来源：<a href="https://github.com/sgl-project/sglang/pull/46395">https://github.com/sgl-project/sglang/pull/46395</a></p>
+<h2>框架更新</h2>
+<p><strong>SGLang：你的 MI350X 吃到一口优化 #47236</strong> 你的 MI350X 代号 gfx950。 SGLang 里 MoE（混合专家模型）路由有条 Triton 快路。 之前这条快路只认 hidden 4096 的模型。 Qwen3-Next-80B-A3B 是 hidden 2048，被漏掉了。 这笔补丁把 2048 也纳进来。 decode 阶段走上 Triton 路由，MoE 选专家更快。 跑 Qwen3-Next 时 AMD 卡这块能省点时间。 来源：<a href="https://github.com/sgl-project/sglang/pull/47236">https://github.com/sgl-project/sglang/pull/47236</a></p>
+<p><strong>DeepSeek-V4.1：prefill 索引算子修对齐 #47684</strong> 长上下文时，算力块分得不整齐。 每轮 tile 结尾都有一小截空转，等于白掏钱。 改完按整波 SM 对齐，不浪费。 纯英伟达侧优化，跟你的 AMD 卡没关系。 来源：<a href="https://github.com/sgl-project/sglang/pull/47684">https://github.com/sgl-project/sglang/pull/47684</a></p>
+<p><strong>一句话带过</strong> SGLang 还有一笔 #47488。 diffusion 离线推理出错时，直接 fail-fast。 不再假装没事继续跑，避免脏结果。 FlashInfer 6 笔全是 cake（新内核生成框架）调优。 动了 deepgemm、GDN、RMSNorm、MoE 四类内核。 全是英伟达新卡的厨房活儿。 跟你的 AMD 卡没关系。 vLLM、TRT-LLM 这轮零合入。 LMDeploy、llama.cpp、TGI 同样零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0，SGLang 还是 v0.5.22。 FlashInfer 稳定版还是 v0.7.2.post1。 TRT-LLM 还是 v1.4.0rc2（预发布）。 llama.cpp 照旧每日快照。 LMDeploy v0.18.0，TGI v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,776</strong> 5点版时 24,756，两小时涨了 20 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 周末不发公告，这是结构性空档。 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p>这轮零新料。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X 大V、HN、Reddit 都没动静。 机器之心、量子位、InfoQ 没更新。 Simon Willison、Latent Space、The Batch 没新文章。 YouTube 三个频道没新视频。 Spotify 查了，Latent Space 没新单集。 最新还是 10/31 的两期金融主题。</p>
+<h2>值得深读</h2>
+<p>这轮没有独立成篇的内容。 头条 #46395 就是跟你 P/D 评估最相关的。 它的细节都写进简报了，直接看上面就行。</p>
+<p>*去重说明：本轮窗口是 11/01 05:00 到 07:00 PDT，对应 UTC 11/01 12:00 到 14:00。GitHub 按 merged 时间亲查：7 仓库共 10 个 merged PR——SGLang 4 个（#47488 12:26 diffusion fail-fast、#46395 12:52 P/D 解耦 decode KV 写 linker、#47236 13:28 AMD gfx950 Qwen3-Next Triton top-k 路由、#47684 13:48 DeepSeek-V4.1 dense indexer 对齐整波 SM）；FlashInfer 6 个全是 cake 内核（#8199 deepgemm MHC、#8197 lm_head 反向、#8196 GDN BF16、#8195 RMSNorm、#8194 GDN 伴随扫描、#8192 mega MoE v3）；vLLM、TRT-LLM、LMDeploy、llama.cpp、TGI 零合入。版本水位全平：vLLM 仍 v0.32.0；SGLang 仍 v0.5.22（v0.5.23 仍裸 tag，notes 第九天未出）；FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 仍预发布）；TRT-LLM 仍 v1.4.0rc2；llama.cpp 仍每日快照；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer 星标亲核 24,776（5点版 24,756，本轮 +20），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 零入库（周末结构性空档），下一批北京时间 11/2 早 8 点。广域（子代理并行亲查 + Spotify connector 亲核）：X 大V、HN、Reddit、中文三家、Simon Willison/Latent Space/The Batch、YouTube 三频道，窗口内及更广的&quot;新冒头&quot;范围零 serving 强相关新料（dev.to 10/28 vLLM 本地小模型随笔已 4 天、相关度低，未收录；HN 的 Thaw、Latent Space AINews 10/30 期、InfoQ RTP-LLM P-D 实测、量子位 DeepSeek 转载均已在往期报过；arXiv 搜到的 P/D 论文 Adrenaline/ARES 非新入库）。深读：这轮无独立成篇内容（宁缺毋滥），头条 #46395 的细节已写进简报。*</p></body></html>
