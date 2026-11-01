@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月1日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-01"/>
+<meta name="doc-ts" content="2026-11-01T17:04:22"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-01（9点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-01（9点版）</h1>
+<p>9点版来了。这轮有两件值得你看的事。</p>
+<h2>头条</h2>
+<p><strong>PD 解耦的隐形坑，被一篇复盘挖透了</strong> 10/26 那起串话事故你还记得。Cloudflare 的 GLM-5.3，155 条回复掺了别人的内容。 当时 10/26 版做了深读，讲的是事故本身。这篇是新的第三方复盘。 它回答了一个关键问题：KV 槽位什么时候才算真正空了。 答案是没有远程写还能碰到它，才算空。分配器的&quot;空闲&quot;不管网卡在飞的写。 请求中途被干掉时，decode 释放了槽位。prefill 发射出去的写还在路上。 RDMA 是网卡直写内存，发射了撤不回来。 槽位转手给新请求，老写入后脚落地。新请求读到的就是别人的草稿纸。 作者给了修复公式。保持时间要大于三项之和：传播、剩余 chunk、在飞调用。 运维建议是保持 60–120 秒。用 SGLang v0.5.21 以上。 SGLang 团队实测过。开和关吞吐差在 ±2% 以内，基本零代价。 这篇正对你的 PD 评估。已做深读，细节看笔记。 来源：<a href="https://dev.to/wolfsea2357/when-is-a-kv-cache-slot-actually-free-lessons-from-the-sglang-and-cloudflare-cross-request-exposure-1058">https://dev.to/wolfsea2357/when-is-a-kv-cache-slot-actually-free-lessons-from-the-sglang-and-cloudflare-cross-request-exposure-1058</a></p>
+<h2>框架更新</h2>
+<p><strong>vLLM：在给每层独立量化 KV 铺路 #56155</strong> vLLM 刚合入一笔地基型补丁。它让 attention 运行时能按层决议 KV 的数据类型。 这是两笔大活的前置。#56156 打包混合模型的异构 KV 页。#56116 支持 ModelOpt 的逐层混合 KV 缓存。 换句话说，以后每层可以用不同精度存草稿纸。省显存，又不丢精度。 两笔后续都还开着，没合入。铺路阶段，先记一笔。 来源：<a href="https://github.com/vllm-project/vllm/pull/56155">https://github.com/vllm-project/vllm/pull/56155</a></p>
+<p><strong>TRT-LLM：多模态的 prefill→decode 交接更顺了 #21037</strong> 多模态请求走 TRT-LLM 的 OpenEngine 路径。图片预处理最多同时做 4 个。 重点是 Qwen 的视觉处理器。它把三样东西从 prefill 直接带到 decode。 展开后的 prompt ID。mRoPE，也就是多模态的位置编码。还有多模态缓存的布局。 decode 侧不再重新抓图预处理。少一次折腾。 跟你的多模态资源分离方向沾边。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21037">https://github.com/NVIDIA/TensorRT-LLM/pull/21037</a></p>
+<p><strong>一句话带过</strong> SGLang 一笔 #47474：视频 diffusion 模型的 LTX-2 warmup。小众，一句话。 FlashInfer 12 笔全是 cake 内核调优。deepgemm、GDN、RMSNorm、MoE、MLA 全动了。 全是英伟达新卡的厨房活儿。跟你的 AMD 卡没关系。 LMDeploy、llama.cpp、TGI 零合入。</p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0。SGLang 还是 v0.5.22。v0.5.23 的 notes 第九天还没写出来。 FlashInfer 稳定版还是 v0.7.2.post1。TRT-LLM 还是 v1.4.0rc2。 llama.cpp 照旧每日快照。LMDeploy v0.18.0，TGI v3.3.7。</p>
+<p><strong>DeepInfer 星标 24,786</strong> 7点版时 24,776，两小时涨了 10 个。代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮零入库</strong> 周末不发公告，这是结构性空档。下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p><strong>LMDeploy 爆了个高危漏洞</strong> CVE 就是公开漏洞的编号系统。这次编号是 CVE-2026-119706。 LMDeploy 0.9.0 到 0.18.0 中招。/update_weights 接口的反序列化没做校验。 攻击者不用登录就能远程执行命令。CVSS 给了 CRITICAL，最高级。 PoC 已经在 GitHub 上流传。修复 PR #4964 还开着，没合入。 你要是用 LMDeploy 的 api_server，先别暴露到公网。 这事跟推理性能无关。但跟你的评估环境安全有关，提一嘴。 来源：<a href="https://cvefeed.io/vuln/detail/CVE-2026-119706">https://cvefeed.io/vuln/detail/CVE-2026-119706</a></p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X 大V、HN、Reddit 都没动静。机器之心、量子位、InfoQ 没更新。 Simon Willison 没新文章。Latent Space、The Batch 也没新文章。YouTube 三个频道没新视频。 Spotify 查了，Latent Space 没新单集。最新还是 10/31 的两期金融主题。</p>
+<h2>值得深读</h2>
+<p>这轮一篇：上面头条那篇 dev.to 复盘。 推荐理由：它是目前唯一把 PD 解耦 abort 路径讲透的实战复盘。 修复公式、参数建议、运维脚本都能直接抄进你的评估清单。 跟 10/26 的事故深读是姐妹篇：一个讲事故，一个讲修复。 精读笔记已同步到深度阅读目录（HTML 版，手机可直接看）。</p>
+<p>*去重说明：本轮窗口是 11/01 07:00 到 09:00 PDT，对应 UTC 11/01 14:00 到 16:57。GitHub 按 merged 时间亲查：7 仓库共 16 个 merged PR——vLLM 1 个（#56155 15:03 按层决议 KV dtype，#56156/#56116 的前置依赖，两者仍 open）；SGLang 1 个（#47474 14:21 LTX-2 两阶段 warmup）；TRT-LLM 1 个（#21037 16:05 OpenEngine 图片预处理限 4 并发、Qwen 视觉处理器 prefill→decode 带 prompt ID/mRoPE/多模态缓存布局）；FlashInfer 12 个全 cake（#8200 GDN CP SM107 约 1.05x、#8203 selective_state_update sm_103a、#8205 causal_conv1d 反向 SM100/103、#8204 refactor、#8207 kimi_k3_attn B200/B300、#8206 GDN CP ring fixup、#8201 tinygemm2 wgmma sm_90a、#8210 msa_icp_indexer sm_107a、#8211 trtllm_mla_blackwell GB300、#8212 GDN KCP、#8213 fix ssd_combined、#8214 chore）；LMDeploy、llama.cpp、TGI 零合入。版本水位全平：vLLM 仍 v0.32.0（v0.33.0rc3 仍裸 tag）；SGLang 仍 v0.5.22（v0.5.23 仍裸 tag，notes 第九天未出）；FlashInfer 仍 v0.7.2.post1（v0.7.3rc1 仍预发布）；TRT-LLM 仍 v1.4.0rc2；llama.cpp 仍每日快照；LMDeploy 仍 v0.18.0；TGI 仍 v3.3.7。DeepInfer 星标亲核 24,786（7点版 24,776，本轮 +10），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 零入库（周末结构性空档，最新 published 2026-10-29T17:59:53Z），下一批北京时间 11/2 早 8 点。广域（子代理并行亲查 + Spotify connector 亲核）：严格窗口内零新料；X/Reddit 搜 x.com、reddit.com 受搜索引擎限制无返回，lmsys.org 博客最新仍是 10/29（MI355X）与 10/26（安全更新）；HN 的 NCompass Show HN、Consus Launch HN 均为 7–12 天前旧帖；中文三家、Simon Willison、Latent Space、The Batch、YouTube 三频道无窗口内新料；Spotify 查 Latent Space 无新单集（最新仍是 10/31 两期金融主题）。窗口外新冒头两条已核验收录：dev.to 10/31 的 KV 槽位复盘长文（SGLang PD abort 路径的分布式 use-after-free，配修复公式与运维清单，官方数字口径，三张 Illustrative 图为作者示意模型非实测，已做深读）与 CVE-2026-119706（LMDeploy 0.9.0–0.18.0 /update_weights pickle 反序列化未授权 RCE，CVSS 3.1/4.0 双 CRITICAL，PoC 已公开，修复 PR #4964 仍 open，已亲核 cvefeed 页面）。BRaiN 的 GH200 跑分 infographic 是厂商自宣传（自报胜过 vLLM 0.32.0/SGLang 0.5.22），不可靠，未收录。*</p></body></html>
