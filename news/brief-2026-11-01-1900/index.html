@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月1日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-01"/>
+<meta name="doc-ts" content="2026-11-02T03:05:33"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-01（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-01（19点版）</h1>
+<p>19点版来了，周日晚间仓库又忙起来。 vLLM、SGLang、FlashInfer、TRT-LLM 一共合入 34 个 PR。 大多是内核打磨和修 bug，没发新版本。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM：7 个合入，PD 解耦相关一笔</strong></p>
+<p>#63971 让 Mooncake 的 decode 复用本地前缀命中。</p>
+<p>Mooncake 是 PD 解耦的 KV 搬运方案。 前缀命中就是草稿纸里已有现成答案。 这笔跟你的 PD 解耦评估直接相关。</p>
+<p>#64944 给 Nemotron-3.5-Transcribe 的音频塔打包有效帧。</p>
+<p>音频塔就是模型里负责&quot;听&quot;的部分。</p>
+<p>#61950 修了 ROCm 上 Kimi K3 的在线量化。</p>
+<p>ROCm 是 AMD 显卡的软件栈。</p>
+<p>#63232 给 FA4 的 FP8 缩放传参做了性能优化。</p>
+<p>FA4 是 FlashAttention 的第四代。 剩下三笔是 logprobs、接口和 CI 的小修补。 来源：<a href="https://github.com/vllm-project/vllm/pull/63971、https://github.com/vllm-project/vllm/pull/64944">https://github.com/vllm-project/vllm/pull/63971、https://github.com/vllm-project/vllm/pull/64944</a></p>
+<p><strong>SGLang：14 个合入，NPU 和 MoE 是大头</strong></p>
+<p>#47611 给 GLM-5.2 加了 2P2D 的测试用例。</p>
+<p>2P2D 就是 2 个 prefill 配 2 个 decode。 这正是 PD 解耦的部署拓扑，值得留意。</p>
+<p>#45089 给 H20 加了 GLM-5.3-Flash 的 MoE 配置。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>#47784 把 moe_finalize 改写成 JIT 内核。</p>
+<p>JIT 就是运行时现编现用的内核。</p>
+<p>#47503 给 SM100 调了一套归一化 JIT 模板。</p>
+<p>SM100 是 Blackwell 这一代显卡的代号。 NPU 侧有 4 笔：删图运行器、量化重构、mlaprolog 支持、文档澄清。 剩下是 diffusion、注意力填充、对称显存的小修补。 来源：<a href="https://github.com/sgl-project/sglang/pull/47611、https://github.com/sgl-project/sglang/pull/45089">https://github.com/sgl-project/sglang/pull/47611、https://github.com/sgl-project/sglang/pull/45089</a></p>
+<p><strong>FlashInfer：6 个合入，cake 内核继续提速</strong> 6 笔全是 cake 系列在 B200/GB200 上的性能打磨。 覆盖注意力解码、MoE、rope 融合、lm-head 等内核。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8244">https://github.com/flashinfer-ai/flashinfer/pull/8244</a></p>
+<p><strong>TRT-LLM：7 个合入，KV 相关两笔</strong></p>
+<p>#20049 删掉了 Python 版的 KV 中转缓冲。</p>
+<p>换句话说：KV 搬运全走 C++，少一层拷贝。</p>
+<p>#21002 修了 qwen3 fp8 解耦模式的输出检查。</p>
+<p>剩下是 CI、文档、Nemotron-H 的小修补。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20049">https://github.com/NVIDIA/TensorRT-LLM/pull/20049</a></p>
+<p><strong>LMDeploy、llama.cpp、TGI：零合入</strong></p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0。 SGLang 还是 v0.5.22。 v0.5.23 的 release notes 第 12 天了，还没影。 FlashInfer 稳定版还是 v0.7.2.post1。 预发布版 v0.7.3rc1 是 10/30 的。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。 llama.cpp 还是每日快照。</p>
+<p><strong>DeepInfer 星标 24,843</strong> 17点版时 24,813，两小时涨了 30 个。 代码还是 10/26 那版，没动过。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：接口这轮通了，窗口内无新入库</strong> 最新还是 10/30 的批次。 补报一篇 10/30 的：ARK。 它研究 PD 解耦里 KV 搬运的路由冲突。 路由冲突就像快递车都挤在一条路上。 跟你的 PD 解耦评估直接相关。 来源：<a href="http://arxiv.org/abs/2610.41160v1">http://arxiv.org/abs/2610.41160v1</a> 下一批北京时间 11/2 早 8 点。</p>
+<h2>业内新闻</h2>
+<p><strong>无</strong> 芯片、云厂商都没动静。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X 大V、HN、Reddit 都没窗口内动静。 机器之心、量子位、InfoQ 没更新。 Simon Willison 没新文章。 Latent Space、The Batch 也没更新。 YouTube 三个频道没新视频。 Spotify 亲核了。 Latent Space 最新还是 10/31 的两期。</p>
+<h2>值得深读</h2>
+<p><strong>无</strong> 这轮都是增量 PR，宁缺毋滥，没做深读。</p>
+<p>*去重说明：本轮窗口是 UTC 11/02 01:00 到 03:05（上一轮 17点版结束于 01:00 UTC）。GitHub 用 search API 按 merged 时间过滤，逐个用 pulls 端点核验 merged_at，全部在窗口内：vLLM 7 个（#65008/#64944/#64914/#63971/#63232/#61950/#35508，多模态音频塔+Mooncake 前缀复用+Kimi K3 ROCm 修补+FA4 优化）、SGLang 14 个（#47784/#47744/#47742/#47611/#47503/#47429/#47373/#47211/#47173/#47066/#46225/#45200/#45089/#43194，2P2D 测试+MoE/NPU/归一化）、FlashInfer 6 个（#8244/#8243/#8242/#8241/#8240/#8193，cake 系列 B200/GB200 内核提速）、TRT-LLM 7 个（#21398/#21390/#21002/#20901/#20285/#20049/#15398，KV 缓冲 C++ 化+解耦测试修补）；LMDeploy、llama.cpp、TGI 零合入。版本水位全平：vLLM v0.32.0、SGLang v0.5.22（v0.5.23 notes 第 12 天未出）、FlashInfer 稳定版 v0.7.2.post1（预发布 v0.7.3rc1 为 10/30）、TRT-LLM v1.4.0rc2、LMDeploy v0.18.0、TGI v3.3.7、llama.cpp 每日快照（b12032 为 11/1 09:00 UTC，非窗口内）。DeepInfer 星标亲核 24,843（17点版 24,813，+30），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 本轮接口恢复正常（HTTP 200），窗口内零新入库，最新仍 10/30 批次；补报 10/30 的 ARK（PD 解耦 KV 搬运路由冲突，<a href="http://arxiv.org/abs/2610.41160v1，属">http://arxiv.org/abs/2610.41160v1，属</a> 17点版限流欠账的补扫）；下一批北京时间 11/2 早 8 点。广域亲查（子代理并行）：X 一线人物、HN（6 条相关帖均为数天前）、Reddit、中文三家（11/1 当天均为泛行业通稿）、Simon Willison、Latent Space newsletter、The Batch、YouTube 三频道均无窗口内新料；Spotify 亲核 Latent Space 无新单集（最新仍 10/31 两期）。*</p></body></html>
