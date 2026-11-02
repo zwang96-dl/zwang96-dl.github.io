@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月2日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-02"/>
+<meta name="doc-ts" content="2026-11-02T21:05:57"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-02（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-02（13点版）</h1>
+<p>13点版来了。这轮 vLLM 有两笔干货。 一笔跟你正在评估的 P/D 解耦直接相关。 另一笔是 DeepSeek-V4.1 的大块 attention 提速。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM #64475：异构 TP 之间也能搬 NVFP4 KV 了</strong> 这笔打通了 P/D 解耦的一个硬骨头。 NIXL 现在能在 TP 配置不同的 prefill 和 decode 实例之间搬 MiniMax-M3.1 的 NVFP4 KV cache。 举例：prefill 跑 TP1，decode 跑 TP4。 以前这种组合搬 NVFP4 直接被拒绝。 这笔按 KV head 重新分片，把卡点疏通了。 你正在评估 P/D 解耦，vLLM 侧这条路的变化值得盯。 来源：<a href="https://github.com/vllm-project/vllm/pull/64475">https://github.com/vllm-project/vllm/pull/64475</a></p>
+<p><strong>vLLM #62632：DeepSeek-V4.1 的 mega-attention 快了近 2 倍</strong> TP2、eager 步长超过 2048 个 token 时，提速 1.9 到 2.15 倍。 输出逐比特一致，不用担心结果漂移。 做法不算花哨：融合算子只做 KV 插入，Q 的零填充交给 Triton 连续拷贝另起炉灶。 跑 DeepSeek-V4.1 的人，这笔直接吃。 来源：<a href="https://github.com/vllm-project/vllm/pull/62632">https://github.com/vllm-project/vllm/pull/62632</a></p>
+<p><strong>vLLM 其余一笔带过</strong></p>
+<p>#65201：HiSparse 绕开 MNNVL 的 FlashInfer all-reduce。</p>
+<p>#60479：GPTQ 线性层保持 batch 不变性。</p>
+<p>#61641：FP8 量化内核每次转换转 2 个值。</p>
+<p>#64472：混合精度下保持 KV 缓存零化。</p>
+<p>#64692：模型加载后原地重填权重派生张量。</p>
+<p>#62270：MiniMax-M3 在 gfx942 上开 fp8 indexer 缓存。</p>
+<p>#65162：构建改 tarball 拉 triton_kernels，省 400MB。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pulls">https://github.com/vllm-project/vllm/pulls</a></p>
+<p><strong>Dynamo 5 个：采样默认值修了，别再全词表采样</strong></p>
+<p>#17777：请求没填 top_k/top_p 时，Dynamo 的 SGLang worker 之前直接全词表采样。</p>
+<p>输出分布变了，每步还慢约 2.4%。 这笔改成跟 sglang.launch_server 一样，从模型配置里取默认值。</p>
+<p>#17237：direct-mode 前端不再订阅每个 worker 的 KV 指标，省一波网络开销。</p>
+<p>做解耦部署的人可以看一眼。 其余 #17344/#16193 是小修，#17314 是文档。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17777">https://github.com/ai-dynamo/dynamo/pull/17777</a></p>
+<p><strong>FlashInfer 12 个：cake 内核继续小步快跑</strong> 推理侧看 4 笔：#8371 是 sm_100a 上 NVFP4 MoE 下行拆分。</p>
+<p>#8370 是 SM103 decode 的 FC2 选核。</p>
+<p>#6114 修了 mamba 的 FP16 亚规格数。</p>
+<p>#8362 是 mega_moe_v3 的 EP 提速。</p>
+<p>其余 8 个全是训练侧打磨。 数字全是厂商自报，当路标看。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pulls">https://github.com/flashinfer-ai/flashinfer/pulls</a></p>
+<p><strong>其余框架窗口内零合入</strong> SGLang 只有一笔 AMD cookbook 文档，讲 MI355X 跑 Qwen3.8-Flash-Next 的命令。 TRT-LLM、LMDeploy、TGI、llama.cpp、Mooncake 本轮都是 0。</p>
+<p><strong>版本水位</strong> vLLM 仍是 v0.33.0rc3。 网上有页面写 v0.33.0 已发布，别信，release API 里只有 rc3。 SGLang 仍 v0.5.22，v0.5.23 的 notes 第 4 天了还没写出来。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：结构性零入库</strong> 接口正常，没被限流。 最新还是 10/30 的批次。 新批次今晚 17:00 PST 出，下轮再看。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内无新料</strong> 顺手复核了一条：TorchTPU 今天有中文二次报道。 别当新事，它 10 月 20 日就开源了。</p>
+<h2>访谈与深度</h2>
+<p><strong>名单全扫，均无窗口内新帖</strong> @lmsysorg、vLLM 官方、karpathy、jimfan、swyx 都安静。 Simon Willison、Latent Space、The Batch、机器之心、量子位均无新料。 YouTube、播客、IG/Threads/FB 也都安静。</p>
+<p>*本轮无「值得深读」。vLLM #64475 虽跟你的 P/D 解耦方向直接相关，但它只是单个 PR、没有论文和图表支撑，未达深读门槛；机制已在简报里讲透。* *去重脚注：本期窗口为 UTC 11/02 19:05–21:10；11点版已报的 #64444/#63988/#64300/#64819（KV 四连修）、#64589/#60102/#64448/#64815（AMD 性能）、#64984（Qwen3-VL）、SGLang #47949、Dynamo #14037/#14038/#17794/#17771、FlashInfer #8351/#8340/#8343、llama.cpp s390x 文档等不重复。*</p></body></html>
