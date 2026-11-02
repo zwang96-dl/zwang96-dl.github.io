@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月2日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-02"/>
+<meta name="doc-ts" content="2026-11-02T17:05:14"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-02（9点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-02（9点版）</h1>
+<p>9点版来了。GitHub 这轮 27 个合入。 AMD 用户吃到一笔实在的：SGLang 确定性模式提速。 TRT-LLM 开始在 KV 压力下抢占请求了。 其余看点在下面。</p>
+<h2>框架更新</h2>
+<p><strong>SGLang #46325：AMD 确定性模式大提速</strong> 确定性模式就是每次跑结果 bit 级一致，专给评测用。 以前开它要交一半性能的税，all-reduce 占了大头。 这笔把大输入的 all-reduce 换成固定顺序两阶段。 MI350X 上 TP8 吞吐涨 29% 到 57%，首 token 延迟也降了。 你的 MI355X 跑可复现评测时，直接受益。 来源：<a href="https://github.com/sgl-project/sglang/pull/46325">https://github.com/sgl-project/sglang/pull/46325</a></p>
+<p><strong>TRT-LLM #21122：KV 压力大了就抢占请求</strong> KV cache 是推理时的草稿纸，显存快满就叫 KV 压力。 这笔加了个功能：压力下直接抢占低优先级请求。 aggregated Helix 是它的新推理后端架构。 做 serving 调度的人，可以看一眼它的抢占策略。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21122">https://github.com/NVIDIA/TensorRT-LLM/pull/21122</a></p>
+<p><strong>Mooncake #5165：NVLink 小拷贝走同步快路</strong> Mooncake 就是 PD 解耦（分工流水线）里搬 KV 的引擎。 这笔给 NVLink 加了条小拷贝快路：2MiB 以下直接同步拷。 TENT 是它的新传输层，实测并发下小拷贝快 4% 到 40%。 说白了：小包裹别走流水线，直接手递手更快。 来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5165">https://github.com/kvcache-ai/Mooncake/pull/5165</a></p>
+<p><strong>FlashInfer 10 个，全是 cake 内核小步快跑</strong> 推理侧看两笔：#8340，Kimi-K3 的 LatentMoE decode 尾巴。 在 GB200 和 GB300 上快 1.05 到 1.39 倍。</p>
+<p>#8343，给 MLA（省显存的注意力变体）decode 后端做了 FP8 优化。</p>
+<p>其余 8 个全是训练侧：MoE 量化器、rmsnorm、lm_head 损失等。 数字全是厂商自报，当路标看。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pulls">https://github.com/flashinfer-ai/flashinfer/pulls</a></p>
+<p><strong>vLLM 6 个：Kimi-K3 的 NaN 修复最实在</strong></p>
+<p>#64759：Kimi-K3 的注意力内核修了 NaN bug。</p>
+<p>这笔把依赖钉到修复后的版本，跑 Kimi-K3 的人必吃。 其余是小修：CI、benchmark、前端流式、embedding 校验。 来源：<a href="https://github.com/vllm-project/vllm/pull/64759">https://github.com/vllm-project/vllm/pull/64759</a></p>
+<p><strong>llama.cpp #29510：多序列共享 KV 更省了</strong> flash_attn_ext_rows，多序列统一 KV 的新实现。 以前某些形状会回退到稠密 mask，现在不回了。 本地多并发跑模型的人能吃到。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/29510">https://github.com/ggml-org/llama.cpp/pull/29510</a></p>
+<p><strong>其余一笔带过</strong> SGLang #47852：MiniMax-H3 diffusion encoder 的 SiLU 和 padding 融合。 LMDeploy #5081：采样修了个小 bug，中性 temperature 和 top_k=-1 照收。 Mooncake #4752：存储层修了个互斥锁争用。 TRT-LLM 另三笔：devcontainer 修 zsh，两个测试 infra。 TGI 零合入。Dynamo 这轮没查到（接口 403），下轮补。</p>
+<p><strong>版本水位</strong> vLLM v0.33.0（挂 rc3 tag，11/02 10:10 UTC 发布，3 点版已报）。 SGLang 仍 v0.5.22。 v0.5.23 的 tag 是 10/30 打的，notes 第 4 天了还没写出来。 之前几期数的天数有误，按 tag 时间纠正。 DeepInfer 星标 25,002（+12），代码还是 10/26 那版。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：结构性零入库</strong> 接口正常，没被限流。 最新还是 10/30 那批，Blackwell 功耗实测打头。 00:00 UTC 的新批次今晚 17:00 PST 出，下轮再看。</p>
+<h2>业内新闻</h2>
+<p><strong>有人把 GPU 数据中心比作 token 工厂</strong> 这是 2026 云报告第 10 期，今天刚发，聊推理基础设施。 专用推理芯片三家近况：Cerebras、Groq、Taalas。 做推理 infra 选型的人，可以看一眼大局。 来源：<a href="https://chaesangjung.medium.com/2026-cloud-solutions-report-10-inference-infrastructure-2-token-supply-703db03fc617">https://chaesangjung.medium.com/2026-cloud-solutions-report-10-inference-infrastructure-2-token-supply-703db03fc617</a></p>
+<h2>访谈与深度</h2>
+<p><strong>一张图讲清 prefill 和 decode 的瓶颈</strong> 这是今天刚发的科普：prefill 吃算力，decode 吃显存带宽。 这正是 PD 解耦&quot;为啥要拆&quot;的最直观解释。 给团队新人看正好，5 分钟建立直觉。 来源：<a href="https://medium.com/@sachinworks18/the-roofline-model-for-llm-inference-b5d68cfcfdb4">https://medium.com/@sachinworks18/the-roofline-model-for-llm-inference-b5d68cfcfdb4</a></p>
+<p>*本轮无「值得深读」内容。FlashInfer 全是 PR 级 perf 小步快跑、Medium 两篇偏科普，未达深读门槛。* *去重脚注：本期窗口为 UTC 11/02 15:00–17:05；7 点版已报的 vLLM #63870/#64838/#57678/#65059/#65005/#65157/#65140、SGLang #42968/#46082/#38719/#46166、FlashInfer #8338/#8302/#8337/#8316/#8327/#8310/#8260/#8317/#8309/#8332/#8323/#8304、TRT-LLM #21225、llama.cpp #31522、vLLM v0.33.0、SGLang v0.5.23 tag、dev.to KV 复盘、Mistral Large 4 开源权重、arXiv 2610.40541 等不重复。*</p></body></html>
