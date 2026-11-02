@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月2日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-02"/>
+<meta name="doc-ts" content="2026-11-02T09:03:37"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-02（1点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-02（1点版）</h1>
+<p>1点版来了，深夜档开挖 PD 解耦的坑。 这轮 20 个合入，关键词是实战修 bug。 PD 解耦就是 prefill 和 decode 分工干活。 像流水线一样，各自专精一件事。</p>
+<h2>框架更新</h2>
+<p><strong>SGLang #47614：PD 解耦里 decode 输出被污染了</strong> 这笔修了一个 token-0 污染 bug。 decode 段开了流水线并行时。 收到代理张量没记到正确的流上。 192 个 token 里 51–98 个受影响。 说白了：多路干活时，某路偷看了别人的草稿纸。 跟你的 PD 解耦评估直接相关，值得记住这个坑。 来源：<a href="https://github.com/sgl-project/sglang/pull/47614">https://github.com/sgl-project/sglang/pull/47614</a></p>
+<p><strong>TRT-LLM #21343：解耦的 context worker 别乱热身</strong> 以前只做 prefill 的 worker 会假装要生成。 它在纯 context 的草稿纸上硬建生成热身请求。 说白了：只管备菜的人非要试炒一盘。 现在直接跳过，不再提 bogus 请求。 同样跟你的 PD 解耦评估直接相关。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21343">https://github.com/NVIDIA/TensorRT-LLM/pull/21343</a></p>
+<p><strong>vLLM #64029：Kimi-K3 在 AMD 卡上的 decode 提速</strong> 给 decode 做了一版专用内核。 sentinel all-reduce 加预载入，行级位精确。 你的 MI 系列卡吃得到这笔。 来源：<a href="https://github.com/vllm-project/vllm/pull/64029">https://github.com/vllm-project/vllm/pull/64029</a></p>
+<p><strong>TRT-LLM #21371：GB300 上跑 MLA 要小心</strong> Blackwell 是英伟达的新一代 GPU 架构。 MLA 是 DeepSeek 的省显存注意力。 mixed-precision KV 的 MLA 数值测试被删了。 因为它在每台 GB300 上都跑不过。 B200/B300 上数值余量也只有 0.026。 想在 Blackwell 上跑 MLA，心里先有个底。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21371">https://github.com/NVIDIA/TensorRT-LLM/pull/21371</a></p>
+<p><strong>其余一句话带过</strong> vLLM #65080：ROCm 侧 housekeeping，无性能变化。 FlashInfer 4 笔：全是训练用 autograd 内核，跟推理无关。 TRT-LLM #21342：Kimi-K3 寻址修复，英伟达侧。 TRT-LLM #21271：采样路径小性能优化。 SGLang #47574：Ascend NPU 专家负载均衡，跟你无关。 llama.cpp 2 笔：CI 和 cmake，全是边角料。 LMDeploy、TGI：零合入。 来源：<a href="https://github.com/vllm-project/vllm/pull/65080、https://github.com/flashinfer-ai/flashinfer/pull/8276、https://github.com/NVIDIA/TensorRT-LLM/pull/21342、https://github.com/sgl-project/sglang/pull/47574">https://github.com/vllm-project/vllm/pull/65080、https://github.com/flashinfer-ai/flashinfer/pull/8276、https://github.com/NVIDIA/TensorRT-LLM/pull/21342、https://github.com/sgl-project/sglang/pull/47574</a></p>
+<p><strong>版本水位：全平</strong> vLLM v0.32.0，v0.33.0 还是裸 tag。 SGLang v0.5.22，v0.5.23 的 notes 第 15 天了还没影。 <strong>DeepInfer 星标 24,931</strong>，两小时涨了 40 个，代码没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：窗口内零新入库</strong> 接口正常，查了四组关键词。 最新还是 10/30 那批 Blackwell 功耗基准。 这个点正是日批次间隙，结构性零入库。</p>
+<h2>业内新闻</h2>
+<p><strong>推理数据量首次超过训练，中国赛迪研究院说的</strong> 2026 年 6 月日均词元调用超 175 万亿。 推理第一次盖过训练。 你搞 PD 解耦不是凑热闹，赛道是真大。 来源：<a href="https://finance.sina.cn/2026-11-02/detail-inixipxc9411025.d.html">https://finance.sina.cn/2026-11-02/detail-inixipxc9411025.d.html</a></p>
+<h2>访谈与深度</h2>
+<p><strong>全线安静</strong> X 大V、HN、Reddit、中文媒体、博客、YouTube、播客。 全部扫过，窗口内无新料。</p>
+<h2>值得深读</h2>
+<p><strong>无</strong> 两个 PD 坑都是工程 bugfix，宁缺毋滥，不做笔记。</p>
+<p>*去重说明：本轮窗口 UTC 11/02 07:00–09:00。GitHub 逐个用 pulls 端点核验 merged_at 落在窗口内：vLLM 2 个（#65080/#64029）、SGLang 4 个（#47614/#47837/#47574/#47875）、FlashInfer 4 个（#8276/#8252/#8269/#8275，全是训练 cake 内核）、TRT-LLM 8 个（#21343/#21342/#21271/#21371/#21331/#20999/#21231/#21415；#21402 差 3 秒出窗口排除）、llama.cpp 2 个（CI/cmake）；LMDeploy、TGI 零合入。版本水位全平：vLLM v0.32.0（v0.33.0 仍裸 tag）、SGLang v0.5.22（v0.5.23 notes 第 15 天未出）、FlashInfer v0.7.3rc1（10/30 已存在）、TRT-LLM stable v1.2.1（prerelease v1.4.0rc2.post1 为 10/28）、LMDeploy v0.18.0、TGI v3.3.7、llama.cpp latest v0.8.0。DeepInfer 星标 24,931（23点版 24,891，+40），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 四组关键词（LLM inference / speculative decoding / KV cache / prefill-decode disaggregation），HTTP 200 无 429，最新提交仍 10/30（2610.41919 Blackwell 功耗基准），结构性零入库。广域扫网（X 大V / HN / Reddit / 中文媒体 / 博客 / YouTube / Spotify / 社交）窗口内无新料，仅赛迪研究院宏观报道一条（07:33Z，推理数据量首次超训练）；Instagram/Threads 两条均为低价值复述/收藏帖，无新增量。*</p></body></html>
