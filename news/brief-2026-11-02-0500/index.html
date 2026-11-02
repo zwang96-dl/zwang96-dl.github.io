@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月2日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-02"/>
+<meta name="doc-ts" content="2026-11-02T12:59:57"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-02（5点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-02（5点版）</h1>
+<p>5点版来了，深夜档继续安静。 GitHub 20 个合入，全是小修小补。 挑得出两条能看的，其余一笔带过。</p>
+<h2>框架更新</h2>
+<p><strong>FlashInfer 9 个合入，内核层的小步快跑</strong> 9 个全是 cake 系列内核的打磨。 最值得看的是 #8321：MoE finalize 加 allreduce 融合内核。 MoE 就是专家分工干活的架构。 finalize 是专家们交卷时的收尾动作。 allreduce 是多卡汇总结果的集体通信。 这个内核把收尾和汇总拼成一个，一次搞定。 它针对 128 token 以内的小 batch、4 到 8 卡优化。 大 MoE 模型做 decode 时直接吃红利。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8321">https://github.com/flashinfer-ai/flashinfer/pull/8321</a></p>
+<p><strong>FlashInfer #8291：Kimi-K3 在新卡上更快了</strong> Kimi-K3 的 attention residual 内核加了更多 shape 优化。 B200、B300、GB300 全覆盖。 Kimi-K3 的优化这几天一直在加码。 说明厂商还在往 GB300 这边持续砸工程。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8291">https://github.com/flashinfer-ai/flashinfer/pull/8291</a></p>
+<p><strong>SGLang 4 个，全是边角料</strong></p>
+<p>#47902 给 NPU 加了 DeepSeek_v4_pro 的性能测试用例。</p>
+<p>#47714 是内存池重构，稀疏注意力的索引池改结构。</p>
+<p>剩下一对是投机解码测试桩的 dtype 小修。 纯重构、纯测试，没有性能声明。 v0.5.23 的 release notes 还是没发出来，快两周了。 来源：<a href="https://github.com/sgl-project/sglang/pulls">https://github.com/sgl-project/sglang/pulls</a></p>
+<p><strong>TRT-LLM 1 个，稳定性小修</strong></p>
+<p>#21266 给 ZeroMQ 队列的关闭 linger 设了上限。</p>
+<p>ZeroMQ 是 serving 里常用的消息队列。 linger 就是关闭时排队消息最多等多久。 设了上限，服务 teardown 时不会 hang 住。 修的是稳定性，无性能数据。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21266">https://github.com/NVIDIA/TensorRT-LLM/pull/21266</a></p>
+<p><strong>其余框架：平淡</strong> vLLM 零合入，v0.33.0 发布后的余温都散了。 llama.cpp 6 个，全是后端和文档边角料。 新快照 b12038 在窗口内发布，按惯例不算发版。 LMDeploy 继续静默，TGI 基本停滞。</p>
+<p><strong>版本水位与 DeepInfer</strong> 水位全平：vLLM v0.33.0，SGLang v0.5.22。 DeepInfer 星标 24,969，加了 14 个。 代码还是 10/26 那版没动。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：结构性零入库</strong> 接口正常，没被限流。 四组关键词最新提交还停在 10/30。 11:00 到 13:00 UTC 处于日批次后的间隙。 零入库符合预期，下轮再看。</p>
+<h2>业内新闻</h2>
+<p><strong>全线安静</strong> X 大V、HN、Reddit、中文媒体全静默。 karpathy 最近的两条帖子还是 10 月中的旧闻。 Simon Willison 最新两篇跟 serving 无关。 social 上全是 vLLM 科普和 0.33.0 复述，无实质新信息。</p>
+<h2>访谈与深度</h2>
+<p><strong>无</strong> 这轮无访谈与深度内容。</p>
+<p>*本轮无「值得深读」内容。FlashInfer 的 perf 内核是小步快跑、无关键图表，未达深读门槛。* *去重脚注：本期窗口为 UTC 11/02 11:00–13:00；3 点版已报的 vLLM v0.33.0、FlashInfer #8289/#8278/#8290、SGLang #47915/#47782/#45972/#46251、TRT-LLM #21412/#21425 等不重复。*</p></body></html>
