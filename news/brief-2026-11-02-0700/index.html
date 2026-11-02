@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月2日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-02"/>
+<meta name="doc-ts" content="2026-11-02T15:00:31"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-02（7点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-02（7点版）</h1>
+<p>7点版来了，深夜档还是安静。 GitHub 25 个合入，没出大招。 挑得出的看点在下面，其余一笔带过。</p>
+<h2>框架更新</h2>
+<p><strong>SGLang #46082：大 batch 下 decode 再提速</strong> 这条是 trtllm_mha 的优化。 trtllm_mha 就是 attention 的计算内核。 做法是把 decode 的 KV 按 CTA 拆开并行算。 CTA 可以理解成 GPU 上的一组线程。 batch 越大越吃香，是个可选开关。 来源：<a href="https://github.com/sgl-project/sglang/pull/46082">https://github.com/sgl-project/sglang/pull/46082</a></p>
+<p><strong>SGLang #42968：DeepSeek-V4.1 的 indexer 支持 TP 切分</strong> indexer 是 DeepSeek 新模型里的索引模块。 TP 切分就是把模型切开多卡分担。 新模型支持又跟进了一步。 来源：<a href="https://github.com/sgl-project/sglang/pull/42968">https://github.com/sgl-project/sglang/pull/42968</a></p>
+<p><strong>FlashInfer 12 个，全是 cake 内核小步快跑</strong> 最顺眼的是 #8338：ragged prefill 最高 1.17x。 ragged 就是输入长短不齐的场景。</p>
+<p>#8337 优化 Blackwell 的 grouped paged decode。</p>
+<p>#8327 的 MoE 内核在 B200 上更快了。</p>
+<p>全是厂商自报数据，当路标看。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pulls">https://github.com/flashinfer-ai/flashinfer/pulls</a></p>
+<p><strong>vLLM 7 个：gRPC 健康检查更精细了</strong></p>
+<p>#63870 把 liveness 和 readiness 分开。</p>
+<p>liveness 只管进程活着没。 readiness 管模型能不能接单。 k8s 网关做健康检查更准了。 其余是 MoE 内核小修、文档和 CI。 来源：<a href="https://github.com/vllm-project/vllm/pull/63870">https://github.com/vllm-project/vllm/pull/63870</a></p>
+<p><strong>llama.cpp #31522：量化流水线修了个崩溃</strong> imatrix 的 --nextn 会崩，现在修好了。 imatrix 是给量化做重要性校准的工具。 新快照 b12040 在窗口内发布，按惯例不算发版。 TRT-LLM 1 个测试修复，LMDeploy、TGI 零合入。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31522">https://github.com/ggml-org/llama.cpp/pull/31522</a></p>
+<p><strong>版本水位与 DeepInfer</strong> 水位全平：vLLM 停在 v0.33.0。 SGLang 还是 v0.5.22。 v0.5.23 的 release notes 第 14 天了还没影。 DeepInfer 星标 24,990，加了 21 个。 代码还是 10/26 那版没动。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：结构性零入库</strong> 接口正常，没被限流。 四组关键词最新提交还停在 10/30。 13:00 到 15:00 UTC 是日批次后的间隙。 零入库符合预期，下轮再看。</p>
+<h2>业内新闻</h2>
+<p><strong>HN：spinf-serve，批量打分专用服务器</strong> 这是个开源推理服务器，Apache 2.0。 专治每天几百万篇文章多角度打分。 内容只读一遍，每个问题只花自己的 token。 自称同卡比 vLLM 加前缀缓存快 2 到 3 倍。 数字是自报的，先打个问号。 来源：<a href="https://news.ycombinator.com/item?id=50306815">https://news.ycombinator.com/item?id=50306815</a></p>
+<h2>访谈与深度</h2>
+<p><strong>无</strong> 这轮无访谈与深度内容。</p>
+<p>*本轮无「值得深读」内容。FlashInfer 的 perf 内核是小步快跑、无关键图表，未达深读门槛。* *去重脚注：本期窗口为 UTC 11/02 13:00–15:00；5 点版已报的 FlashInfer #8321/#8291、SGLang #47902/#47714/#47858/#47860、TRT-LLM #21266 等不重复。*</p></body></html>
