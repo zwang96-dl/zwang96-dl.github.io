@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月2日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-02"/>
+<meta name="doc-ts" content="2026-11-02T11:03:58"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-02（3点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-02（3点版）</h1>
+<p>3点版来了，深夜档出了本轮最大的一条新闻。 vLLM v0.33.0 正式发版，927 个提交、389 位贡献者。 PD 解耦、投机解码、AMD 卡全是你的菜。 这轮直接吃到大餐，一篇一篇掰给你看。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM v0.33.0 正式发布，PD 解耦相关一堆硬货</strong> vLLM 出了个大版本，release 10:10 UTC 落在窗口内。 先说跟你评估最相关的两条。 AWS EFA 镜像打包了 Mooncake 传送引擎的 EFA 版。 Mooncake 就是 PD 解耦里 KV 搬运的高速公路。 它让 KV 跨节点搬运更快、多机部署更顺。 正好对上你评估清单里 KV 搬运那条。 FlashInfer 的 DCP prefill 接进了 trtllm-gen。 100k 长输入下首 token 延迟降了 39 到 48%。 测试机是 8 卡 B200，长文场景直接受益。 来源：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.33.0">https://github.com/vllm-project/vllm/releases/tag/v0.33.0</a></p>
+<p><strong>v0.33.0 的投机解码三板斧</strong> 投机解码就是小模型先打草稿、大模型再改。 第一斧：FLy 有损验证。 它是投机解码里验证步骤的放水版。 decode 吞吐涨 1.04 到 1.31 倍。 测试机是 MI355X 和 B300。 第二斧：DSpark 不再预留草稿槽位。 DeepSeek-V4.1-Flash 的实测数据很夸张。 GB300 上，从 1373 飙到 3390 输出 tok/s。 第三斧：EAGLE/MTP 前缀缓存保住最后一块。 默认开启，不用动手。 来源：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.33.0">https://github.com/vllm-project/vllm/releases/tag/v0.33.0</a></p>
+<p><strong>v0.33.0 的 AMD 卡福利</strong> ROCm 默认升到 10.0，旧版 7.2 还留着。 MonoKernel decode 登上了 MI355X。 MonoKernel 是 decode 专用单内核。 MiniMax-M3-MXFP4 的 TPOT 降了 16.6%。 TPOT 就是吐一个 token 的耗时。 MXFP4 是 4 位微缩放量化。 你的 MI355X 这下又吃到一笔。 来源：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.33.0">https://github.com/vllm-project/vllm/releases/tag/v0.33.0</a></p>
+<p><strong>v0.33.0 的多模态硬料</strong> 多模态 encoder 这边也有料。 PaddleOCR-VL 的 vision encoder 批处理化了。 吞吐涨 34 到 85%。 compile_mm_encoder 上线了。 它是给视觉编码器开编译加速的开关。 DeepSeek-VL2 的 ViT 用上了 full CUDA graphs。 CUDA graphs 能省掉每步调度的开销。 流水线并行里，后面几个 stage 不用再跑 encoder。 每层省 0.58 到 1.27 GiB 显存。 encoder/prefill/decode 资源分离，跟你的研究正对。 来源：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.33.0">https://github.com/vllm-project/vllm/releases/tag/v0.33.0</a></p>
+<p><strong>v0.33.0 的其他硬料</strong> DeepSeek-V4/V4.1 的 MXFP4 专家跑成了 block FP8。 block FP8 是按块做的 FP8 量化。 Hopper 卡上 decode 快 9 到 21%。 PyTorch 升到 2.14，CUDA 12.9 的包不发了。 现在只有 CUDA 13.0 一条道。 顺手一提：release 名叫 v0.33.0。 实际挂在 v0.33.0rc3 的 tag 上。 这操作，社区明天肯定有梗。 来源：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.33.0">https://github.com/vllm-project/vllm/releases/tag/v0.33.0</a></p>
+<p><strong>FlashInfer：量化内核三连</strong> FlashInfer 一口气合了 12 个 PR。 全是 cake 系列确定性内核的打磨。 值得看的是三笔量化活：#8289 的 NVFP4 MoE 专家内核。</p>
+<p>#8278 的 MXFP8 megamoe EP16 内核。</p>
+<p>#8290 的 FP8 attention/decode 路径优化。</p>
+<p>全是 Blackwell 那边的量化工程。 跟你评估清单的量化路线对得上。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8289">https://github.com/flashinfer-ai/flashinfer/pull/8289</a></p>
+<p><strong>SGLang：4 个小修，无大新闻</strong></p>
+<p>#47915 修内核基准测试的搬家问题。</p>
+<p>#47782 把 GPU 架构查询集中到一处。</p>
+<p>#45972 给 Kimi-K3 换了个 tool_call_id 算法。</p>
+<p>#46251 给路由层分词加速。</p>
+<p>四个全是 infra 边角料，不值得细看。 v0.5.23 的 notes 还是没发出来。 按 tag 日期算，到今天 3 天半了。 来源：<a href="https://github.com/sgl-project/sglang/pulls">https://github.com/sgl-project/sglang/pulls</a></p>
+<p><strong>其余框架：平淡</strong> TRT-LLM 2 个：一个是解耦 launcher 的遥测测试搬 CPU。 测试管线搬家，没业务价值。 另一个是 Mistral Large 4 的纯文档。 llama.cpp 4 个全跟 serving 没关系。 最新快照 b12034，按惯例不算发版。 LMDeploy 和 TGI 零合入，深夜档都在睡觉。</p>
+<p><strong>版本水位与 DeepInfer</strong> 版本水位：vLLM 一家升 v0.33.0。 其余全平：SGLang 还是 v0.5.22。 FlashInfer、TRT-LLM、LMDeploy、TGI 都不动。 DeepInfer 星标 24,955，加了 24 个。 代码还是 10/26 那版没动。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：结构性零入库</strong> 接口正常，HTTP 200，没被限流。 四组关键词最新提交还停在 10/30。 09:00–11:00 UTC 处于日批次后的间隙。 零入库符合预期，下轮再看。</p>
+<h2>业内新闻</h2>
+<p><strong>全线无新料</strong> X 大V、HN、Reddit、中文媒体、播客、YouTube 全静默。 social 上 8 条命中全是翻炒旧内容。 深夜档的互联网难得这么安静。</p>
+<h2>访谈与深度</h2>
+<p><strong>无</strong> 这轮无访谈与深度内容。</p>
+<p>*本轮无「值得深读」内容。v0.33.0 release notes 是聚合型发布说明，无关键图表，未达深读门槛。* *去重脚注：本期窗口为 UTC 11/02 09:00–11:00；1 点版已报的 SGLang #47614、TRT-LLM #21343、vLLM #64029 等不重复。*</p></body></html>
