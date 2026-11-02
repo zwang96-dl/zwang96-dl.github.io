@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月1日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-01"/>
+<meta name="doc-ts" content="2026-11-02T07:00:56"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-01（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-01（23点版）</h1>
+<p>23点版来了，午夜前仓库还在加班。 这轮一共合入 44 个 PR。 来自 vLLM、SGLang、FlashInfer、TRT-LLM。 版本一个没发，论文和社区也都安静。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM：8 个合入，MiniMax-M3 量化落地一笔</strong></p>
+<p>#64852 值得看一眼：给 MiniMax-M3 做了量化内核提速。</p>
+<p>MXFP8 是一种 8 位浮点量化格式。 可惜只支持英伟达卡，跟你的 AMD 卡无关。</p>
+<p>#64179 把多模态 encoder 的并行策略开给 MiMo-V2.6。</p>
+<p>剩下 6 个全是 CI 自动分片改造。 跟推理性能没关系，一句话带过。 来源：<a href="https://github.com/vllm-project/vllm/pull/64852、https://github.com/vllm-project/vllm/pull/64179">https://github.com/vllm-project/vllm/pull/64852、https://github.com/vllm-project/vllm/pull/64179</a></p>
+<p><strong>SGLang：18 个合入，PD 解耦那笔你得看</strong></p>
+<p>#43902 是 PD 解耦调度器的一次改名重构。</p>
+<p>它把 inflight queue 改成 transfer queue。 说白了：PD 解耦的本质是 KV 搬运。 KV 搬运就是把 prefill 的草稿纸快递给 decode。 名字终于跟上了，这笔跟你的 PD 解耦评估直接相关。</p>
+<p>#47743 优化了 MLA 注意力的 kernel。</p>
+<p>MLA 是 DeepSeek 的低成本注意力机制。</p>
+<p>#44974 修了 MoE 路由里的陈旧前缀缓存。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>#46088 把 DeepSeek v4.1 的 decode 三个环节融成一个内核。</p>
+<p>融核就像把三道工序并成一道。</p>
+<p>#47844 补了一份 MI355X 的 cookbook 文档。</p>
+<p>cookbook 就是手把手的实战指南。 它验证了 MiniMax-M3.1-Flash 在 MI355X 上的高吞吐。 剩下是线性注意力外挂、DSpark 校验视图、NPU 的小修补。 来源：<a href="https://github.com/sgl-project/sglang/pull/43902、https://github.com/sgl-project/sglang/pull/47844">https://github.com/sgl-project/sglang/pull/43902、https://github.com/sgl-project/sglang/pull/47844</a></p>
+<p><strong>FlashInfer：14 个合入，cake 内核继续打磨</strong> 全是英伟达 B200/GB200 侧的 MoE 和 FP8 内核提速。 其中一笔在 SM107 上支持了 MXFP4 W4A4。 SM107 是英伟达新卡的代号。 跟你的卡没关系，一句话带过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7944">https://github.com/flashinfer-ai/flashinfer/pull/7944</a></p>
+<p><strong>TRT-LLM：4 个合入，全是内部测试</strong> 存储驱动测试、安全目录限制、单元测试配置。 没有面向用户的变化。</p>
+<p><strong>LMDeploy、llama.cpp、TGI：零合入</strong></p>
+<p><strong>版本水位：全平</strong> vLLM 还是 v0.32.0，v0.33.0 的 tag 还在裸奔。 SGLang 还是 v0.5.22，notes 第 14 天了还没影。 FlashInfer、TRT-LLM、LMDeploy、TGI 都没动。 <strong>DeepInfer 星标 24,891</strong>，两小时涨了 19 个，代码没动。 来源：<a href="https://github.com/deepseek-ai/DeepInfer">https://github.com/deepseek-ai/DeepInfer</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：窗口内无新入库</strong> 接口这轮正常，最新还是 10/30 的批次。 下一轮再看。</p>
+<h2>业内新闻</h2>
+<p><strong>无</strong> 芯片、云厂商都没动静。</p>
+<h2>访谈与深度</h2>
+<p><strong>广域全线零新料</strong> X 大V、HN、Reddit 都没窗口内动静。 中文媒体、博客、newsletter 也都安静。 YouTube 三个频道没新视频。 Spotify 播客没新单集。</p>
+<h2>值得深读</h2>
+<p><strong>无</strong> 这轮都是增量 PR，宁缺毋滥，没做深读。</p>
+<p>*去重说明：本轮窗口是 UTC 11/02 04:56 到 07:00（上一轮 21点版结束于 04:56 UTC）。GitHub 逐个用 pulls 端点核验 merged_at，全部在窗口内：vLLM 8 个（#64852/#64179/#64599/#64598/#64597/#64594/#64355/#64181，MXFP8 内核+MiMo-V2.6 并行+CI 分片改造）、SGLang 18 个（#43902/#47743/#44974/#42654/#46606/#36059/#46088/#47234/#47844/#45406/#46478/#47599/#43865/#47367/#46580/#39682/#47823/#30980，PD 解耦调度器改名重构+MLA 优化+MoE 修复+DeepSeek decode 融核+MI355X cookbook+DSpark 校验）、FlashInfer 14 个（cake 系列 SM107 MXFP4 W4A4 MoE、GB300 Kimi-K3、Blackwell FP8 paged decode 等内核提速）、TRT-LLM 4 个（内部测试/安全修复）；LMDeploy、llama.cpp、TGI 零合入。版本水位全平：vLLM v0.32.0（v0.33.0 tag 存在、release 页仍 404，裸 tag 口径不算正式发版）、SGLang v0.5.22（v0.5.23 notes 第 14 天未出）、FlashInfer v0.7.2.post1、TRT-LLM stable v1.2.1（prerelease v1.4.0rc2 为 10/28）、LMDeploy v0.18.0、TGI v3.3.7、llama.cpp latest v0.8.0（每日快照口径）。DeepInfer 星标亲核 24,891（21点版 24,872，+19 噪声），pushed_at 仍 2026-10-26T05:30:52Z。arXiv 接口正常（HTTP 200，三组关键词查询），窗口内零新入库，最新仍 10/30 批次（最新 submitted 2026-10-30T17:59:34Z）。广域亲查（子代理并行）：X 一线人物（lmsysorg/vLLM/karpathy/jimfan/swyx）、HN、Reddit（r/LocalLLaMA/r/MachineLearning）、中文三家（机器之心/量子位/InfoQ）、Simon Willison/Latent Space newsletter/The Batch、YouTube 三频道、Spotify 播客均无窗口内新料；唯一窗口内命中是 Instagram 上一张 vLLM 架构科普信息图（@batamgems，2026-11-02 05:24 UTC），无新闻价值。*</p></body></html>
