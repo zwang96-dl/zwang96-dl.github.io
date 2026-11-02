@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang v0.5.23 发布说明精读"/>
+<meta name="doc-description" content="原文链接：https://github.com/sgl-project/sglang/releases/tag/v0.5.23"/>
+<meta name="doc-date" content="2026-11-02"/>
+<meta name="doc-ts" content="2026-11-02T23:03:56"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang v0.5.23 发布说明精读</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang v0.5.23 发布说明精读</h1>
+<p>原文链接：<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.23">https://github.com/sgl-project/sglang/releases/tag/v0.5.23</a> 发布信息：tag 打于 10/30，说明正文 11/02 22:14 UTC 才发布，晚了 4 天 规模：1007 个 PR、257 位贡献者 本期说明：数字均为官方自报。没有独立复测，别当定论。 本期说明：原说明是纯文本、无配图。本笔记不含图。</p>
+<h2>人话解读</h2>
+<ul><li>v0.5.23 的说明终于写出来了。</li><li>tag 早打了，正文拖到今天才发。</li><li>一个版本装了 1007 个 PR。</li><li>三大块：快、省、稳。</li><li>快：DeepSeek-V4.1 全线提速。</li><li>prefill 就是读题先算一遍。</li><li>decode 就是逐个往外吐词。</li><li>省：MoE 也能塞进消费级单卡。</li><li>MoE 就是混合专家模型。</li><li>稳：PD 解耦修了一堆实战坑。</li><li>PD 解耦就是两阶段拆机器跑。</li></ul>
+<h2>核心方法</h2>
+<h3>低延迟模式</h3>
+<ul><li>opt-in 模式，自愿开启。</li><li>NVIDIA 侧叫 megakernel（融合大内核）。</li><li>AMD 侧叫 monokernel（单内核插件）。</li><li>把 V4.1-Flash 的解码步打成一个融合持久内核。</li><li>持久内核就是常驻 GPU 不退场。</li><li>省掉反复启动内核的开销。</li><li>GB300 上单用户解码快 44%。</li><li>MI350X 上单用户解码快 75%。</li><li>你手里正好有 MI350X。</li><li>插件仓库：sgl-nvidia-mega / sgl-amd-mono。</li></ul>
+<h3>DeepSeek-V4.1 在 GB300 上</h3>
+<ul><li>高负载下 prefill 吞吐最高 1.5 倍。</li><li>32K 到 64K 长提示，首字延迟降约 28%。</li><li>配套 PR：#44403、#45059、#45107。</li><li>手法是 breakable prefill CUDA 图重放。</li><li>CUDA 图就是把算子序列打包预录。</li><li>长短上下文都能直接重放。</li></ul>
+<h3>MoE 首字更快</h3>
+<ul><li>7 个 MoE 模型，8K 提示首字早到 30% 到 58%。</li><li>在 H200 上测的。</li><li>名单：V4.1-Flash、GLM-5.3-Flash、gpt-oss 等。</li><li>手法是 MoE autotune 覆盖 prefill 块。</li><li>PR #43363。</li></ul>
+<h3>Paged Experts</h3>
+<ul><li>opt-in 功能。</li><li>大到装不进单卡的 MoE 模型。</li><li>也能在消费级单卡上跑。</li><li>比 CPU offload 快 30 倍。</li><li>CPU offload 就是权重放内存、算时再搬。</li></ul>
+<h3>LoRA 上量化 MoE</h3>
+<ul><li>FP8 和 NVFP4 量化模型也能挂 LoRA 了。</li><li>LoRA 就是低秩微调适配器。</li><li>用的是新 LoRA 引擎。</li><li>opt-in 开启。</li></ul>
+<h3>HiCache 文件级 L3</h3>
+<ul><li>MLA 做解码上下文并行时。</li><li>前缀缓存能存到文件级 L3 存储。</li><li>HiCache 就是多层缓存。</li><li>PR #41187。</li></ul>
+<h3>TPU7x</h3>
+<ul><li>通过 SGLang-TorchTPU 插件上 TPU7x。</li><li>PyTorch 原生，不走 JAX。</li></ul>
+<h3>新模型</h3>
+<ul><li>Muse Spark Open、Beam-1.0。</li><li>MiniMax-M3.1-Flash、MiniCPM-V 4.7。</li><li>Kev。</li><li>扩散类：Cosmos3-Nano-Sim、FastH3 Omni。</li><li>FLUX.3 Image Klein、HY-Nomas、MOSS-Image。</li></ul>
+<h3>PD 解耦专章</h3>
+<ul><li>这一章全是跟 PD 相关的。</li><li>每条都翻译成大白话。</li></ul>
+<p>搬运加速：</p>
+<ul><li>#44740：NIXL 传送引擎支持 prepared dlists。混合模型的 KV 搬运更快。NIXL 就是 PD 搬运的高速通道。dlist 就是提前备好的描述符列表。</li><li>#38955：解码侧 KV 预分配走 pinned 内存。pinned 内存就是锁页内存，搬运不经过 CPU 换页。</li><li>#44029：KVShard 的 0SM KV cache allgather。0SM 就是不占流处理器，纯靠拷贝引擎。</li><li>#44598：预构建的解码批输入直接拷 GPU。免掉 CPU 同步。</li><li>#45492：prefill 的 KV 分块发送免 CPU 同步。调度线程直接发。</li><li>#44622：调度器的 MLP 同步行改用 gather 加 broadcast。走 gloo 后端。</li></ul>
+<p>正确性修复：</p>
+<ul><li>#39729：KV 校验和实现清理加优化。搬运时少一笔计算。</li><li>#42702：解耦下 decode 撤回请求跟在飞前向撞车。修了竞态。</li><li>#44605：传送后端可以跳过不可比对端的校验和。省掉无效校验。</li><li>#45453：延迟的 decode KV 释放在 TP 各卡间同步。TP 就是张量并行。</li><li>#45973：NIXL 或 Mori 写失败时给延迟的 abort 确认下毒。防止错放行。</li><li>#44386：延迟 KV 释放被按住时，PD decode 不许闲置。调度器别偷懒。</li><li>#45922：丢了的 prefill 心跳计数重启。断线重连的账别算错。</li><li>#46423：解码侧 radix 缓存下也做 KV 校验。</li></ul>
+<p>布局与握手：</p>
+<ul><li>#45075：PD 默认走 MegaAttention。KV 布局写进 PD 握手里。</li><li>#43482：NIXL 支持按 GPU 选 UCX 网卡。#45722 保留手动选择。</li><li>#44140：只传 decode 前缀长度之后的 DSA 索引器状态。少搬一点是一点。</li><li>#44215：运行时 PD 角色切换支持 DP 和 DP attention。</li><li>#43760：PD 角色切换时复用启动时的解码图。少重建一次。</li></ul>
+<p>KVShard 系列：</p>
+<ul><li>#38473：KVShard 的 PD 传输加端到端测试。KVShard 就是 KV 缓存分片。</li><li>#40929：KVShard 支持 MTP 的 KV 缓存分片。MTP 就是多词元预测。</li><li>#42973：GLM 的 DSA/MTP 接 PD 和 CPU HiCache。</li></ul>
+<p>多模态相关：</p>
+<ul><li>#45440：prefill 异常重排队时，多模态输入不再丢。</li><li>#44952：V4.1 的编码器 SWA 有界重放在 PD prefill worker 上跑。SWA 就是滑动窗口注意力。</li></ul>
+<p>数字彩蛋：</p>
+<ul><li>#46463：按 NVML fabric 状态识别 MNNVL 设备。Kimi-K3 双节点 TP8/DCP8 解码从 379 涨到 485 词/秒。DCP 就是解码上下文并行。MNNVL 是 NVLink 级互联。</li></ul>
+<h2>关键数据</h2>
+<table><thead><tr><th>项目</th><th>数据</th><th>来源口径</th></tr></thead><tbody><tr><td>低延迟模式单用户解码 GB300</td><td>+44%</td><td>官方自报</td></tr><tr><td>低延迟模式单用户解码 MI350X</td><td>+75%</td><td>官方自报</td></tr><tr><td>V4.1 GB300 prefill 高负载吞吐</td><td>最高 1.5 倍</td><td>官方自报</td></tr><tr><td>32K–64K 提示首字延迟</td><td>−28%</td><td>官方自报</td></tr><tr><td>7 个 MoE 8K 提示首字</td><td>早到 30%–58%</td><td>H200 官方自报</td></tr><tr><td>Paged Experts 对 CPU offload</td><td>快 30 倍</td><td>官方自报</td></tr><tr><td>Kimi-K3 双节点 TP8/DCP8</td><td>379→485 词/秒</td><td>PR #46463 作者</td></tr><tr><td>QSA 上下文并行 CP4 8K prefill</td><td>−26.5%</td><td>PR #43792 作者</td></tr></tbody></table>
+<h2>跟你研究方向的关联</h2>
+<ul><li>你正在评估 SGLang 的 PD 解耦。</li><li>这一版 PD 专章全是实战坑的修复。</li><li>搬运正确性：校验、同步、竞态都在清单里。</li><li>搬运延迟：免同步发送、pinned 预分配是现成旋钮。</li><li>#45075 把 KV 布局写进 PD 握手。</li><li>这跟你评估里的&quot;拓扑先锁死&quot;直接对上。</li><li>MI350X 的低延迟单内核模式：单用户解码快 75%。</li><li>你手里的 MI350X 值得一测。</li><li>注意 #43809：TP2 以上拒绝 RCCL 确定性 all-reduce。</li><li>你做可复现评测时，TP4 起的确定性模式要看这条。</li><li>注意 #43640：HIP 上 EAGLE topk=1 用预分配草稿链。</li><li>跟你的推测解码评估相关。</li></ul>
+<h2>术语表</h2>
+<ul><li>prefill：读题阶段，先把提示算一遍。</li><li>decode：吐字阶段，逐个往外生成词。</li><li>PD 解耦：读题和吐字拆到不同机器跑。</li><li>KV cache：注意力草稿纸。</li><li>NIXL：PD 搬运的高速通道。</li><li>DCP：解码上下文并行。</li><li>SWA：滑动窗口注意力。</li><li>HiCache：多层 KV 缓存。</li><li>megakernel：融合大内核。</li><li>monokernel：AMD 侧单内核插件。</li><li>MoE：混合专家模型。</li><li>MNNVL：NVLink 级互联 fabric。</li><li>pinned 内存：锁页内存。</li><li>opt-in：默认不开，手动启用。</li><li>TTFT：首字延迟。</li><li>TPOT：词间延迟。</li></ul></body></html>

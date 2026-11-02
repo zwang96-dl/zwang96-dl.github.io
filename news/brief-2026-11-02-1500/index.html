@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月2日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-02"/>
+<meta name="doc-ts" content="2026-11-02T23:02:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-02（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-02（15点版）</h1>
+<p>15点版来了。 这轮头条是 SGLang：v0.5.23 的发布说明终于写出来了。 tag 挂了 4 天，现在才有正文。 1007 个 PR、257 位贡献者。 一个版本装了这么多料，值得翻一翻。</p>
+<h2>框架更新</h2>
+<p><strong>头条：SGLang v0.5.23 发布说明上线</strong> 说明地址：<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.23">https://github.com/sgl-project/sglang/releases/tag/v0.5.23</a> Docker 同步上架：NVIDIA CUDA13 版、AMD MI35x/MI30x 版、Intel XPU 版、Google TPU7x 版。</p>
+<p>划重点（跟你的卡直接相关的先说）：</p>
+<ul><li>低延迟模式来了。NVIDIA 的 megakernel（融合大内核）加 AMD 的 monokernel（单内核插件）都是 opt-in 可选项。它们把 DeepSeek-V4.1-Flash 的解码步打成一个融合持久内核。单用户解码 GB300 上快 44%，MI350X 上快 75%。MI350X 你手里正好有。</li><li>DeepSeek-V4.1 在 GB300 上：高负载下 prefill 吞吐最高 1.5 倍，32K 到 64K 长提示的首字延迟降约 28%。</li><li>MoE 首字更快：V4.1-Flash、GLM-5.3-Flash、gpt-oss 等 7 个 MoE 模型，8K 提示下首字早到 30% 到 58%，H200 上测的。</li><li>Paged Experts（分页专家，opt-in）：装不进单卡的 MoE 模型也能在消费级单卡上跑，比 CPU offload 快 30 倍。</li><li>LoRA 挂上量化 MoE：FP8 和 NVFP4 的量化模型也能接 LoRA 了，用的是新 LoRA 引擎。</li><li>解码上下文并行时，MLA 的前缀缓存能进 HiCache 的文件级 L3 存储了。HiCache 就是多层缓存，显存放不下就卸到别处。</li><li>Google TPU7x 也能跑了，走 SGLang-TorchTPU 插件。</li></ul>
+<p>PD 解耦那一章全是跟你评估相关的：</p>
+<ul><li>NIXL 传送引擎支持 prepared dlists，混合模型的 KV 搬运更快。NIXL 就是 PD 搬运的高速通道。</li><li>KV 校验和被清理优化，搬运时少一笔计算。</li><li>解耦下 decode 撤回请求跟在飞前向计算撞车，修了。</li><li>prefill 的 KV 分块发送不再等 CPU 同步，调度线程直接发。</li><li>prefill 异常重排队时，多模态输入不再丢。</li><li>解码侧 radix 缓存下加了 KV 校验，防止读到坏草稿。</li></ul>
+<p>数字全是官方自报，当路标看。</p>
+<p><strong>vLLM 4 个</strong></p>
+<ul><li>#65178：DCP 里 top-k 拼结果少一次全量拷贝。DCP 是 DeepSeek 稀疏注意力的上下文并行。各卡先选出自己的 top-k，再拼成全局答案。以前拼之前要把每份都完整抄一遍，现在省了。</li><li>#59999：FlashInfer 只声明自己真能寻址的 KV 布局。小修。</li><li>#63426 / #64833：都是 ROCm 的 CI 小修。CI 就是自动测试流水线，生产跑不着。</li></ul>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pulls">https://github.com/vllm-project/vllm/pulls</a></p>
+<p><strong>Dynamo 8 个</strong></p>
+<ul><li>#17854：Velo 响应面的批量窗口默认从 5ms 降到 2ms。GPU 上实测中位首字延迟追平 TCP 面，约好 10ms。吞吐和词间间隔不变。只影响开 Velo 面的人。</li><li>#17778：Dynamo 的 SGLang worker 开工前先热身加冻结 GC。以前比 launch_server 解码慢 3.5%，还每 30 秒全卡一下。</li><li>#17339：GMS 的 V1 侧车给每个 GPU 一个独立进程。服务就绪从 4 到 6 秒降到 0.4 秒。</li><li>#17371：全局发现 HTTP 服务上线。给全局路由器用的服务注册表。</li><li>#15333：会话亲和在 chat 处理器链里保持住。</li><li>#17709 / #17624：解耦取消、强制工具调用的端到端测试。</li><li>注：#17860 和 #17859 是池优先级的旧工作，11点版报过 #14037/#14038，本轮不重复。</li></ul>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pulls">https://github.com/ai-dynamo/dynamo/pulls</a></p>
+<p><strong>FlashInfer 11 个</strong></p>
+<ul><li>#8392：Kimi-K3 NVFP4 SiTU 专家在 SM100 上单行优化，decode 的 MoE 相关。</li><li>#8388：mega_moe_v3 在 TP4 EP4、TP8 EP8 下更快。</li><li>#8387：decode 小矩阵切分改到发射流的 SM 分区规划。</li><li>#8382：SM107 上 GDN 解码最高快 1.18 倍。</li><li>#8361：batch 不变模式的开关。评测要可复现的人看。</li><li>#8334：tinygemm2 的 64 位索引修。</li><li>#7509：TS 侧原语的 QK-MXFP8 上下文 FMHA。</li></ul>
+<p>其余是 R200 记录、CODEOWNERS 和小修。数字全是厂商自报，当路标看。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pulls">https://github.com/flashinfer-ai/flashinfer/pulls</a></p>
+<p><strong>TRT-LLM 5 个</strong></p>
+<ul><li>#21347：Ray 下从 torch 专家并行组引导 NCCL 的专家并行。</li><li>#21121：自调优时预热 MegaMoE 的 tile 变体。</li><li>#19764：修迭代日志关机卡死。</li><li>另两个是 infra 的失败用例豁免，跳过。</li></ul>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pulls">https://github.com/NVIDIA/TensorRT-LLM/pulls</a></p>
+<p><strong>其余框架窗口内零合入</strong> LMDeploy、TGI、llama.cpp、Mooncake 都是 0。</p>
+<p>版本水位：vLLM 仍是 v0.33.0（rc3 的 tag，老梗）；SGLang v0.5.23 发布说明上线（本期头条）。</p>
+<h2>新技术与论文</h2>
+<p>arXiv：接口正常，还是 10/30 的批次。 新批次今晚 17:00 PST 出，下轮再看。</p>
+<h2>业内新闻</h2>
+<p>窗口内无新料。 Google TPU 那堆都是 10/20 旧闻的二次报道，别当新事。</p>
+<h2>访谈与深度</h2>
+<p>名单全扫：@lmsysorg、vLLM 官方、@karpathy、@jimfan、swyx。 Simon Willison、Latent Space、The Batch、机器之心、量子位。 窗口内都没新帖，播客、YouTube、IG/Threads/FB 也都安静。</p>
+<h2>值得深读</h2>
+<p><strong>SGLang v0.5.23 发布说明</strong>：PD 解耦那一章全是跟你评估直接相关的修补和优化。NIXL 搬运加速、KV 校验、撤回竞态、免同步发送，这些正是你评估清单里的搬运正确性和延迟项。说明里还藏了 AMD 干货（ROCm 统一 KV 上的 DSV4 decode radix 缓存、MI350X 单用户解码快 75% 的单内核模式）。笔记已生成，见深度阅读目录。</p>
+<p>*去重脚注：本期窗口为 UTC 11/02 21:10–22:57；13点版已报的 vLLM #64475、#62632、#65201、#60479、#61641、#64472、#64692、#62270、#65162，Dynamo #17777、#17237、#17344、#16193、#17314，FlashInfer #8371、#8370、#6114、#8362，11点版已报的 Dynamo #14037/#14038（池优先级，与本轮 #17860/#17859 同内容）等不重复。*</p></body></html>
