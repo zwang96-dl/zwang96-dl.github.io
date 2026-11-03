@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月3日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-03"/>
+<meta name="doc-ts" content="2026-11-03T21:01:32"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-03（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-03（13点版）</h1>
+<p>13点版来了。这轮框架侧继续加班。vLLM 17 笔。Dynamo 和 FlashInfer 也都十几笔。多模态看点在 Dynamo 的多媒体转发和修补。SGLang 的缓存淘汰也变聪明了。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 17 笔</strong></p>
+<p><strong>#65230：QuTLASS 和 fp_quant 被删了</strong></p>
+<p>两个旧量化路径直接下线。NVFP4 的 QuIP 方案重新跑通，删掉约 1800 行代码。 注意：fp_quant 存的权重以后打不开了。这是破坏性改动，升级前先看好。 来源：<a href="https://github.com/vllm-project/vllm/pull/65230">https://github.com/vllm-project/vllm/pull/65230</a></p>
+<p><strong>#65214：HiSparse 吃上可扩展 KV 缓存了</strong></p>
+<p>GPU 加主机两端的 KV 容量涨了 16%。NIXL 做 PD 分离和 Mooncake 搬运也都通了。 换句话说：草稿纸更大了，跨卡传也顺了。 throughput 跟原来持平。 来源：<a href="https://github.com/vllm-project/vllm/pull/65214">https://github.com/vllm-project/vllm/pull/65214</a></p>
+<p><strong>#65125：Muse Spark 的 DSpark 草稿修好了</strong></p>
+<p>之前 draft 模型启动就报错。DSpark（DeepSeek 式的投机解码头）能正常装载了。 验证过接受率没变：纯修 bug，性能没缩水。 来源：<a href="https://github.com/vllm-project/vllm/pull/65125">https://github.com/vllm-project/vllm/pull/65125</a></p>
+<p><strong>#62750：MXFP4 上线块哈达玛旋转</strong></p>
+<p>给权重先做一次&quot;搅拌&quot;再量化。离群值被摊平，量化误差就小了。 在线量化和 Quark 导出的旋转权重都吃这套。 来源：<a href="https://github.com/vllm-project/vllm/pull/62750">https://github.com/vllm-project/vllm/pull/62750</a></p>
+<p><strong>#65467、#65258：部署食谱两笔</strong></p>
+<p>Kimi-K3 的 B300 食谱跟到 InferenceX 最新版。MiniMax-M3.1-Flash 精简了两个配置。 来源：<a href="https://github.com/vllm-project/vllm/pull/65467、https://github.com/vllm-project/vllm/pull/65258">https://github.com/vllm-project/vllm/pull/65467、https://github.com/vllm-project/vllm/pull/65258</a></p>
+<p><strong>#65459、#65216：前端两笔</strong></p>
+<p>Anthropic 接口支持 min_tokens 了。Granite 4.2 的工具调用解析器上线了。 来源：<a href="https://github.com/vllm-project/vllm/pull/65459、https://github.com/vllm-project/vllm/pull/65216">https://github.com/vllm-project/vllm/pull/65459、https://github.com/vllm-project/vllm/pull/65216</a></p>
+<p><strong>#65046、#64989、#63742、#64743：小修一批</strong></p>
+<p>DSv4 空块跳过。HiSparse 临时显存释放。Mamba 换统一导出器。Mistral 字节回退小修。 来源：<a href="https://github.com/vllm-project/vllm/pull/65046、https://github.com/vllm-project/vllm/pull/64989、https://github.com/vllm-project/vllm/pull/63742、https://github.com/vllm-project/vllm/pull/64743">https://github.com/vllm-project/vllm/pull/65046、https://github.com/vllm-project/vllm/pull/64989、https://github.com/vllm-project/vllm/pull/63742、https://github.com/vllm-project/vllm/pull/64743</a></p>
+<p><strong>SGLang 4 笔</strong></p>
+<p><strong>#46930：hicache 淘汰只等一次了</strong></p>
+<p>之前每踢掉一个 KV 块就停一次。GPU 干等着，调度被拖慢。 现在批量踢、一次性等完。决策不变，排队更顺。 来源：<a href="https://github.com/sgl-project/sglang/pull/46930">https://github.com/sgl-project/sglang/pull/46930</a></p>
+<p><strong>#41916：top-k 和 top-p 采样统一了</strong></p>
+<p>之前几条路各自为政。同样参数，效果居然不一样。 现在全对齐：top-p 的截断基准统一用原始概率分布。 来源：<a href="https://github.com/sgl-project/sglang/pull/41916">https://github.com/sgl-project/sglang/pull/41916</a></p>
+<p><strong>#47955：extend 这轮走没走完有标记了</strong></p>
+<p>每个请求独立记一笔。模型代码不用再去 GPU 上比长度猜。 一行 flag，省一堆麻烦。 来源：<a href="https://github.com/sgl-project/sglang/pull/47955">https://github.com/sgl-project/sglang/pull/47955</a></p>
+<p><strong>#48131：CI 小修，略过</strong></p>
+<p><strong>TRT-LLM 1 笔</strong></p>
+<p><strong>#21377：Muse Spark Open 铺上 Vera Rubin 快车道</strong></p>
+<p>一个构建伺候三档负载：高并发、中等、超低延迟。按部署自己挑档。 PD 分离部署的 context 和生成服务器都吃得到。SM107 用户可以试了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21377">https://github.com/NVIDIA/TensorRT-LLM/pull/21377</a></p>
+<p><strong>llama.cpp 1 笔</strong></p>
+<p><strong>#31552：高通 Hexagon 加了 TOP_K_MASK</strong></p>
+<p>手机端采样拼图继续补。测试全过，就一笔。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31552">https://github.com/ggml-org/llama.cpp/pull/31552</a></p>
+<p><strong>Dynamo 13 笔</strong></p>
+<p><strong>#16203：sidecar 终于能转发多媒体了</strong></p>
+<p>图片、视频、音频都能透传给 SGLang。SGLang 0.5.23 刚加了多媒体字段，这边立刻接上。 多模态请求不再被 400 挡在门外。Qwen3-VL 这类模型直接可用。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/16203">https://github.com/ai-dynamo/dynamo/pull/16203</a></p>
+<p><strong>#17712：路由插件支持无状态模式</strong></p>
+<p>轮询、最少负载这些简单算法，以前必须绕调度器。现在插件自己跑。 不加锁、不分配，延迟更低。简单算法走简单路。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17712">https://github.com/ai-dynamo/dynamo/pull/17712</a></p>
+<p><strong>#17702：全局发现客户端加池子缓存</strong></p>
+<p>GET /pools 实时拉池子列表。扩缩容不用改配置。 先占个坑：前端还没切换过去，后续 PR 接上。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17702">https://github.com/ai-dynamo/dynamo/pull/17702</a></p>
+<p><strong>#14197：规划器批量运行时接上租约</strong></p>
+<p>Redis 做仲裁，写操作带围栏。调度决策过期就作废，不会误执行。 全局调度拼图的又一块。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/14197">https://github.com/ai-dynamo/dynamo/pull/14197</a></p>
+<p><strong>#17935：多模态 NIXL 修了个漏缓冲的 bug</strong></p>
+<p>搬 embedding 缓冲区之前，先验元数据是不是 READ。之前把 WRITE 当 READ 借走，缓冲池慢慢漏光。 先验货再借东西，基本操作。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17935">https://github.com/ai-dynamo/dynamo/pull/17935</a></p>
+<p><strong>#17653、#17894、#17660、#16651、#17664：小修一批</strong></p>
+<p>SGLang 提到 0.5.23。LoRA 重构准备。GLM 推理输出过滤。Helm 和 mocker 小修。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17653、https://github.com/ai-dynamo/dynamo/pull/17894、https://github.com/ai-dynamo/dynamo/pull/17660、https://github.com/ai-dynamo/dynamo/pull/16651、https://github.com/ai-dynamo/dynamo/pull/17664">https://github.com/ai-dynamo/dynamo/pull/17653、https://github.com/ai-dynamo/dynamo/pull/17894、https://github.com/ai-dynamo/dynamo/pull/17660、https://github.com/ai-dynamo/dynamo/pull/16651、https://github.com/ai-dynamo/dynamo/pull/17664</a></p>
+<p><strong>FlashInfer 17 笔</strong></p>
+<p><strong>#8374：SDSA 稀疏注意力 indexer 来了</strong></p>
+<p>一个头先挑出最重要的 K。再让 MQA 注意力集中算这部分，省计算量。 跑在 Blackwell 上，其他卡只能跑打分那步。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8374">https://github.com/flashinfer-ai/flashinfer/pull/8374</a></p>
+<p><strong>#8419：MoE 专家并行传输支持 SM107</strong></p>
+<p>Lamport 单边通信扩展到 Vera Rubin。64 个 rank 上限不变。 MoE 跨卡搬专家权重更快了。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8419">https://github.com/flashinfer-ai/flashinfer/pull/8419</a></p>
+<p><strong>#8423：QSA 在 SM80–SM90 上更快了</strong></p>
+<p>BF16、FP8、NVFP4 全受益。NVFP4 切到默认 kernel，启动开销也小了。 注意：末位精度可能差 1 bit，能接受再开。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8423">https://github.com/flashinfer-ai/flashinfer/pull/8423</a></p>
+<p><strong>#7494、#7882、#7626：小修三笔</strong></p>
+<p>rope 写越界、MTP 池子散射、自调优查表上限。纯修 bug。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7494、https://github.com/flashinfer-ai/flashinfer/pull/7882、https://github.com/flashinfer-ai/flashinfer/pull/7626">https://github.com/flashinfer-ai/flashinfer/pull/7494、https://github.com/flashinfer-ai/flashinfer/pull/7882、https://github.com/flashinfer-ai/flashinfer/pull/7626</a></p>
+<p><strong>Cake 训练侧 6 笔 + CI 4 笔</strong></p>
+<p>继续压榨 Blackwell 的训练 kernel。softmax、MoE、投影、卷积轮番优化。略过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8543、https://github.com/flashinfer-ai/flashinfer/pull/8540、https://github.com/flashinfer-ai/flashinfer/pull/8538、https://github.com/flashinfer-ai/flashinfer/pull/8521、https://github.com/flashinfer-ai/flashinfer/pull/8517、https://github.com/flashinfer-ai/flashinfer/pull/8504">https://github.com/flashinfer-ai/flashinfer/pull/8543、https://github.com/flashinfer-ai/flashinfer/pull/8540、https://github.com/flashinfer-ai/flashinfer/pull/8538、https://github.com/flashinfer-ai/flashinfer/pull/8521、https://github.com/flashinfer-ai/flashinfer/pull/8517、https://github.com/flashinfer-ai/flashinfer/pull/8504</a></p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0 没动。SGLang v0.5.23 没动。TRT-LLM 还是 v1.4.0rc2。LMDeploy 还是 v0.18.0。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 无新批次。每日批次在 00:00 UTC 发布，本轮窗口结构性零入库。</p>
+<h2>业内新闻</h2>
+<p>本轮无实质新内容。X 大V 名单扫过，无值得收录的动态。 d3-ultra 那篇是 10/27 已报新闻的转载，不重复。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。</p>
+<h2>值得深读</h2>
+<p>宁缺毋滥：本轮没有达到深读标准的内容，不做笔记。</p>
+<p>*去重脚注：本期窗口为 UTC 11/03 19:00–21:00；11点版已报的 vLLM #56277、#62633、#63754、#63801、#65206、#65322、#64317、#60418、#65423、#65253，SGLang #48125、#48099、#48192，TRT-LLM #21432、#20639、#20704、#21565，llama.cpp #31356、#31279、#31596，Dynamo #17332、#14196、#17856、#17864、#17305、#17563、#17719、#17791、#17788，FlashInfer #8529、#8528、#8524、#8523、#8522、#8519、#8501、#6276、#5740、#8368、#5324、#5124 等不重复。*</p></body></html>
