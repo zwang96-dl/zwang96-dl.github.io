@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月3日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-03"/>
+<meta name="doc-ts" content="2026-11-03T23:02:03"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-03（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-03（15点版）</h1>
+<p>15点版来了。这轮框架继续加班。vLLM、TRT-LLM 都有新合入。Dynamo、FlashInfer 也没闲着。vLLM 给 Qwen3.5 加了融合算子。TRT-LLM 出了统一 KVCache。多模态看点在视频。llama.cpp 的 Qwen3-VL 格式修准了。Dynamo 给 TRT-LLM 接上了视频通道。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 4 笔</strong></p>
+<p><strong>#64723：Qwen3.5 在英伟达卡上跑得更顺了</strong> all-reduce、norm、量化三步揉进一个 kernel。少几轮显存读写，延迟直接降。 来源：<a href="https://github.com/vllm-project/vllm/pull/64723">https://github.com/vllm-project/vllm/pull/64723</a></p>
+<p><strong>#62565：Kimi-K2.6 的 prefill 掉速被抓回来</strong> Triton 3.8 上的 int4 MoE 预填充变慢了。这笔用调优配置把速度修回来。 gfx950 正是 MI350X 的架构。玩 AMD 卡的同学升级吃得到。 来源：<a href="https://github.com/vllm-project/vllm/pull/62565">https://github.com/vllm-project/vllm/pull/62565</a></p>
+<p><strong>#65496：MiniMax-M3 的 MXFP8 小毛病</strong> 序列并行下 input norm 误出了 MXFP8。现在只修 bug，精度速度不变。 来源：<a href="https://github.com/vllm-project/vllm/pull/65496">https://github.com/vllm-project/vllm/pull/65496</a></p>
+<p><strong>#64518：工具解析器保留原始文本</strong> string 参数带 union/enum 时，原始文本不再被吞。Muse、MiniCPM5、Poolside 受益。 来源：<a href="https://github.com/vllm-project/vllm/pull/64518">https://github.com/vllm-project/vllm/pull/64518</a></p>
+<p><strong>SGLang 1 笔</strong></p>
+<p>纯重构。TokenizerWorker 合并进主管理器。行为不变，略过。 来源：<a href="https://github.com/sgl-project/sglang/pull/48119">https://github.com/sgl-project/sglang/pull/48119</a></p>
+<p><strong>TRT-LLM 6 笔</strong></p>
+<p><strong>#20486：Dflash 统一 KVCache</strong> KV 缓存接口收拢到一套。以后换 backend 不折腾，开发省事了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20486">https://github.com/NVIDIA/TensorRT-LLM/pull/20486</a></p>
+<p><strong>#21475：DSpark 升级，更稳了</strong> DSpark（小模型先打草稿、大模型改的投机解码）采样加了块验证。 prefix 缓存命中时，草稿能带着上下文开工。还附了 GB300 的 agentic 食谱。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21475">https://github.com/NVIDIA/TensorRT-LLM/pull/21475</a></p>
+<p><strong>#21239：CuteDSL MoE 的 NVFP4 量化提速</strong> tiled Triton 量化路径打通。MoE 权重压成 NVFP4 更快了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21239">https://github.com/NVIDIA/TensorRT-LLM/pull/21239</a></p>
+<p><strong>#19786：DSA 跳过重复的调度重建</strong> indexer 调度在共享 index 的 draft 步直接复用。小优化，积少成多。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19786">https://github.com/NVIDIA/TensorRT-LLM/pull/19786</a></p>
+<p><strong>#21579、#21283：小修两笔</strong> Helix MLA 解码 kernel 选择修准。Lamport all-reduce 的清零大小按字节算。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21579、https://github.com/NVIDIA/TensorRT-LLM/pull/21283">https://github.com/NVIDIA/TensorRT-LLM/pull/21579、https://github.com/NVIDIA/TensorRT-LLM/pull/21283</a></p>
+<p><strong>llama.cpp 2 笔</strong></p>
+<p><strong>#31619：Qwen3-VL 的视频提示词格式修准</strong> mtmd 对 Qwen3-VL 视频输入的格式支持更准了。多模态本地推理的坑少一个。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31619">https://github.com/ggml-org/llama.cpp/pull/31619</a></p>
+<p><strong>#30993：接上 chatterbox TTS</strong> 语音合成模型支持上线。做语音方向的可以玩了。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30993">https://github.com/ggml-org/llama.cpp/pull/30993</a></p>
+<p><strong>Dynamo 5 笔（实质）</strong></p>
+<p><strong>#16870：TRT-LLM 的视频通道打通了</strong> 视频请求能走 OpenEngine sidecar 进 TRT-LLM。多模态管线又齐了一块。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/16870">https://github.com/ai-dynamo/dynamo/pull/16870</a></p>
+<p><strong>#17728、#17727：可靠性两笔</strong> vLLM sidecar 挂了自动重启。引擎丢了，worker 主动排水退出。 生产环境半夜少被叫醒。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17728、https://github.com/ai-dynamo/dynamo/pull/17727">https://github.com/ai-dynamo/dynamo/pull/17728、https://github.com/ai-dynamo/dynamo/pull/17727</a></p>
+<p><strong>#17290：kvcr 启动监管加资源配置</strong> 内存服务的资源配额管起来了。PD 分离的 KV 搬运更稳。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17290">https://github.com/ai-dynamo/dynamo/pull/17290</a></p>
+<p><strong>#17980：SGLang 多媒体字段只设一次</strong> 修 bug 一笔。上轮刚接上的多媒体转发，这轮把重复设置掐掉。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17980">https://github.com/ai-dynamo/dynamo/pull/17980</a></p>
+<p><strong>FlashInfer 5 笔（实质）</strong></p>
+<p><strong>#8221：每个 CUDA 流配自己的 GEMM 工作区</strong> 并发时工作区不再打架。正确性修复，顺手更稳。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8221">https://github.com/flashinfer-ai/flashinfer/pull/8221</a></p>
+<p><strong>#8002：采样指标对齐</strong> indexed top-k 和投机解码的指标口径统一。测出来的数更可信。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8002">https://github.com/flashinfer-ai/flashinfer/pull/8002</a></p>
+<p><strong>#7987：FP4 量化目标提前拦错</strong> 不支持的 FP4 目标直接报错。少在半夜查 NaN。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7987">https://github.com/flashinfer-ai/flashinfer/pull/7987</a></p>
+<p><strong>#5617：SM90 上拒绝采样更快了</strong> 行拆到线程块簇上并行。采样这步提速。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/5617">https://github.com/flashinfer-ai/flashinfer/pull/5617</a></p>
+<p><strong>Cake 训练侧 7 笔</strong> sm_103a、sm_107a 的训练 kernel 轮番压榨。跟推理无关，略过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8553、https://github.com/flashinfer-ai/flashinfer/pull/8547、https://github.com/flashinfer-ai/flashinfer/pull/8546、https://github.com/flashinfer-ai/flashinfer/pull/8544、https://github.com/flashinfer-ai/flashinfer/pull/8525、https://github.com/flashinfer-ai/flashinfer/pull/8518、https://github.com/flashinfer-ai/flashinfer/pull/8502">https://github.com/flashinfer-ai/flashinfer/pull/8553、https://github.com/flashinfer-ai/flashinfer/pull/8547、https://github.com/flashinfer-ai/flashinfer/pull/8546、https://github.com/flashinfer-ai/flashinfer/pull/8544、https://github.com/flashinfer-ai/flashinfer/pull/8525、https://github.com/flashinfer-ai/flashinfer/pull/8518、https://github.com/flashinfer-ai/flashinfer/pull/8502</a></p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0 没动。SGLang v0.5.23 没动。TRT-LLM 还是 v1.4.0rc2。LMDeploy 还是 v0.18.0。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 无新批次。每日批次在 00:00 UTC 发布，本轮窗口结构性零入库。</p>
+<h2>业内新闻</h2>
+<p>本轮无实质新内容。X 大V 名单扫过，无值得收录的动态。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。</p>
+<h2>值得深读</h2>
+<p>宁缺毋滥：本轮没有达到深读标准的内容，不做笔记。</p>
+<p>*去重脚注：本期窗口为 UTC 11/03 21:00–23:00；13点版已报的 vLLM #65230、#65214、#65125、#62750、#65467、#65258、#65459、#65216、#65046、#64989、#63742、#64743，SGLang #46930、#41916、#47955，TRT-LLM #21377，llama.cpp #31552，Dynamo #16203、#17712、#17702、#14197、#17935、#17894、#17653、#17660、#16651、#17664，FlashInfer #8374、#8419、#8423、#7494、#7882、#7626、#8543、#8540、#8538、#8521、#8517、#8504 等不重复。*</p></body></html>
