@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月3日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-03"/>
+<meta name="doc-ts" content="2026-11-03T11:00:29"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-03（3点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-03（3点版）</h1>
+<p>3点版来了。这轮是投机解码专场：两篇新论文都在给猜词这套玩法加料。框架侧则比较安静。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 4 笔</strong></p>
+<p><strong>#65296：DeepSeek-V4 的 ROCm 加载修了</strong>。预打乱的缩放因子以前被塞进模块参数。现在留在外面。AMD 卡上加载 V4 不再出幺蛾子。 来源：<a href="https://github.com/vllm-project/vllm/pull/65296">https://github.com/vllm-project/vllm/pull/65296</a></p>
+<p><strong>#65281：热重载权重更快了</strong>。直接重载（direct reload）时，checkpoint 按重定位后的权重起始位置排布。换权重不用从头排一遍。 来源：<a href="https://github.com/vllm-project/vllm/pull/65281">https://github.com/vllm-project/vllm/pull/65281</a></p>
+<p><strong>#65174：Kimi-VL 的 pad 补齐了</strong>。KimiVLConfig 里以前没显式设 pad_token_id。现在补上。多模态模型的配置坑又少一个。 来源：<a href="https://github.com/vllm-project/vllm/pull/65174">https://github.com/vllm-project/vllm/pull/65174</a></p>
+<p><strong>#65152：Step-5 的 SwiGLU 进 TRTLLM MoE 了</strong>。一个内核启用补丁，细节不多。</p>
+<p><strong>SGLang 1 笔</strong></p>
+<p><strong>#48087：调度热路径瘦身</strong>。detokenizer 从 TokenizerManager 上摘下来，tokenizer 也不挂在 schedule_batch 上。调度器每步少背点东西。 来源：<a href="https://github.com/sgl-project/sglang/pull/48087">https://github.com/sgl-project/sglang/pull/48087</a></p>
+<p><strong>TRT-LLM 2 笔</strong></p>
+<p><strong>#21391：Kimi-K3 的思考设置生效了</strong>。Anthropic 和 chat 请求里的 thinking、effort 参数以前被忽略。现在会传给模型。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21391">https://github.com/NVIDIA/TensorRT-LLM/pull/21391</a></p>
+<p><strong>#21426：NVFP4 核心性能覆盖加了</strong>。Muse Spark Open 的 NVFP4 测试覆盖，部署验证用。</p>
+<p><strong>LMDeploy 1 笔</strong></p>
+<p><strong>#5079：top-k 过滤默认关了</strong>。改个默认行为，影响采样细节。 来源：<a href="https://github.com/InternLM/lmdeploy/pull/5079">https://github.com/InternLM/lmdeploy/pull/5079</a></p>
+<p><strong>llama.cpp 4 笔</strong></p>
+<p><strong>#31581：Metal 的 cpy 内核修了</strong>。目标在 dim 0 不连续时会算错。现在修好。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31581">https://github.com/ggml-org/llama.cpp/pull/31581</a></p>
+<p><strong>#31579：GGUF 分片合并加了校验</strong>。分片对不上就直接拒绝合并，不再静默拼错。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31579">https://github.com/ggml-org/llama.cpp/pull/31579</a></p>
+<p><strong>#31391：CUDA 读数合并了</strong>。成批的张量读聚进映射主机内存。一次搬运顶多次。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31391">https://github.com/ggml-org/llama.cpp/pull/31391</a></p>
+<p><strong>#31427：NVFP4 转换对齐了名字</strong>。转换脚本用原始模型的张量名，对账更方便。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31427">https://github.com/ggml-org/llama.cpp/pull/31427</a></p>
+<p><strong>Dynamo 1 笔</strong></p>
+<p><strong>#17797：前端尊重 vLLM 的选项了</strong>。vLLM 的 renderer 和 cache 选项现在会被 Dynamo 前端认领。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17797">https://github.com/ai-dynamo/dynamo/pull/17797</a></p>
+<p><strong>FlashInfer：cake 微优化又二十笔</strong>。挑关键的说：#8463 B200 上 TP8 的 640–1008 token 走新的 cluster-pair 归属程序；#8473 RTX 5090 和 PRO 6000 的 SM120 分页 FP8 MQA logits 路径更快；#8477 修了 Rubin 调优缓存的复用。剩下的全是 cake 微调，数字都是作者自报。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8463">https://github.com/flashinfer-ai/flashinfer/pull/8463</a></p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0、SGLang v0.5.23、TRT-LLM v1.4.0rc2、LMDeploy v0.18.0，全无变化。TGI 和 Mooncake 本轮零实质合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>SpecPilot（11-02 提交）</strong>：让 AI 自己发明投机解码加速。流程像自动化的调参工程师：成本模型先算&quot;离理论上限差多远&quot;，一群 agent 每块 GPU 一个方向并行探索，逐词核验防 agent 偷工减料，经验沉淀成记忆给新部署复用。发现了三个能抄的：无损 12 位权重格式 W12、混合循环模型的树验证、两级验证。单请求从官方版的 4.46 倍提到 10.87 倍，带 batch 从 1.94 倍到 3.93 倍。Berkeley、Princeton、Stanford、NVIDIA 联合出品。 来源：<a href="https://arxiv.org/abs/2611.02501">https://arxiv.org/abs/2611.02501</a></p>
+<p><strong>SpecOPD（11-02 提交）</strong>：给并行猜词员做 on-policy 蒸馏。关键洞察是监督信号不用串行 rollout 攒，可以按分支并行采。三个并行猜词架构都测了（DFlash、DSpark、DFlash V2）。平均接受长度涨 41.45%，相对普通解码最高 3.56 倍加速。注：DSpark 就是 DeepInfer 的投机解码组件，跟你追的那条线直接咬合。 来源：<a href="https://arxiv.org/abs/2611.02846">https://arxiv.org/abs/2611.02846</a></p>
+<p><strong>R²-Omni（11-02 提交）</strong>：多模态 KV 的双重瘦身，不用训练。先按时空相似度合并冗余的音视频 token（结构冗余），再按语义敏感度给剩下的分配精度（精度冗余）。内存砍 5 倍，生成质量保住 97.98%，端到端快 1.48 倍。纯多模态方向，跟你的主线最对口。 来源：<a href="https://arxiv.org/abs/2611.03247">https://arxiv.org/abs/2611.03247</a></p>
+<p><strong>Fairway（11-01，补漏）</strong>：给 prefill 调度做负载感知。核心矛盾：光顾着复用 KV 会饿死贵请求，光顾着公平中位数 TTFT 又涨。解法是双车道：队列短时走&quot;复用优先快车道&quot;，请求等久了切&quot;公平车道&quot;。p99 首字延迟最高比旧的前缀感知调度低 8.6 倍。 来源：<a href="https://arxiv.org/abs/2611.02082">https://arxiv.org/abs/2611.02082</a></p>
+<p><strong>谁给草稿纸打分？（11-01，补漏）</strong>：KV 驱逐时 token 重要性该看哪一层。21 个模型测下来：浅层看不懂问题，深层已经想偏了，中间 40%–75% 深度那几层打分最准。紧预算下比 SnapKV 高 18–43 个点。注意大模型上默认的本层打分已经接近最优，增益主要在 14B 以下。 来源：<a href="https://arxiv.org/abs/2611.02230">https://arxiv.org/abs/2611.02230</a></p>
+<p><strong>SIMPLE 定律（11-02，备查）</strong>：LLM 推理能耗的经验定律。偏成本建模，跟你评估的功耗账有关时再看。 来源：<a href="https://arxiv.org/abs/2611.03330">https://arxiv.org/abs/2611.03330</a></p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic 发了可验证推理原型 FlashProve（11/2）</strong>：用零知识证明（zkSNARK，一种&quot;我算对了但不用给你看权重&quot;的密码学证明）证明&quot;这个回答确实来自指定模型&quot;。Llama 4 Maverick 在单张 H100 上约 110 token/秒，每 1024 token 的证明约 19MB。但证明的 GPU 开销是正常推理的 70–95 倍。目前是研究原型，不是产品。数字全是 Anthropic 自报，没独立复现。 来源：<a href="https://blockchain.news/news/anthropic-provable-inference-flashprove-llama-4-maverick">https://blockchain.news/news/anthropic-provable-inference-flashprove-llama-4-maverick</a></p>
+<p><strong>印度 E2E Networks 上线按 token 计费的推理服务 Blaze（11/2）</strong>：一个 OpenAI 兼容的 API，聚合了 Nemotron、DeepSeek、Qwen、GLM、Gemma。底座是 NVIDIA Dynamo：KV 缓存感知路由加 prefill/decode 分离。这就是 PD 解耦的生产级落地样本。 来源：<a href="https://cio.eletsonline.com/artificial-intelligence/e2e-networks-blaze-ai-inference/76665/">https://cio.eletsonline.com/artificial-intelligence/e2e-networks-blaze-ai-inference/76665/</a></p>
+<p><strong>壁仞天垓 300 自报部分场景超 H200（11/1–2）</strong>：国产推理芯片的媒体演示口径。第三方 INESA 外测只给了 1.05 倍，15% MoE 吞吐领先也是媒体转述。厂商自报，当路标看。 来源：<a href="https://www.siliconreport.com/iluvatar-corex-benchmarks-claim-tiangai-300-tops-nvidia-h200">https://www.siliconreport.com/iluvatar-corex-benchmarks-claim-tiangai-300-tops-nvidia-h200</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无实质新内容。Latent Space 最新单集仍是 11/2 的法律 Agent 那期（23点版已报）。X 大V 全安静。Reddit、HN 近两天无高赞 serving 讨论。中文媒体无新稿。播客搜了一圈，Spotify 上推理 serving 相关无新单集。</p>
+<h2>值得深读</h2>
+<p><strong><a href="DEEPREAD_LINK_PLACEHOLDER">SpecPilot：让 AI 自己发明投机解码加速</a></strong> 推荐理由：这篇是方法论级别的——它不只给了一个加速技巧，而是给了一整套&quot;让 agent 自动给投机解码找优化&quot;的流程。W12 权重格式、两级验证、逐词防作弊核验，三个机制都能直接抄进你的 SGLang 评估部署。图都配好了。</p>
+<p>*去重脚注：本期窗口为 UTC 11/03 06:57–10:58；23点版及之前已报的 vLLM #64312、#65153、#65226、#64096，SGLang #47993、#44489、#47976、#47292，TRT-LLM #21272、#20709、#21245、#20975、#21550、#21542、#21521、#21487、#21437、#21326，Dynamo #16208，llama.cpp #30662、#31292、#31570、#31339，FlashInfer cake 批，arXiv 2611.02583、2611.00588、2611.00915、2611.00403、2610.41919、2611.01097、2611.02401，墨芯 AI 融资、趋境×智谱×摩尔线程、凌烟阁×Skymizer、高通 AI Hub 等不重复。*</p></body></html>
