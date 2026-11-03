@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月3日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-03"/>
+<meta name="doc-ts" content="2026-11-03T13:05:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-03（5点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-03（5点版）</h1>
+<p>5点版来了。这轮凌晨窗口比较冷清。arXiv 没出新批次。新闻只有一条 DeepSeek 乌镇谈开源。框架侧靠 GitHub PR 撑场面。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 6 笔</strong></p>
+<p><strong>#65271：多模态 + prefix cache 的调度 bug 修了</strong>。cache 命中点以前会卡在图片/视频内容中间，把请求拦腰切断。现在不会了。多模态 serving 的稳定性直接受益。 来源：<a href="https://github.com/vllm-project/vllm/pull/65271">https://github.com/vllm-project/vllm/pull/65271</a></p>
+<p><strong>#65175：推测解码多了 XPress 策略</strong>。还加了个接受率估计器。玩 spec decoding 的人现在多了一个 draft 方案可试。 来源：<a href="https://github.com/vllm-project/vllm/pull/65175">https://github.com/vllm-project/vllm/pull/65175</a></p>
+<p><strong>#65033：Mamba decode 搬上 GPU Triton kernel</strong>。用 ReplaySSM 跑 decode，还适配了新版 Model Runner V2。Mamba 类模型 serving 提速。 来源：<a href="https://github.com/vllm-project/vllm/pull/65033">https://github.com/vllm-project/vllm/pull/65033</a></p>
+<p><strong>#65279：KV offload 的数据损坏修了</strong>。往 CPU/磁盘存 KV 失败重试后，滑动窗口注意力的空页偏移不再丢失。做 KV 卸载的部署升级后更稳。 来源：<a href="https://github.com/vllm-project/vllm/pull/65279">https://github.com/vllm-project/vllm/pull/65279</a></p>
+<p><strong>#62275：Blackwell 新卡上 FP4 MoE 不再踩坑</strong>。出问题的 CUTLASS 后端在 B200/B300（sm_110）上被禁用了。FP4 量化 MoE 在这批新卡上可以放心跑。 来源：<a href="https://github.com/vllm-project/vllm/pull/62275">https://github.com/vllm-project/vllm/pull/62275</a></p>
+<p><strong>#65289：RL 训练流水线的辅助输出回放</strong>。纯训练侧，serving 用户可忽略。 来源：<a href="https://github.com/vllm-project/vllm/pull/65289">https://github.com/vllm-project/vllm/pull/65289</a></p>
+<p><strong>SGLang 4 笔</strong></p>
+<p><strong>#47928：HiCache host 缓存池重构</strong>。按 buffer 信息组装。HiCache 是显存+主机内存的两级 KV 缓存。它管 PD 解耦里的 KV 搬运。做这条线的人值得看一眼。 来源：<a href="https://github.com/sgl-project/sglang/pull/47928">https://github.com/sgl-project/sglang/pull/47928</a></p>
+<p><strong>#47641：MoE 路由器提速</strong>。一个 warp（GPU 里的一小撮并行线程）处理一个 token。三种路由函数都覆盖。DeepSeek 这类 MoE 模型的 prefill 更快。 来源：<a href="https://github.com/sgl-project/sglang/pull/47641">https://github.com/sgl-project/sglang/pull/47641</a></p>
+<p><strong>#48041：prefill 路径跳过 hash 层修正确性</strong>。MoE 路由前不再走 hash 层。小修。 来源：<a href="https://github.com/sgl-project/sglang/pull/48041">https://github.com/sgl-project/sglang/pull/48041</a></p>
+<p><strong>#46921：华为昇腾 NPU 支持 MLA 的 FP8 KV cache</strong>。国产算力部署相关。NVIDIA 用户可忽略。 来源：<a href="https://github.com/sgl-project/sglang/pull/46921">https://github.com/sgl-project/sglang/pull/46921</a></p>
+<p><strong>TRT-LLM 1 笔</strong></p>
+<p><strong>#21198：QKV 预处理加了分块版本</strong>。可选开启。prefill 阶段的注意力输入准备更快。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21198">https://github.com/NVIDIA/TensorRT-LLM/pull/21198</a></p>
+<p><strong>llama.cpp 1 笔</strong></p>
+<p><strong>#31598：LFM3 模型开始记录各层输入</strong>。为推测解码铺路。Liquid AI 的 LFM 系列以后可能有草稿模型加速。端侧玩家关注。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31598">https://github.com/ggml-org/llama.cpp/pull/31598</a></p>
+<p><strong>FlashInfer 2 笔</strong></p>
+<p><strong>#8486：FP8 分页注意力适配更多 GQA 头组合</strong>。运行时自适应。FP8 推理 serving 更快。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8486">https://github.com/flashinfer-ai/flashinfer/pull/8486</a></p>
+<p><strong>#8493：修 DeepSeek V4 注意力 kernel 的对齐 bug</strong>。小修。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8493">https://github.com/flashinfer-ai/flashinfer/pull/8493</a></p>
+<p><strong>Mooncake 1 笔</strong></p>
+<p><strong>#5026：传输引擎修资源泄漏</strong>。导出进程退出时关闭 XPU 的 IPC 映射。KV 跨节点搬运长期跑更稳。PD 解耦部署相关。 来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5026">https://github.com/kvcache-ai/Mooncake/pull/5026</a></p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0、SGLang v0.5.23、TRT-LLM v1.4.0rc2、LMDeploy v0.18.0，全无变化。LMDeploy、TGI、Dynamo 本轮零实质合入。</p>
+<h2>新技术与论文</h2>
+<p>本轮 arXiv 无新批次（下一个批次 11/4 0 点 UTC 才出）。无新论文可报。</p>
+<h2>业内新闻</h2>
+<p><strong>DeepSeek 工程师乌镇谈开源逻辑（11/3）</strong>。研究工程师高熙在世界互联网大会上首次公开解释开源动机。原话是：&quot;我们想要 AGI 更快到来&quot;。阿里千问的刘大一恒同场谈了开源加速创新。 DeepInfer 是你正在追的线。官方亲口表态会继续喂养开源生态。选型时算个定心丸。 来源：<a href="https://finance.sina.cn/tech/2026-11-03/detail-inixnitq9840544.d.html?vt=4">https://finance.sina.cn/tech/2026-11-03/detail-inixnitq9840544.d.html?vt=4</a></p>
+<p><strong>DeepSeek V5 计划用昇腾训练（补漏）</strong>。科创板日报引产业链消息：V5 训练要用华为昇腾。此前昇腾只承担 DeepSeek 的推理任务。今年 9 月 DeepSeek 已开源面向昇腾的 TileLang 工具链。消息是&quot;据称&quot;口径，未经官方确认。 如果属实，DeepInfer/SGLang 的国产算力适配就从加分项变必选项了。 来源：<a href="https://news.marsbit.co/flash/20261103143021830943.html">https://news.marsbit.co/flash/20261103143021830943.html</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无实质新内容。X 大V 全安静。Reddit、HN 近两天无高赞 serving 讨论。中文媒体无新稿。播客和视频都无更新。</p>
+<h2>值得深读</h2>
+<p>本轮宁缺毋滥：没有达到深读标准的内容，不做笔记。</p>
+<p>*去重脚注：本期窗口为 UTC 11/03 10:58–13:00；3点版及之前已报的 vLLM #65296、#65281、#65174、#65152，SGLang #48087，TRT-LLM #21391、#21426，LMDeploy #5079，llama.cpp #31581、#31579、#31391、#31427，Dynamo #17797，FlashInfer #8463、#8473、#8477，arXiv 2611.02501、2611.02846、2611.03247、2611.02082、2611.02230、2611.03330，FlashProve、E2E Blaze、壁仞天垓 300、墨芯 AI 融资等不重复。*</p></body></html>
