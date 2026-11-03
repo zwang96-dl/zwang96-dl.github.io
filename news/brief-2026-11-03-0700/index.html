@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月3日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-03"/>
+<meta name="doc-ts" content="2026-11-03T15:01:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-03（7点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-03（7点版）</h1>
+<p>7点版来了。今晨框架侧 vLLM 和 llama.cpp 有干货，SGLang 休息了一轮。业内有条 PD 解耦的硬件版大新闻。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 6 笔</strong></p>
+<p><strong>#65030：DeepSeek V4 多图编码提速 2 倍多</strong>。一次请求里带多张图时，以前每张图单独过一遍视觉编码器。现在打包成一次前向。54 组多图调用实测，编码快 2.0–2.6 倍，跑在 H100 上。多模态 serving 的图片预处理直接受益。 来源：<a href="https://github.com/vllm-project/vllm/pull/65030">https://github.com/vllm-project/vllm/pull/65030</a></p>
+<p><strong>#63672：重启不用重新量化权重了</strong>。在线 FP8 和 NVFP4 的权重缓存，引擎重启后直接复用。省掉了重复量化和权重转换的时间。频繁重启调参的人会爽。 来源：<a href="https://github.com/vllm-project/vllm/pull/63672">https://github.com/vllm-project/vllm/pull/63672</a></p>
+<p><strong>#62367：LFM2 模型支持可复现模式</strong>。batch invariant 就是同批输入结果可复现。以前开这个开关，LFM2 直接拒绝启动。现在能用了。评测党受益。 来源：<a href="https://github.com/vllm-project/vllm/pull/62367">https://github.com/vllm-project/vllm/pull/62367</a></p>
+<p><strong>#65389、#63434、#65185：三个小修</strong>。一个修 render 接口丢 max_tokens 的 bug。一个修 chat 解析器看不到 prompt 的问题。还有一个修编译警告。都是顺手带过的小坑。 来源：<a href="https://github.com/vllm-project/vllm/pull/65389">https://github.com/vllm-project/vllm/pull/65389</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/63434">https://github.com/vllm-project/vllm/pull/63434</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/65185">https://github.com/vllm-project/vllm/pull/65185</a></p>
+<p><strong>llama.cpp 2 笔</strong></p>
+<p><strong>#31608：LFM3 吃上 NVFP4 量化了</strong>。Liquid AI 的 LFM3 支持 NVFP4 权重了。含 2B 视觉版。跑在 llama.cpp 上。测试用的 GGUF 已上传 Hugging Face。端侧多模态玩家可以试了。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31608">https://github.com/ggml-org/llama.cpp/pull/31608</a></p>
+<p><strong>#31471：加了个语音转写模型支持</strong>。NVIDIA 的 Nemotron 3.5 Transcribe 来了。30B 参数，40 种语言离线转写。还能区分说话人。llama.cpp 的多模态版图又多了一块音频。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31471">https://github.com/ggml-org/llama.cpp/pull/31471</a></p>
+<p><strong>Dynamo 1 笔</strong></p>
+<p><strong>#14055：全局规划器的预算仲裁拼完最后一块</strong>。mocker 池（没 GPU 的模拟池）也能参与预算分配了。PD 解耦（prefill/decode 分开跑）里，分资源就靠这套机制。跟你评估的那条线直接相关。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/14055">https://github.com/ai-dynamo/dynamo/pull/14055</a></p>
+<p><strong>FlashInfer 3 笔</strong></p>
+<p><strong>Cake 确定性训练 kernel 三连优化</strong>。Cake 是 FlashInfer 新出的确定性 kernel 家族。这次连优三个：rmsnorm 门控、MoE 收尾融合、稠密投影。目标都是 Blackwell 的 SM100/SM103。训练侧提速，推理侧暂时吃不到。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8505">https://github.com/flashinfer-ai/flashinfer/pull/8505</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8503">https://github.com/flashinfer-ai/flashinfer/pull/8503</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8456">https://github.com/flashinfer-ai/flashinfer/pull/8456</a></p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0、SGLang v0.5.23、TRT-LLM v1.4.0rc2、LMDeploy v0.18.0。 四个版本都没动。SGLang、TRT-LLM、LMDeploy 本轮零合入。TGI、Mooncake 也是。</p>
+<h2>新技术与论文</h2>
+<p>本轮 arXiv 无新批次。下一个批次 11/4 0 点 UTC 才出。</p>
+<p><strong>社区实验（补漏）：两张 3090 跑 8 个 25 万 token 的 agent</strong>。秘诀是把草稿纸（KV 缓存）全塞主机内存。decode 时先用 64 维 key 素描挑 token。每步只对约 1% 做精确注意力。数字全是作者自报，没人独立复现过。当思路看，别当结论用。 来源：<a href="https://Richland.au/blog/8-agents-250k-context-on-two-3090s-sparse-kv-decode-with-a-rank-64-key-sketch-and-a-host-ram-tier">https://Richland.au/blog/8-agents-250k-context-on-two-3090s-sparse-kv-decode-with-a-rank-64-key-sketch-and-a-host-ram-tier</a></p>
+<h2>业内新闻</h2>
+<p><strong>SambaNova 牵手 Supermicro，做 PD 解耦的硬件版（11/3）</strong>。首批 1 万颗 SN50 推理芯片。分工很直白：GPU 读输入，SN50 写回答。这就是你评估的 PD 解耦，只不过搬到了硬件上。先从主权云和 NeoCloud 切入。 来源：<a href="https://business.am-news.com/am-news/article/bizwire-2026-11-3-sambanova-sn50-chips-to-power-supermicros-new-inference-racks-delivering-high-performance-inference-to-data-centers-worldwide">https://business.am-news.com/am-news/article/bizwire-2026-11-3-sambanova-sn50-chips-to-power-supermicros-new-inference-racks-delivering-high-performance-inference-to-data-centers-worldwide</a></p>
+<p><strong>中国 AI 推理数据量首次超过训练（赛迪研究院）</strong>。截至 2026 年 6 月，国内日均 token 调用超 175 万亿。产业重心正式从训练转向推理。做推理优化的人，时代站在你这边。 来源：<a href="https://www.21jingji.com/article/20261103/herald/d19a50cdeaa98d24996dc22679ce1e12.html">https://www.21jingji.com/article/20261103/herald/d19a50cdeaa98d24996dc22679ce1e12.html</a></p>
+<h2>访谈与深度</h2>
+<p><strong>HN 172 赞：工具调用 100% 格式正确，不等于调用得对</strong>。Ubicloud 在 vLLM 上跑 Kimi K2.6。工具调用格式准确率从 92% 修到 100%。HN 的讨论比文章本身更值。约束解码只保证&quot;格式对&quot;，不保证&quot;调对了工具&quot;。三层清单：格式靠约束解码，选没选对靠评测，调完有没有效果靠事后检查。做 agent serving 的人可以直接抄这套。 来源：<a href="https://www.reticle.sh/signal/2026-11-03-vllm-tool-call-schema-not-semantics-digest">https://www.reticle.sh/signal/2026-11-03-vllm-tool-call-schema-not-semantics-digest</a></p>
+<h2>值得深读</h2>
+<p>本轮宁缺毋滥：没有达到深读标准的内容，不做笔记。</p>
+<p>*去重脚注：本期窗口为 UTC 11/03 13:00–15:00；5点版及之前已报的 vLLM #65271、#65175、#65033、#65279、#62275、#65289，SGLang #47928、#47641、#48041、#46921，TRT-LLM #21198，llama.cpp #31598，FlashInfer #8486、#8493，Mooncake #5026，DeepSeek 乌镇谈开源、V5 计划用昇腾训练（据称）等不重复。*</p></body></html>
