@@ -1,0 +1,83 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月2日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-02"/>
+<meta name="doc-ts" content="2026-11-03T03:00:27"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-02（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-02（19点版）</h1>
+<p>19点版来了。这轮框架都很忙。PD 解耦又添三笔新料。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM #63420：前缀缓存不再乱续租</strong> 这笔跟前缀缓存直接相关。前缀缓存就是复用算过的提示词。Mooncake 查前缀时，以前会给所有命中键续租。有些键其实根本不会被读到。满了之后，该留的被挤走。不该留的反倒留下。这笔改成只租真正要读的键。先探查不续租，再按实际读取集合续租。说白了，只给要用的草稿纸续费。 来源：<a href="https://github.com/vllm-project/vllm/pull/63420">https://github.com/vllm-project/vllm/pull/63420</a></p>
+<p><strong>vLLM #61435：Kimi-K3 有了专属解码</strong> 这笔跑在 MI355X 上。这笔是给 Kimi-K3 做专属解码。专属解码就是为一个模型量身定制的快路。它把 MoE 解码层换成常驻内核。常驻内核就是一直待在卡上不用反复启动。TP8 下跑 FP8 KV，DCP1 和 DCP8 都支持。DCP 就是解码上下文并行。性能图在 PR 里，数字是作者自报。 来源：<a href="https://github.com/vllm-project/vllm/pull/61435">https://github.com/vllm-project/vllm/pull/61435</a></p>
+<p><strong>vLLM #60339：后缀投机解码上了新版运行器</strong> 后缀解码就是靠结尾重复片段猜下文。以前它只能跑旧运行器，还依赖 CPU。还强制关掉异步调度。现在它跑上 GPU 新版运行器。异步调度也回来了，接受率跟旧方案打平。Qwen2.5-7B 上吞吐不输旧方案。 来源：<a href="https://github.com/vllm-project/vllm/pull/60339">https://github.com/vllm-project/vllm/pull/60339</a></p>
+<p><strong>vLLM #61609：稀疏 MLA 的 bf16 路也能切分了</strong> FlashMLA 稀疏版以前 bf16 下不支持 DCP。DCP 就是把解码上下文分到多卡。这笔把它打通了，Hopper 卡上独一份。GLM-5.3-Flash 的 GSM8K 分数基本没变。DCP4 是 0.904，DCP1 是 0.894。 来源：<a href="https://github.com/vllm-project/vllm/pull/61609">https://github.com/vllm-project/vllm/pull/61609</a></p>
+<p><strong>vLLM #61795：UMBP 单机模式先搭骨架</strong> UMBP 就是 vLLM 的跨引擎 KV 共享机制。这笔只加单机服务器运行时。多个引擎共用一块内存池。KV 字节走 HIP 直传，不走套接字。服务器挂了就直接失败，不无限等。注意，这只是实现，测试在下一个 PR。 来源：<a href="https://github.com/vllm-project/vllm/pull/61795">https://github.com/vllm-project/vllm/pull/61795</a></p>
+<p><strong>vLLM 其余三笔带过</strong></p>
+<p>#65238 是 CI 自动打标签。#65199 是文档列插件。#64651 是 XPU 测试。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pulls">https://github.com/vllm-project/vllm/pulls</a></p>
+<p><strong>SGLang #43906：调度器修了分块计数的坑</strong> 这笔接上 17点版的调度器重构。分块预填充就是把长提示切段算。以前计数器只加不减，尾段会被误认成中段。PD 预填充下，尾段会被重新排队。流水线并行下，输出交换也可能被跳过。现在每步按自己的记录认身份。这个坑跟你的 PD 评估直接相关。 来源：<a href="https://github.com/sgl-project/sglang/pull/43906">https://github.com/sgl-project/sglang/pull/43906</a></p>
+<p><strong>SGLang #45785：空闲时也要上报 KV 用量</strong> Dynamo 会按 KV 用量决定接不接请求。引擎空闲后，旧的用量数字还留在那。结果明明有空位，请求却被拒。实测里，第一单跑完，后三单全被拒。修掉后，四单全跑通，空闲用量回到零。这笔虽小，却是 PD 联动的运维坑。 来源：<a href="https://github.com/sgl-project/sglang/pull/45785">https://github.com/sgl-project/sglang/pull/45785</a></p>
+<p><strong>SGLang #47476：常驻专家数不用手调了</strong> Paged Experts 就是把专家按需换进换出。常驻数以前要靠手试。设大了，启动就内存不足。设小了，显存空转，还多换页。现在系统按卡、模型和量化自动算。例子里，K 从 63 调到 92。解码从 208 涨到 233 token 每秒。 来源：<a href="https://github.com/sgl-project/sglang/pull/47476">https://github.com/sgl-project/sglang/pull/47476</a></p>
+<p><strong>SGLang #44148：Kimi-K3 的 NVFP4 路打通了</strong> SiTU 是 Kimi-K3 路由专家用的激活函数。以前两处检查只认 silu 和 relu2。结果 K3 用不上 FlashInfer 的 NVFP4 内核。NVFP4 就是 4 比特浮点量化。这笔把 SiTU 放行，参数也传过去了。 来源：<a href="https://github.com/sgl-project/sglang/pull/44148">https://github.com/sgl-project/sglang/pull/44148</a></p>
+<p><strong>SGLang 其余七笔带过</strong></p>
+<p>#48032 是 MI355X 解耦 nightly 改到 UTC 4 点。#47810 是 DeepSeek recipe 暴露两个接口。#47997、#47900、#47954 是文档和服务端小修。#44398、#40825 是 NPU 上 Kimi-K3 的测试和 DCP。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pulls">https://github.com/sgl-project/sglang/pulls</a></p>
+<p><strong>TRT-LLM 6 个：GB300 优化加智能体建模工作流</strong></p>
+<p>#20937 是 Qwen3.8-Flash-Next 的 NVFP4 优化。目标是 GB300，8K 输入 1K 输出。#20907 是 agent-flow 统一建模工作流。说白了，让智能体按规矩写新模型 target。其余四笔带过：文档拆分、测试清理、FastWan 指标、QA 冷读边界。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pulls">https://github.com/NVIDIA/TensorRT-LLM/pulls</a></p>
+<p><strong>Dynamo #15500：多模态传输出错不再漏资源</strong> 发送方准备共享内存或 NIXL 注册时，中途失败会丢清理句柄。NIXL 就是跨节点传 KV 的高速通道。丢了句柄，第一段资源就没人管了。现在准备失败就自己释放，错误原样保留。已传出去的仍按老路子走。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/15500">https://github.com/ai-dynamo/dynamo/pull/15500</a></p>
+<p><strong>FlashInfer 17 个：cake 内核继续小步快跑</strong></p>
+<p>#8424 是 FP8 和 FP16 上下文统计的 barrier 修。#8417 是小批量形状的路由优化。#8320 是 mega_gate 的新功能包。#4924 是 SageAttention2 的低精度 QKV 交换。其余是 cake 系列的修和优化。数字全是厂商自报，当路标看。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pulls">https://github.com/flashinfer-ai/flashinfer/pulls</a></p>
+<p><strong>Mooncake 4 个：传输层小修一批</strong></p>
+<p>#5127 是 NVLink 开关语义统一。#5117 是 XPU 并发拷贝。#5094 是无损请求记账。#4695 是停止前排空在途传输。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pulls">https://github.com/kvcache-ai/Mooncake/pulls</a></p>
+<p><strong>llama.cpp 1 个：dflash 的 prefill 提速</strong> 这笔把 dflash 的隐藏特征改成设备间直接拷贝。prefill 在 RTX PRO 6000 上快约两成。解码也有几个百分点的提升。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31506">https://github.com/ggml-org/llama.cpp/pull/31506</a></p>
+<p><strong>其余框架窗口内零合入</strong> LMDeploy 和 TGI 都是 0。</p>
+<p><strong>版本水位</strong> vLLM 正式版仍未发。v0.33.0 只有裸 tag，release 页仍 404。最新正式 release 仍是 rc3。SGLang 仍是 v0.5.23。TRT-LLM 仍是 v1.4.0rc2。FlashInfer 仍是 v0.7.2.post1。LMDeploy 仍是 v0.18.0。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 官方 API 实查，最新仍是 10/30 批次。本轮零新入库，下轮再看。</p>
+<h2>业内新闻</h2>
+<p>窗口内无新料。</p>
+<h2>访谈与深度</h2>
+<p>名单全扫，窗口内无 serving 强相关新帖。Latent Space 11 月 2 日新单集是法律智能体主题。不收录。X 搜索本轮无返回，一线人物的窗口内动态无法验证。</p>
+<h2>值得深读</h2>
+<p>本轮无。本轮三笔 PD 相关都是单个 PR。机制已在简报里讲透，未达深读门槛。</p>
+<p>*去重脚注：本期窗口为 UTC 11/03 00:57–02:57；17点版已报的 vLLM #65060、#65041，SGLang #47994、#43905、#43904，Dynamo #17875、#17126、#16761，FlashInfer #8413、#8390、#8409、#8408、#8407、#8406，TRT-LLM #20763、#21065、#20501 等不重复。*</p></body></html>
