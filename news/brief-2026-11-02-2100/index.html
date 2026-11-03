@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月2日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-02"/>
+<meta name="doc-ts" content="2026-11-03T05:07:27"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-02（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-02（21点版）</h1>
+<p>21点版来了。这轮先纠正一条水位误判。框架侧小步快跑，PD 解耦国内外都在加码。</p>
+<h2>框架更新</h2>
+<p><strong>头条更正：vLLM v0.33.0 其实已经正式发布了</strong> 之前几期说&quot;正式版未发、只有裸 tag&quot;，是误判。release 名叫 v0.33.0。它挂在 v0.33.0rc3 这个 tag 上。11 月 2 日 10:10 UTC 正式发布。说明正文 3.7 万字。之前打开 /releases/tag/v0.33.0 看到 404。是因为这个 tag 根本不存在。真正的地址是 /releases/tag/v0.33.0rc3。说白了，vLLM 把 rc3 直接扶正，名字改成 v0.33.0。 来源：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.33.0rc3">https://github.com/vllm-project/vllm/releases/tag/v0.33.0rc3</a></p>
+<p><strong>vLLM 6 个：权重热更新工具进仓库</strong></p>
+<p>#65291 和 #65292 把权重状态验证工具收进仓库。权重热更新就是不停机给服务换权重。工具走 NCCL 权重传输推 safetensors，还带验证脚本。注意这两笔是分支和文档指针，不进主线。</p>
+<p>#65050：CuteDSL 的 GDN prefill 后端支持 SM110，也就是 Jetson Thor。GDN 是一种新型注意力。Thor 上 16k 提示的首字延迟降约 6%。</p>
+<p>#65051：没开 LoRA 时跳过 MoE-LoRA 的伸缩内核。修了 XPU 上的一次段错误。</p>
+<p>#65036：流式输出的第一块 usage 也带缓存拆分。跟 Anthropic 的 message_start 对齐。</p>
+<p>#65093：Pooling 打分在 Mistral 分词器下的 token 上限修。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pulls">https://github.com/vllm-project/vllm/pulls</a></p>
+<p><strong>SGLang 6 个：两笔回退，调优别硬编码</strong></p>
+<p>#48055 回退了 Kimi-K3 的 FlashInfer prefill MoE 调优。理由是：一份部署的调优结果，不该写死成模型专属代码。调优结果就该待在 autotune 缓存里。</p>
+<p>#48054 回退了 BRIA Fibo 2.0 扩散模型。跟 17点版的 MoE JIT 回退一个路数。</p>
+<p>其余四个是文档和 import 重构，直接跳过。 来源：<a href="https://github.com/sgl-project/sglang/pulls">https://github.com/sgl-project/sglang/pulls</a></p>
+<p><strong>LMDeploy 1 个：前缀查缓存提前跑</strong></p>
+<p>#5082 优化了 kv_connector 的外部查找。Mooncake 的前缀查找以前卡在准入环节。查一次只要几毫秒，查不到就得等下一轮调度。实测从第一次准入到成功，平均 103 毫秒。这笔把查找提前发，跟排队执行重叠起来。说白了，查缓存不等车，边排队边查。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5082">https://github.com/InternLM/lmdeploy/pull/5082</a></p>
+<p><strong>Dynamo 1 个：路由器的前缀续传</strong></p>
+<p>#17657 让 fetch hint 支持单源续传。目标手里有 1 到 10 块，只缺 11 到 15。就从同一源只拿缺的那段，不用从头再扫一遍。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17657">https://github.com/ai-dynamo/dynamo/pull/17657</a></p>
+<p><strong>FlashInfer 7 个：cake 内核继续加餐</strong> 全是性能小修，覆盖 dense 投影和 Kimi-K3 注意力。B200 到 GB300 的新形状都有。lm_head、deepgemm、GDN、fmha 解码也都在列。#8395 加了四卡融合的 FP4 all-reduce。数字全是作者自报，当路标看。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pulls">https://github.com/flashinfer-ai/flashinfer/pulls</a></p>
+<p><strong>Mooncake 2 个：元数据提速 41 倍</strong></p>
+<p>#5093 把 Store-RS 的空位查找改成栈。以前每插一个副本都要线性扫一遍。5 万条填充从 2900 毫秒降到 70 毫秒，快 41 倍。注意这是元数据提速，不是端到端吞吐。</p>
+<p>#5167 是 Memfabric wheel 的打包流水线，纯 CI。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pulls">https://github.com/kvcache-ai/Mooncake/pulls</a></p>
+<p><strong>TRT-LLM 4 个：全是 infra</strong> waive 失败用例，回退 git pin。依赖安装超时提到 60 分钟，MXFP8 阈值放宽。生产跑不着，一笔带过。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pulls">https://github.com/NVIDIA/TensorRT-LLM/pulls</a></p>
+<p><strong>llama.cpp 和 TGI 窗口内零合入</strong></p>
+<p><strong>版本水位</strong> vLLM v0.33.0 正式发布（本期头条更正）。SGLang 仍 v0.5.23。TRT-LLM 仍 v1.4.0rc2。LMDeploy 仍 v0.18.0。llama.cpp 每日快照照常滚动。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 接口被 429 限流，直接硬停。这轮查不了，下轮补扫。新批次应该已经落地了。</p>
+<h2>业内新闻</h2>
+<p><strong>趋境 × 智谱 × 摩尔线程：国产异构 P/D 解耦</strong> 10 月 31 日大会上发布&quot;国产异构推理 AI Token 工厂&quot;。思路就是 P/D 解耦。算力强的卡跑 Prefill，显存带宽大的卡跑 Decode。CPU、GPU、内存、高速网络统一调度。号称精度全链路无损。 来源：<a href="https://news.zol.com.cn/1268/12684045.html">https://news.zol.com.cn/1268/12684045.html</a></p>
+<p><strong>凌烟阁 × Skymizer：LPU 专啃 Decode</strong> HTX301 是 Skymizer 的 LPU 推理卡。方案也是异构解耦。GPU 跑 Prefill，HTX301 跑 Decode。各干各擅长的。11 月 19 日 ICCADExpo 有原型演示。 来源：<a href="https://www.eetrend.com/content/2026-11/a73a1bb4-69cb-42be-93fa-21a79adaf549-100605355.html">https://www.eetrend.com/content/2026-11/a73a1bb4-69cb-42be-93fa-21a79adaf549-100605355.html</a></p>
+<p><strong>高通 AI Hub 对中国开发者开放</strong> 端侧推理平台，手机、PC、物联网都能部署。跟你云端 serving 主线关系不大，一笔带过。 来源：<a href="https://finance.sina.cn/stock/jdts/2026-11-03/detail-inixmnpy9937650.d.html">https://finance.sina.cn/stock/jdts/2026-11-03/detail-inixmnpy9937650.d.html</a></p>
+<h2>访谈与深度</h2>
+<p><strong>约束解码深文：怎么把大模型逼出合法 JSON</strong> 11 月 1 日的博客，之前没报过。讲透了结构化输出的原理：每步算 token 掩码。四大引擎都接了 XGrammar。就是 vLLM、SGLang、TRT-LLM、MLC。还提到一笔废弃。vLLM v0.33.0 废弃了一个后端。就是 lm-format-enforcer。做智能体工具调用的人值得一看。 来源：<a href="https://blog.teliaz.com/2026/11/01/constrained-decoding-how-llms-get-forced-into-valid-json/">https://blog.teliaz.com/2026/11/01/constrained-decoding-how-llms-get-forced-into-valid-json/</a></p>
+<p>X 大V 全安静。@lmsysorg 和 vLLM 官方都没新帖。karpathy、jimfan、swyx 也都安静。Spotify 上 Latent Space 没新货。最新还是法律智能体那期，不收。机器之心、量子位无 serving 新料。</p>
+<h2>值得深读</h2>
+<p>本轮无。全是 PR 级小步更新和回退。LMDeploy #5082 机制已在简报里讲透。SGLang #48055 跟 #47994 同类教训，不重复做笔记。</p>
+<p>*去重脚注：本期窗口为 UTC 11/03 02:57–04:57；19点版已报的 vLLM #63420、#61435、#60339、#61609、#61795、#65238、#65199、#64651，SGLang #43906、#45785、#47476、#44148、#48032、#47810、#47997、#47900、#47954、#44398、#40825，Dynamo #15500，FlashInfer #8424、#8417、#8320、#4924，Mooncake #5127、#5117、#5094、#4695，TRT-LLM #20937、#20907，llama.cpp #31506 等不重复。*</p></body></html>
