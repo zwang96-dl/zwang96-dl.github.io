@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月3日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-03"/>
+<meta name="doc-ts" content="2026-11-03T17:00:33"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-03（9点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-03（9点版）</h1>
+<p>9点版来了。这轮是 vLLM 的 KV 搬运专场。SGLang 小修一笔，llama.cpp 迎来新架构。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 10 笔</strong></p>
+<p><strong>#65428：PD 解耦加投机解码的测试修好了</strong></p>
+<p>NixlConnector 是跨机搬 KV 的一种连接器。它在 MI355 上的验收挂了几天。根因是提示词丢了聊天模板。EAGLE3 接受长度回到 2.583，测试通过。之前一度掉到 1.928。 来源：<a href="https://github.com/vllm-project/vllm/pull/65428">https://github.com/vllm-project/vllm/pull/65428</a></p>
+<p><strong>#64686：KV 跨卡搬运的会话泄漏堵上了</strong></p>
+<p>源头和解码器分处两个对端会话时，会出小毛病。请求结束，解码侧的会话条目没清掉。长连接的服务器上，僵尸条目越积越多。现在两端各自收尾，不再漏。 来源：<a href="https://github.com/vllm-project/vllm/pull/64686">https://github.com/vllm-project/vllm/pull/64686</a></p>
+<p><strong>#56076：KV 卸载接口重构，给 GDS 铺路</strong></p>
+<p>以前每个 worker 各自算一遍显存指针，重复造轮子。现在统一算一次，worker 直接拿现成的指针。还加了 FSOffloadingWorker 抽象基类。GDS 是 GPU 直读存储。后面 GDS、cuFile、NIXL 都能直接挂上来。 来源：<a href="https://github.com/vllm-project/vllm/pull/56076">https://github.com/vllm-project/vllm/pull/56076</a></p>
+<p><strong>#57474：KV 卸载的异步查询按请求组分发</strong></p>
+<p>查命中时，结果不再一股脑广播。按请求组分发，调度器少做无用功。 来源：<a href="https://github.com/vllm-project/vllm/pull/57474">https://github.com/vllm-project/vllm/pull/57474</a></p>
+<p><strong>#65350：投机解码的配置接口统一了</strong></p>
+<p>投机解码就是先让实习生打草稿，再让专家改。MRV1 DFlash 的配置改用统一替换接口。代码整洁向的小修。 来源：<a href="https://github.com/vllm-project/vllm/pull/65350">https://github.com/vllm-project/vllm/pull/65350</a></p>
+<p><strong>#65418：AMD 卡的 KV 缓存预留提到 3 GiB</strong></p>
+<p>可扩展 KV 缓存的预留底线调高到 3 GiB。AMD 卡上不容易爆显存了。 来源：<a href="https://github.com/vllm-project/vllm/pull/65418">https://github.com/vllm-project/vllm/pull/65418</a></p>
+<p><strong>#56450、#63835、#56307：Strix Halo 三连修</strong></p>
+<p>三个都是 gfx1151 的 kernel 修。gfx1151 就是 AMD 的 Strix Halo APU。编码器 prefill 注意力做了拆分优化。tile 启动修了 bug，还加了新的 hip GDN 后端。 来源：<a href="https://github.com/vllm-project/vllm/pull/56450">https://github.com/vllm-project/vllm/pull/56450</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/63835">https://github.com/vllm-project/vllm/pull/63835</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/56307">https://github.com/vllm-project/vllm/pull/56307</a></p>
+<p><strong>#60213：多了个请求渲染耗时指标</strong></p>
+<p>前端现在能暴露 render duration 了。做延迟拆解的人有新玩具了。 来源：<a href="https://github.com/vllm-project/vllm/pull/60213">https://github.com/vllm-project/vllm/pull/60213</a></p>
+<p><strong>SGLang 1 笔</strong></p>
+<p><strong>#47119：sgl-router 认得 MiniMax-M3 了</strong></p>
+<p>sgl-router 自己渲染聊天模板，按缓存命中选后端。M3 和 M3.1 以前走通用路径，吃不到这套红利。现在有了专用渲染器，请求直接转发 input_ids。 来源：<a href="https://github.com/sgl-project/sglang/pull/47119">https://github.com/sgl-project/sglang/pull/47119</a></p>
+<p><strong>TRT-LLM 2 笔</strong></p>
+<p><strong>#21526：MLA prefill 的修同步进 Helix</strong></p>
+<p>MLA 是 DeepSeek 那套多头潜注意力。prefill 侧的 review 意见合进了 Helix 分支。细节在内部评审里，不展开。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21526">https://github.com/NVIDIA/TensorRT-LLM/pull/21526</a></p>
+<p><strong>#21441：配置库的 CLI 测试能跑了</strong></p>
+<p>纯测试修，一句话带过。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21441">https://github.com/NVIDIA/TensorRT-LLM/pull/21441</a></p>
+<p><strong>llama.cpp 4 笔</strong></p>
+<p><strong>#31134：新架构 Metis-1.6 来了</strong></p>
+<p>两个新模型：Praxis（2.94B）和 Logos（10.2B）。架构是 Mamba-2 层加 GQA 注意力混搭。做了 2 遍 depth recurrence。每遍的 attention 上还挂了 LoRA 微调。Praxis 量化版 prefill 跑到 4033 tok/s。权重 11 月 1 日才公开，刚出炉。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31134">https://github.com/ggml-org/llama.cpp/pull/31134</a></p>
+<p><strong>#30141：投机解码的 MTP 状态能存能取了</strong></p>
+<p>MTP 是多 token 预测，DeepSeek 的猜词路子。以前恢复 KV 检查点时，猜词器的隐藏状态会丢。现在存取接口都补上了。Qwen3.5-2B 在 CPU 和 Metal 上都过了测试。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30141">https://github.com/ggml-org/llama.cpp/pull/30141</a></p>
+<p><strong>#30953：DeepSeek V4 的算子上了高通 DSP</strong></p>
+<p>加了 DSV4_HC_PRE 和 DSV4_HC_POST 两个算子。目标是高通 Hexagon DSP，手机端侧那条线。手机上跑 DeepSeek V4 又近了一步。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30953">https://github.com/ggml-org/llama.cpp/pull/30953</a></p>
+<p><strong>#31583：IBM zDNN 的测试小修</strong></p>
+<p>小众硬件线，一句话带过。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31583">https://github.com/ggml-org/llama.cpp/pull/31583</a></p>
+<p><strong>Dynamo 1 笔</strong></p>
+<p><strong>#17688：pool-relay 开始从全局发现拉路由</strong></p>
+<p>开了全局发现地址后，Relay 每 5 秒拉一次路由列表。发现服务挂了也不怕，保留上次的结果不丢。全局规划器那套布线继续推进中。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17688">https://github.com/ai-dynamo/dynamo/pull/17688</a></p>
+<p><strong>FlashInfer 9 笔</strong></p>
+<p><strong>Cake 确定性 kernel 在 Blackwell 变体上连优九次</strong></p>
+<p>sm_103a 和 sm_107a 两档 Blackwell 变体。几个核心 kernel 再压榨一轮，覆盖 softmax 和 MoE。同一个人一口气合了九个，训练侧受益。推理侧暂时吃不到。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8515">https://github.com/flashinfer-ai/flashinfer/pull/8515</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8513">https://github.com/flashinfer-ai/flashinfer/pull/8513</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8506">https://github.com/flashinfer-ai/flashinfer/pull/8506</a></p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0，SGLang v0.5.23，都没动。TRT-LLM 还是 v1.4.0rc2。LMDeploy 还是 v0.18.0。LMDeploy、TGI、Mooncake 本轮零合入。</p>
+<h2>新技术与论文</h2>
+<p>本轮 arXiv 无新批次。下一个批次 11/4 0 点 UTC 才出。</p>
+<p><strong>补漏：Mistral Large 4 开源权重（10/29）</strong></p>
+<p>万亿参数的 MoE，原生多模态，10 月 29 日开的源。FP8 版 1.06TB，NVFP4 版 610GB，8 张卡起步。vLLM、SGLang、llama.cpp 首日就支持。8 张 GB300 跑 NVFP4，单卡约 110 tok/s。许可证是修改版 MIT，商用做模型服务要另谈。 来源：<a href="https://dev.to/m_t_ramkrushna/mistral-large-4-is-open-weight-read-the-license-and-do-the-memory-math-before-you-self-host-4dij">https://dev.to/m_t_ramkrushna/mistral-large-4-is-open-weight-read-the-license-and-do-the-memory-math-before-you-self-host-4dij</a> 来源：<a href="https://andrew.ooo/answers/mistral-large-4-open-weights-released-license-hardware-price-2026/">https://andrew.ooo/answers/mistral-large-4-open-weights-released-license-hardware-price-2026/</a></p>
+<h2>业内新闻</h2>
+<p>本轮无实质新内容。X 大V 名单扫过，无值得收录的动态。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。</p>
+<h2>值得深读</h2>
+<p>本轮宁缺毋滥：没有达到深读标准的内容，不做笔记。</p>
+<p>*去重脚注：本期窗口为 UTC 11/03 15:00–17:00；7点版已报的 vLLM #65030、#63672、#62367、#65389、#63434、#65185，llama.cpp #31608、#31471，Dynamo #14055，FlashInfer #8505、#8503、#8456，SambaNova×Supermicro、赛迪推理超训练、工具调用 HN 讨论、sparsekv-hyperqwen 社区实验等不重复。*</p></body></html>
