@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月3日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-03"/>
+<meta name="doc-ts" content="2026-11-03T19:02:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-03（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-03（11点版）</h1>
+<p>11点版来了。这轮框架侧多点开花。多模态看点是 Mistral 视觉编码器吃上 CUDA Graph。Dynamo 继续堆全局调度的拼图。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 10 笔</strong></p>
+<p><strong>#56277：Mistral 视觉编码器吃上 CUDA Graph</strong></p>
+<p>Mistral 的视觉编码器也吃上 CUDA Graph 了。视觉编码相当于看图那一步，固定流程被打包成一张图，省掉重复启动的开销。 来源：<a href="https://github.com/vllm-project/vllm/pull/56277">https://github.com/vllm-project/vllm/pull/56277</a></p>
+<p><strong>#62633：DeepSeek V4.1 小卡解码再提速</strong></p>
+<p>DeepSeek V4.1 的解码算子又压榨了一把。张量并行 2 卡或 4 卡的小规模部署，解码那步走得更快了。 来源：<a href="https://github.com/vllm-project/vllm/pull/62633">https://github.com/vllm-project/vllm/pull/62633</a></p>
+<p><strong>#63754：FP8 权重缓存支持断点续传</strong></p>
+<p>FP8 权重缓存现在支持断点续传了。服务重启后，不用重新量化一遍权重，直接吃缓存。 来源：<a href="https://github.com/vllm-project/vllm/pull/63754">https://github.com/vllm-project/vllm/pull/63754</a></p>
+<p><strong>#63801：投机解码的草稿预取提速</strong></p>
+<p>投机解码这套&quot;实习生打草稿&quot;玩法的预取更快了。拷贝 worker 数量加了上限，不会一拥而上抢资源。 来源：<a href="https://github.com/vllm-project/vllm/pull/63801">https://github.com/vllm-project/vllm/pull/63801</a></p>
+<p><strong>#65206：NVIDIA 各层共用一份 RoPE 缓存</strong></p>
+<p>Muse Spark 模型各层不再各备一份旋转位置缓存了。合成一份大家共用，显存占用少了一截。 来源：<a href="https://github.com/vllm-project/vllm/pull/65206">https://github.com/vllm-project/vllm/pull/65206</a></p>
+<p><strong>#65322：AMD gfx115x 的 INT4 解码矩阵调优</strong></p>
+<p>AMD gfx115x 上 4 位权重的解码矩阵乘法重新调优了。W4A16 就是权重 4 位、激活 16 位的省显存玩法。 来源：<a href="https://github.com/vllm-project/vllm/pull/65322">https://github.com/vllm-project/vllm/pull/65322</a></p>
+<p><strong>#64317：AMD 卡 KV 缓存继续走 32 位寻址</strong></p>
+<p>AMD 卡的 KV 缓存继续走 32 位寻址。32 位够用还快，犯不着切 64 位掏更多开销。 来源：<a href="https://github.com/vllm-project/vllm/pull/64317">https://github.com/vllm-project/vllm/pull/64317</a></p>
+<p><strong>#60418：RDNA 注意力 kernel 换调优配置</strong></p>
+<p>AMD RDNA 卡的注意力 kernel 换了新调优配置。TRITON 版本的注意力实现提到前面，优先被调用。 来源：<a href="https://github.com/vllm-project/vllm/pull/60418">https://github.com/vllm-project/vllm/pull/60418</a></p>
+<p><strong>#65423：启动小修，导配置不再拖进 openai</strong></p>
+<p>启动加速小修：导 vllm.config 时不再顺手导 openai。 来源：<a href="https://github.com/vllm-project/vllm/pull/65423">https://github.com/vllm-project/vllm/pull/65423</a></p>
+<p><strong>#65253：压测路由的专家 ID 不再丢</strong></p>
+<p>压测路由的小修：合成前向里非活跃专家的 ID 保住了。 来源：<a href="https://github.com/vllm-project/vllm/pull/65253">https://github.com/vllm-project/vllm/pull/65253</a></p>
+<p><strong>SGLang 3 笔</strong></p>
+<p><strong>#48125：unified_cache 也认得 MiniMax-M3.1 了</strong></p>
+<p>9点版报过 M3 吃上 sgl-router 的缓存红利。这轮轮到 M3.1：统一缓存的外部链接器也给它开了专用通道。 来源：<a href="https://github.com/sgl-project/sglang/pull/48125">https://github.com/sgl-project/sglang/pull/48125</a></p>
+<p><strong>#48099：MoE 定位版的 KV 容量对齐了</strong></p>
+<p>本地化的 Mega MoE 现在释放原始权重。KV 缓存的可用容量跟非本地化版对齐了。 来源：<a href="https://github.com/sgl-project/sglang/pull/48099">https://github.com/sgl-project/sglang/pull/48099</a></p>
+<p><strong>#48192：mooncake 依赖提到 0.3.14</strong></p>
+<p>常规跟进，一句话带过。 来源：<a href="https://github.com/sgl-project/sglang/pull/48192">https://github.com/sgl-project/sglang/pull/48192</a></p>
+<p><strong>TRT-LLM 4 笔</strong></p>
+<p><strong>#21432：KV 缓存管理器 v2 加新复用策略</strong></p>
+<p>KV 缓存管理器 v2 多了一种注意力复用策略。新策略管的是注意力权重哪些能复用、哪些必须重算。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21432">https://github.com/NVIDIA/TensorRT-LLM/pull/21432</a></p>
+<p><strong>#20639：GLM-5.3-Flash 稀疏注意力跑上 SM120</strong></p>
+<p>GLM-5.3-Flash 的稀疏注意力现在能跑在 SM120 上了。稀疏注意力就是只算重要的注意力分数，省计算量。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20639">https://github.com/NVIDIA/TensorRT-LLM/pull/20639</a></p>
+<p><strong>#20704：PyTorch 分布式初始化收拢到一处</strong></p>
+<p>工程整洁向小修，一句话带过。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20704">https://github.com/NVIDIA/TensorRT-LLM/pull/20704</a></p>
+<p><strong>#21565：post-merge 有个失败用例被豁免</strong></p>
+<p>纯 CI 杂务，一句话带过。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21565">https://github.com/NVIDIA/TensorRT-LLM/pull/21565</a></p>
+<p><strong>llama.cpp 3 笔</strong></p>
+<p><strong>#31356：gemma4 图优化，提示词处理大提速</strong></p>
+<p>Gemma4 的计算图优化了一轮，提示词处理阶段提速明显。E2B 和 E4B 这两个小尺寸版本受益最大。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31356">https://github.com/ggml-org/llama.cpp/pull/31356</a></p>
+<p><strong>#31279：高通 Hexagon 采样器的 TOP_K 提速</strong></p>
+<p>高通 Hexagon 后端的采样器，TOP_K 这步更快了。手机端侧采样的老路子，继续打磨。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31279">https://github.com/ggml-org/llama.cpp/pull/31279</a></p>
+<p><strong>#31596：UI 测试改用装好的 Chrome 跑</strong></p>
+<p>纯测试小修，一句话带过。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31596">https://github.com/ggml-org/llama.cpp/pull/31596</a></p>
+<p><strong>Dynamo 9 笔</strong></p>
+<p><strong>#17332：全局路由器改从注册中心读模型</strong></p>
+<p>全局路由器不再读静态文件找模型了。改从注册中心实时拉，扩缩容不用改配置。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17332">https://github.com/ai-dynamo/dynamo/pull/17332</a></p>
+<p><strong>#14196：规划器开始攒批调度观测数据</strong></p>
+<p>全局规划器开始攒批调度的观测数据了。有了这批数据，调度策略才能有的放矢地调。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/14196">https://github.com/ai-dynamo/dynamo/pull/14196</a></p>
+<p><strong>#17856：离线回放也能拿 KV 路由的取货提示</strong></p>
+<p>离线回放时，模拟器也能拿到 KV 路由器的取货提示了。调 KV 搬运策略不用真跑集群，先在回放里验证。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17856">https://github.com/ai-dynamo/dynamo/pull/17856</a></p>
+<p><strong>#17864：sidecar 到引擎的 gRPC 连接默认 32 条</strong></p>
+<p>sidecar 到推理引擎的 gRPC 连接默认开到 32 条。连接数翻倍，高并发下排队更少。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17864">https://github.com/ai-dynamo/dynamo/pull/17864</a></p>
+<p><strong>#17305：官方食谱加 Cosmos3 Nano Reasoner</strong></p>
+<p>官方食谱多了 Cosmos3 Nano Reasoner 的一键部署。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17305">https://github.com/ai-dynamo/dynamo/pull/17305</a></p>
+<p><strong>#17563、#17719、#17791、#17788：小修与文档</strong></p>
+<p>分析器按文件元数据算 Hub 检查点大小。P3 阶段把语法状态显式化。两笔文档小修。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17563">https://github.com/ai-dynamo/dynamo/pull/17563</a> 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17719">https://github.com/ai-dynamo/dynamo/pull/17719</a></p>
+<p><strong>FlashInfer 12 笔</strong></p>
+<p><strong>Cake 确定性 kernel 又被压榨一轮</strong></p>
+<p>Cake 确定性 kernel 又被压榨了一轮，7 笔全是训练侧优化。覆盖 Blackwell 变体的 softmax、MoE、投影和卷积。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8529">https://github.com/flashinfer-ai/flashinfer/pull/8529</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8528">https://github.com/flashinfer-ai/flashinfer/pull/8528</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8524">https://github.com/flashinfer-ai/flashinfer/pull/8524</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8523">https://github.com/flashinfer-ai/flashinfer/pull/8523</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8522">https://github.com/flashinfer-ai/flashinfer/pull/8522</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8519">https://github.com/flashinfer-ai/flashinfer/pull/8519</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8501">https://github.com/flashinfer-ai/flashinfer/pull/8501</a></p>
+<p><strong>#6276：FP8 NVFP4 的 TMA 量化路径修 bug</strong></p>
+<p>FP8 NVFP4 的 TMA 量化路径修了个 bug。现在整列分块都能正确编码，不再漏块。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6276">https://github.com/flashinfer-ai/flashinfer/pull/6276</a></p>
+<p><strong>#5740：冗余的同值写入被拦下了</strong></p>
+<p>归一化、解码、级联 kernel 里写相同值的冗余操作被拦下了。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/5740">https://github.com/flashinfer-ai/flashinfer/pull/5740</a></p>
+<p><strong>#8368、#5324、#5124：CI 与采样器小修</strong></p>
+<p>PR 的 H100 测试重新打开了。采样器的文档和一个小修。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8368">https://github.com/flashinfer-ai/flashinfer/pull/8368</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/5324">https://github.com/flashinfer-ai/flashinfer/pull/5324</a></p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0，SGLang v0.5.23，都没动。TRT-LLM 还是 v1.4.0rc2。LMDeploy 还是 v0.18.0。LMDeploy、TGI、Mooncake 本轮零合入。</p>
+<h2>新技术与论文</h2>
+<p>本轮 arXiv 无新批次。每日批次在 00:00 UTC 发布，本轮窗口内结构性零入库。</p>
+<h2>业内新闻</h2>
+<p>本轮无实质新内容。X 大V 名单扫过，无值得收录的动态。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。</p>
+<h2>值得深读</h2>
+<p>本轮宁缺毋滥：没有达到深读标准的内容，不做笔记。</p>
+<p>*去重脚注：本期窗口为 UTC 11/03 17:00–19:00；9点版已报的 vLLM #65428、#64686、#56076、#57474、#65350、#65418、#56450、#63835、#56307、#60213，SGLang #47119，TRT-LLM #21526、#21441，llama.cpp #31134、#30141、#30953、#31583，Dynamo #17688，FlashInfer #8515、#8513、#8506 等不重复。*</p></body></html>
