@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月2日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-02"/>
+<meta name="doc-ts" content="2026-11-03T07:10:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-02（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-02（23点版）</h1>
+<p>23点版来了。arXiv 这轮恢复正常，上轮被限流落下的论文补上了。TRT-LLM 这轮全是 P/D 搬运的活。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 4 笔</strong></p>
+<p><strong>#64312：能直接吃官方 FP4 权重了</strong>。ModelOpt 导出的 NVFP4 权重里，有一种压缩格式叫 CSF。以前这种格式会卡住。现在解码一次就能跑。比如 Qwen3.8-Flash-Next-FP4。还有 GLM-5.3-Flash-FP4。这类官方 FP4 权重现在直接可用。 来源：<a href="https://github.com/vllm-project/vllm/pull/64312">https://github.com/vllm-project/vllm/pull/64312</a></p>
+<p><strong>#65153：Step-5 开 FP8 KV 不用再手动绕坑</strong>。以前默认 block 16 会直接崩。只能靠手动传 --block-size 32 绕过。现在 vLLM 自己会选大一点。命令更短，不再启动就挂。 来源：<a href="https://github.com/vllm-project/vllm/pull/65153">https://github.com/vllm-project/vllm/pull/65153</a></p>
+<p><strong>#65226：MiniMax-M3 多模态编码器更稳了</strong>。CUDA graph 以前把 padding 行当成真序列。做了全套注意力，又浪费又跟共享 buffer 冲突。改成零长序列填充后更稳也更快。 来源：<a href="https://github.com/vllm-project/vllm/pull/65226">https://github.com/vllm-project/vllm/pull/65226</a></p>
+<p><strong>#64096：投机解码的 KV 复用更多了</strong>。EAGLE 和 MTP 的 lookahead 哈希扩到 KV connector。NIXL P/D、Mooncake P/D 都覆盖。开 P/D 解耦加投机解码时，KV cache 复用更多。少一次搬运就是一次延迟节省。 来源：<a href="https://github.com/vllm-project/vllm/pull/64096">https://github.com/vllm-project/vllm/pull/64096</a></p>
+<p><strong>SGLang 4 笔</strong></p>
+<p><strong>#47993：Qwen3-VL 的多模态 decode 省钱了</strong>。融合的 QK-norm 加 RoPE 内核。以前只有纯文本 Qwen3 能用。现在 Qwen3-VL 的 MRoPE 也能用了。多模态 decode 又省下一截注意力开销。 来源：<a href="https://github.com/sgl-project/sglang/pull/47993">https://github.com/sgl-project/sglang/pull/47993</a></p>
+<p><strong>#44489：确定性模式的短板补上了</strong>。MI350X 和 MI355X 现在能用 AITER 跑 decode attention。确定性模式就是每次跑结果 bit 级一致，专给评测用。Qwen3-8B 确定性吞吐涨 1.27 到 1.91 倍。GSM8K 结果不变。你跑可复现评测时直接受益。 来源：<a href="https://github.com/sgl-project/sglang/pull/44489">https://github.com/sgl-project/sglang/pull/44489</a></p>
+<p><strong>#47976：MoE 权重按 NUMA 本地化</strong>。DeepGEMM Mega MoE 的专家权重不再跨域读。SM 读权重不用跨域了。Hopper 级别的 MoE 延迟更稳。 来源：<a href="https://github.com/sgl-project/sglang/pull/47976">https://github.com/sgl-project/sglang/pull/47976</a></p>
+<p><strong>#47292：视频生成那条路省显存</strong>。SANA-Video 的 depthwise 卷积。加 40 个 GLU 融成一个 Triton 核。扩散模型那条路省显存又加速。跟你主线关系不大，一笔带过。 来源：<a href="https://github.com/sgl-project/sglang/pull/47292">https://github.com/sgl-project/sglang/pull/47292</a></p>
+<p><strong>TRT-LLM 4 笔：全是 P/D KV 搬运</strong></p>
+<p><strong>#21272：BF16 KV 直传加了内存保护</strong>。context-first 就是 prefill 算完直接传 KV。传的时候源和目标内存不会被提前释放。搬运可靠性上了一档。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21272">https://github.com/NVIDIA/TensorRT-LLM/pull/21272</a></p>
+<p><strong>#20709：各层 head 数不一样也能搬了</strong>。有些模型各层的 KV head 数不一样。以前这种模型做原生解耦传输会选错分片。现在按每层的 head 形状选 slice 和 sender。混精度 twin 层的坑修了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20709">https://github.com/NVIDIA/TensorRT-LLM/pull/20709</a></p>
+<p><strong>#21245：Helix 的 MLA KV 写入瘦身了</strong>。Helix 做 MLA 上下文并行时。每个 rank 只写自己分到的压缩 KV 记录。不再重复写整份。写入量和显存占用都下来了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21245">https://github.com/NVIDIA/TensorRT-LLM/pull/21245</a></p>
+<p><strong>#20975：多 pool 解耦的 row 寻址修了</strong>。以前 KV 传输的 row 按单个地址描述。跨 pool 的 row 描述不了。现在加了 page_ordinals 让 peer 正确配对。底层 correctness 补丁。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20975">https://github.com/NVIDIA/TensorRT-LLM/pull/20975</a></p>
+<p><strong>Dynamo 1 笔</strong></p>
+<p><strong>#16208：音频转写进 Dynamo 了</strong>。vLLM worker 加了 OpenAI 兼容的音频转写接口。POST /v1/audio/transcriptions。多模态音频 serving 正式进 Dynamo。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/16208">https://github.com/ai-dynamo/dynamo/pull/16208</a></p>
+<p><strong>llama.cpp 4 笔</strong></p>
+<p><strong>#30662：CUDA graph 不再被误删</strong>。清理定时器会误删马上要用的 graph。高并发下无故降性能。现在加了防提前淘汰的逻辑。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30662">https://github.com/ggml-org/llama.cpp/pull/30662</a></p>
+<p><strong>#31292：DeepSeek-V4.1 的 offload 坑又填一个</strong>。部分 offload 时的 state restore 修了。llama.cpp 跟 V4.1 兼容的坑又填了一个。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31292">https://github.com/ggml-org/llama.cpp/pull/31292</a></p>
+<p><strong>#31570：KV cache 边缘修</strong>。没有 cell 的序列以前会返回 0 个 kv_rows。现在保证不返回 0。下游不会算错。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31570">https://github.com/ggml-org/llama.cpp/pull/31570</a></p>
+<p><strong>#31339：OpenCL 加了 iq4_xs 量化</strong>。移动端 Adreno 设备能用的量化又多了一种。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31339">https://github.com/ggml-org/llama.cpp/pull/31339</a></p>
+<p><strong>FlashInfer：挑关键的说</strong></p>
+<p><strong>#8447：decode 按真实长度分活了</strong>。以前按最大长度一刀切分配。长短不齐的 batch 下，B200 快 1.18 到 1.95 倍。GB300 快 1.23 到 2.2 倍。decode 端的一大包提速，要 opt-in 开。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8447">https://github.com/flashinfer-ai/flashinfer/pull/8447</a></p>
+<p><strong>#8375：VR200 能跑 DeepSeek-V4 的 FP8 decode 了</strong>。SM107 的 cake 后端覆盖又一块新卡。DeepSeek-V4 系在新硬件上能用了。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8375">https://github.com/flashinfer-ai/flashinfer/pull/8375</a></p>
+<p><strong>#8420：修了一个会卡死的 hang</strong>。销毁过的 stream 被复用时，缓存的 SM 数是旧分区的。规划超量直接卡死。B200 和 GB300 都会中招。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8420">https://github.com/flashinfer-ai/flashinfer/pull/8420</a></p>
+<p><strong>GDN 三连 #8462、#8461、#8457</strong>。Gated DeltaNet 是线性注意力方向。sm_107a 上 decode 最高 1.11x。prefill 最高 1.17x。上下文并行 prefill 最高 1.35x。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8462">https://github.com/flashinfer-ai/flashinfer/pull/8462</a></p>
+<p><strong>#8427：Rubin 的 MoE 调优不用手挑了</strong>。offline tuner 加了自动扫最优核。不用手动挑了。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8427">https://github.com/flashinfer-ai/flashinfer/pull/8427</a></p>
+<p>其余是 cake 微优化。数字全是作者自报，当路标看。</p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0，无变化。SGLang v0.5.23，无变化。TRT-LLM 仍是 v1.4.0rc2。但多了个 v1.4.0rc2.post1 小修补 tag。release 对象还没发布。LMDeploy v0.18.0，无变化，本轮零合入。TGI 和 Mooncake 本轮零实质合入。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮正常返回了。上轮被 429 限流，这轮补上。</p>
+<p><strong>BasisKV（11-02 提交）</strong>：长上下文 KV 缓存瘦身，专治多卡并行通信拖后腿。8 卡下端到端快 1.42 倍。还顺手用压缩后的 Value 帮 Key 做路由挑选。跟你 P/D 评估里的 KV 搬运直接相关。 来源：<a href="https://arxiv.org/abs/2611.02583">https://arxiv.org/abs/2611.02583</a></p>
+<p><strong>TVP（10-31）</strong>：投机解码的新训练目标。用 TV 距离代替交叉熵训 draft 模型。实测 draft 接受长度涨约 9.8%。你要是调投机解码，这个 loss 值得一读。 来源：<a href="https://arxiv.org/abs/2611.00588">https://arxiv.org/abs/2611.00588</a></p>
+<p><strong>Coffee（10-31）</strong>：软硬件协同的混合精度长上下文架构。按哪块 GEMM 输入更影响输出误差，动态分配位宽。系统建模对比 B200 基线，吞吐 up to 4.96 倍。能效 up to 12.56 倍。 来源：<a href="https://arxiv.org/abs/2611.00915">https://arxiv.org/abs/2611.00915</a></p>
+<p><strong>MXCode（10-30）</strong>：向量量化加 MX-FP4 原生计算打通。Qwen3 235B 在 GB300 上，模型加载内存省一半。P90 TTFT 最多快 94.5%。 来源：<a href="https://arxiv.org/abs/2611.00403">https://arxiv.org/abs/2611.00403</a></p>
+<p><strong>B200 vs B300 实测（10-30）</strong>：B300 不是全方位赢家。70B 吞吐反而慢 24 到 27%。两个同硅片的 B300 节点。只因 vLLM build 不同，TTFT 差 2.1 倍。采购和部署的实测参考。 来源：<a href="https://arxiv.org/abs/2610.41919">https://arxiv.org/abs/2610.41919</a></p>
+<p><strong>Hush-Up（10-31）</strong>：分布式推理的安全攻击研究。恶意 worker 用极小扰动逼模型提前输出 EOS。现有 watchdog 基本抓不到。做去中心化推理的话得看。 来源：<a href="https://arxiv.org/abs/2611.01097">https://arxiv.org/abs/2611.01097</a></p>
+<p><strong>端侧解码存内计算（11-02）</strong>：In-DRAM 并行，解码快 2.45 倍。偏边缘端，跟你云端评估关联弱。列一条备查。 来源：<a href="https://arxiv.org/abs/2611.02401">https://arxiv.org/abs/2611.02401</a></p>
+<h2>业内新闻</h2>
+<p><strong>墨芯 AI 完成近 10 亿元 C+ 轮（11-03 官宣）</strong>：国产稀疏计算推理芯片。S30 和 S40 在 MLPerf Inference 拿过三届冠军。已铺开千卡集群。新一代 SP200 板卡年底前发布。推理芯片国产线的新动向。 来源：<a href="https://news.marsbit.co/20261103100610444321.html">https://news.marsbit.co/20261103100610444321.html</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无实质新内容。Latent Space 播客 11 月 2 日的新单集是法律 Agent。跟推理 serving 无关。Simon Willison 博客近两天无 serving 相关。The Batch 最新一期是 6 天前的。X 大V 全安静。Reddit 和 HN 近两天无高赞 serving 讨论。</p>
+<h2>值得深读</h2>
+<p><strong><a href="https://zwang96-dl.github.io/news/deep-20261102-basiskv/">BasisKV：长上下文 KV 瘦身，顺手治好多卡通信</a></strong> 推荐理由：这篇正是你 P/D 评估里的 KV 搬运大头。KV 瘦身、通信加速、路由挑选三件事一起干。8 卡 1.42 倍。笔记已上站，含原文两张关键图。</p>
+<p>*去重脚注：本期窗口为 UTC 11/03 04:57–06:57；21点版已报的 vLLM #63420、#61435、#60339、#61609、#61795、#65238、#65199、#64651、#65291、#65292、#65050、#65051、#65036、#65093，SGLang #43906、#45785、#47476、#44148、#48032、#47810、#47997、#47900、#47954、#44398、#40825、#48055、#48054，Dynamo #15500、#17657，FlashInfer #8424、#8417、#8320、#4924、#8395，Mooncake #5127、#5117、#5094、#4695、#5093、#5167，TRT-LLM #20937、#20907 等不重复。*</p></body></html>
