@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月4日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-04"/>
+<meta name="doc-ts" content="2026-11-04T09:04:27"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-04（1点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-04（1点版）</h1>
+<p>1点版来了。凌晨小窗口，动静不大。 最大的一条：FlashInfer 发了 0.7.3 正式版。 论文侧补了 4 篇白天漏收的，基建新闻两条。</p>
+<h2>框架更新</h2>
+<p><strong>FlashInfer v0.7.3 正式版（11/4 05:57Z，上一轮窗口内漏报，补上）</strong> FlashInfer 是 vLLM、SGLang 底层用的注意力内核库。 MLA 后端收拢成一套，还自带自动调优。 cuDNN 分组 GEMM 也接进了统一的 MoE 接口。 Rubin（SM107）支持继续加码。 DeepSeek-V4 的 NVFP4 解码上了车。 Kimi-K3、MiniMax-H3 的专用内核，也打包了。 简单说：Blackwell 和 Rubin 用户，升级吃得到。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.3">https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.3</a></p>
+<p><strong>vLLM 9 笔</strong></p>
+<p><strong>#64182：AWQ/GPTQ 的 Marlin 权重缓存支持重启</strong> 11点版报过 FP8 版，这轮是 INT4 版。 权重缓存守护进程能把打包好的 Marlin 权重留着。 引擎重启后不用重新转格式，开工更快。 来源：<a href="https://github.com/vllm-project/vllm/pull/64182">https://github.com/vllm-project/vllm/pull/64182</a></p>
+<p><strong>#63921：DeepSeek-V4.1 在英伟达卡上 decode 提速</strong> 实测一块 GB300 托盘，batch 1 到 32。 decode 那步快 5.9% 到 17%。 agent 场景的 P90 交互性高 4% 到 26%。 来源：<a href="https://github.com/vllm-project/vllm/pull/63921">https://github.com/vllm-project/vllm/pull/63921</a></p>
+<p><strong>#65498：MoE 的 combine 少一次显存拷贝</strong> MoE 的 combine 就是把各专家的输出拼回来。 B200 上 EP4、Qwen3.5-397B 的尺寸。 每层省 163 微秒，约等于半 GB 的显存读写。 来源：<a href="https://github.com/vllm-project/vllm/pull/65498">https://github.com/vllm-project/vllm/pull/65498</a></p>
+<p><strong>#65076：Mooncake 的 KV 搬运认得每张卡了</strong> KV 搬运就是 PD 解耦里的搬运活。 草稿纸从 prefill 卡传到 decode 卡。 Mooncake 连接器现在能按 GPU 取设备名。 多卡环境下寻址更准。 来源：<a href="https://github.com/vllm-project/vllm/pull/65076">https://github.com/vllm-project/vllm/pull/65076</a></p>
+<p>其余 5 笔略过。音频解析的张量转换修准了（#65579）。XPU 升到 torch 2.15。run-batch 的 JSON 修补。DeepSeek-V4.1 的 tokenizer 修正。UMBP 的恢复测试。</p>
+<p><strong>SGLang 9 笔</strong></p>
+<p><strong>#45828：Hopper 上小 batch 的 FP8 GEMV 提速</strong> decode 时 batch 很小，大 GEMM 内核不划算。 这笔给小矩阵走路（GEMV）开了快速通道。 H200 上实测 Ling-3.1-flash。 batch-1 的 decode 快 7.3%。 来源：<a href="https://github.com/sgl-project/sglang/pull/45828">https://github.com/sgl-project/sglang/pull/45828</a></p>
+<p><strong>#47853：Blackwell 上 MXFP8 多了个可选后端</strong> HALOps 成了 MXFP8 GEMM 的可选后端。 mega MoE 也吃上了 mxfp8。 都是 opt-in，默认行为不变。 来源：<a href="https://github.com/sgl-project/sglang/pull/47853">https://github.com/sgl-project/sglang/pull/47853</a></p>
+<p><strong>#48357/#48343：Kimi-K3 的工具 schema 修准</strong> 工具调用的参数 schema 解析更准。 跑 Kimi-K3 agent 的同学，升级吃得到。 来源：<a href="https://github.com/sgl-project/sglang/pull/48357">https://github.com/sgl-project/sglang/pull/48357</a></p>
+<p>其余略过。NPU 的 MLA 前缀打包（#47924）。cu134 容器升 torch 2.15（#48279）。NPU 引用重命名。XPU 依赖钉版本。Arm64 测试修补。</p>
+<p><strong>TRT-LLM 9 笔</strong></p>
+<p><strong>#21242：Rubin 上支持 NVFP4_PLUS</strong> NVFP4_PLUS 是新量化格式。 值还是 E2M1，一种 4 位浮点。 每 32 个值配一个 UE5M3 块缩放。 Rubin 的 SM107 硬件直接读这种缩放。 MXFP4 的 checkpoint 不用转，直接加载。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21242">https://github.com/NVIDIA/TensorRT-LLM/pull/21242</a></p>
+<p><strong>#21108：GLM 的工具解析器小修</strong> 工具调用参数里又开新调用，旧参数不再被吞。 其余 7 笔略过。测试覆盖加了一批。Mistral Large 4 的代码整理。</p>
+<p><strong>llama.cpp 6 笔</strong></p>
+<p><strong>#31609：修了 bf16 基座导出 LoRA 会崩</strong> <strong>#31577：Adreno 的 q2_0 GEMV 提速</strong> 其余是 gguf 写入、tag 匹配、视图边界等小修，略过。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31609">https://github.com/ggml-org/llama.cpp/pull/31609</a></p>
+<p><strong>TGI、LMDeploy</strong></p>
+<p>窗口内 0 笔。</p>
+<p><strong>Dynamo 1 笔</strong></p>
+<p><strong>#15835：LoRA 解析器改成插件式</strong> Dynamo 是英伟达的多机调度框架。 请求时按需解析 LoRA 的接口，做成后端无关的插件。 懒加载、worker 本地配置都有了。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/15835">https://github.com/ai-dynamo/dynamo/pull/15835</a></p>
+<p><strong>FlashInfer 窗口内 PR 19 笔</strong></p>
+<p>v0.7.3 刚发，窗口内还是 cake 内核微调。 跟 serving 沾边的 4 笔。</p>
+<p>#8322：DSv4 稀疏 MLA decode 在 SM103/SM107 提速。</p>
+<p>#8565：三个量化器支持 batch 不变量。</p>
+<p>#8619，SM100a/SM103a 的 NVFP4-KV 分页上下文内核。</p>
+<p>#8621，RTX 5090 那档的 FP8 MQA logits 路由提速。</p>
+<p>其余 15 笔是 cake 内核的确定性和训练侧微调，略过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8322">https://github.com/flashinfer-ai/flashinfer/pull/8322</a></p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0、SGLang v0.5.23。 TRT-LLM v1.4.0rc2、LMDeploy v0.18.0、TGI v3.3.7。 上面这些水位都没动。 FlashInfer 正式版升到 v0.7.3（本轮新）。</p>
+<h2>新技术与论文</h2>
+<p><strong>对抗性投机推理：投机解码会改变 agent 的行为（2611.05345）</strong> 投机解码就是小模型先打草稿、大模型再改。 以前大家只当它是纯加速手段。 这篇说：在长链条 agent 任务里。 草稿被接受还是被拒，会改变推理链的输出分布。 换句话说，验证窗口里的数值噪声会悄悄改写 agent 的&quot;想法&quot;。 跟你的投机解码方向相关，角度很新。 来源：<a href="https://arxiv.org/abs/2611.05345（11/3">https://arxiv.org/abs/2611.05345（11/3</a> 提交）</p>
+<p><strong>循环模型跑 serving，瓶颈到底在哪（2611.05150）</strong> 循环模型就是同一组层反复用很多遍，Ouro、Huginn 是代表。 作者在开源引擎里实测。 每个 token 要跑 5689 个小 kernel。 把它们融起来，吞吐涨 1.11 到 1.59 倍。 而且 1014 个请求逐位一致，精度没动。 跟 LoopVQ 是姊妹篇，23点版报过。 一个压 KV，一个压 kernel。 来源：<a href="https://arxiv.org/abs/2611.05150（11/3">https://arxiv.org/abs/2611.05150（11/3</a> 提交）</p>
+<p><strong>LiquidCP：把注意力任务从通信和内核边界里解放出来（2611.04401）</strong> 上下文并行就是把长序列切开、让多张卡各算一段。 老办法是环形执行，每步都等通信，GPU 经常闲着。 这篇把任务拆成传输、计算、归约三类，按 tile 级依赖调度。 训练和推理走同一套模型，decode 的长尾也不再堵路。 做长上下文 serving 的，可以看一眼思路。 来源：<a href="https://arxiv.org/abs/2611.04401（11/3">https://arxiv.org/abs/2611.04401（11/3</a> 提交）</p>
+<p><strong>cμ 规则：显存受限下的最优调度理论（2611.04807）</strong> 偏理论的一篇。把 LLM 推理调度写成排队论问题。 结论是：在 KV 显存受限时，cμ 规则渐近最优。 工程上直接抄不了，但能帮你想明白调度器的天花板在哪。 来源：<a href="https://arxiv.org/abs/2611.04807（11/3">https://arxiv.org/abs/2611.04807（11/3</a> 提交）</p>
+<p>*注：以上 4 篇都是 11/3 批次、白天各版漏收的，今晚统一补上。*</p>
+<h2>业内新闻</h2>
+<p><strong>llm-d 1.0 的媒体跟进：多了两个生产案例数字（11/4）</strong> llm-d 1.0 本体 10/20 已深读过，这里只补新料。 IBM Research 拿它做量子纠错硬件研究。 前缀缓存命中 98%，综合成本每百万 token 约 0.11 美元。 另一个案例：753B 的 GLM 5.2。 峰值每分钟 660 万输出 token。 3000 个并发 coding agent，零抢占。 提醒一句：数字都是项目方口径，无独立复测。 来源：<a href="https://channellife.co.uk/story/llm-d-1-0-aims-to-cut-ai-inference-costs-for-firms">https://channellife.co.uk/story/llm-d-1-0-aims-to-cut-ai-inference-costs-for-firms</a></p>
+<p><strong>Baseten 本周三连发推理平台新品（11/3，LinkedIn）</strong> 周三 Grid：网关、智能路由、coding agent 的护栏。 周四 Sandboxes：有状态、VM 隔离、跟推理同机房。 周五 Loops：开源模型上的 serverless 微调和 RL。 正式 GA。 三件都是 agent 基建。看得出 coding agent 是眼下最热的 workload。 来源：<a href="https://www.linkedin.com/company/baseten">https://www.linkedin.com/company/baseten</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无。</p>
+<h2>值得深读</h2>
+<p>本轮无。宁缺毋滥。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-04-0100/">https://zwang96-dl.github.io/news/brief-2026-11-04-0100/</a></p>
+<p>*去重脚注：本期窗口为 UTC 11/04 07:00–09:00；23点版已报的 vLLM #63406、#65432、#65375、#64697、#65547、#64836，SGLang #43786、#48109、#48292、#48111、#48283，vLLM #65369–#65377、#65528，TRT-LLM #21419、#19285、#21608、#21528、#21521、#21526，llama.cpp #31289，Dynamo #17979、#17977、#17874、#18030、#17980、#17935、#17936，FlashInfer #8605、#8596、#8574、#8594，Mooncake 3 笔，arXiv LoopVQ（2611.05304）、Uni-LaSpec（2611.01617）、CacheWeave（2611.01735）、Penelope（2611.00391）、Fairway（2611.02082）、SpecOPD（2611.02846）、FlagRot（2611.03992）、LeanSparse（2611.04671），Revolut 自建推理、美团 LongCat 2.5、杜德利观点、Kimi K3 实测账本、Mistral Large 4 教程、The Context 日报，不重复；arXiv 2611.05345、2611.05150、2611.04401、2611.04807 为 11/3 批次漏收补报；FlashInfer v0.7.3 发于 23点版窗口内（05:57Z）但未报，本轮补上；HN Algolia API 本轮连接失败，未扫 HN。*</p></body></html>
