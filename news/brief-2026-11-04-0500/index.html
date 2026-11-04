@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月4日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-04"/>
+<meta name="doc-ts" content="2026-11-04T13:00:11"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-04（5点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-04（5点版）</h1>
+<p>5点版来了。凌晨小窗口，框架侧小修小补。最醒目的一条：llama.cpp 0.9.0 正在准备中。vLLM 有一笔 Fast Start 的 FP8 缓存重启。SGLang 修了一笔多模态 VLM 缓存。</p>
+<h2>框架更新</h2>
+<p><strong>llama.cpp：0.9.0 正在准备中（#31646）</strong></p>
+<p>版本 bump PR 已合入，release notes 都写好了。tag 还没切，上一个 tag 还是 v0.8.0。亮点不少：OCP FP8 E4M3（一种 8 位浮点权重格式）。统一 KV cache 跑多序列更快了。靠的是新算子 flash_attn_ext_rows。ggml 升到 v0.29.0。带 NCCL 多节点张量并行。Gemma 4 E2B/E4B 的 prefill 大优化。新增 4 个架构支持。最醒目的是 Mistral Large 4。音频侧加了 Chatterbox TTS。本地跑模型的朋友，值得等等正式 tag。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31646">https://github.com/ggml-org/llama.cpp/pull/31646</a></p>
+<p><strong>vLLM 5 笔</strong></p>
+<p><strong>#64119：Fast Start 的 FP8 缓存重启，补上 ModelOpt 那块</strong> Fast Start 就是权重打包好存着、下次启动直接复用。之前几版报过 Marlin INT4 版。补的是 ModelOpt 的 CUTLASS block FP8。重启开工更快。冷启动的用户，升级吃得到。 来源：<a href="https://github.com/vllm-project/vllm/pull/64119">https://github.com/vllm-project/vllm/pull/64119</a></p>
+<p><strong>#65449：Mistral EAGLE 的权重加载器，状态初始化修了</strong> EAGLE 就是投机解码的草稿头。小模型先打草稿、大模型再改。EAGLE 的权重加载器，状态没初始化干净。这笔修了。跑 Mistral Large 4 投机解码的，值得升级。 来源：<a href="https://github.com/vllm-project/vllm/pull/65449">https://github.com/vllm-project/vllm/pull/65449</a></p>
+<p><strong>#59383：KV 卸载时，懒卸载的 GPU 块放回驱逐端</strong> KV 卸载就是把草稿纸搬到内存里腾显存。懒卸载的 GPU 块，之前放错了位置。这笔放回驱逐那一端。驱逐顺序修准了。 来源：<a href="https://github.com/vllm-project/vllm/pull/59383">https://github.com/vllm-project/vllm/pull/59383</a></p>
+<p><strong>#63752：只收到部分分片的权重，直接拒绝加载</strong> 模型权重分片下载，缺片时继续装会出怪 bug。这笔提前拦掉。小校验，大省心。 来源：<a href="https://github.com/vllm-project/vllm/pull/63752">https://github.com/vllm-project/vllm/pull/63752</a></p>
+<p>其余 1 笔略过：Rust 前端的错误堆栈开关（#65001）。</p>
+<p><strong>SGLang 7 笔</strong></p>
+<p><strong>#47120：多模态 VLM 缓存，图像块的身份保住了</strong> VLM 就是视觉语言模型。图像块进缓存做去重时，旧逻辑会丢身份。这笔把图像块的强身份标识留下来。正对多模态 serving 的人。 来源：<a href="https://github.com/sgl-project/sglang/pull/47120">https://github.com/sgl-project/sglang/pull/47120</a></p>
+<p><strong>#47494：昇腾 DSpark，每个验证步只刷新一次 Mamba 跟踪</strong> DSpark 是昇腾上的投机解码。3点版刚报过 compact 模式。这笔把 Mamba 的跟踪刷新从每 token 改成每验证步。少跑冤枉路。 来源：<a href="https://github.com/sgl-project/sglang/pull/47494">https://github.com/sgl-project/sglang/pull/47494</a></p>
+<p><strong>#44503：sparse-mla 暴露算术和 DSA 元数据钩子</strong> sparse-mla 是 DeepSeek 的稀疏注意力。钩子给外部工具调内部数据用。外部调优和性能分析更顺手。 来源：<a href="https://github.com/sgl-project/sglang/pull/44503">https://github.com/sgl-project/sglang/pull/44503</a></p>
+<p>其余略过：embedding 模型 nemotron3-embed 支持（#45885）。昇腾 glm-ocr 的 M-RoPE 修准（#44506）。文档 cookbook（#48392）。昇腾依赖 bump（#48352）。</p>
+<p><strong>FlashInfer 10 笔</strong></p>
+<p>还是 cake 内核微调。dense projection 和 RMSNorm 门控那几块。梯度侧为主，跟 serving 关系不大。略过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8660">https://github.com/flashinfer-ai/flashinfer/pull/8660</a></p>
+<p><strong>TRT-LLM 1 笔</strong></p>
+<p>infra 侧 waive 一个失败用例，略过。</p>
+<p><strong>LMDeploy、TGI、Dynamo、Mooncake</strong></p>
+<p>窗口内 0 笔。</p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0、SGLang v0.5.23 都没动。TRT-LLM 还是 v1.4.0rc2，LMDeploy 还是 v0.18.0。TGI 还是 v3.3.7，FlashInfer 还是 v0.7.3。llama.cpp 的 0.9.0 在准备中，tag 未切。</p>
+<h2>新技术与论文</h2>
+<p>本轮无。arXiv 的下一批要到今天下午 4 点才发。属结构性零入库。</p>
+<h2>业内新闻</h2>
+<p>本轮无。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。</p>
+<h2>值得深读</h2>
+<p>本轮无。宁缺毋滥。</p>
+<p>*去重脚注：本轮已与 3点版去重。SGLang #38440、Dynamo #14775、TRT-LLM #21503/#20650、llama.cpp #31635/#31607/#31644、FlashInfer #8635 及之前各笔都在 3点版报过，不再重复。ZSE 的 HN 帖是 9 月旧闻，9/15 已确认不收录。*</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-04-0500/">https://zwang96-dl.github.io/news/brief-2026-11-04-0500/</a></p></body></html>
