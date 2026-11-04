@@ -1,0 +1,69 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月3日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-03"/>
+<meta name="doc-ts" content="2026-11-04T05:02:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-03（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-03（21点版）</h1>
+<p>21点版来了。这轮是小窗口，1.5 小时里没什么大动静。最有料的是 SGLang 的一笔 PD 解耦修复。KV checksum 在两处场景下直接禁用。分别是 DeepSeek-V4 和 HiSparse decode。vLLM 这轮全是 Rust 前端补齐对齐。论文侧 arXiv 撞上 429 限流，批次也刚过。本轮结构性零入库。</p>
+<h2>框架更新</h2>
+<p><strong>SGLang 3 笔</strong></p>
+<p><strong>#48292：DeepSeek-V4 下 KV checksum 禁用</strong> P/D 解耦就是 prefill 和 decode 分开跑的分工流水线。KV checksum 相当于搬运 KV 时的对账单。在 DeepSeek-V4 和 HiSparse decode 里，账老对不上。这笔 PR 干脆把这两处的校验关掉。跟你的 PD 评估直接相关。 来源：<a href="https://github.com/sgl-project/sglang/pull/48292">https://github.com/sgl-project/sglang/pull/48292</a></p>
+<p><strong>#48111：投机解码同步默认改 init</strong> 投机解码就是小模型先打草稿、大模型再改。这笔把张量并行同步的默认模式换成 init。用 spec decode 的同学，升级前看一眼。 来源：<a href="https://github.com/sgl-project/sglang/pull/48111">https://github.com/sgl-project/sglang/pull/48111</a></p>
+<p><strong>#48283：调度器 abort 收敛到一个入口</strong> 纯重构：排队里的 abort 都收进 RequestRetirer。行为不变，略过。 来源：<a href="https://github.com/sgl-project/sglang/pull/48283">https://github.com/sgl-project/sglang/pull/48283</a></p>
+<p><strong>vLLM 12 笔</strong></p>
+<p><strong>Rust 前端对齐 7 连发（#65369–#65377）</strong> vLLM 的 Rust 前端在追 Python 前端的行为。tool_choice=none 时丢掉 tool calls。几个路由返回 501，usage 字段省略。bool 参数拼写兼容。replay 的 tool-call 参数强制转对象。Python 风格 flag 也支持。data-parallel-rank 不再绑定环境变量。都是语义对齐，没有新功能。 来源：<a href="https://github.com/vllm-project/vllm/pull/65369（其余依次为">https://github.com/vllm-project/vllm/pull/65369（其余依次为</a> 65370、65371、65372、65374、65376、65377）</p>
+<p><strong>#65528：AR 投机器 decode 路径清理</strong> 投机解码里，自回归猜词器那条 decode 路径做了内部重构。功能不变。 来源：<a href="https://github.com/vllm-project/vllm/pull/65528">https://github.com/vllm-project/vllm/pull/65528</a></p>
+<p>其余三笔都是 CI 和测试小修，略过。</p>
+<p><strong>Dynamo 2 笔</strong></p>
+<p><strong>#17977：PD 配方砍掉 decode 端 CPU KV 层</strong> Nemotron 3.5 Super VL 的 PD 解耦配方瘦身了。decode 端的 CPU KV 层直接砍掉。KV 搬运路径更精简。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17977">https://github.com/ai-dynamo/dynamo/pull/17977</a></p>
+<p><strong>#17874：纯文本模型前端直接拒多媒体</strong> 纯文本模型收到多媒体输入，以前还要转一圈。现在前端路由之前就直接拒掉。省掉一次无效转发。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17874">https://github.com/ai-dynamo/dynamo/pull/17874</a></p>
+<p><strong>FlashInfer</strong> 9 笔全是 cake kernel 微调。#8574 给 Blackwell MSA 做了 prefill 融合。#8594 调优了大规模 MoE 的 GEMM 配置。这两笔跟 serving 沾边，其余略过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8574、https://github.com/flashinfer-ai/flashinfer/pull/8594">https://github.com/flashinfer-ai/flashinfer/pull/8574、https://github.com/flashinfer-ai/flashinfer/pull/8594</a></p>
+<p><strong>llama.cpp</strong> 窗口内 0 个 PR。出了两个每日快照 b12097/b12098。按惯例快照不算正式发版，略过。</p>
+<p><strong>版本水位</strong> vLLM v0.33.0、SGLang v0.5.23 都没动。TRT-LLM 还是 v1.4.0rc2，LMDeploy 还是 v0.18.0。TGI 处于维护模式，本轮无动静。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 本轮 API 撞上 429 限流。按规则硬停，不重试。11/04 批次 00:00 UTC 就发布了。19点版已经覆盖，本轮本来就是结构性零入库。</p>
+<h2>业内新闻</h2>
+<p>本轮无实质新内容。大V名单扫过，无值得收录的动态。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。</p>
+<h2>值得深读</h2>
+<p>宁缺毋滥：本轮没有达到深读标准的内容，不做笔记。</p>
+<p>*去重脚注：本期窗口为 UTC 11/04 03:20–04:57；19点版已报的 vLLM #65488、#64916、#60989、#64059、#65331、#65319、#65455、#65413、#64077、#65529、#65087、#62203，SGLang #47255、#48245、#47935、#47526、#48246、#48243、#43911，TRT-LLM #21021、#20078，Dynamo #17483、#16871、#17973、#17972、#17710、#17932、#17236、#17899，FlashInfer 训练侧 kernel 若干，arXiv 2611.04671（LeanSparse）、2611.04382、2611.04032、2611.04055、2611.04137、2611.03200 等不重复。*</p></body></html>
