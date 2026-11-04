@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月3日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-03"/>
+<meta name="doc-ts" content="2026-11-04T03:34:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-03（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-03（19点版）</h1>
+<p>19点版来了。这轮是投机解码和 KV 搬运的双专场。vLLM 给 DFlash 连打四套组合拳。SGLang 把 NIXL 传输绑死设备。论文侧迎来 11/04 新批次，稀疏注意力 serving 有篇硬货。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 12 笔</strong></p>
+<p><strong>投机解码 4 笔</strong></p>
+<p><strong>#65488：DFlash 草稿输入补齐</strong> DFlash 是 vLLM 的并行猜词投机解码。同一批发射里多出来的程序，草稿输入先补齐再算。少一次形状对不上的等待。 来源：<a href="https://github.com/vllm-project/vllm/pull/65488">https://github.com/vllm-project/vllm/pull/65488</a></p>
+<p><strong>#64916：DFlash2 打分融进 Triton</strong> 候选边的打分逻辑塞进一个 Triton kernel。少跑一轮 kernel，验证更快。 来源：<a href="https://github.com/vllm-project/vllm/pull/64916">https://github.com/vllm-project/vllm/pull/64916</a></p>
+<p><strong>#60989：草稿模型开 CUDA Graph</strong> AR 系猜词器重构完，草稿模型也吃上 CUDA Graph。CUDA Graph 相当于把固定流程打包，省掉重复启动。 来源：<a href="https://github.com/vllm-project/vllm/pull/60989">https://github.com/vllm-project/vllm/pull/60989</a></p>
+<p><strong>#64059：修 DFlash 接受数为 0 的 bug</strong> 全 CUDA Graph 下草稿接受数是 0 就崩。现在修好了。 来源：<a href="https://github.com/vllm-project/vllm/pull/64059">https://github.com/vllm-project/vllm/pull/64059</a></p>
+<p><strong>KV 搬运 4 笔</strong></p>
+<p><strong>#65331：Mooncake 仓库认扩容后的 KV</strong> KV cache 扩容后，已提交的块要去 Mooncake 仓库登记。不登记，搬运时就找不到。 来源：<a href="https://github.com/vllm-project/vllm/pull/65331">https://github.com/vllm-project/vllm/pull/65331</a></p>
+<p><strong>#65319：batch 满了也开始搬 KV</strong> 以前 batch 满就干等。现在限量启动异步 KV 加载，搬运和计算重叠。 来源：<a href="https://github.com/vllm-project/vllm/pull/65319">https://github.com/vllm-project/vllm/pull/65319</a></p>
+<p><strong>#65455：KV 卸载适配新 key 接口</strong> KV 卸载走新版 KVCR key adapter。接口对齐，后续不折腾。 来源：<a href="https://github.com/vllm-project/vllm/pull/65455">https://github.com/vllm-project/vllm/pull/65455</a></p>
+<p><strong>#65413：KV cache 按真实空闲显存定大小</strong> 以前按毛值估。现在扣掉 UMA 占用再算，大小更准。 来源：<a href="https://github.com/vllm-project/vllm/pull/65413">https://github.com/vllm-project/vllm/pull/65413</a></p>
+<p><strong>模型与硬件 4 笔</strong></p>
+<p><strong>#64077：Muse Spark 在 GB300 解码快 1.5 倍</strong> Open 版专用解码路径优化。GB300 上 decode 提速一半。 来源：<a href="https://github.com/vllm-project/vllm/pull/64077">https://github.com/vllm-project/vllm/pull/64077</a></p>
+<p><strong>#65529：Kimi-K3 的 B200 Mooncake 预设</strong> 给 Kimi-K3 配了 B200 上的聚合 Mooncake 预设。KV 搬运用 Mooncake，直连即用。 来源：<a href="https://github.com/vllm-project/vllm/pull/65529">https://github.com/vllm-project/vllm/pull/65529</a></p>
+<p><strong>#65087：MiniMax-M3.1 在 AMD 解码提速</strong> four-wave 解码 top-k，走 NVFP4 indexer。MI350X 那档卡吃得到。 来源：<a href="https://github.com/vllm-project/vllm/pull/65087">https://github.com/vllm-project/vllm/pull/65087</a></p>
+<p><strong>#62203：Kimi K3 流式 tool call 增量扫描</strong> 工具调用边流边扫，不用等整段。流式场景延迟更低。 来源：<a href="https://github.com/vllm-project/vllm/pull/62203">https://github.com/vllm-project/vllm/pull/62203</a></p>
+<p><strong>SGLang 7 笔</strong></p>
+<p><strong>#47255：NIXL 传输 worker 绑设备</strong> PD 解耦里 KV 跨卡搬运走 NIXL。传输 worker 绑到自己 rank 的设备上，不串门。跟你的 PD 评估直接相关。 来源：<a href="https://github.com/sgl-project/sglang/pull/47255">https://github.com/sgl-project/sglang/pull/47255</a></p>
+<p><strong>#48245：DeepSeek V4 prefill 分发提速</strong> mega MoE 预分发每线程啃 4 个 chunk。prefill 那批大请求分发更快。 来源：<a href="https://github.com/sgl-project/sglang/pull/48245">https://github.com/sgl-project/sglang/pull/48245</a></p>
+<p><strong>#47935：DeepSeek V4.1 解码省显存</strong> MXFP4 Engram 表保持打包状态。gather 时再解 E2M1。少一次展开，解码更顺。 来源：<a href="https://github.com/sgl-project/sglang/pull/47935">https://github.com/sgl-project/sglang/pull/47935</a></p>
+<p><strong>#47526：Kimi-K3 融合 KDA 解码</strong> 6 头和 3 头每 rank 开 fused KDA decode。Kimi-K3 解码更快。 来源：<a href="https://github.com/sgl-project/sglang/pull/47526">https://github.com/sgl-project/sglang/pull/47526</a></p>
+<p><strong>#48246：deep_select top-512 换 3-CTA</strong> 非分页 bf16 的 top-512 采样走 3-CTA 那档。采样这步提速。 来源：<a href="https://github.com/sgl-project/sglang/pull/48246">https://github.com/sgl-project/sglang/pull/48246</a></p>
+<p><strong>#48243：V4.1 paged 反量化并行</strong> 一个 program 一次解多个 KV token。反量化这步更快。 来源：<a href="https://github.com/sgl-project/sglang/pull/48243">https://github.com/sgl-project/sglang/pull/48243</a></p>
+<p><strong>#43911：HiSparse 校验失败就放行</strong> KV checksum 对不上就释放对应行。别让坏块占着坑。 来源：<a href="https://github.com/sgl-project/sglang/pull/43911">https://github.com/sgl-project/sglang/pull/43911</a></p>
+<p><strong>TRT-LLM 2 笔</strong></p>
+<p><strong>#21021：混合精度 KV cache 扩到投机解码</strong> 以前只管普通解码。现在投机解码和稀疏 MLA 后端也能用混合精度 KV。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21021">https://github.com/NVIDIA/TensorRT-LLM/pull/21021</a></p>
+<p><strong>#20078：DSpark 置信度调度开关</strong> DSpark 解码加置信度调度，opt-in 开启。草稿靠谱才多猜，不靠谱就收。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20078">https://github.com/NVIDIA/TensorRT-LLM/pull/20078</a></p>
+<p><strong>Dynamo 7 笔</strong></p>
+<p><strong>#17483：planner 从录制 trace 自调参</strong> DGDR v1beta2，planner 按历史 trace 在线重调。你念叨的 AI 自动调参，这就是官方版。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17483">https://github.com/ai-dynamo/dynamo/pull/17483</a></p>
+<p><strong>#16871：TRT-LLM sidecar 接音频</strong> 上轮视频通道刚通，这轮音频也接上了。OpenEngine sidecar 多模态又齐一块。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/16871">https://github.com/ai-dynamo/dynamo/pull/16871</a></p>
+<p><strong>#17973、#17972：sidecar 挂了自动重启</strong> TRT-LLM 和 SGLang 的 sidecar 停服就重启。半夜少被叫醒两笔。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17973、https://github.com/ai-dynamo/dynamo/pull/17972">https://github.com/ai-dynamo/dynamo/pull/17973、https://github.com/ai-dynamo/dynamo/pull/17972</a></p>
+<p><strong>#17710：引擎死后请求自动迁移</strong> 引擎挂了或排水，请求迁到别的实例。不断连。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17710">https://github.com/ai-dynamo/dynamo/pull/17710</a></p>
+<p><strong>#17932：跨机房 gRPC 开 TCP_NODELAY</strong> pool-relay 的 WAN 连接关掉 Nagle。小包不等了，跨机房 KV 中继延迟降。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17932">https://github.com/ai-dynamo/dynamo/pull/17932</a></p>
+<p><strong>#17236、#17899：模型解析加路由清理</strong> MiniMax M3 接 UnifiedParser。router 删掉 1.7.0 待废的旧路径。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17236、https://github.com/ai-dynamo/dynamo/pull/17899">https://github.com/ai-dynamo/dynamo/pull/17236、https://github.com/ai-dynamo/dynamo/pull/17899</a></p>
+<p><strong>FlashInfer</strong>：16 笔全是 Cake 训练 kernel、小修和打包。跟推理无关，略过。</p>
+<p><strong>版本水位</strong>：vLLM v0.33.0、SGLang v0.5.23、TRT-LLM v1.4.0rc2、LMDeploy v0.18.0，都没动。</p>
+<h2>新技术与论文</h2>
+<p><strong>LeanSparse（11-03 提交）</strong>：稀疏注意力模型的 serving 瘦身，在 SGLang 里实现。读题按层流式，只留两块显存缓冲轮用。吐字先拿压缩版目录卡粗筛，再查原始目录卡精排。95 万上下文下并发是 HiSparse 的 2.95 倍，decode 吞吐 2.14 倍。首字延迟中位数 21.6 秒压到 0.6 秒。<strong>值得深读</strong>，笔记已生成。 来源：<a href="https://arxiv.org/abs/2611.04671">https://arxiv.org/abs/2611.04671</a></p>
+<p><strong>Beyond Compression Ratio（11-03 提交）</strong>：PD 解耦搬运 KV，先压缩再传。压缩本身太慢会把省下的时间吃光。这篇把变换和量化融进一个 kernel，快 5.9 倍。压缩吞吐从 90GB/s 干到 500GB/s 以上。作业完成时间最高快 2.04 倍。NPC 2026 接收。跟你的 PD 评估直接咬合。 来源：<a href="https://arxiv.org/abs/2611.04382">https://arxiv.org/abs/2611.04382</a></p>
+<p><strong>ROCm InferaSim（11-03 提交）</strong>：AMD 官方的 serving 配置预测器。调参不用穷举实测，11 个锚点 9.1 卡时，替代 2.5 万卡时的暴力搜索。单 token 延迟误差中位数 8.1%，PD 解耦吞吐误差 5.5%。在 MI355X 上用 vLLM、SGLang 测的。你那套&quot;人肉调不出最优 QPS&quot;的痛，它就是来治的。 来源：<a href="https://arxiv.org/abs/2611.04032">https://arxiv.org/abs/2611.04032</a></p>
+<p><strong>HybridSpec（11-03 提交）</strong>：给 GDN-MoE 混合模型调投机解码的验证长度。Qwen3.6-35B-A3B 上，验证长度在 GPU 上现算现定。比自回归快 1.75–1.88 倍，比 DFlash 快 1.30–1.33 倍。 来源：<a href="https://arxiv.org/abs/2611.04055">https://arxiv.org/abs/2611.04055</a></p>
+<p><strong>LoopKV（11-03 提交）</strong>：循环 Transformer 的 KV 压缩。离线画像定每格用 4bit、2bit 还是复用。vLLM 里一个融合 kernel 执行。比 KIVI-4 省 35% KV，goodput 高 1.7–2.2 倍。 来源：<a href="https://arxiv.org/abs/2611.04137">https://arxiv.org/abs/2611.04137</a></p>
+<p><strong>CISA（11-02 提交，补漏）</strong>：免训练给稠密模型换稀疏注意力。按块选 KV，不搞 token 级索引。百万 token 下 prefill 快 8.6 倍、decode 快 3 倍。4 张 B300 上端到端吞吐 2.29 倍，精度掉 1.5 个点以内。NVIDIA 出品，3 点版漏报了。 来源：<a href="https://arxiv.org/abs/2611.03200">https://arxiv.org/abs/2611.03200</a></p>
+<p>备查：HyPAIC（闪存 HBF 给万亿参数 MoE 续命，仿真口径）<a href="https://arxiv.org/abs/2611.04144；FlagRot（2bit">https://arxiv.org/abs/2611.04144；FlagRot（2bit</a> KV 量化前旋转不一定管用）<a href="https://arxiv.org/abs/2611.03992；SeqoFlow（语义查询的运行时自适应调度）https://arxiv.org/abs/2611.04248">https://arxiv.org/abs/2611.03992；SeqoFlow（语义查询的运行时自适应调度）https://arxiv.org/abs/2611.04248</a>。</p>
+<h2>业内新闻</h2>
+<p>本轮无实质突发。X 大V 名单扫过，无值得收录的动态。</p>
+<h2>访谈与深度</h2>
+<p><strong>SGLang vs vLLM 到底谁快（11/02 更新）</strong>：localaimaster 的对比长文，方法论很诚实。只收录可溯源的数字，营销口径的全删了。结论：请求前缀重叠超 60% 选 SGLang，首字延迟降 20–40%。prompt 各不相同，两家吞吐差 5% 以内。你评估 PD 解耦顺手可以对照着看。 来源：<a href="https://localaimaster.com/blog/sglang-vs-vllm-comparison">https://localaimaster.com/blog/sglang-vs-vllm-comparison</a></p>
+<h2>值得深读</h2>
+<p>LeanSparse 一篇。笔记已生成，见深度阅读目录。</p>
+<p>*去重脚注：本期窗口为 UTC 11/03 23:00–11/04 03:20（17点版无简报产出，窗口合并覆盖）；15点版已报的 vLLM #64723、#62565、#65496、#64518，SGLang #48119，TRT-LLM #20486、#21475、#21239、#19786、#21579、#21283，llama.cpp #31619、#30993，Dynamo #16870、#17728、#17727、#17290、#17980，FlashInfer #8221、#8002、#7987、#5617，arXiv 2611.03330（SIMPLE）、2611.02583（BasisKV）等不重复。*</p></body></html>
