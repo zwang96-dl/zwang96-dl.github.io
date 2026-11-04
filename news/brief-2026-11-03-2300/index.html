@@ -1,0 +1,90 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月3日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-03"/>
+<meta name="doc-ts" content="2026-11-04T07:07:00"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-03（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-03（23点版）</h1>
+<p>23点版来了。这轮是深夜小窗口。框架侧大多是小修小补。论文侧补到 4 篇新的。业内最大的一条，是 Revolut 的自建推理账本。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 6 笔</strong></p>
+<p><strong>#63406：prefill 和 decode 的 CUDA 图分开抓</strong> CUDA 图就是把一串 GPU 操作录下来反复播。以前 prefill 和 decode 共用一套捕获尺寸。现在 prefill 按 token 数抓，decode 按请求数抓。各抓各的，调优更顺手。 来源：<a href="https://github.com/vllm-project/vllm/pull/63406">https://github.com/vllm-project/vllm/pull/63406</a></p>
+<p><strong>#65432：MiniMax-M3.1 在 AMD 卡上 decode 更顺</strong> ROCm 这边的性能优化。请求少于 3 个时，DSpark 的打分直接本地算。不走 indexer 那条重路子。玩 AMD 卡的同学，升级可以期待。 来源：<a href="https://github.com/vllm-project/vllm/pull/65432">https://github.com/vllm-project/vllm/pull/65432</a></p>
+<p>其余 4 笔都是小修。#65375、#64697 是 Rust 前端继续对齐 Python 版。#65547 让空 tools 数组按 OpenAI 的来。#64836 是 ROCm 测试。略过。</p>
+<p><strong>SGLang 5 笔</strong></p>
+<p><strong>#43786：DeepSeek-V4 的 FP8 量化再压一刀</strong> 逆 RoPE 直接融进 wo_a 的 FP8 量化里。少一次 kernel 启动，decode 快一点。跑 DeepSeek-V4 serving 的同学，升级吃得到。 来源：<a href="https://github.com/sgl-project/sglang/pull/43786">https://github.com/sgl-project/sglang/pull/43786</a></p>
+<p><strong>#48109：MoE 填充行索引类型修准</strong> 小 bug 修复，略过。其余三笔是 CI，略过。 来源：<a href="https://github.com/sgl-project/sglang/pull/48109">https://github.com/sgl-project/sglang/pull/48109</a></p>
+<p><strong>TRT-LLM 3 笔</strong></p>
+<p>#21419：autotuner 一轮调优共用一个 CUDA 图池。小优化，积少成多。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21419">https://github.com/NVIDIA/TensorRT-LLM/pull/21419</a></p>
+<p>#19285：自采样 GVR 模板统一支持三种精度。FP32、BF16、FP16 一次配齐。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19285">https://github.com/NVIDIA/TensorRT-LLM/pull/19285</a></p>
+<p>#21608 是 infra 放行，略过。</p>
+<p><strong>llama.cpp / TGI / LMDeploy</strong></p>
+<p>llama.cpp 只有一笔 Hexagon DSP 的，编号 #31289。跟 GPU serving 无关，略过。TGI、LMDeploy 窗口内 0 笔。</p>
+<p><strong>Dynamo 1 笔</strong></p>
+<p>#17979：Nemotron 3.5 Super VL 配方的内存申请降到 16Gi。纯配置小调，略过。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17979">https://github.com/ai-dynamo/dynamo/pull/17979</a></p>
+<p><strong>FlashInfer 15 笔</strong></p>
+<p>全是 cake kernel 微调。两笔跟 serving 沾边，其余略过。</p>
+<p><strong>#8605：SM103 上 FP8 计算和集合通信融成一个 kernel</strong> 张量并行 2、4、8 卡都能用。计算跟通信绑一起，少跑一趟显存。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8605">https://github.com/flashinfer-ai/flashinfer/pull/8605</a></p>
+<p><strong>#8596：GB300 上短 decode 的 NVFP4 MLA 两段合并</strong> decode kernel 的小优化。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8596">https://github.com/flashinfer-ai/flashinfer/pull/8596</a></p>
+<p><strong>Mooncake 3 笔</strong></p>
+<p>都是运维小修，略过。分别是 codeowners、RPC 线程数回退、HA 指标对齐。</p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0、SGLang v0.5.23 都没动。TRT-LLM 还是 v1.4.0rc2。LMDeploy 还是 v0.18.0。</p>
+<h2>新技术与论文</h2>
+<p><strong>LoopVQ：循环模型的亚 1-bit KV 量化</strong> KV cache 就是推理时的草稿纸。循环模型（Ouro、Huginn）的草稿纸沿 loop 轴高度重复。这篇按 loop 和 layer 的灵敏度联合编码。0.5 bit 每个元素，还比现有方法好。SGLang 里已实现，32K 上下文 decode 延迟近乎减半。 来源：<a href="https://arxiv.org/abs/2611.05304（11/3">https://arxiv.org/abs/2611.05304（11/3</a> 提交）</p>
+<p><strong>Uni-LaSpec：视觉语言模型的自适应投机解码</strong>「值得深读」 投机解码就是小模型先打草稿、大模型再改。多模态的麻烦是：草稿器看不懂图。这篇直接复用大模型自己的注意力。从图里挑 8 个关键视觉 token，喂给草稿器。只留 8 个，接受率还能保住 98.6%。再按 GPU 负载动态选验证结构：闲时用树，忙时截断。6 个视觉语言模型上，文本吞吐最高 5.11 倍，多模态 3.24 倍。跟你的多模态推理优化方向正对口，精读笔记已生成。 来源：<a href="https://arxiv.org/abs/2611.01617（11/1">https://arxiv.org/abs/2611.01617（11/1</a> 提交） 深读：<a href="https://zwang96-dl.github.io/news/deep-20261104-uni-laspec/">https://zwang96-dl.github.io/news/deep-20261104-uni-laspec/</a></p>
+<p><strong>CacheWeave：学出来的 KV 重算选择器</strong> 前缀缓存的进阶玩法。KV 按 chunk 跨位置复用，再学一个选择器决定重算哪 5%。TTFT 最高快 16.1 倍。比 CacheBlend、ProphetKV 都好。 来源：<a href="https://arxiv.org/abs/2611.01735（11/1">https://arxiv.org/abs/2611.01735（11/1</a> 提交）</p>
+<p><strong>Penelope：给 agent serving 重想 KV 驱逐</strong> agent 多轮对话攒出超长历史，显存不够先扔谁？这篇说：从序列开头扔，保住共享前缀和后缀。SGLang 里实现了，Qwen3 上 TTFT 最多降 60%。 来源：<a href="https://arxiv.org/abs/2611.00391（10/30">https://arxiv.org/abs/2611.00391（10/30</a> 提交）</p>
+<p>以下白天版已报过，不重复。 Fairway 2611.02082。 SpecOPD 2611.02846。 FlagRot 2611.03992。</p>
+<h2>业内新闻</h2>
+<p><strong>Revolut 自建推理：56 张 B200 替代 Claude，成本降九成（11/3，The Register）</strong> 主角是欧洲金融科技公司 Revolut。它把 2000 名工程师的 AI 编程，切到了自托管。模型是 GLM-5.3，56 张 B200，7 台 DGX。综合成本每百万 token 0.3 美元，大约是原来的十分之一。关键不是换模型，是调推理栈。上下文长度上限、FP4 量化、张量并行、缓存命中，卡数没变。首字延迟从 14 秒压到 1.7 秒。这是生产环境调推理栈省钱的公开案例。注意两点：数字是 Revolut 自报的。0.3 美元这个数，没算云、人力和可观测性成本。 来源：<a href="https://www.theregister.com/ai-and-ml/2026/11/03/british-fintech-revolut-slashes-ai-coding-costs-10x-by-cutting-out-claude-and-going-self-hosted/5307345">https://www.theregister.com/ai-and-ml/2026/11/03/british-fintech-revolut-slashes-ai-coding-costs-10x-by-cutting-out-claude-and-going-self-hosted/5307345</a> 演讲实录：<a href="https://sparsenotes.com/posts/2026/10/revolut-self-hosted-open-models-david-abitbol/">https://sparsenotes.com/posts/2026/10/revolut-self-hosted-open-models-david-abitbol/</a></p>
+<p><strong>美团 LongCat 2.5：1.6 万亿参数多模态，全程国产芯片训练（11/2）</strong> 文本加图像的多模态大模型，面向长流程 agent 任务。目前只有韩文 AI 日报的转述，原生中文报道还没抓到。先记一笔，不展开。 来源：<a href="https://kimkj.com/zh/daily-briefing-zh/?mod=document&amp;amp;uid=20793">https://kimkj.com/zh/daily-briefing-zh/?mod=document&amp;amp;uid=20793</a></p>
+<p><strong>杜德利警告：AI 基建投入或破 10 万亿美元（11/4）</strong> 前纽约联储主席的观点。七八家想当超大规模数据中心商，最后只剩两三家。设备折旧快，每年要 3 万亿美元以上收入才回本。一家之言，听听就好。 来源：<a href="https://m.jrj.com.cn/madapter/finance/2026/11/04114859007684.shtml">https://m.jrj.com.cn/madapter/finance/2026/11/04114859007684.shtml</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Kimi K3 实测账本：2.8T 参数塞进单机 8×B300（11 月新）</strong>（推荐一看） 一家叫 Geodesic 的团队，把 2.8 万亿参数的 Kimi K3 跑通了。只用了一台机器，8 张 B300。用 SGLang 0.5.23，张量并行 8 路。解码上下文并行也开了 8 路。单用户 104 token/s。64 个 agent 会话一起跑，约 2000 token/s。全文是内存算术课。1.56TB 权重怎么摆，为什么开了前缀缓存并发还卡在 53。答案是线性注意力的循环状态成了瓶颈，不是 KV。整个项目含两次失败只花了约 49 美元。数字全是作者自测。但方法论写得很细，评估 serving 时可对照。 来源：<a href="https://medium.com/@willyouzhizou/serving-2-8-trillion-parameter-open-agent-model-kimi-k3-on-8xb300-gpus-f71b4a549fb7">https://medium.com/@willyouzhizou/serving-2-8-trillion-parameter-open-agent-model-kimi-k3-on-8xb300-gpus-f71b4a549fb7</a></p>
+<p><strong>Mistral Large 4 的 vLLM Docker 13 步教程（11/3）</strong> 模型本身 10/29 已报过，这篇是实操教程。从空 Ubuntu 到 OpenAI 兼容接口。NVFP4 走 4 卡 Blackwell，FP8 走 8 卡。作者坦白没真跑过 8 卡节点，命令来自官方文档。动手前可当清单用。 来源：<a href="https://tech-insider.org/vllm-docker-setup-mistral-large-4-13-steps-2026/">https://tech-insider.org/vllm-docker-setup-mistral-large-4-13-steps-2026/</a></p>
+<p><strong>The Context AI 日报（11/4，HN 精选）</strong> 32 条开发者工具动态，含 Revolut 自建那条。HN 热度的二手精选源。 来源：<a href="https://thecontext.dev/en/topics/developer-tools/">https://thecontext.dev/en/topics/developer-tools/</a></p>
+<h2>值得深读</h2>
+<p>本轮 1 篇：Uni-LaSpec（2611.01617）。多模态投机解码，草稿器只看 8 个图像块、验证按负载选阵仗。正对你的多模态推理优化方向。精读笔记已生成，含原文 3 张关键图。 深读：<a href="https://zwang96-dl.github.io/news/deep-20261104-uni-laspec/">https://zwang96-dl.github.io/news/deep-20261104-uni-laspec/</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-03-2300/">https://zwang96-dl.github.io/news/brief-2026-11-03-2300/</a></p>
+<p>*去重脚注：本期窗口为 UTC 11/04 04:57–07:00；21点版已报的 SGLang #48292、#48111、#48283，vLLM #65369–#65377、#65528，Dynamo #17977、#17874，FlashInfer #8574、#8594，llama.cpp 快照 b12097/b12098，arXiv 2611.04671（LeanSparse）、2611.04382、2611.04032、2611.04055、2611.04137、2611.03200 不重复；19点版备查的 FlagRot（2611.03992）不重复；3点版/5点版已报的 Fairway（2611.02082）、SpecOPD（2611.02846）不重复；sparsekv-hyperqwen、Mistral Large 4 模型发布、Kimi K3 的 vLLM PR 已报过，不重复。*</p></body></html>
