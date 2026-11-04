@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月4日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-04"/>
+<meta name="doc-ts" content="2026-11-04T23:06:49"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-04（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-04（15点版）</h1>
+<p>这轮 GitHub 上 vLLM 落了三笔、Dynamo 两笔。 FlashInfer 一次性合了 8 个 kernel 优化。 最大两条：GLM-5.3 的 Flash 草稿模型开了 FP8 KV，每卡再省近 1GB。 AMD 还发了篇论文，只测 11 个点、就能预测 226 种 serving 配置的性能。 这篇正对你的 AI 自动调参，本轮深读安排上了。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 3 笔</strong></p>
+<p><strong>#65553：GLM-5.3 Flash 草稿也开了 FP8 KV</strong></p>
+<p>13 点版 #65198 的下半场来了。 上笔是把草稿 KV 格式跟目标对齐，省 50%。 这笔是把 FP8 开关打到 GLM-5.3-Flash 的 DSpark 草稿上。 TP=4、48 个并发请求下，每卡省 960 MiB。 四卡一共省 3.75 GiB。 跑 EAGLE/DSpark 这类多草稿的，升级吃得到。 来源：<a href="https://github.com/vllm-project/vllm/pull/65553">https://github.com/vllm-project/vllm/pull/65553</a></p>
+<p><strong>#65542：Marlin 内核不再碰 8 位激活</strong></p>
+<p>W4A8 这条路，从 Marlin 搬到 Humming 内核。 W4A8 就是 4 位权重加 8 位激活的量化。 以后 Marlin 只干 16 位激活。 用 FP8 量化跑 vLLM 的，升级前看一眼路由变化。 来源：<a href="https://github.com/vllm-project/vllm/pull/65542">https://github.com/vllm-project/vllm/pull/65542</a></p>
+<p><strong>#65540：Marlin 删掉 SM12x 专用二进制</strong></p>
+<p>SM12x 就是 GB10 那代架构。 专用 cubin 删掉后，靠 PTX 在 GB10 上即时编译。 速度一样、结果正确，安装包还小了。 来源：<a href="https://github.com/vllm-project/vllm/pull/65540">https://github.com/vllm-project/vllm/pull/65540</a></p>
+<p><strong>Dynamo 2 笔</strong></p>
+<p><strong>#18077：pool-relay 终于在全局发现里露面</strong></p>
+<p>多节点 Dynamo 的编排补齐一块。 pool-relay 启动时，把路由池注册进 Global Discovery。 Global Router 的 GET /pools 终于能看见它。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18077">https://github.com/ai-dynamo/dynamo/pull/18077</a></p>
+<p><strong>#18017：MiniMax M3 结构化输出的推理过程修准</strong></p>
+<p>guided decoding 下，M3 的 reasoning 会被截断或错位。 这笔修了：信任渲染后的 prompt，reasoning 信号沿用请求侧。 用 M3 加结构化输出的注意升级。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18017">https://github.com/ai-dynamo/dynamo/pull/18017</a></p>
+<p><strong>FlashInfer 8 笔</strong></p>
+<p>一个作者两小时内连落 8 个 kernel 优化。 全是 cake 微调打包：dsv4 的 FP8 decode/prefill。 KDA 的 BF16 prefill、deepgemm FP8、mega_moe_v3、rmsnorm 反向。 面向 SM100a/SM103a/SM107。 代表链接：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8715">https://github.com/flashinfer-ai/flashinfer/pull/8715</a></p>
+<p><strong>零合入</strong></p>
+<p>SGLang 窗口内只有一条删单测的 PR。 TRT-LLM 只有一条测试修复。 llama.cpp、LMDeploy、TGI、Mooncake 全零。</p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0、SGLang v0.5.23、TRT-LLM v1.4.0rc2 全没动。 LMDeploy v0.18.0、llama.cpp v0.9.0、TGI v3.3.7、FlashInfer v0.7.3 也没动。 llama.cpp 顺手切了三个每日快照 b12116–b12119，按惯例不算正式发版。</p>
+<h2>新技术与论文</h2>
+<p><strong>「值得深读」AMD ROCm InferaSim：只测 11 个点，预测 226 种配置</strong></p>
+<p>你想做的 AI 自动调参，这篇就是现成底子。 穷举全部候选配置，本来要约 2.5 万 GPU 小时。 InferaSim 只测 11 个锚点，9.1 GPU 小时搞定。 锚点就是每个不同的 kernel 组合，在单节点上测一次。 解析规律再把结果放大到其他配置。 MI355X 上测的，vLLM、SGLang、ATOM 三个引擎。 172 个配置：首字延迟口径下中位误差 8.1%。 多轮代码任务：吞吐预测误差 8% 以内。 159 个 PD 解耦部署：吞吐误差 5.5% 以内。 这些 PD 部署都没当过锚点，是纯预测。 自带的调优 agent 选出的 top-5，含在最优 12% 以内。 精读笔记已生成，见深读目录。 原文：<a href="https://arxiv.org/abs/2611.04032">https://arxiv.org/abs/2611.04032</a></p>
+<p>arXiv 结构性零入库。 最新还是 11 月 3 日的，下一批今天 16:00 PST 再来。</p>
+<h2>业内新闻</h2>
+<p><strong>腾讯混元 Hy4 正式版来了（今天）</strong></p>
+<p>混元新模型，带视觉和电脑操作能力。 API 已上线，腾讯云 TokenHub 和 OpenRouter 都能调。 开源权重还没放，说&quot;未来几天&quot;。 承诺 vLLM 和 SGLang 社区支持。 现在只能先用托管服务。 来源：<a href="https://seriouslyitsai.blogspot.com/2026/11/tencent-hy4-is-here-vision-and-computer.html">https://seriouslyitsai.blogspot.com/2026/11/tencent-hy4-is-here-vision-and-computer.html</a></p>
+<p><strong>ZStack GPUWorks 开源（今天）</strong></p>
+<p>GPU 管理平台，Apache 2.0 协议。 一条命令部署，不用你现成有 K8s。 宣称单实例管 1003 台 GPU 服务器。 4 分钟拉起 500 多个推理副本。 推理引擎就是 vLLM 和 SGLang。 数字全是厂商自报，没独立验证。 来源：<a href="https://tech-insider.org/gpuworks-open-source-40mb-platform-1003-gpu-servers-2026/">https://tech-insider.org/gpuworks-open-source-40mb-platform-1003-gpu-servers-2026/</a></p>
+<p>X 关键人物、Reddit、HN、机器之心/量子位、Simon Willison。 窗口内全扫了，没实质新料。</p>
+<h2>访谈与深度</h2>
+<p>本轮深读就是上面的 InferaSim。 Latent Space 的最新单集，还是 13 点版报过的幕后花絮。 无新单集。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 13 点版去重。</p>
+<p>#65198 草稿 KV 对齐、NIXL 拒收错配握手、Latent Space 幕后单集都在 13 点版报过。</p>
+<p>本轮深读：AMD ROCm InferaSim 精读（arXiv:2611.04032）。</p></body></html>
