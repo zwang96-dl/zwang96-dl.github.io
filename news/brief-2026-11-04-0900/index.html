@@ -1,0 +1,81 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月4日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-04"/>
+<meta name="doc-ts" content="2026-11-04T17:06:58"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-04（9点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-04（9点版）</h1>
+<p>9点版来了。这轮的最大头条：Kimi K3.1 Pro 的权重正式上线。vLLM 和 SGLang 的部署配方也在同一轮入库。</p>
+<h2>业内新闻</h2>
+<p><strong>Kimi K3.1 Pro 权重正式放出（今天）</strong></p>
+<p>月之暗面官方 X 账号已官宣。HuggingFace 仓库已公开，我刚亲眼确认过。 来源：<a href="https://huggingface.co/moonshotai/Kimi-K3.1-Pro">https://huggingface.co/moonshotai/Kimi-K3.1-Pro</a></p>
+<p>架构是 2.8T 的 MoE（专家混合模型）。每次推理只激活 104B。896 个专家，每 token 用 16 个加 2 个共享。</p>
+<p>93 层里有 24 层用了 Gated DSA（门控稀疏注意力）。它替换了原来的全注意力层。长上下文推理更省算力。</p>
+<p>视觉侧是 MoonViT-V2，4.01 亿参数。原生图文多模态。</p>
+<p>权重 MXFP4、激活 MXFP8（4 位和 8 位浮点格式）。训练时直接压好的，不是事后转的。</p>
+<p>许可证是 Kimi K3.1 Pro License。跟 K3 同款，大体免费。但年营收 2000 万美元以上的模型服务商要单独谈。</p>
+<p>安全上有个细节：开源前剔除了网络攻防数据。内部未削弱版攻防基准 90.5%，发布版 81.0%。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM #65684：Kimi K3.1 Pro 部署配方入库</strong></p>
+<p>跟权重上线同一轮合入的。硬件要 TP8。两个 GB300 托盘，或 1 个 B300 节点，或 1 个 MI355X 节点。</p>
+<p>vLLM 最低要 0.34.0。还是 nightly 版，正式版装不上。</p>
+<p>Day-0 镜像已就位。vllm/vllm-openai:kimi-k31，CUDA 13 构建。AMD 那边有 ROCm 10.0 版。</p>
+<p>自带投机解码配置。投机解码就是先让小模型打草稿、大模型再改。草稿模型 5 层，一次猜 5 个 token。</p>
+<p>你手里的 H100 和 MI350X 这次没进验证名单。MI355X 倒是支持了。 来源：<a href="https://github.com/vllm-project/vllm/pull/65684">https://github.com/vllm-project/vllm/pull/65684</a></p>
+<p><strong>SGLang #48413：Kimi-K3.1-Pro 部署 cookbook 入库</strong></p>
+<p>官方文档加了部署指南。还有个 MI355X 的预设配置。跟 vLLM 那边同步上线。 来源：<a href="https://github.com/sgl-project/sglang/pull/48413">https://github.com/sgl-project/sglang/pull/48413</a></p>
+<p><strong>vLLM #59802：DeepSeek-V4.1 在 AMD 卡上 decode 更顺</strong></p>
+<p>mHC 的门投影和注意力、FFN 重叠计算。跑 ROCm 的 V4.1 serving，升级吃得到。 来源：<a href="https://github.com/vllm-project/vllm/pull/59802">https://github.com/vllm-project/vllm/pull/59802</a></p>
+<p><strong>vLLM #62172：cooperative_topk 直接读 BF16 的 indexer 分数</strong></p>
+<p>DeepSeek 稀疏注意力的 top-k（取分最高的 k 个）内核。又快了一点。 来源：<a href="https://github.com/vllm-project/vllm/pull/62172">https://github.com/vllm-project/vllm/pull/62172</a></p>
+<p><strong>TRT-LLM #21226：视频 serving 支持合并 Omni 引用</strong></p>
+<p>Omni 是英伟达的多模态模型系列。跑视频推理的同学，值得看。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21226">https://github.com/NVIDIA/TensorRT-LLM/pull/21226</a></p>
+<p>其余略过：vLLM #61463 是内核小修。vLLM #65641、#65425 是 ROCm CI。TRT-LLM #21626 是 infra waive。FlashInfer 本轮又是十几笔 cake 内核微调，跟 serving 关系不大。</p>
+<p>LMDeploy、TGI、Dynamo、Mooncake：窗口内 0 笔。</p>
+<p><strong>版本水位</strong></p>
+<p>vLLM 还是 v0.33.0。SGLang 还是 v0.5.23。TRT-LLM 还是 v1.4.0rc2。LMDeploy 还是 v0.18.0。TGI 还是 v3.3.7。FlashInfer 还是 v0.7.3。llama.cpp 还是 v0.9.0。Dynamo 还是 v1.6.1。Mooncake 还是 v0.3.14。</p>
+<h2>新技术与论文</h2>
+<p>本轮无。arXiv 下一批要到今天下午 4 点（PST）才发。已查关键词最新时间戳确认，属结构性零入库。</p>
+<h2>访谈与深度</h2>
+<p>本轮无。Latent Space 最新单集是 11/3 的 Warp 那期，之前报过。HN、Reddit 上 K3.1 权重的讨论帖还没起量。中文 AI 媒体今天还没跟进权重上线的报道。</p>
+<h2>值得深读</h2>
+<p>本轮无。宁缺毋滥。</p>
+<p>*去重脚注：本轮已与 7点版去重。vLLM #64935/#60252/#63012/#64492/#64471/#65417/#64762、SGLang #47553/#48327、TRT-LLM #20973/#21399/#21584/#21541/#21633/#21617、Dynamo #17716、FlashInfer #8669、llama.cpp #31613/#31631/#31605/#31468/#31348/#31444 都在 7点版报过，不再重复。*</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-04-0900/">https://zwang96-dl.github.io/news/brief-2026-11-04-0900/</a></p></body></html>
