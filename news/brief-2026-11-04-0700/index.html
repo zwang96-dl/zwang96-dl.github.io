@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月4日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-04"/>
+<meta name="doc-ts" content="2026-11-04T15:08:57"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-04（7点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-04（7点版）</h1>
+<p>7点版来了。凌晨窗口，头条是 llama.cpp 正式发了 0.9.0。5点版时还在准备，tag 刚切下来。vLLM 这轮 7 笔，多是修 bug。SGLang 2 笔，TRT-LLM 有笔视觉归一化移到 GPU。</p>
+<h2>框架更新</h2>
+<p><strong>llama.cpp v0.9.0 正式版来了（tag 刚切，13:08 UTC）</strong></p>
+<p>5点版还在等，这轮正式发布。亮点之前报过：OCP FP8 E4M3（一种 8 位浮点权重格式）。统一 KV cache 跑多序列更快了。ggml 升到 v0.29.0，带 NCCL 多节点张量并行。Gemma 4 E2B/E4B 的 prefill 大优化。新增 4 个架构：Clover、Limite、Metis-1.6、Mistral Large 4。音频侧加了 Chatterbox TTS。完整 release notes 见链接。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/v0.9.0">https://github.com/ggml-org/llama.cpp/releases/tag/v0.9.0</a></p>
+<p><strong>llama.cpp 本轮 6 笔</strong></p>
+<p><strong>#31613：加了 drama-3 TTS 支持</strong> drama-3 是个语音合成模型。llama.cpp 的多模态接口开始认它。跑本地 TTS 的朋友，值得看。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31613">https://github.com/ggml-org/llama.cpp/pull/31613</a></p>
+<p>其余略过：gguf-py 校验 token 合并对（#31631）。SYCL docker 修（#31605）。PDF 附件缩略图（#31468）。WebGPU 缓冲修（#31348）。common 清理（#31444）。</p>
+<p><strong>vLLM 7 笔</strong></p>
+<p><strong>#64935：批量接口的推理 token 计数补上了</strong> 批量聊天接口之前不报 reasoning_tokens。用了 reasoning parser 的人，批量结果里少一块用量统计。这笔把单会话那套计数搬过来。做计费和监控的，升级吃得到。 来源：<a href="https://github.com/vllm-project/vllm/pull/64935">https://github.com/vllm-project/vllm/pull/64935</a></p>
+<p><strong>#60252：投机解码的滑动窗口草稿块对齐主块</strong> 投机解码就是小模型先打草稿、大模型再改。滑动窗口层的草稿块大小，得是主块的整数倍。这笔把不对齐的那块垫平。跑 SW 注意力的投机解码用户，值得升级。 来源：<a href="https://github.com/vllm-project/vllm/pull/60252">https://github.com/vllm-project/vllm/pull/60252</a></p>
+<p><strong>#63012：b12x 后端不再宣称支持 head_dim 64</strong> 小 bug 修复：b12x 注意力后端误报支持的维度。这笔关掉误报。 来源：<a href="https://github.com/vllm-project/vllm/pull/63012">https://github.com/vllm-project/vllm/pull/63012</a></p>
+<p>其余略过：Rust 前端对齐 2 笔（#64492、#64471）。MyPy 目录收紧（#65417）。CI 换测试模型源（#64762）。</p>
+<p><strong>SGLang 2 笔</strong></p>
+<p><strong>#47553：MoE 里没发数据的卡，跳过专家捕获</strong> MoE 就是把输入分给不同专家处理。没有 DeepEP 时，每张卡都算一遍 top-k 专家编号。但只有输出卡真正用这个结果。其他卡算完白算。这笔让没数据的卡直接跳过。省的是冗余拷贝，TP8 跑 MoE 的，升级吃得到。 来源：<a href="https://github.com/sgl-project/sglang/pull/47553">https://github.com/sgl-project/sglang/pull/47553</a></p>
+<p>其余略过：调度器重构（#48327）。</p>
+<p><strong>TRT-LLM 6 笔</strong></p>
+<p><strong>#20973：视觉像素归一化，从 CPU 搬到 GPU</strong> 多模态模型进图之前，要先缩放、归一化。以前这步在 CPU 上做，再把浮点像素拷到 GPU。这笔加了个开关，叫 vision_gpu_normalize。CPU 只做缩放。归一化搬到 GPU，进视觉编码器前一刻才做。CPU 预处理时间砍掉，主内存到显存的搬运量直接减半（BF16 视觉输入）。跑 VLM serving 的人，值得看。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20973">https://github.com/NVIDIA/TensorRT-LLM/pull/20973</a></p>
+<p><strong>#21399：Kimi-K3 的 decode 注意力残差内核提速</strong> CuTe DSL 写的 decode 内核。把 MoE 残差融进去了。还加了 MXFP8 交接和低 M 的 GEMM 变体。跑 Kimi-K3 的同学，升级吃得到。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21399">https://github.com/NVIDIA/TensorRT-LLM/pull/21399</a></p>
+<p>其余略过：非生成请求的干净失败（#21584）。测试标记（#21541）。infra waive 2 笔（#21633、#21617）。</p>
+<p><strong>Dynamo 1 笔</strong></p>
+<p><strong>#17716：pool-relay 跨连接模式共享池状态</strong> 路由器的池状态（目录、就绪度、负载）现在跨连接模式共享。Global Router 的副本都能拿到实时状态。跟 PD 解耦的路由调度相关。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17716">https://github.com/ai-dynamo/dynamo/pull/17716</a></p>
+<p><strong>FlashInfer 13 笔</strong></p>
+<p>还是 cake 内核微调。密集投影、RMSNorm 门控、梯度那几块。跟 serving 关系不大，略过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8669">https://github.com/flashinfer-ai/flashinfer/pull/8669</a></p>
+<p><strong>LMDeploy、TGI</strong></p>
+<p>窗口内 0 笔。</p>
+<p><strong>版本水位</strong></p>
+<p>llama.cpp v0.9.0 正式版发布（tag 已切）。vLLM 还是 v0.33.0。SGLang 还是 v0.5.23。TRT-LLM 还是 v1.4.0rc2。LMDeploy 还是 v0.18.0。TGI 还是 v3.3.7。FlashInfer 还是 v0.7.3。</p>
+<h2>新技术与论文</h2>
+<p>本轮无。arXiv 下一批要到今天下午 4 点（PST）才发。属结构性零入库，已用关键词查过最新时间戳确认。</p>
+<h2>业内新闻</h2>
+<p><strong>llama.cpp 高危漏洞：ggml-rpc 的 RDMA 有栈溢出（CVE-2026-118375）</strong></p>
+<p>ggml-rpc 是 llama.cpp 的远程推理传输。rdma_recv 那块有栈缓冲区溢出。没登录的远程用户，能直接搞崩 server，甚至劫持。评级 Critical 9.9。影响 b8841 到 b11865 之间的版本。b11865 及之后已修。对外暴露 llama.cpp RPC 服务的同学，赶紧升级。 来源：<a href="https://stackflag.com/vulnerabilities/cve-2026-118375-llama-cpp">https://stackflag.com/vulnerabilities/cve-2026-118375-llama-cpp</a></p>
+<p><strong>AMD 给 vLLM 贡献了一年 12.4% 的提交（10/30，补漏）</strong></p>
+<p>FourWeekMBA 数了公开 git 历史。vLLM 一年 13,360 个提交里，AMD 邮箱占了 1,652 个。是 NVIDIA（628 个）的 2.6 倍。份额从上半年 9.5% 涨到下半年 14.3%。你手里有 MI350X/MI300X，AMD 在 vLLM 这边是越投越多了。 来源：<a href="https://fourweekmba.com/ai-amd-made-12-4-of-vllms-commits-in-a-year-2-6x-nvidias/">https://fourweekmba.com/ai-amd-made-12-4-of-vllms-commits-in-a-year-2-6x-nvidias/</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无。HN、Reddit、X 重点账号、中文 AI 媒体都没新料。Ubicloud 那篇工具调用 HN 帖，11月3日的 7点版报过，不再重复。</p>
+<h2>值得深读</h2>
+<p>本轮无。宁缺毋滥。</p>
+<p>*去重脚注：本轮已与 5点版去重。llama.cpp #31646、vLLM #64119/#65449/#59383/#63752/#65001、SGLang #47120/#47494/#44503/#45885/#44506/#48392/#48352、FlashInfer #8660、TRT-LLM infra 那笔都在 5点版报过，不再重复。*</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-04-0700/">https://zwang96-dl.github.io/news/brief-2026-11-04-0700/</a></p></body></html>
