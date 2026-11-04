@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月4日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-04"/>
+<meta name="doc-ts" content="2026-11-04T11:00:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-04（3点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-04（3点版）</h1>
+<p>3点版来了。凌晨小窗口，动静不大。vLLM 本轮挂零。SGLang 在昇腾 NPU 上补了一块投机解码。Dynamo 修了一个 PD 链路的取消传播。</p>
+<h2>框架更新</h2>
+<p><strong>SGLang 1 笔</strong></p>
+<p><strong>#38440：昇腾 NPU 上，DeepSeek-V4 的投机解码有了紧凑模式</strong> 投机解码就是小模型先打草稿、大模型再改。昇腾后端以前只能用统一的验证窗口，或者干脆退回后处理。两处冤枉开销：验证窗口按最长的算、收尾步骤不在计算图里。这笔 PR 把紧凑模式搬到 NPU 上。验证图按 token 层级回放，收尾步骤也融进图里。玩昇腾卡的同学可以期待。 来源：<a href="https://github.com/sgl-project/sglang/pull/38440">https://github.com/sgl-project/sglang/pull/38440</a></p>
+<p><strong>Dynamo 1 笔</strong></p>
+<p><strong>#14775：客户端取消，能传到远端的 prefill 卡了</strong> PD 解耦就是 prefill 和 decode 分开跑的分工流水线。以前客户端取消请求，prefill 端的远程 worker 可能还在干活。这笔让取消信号穿过路由器，传到远程 prefill worker。省掉的算力马上释放。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/14775">https://github.com/ai-dynamo/dynamo/pull/14775</a></p>
+<p><strong>TRT-LLM 2 笔</strong></p>
+<p><strong>#21503：Kimi K2 的工具解析器，流尾的参数不再丢</strong> 用 Kimi K2 / K2.5 做流式工具调用。如果最后一个数据包正好带完整个工具调用，旧参数会被吞掉。这笔把流尾的参数释放出来。agent 场景下值得升级。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21503">https://github.com/NVIDIA/TensorRT-LLM/pull/21503</a></p>
+<p><strong>#20650：KV 窗口检查先看开关再记日志</strong> 每步 decode 都要查 KV 窗口是否越界。日志级别的判断本身挺贵，还在栈里翻调用者。这笔先看容量、再看日志开关。小优化，略过不亏。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20650">https://github.com/NVIDIA/TensorRT-LLM/pull/20650</a></p>
+<p><strong>llama.cpp 3 笔</strong></p>
+<p>#31635：Gemma4 助手的 flash attention 跟进了。#31607：RISC-V 向量指令按目标扩展开关。其余 #31644 是 ggml 同步，略过。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31635">https://github.com/ggml-org/llama.cpp/pull/31635</a></p>
+<p><strong>FlashInfer 5 笔</strong></p>
+<p>全是 cake 内核微调。#8633 那笔动了 decode 合并的 TP4 行轮询。其余是梯度 kernel 的调优配置。跟训练沾边多，serving 略过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8633">https://github.com/flashinfer-ai/flashinfer/pull/8633</a></p>
+<p><strong>vLLM、LMDeploy、TGI</strong></p>
+<p>窗口内 0 笔新合入。</p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0、SGLang v0.5.23 都没动。TRT-LLM 还是 v1.4.0rc2，LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。FlashInfer 正式版还是 v0.7.3。llama.cpp 出了每日快照 b12102，按惯例不算正式发版。</p>
+<h2>新技术与论文</h2>
+<p><strong>光交换给 decode 铺路：静态光路切换做 LLM 解码（2611.05104）</strong> decode 是逐个 token 吐字的阶段，最怕通信拖后腿。这篇用光路切换搭互联。光路事先按负载配好，不用动态调度。说白了：给卡和卡之间修一条光纤专用道。做长上下文 serving 的，可以看一眼思路。 来源：<a href="https://arxiv.org/abs/2611.05104（11/3">https://arxiv.org/abs/2611.05104（11/3</a> 提交）</p>
+<p><strong>卸载式 MoE 推理：多请求交错打，显存和算力都不闲（2611.04794）</strong> MoE 就是每次只激活几个专家的模型。权重放不下显存时，要在 CPU 和 GPU 之间倒腾。倒腾的功夫 GPU 就闲着。这篇让多个请求的倒腾和计算交错开。一个在搬，一个在算。单机玩大 MoE 的，思路可借鉴。 来源：<a href="https://arxiv.org/abs/2611.04794（11/3">https://arxiv.org/abs/2611.04794（11/3</a> 提交）</p>
+<p>*注：这两篇是 11/4 批次里白天各版漏收的。*</p>
+<h2>业内新闻</h2>
+<p><strong>英国 ARIA 要实测光计算服务器：给 prefill 那步换光路（11/3）</strong> Lumai 是牛津分拆的光计算创业公司。它的 Iris 服务器把矩阵运算放在光束里做，主攻 prefill 那步。prefill 就是先读提示词、一次算完的阶段。ARIA 要把几台 Iris 搬进自家的推理实验室。实验室花了 5000 万英镑，专做推理规模化验证。目标是验证功耗降 90% 的说法。数字目前全是创业公司口径，没独立实测。跟上面那篇光路论文正好呼应。 来源：<a href="https://www.siliconreport.com/aria-will-test-lumai-servers-that-use-light-to-run-ai-models">https://www.siliconreport.com/aria-will-test-lumai-servers-that-use-light-to-run-ai-models</a></p>
+<p><strong>Anthropic 开源 FlashProve：用密码学证明&quot;真是这个模型答的你&quot;（11/2）</strong> FlashProve 是一套零知识证明系统。模型方先对权重做一次承诺，每次回答附上一份短证明。用户不用看到权重，就能验证回答确实出自宣称的模型。代价不小：生成证明的 GPU 时间是跑 vLLM 推理的 70 到 95 倍。上下文目前只到 1024 token。防的是第三方路由偷换便宜模型那档事。 来源：<a href="https://pondero.ai/news/2026-11-04-anthropic-flashprove-provable-inference/">https://pondero.ai/news/2026-11-04-anthropic-flashprove-provable-inference/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>DeepInfer 产品视角：DeepSeek 没开源的才是产品（11/3）</strong> DeepInfer 本体 10 月 20 日已报过，这里是新的产品分析。DeepSeek 把部署 Q&amp;A 更新到了 0.2 版。披露了集群分工、缓存保留时长、单卡每小时收入。有个新料：vLLM 团队也报了个数，在 GB200 上。batch 从 8 到 256，decode 只慢 6% 以内。提醒一句：数字都是 DeepSeek 和 vLLM 各自口径，无独立复测。评估 serving 方案时，这篇可当方法论对照。 来源：<a href="https://medium.com/@saeed_themedaibiref/deepseek-open-sourced-its-inference-engine-what-it-kept-back-is-the-product-d05aa7b09f0c">https://medium.com/@saeed_themedaibiref/deepseek-open-sourced-its-inference-engine-what-it-kept-back-is-the-product-d05aa7b09f0c</a></p>
+<p><strong>KV 预留量其实是个定价问题：报童模型视角（11/3，LinkedIn）</strong> KV cache 就是解码时留的草稿纸，预留多了浪费显存、少了会被抢占。作者把这写成运筹学的报童问题。最优预留分位点，等于抢占成本和闲置成本的临界比。正好呼应 1点版那篇 cμ 调度论文。偏理论，但能帮你想明白调度器的天花板。 来源：<a href="https://www.linkedin.com/pulse/your-kv-reservation-quantile-price-you-never-wrote-down-jatasra-cfzqc">https://www.linkedin.com/pulse/your-kv-reservation-quantile-price-you-never-wrote-down-jatasra-cfzqc</a></p>
+<p><strong>补漏：ElasticMM，多模态 serving 的新执行范式（HN）</strong> 这条是两天前的 Show HN，之前各版漏了。ElasticMM 是专为多模态大模型做的开源 serving 系统。NeurIPS 2025 的 Oral 论文。它提出一个新执行范式。英文名 Elastic Multimodal Parallelism。翻成中文：弹性多模态并行。按推理阶段和模态动态调并行度。论文口径：TTFT（首 token 延迟）降 4.2 倍。混合多模态负载吞吐涨 3.2 到 4.5 倍。正对你的多模态推理优化方向。开源地址在 GitHub。 来源：<a href="https://news.ycombinator.com/item?id=46269848">https://news.ycombinator.com/item?id=46269848</a></p>
+<h2>值得深读</h2>
+<p>宁缺毋滥：本轮没有达到深读标准的内容，不做笔记。</p>
+<p>*去重脚注：本轮已与 1点版去重。vLLM #64182 等 9 笔、SGLang 9 笔、FlashInfer v0.7.3、4 篇论文（2611.05345 / 2611.05150 / 2611.04401 / 2611.04807）、llm-d 和 Baseten 新闻都在 1点版报过，不再重复。arXiv 本轮无新批次，属结构性零入库。*</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-04-0300/">https://zwang96-dl.github.io/news/brief-2026-11-04-0300/</a></p></body></html>
