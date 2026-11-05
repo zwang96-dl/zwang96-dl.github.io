@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月4日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-04"/>
+<meta name="doc-ts" content="2026-11-05T01:10:16"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-04（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-04（17点版）</h1>
+<p>这轮是安静窗口。 GitHub 上只有 Dynamo 和 SGLang 有动静。 论文侧零入库，新闻社区也没新料。</p>
+<h2>框架更新</h2>
+<p><strong>Dynamo v1.6.2 发布在即</strong></p>
+<p>版本号 PR 刚合入，正式 release 还没发。 v1.6.2 就是 Dynamo 的新小版本。 你在评估 PD 解耦，Dynamo 的版本值得跟。 下一轮我帮你盯 release 落地。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18157">https://github.com/ai-dynamo/dynamo/pull/18157</a></p>
+<p><strong>Dynamo #18078：TRT-LLM 侧车加了音频支持</strong></p>
+<p>OpenEngine sidecar 是 TRT-LLM 旁边跑的小进程。 这笔给它加了音频能力，合进 1.7.0 分支。 做多模态语音 serving 的可以留意。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18078">https://github.com/ai-dynamo/dynamo/pull/18078</a></p>
+<p><strong>SGLang #48424：DeepSeek-V4 的 GEMM 库升级</strong></p>
+<p>sgl-deep-gemm 升到 0.2.6。 GEMM 就是矩阵乘法，推理里最吃算力的活。 布局改走 FlashInfer 那套，顺手跟了新版 MQA 接口。 跑 DeepSeek-V4 的，升级吃得到。 来源：<a href="https://github.com/sgl-project/sglang/pull/48424">https://github.com/sgl-project/sglang/pull/48424</a></p>
+<p><strong>零合入</strong></p>
+<p>vLLM 窗口内只有 4 个 CI 小修。 TRT-LLM、LMDeploy、llama.cpp、TGI、Mooncake 全零。</p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0、SGLang v0.5.23、TRT-LLM v1.4.0rc2 全没动。 LMDeploy v0.18.0、llama.cpp v0.9.0、TGI v3.3.7、FlashInfer v0.7.3 也没动。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 本轮结构性零入库。 11 月 4 日的日批到 17:03 PST 还没上线。 最新提交还停在 11 月 3 日。 下一轮补扫。</p>
+<h2>业内新闻</h2>
+<p>窗口内没扫到实质新料。 X、Reddit、HN、中文媒体和关键人物账号都看了。</p>
+<h2>访谈与深度</h2>
+<p>无。本轮无深读。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 15 点版去重。 15 点版报过的不再重复。 包括 GLM-5.3 的 FP8 KV 草稿。 还有 Dynamo 的 pool-relay。 以及 FlashInfer 的 kernel 微调。</p></body></html>
