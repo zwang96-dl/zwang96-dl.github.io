@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月4日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-04"/>
+<meta name="doc-ts" content="2026-11-05T04:58:00"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-04（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-04（21点版）</h1>
+<p>这轮比较清淡。 框架侧只有一笔值得说的优化。 另外补两条之前漏的新料。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM：等输出时少空转，尾延迟受益</strong></p>
+<p>vLLM 刚合入 #65773。 它改的是等模型输出时的空转方式。 空转就是 CPU 原地打转等结果。 原来一轮空转要 4 微秒。 现在压到 1 微秒左右。 输入输出线程不再被拖住。 吞吐和尾延迟都能好一点。 跑 vLLM 生产服务的可以跟一下。 来源：<a href="https://github.com/vllm-project/vllm/pull/65773">https://github.com/vllm-project/vllm/pull/65773</a></p>
+<p><strong>其他框架：一句话带过</strong></p>
+<p>SGLang 这轮只有测试和 lint 小修。 FlashInfer 继续磨 B300 的 cake 内核。 cake 是它给新卡写的内核系列。 Dynamo 修了容量预测卡在零的 bug。 llama.cpp 给 OpenCL 补了两个小支持。 TRT-LLM、LMDeploy、TGI 零合入。</p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0、SGLang v0.5.23 没动。 TRT-LLM v1.4.0rc2 没动。 LMDeploy v0.18.0 也没动。 FlashInfer v0.7.3、Dynamo v1.6.1 没动。</p>
+<h2>新技术与论文</h2>
+<p><strong>JITEngine：让 AI 给你的 Mac 现写一个推理引擎</strong></p>
+<p>伯克利 Sky Computing Lab 刚发布 JITEngine。 思路很野：不用通用引擎。 直接让 coding agent 给你的 Mac 定制一个。 coding agent 就是会写代码的 AI。 一台 Mac、一个 MoE 模型，专属定制。 MoE 模型就是一次只激活部分专家。 单用户解码最快比现有方案快 2.72 倍。 说白了，引擎从成衣改成量体裁衣。 目前只有 6 个定制版本。 能不能推广到别的硬件，还没验证。 本地跑模型的朋友值得围观。 来源：<a href="https://runtimewire.com/article/berkeley-jitengine-synthesized-mac-llm-engines">https://runtimewire.com/article/berkeley-jitengine-synthesized-mac-llm-engines</a></p>
+<p><strong>补报：超长上下文的 prefill 还能再快</strong></p>
+<p>这条是 10 月 30 日的论文，之前漏了。 方法叫 Latent Sparse Attention。 它不给每个 key 逐个打分。 而是先按簇分好，再按层级找。 prefill 就是模型先读完提示词那一步。 10M token 时，单层 prefill 快 72.4 倍。 注意：这是单层的数据，不是整机。 整模型能快多少，还没定论。 来源：<a href="https://superpowerdaily.com/posts/researchers-report-72-4x-faster-attention-layer-prefill-at-10-million-tokens">https://superpowerdaily.com/posts/researchers-report-72-4x-faster-attention-layer-prefill-at-10-million-tokens</a></p>
+<h2>业内新闻</h2>
+<p><strong>Nutanix 牵手 Supermicro，做企业推理一体机</strong></p>
+<p>两家要联合做企业 AI 推理方案。 目标是把推理成本和部署难度压下来。 方案用 Supermicro 的服务器加英伟达 GPU。 单节点 8 块 Blackwell Ultra。 网络用 Spectrum-X。 预计 2027 年初才上市。 离落地还早，先记一笔。 来源：<a href="https://www.intelligentcio.com/me/2026/11/04/nutanix-and-supermicro-collaborate-to-reduce-enterprise-ai-inference-costs/">https://www.intelligentcio.com/me/2026/11/04/nutanix-and-supermicro-collaborate-to-reduce-enterprise-ai-inference-costs/</a></p>
+<h2>访谈与深度</h2>
+<p>这轮扫了 X、Hacker News 和 newsletter。 没有新的访谈和深度内容。 Simon Mo 那篇 19 点版已报过。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 19 点版去重。 Kimi K3.1 Pro 权重上午已报过。 Together Compiler 11 点版已报过。 GPUWorks 和 SambaNova 也不再重复。 arXiv 这轮没有新论文入库。 本轮没有值得深读的新内容。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-04-2100/">21点版</a></p></body></html>
