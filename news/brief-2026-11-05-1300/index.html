@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月5日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-05"/>
+<meta name="doc-ts" content="2026-11-05T21:02:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-05（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-05（13点版）</h1>
+<p>13点版来了。</p>
+<p>这轮有两件新事。 一件是 vLLM 生态的新管家。 一件是 TPU 跑分的新战报。 框架那边全是小修，没新版。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没新版</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 FlashInfer 还是 v0.7.3。 Dynamo 还是 v1.6.1。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 llama.cpp 还是 v0.9.0。 Dynamo v1.6.2 正式版还没发。</p>
+<p><strong>小修小补：一句话带过</strong></p>
+<p>vLLM 合入 #62759。 LUT-B 是查表量化的 MoE 算法。 这次给 Rubin 做了原生内核。 Rubin 是英伟达下一代 GPU。 还带了模拟模式。 SGLang 合入 #46890。 读题图能打断重排了。 这次扩展到 GlmMoe 模型。 读题就是 prefill，先把提示词算成草稿。 TRT-LLM 合入 #21525。 KV 缓存管理器 V1 准备退役。 KV 缓存就是推理时留的草稿纸。 连带 C++ 的跨卡缓存传输代码一起废。 llama.cpp 只有日常快照 b12130 到 b12132。 全是日常维护，没实质新功能。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次入库</strong></p>
+<p>最新还是 11 月 4 日那批。 下一批在今天 16 点左右。</p>
+<h2>业内新闻</h2>
+<p><strong>Kinference：vLLM 多了个会看缓存的管家</strong></p>
+<p>Buoyant 给 vLLM 做了个新控制面。 控制面就是管请求去哪的那层。 名字叫 Kinference，跑在 K8s 上。 K8s 就是容器编排，管一堆机器跑服务。 它最大的本事是看缓存分流。 分流前先查各卡的 KV 缓存里有啥。 KV 缓存就是推理时留的草稿纸。 请求发给草稿最齐的那台卡。 不用重算前缀，首字就等得短。 官方实测：首字延迟中位数砍 95%。 端到端延迟中位数砍 45%。 共享前缀场景吞吐涨 7.4 倍。 多轮对话场景涨 3.5 倍。 注意：这些数都是发布方自报。 只测了一种负载，别当真。 除此之外，它还能按租户限流计费。 能写 YAML 策略管路由。 比如简单问题丢给便宜模型。 含隐私的请求绝不发到云端。 策略能进 git，能评审能回滚。 开源协议是 Apache v2。 跟 llm-d 算同赛道的不同解法。 llm-d 是 K8s 原生的推理控制面。 Kinference 更像给平台方用的网关。 来源：<a href="https://vllm.ai/blog/2026-11-04-introducing-kinference">https://vllm.ai/blog/2026-11-04-introducing-kinference</a></p>
+<p><strong>SemiAnalysis：TPU 跑智能体任务，第一次交卷</strong></p>
+<p>SemiAnalysis 发了 TPU 的新战报。 战报就是跑分对比，看看谁更划算。 这次测的是长上下文多轮智能体任务。 智能体任务就是模型多步自己干活。 四组模型，全跑在 TPUv7 上。 TPUv7 就是谷歌第七代推理芯片。 GLM-5.2 这组最亮眼。 每美元出的词是 B200 的 1.2 到 2.7 倍。 B200 是英伟达的旗舰 GPU。 Qwen3.5 这组用了 llm-d 做 P/D 解耦。 P/D 解耦就是读题和吐字分开跑。 结果在各级速度上都赢了 GB300。 GB300 是英伟达的新旗舰。 Kimi K3 这组每美元也赢 1.15 到 2.5 倍。 GB300 的 FP4 反击还是输了。 每美元比 TPUv7 的 FP8 差 1.64 倍。 FP8 和 FP4 都是低精度数格式。 数字越小，算得越快也越省。 提醒一句：这是 SemiAnalysis 组织的跑分。 方法口径之前就有过争议。 9 月那篇就有人质疑拿单卡比整机柜。 结论先记一笔，别直接当采购依据。 来源：<a href="https://newsletter.semianalysis.com/p/tpu-strikes-the-king">https://newsletter.semianalysis.com/p/tpu-strikes-the-king</a></p>
+<h2>访谈与深度</h2>
+<p><strong>手把手拆一遍推理栈：从调度器到 GPU 字节</strong></p>
+<p>Medium 上有篇 44 分钟的长文。 作者从零搭了个迷你推理栈。 拿 Falcon H1 跑在两块 A100 上。 Falcon H1 是混合模型，又有注意力又有 Mamba。 Mamba 是不用存全部 KV 的新架构。 文章先讲控制面和数据面怎么分工。 控制面动脑子，数据面出苦力。 再讲调度器怎么记状态、怎么分任务。 最后讲到字节怎么在核与卡之间搬。 KV 缓存两种记法也对比了。 SGLang 用前缀树，vLLM 用分块哈希。 前缀树就是按 token 排的字典树。 分块哈希就是每块算个指纹去重。 想系统补一遍 serving 全貌，这篇合适。 周末慢慢看，不用赶。 来源：<a href="https://medium.com/@manishimmi2k3/yet-another-inference-engineering-blog-a-tour-of-the-whole-serving-stack-0511434a3fd2">https://medium.com/@manishimmi2k3/yet-another-inference-engineering-blog-a-tour-of-the-whole-serving-stack-0511434a3fd2</a></p>
+<p>Latent Space 没新单集。 最新还是 11 月 4 日那期。 里面的内容之前都报过。 Simon Willison 最新是浏览器随笔。 跟 serving 无关。 X、Hacker News、Reddit 也扫了。 Revolut 自建 GLM 那条 11 月 3 日已报。 没有新的一手动向。</p>
+<h2>深读</h2>
+<p>本轮没有值得深读的新论文。 Kinference 是产品发布，数字是厂商自报。 Medium 长文是科普向，原文直接读就行。 下一批 arXiv 在今天 16 点左右。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 11 点版、9 点版去重。 7 点版、5 点版、3 点版、1 点版也对过。 SafeStart 11 点版已报。 ThunderAgent 和 OCRia-1 1 点版已报。 llm-d 的 Kimi K3.1 Pro 配方 9 点版已报。 Kimi K3.1 Pro 的 AMD 适配 7 点版已报。 Together Compiler 11 月 4 日 11 点版已报。 Google 的 TorchTPU 11 月 2 日已报。 Revolut 自建 GLM 11 月 3 日已报。 本轮没有新增深读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-05-1300/">13点版</a></p></body></html>
