@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月5日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-05"/>
+<meta name="doc-ts" content="2026-11-05T19:06:17"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-05（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-05（11点版）</h1>
+<p>这轮有三件新事。 一件是 SGLang 的投机解码提速。 一件是三篇漏报的论文补上。 还有一件是 MoE 砍专家的新警告。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没新版</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 FlashInfer 还是 v0.7.3。 Dynamo 还是 v1.6.1。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 llama.cpp 还是 v0.9.0。 Dynamo v1.6.2 正式版还没发。</p>
+<p><strong>小修小补：一句话带过</strong></p>
+<p>SGLang 合入 #47200。 投机解码就是小模型先打草稿、大模型再改。 这次加了 10 项 CUDA 快路径。 默认开关是关的，想开自己开。 第 10 项最实在：并发 272 时。 首字延迟 P90 从 1.87 秒降到 0.88 秒。 注意：PR 里那个 244% 是整套插件的数。 不是这一项单独的功劳，别当真。 TRT-LLM 合入 #21527。 Helix 是分块读题的功能。 读题就是 prefill，先把提示词算成草稿。 分块后历史 KV 散在各卡上。 这次能跨卡拼回来了。 拼的是 MLA 的 KV。 MLA 是 DeepSeek 路线的注意力压缩。 vLLM 和 llama.cpp 都接了 Ripple-65B。 Ripple 是 Ricursive 家的新模型。 vLLM 还修了 LoRA 的 MXFP4 分片。 MXFP4 是 4 位微缩放量化格式。 ROCm 构建也提速了两处。 FlashInfer 的 cake 内核继续磨 Rubin 适配。 Rubin 是英伟达下一代 GPU。 Dynamo 这轮只有文档改动。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次入库</strong></p>
+<p>最新还是 11 月 4 日那批。 下一批在今天 16 点左右。</p>
+<p><strong>SafeStart：砍专家提速，安全阀别一起砍了</strong> ⭐值得深读</p>
+<p>MoE 砍专家提速，会悄悄关掉拒绝能力。 MoE 就是一堆专家、每次只叫醒几个。 每词少叫几个专家，解码快 15% 到 28%。 Qwen1.5-MoE 上，有害回答涨了 18.4 个点。 精度分数却几乎不动。 只看精度，你根本发现不了。 病灶在读题和开头几个词。 只保这两段，提速能留住 85% 以上。 有害涨幅压到 1 个点左右。 这篇值得深读：调参清单里该加一条。 砍专家之前，先测拒绝率。 精读笔记随后上站。 来源：<a href="https://arxiv.org/abs/2611.06147">https://arxiv.org/abs/2611.06147</a></p>
+<p><strong>Parallel Reconsideration：草稿拿不准，就多猜几遍</strong></p>
+<p>投机解码里，草稿模型也有拿不准的时候。 这篇让它对拿不准的词多猜几遍。 多猜的几遍跟正常草稿并行跑。 几乎不花额外时间。 接受长度涨 5.3% 到 10.2%。 整体加速 3.5% 到 9.2%。 在 SGLang、单块 H200 上测的。 来源：<a href="https://arxiv.org/abs/2611.05724">https://arxiv.org/abs/2611.05724</a></p>
+<p><strong>Systolic Linear Attention：给 TPU 重排的线性注意力</strong></p>
+<p>谷歌给 TPU 做的线性注意力。 线性注意力就是不用存全部 KV 的注意力。 Kimi 的 KDA 也是这条路线的。 KDA 是 Kimi 的线性注意力。 TPU 的大张量核跟 GPU 不一样。 之前那套打法搬不过去。 这篇按 TPU 的脾气重新排了计算。 来源：<a href="https://arxiv.org/abs/2611.06828">https://arxiv.org/abs/2611.06828</a></p>
+<h2>业内新闻</h2>
+<p><strong>Lion-ER-35B-A3B：招商局的具身推理模型</strong>（补报）</p>
+<p>招商局狮子山实验室发了具身推理模型。 具身推理就是帮机器人理解空间、做决策。 35B 总参数，每词只激活 3B。 权重已开源，vLLM 和 SGLang 都能跑。 成绩全是发布方自报。 还没第三方复现，先记一笔。 来源：<a href="https://ai.synthepulse.app/stories/18367">https://ai.synthepulse.app/stories/18367</a></p>
+<p>其余旧闻不重复。 Together Compiler 报过。 ERNIE 5.5 报过。 Blackfuel 也报过。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没新单集。 最新还是 11 月 3 日的 AINews。 里面的 serving 内容之前都报过。 Simon Willison 最新是短帖。 跟 serving 无关。 X、Hacker News、Reddit 也扫了。 Reddit 热帖的 LSA 早就报过。 ISTA 的 1-bit 量化是本地 GGUF 玩法。 跟 serving 主线关系不大。 没有新的一手动向。</p>
+<h2>深读</h2>
+<p>本轮值得深读 1 篇：<a href="https://zwang96-dl.github.io/news/deep-20261105-safestart/">SafeStart：MoE 砍专家提速，别把安全阀也砍了</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 9 点版、7 点版、5 点版、3 点版、1 点版去重。 Kimi K3.1 Pro 权重放出 11 月 4 日已报。 AMD 的 MI355X 实测 7 点版已报。 华为昇腾 0Day 适配 7 点版已报。 llm-d 部署配方 9 点版已报。 Blackfuel 推理云 9 点版已报。 ERNIE 5.5 Flash Base 5 点版已报。 Together Compiler 11 月 4 日 11 点版已报。 腾讯 Hy4 正式版 11 月 4 日 15 点版已报。 Dynamo 实验快照 3 点版已报。 Qwen3.8-Flash-Next 指南是旧闻复述。 模型本身 11 月 2 日已报。 LSA 稀疏注意力 11 月 4 日 21 点版已报。 本轮值得深读 1 篇：SafeStart。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-05-1100/">11点版</a></p></body></html>
