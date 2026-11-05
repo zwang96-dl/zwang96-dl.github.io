@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月5日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-05"/>
+<meta name="doc-ts" content="2026-11-05T15:04:11"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-05（7点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-05（7点版）</h1>
+<p>这轮就一件事：Kimi K3.1 Pro 权重放出第二天。 AMD 和华为的适配都到了。 框架那边全是小修，没新版。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没新版</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 FlashInfer 还是 v0.7.3。 Dynamo 还是 v1.6.1。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo v1.6.2 正式版还没发。 llama.cpp 只有日常快照 b12128。</p>
+<p><strong>小修小补：一句话带过</strong></p>
+<p>vLLM 合入 #64689。 MoE 共享专家行可以恢复了。 算是部署灵活性小修。 Rust 前端只改了监控指标。 SGLang 窗口内只有 CI 改动。 llama.cpp 这次只修了测试。 全是日常维护，没实质新功能。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次入库</strong></p>
+<p>最新还是 11 月 4 日那批。 下一批在今天 16 点左右。</p>
+<h2>业内新闻</h2>
+<p><strong>AMD：Kimi K3.1 Pro 首日上 MI355X</strong> ⭐值得深读</p>
+<p>Kimi K3.1 Pro 是月之暗面的 2.8T 模型。 权重昨天刚放出，AMD 今天就跑起来了。 用的还是两个引擎：ATOM 和 vLLM。 ATOM 是 AMD 自家的推理引擎。 一台 8 卡 MI355X 机器能塞下整个模型。 连 100 万词的单请求都能装下。 单步解码就是每层只跑两个融合内核。 它把每词耗时从 5.78 压到 3.84 毫秒。 降了 33.6%，这是低延迟场景的数。 vLLM 那边优化了长输入的读题。 128K 输入总吞吐涨了 154%。 首字延迟从 268.7 秒降到 105.5 秒。 8K 输入只涨 12%，越长越赚。 精度基本没掉。 OCRBench 0.871，官方参考是 0.872。 这篇值得深读：稀疏注意力加单步解码的实测。 跟你手里的 MI350X 评估直接相关。 精读笔记随后上站。 来源：<a href="https://www.amd.com/en/developer/resources/technical-articles/2026/kimi-k3-1-pro-on-amd-instinct-gpus.html">https://www.amd.com/en/developer/resources/technical-articles/2026/kimi-k3-1-pro-on-amd-instinct-gpus.html</a></p>
+<p><strong>华为昇腾：K3.1 Pro 0Day 适配也到了</strong></p>
+<p>华为也宣布完成了 0Day 适配。 0Day 就是模型发布当天就能部署。 走的是 vLLM Ascend 和 SGLang 两套框架。 覆盖 Atlas 800 A3、900 A3 SuperPod 和昇腾 950。 针对新增的稀疏注意力做了算子优化。 多模态推理也一起适配了。 前缀缓存、分块读题、投机解码这些能力都保留。 开发者不用改使用习惯，直接能接。 两套框架的部署文档都已公开。 来源：<a href="https://ai.cnmo.com/news/821852.html">https://ai.cnmo.com/news/821852.html</a></p>
+<h2>访谈与深度</h2>
+<p>X、Hacker News、newsletter 都扫了。 没有新的访谈和深度内容。 Together Compiler 是旧闻。 11 月 4 日 11 点版报过。 今天只是媒体转载，不重复。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 5 点版、3 点版、1 点版去重。 Kimi K3.1 Pro 权重 9 点版已报。 8 块 B300 跑 Kimi-K3 的实测 19 点版已报。 Together Compiler 11 月 4 日 11 点版已报。 本轮值得深读 1 篇：AMD 的 K3.1 Pro 上 MI355X 实测。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-05-0700/">7点版</a></p></body></html>
