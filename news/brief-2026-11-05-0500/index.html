@@ -1,0 +1,73 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月5日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-05"/>
+<meta name="doc-ts" content="2026-11-05T13:00:05"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-05（5点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-05（5点版）</h1>
+<p>这轮有三件新事。 一件是英伟达的实测复盘。 一件是百度的新模型。 还有一件是笔记本上的怪事。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没新版</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 FlashInfer 还是 v0.7.3。 Dynamo 还是 v1.6.1。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo v1.6.2 正式版还没发。 llama.cpp 只有日常快照 b12125。 3 点版已经报过。</p>
+<p><strong>小修小补：一句话带过</strong></p>
+<p>SGLang 合入 #47785。 Qwen3 读提示词那步更快了。 它把 QK norm 和 RoPE 融成一个算子。 QK norm 是注意力里给分数归一化的步骤。 RoPE 是旋转位置编码，给 token 标位置的。 SGLang 还修了 #46928。 AMD 卡上页大小为 1 时，解码会吐乱码。 vLLM 只有 Rust 前端的监控指标小修。</p>
+<h2>新技术与论文</h2>
+<p><strong>英伟达：DGX Spark 上，三招让 MoE 快 42.5%</strong> ⭐值得深读</p>
+<p>这篇博客 10 月 27 日就发了。 之前几期漏了，这里补上。</p>
+<p>英伟达在一台 DGX Spark 上做实测。 DGX Spark 是英伟达的桌面 AI 小主机。 模型是蚂蚁的 Ling-3.0-flash。 124B 参数，每次只激活 5.1B。 MoE 就是一堆专家、每次只叫醒几个。 先说结论：解码从 37.81 涨到 53.89 词/秒。 涨了 42.5%，平均延迟降 24.5%。 正确率 96.89% 变成 96.82%，基本没变。</p>
+<p>第一招：换 Humming 内核跑专家计算。 Humming 是按模型形状现编内核的库。 FlashInfer 的老路子要预编译 97 个目标。 得花几十分钟。 Humming 单个内核几秒编完。 只换这一招，速度涨 9.3%。</p>
+<p>第二招：输出层单独压成 FP8。 输出层就是把 hidden 向量变成词表分数那层。 它有 157184×2560 这么大。 每个词都要完整读一遍它。 从 BF16 压到 FP8，读的数据量直接减半。 两招叠加，速度涨 21.7%。</p>
+<p>第三招：NEXTN 投机解码。 NEXTN 是模型自带的猜词层。 不用另外训草稿模型。 一次猜 3 个词、一起验 4 个。 合成负载上接受长度 3.90。 三招全开，速度涨 185%。 但这是合成负载，别当真。 真实 GSM8K 上接受长度只有 2.68。 三招全开的真实涨幅是 42.5%。</p>
+<p>划重点，有个坑。 FP8 输出层和投机解码一起开时。 草稿模型必须共享整个输出层模块。 只共享权重张量会静默回退。 草稿拿到 FP8 权重、却按 BF16 去读。 接受长度直接掉到 1.00。 速度比啥都不优化还慢。 部署时要在启动时逐项确认优化真的生效。 别只看最后的速度数字。</p>
+<p>这篇值得深读：三招的原理、数字和坑都讲透了。 跟你评估 SGLang 的投机解码直接相关。 精读笔记随后上站。 来源：<a href="https://developer.nvidia.com/blog/3-ways-to-boost-moe-inference-on-nvidia-dgx-spark">https://developer.nvidia.com/blog/3-ways-to-boost-moe-inference-on-nvidia-dgx-spark</a></p>
+<p><strong>arXiv：这轮没有新批次入库</strong></p>
+<p>最新还是 11 月 4 日那批。 下一批在今天 16 点左右。</p>
+<h2>业内新闻</h2>
+<p><strong>百度：ERNIE 5.5 Flash Base 今天发布</strong></p>
+<p>百度放出了 ERNIE 5.5 Flash 的底座版。 底座版就是只训完预训练、还没微调的版本。 280B 总参数，每次只激活 14B。 训了 33.5 万亿个词。 上下文支持 100 万词。 SGLang 和 vLLM 都有现成部署配方。 FP8 和 BF16 两种权重都能下。 MMLU 93.3 分，领先同类底座模型。 比 DeepSeek-V4-Flash 高 3.9 分。 HumanEval+ 82.3 分，也领先。 注意许可证：不含欧盟、英国、韩国。 年收入超 5000 万美元的商用要另外授权。 来源：<a href="https://www.unite.ai/baidu-releases-ernie-5-5-flash-base-for-further-training/">https://www.unite.ai/baidu-releases-ernie-5-5-flash-base-for-further-training/</a></p>
+<p><strong>RTX Spark 笔记本：Linux 下推理只有 Windows 两成速度</strong></p>
+<p>MindStudio 实测了一台 RTX Spark 笔记本。 跑的是 GPT-OSS-120B。 Linux 原生只有 13.9 词/秒。 Windows 上是 65.4 词/秒。 WSL 里也有 65.1 词/秒。 原因是电源管理组件只有 Windows 版。 Linux 下 GPU 频率被锁在 780MHz 左右。 英伟达还没回应。 这只是单家实测，仅供参考。 来源：<a href="https://digitechbytes.com/technology-news-gadgets/nvidia-rtx-spark-encrypted-firmware-slows-inference-speed-to-35-on-linux/">https://digitechbytes.com/technology-news-gadgets/nvidia-rtx-spark-encrypted-firmware-slows-inference-speed-to-35-on-linux/</a></p>
+<p><strong>Blackfuel：新推理云厂商亮相，首站用 AMD MI355X</strong></p>
+<p>Blackfuel 是一家新冒出来的推理云厂商。 首站放在巴塞罗那。 用的是 AMD MI355X。 号称已签 2.5 亿美元多年合同。 跑的是 vLLM 和 SGLang。 来源：<a href="https://www.amd.com/en/blogs/2026/strengthening-signature-verification/blackfuel--building-a-global-cloud-for-ai-inference.html">https://www.amd.com/en/blogs/2026/strengthening-signature-verification/blackfuel--building-a-global-cloud-for-ai-inference.html</a></p>
+<h2>访谈与深度</h2>
+<p>X、Hacker News、newsletter 都扫了。 没有新的访谈和深度内容。 Together Compiler 是旧闻。 11 月 4 日 11 点版报过。 今天只是媒体转载，不重复。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 3 点版、1 点版去重。 英伟达这篇博客是 10 月 27 日发的。 之前几期漏了，这里补上。 Together Compiler 是旧闻，不重复。 Dynamo 实验快照 3 点版已报。 本轮值得深读 1 篇：英伟达 DGX Spark 三招提速。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-05-0500/">5点版</a></p></body></html>
