@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月5日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-05"/>
+<meta name="doc-ts" content="2026-11-05T23:01:31"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-05（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-05（15点版）</h1>
+<p>15点版来了。</p>
+<p>这轮就一件新事。 Dynamo v1.6.2 正式版发布了。 13点版还说它没发。 两个小时后它就来了。 框架那边其余全是小修。 arXiv 还是没新批次。 下一批在今天 16 点左右。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 Dynamo 动了</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 FlashInfer 还是 v0.7.3。 Dynamo 从 v1.6.1 升到 v1.6.2。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 llama.cpp 还是 v0.9.0。 快照到了 b12138。</p>
+<p><strong>Dynamo v1.6.2：补丁版，别指望新功能</strong></p>
+<p>Dynamo 是英伟达的推理编排层。 编排层就是管一堆推理引擎协同干活的那层。 这次只是补丁版，没有新功能。 改动就两类：依赖刷新加两个修补。 先说依赖刷新。 SGLang 镜像换到 CPython 3.12.16。 CPython 就是官方的 Python 解释器。 Mooncake 升到 0.3.14。 Mooncake 是跨机器搬 KV 缓存的传输库。 KV 缓存就是推理时留的草稿纸。 解码器、diffusers 也都升了小版本。 再说两个修补。 第一处：TRT-LLM 的超长提示词。 以前超了直接报 500，服务还可能挂。 现在返回 400，worker 继续跑。 400 就是请求本身有问题的意思。 第二处：SGLang worker 加了个可选开关。 叫 --freeze-gc-after-init。 垃圾回收就是定时清理没用内存的动作。 启动后把它冻住，直播式输出卡顿会少。 默认是关的，官方建议先拿一台对照着测。 划重点：三件套的版本都没变。 SGLang 还是 v0.5.21。 TRT-LLM 还是 v1.3.0rc29。 vLLM 还是 v0.31.0。 Dynamo 锁的版本比官方最新低一截。 升级前先对一下你自己的版本。 来源：<a href="https://github.com/ai-dynamo/dynamo/releases/tag/v1.6.2">https://github.com/ai-dynamo/dynamo/releases/tag/v1.6.2</a></p>
+<p><strong>小修小补：一句话带过</strong></p>
+<p>vLLM 合入 #65986。 DeepSeek-V4.1-Flash 的跑分预设更新了。 vLLM 还合入 #65761。 多模态编码器的 CUDA 图修了一处。 CUDA 图就是把一串算子打包一次下发。 vLLM 还合入 #65883。 MiniMax-M3 的稀疏注意力读题更快了。 SGLang 合入 #40421。 P/D 解耦的读题环节复用解压后的 KV。 P/D 解耦就是读题和吐字分开跑。 这是第 7 步，总共 N 步，还没完。 SGLang 还合入 #48622。 DeepSeek V4.1 解码换了新版 DeepGEMM 接口。 DeepGEMM 是 DeepSeek 的矩阵乘法库。 TRT-LLM 合入 #20498。 检查点读写策略改成字符串枚举。 这是破坏性重构，升级要看迁移说明。 FlashInfer 继续磨 cake 内核。 这次主攻 Rubin 的 SM103a。 Rubin 是英伟达下一代 GPU。 llama.cpp 只有日常快照。 修了一处 KV 移动的 bug。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次入库</strong></p>
+<p>最新还是 11 月 4 日那批。 下一批在今天 16 点左右。 这是结构性空窗，不是漏扫。</p>
+<h2>业内新闻</h2>
+<p>这轮没有新的业内新闻。 ERNIE 5.5 Flash Base 5 点版已报。 RTX Spark 那条 5 点版已报。 SemiAnalysis 的 TPU 战报 13 点版已报。 Kinference 13 点版已报。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没新单集。 最新还是 11 月 4 日那期。 Simon Willison 最新是浏览器随笔。 跟 serving 无关。 Karpathy 最新是 11 月 3 日的回复。 跟 serving 无关。 X、Hacker News、Reddit 也扫了。 没有新的一手动向。</p>
+<h2>深读</h2>
+<p>本轮没有值得深读的新内容。 Dynamo v1.6.2 是补丁版。 依赖刷新加两个小修补。 不用专门写精读笔记。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 13 点版、11 点版去重。 9 点版、7 点版、5 点版也对过。 ERNIE 5.5 Flash Base 5 点版已报。 RTX Spark 笔记本 5 点版已报。 Together Compiler 11 月 4 日已报。 SemiAnalysis TPU 战报 13 点版已报。 Kinference 13 点版已报。 SafeStart 11 点版已报。 llm-d 的 Kimi K3.1 Pro 配方 9 点版已报。 本轮没有新增深读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-05-1500/">15点版</a></p></body></html>
