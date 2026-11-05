@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月5日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-05"/>
+<meta name="doc-ts" content="2026-11-05T17:00:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-05（9点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-05（9点版）</h1>
+<p>这轮有两件新事。 一件是补报：llm-d 的 Kimi K3.1 Pro 部署配方。 另一件是 AMD 卡的新云。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没新版</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 FlashInfer 还是 v0.7.3。 Dynamo 还是 v1.6.1。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo v1.6.2 正式版还没发。 llama.cpp 只有日常快照 b12128。</p>
+<p><strong>小修小补：一句话带过</strong></p>
+<p>vLLM 合入 #65160。 MooncakeStore 是跨机器共享 KV 缓存的组件。 KV 缓存就是模型推理时留的草稿纸。 这次它能自动加部署缓存前缀。 部署时缓存前缀不用手填了。 KV Offload 修了两处。 一处是滑窗组的整块上限。 另一处是缓存重置时，停掉还没传完的加载。 其余合入全是 CI。 SGLang 只修了一处 #48421。 HiCache 是把 KV 卸到主机内存的分层缓存。 这次它拒绝给混合模型做不完整的 L3 预取。 llama.cpp 这次只修了测试。 全是日常维护，没实质新功能。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次入库</strong></p>
+<p>最新还是 11 月 4 日那批。 下一批在今天 16 点左右。</p>
+<h2>业内新闻</h2>
+<p><strong>llm-d：Kimi K3.1 Pro 部署配方来了</strong> ⭐值得深读</p>
+<p>这是 11 月 4 日的博客。 之前几期漏了，这里补上。 llm-d 是 Kubernetes 原生的推理控制面。 控制面就是管请求去哪、KV 放哪的那层。 同一套栈横跨 TPU 和 GPU。 GPU 这边走 vLLM。 3P1D 就是 3 组读题加 1 组吐字。 读题是 prefill，吐字是 decode。 P/D 解耦就是读题和吐字分开跑。 KV 搬运走 NIXL，溢出走主机内存。 NIXL 是英伟达的跨卡 KV 搬运库。 TPU 这边走 SGLang。 32 卡跑 TP=32、EP=8。 TP 是张量并行，EP 是专家并行。 HiCache 把 KV 卸到主机内存。 容量是显存的 2 倍。 路由按前缀缓存亲和性粘住多轮会话。 说白了，多轮对话尽量落在同一台机器上。 免得每轮都重算前缀。 这篇值得深读：3P1D 配比能直接抄进你的 PD 评估。 HiCache 和 NIXL 的接法也一样。 精读笔记随后上站。 来源：<a href="https://llm-d.ai/blog/deploy-kimi-k3-1-pro-with-llm-d">https://llm-d.ai/blog/deploy-kimi-k3-1-pro-with-llm-d</a></p>
+<p><strong>Blackfuel：巴塞罗那开了 MI355X 推理云</strong></p>
+<p>Blackfuel 是家新推理云厂商。 第一站在巴塞罗那上线。 用的是 AMD MI355X，液冷 Dell 机柜。 软件栈是 ROCm 加 vLLM 和 SGLang。 卖点是按量预留算力。 Logical GPU 就是按月包一段模型算力。 不用自己管底层机器。 消息来自一家小媒体，疑似通稿转载。 先记一笔，等大媒体跟进再看。 来源：<a href="https://asiatokenfund.com/blackfuel-launches-amd-powered-ai-inference-cloud-in-barcelona/">https://asiatokenfund.com/blackfuel-launches-amd-powered-ai-inference-cloud-in-barcelona/</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 今早发了 AINews。 内容是 Kimi 权重和 OpenAI 内核安全。 Kimi 那部分已经报过。 Simon Willison 这轮没有 serving 新帖。 X、Hacker News、Reddit 也扫了。 新帖全是 Kimi 的旧闻转载。 没有新的访谈和深度内容。</p>
+<h2>深读</h2>
+<p>本轮值得深读 1 篇：<a href="https://zwang96-dl.github.io/news/deep-20261105-llm-d-kimi-k3-1-pro/">llm-d 的 Kimi K3.1 Pro 部署配方：3P1D 加分层 KV，横跨 TPU 和 GPU</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 7 点版、5 点版、3 点版、1 点版去重。 Kimi K3.1 Pro 权重放出 11 月 4 日已报。 AMD 的 MI355X 实测 7 点版已报。 华为昇腾 0Day 适配 7 点版已报。 ERNIE 5.5 Flash Base 5 点版已报。 Together Compiler 11 月 4 日 11 点版已报。 腾讯 Hy4 正式版 11 月 4 日 15 点版已报。 本轮值得深读 1 篇：llm-d 的 Kimi K3.1 Pro 部署配方。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-05-0900/">9点版</a></p></body></html>

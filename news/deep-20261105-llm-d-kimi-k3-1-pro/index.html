@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · llm-d 的 Kimi K3.1 Pro 部署配方：3P1D 加分层 KV，横跨 TPU 和 GPU"/>
+<meta name="doc-description" content="- 原文：https://llm-d.ai/blog/deploy-kimi-k3-1-pro-with-llm-d"/>
+<meta name="doc-date" content="2026-11-05"/>
+<meta name="doc-ts" content="2026-11-05T17:01:43"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>llm-d 的 Kimi K3.1 Pro 部署配方：3P1D 加分层 KV，横跨 TPU 和 GPU</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>llm-d 的 Kimi K3.1 Pro 部署配方：3P1D 加分层 KV，横跨 TPU 和 GPU</h1>
+<ul><li>原文：<a href="https://llm-d.ai/blog/deploy-kimi-k3-1-pro-with-llm-d">https://llm-d.ai/blog/deploy-kimi-k3-1-pro-with-llm-d</a></li><li>标题：Serving Moonshot AI&#x27;s Kimi K3.1 Pro with llm-d across TPUs and GPUs</li><li>作者：llm-d 团队（与 Inferact、RadixArk 合作）</li><li>发布：2026-11-04</li><li>深读：9点版（2026-11-05，之前几期漏报的补读）</li><li>配套代码：llm-d 仓库 kimi-k3-1 Well-Lit Path（vLLM 与 SGLang 配方）</li><li>原文无配图，本笔记不含图</li></ul>
+<h2>人话解读</h2>
+<p>一句话：2.8T 的大模型，llm-d 给了一套开箱即用的部署配方。 同一套控制面，TPU 和 GPU 两边都能跑。 难在哪：权重 1.56TB，单机显存装不下。 1M 上下文的 KV 缓存，几轮对话就把显存吃光。 多轮智能体会话，状态还不能丢。 读题 burst 一来，正在吐字的请求会被卡住。 读题是 prefill，吐字是 decode。 llm-d 的解法是四件套。 路由粘住会话，分层 KV 兜底。 读题吐字分开跑，投机解码再加速。 这篇没有跑分数字。 它是一份部署手册，不是测评。 值钱的是拓扑和配置，不是数字。</p>
+<h2>核心方法</h2>
+<h3>1. 状态感知 KV 路由：多轮对话粘在同一台机器上</h3>
+<p>每个副本实时上报 KV 事件。 上报走 ZMQ，控制面是 EPP。 EPP 就是端点选择器，管请求去哪。 它看两个分数：前缀缓存亲和性，实时 token 负载。 多轮轨迹尽量落在已有暖 KV 的副本上。 同时用&quot;粘住直到饱和&quot;策略防热点。 说白了：熟人坐熟桌，桌满了再换桌。 前缀缓存就是之前算好的草稿纸。 命中了就不用重算，首字更快。</p>
+<h3>2. 分层 KV：显存装不下就卸到主机内存</h3>
+<p>HBM 只留权重和正在算的注意力状态。 HBM 就是 GPU 片上的高速显存。 被挤掉的 KV 块溢出到主机 DRAM。 GPU 这边用 vLLM 的 KV 卸载连接器。 TPU 这边用 SGLang 的 HiCache。 HiCache 是 SGLang 的分层缓存。 溢出走 CPUOffloadingSpec 声明。 类比：桌面放不下就放抽屉。 抽屉慢一点，但总比扔了重算强。</p>
+<h3>3. P/D 解耦：读题和吐字分开跑</h3>
+<p>GPU 轨道是 3P1D。 3 组 prefill 加 1 组 decode。 TP=16，EP=8。 TP 是张量并行，EP 是专家并行。 KV 搬运走 NIXL。 NIXL 是英伟达的跨卡 KV 搬运库。 溢出走 OffloadingConnector。 走的是 Grace LPDDR5X 内存。 部署形态是 DisaggregatedSet。 它是 llm-d 里专门管 P/D 分离的控制器。 TPU 轨道不走 P/D 分离。 它靠 32 卡大并行加 HiCache 硬扛。</p>
+<h3>4. 投机解码：草稿先行，专家再验</h3>
+<p>原生支持 MTP 和投机草稿检查点。 MTP 是多词元预测，一次猜好几个词。 草稿包括 NEXTN 和 DFlash2。 NEXTN 是模型自带的猜词层。 不用另外训草稿模型。 这部分博客只给了配置入口。 没给接受长度和加速数字。</p>
+<h3>5. 两条硬件轨道的具体配置</h3>
+<p>GPU 轨道：A4X-Max，GB300 NVL72。 3 组 prefill 的 LeaderWorkerSet。 再加 1 组 decode。 多节点 NVLink 加 GKE DRANet RDMA。 DRANet 是谷歌云的 RDMA 网络。 TPU 轨道：2 个 Ironwood TPU v7x 切片。 每个切片 2x2x4，4 台主机各 4 块卡。 一共 32 块卡，64 个 TensorCore。 SGLang 跑在 TorchTPU 上。 稀疏 MLA 走 pallas_tpu_mla_sparse。 FP8 KV 缓存，上下文 480K。 HiCache 参数是 raiden 后端，比例 2。 意思是主机内存缓存是显存的 2 倍。 KDA 的循环状态也走 TPU Sync 搬运。 KDA 是 Kimi 的线性注意力。</p>
+<h3>6. 部署流程：权重先上云盘，再装路由</h3>
+<p>权重 1.56TB，先拷进区域 GCS 桶。 再挂到 Hyperdisk ML 的 PVC 上。 PVC 是 K8s 的持久卷声明。 挂载点是 /models，只读多挂。 路由用 Helm 装。 校准工具先量 peakPrefillThroughput。 再决定前缀亲和过滤的门限。 验证跑冒烟测试。 确认端到端生成、缓存命中、KV 搬运都通。 压测用 inference-perf.yaml 预设。</p>
+<h2>关键数据</h2>
+<ul><li>模型：2.8T 总参数，每次激活 104B。</li><li>专家：896 个路由专家，每词挑 16 个。</li><li>层数：93 层，69 层 KDA 加 24 层门控 MLA。</li><li>上下文：1M 词元。</li><li>权重：1.56TB，MXFP4 专家权重。</li><li>GPU 轨道：GB300 NVL72，3P1D，TP=16，EP=8。</li><li>TPU 轨道：32 块 TPU v7x，TP=32，EP=8。</li><li>TPU 上 FP8 KV 缓存：480K 上下文。</li><li>HiCache 比例 2：主机缓存是显存 2 倍。</li><li>提醒：以上全是配置参数，不是实测成绩。</li><li>博客没给吞吐、延迟、命中率数字。</li><li>别把配置清单当成性能承诺。</li></ul>
+<h2>跟研究方向的关联</h2>
+<ul><li>3P1D 配比可以直接抄进 PD 评估。</li><li>读题重、吐字轻的负载，3 比 1 是个起点。</li><li>你的评估可以先测 3P1D，再左右调配比。</li><li>NIXL 加主机内存溢出是 PD 搬运账本的新行。</li><li>搬运成本不只看网卡，还要看溢出路径。</li><li>HiCache 比例 2 是个可抄的默认值。</li><li>先按 2 倍显存配，再看命中率调。</li><li>前缀亲和路由值得进评估清单。</li><li>它决定多轮会话的 KV 命中率。</li><li>命中率直接影响首字延迟。</li><li>TPU 轨道证明 SGLang 的 PD 思路能跨硬件。</li><li>同一套控制面，换个后端就能跑。</li><li>你的评估如果只测 GPU，结论可能不通用。</li><li>注意：llm-d v0.10.0 以上才有这套能力。</li><li>旧版 llm-d 没有 agentic-serving 这组功能。</li></ul>
+<h2>术语表</h2>
+<ul><li><strong>llm-d</strong>：Kubernetes 原生的分布式推理控制面。</li><li><strong>EPP</strong>：端点选择器，决定请求发给哪个副本。</li><li><strong>P/D 解耦</strong>：prefill 和 decode 分开跑。</li><li><strong>3P1D</strong>：3 组 prefill 加 1 组 decode 的拓扑。</li><li><strong>NIXL</strong>：英伟达的跨卡 KV 搬运库。</li><li><strong>HiCache</strong>：SGLang 的分层 KV 缓存。</li><li><strong>KDA</strong>：Kimi Delta Attention，线性注意力。</li><li><strong>DSA</strong>：K3.1 Pro 的稀疏注意力，先打分再细看。</li><li><strong>MLA</strong>：多头隐注意力，DeepSeek 路线的注意力压缩。</li><li><strong>MTP</strong>：多词元预测，一次猜好几个词。</li><li><strong>NEXTN</strong>：模型自带的猜词层。</li><li><strong>TP</strong>：张量并行，把一层切到多卡。</li><li><strong>EP</strong>：专家并行，把专家分到多卡。</li><li><strong>LeaderWorkerSet</strong>：K8s 控制器，管一组主从 Pod。</li><li><strong>DisaggregatedSet</strong>：llm-d 里管 P/D 分离的控制器。</li><li><strong>DRANet</strong>：谷歌云的 RDMA 网络。</li><li><strong>HBM</strong>：高带宽显存，GPU 片上的高速内存。</li><li><strong>MXFP4</strong>：4 位微缩放浮点量化格式。</li></ul>
+<h2>原文链接</h2>
+<ul><li>llm-d 博客原文：<a href="https://llm-d.ai/blog/deploy-kimi-k3-1-pro-with-llm-d">https://llm-d.ai/blog/deploy-kimi-k3-1-pro-with-llm-d</a></li><li>配方总览：<a href="https://llm-d.ai/docs/dev/well-lit-paths/models/kimi-k3-1">https://llm-d.ai/docs/dev/well-lit-paths/models/kimi-k3-1</a></li><li>vLLM 配方：<a href="https://github.com/vllm-project/vllm-torchtpu/tree/kimi-k31pro">https://github.com/vllm-project/vllm-torchtpu/tree/kimi-k31pro</a></li><li>SGLang 配方：<a href="https://lmsysorg.mintlify.app/cookbook/autoregressive/Moonshotai/Kimi-K3.1-Pro">https://lmsysorg.mintlify.app/cookbook/autoregressive/Moonshotai/Kimi-K3.1-Pro</a></li><li>模型卡：<a href="https://huggingface.co/moonshotai/Kimi-K3.1-Pro">https://huggingface.co/moonshotai/Kimi-K3.1-Pro</a></li></ul></body></html>
