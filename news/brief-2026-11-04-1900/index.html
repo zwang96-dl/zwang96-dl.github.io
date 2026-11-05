@@ -1,0 +1,128 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月4日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-04"/>
+<meta name="doc-ts" content="2026-11-05T03:08:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-04（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-04（19点版）</h1>
+<p>这轮不算安静。 arXiv Nov 4 的日批刚落地，9 篇新论文。 框架侧 vLLM、SGLang、TRT-LLM 都有合入。 还有一篇新 talk。 Simon Mo 谈 agent serving。</p>
+<h2>框架更新</h2>
+<p><strong>vLLM 7 笔</strong></p>
+<p><strong>#60895：GLM-5.3-Flash MoE 提速</strong></p>
+<p>DeepGEMM FP8 MegaMoE，加了融合共享专家。 GEMM 就是矩阵乘法，推理里最吃算力的活。 MoE 是混合专家模型，一次只激活部分专家。 跑 GLM-5.3-Flash 的，升级吃得到。 来源：<a href="https://github.com/vllm-project/vllm/pull/60895">https://github.com/vllm-project/vllm/pull/60895</a></p>
+<p><strong>#63027：MI355X 调优 DeepSeek-V4.1</strong></p>
+<p>AMD 卡注意：K1/K2 在 TP2 下调过。 MI355X 跟你手里的 MI350X 同代。 跑 DeepSeek-V4.1 的可以跟。 来源：<a href="https://github.com/vllm-project/vllm/pull/63027">https://github.com/vllm-project/vllm/pull/63027</a></p>
+<p>其余 5 笔是 bugfix。</p>
+<p>#65598 修 FlashInfer TRTLLM 的 prefill 偏移。</p>
+<p>#65593 修 EC connector 的控制面心跳。</p>
+<p>#65577 给 Gemma 4 加多模态归一化。</p>
+<p>#65237 修 KV offload 的 CPU 存储。</p>
+<p>#60762 修 SM120 稀疏后端的 kernel 块。</p>
+<p><strong>SGLang 13 笔</strong></p>
+<p><strong>#48490：Kimi-K3 的 AMD prefill 提速</strong></p>
+<p>MoE 前端按行切分（row-sharded）。 o_proj 加了 stream。 o_proj 是注意力最后的输出投影。 跑 Kimi-K3 加 AMD 卡的，升级吃得到。 来源：<a href="https://github.com/sgl-project/sglang/pull/48490">https://github.com/sgl-project/sglang/pull/48490</a></p>
+<p><strong>#44394：CPU 也能跑 prefill 编译图了</strong></p>
+<p>torch compile 的 prefill 图加动态图支持。 compile 就是把模型编译成快代码。 这是 CPU serving 的路子。 来源：<a href="https://github.com/sgl-project/sglang/pull/44394">https://github.com/sgl-project/sglang/pull/44394</a></p>
+<p>其余 11 笔一句话带过。</p>
+<p>#48481、#48480 修 Kimi-K3 的 tool call。</p>
+<p>#48467 修 DeepSeek-V4 的 sparse MLA 计数器。</p>
+<p>#47632、#42198 是 AMD 的 attention 和 all-reduce 微调。</p>
+<p>#45717 支持下代 Xeon 的 CPU 核绑定。</p>
+<p>#41294 给 Hopper 的 dsv41 换融合压缩器。</p>
+<p>#39793 加 xing4_0 模型支持。</p>
+<p>#48339、#46922 是 NPU CI 和 CPU 测试。</p>
+<p><strong>TRT-LLM 4 笔</strong></p>
+<p>都是 infra 和测试。</p>
+<p>#21424 把 strict accept 的编译变体收成一个。</p>
+<p>#21410 重构 EncoderExecutor。</p>
+<p>其余两笔是修复和测试。</p>
+<p><strong>Dynamo 5 笔</strong></p>
+<p>#18084：kv-router 的 stale-leaf 扫描按树大小自适应。</p>
+<p>#18008：router 用 Fx 集合探 worker 存活。</p>
+<p>#17947：planner 加了托管优先级池分配。</p>
+<p>#17900、#17625 是测试和 beam 修复。</p>
+<p>KV 路由跟 PD 部署相关，可以留意。</p>
+<p><strong>FlashInfer 8 笔</strong></p>
+<p>大多是 B300 的 cake 内核微调。</p>
+<p>#8733 修 FP8 8-head prefill 的宽度校验。</p>
+<p>#7704 修 sm12x 的 scale 布局。</p>
+<p>#8729 修 CUDA graph 的 handle 拷贝。</p>
+<p><strong>llama.cpp 2 笔、Mooncake 2 笔</strong></p>
+<p>#31296：NVFP4 门控矩阵乘和 GLU 融了。</p>
+<p>#30541 修量化 KV 的设备端拷贝。</p>
+<p>#4788：io_uring 的 buffer 注册跨 ring 共用。</p>
+<p>#4231：bucket 卸载分散到多块盘。</p>
+<p>LMDeploy、TGI 零合入。</p>
+<p><strong>版本水位</strong></p>
+<p>vLLM v0.33.0、SGLang v0.5.23 没动。 TRT-LLM v1.4.0rc2 也没动。 LMDeploy v0.18.0、TGI v3.3.7 没动。 llama.cpp 是滚动版，同样没动。 FlashInfer v0.7.3 没动。 Mooncake v0.3.14 也没动。 Dynamo v1.6.1 也没动。 Dynamo 的 v1.6.2 release 还没发。</p>
+<h2>新技术与论文</h2>
+<p>arXiv Nov 4 的日批上线了。 17点版去看的时候还没上，这轮补上。</p>
+<p><strong>「值得深读」Runway：57B 视频模型跑 24fps 实时对话</strong></p>
+<p>Runway 的视频对话角色，虚拟人边听边说边动。 57B 参数的自回归视频扩散 transformer。 4 块 H100，704×1088。稳态跑到 24.5fps。 主线是&quot;读时做的活挪到写时做&quot;。 RoPE 和 FP8 量化只在写 cache 时做一次。 cache 维护从 69.7ms 压到 6ms。 优化前 240.9ms 一步，优化后 159.3ms。 生产跑了七周，99.5% 会话达标。 精读笔记已生成，见深读目录。 原文：<a href="https://arxiv.org/abs/2611.05642">https://arxiv.org/abs/2611.05642</a></p>
+<p><strong>Metastability：PD 解耦的雪崩陷阱</strong></p>
+<p>这篇跟你 PD 评估直接相关。 一次短时流量高峰，能让 PD 解耦引擎瘫痪一小时。 SGLang 上实测：10 分钟高峰后 goodput 掉 88%。 人走完了，系统还缓不过来。 元凶是正反馈：请求变慢，会话堆积。 堆积拉低缓存命中率，命中率低又更慢。 给你的 PD 评估提个醒：压测要加&quot;高峰后恢复&quot;这一档。 来源：<a href="https://arxiv.org/abs/2611.02543">https://arxiv.org/abs/2611.02543</a></p>
+<p><strong>EchoKV：KV 淘汰的自我纠错</strong></p>
+<p>KV cache 淘汰不只是给 token 打分。 打分用的&quot;草稿工作区&quot;错了，后面全歪。 EchoKV 用迭代反馈修工作区。 LongBench 上跨文档找证据的任务涨得明显。 来源：<a href="https://arxiv.org/abs/2611.05903">https://arxiv.org/abs/2611.05903</a></p>
+<p><strong>ReCR：视频解码时，哪些历史帧该给模型看</strong></p>
+<p>自回归视频生成里，过去的帧是未来的证据。 ReCR 把&quot;给解码器看哪些过去帧&quot;当成显式决策。 用模型自己的内部表示挑上下文。 训练都不用，即插即用。 来源：<a href="https://arxiv.org/abs/2611.04164">https://arxiv.org/abs/2611.04164</a></p>
+<p><strong>PARC：端侧多模态智能体的显存瘦身</strong></p>
+<p>手机上跑多模态智能体，显存不够。 两招：剪枝按加速器核心数对齐。 视觉历史按生命周期分开管。 来源：<a href="https://arxiv.org/abs/2611.02601">https://arxiv.org/abs/2611.02601</a></p>
+<p><strong>DepthGraft：跨层 KV 复用还是结构正则化</strong></p>
+<p>跨层 KV 共享不只是省显存。 深层到浅层的梯度直通，让 key 的检索方向更锐。 来源：<a href="https://arxiv.org/abs/2611.03142">https://arxiv.org/abs/2611.03142</a></p>
+<p><strong>闲时 serving 卡拿来预训练</strong></p>
+<p>serving 低峰期显卡闲着也是闲着。 这篇用零阶优化拿闲卡做预训练。 零阶就是只跑前向、不用反向。 预训练要更新全部参数，梯度估计会散。 他们的观察是曲率可以救。 来源：<a href="https://arxiv.org/abs/2611.02688">https://arxiv.org/abs/2611.02688</a></p>
+<p><strong>循环语言模型的量化比想象中简单</strong></p>
+<p>线性循环替代 softmax 注意力。 KV cache 不再随长度涨。 但量化那套是按 Transformer 调的。 这篇把循环模型的量化设计空间理了一遍。 来源：<a href="https://arxiv.org/abs/2611.01864">https://arxiv.org/abs/2611.01864</a></p>
+<p><strong>Dory1.0-4B：循环 GPT，一份权重多档算力</strong></p>
+<p>4B 参数的循环 transformer。 循环块跑几遍可调。 一份 checkpoint 适配不同算力预算。 NVFP4 预训练 4.5 万亿 token。 来源：<a href="https://arxiv.org/abs/2611.03998">https://arxiv.org/abs/2611.03998</a></p>
+<h2>业内新闻</h2>
+<p>这轮没有大新闻。 两条 newsletter 里的 serving 料放下面。</p>
+<h2>访谈与深度</h2>
+<p><strong>Simon Mo 新 talk：agent 负载改写 vLLM</strong></p>
+<p>Simon Mo 是 vLLM 创始团队的。 11 月 2 日，Modal 的 Runtime 2026 大会。 他讲了 18 分钟。 核心数据：agent 会话中位读 14.2 万 token。 只写 444 个，循环几十轮。 KV cache 是核心战场。 三招：混合 cache、P/D 解耦、分布式 KV 池。 Codex agent trace 上，吞吐 3.8 倍。 跟你 PD 评估对口，值得看。 来源：<a href="https://vllmbangkok.com/en/blog/serving-the-agentic-workload/">https://vllmbangkok.com/en/blog/serving-the-agentic-workload/</a></p>
+<p><strong>Latent Space：llm-d 合并 ThunderAgent</strong></p>
+<p>llm-d 把 ThunderAgent 合并了。 agent trace 的首字中位延迟从 50 秒压到 2–4 秒。 吞吐 1.5–2 倍。 OCRia-1，单块 B200，285 干到 2800 tok/s。 靠投机解码加量化加 17 个小优化。 来源：<a href="http://latent.space/p/ainews-behind-latent-space-kill-my-saas-jev-ai-in-2026-aiei-shanghai/">http://latent.space/p/ainews-behind-latent-space-kill-my-saas-jev-ai-in-2026-aiei-shanghai/</a></p>
+<p><strong>实测：8 块 B300 跑 2.8T Kimi-K3</strong></p>
+<p>实测帖：SGLang 0.5.23，8 块 B300。 1.56TB 权重全塞进一台机器。 单用户 104 token/s。64 个 agent 会话共 2000 token/s。 整单实验花了 49 美元。 来源：<a href="https://medium.com/@willyouzhizou/serving-2-8-trillion-parameter-open-agent-model-kimi-k3-on-8xb300-gpus-f71b4a549fb7">https://medium.com/@willyouzhizou/serving-2-8-trillion-parameter-open-agent-model-kimi-k3-on-8xb300-gpus-f71b4a549fb7</a></p>
+<p>本轮深读就是上面的 Runway Characters。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 17 点版去重。 17 点版的 Dynamo v1.6.2 不再重复。 SambaNova 补报也不再重复。 15 点版的腾讯 Hy4 正式版不再重复。 ZStack GPUWorks 也不再重复。 11 月 3 日那批论文早几版报过。 LoopKV、LeanSparse 等不再重复。</p>
+<p>本轮深读：Runway Characters 精读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-04-1900/">19点版</a></p></body></html>
