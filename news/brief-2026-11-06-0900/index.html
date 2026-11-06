@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月6日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-06"/>
+<meta name="doc-ts" content="2026-11-06T16:59:39"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-06（09点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-06（09点版）</h1>
+<p>09点版来了。</p>
+<p>这轮还是早晨档，动静不大。 版本水位只动了一处。 框架合入一批小修小补。 arXiv 还没新货。 X、HN、中文媒体都没新动向。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动一处</strong></p>
+<p>llama.cpp 快照到了 b12176。 发布时间是今天 08:39。 之前是 b12172。 今天连发三条快照。 b12174、b12175、b12176。 按惯例每日快照不算正式版。 正式版还是 v0.9.0。 这次快照只改了测试和构建。 测试里数学函数加了 std:: 前缀。 构建侧改了 Windows 资源文件生成。 跟推理主线关系不大。</p>
+<p>其余全平，没新版。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 Dynamo 还是 v1.6.2。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 TRT-LLM 最新 tag 还是 rc3。 最新 release 还是 rc2。 rc4 这个 tag 不存在。</p>
+<p><strong>小修小补：一句话带过</strong></p>
+<p>vLLM 合入 #66123。 embedding 尺寸的手动覆盖不再被吃掉。 embedding 就是词的向量表示。 vLLM 还合入 #65955。 量化配置解析时不再误引 humming。 humming 是个量化库。 vLLM 还合入 #66111。 只是 CI 的引用复用。</p>
+<p>SGLang 只合入 #48816。 路由器的标签事件不再反复重启分层。 只是 CI 侧的修复。</p>
+<p>FlashInfer 这轮合入 4 条。 全是 cake 内核的性能打磨。 cake 是它家的注意力内核系列。 覆盖 SM107a、SM103a 和 SM120。 三条管 FP8 矩阵乘和解码切分。 一条管索引器的排序融合。</p>
+<p>Dynamo、LMDeploy 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p>arXiv：11 月 7 日那批还没贴出来。 每天 00:00 UTC 发一批。 换算过来是今天下午 4 点。 最新还是 11 月 5 日的提交。 23 点版已经扫到底了。 下轮接着盯 11 月 7 日那批。</p>
+<h2>业内新闻</h2>
+<p>这轮没有新的业内新闻。 X、Hacker News、Reddit 都扫了。 没有窗口内的新动向。 中文 AI 媒体也没有 serving 新料。 SemiAnalysis 那篇是旧闻复述。 讲的是 11 月 3 日那场演讲。 5 号那几期已经报过。 KVGuard 那篇是已报论文的通俗解读。 China AI Ledger 是本周消息的汇总。 里面全是已报过的内容。 Latent Space 新出了一期生物对话。 跟 serving 无关。 社交平台上也没有新的 serving 动向。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没新的 serving 单集。 最新还是 11 月 4 日那期。 Simon Willison 最新一篇是 11 月 3 日的。 讲模型读权重，跟 serving 无关。 X 上关键人物这轮没新帖。</p>
+<h2>深读</h2>
+<p>本轮没有值得深读的新内容。 合入的都是小修小补。 等 11 月 7 日那批 arXiv 再说。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 07 点版、05 点版、03 点版、01 点版去重。 Kimi-K3.1、ERNIE 5.5 已报过。 SemiAnalysis、KVGuard 也已报过。 Inkling 2 Small 是 05 点版补报的。 本轮无深读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-06-0900/">09点版</a></p></body></html>
