@@ -1,0 +1,73 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月5日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-05"/>
+<meta name="doc-ts" content="2026-11-06T01:15:22"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-05（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-05（17点版）</h1>
+<p>17点版来了。</p>
+<p>这轮窗口里没新版本。 新一批 arXiv 也还没贴出来。 但扫到了昨天那批漏掉的论文。 5 篇都跟 serving 直接相关。 其中 1 篇值得深读。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没新版</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 FlashInfer 还是 v0.7.3。 Dynamo 还是 v1.6.2。 TRT-LLM 还是 v1.4.0rc2。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 llama.cpp 还是 v0.9.0。 快照只多了一个小提交。</p>
+<p><strong>小修小补：一句话带过</strong></p>
+<p>vLLM 合入 #65725。 Kimi-K3.1-Pro 加了 TPU 跑法。 TPU 就是谷歌的 AI 芯片。 走 vllm-torchtpu 的配方。 vLLM 还合入 #65599。 ROCm 上稀疏注意力读题更快了。 ROCm 是 AMD 的 GPU 软件栈。 vLLM 还合入 #65554。 修了 KV 缓存段没对齐的启动崩溃。 KV 缓存就是推理时留的草稿纸。 SGLang 合入 #48037。 P/D 解耦的解码准入记账能复用了。 P/D 解耦就是读题和吐字分开跑。 SGLang 还合入 #48452。 提前让出的读题 KV 用写穿缓存发布。 FlashInfer 继续磨 cake 内核。 这次还修了 Windows 构建。 llama.cpp 只有一个 cmake 改动。 TRT-LLM 和 LMDeploy 零提交。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还没来，昨天那批补上 5 篇</strong></p>
+<p>新一批按规律在 16 点左右。 到 17 点还没贴出来。 listing 还是 11 月 5 日那批。 API 这轮还被 429 限流了。 429 就是请求太频繁被拦了。 下轮再扫，先把昨天那批漏的补上。</p>
+<p><strong>vLLM 对 SGLang：64 倍差距，大半是配置背锅</strong> ⭐值得深读</p>
+<p>默认配置下，vLLM 首字慢 64 倍。 听着吓人，其实大半是配置背锅。 两家默认的分块读题设置不一样。 分块读题就是把长提示词切段算。 只把这一个设置对齐。 容量差距就去掉 78%。 延迟差距去掉 30% 到 67%。 剩下的差距其实是排队。 吞吐只差 4.4%，队越排越长。 跑越久，延迟比越大。 这篇值得深读：六条对比建议。 能直接抄进你的 PD 解耦评估。 先说清楚：它测的是老版本。 vLLM 0.6.3 对 SGLang 0.4.1。 64 倍别套到今天的版本上。 精读笔记随后上站。 来源：<a href="https://arxiv.org/abs/2611.05991">https://arxiv.org/abs/2611.05991</a></p>
+<p><strong>RECAP：多模态投机解码，不用训草稿模型</strong></p>
+<p>投机解码就是小模型先打草稿、大模型再改。 这篇不用额外训草稿模型。 直接复用目标模型自己的预测。 视觉模型有个坑：只看最后一个词。 不同图片下的预测会撞车。 这篇按一到三个词记预测。 本次请求的记忆只活这一轮。 跨请求的记忆留着保覆盖。 Qwen2.5-VL-7B 上提速 1.66 倍。 LLaVA-1.6-7B 上提速 1.56 倍。 跟你研究的多模态方向正对口。 来源：<a href="https://arxiv.org/abs/2611.05894">https://arxiv.org/abs/2611.05894</a></p>
+<p><strong>混合模型长上下文解码：不用重训，快 2 倍多</strong></p>
+<p>混合模型就是注意力加线性注意力混搭。 线性注意力不用存全部 KV。 但剩下的全注意力层还是拖后腿。 这篇不动权重，只改注意力。 每层只看近期窗口、固定开头、最相关的词。 窗口大小按层自动搜出来。 256K 上下文解码快 2.06 到 2.23 倍。 64K 也有 1.16 到 1.26 倍。 精度在 21 个长上下文集上基本没掉。 Qwen3.5 和 397B 的 Ornith 都测了。 来源：<a href="https://arxiv.org/abs/2611.06133">https://arxiv.org/abs/2611.06133</a></p>
+<p><strong>KV 缓存修补：预算要花在答案那块上</strong></p>
+<p>非前缀复用就是把检索来的块各算各的。 再把草稿拼起来，省掉重算。 但拼起来的草稿是带伤的。 这篇问：小修补预算花在哪最值。 答案是花在答案所在的那块上。 修别的块，收效很小。 直接重算答案块，比贴原版草稿还好。 7 组设置里都赢了。 检索器找答案块比注意力靠谱。 来源：<a href="https://arxiv.org/abs/2611.06397">https://arxiv.org/abs/2611.06397</a></p>
+<p><strong>vExpert：MoE 专家放不均，用虚拟存储调</strong></p>
+<p>MoE 就是一堆专家、每次只叫醒几个。 专家放哪是静态的，流量是动态的。 忙的卡忙死，闲的卡闲着。 这篇把专家全量备份到主机内存。 运行时按需映射到显存。 8 节点 H100 上测 DeepSeek-V3.1。 负载均衡比最多改善 55%。 端到端快 1.2 倍。 来源：<a href="https://arxiv.org/abs/2611.06057">https://arxiv.org/abs/2611.06057</a></p>
+<h2>业内新闻</h2>
+<p>这轮没有新的业内新闻。 ERNIE 5.5 是 5 点版已报的。 Together Compiler 是 11 月 4 日已报的。 今天的复述文章不重复报。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 没新单集。 最新还是 11 月 4 日那期。 Simon Willison 最新与 serving 无关。 Karpathy 最新还是 11 月 3 日的回复。 X、Hacker News、Reddit 也扫了。 没有窗口内的新动向。</p>
+<h2>深读</h2>
+<p>本轮值得深读 1 篇：<a href="https://zwang96-dl.github.io/news/deep-20261106-vllm-sglang/">vLLM 对比 SGLang：64 倍差距里，大半是配置背锅</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 15 点版、13 点版去重。 11 点版、9 点版、7 点版也对过。 Dynamo v1.6.2 15 点版已报。 Kinference 13 点版已报。 SemiAnalysis TPU 战报 13 点版已报。 SafeStart 11 点版已报。 Parallel Reconsideration 11 点版已报。 Systolic Linear Attention 11 点版已报。 ERNIE 5.5 Flash Base 5 点版已报。 Together Compiler 11 月 4 日已报。 本轮值得深读 1 篇：vLLM 对比 SGLang 跑分差距拆解。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-05-1700/">17点版</a></p></body></html>
