@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月6日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-06"/>
+<meta name="doc-ts" content="2026-11-06T20:59:39"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-06（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-06（13点版）</h1>
+<p>13点版来了。</p>
+<p>这轮动静比上午大一点。 框架合入一批跟 P/D 解耦有关的。 还多了一份六引擎实测。 arXiv 新一批还没贴出来。 要等到下午 4 点。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动一处</strong></p>
+<p>llama.cpp 快照到了 b12179。 发布时间是今天 12:43。 之前是 b12177。 这次改的是 Hexagon 的卷积。 Hexagon 是高通手机芯片里的 DSP。 跟服务端推理关系不大。 按惯例每日快照不算正式版。 正式版还是 v0.9.0。</p>
+<p>其余全平，没新版。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 Dynamo 还是 v1.6.2。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 TRT-LLM 最新 release 还是 rc2。</p>
+<p><strong>vLLM：P/D 解耦和投机解码有看点</strong></p>
+<p>vLLM 合入 #59746。 NIXL 传 KV 时按块尾对齐。 不同块大小也能配对上。 这条跟 P/D 解耦直接相关。 P/D 解耦就是 prefill 和 decode 分开跑。 像流水线分工，各干各的。</p>
+<p>vLLM 还合入 #66048。 修了投机解码里的一个竞态。 投机解码就是先让小模型打草稿。 再让大模型快速改一遍。 竞态就是两件事抢着跑会撞车。</p>
+<p>vLLM 还合入 #65270。 修了混合草稿模型的预热预算。 也是投机解码那条线。</p>
+<p>vLLM 还合入 #66010。 睡眠模式第二档只丢参数。 睡眠模式就是让引擎先歇着。 需要时再快速醒过来。</p>
+<p>其余几条是 ROCm 和 CI 的。 跟推理主线关系不大。</p>
+<p><strong>SGLang：P/D 解耦修了一处关键逻辑</strong></p>
+<p>SGLang 合入 #48458。 非最终的 KV 发送留在保护前缀内。 说白了就是传一半的 KV 别越界。 这条跟 P/D 解耦直接相关。 做 P/D 分离的可以留意。</p>
+<p>SGLang 还合入 #48496。 缓存回收的写顺序调了一下。 属于性能小修。</p>
+<p>SGLang 还合入 #41635。 Gemma4 的 MoE 专家执行器可自选。 MoE 就是专家混合模型。</p>
+<p>其余几条是 CI 和调度健壮性。 跟主线关系不大。</p>
+<p><strong>FlashInfer：给 Kimi K3 加了专属后端</strong></p>
+<p>FlashInfer 合入 #8934。 给 Kimi K3 家族加了 MegaMoE 后端。 MegaMoE 就是超大专家混合结构。 Kimi K3 是 2.8T 参数的 MoE。 这条说明 Kimi 的生态在跟进。</p>
+<p>其余 8 条里 5 条是 cake 内核打磨。 cake 是它家的注意力内核系列。 覆盖 SM100a 和 SM107a。 剩下的是动态加载内核包等杂项。</p>
+<p><strong>Dynamo：两条小修</strong></p>
+<p>Dynamo 合入 #17575。 K8s 发现信息的持久化加了上限。 Dynamo 还合入 #18255。 Kimi K3.1 的食谱对齐了规范。 食谱就是官方给的部署配方。</p>
+<p>LMDeploy 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p>arXiv：11 月 7 日那批还没贴出来。 每天 00:00 UTC 发一批。 换算过来是今天下午 4 点。 最新还是 11 月 6 日那批。 23 点版已经扫到底了。</p>
+<p><strong>跟进：KVGuard 有了新解读（11 月 6 日）</strong></p>
+<p>KVGuard 的论文 23 点版报过。 这是一篇新的解读文章。 作者把修复方法起了个名字。 叫影子块检查。 说白了就是给每块 KV 贴个影子标签。 写错地方立刻能发现。</p>
+<p>文章补了几个具体数字。 H100 上 100 万 token 的缓存池。 影子标签只占 17.8MB。 代价是每 token 慢 3% 到 7%。 vLLM 是 3%，SGLang 是 7.4%。 数字来自论文作者自测。 来源：<a href="https://articles.phantom-byte.com/kv-cache-memory-safety-vllm-sglang.html">https://articles.phantom-byte.com/kv-cache-memory-safety-vllm-sglang.html</a></p>
+<h2>业内新闻</h2>
+<p><strong>六个引擎同台实测：vLLM 全程最快</strong></p>
+<p>Medium 上有篇新鲜实测。 作者在同一台 EC2 G6 上跑了六个引擎。 llama.cpp、vLLM、SGLang 都在内。 还有 mistral.rs 和谷歌的 LiteRT-LM。 模型是 Gemma 4 E2B。 显卡是单张 L4。</p>
+<p>单请求时大家差距很小。 五个引擎都在 135 到 145 token 每秒。 草稿器一开，名次就拉开了。 草稿器就是投机解码里的小模型。 vLLM 提速 1.96 倍。 llama.cpp 是 1.53 倍。 SGLang 是 1.39 倍。</p>
+<p>64 并发时差距更大。 vLLM 到了 4516 token 每秒。 SGLang 是 2967。 llama.cpp 是 1056。 作者算了一笔账。 满载时每百万 token 只要 0.08 美元。 注意这是一台 L4 上的结果。 小模型单卡场景，别直接外推到大模型。 来源：<a href="https://xbill999.medium.com/six-serving-engines-on-one-ec2-g6-gemma-4-e2b-on-an-nvidia-l4-8f4b719f1ecb">https://xbill999.medium.com/six-serving-engines-on-one-ec2-g6-gemma-4-e2b-on-an-nvidia-l4-8f4b719f1ecb</a></p>
+<p><strong>阿里云 M890 当天就跑通了 Kimi K3.1</strong></p>
+<p>阿里云的 M890 SuperPoD 完成了验证。 Kimi K3.1 Pro 当天就能跑。 用的就是 vLLM 和 SGLang。 SuperPoD 就是一大组 GPU 抱团算。 这是 Kimi 开源后的又一个落地信号。 来源：<a href="https://elites.zone/en/top5/2026-11-06">https://elites.zone/en/top5/2026-11-06</a></p>
+<p><strong>小米 MiMo-V2.6 进了 SGLang 菜谱</strong></p>
+<p>SGLang 的 cookbook 更新了。 MiMo-V2.6 有了官方部署配方。 Flash 版是 309B 总参数。 每次只激活 15B。 Pro 版是 1.02T 总参数。 每次激活 42B。 用的都是 MXFP4 量化。 上下文支持到 100 万 token。 来源：<a href="https://lmsysorg.mintlify.app/cookbook/autoregressive/Xiaomi/MiMo-V2.6">https://lmsysorg.mintlify.app/cookbook/autoregressive/Xiaomi/MiMo-V2.6</a></p>
+<h2>访谈与深度</h2>
+<p><strong>ngrok 写了篇 vLLM 科普（11 月 5 日）</strong></p>
+<p>这篇讲 vLLM 为什么快。 从 PagedAttention 讲起。 PagedAttention 就是把显存切成小块。 像操作系统分页管内存。 再讲连续批处理和分块 prefill。 适合刚接触 serving 的人入门。 老手可以直接跳过。 来源：<a href="https://ngrok.com/blog/vllm">https://ngrok.com/blog/vllm</a></p>
+<p><strong>其余渠道</strong></p>
+<p>X、Hacker News、Reddit 都扫了。 没有窗口内的新动向。 中文 AI 媒体也没有 serving 新料。 Latent Space 最新还是那期生物对话。 跟 serving 无关，09 点版提过。 Simon Willison 最新还是 11 月 3 日那篇。</p>
+<h2>深读</h2>
+<p>本轮没有值得深读的新内容。 六引擎实测是单人单卡的自测。 样本太小，不适合深读。 ngrok 那篇是入门科普。 KVGuard 的解读是对已报论文的跟进。 等有新证据再说。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 11 点版、09 点版去重。 ServerBench 已在 23 点版报过。 Kimi K3.1、ERNIE 5.5 也已报过。 六引擎实测、M890 验证是新内容。 本轮无深读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-06-1300/">13点版</a></p></body></html>
