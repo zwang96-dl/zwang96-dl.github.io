@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月6日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-06"/>
+<meta name="doc-ts" content="2026-11-06T23:02:26"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-06（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-06（15点版）</h1>
+<p>15点版来了。</p>
+<p>这轮主角是 Kimi K3.1。 各家引擎都在往里接它。 TRT-LLM 还发了个新候选版。 arXiv 新一批要到 4 点才出。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：动了两处</strong></p>
+<p>TRT-LLM 发了 v1.4.0rc3。 发布时间是今天 13:38。 rc 就是候选版，还没转正。 它把 Kimi K3 的原生建模接进来了。 KV 缓存也支持 NVFP4 格式了。 NVFP4 是一种 4 位量化格式。 省显存，也省搬运带宽。 还打了统一 KV 缓存管理器的地基。 KV 缓存就是推理时的草稿纸。 另外加了稀疏 MLA 注意力。 MLA 是一种省显存的注意力算法。 GLM-5.2、MiniMax-M3 也进了支持列表。 注意它带了几处破坏性改动。 删了几个没用的请求字段。 还清掉了一些过时的兼容接口。 已知问题有两条要留心。 DSA 模型配 NVFP4 KV 可能算错。 Kimi K3 的 DSpark 在 GB300 预热可能卡住。 DSpark 是一种投机解码方案。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.4.0rc3">https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.4.0rc3</a></p>
+<p>Dynamo 出了个实验版。 版本号是 v1.7.0-kimi-k3.1-pro-dev.1。 发布时间是今天 13:44。 它是给 Kimi K3.1 Pro 的早期支持。 vLLM 和 SGLang 两个后端都能跑。 覆盖 GB300、B200 和 VR200。 官方明说了不是生产版。 只拿来评估和尝鲜，别上生产。 来源：<a href="https://github.com/ai-dynamo/dynamo/releases/tag/v1.7.0-kimi-k3.1-pro-dev.1">https://github.com/ai-dynamo/dynamo/releases/tag/v1.7.0-kimi-k3.1-pro-dev.1</a></p>
+<p>其余全平，没新版。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 llama.cpp 快照还是 b12179。 正式版还是 v0.9.0。</p>
+<p><strong>vLLM：Kimi K3.1 开始进主线</strong></p>
+<p>vLLM 合入 #66030。 加了 Kimi K3.1 的模型文件。 还带了英伟达专用解码。 这是 5 个拆分里的第 1 块。 vLLM 还合入 #66028。 加了 Kimi K3.1 的聊天渲染器。 是 Rust 前端那块，第 2 块。 主线分支开始正式接 Kimi K3.1 了。 来源：<a href="https://github.com/vllm-project/vllm/pull/66030">https://github.com/vllm-project/vllm/pull/66030</a></p>
+<p><strong>SGLang：P/D 和多模态都有料</strong></p>
+<p>SGLang 合入 #48451。 这条跟 P/D 解耦直接相关。 P/D 解耦就是 prefill 和 decode 分开跑。 像流水线分工，各干各的。 它按 attention-DP 分片轮询 prefill 结果。 等的时候顺手泵一下 HiCache 事件。 HiCache 是把 KV 缓存溢到主机内存的机制。 来源：<a href="https://github.com/sgl-project/sglang/pull/48451">https://github.com/sgl-project/sglang/pull/48451</a></p>
+<p>SGLang 还合入 #48586。 把 Kimi K3 的 decode MoE 路由融成一个核。 MoE 就是专家混合模型。 路由就是决定每个 token 找哪个专家。</p>
+<p>SGLang 还合入 #48977。 同步了 Kimi K3.1 并行栈的 CI 修复。 CI 就是持续集成，自动跑测试那套。</p>
+<p>多模态那边一次合入 5 条。 都是 sglang-miles 的媒体特征缓存。 说白了就是图片视频特征按条目存磁盘。 下次遇到直接读，不用重新算。</p>
+<p>SGLang 还合入 #37354。 给苹果 MLX 加了 ATen 转 MLX 的降低层。 MLX 是苹果芯片上的推理框架。 其余几条是 SWA、采样器和调度小修。</p>
+<p><strong>FlashInfer：Rubin 有了新 prefill 后端</strong></p>
+<p>FlashInfer 合入 #8716。 给 Rubin 加了可选的 CuTe DSL prefill 后端。 Rubin 是英伟达下一代 GPU。 CuTe DSL 是一种写 GPU 内核的工具。 FlashInfer 还合入 #8613。 CuTe KDA prefill 加了新支持。 现在能接 token-strided QKV。 QKV 就是注意力里的查询键值三件套。 其余 13 条多是 cake 内核打磨。 cake 是它家的注意力内核系列。</p>
+<p><strong>Dynamo：9 条小修</strong></p>
+<p>Dynamo 合入 #18341。 会话亲和的条目上限改读环境变量。 这是 1.7.0 发布分支上的修复。 Dynamo 还合入 #18003。 容器升级了 EFA、Mooncake 和 NIXL。 Mooncake 到了 0.3.14。 Mooncake 是做 KV 缓存搬运的库。 Dynamo 还合入 #17250。 把 tokenization 从异步 worker 上挪走。 tokenization 就是把文字切成 token。 其余几条是文档和食谱对齐。</p>
+<p><strong>llama.cpp：Kimi K3.1 Pro 模型进来了</strong></p>
+<p>llama.cpp 合入 #31779。 加了 Kimi-K3.1-Pro 文本模型。 不过快照还没发新版。 最新快照还是 b12179。 按惯例每日快照不算正式版。 正式版还是 v0.9.0。</p>
+<p><strong>TRT-LLM：3 条合入</strong></p>
+<p>TRT-LLM 合入 #20005。 VisualGen 加了 FP8 注意力和融合算子。 目标是 Rubin 卡。 TRT-LLM 还合入 #19612。 MiniMax-H3 唤醒时可选释放 host 备份。 TRT-LLM 还合入 #21601。 补了 DSpark 置信度的复现指南。</p>
+<p>LMDeploy 和 TGI 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p>arXiv：11 月 7 日那批还没出。 每天 00:00 UTC 发一批。 换算过来是今天下午 4 点。 API 核过，最新还是 11 月 5 日提交的。 这轮结构性零入库。</p>
+<h2>业内新闻</h2>
+<p><strong>Kimi K3.1 的部署教程都是旧闻</strong></p>
+<p>Hyperstack 的 32 卡 H100 部署指南。 llm-d 的 TPU 和 GPU 双轨配方。 DigitalOcean 上架 Kimi K3.1 Pro。 这几件都是 11 月 4 到 5 日的。 之前几期已经报过。 今天没有新的部署消息。</p>
+<p><strong>其余渠道</strong></p>
+<p>X、Hacker News、Reddit 都扫了。 没有窗口内的新动向。 中文 AI 媒体也没有 serving 新料。 Latent Space 最新还是那期生物对话。 09 点版已经提过。 Simon Willison 今天发了一篇。 引用 Nilay Patel 谈 AI 产品成本。 是泛 AI 评论，跟 serving 无关。</p>
+<h2>深读</h2>
+<p>本轮没有值得深读的新内容。 TRT-LLM rc3 的说明是 changelog。 不是论文，也不是技术文章。 等它转正或者有实测再说。 Dynamo 那个实验版也是快照说明。 Kimi K3.1 各家都在跟进。 有新论文或实测会第一时间补。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 13 点版、11 点版去重。 Kimi K3.1 权重和 llm-d 配方已报过。 Hyperstack 指南也报过。 TRT-LLM rc3、Dynamo 实验版是新内容。 本轮无深读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-06-1500/">15点版</a></p></body></html>
