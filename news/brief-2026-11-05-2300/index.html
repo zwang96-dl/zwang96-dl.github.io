@@ -1,0 +1,81 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月5日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-05"/>
+<meta name="doc-ts" content="2026-11-06T07:04:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-05（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-05（23点版）</h1>
+<p>23点版来了。</p>
+<p>这轮 arXiv 没新货。 11 月 6 日那批已经扫到底了。 08483 之后没有新的 serving 论文。 但补上了 6 篇之前漏报的。 其中 1 篇值得深读。 版本水位动了一处。 还要纠正 21 点版一处口径。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动一处</strong></p>
+<p>FlashInfer 出了 v0.7.4rc1。 发布时间是 11 月 5 日 17:42。 只是候选版，不是正式版。 正式版还是 v0.7.3。</p>
+<p><strong>纠正：21 点版漏报了 rc1</strong></p>
+<p>21 点版写 FlashInfer 还是 v0.7.3。 其实 rc1 在那轮开始前 3 个多小时就发了。 是那轮漏扫的，不是没发布。 这句作废。 以后报水位先拉最新 release 再写。</p>
+<p>llama.cpp 快照到了 b12144。 发布时间是 11 月 5 日 19:45。 按惯例每日快照不算正式版。 正式版还是 v0.9.0。</p>
+<p>其余全平，没新版。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 Dynamo 还是 v1.6.2。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 TRT-LLM 最新 tag 还是 rc3。 最新 release 还是 rc2。</p>
+<p><strong>小修小补：一句话带过</strong></p>
+<p>vLLM 合入 #60314。 Gemma-4 的多模态 encoder 支持数据并行。 多模态 encoder 就是看图的那部分。 vLLM 还合入 #61821。 SM120 的 NVFP4 GEMM 补了 bias。 SM120 是 Blackwell 那代卡。 vLLM 还合入 #65826。 加了 LFM3-Text 模型支持。 vLLM 的 ROCm 侧。 AITER 升到 v0.1.28.post1。 AITER 是 AMD 的推理内核库。 gfx942 的 MLA Triton 核查也跟进了。 SGLang 合入 #41301。 H20 的 W8A8 block-FP8 GEMM 配了调优参数。 W8A8 就是权重和激活都压到 8 位。 SGLang 还合入 #44437。 FP4 MLA 的 block scales 跟着 KV 一起搬。 搬 KV 时比例尺不再掉队。 SGLang 还修了一处 PD 解耦。 Mooncake 注册时。 KV 页步长不一致的 decode 节点直接拒绝。 等于握手时先对一遍账。 SGLang 还合入 #48761。 DeepGEMM 的 prenorm 切片减半。 Dynamo 只拆了 LoRA 的独立 crate。 llama.cpp 只有 OpenCL 的 q6_k 改动。 LMDeploy 只有 1 个修复。 TRT-LLM 在磨 Rubin 的 GLM 低延迟。 MoE 性能看板更新到 rc3。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：11 月 6 日这批扫到底了，补 6 篇漏网的</strong></p>
+<p>这 6 篇都在 08483 之前。 之前几期都没报过。 下轮只盯 11 月 7 日那批。</p>
+<p><strong>ACSeL：硬件不够，调参来凑</strong> ⭐值得深读</p>
+<p>serving 的旋钮太多了。 模型大小、batch、量化配方。 一股脑全试，试不完。 这篇换了个思路。 先拿便宜的办法估质量。 再拿便宜的办法估延迟。 两个估算器带着搜。 搜出预算里最好的配置。 质量估算器叫 RMQD。 它量的是候选模型跟参考模型。 下一个词的分布差多远。 跟真实分数的相关性很强。 MMLU 上 -0.85。 算一次只要 6.84 秒。 直接跑评测要 626.91 秒。 快了 91.6 倍。 延迟估算器叫 FMC。 只拿少量真实 profile 校准。 TTFT 的预测误差从 78.5% 压到 24.8%。 搜法叫 BandPareto。 逐层混精度不再乱试。 按带状结构走。 A6000 上。 答得出配置的请求从 48% 涨到 92%。 严格满足延迟的从 32% 涨到 48%。 放宽 10% 容忍后是 84%。 Thor 边缘卡上。 答得出从 16% 涨到 76%。 这篇值得深读：跟你的 AI 自动调参想法正对口。 质量代理加延迟代理加结构搜索。 这三招可以直接抄。 精读笔记随后上站。 来源：<a href="https://arxiv.org/abs/2611.07570">https://arxiv.org/abs/2611.07570</a></p>
+<p><strong>SpecCTMC：扩散模型也能投机解码</strong></p>
+<p>扩散语言模型一次能写好几个词。 但各写各的会打乱词之间的关系。 这篇不用单独的草稿模型。 拿之前算过的预测直接提候选。 再并行验一遍。 验不过的纠正回来。 分布一点不走样。 数学上证明了保真。 LLaDA-8B 和 Dream-7B 上。 顺序算的次数少了 1.73 到 4.38 倍。 来源：<a href="https://arxiv.org/abs/2611.08362">https://arxiv.org/abs/2611.08362</a></p>
+<p><strong>Measured Coupling：扩散模型并行解码，哪些词能一起交</strong></p>
+<p>扩散模型每步要挑哪些词一起定稿。 老办法看两个位置的预测像不像。 这篇直接量真东西。 定一个词会让另一个词的信心变多少。 探针藏在正常前向里。 不用训，不用加模型。 三个模型四个 benchmark 上。 步数比老办法少得多。 多数设置下更快。 精度平均只掉 1.1 个点。 来源：<a href="https://arxiv.org/abs/2611.08307">https://arxiv.org/abs/2611.08307</a></p>
+<p><strong>NUMA-Torch：CPU 读题，内存别跑错插槽</strong></p>
+<p>大模型在多插槽 CPU 上读题。 瓶颈不在算力，在内存带宽。 PyTorch 默认不管 NUMA 拓扑。 权重经常跨插槽去取。 这篇让编译器认路。 每个插槽当一个独立的张量并行分片。 权重按插槽切好。 计算和内存都锁在本地。 双插槽 Haswell 上读题快 2.63 倍。 四插槽 Haswell-EX 上快 2.27 倍。 来源：<a href="https://arxiv.org/abs/2611.07105">https://arxiv.org/abs/2611.07105</a></p>
+<p><strong>ServerBench：让 coding agent 自己设计 serving 系统</strong></p>
+<p>coding agent 不光能写代码。 也能设计整套推理服务。 这篇出了个 benchmark。 目标是每块钱 GPU 挣回多少延迟合格的 token。 Claude Sonnet 5.5 拿了 2.97。 是 vLLM 参考实现的 4.87 倍。 33 次里 22 次交出能验证的系统。 13 次超过最强基线。 来源：<a href="https://arxiv.org/abs/2611.06841">https://arxiv.org/abs/2611.06841</a></p>
+<p><strong>一句话带过</strong></p>
+<p>AMD 的 MI300A 对 MI250X。 新指令到底有多少落在实处。 这篇定义了 capability gain。 就是理论加速在库和应用层还剩几成。 FP8 和 2:4 稀疏指令的账。 换代前先看这篇。 来源：<a href="https://arxiv.org/abs/2611.07198">https://arxiv.org/abs/2611.07198</a></p>
+<h2>业内新闻</h2>
+<p>这轮没有新的业内新闻。 Together Compiler、TorchTPU、Hy4 都已报过。 顺手提一句。 SSDNODES 出了份自托管指南。 主角是 Qwen3.8-Flash-Next。 SGLang 菜谱里有 MI350X 和 MI355X 的 TP8 行。 跑这模型前可以先看一眼。 来源：<a href="https://www.ssdnodes.com/learn/what-it-takes-to-self-host-qwen-3-8-flash-next">https://www.ssdnodes.com/learn/what-it-takes-to-self-host-qwen-3-8-flash-next</a></p>
+<h2>访谈与深度</h2>
+<p><strong>KVGuard 解读：37 个 KV 缓存安全 bug 的来龙去脉</strong></p>
+<p>论文本身 19 点版已报。 这篇是 11 月 6 日的新解读。 讲清楚了 bug 长什么样。 PagedAttention 的块分配器会串块。 一个请求的草稿纸漏给另一个请求。 全程不报错。 修法有个名字：Shadow Block Check。 就是给块加个影子校验。 开销 vLLM 上 3%。 SGLang 上 7.4%。 作者定位是开发期工具。 跟 ASan 一个用法。 来源：<a href="https://articles.phantom-byte.com/kv-cache-memory-safety-vllm-sglang.html">https://articles.phantom-byte.com/kv-cache-memory-safety-vllm-sglang.html</a></p>
+<p>Latent Space 没新单集。 最新还是 11 月 4 日那期。 Simon Willison 11 月 5 日只有一条引言。 跟 serving 无关。 X、Hacker News、Reddit 这轮没新动向。 中文 AI 媒体也没有 serving 新料。</p>
+<h2>深读</h2>
+<p>本轮值得深读 1 篇：<a href="https://zwang96-dl.github.io/news/deep-20261106-acsel/">ACSeL：硬件不够，调参来凑</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 21 点版、19 点版、17 点版、15 点版去重。 Should You Split Decode、Beyond K/V Caches、FlashOffloading、ZYFA、StrataFlux 21 点版已报。 FastAFD、LoopDuet、TriAttention、RecSA、Visual Token Routing、LowRAM 19 点版已报。 HyFlash 19 点版已报。 vLLM 对比 SGLang 跑分拆解 17 点版已报。 Dynamo v1.6.2 15 点版已报。 Together Compiler、TorchTPU、Hy4、KVGuard 论文都已报过。 FlashInfer v0.7.4rc1 的说法 21 点版漏报。 本轮已补上报并纠正。 本轮值得深读 1 篇：ACSeL。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-05-2300/">23点版</a></p></body></html>
