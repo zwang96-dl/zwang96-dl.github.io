@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月7日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-07"/>
+<meta name="doc-ts" content="2026-11-07T16:59:07"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-07（09点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-07（09点版）</h1>
+<p>09点版来了。</p>
+<p>上午这轮很安静。 没有新版本，没有新论文。 但 llama.cpp 有一条挺有意思。 MoE 模型跑本地，缺的专家能扔给 CPU 算。 Qwen 4 那边也多了一条预热消息。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，一个没动</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 还是 v1.6.2。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 llama.cpp 还是 b12189。 没有新快照。 来源：GitHub releases</p>
+<p><strong>llama.cpp：1 条，MoE 缺专家时 CPU 顶上</strong></p>
+<p>llama.cpp 合入 #30966。 跑 MoE 模型时，显存放不下的专家可以扔给 CPU 算。 MoE 就是模型里轮流上岗的那堆子网络。 以前缺了专家就得等，现在 CPU 能先顶上。 还附了一个调参脚本，自动试出最合适的配置。 作者拿 Qwen3.8-Flash-Next 的量化版实测。 显存缓存 6GB 时，CPU 分担 95% 的缺失专家。 速度从 24.2 涨到 47.6 token 每秒，接近翻倍。 缓存给到 19GB 时，CPU 分担反而拖后腿。 所以这个开关要按机器调，不是越大越好。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30966">https://github.com/ggml-org/llama.cpp/pull/30966</a></p>
+<p><strong>vLLM：3 条，都是小活</strong></p>
+<p>vLLM 合入 #65589。 启动时少导一个解析模块，省点启动时间。 vLLM 还合入 #49459。 模型加载时去掉了每次的完整性检查。 vLLM 还合入 #64528。 只是把代码检查工具升了个版本。</p>
+<p><strong>TRT-LLM：1 条，GLM 重构</strong></p>
+<p>TRT-LLM 合入 #21812。 GLM 的 Rubin 建模改成自包含。 Rubin 是英伟达新一代 GPU 的代号。 纯重构，没有行为变化。</p>
+<p><strong>FlashInfer：6 条，cake 内核继续打磨</strong></p>
+<p>FlashInfer 合入 #9099。 GDN 预填充在 sm_107a 上加了双胞胎内核。 sm_107a 就是 Rubin 那代卡的编号。 官方说法最高快 1.17 倍。 FlashInfer 还合入 #9102。 mega_moe_v3 的专家查找更快了。 其余 4 条是重构、修补和测试。</p>
+<p><strong>其余几家</strong></p>
+<p>SGLang、LMDeploy、TGI、Dynamo 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没出</strong></p>
+<p>最新发表还是 11 月 5 日那批。 下一批按惯例在美东时间今晚 8 点出。 也就是你这边今天下午 5 点。 17 点版再看。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：官方发了预热海报，还是没给日期</strong></p>
+<p>Qwen 官方账号 11 月 6 日发了一张海报。 图是万鸟汇成一条大鱼，配了一句英文。 &quot;The becoming begins&quot;，意思是&quot;化成开始了&quot;。 海报没提 Qwen 4，也没给日期。 &quot;下周发&quot;的窗口明天就关了。 HF 上还是没有 Qwen 4 的仓库。 等官宣再说，别按传言排期。 来源：<a href="https://cellcog.ai/blog/qwen-4-release-date/">https://cellcog.ai/blog/qwen-4-release-date/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong></p>
+<p>Latent Space 那期 Anthropic S-1 深挖，07点版报过。 X 和 Reddit 上也没翻到值得报的讨论。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 07 点版、05 点版、03 点版、01 点版去重。 Kinference、ElasticMM、LFM3、Ripple 均已报过。 KVGuard 的论文和解读，23 点版报过。 Blackfuel 巴塞罗那部署，21 点版报过。 其余合入均为窗口内首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-07-0900/">09点版</a></p></body></html>
