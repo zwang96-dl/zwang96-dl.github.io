@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月7日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-07"/>
+<meta name="doc-ts" content="2026-11-07T08:59:02"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-07（01点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-07（01点版）</h1>
+<p>01点版来了。</p>
+<p>深夜这轮很安静。 没有新版本，没有新论文。 但框架那边合入不少。 还有一个 vLLM 的新搭档值得看。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，一个没动</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 还是 v1.6.2。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 llama.cpp 还是 b12182。 来源：GitHub releases</p>
+<p><strong>SGLang：25 条，多模态那条最相关</strong></p>
+<p>SGLang 合入 #49032。 多模态请求能直接传到后面的流水线阶段了。 不用再带原始特征一起传。 原始特征就是图片刚切出来的那堆数字。 这条跟你的多模态方向直接相关。 来源：<a href="https://github.com/sgl-project/sglang/pull/49032">https://github.com/sgl-project/sglang/pull/49032</a></p>
+<p>SGLang 还合入 #48992。 暂停生成在流水线并行下也生效了。 中途取消的 PD 房间会正确释放。 PD 房间就是 prefill 和 decode 各自的工位。 SGLang 还合入 #48638。 Kimi-K3.1 的 decode 加了 MXFP4 常驻内核。 MXFP4 是一种 4 位量化格式。 SGLang 还合入 #48563。 Gemma4 把通信和收尾算子融成一步了。 其余多是 CI、测试和重构。</p>
+<p><strong>vLLM：6 条，MiniMax 和 DeepSeek 占大头</strong></p>
+<p>vLLM 合入 #66227。 MiniMax-M3 的 NVFP4 内核开跑前先预热。 NVFP4 是 4 位浮点量化格式。 vLLM 还合入 #64476。 DSpark 的采样步骤融成一步了。 DSpark 是 DeepSeek 的投机解码方案。 vLLM 还合入 #63540。 DeepSeek V4 的旋转位置编码融进 FP8 量化了。 vLLM 还合入 #60130。 KV 缓存挪到 CPU 时支持大页内存了。 大页就是更大块的内存页。</p>
+<p><strong>FlashInfer：11 条，确定性那条值得记</strong></p>
+<p>FlashInfer 合入 #8999。 softmax 和 log_softmax 有了新模式。 新模式下结果不随拼批变。 23 点版报过的 BlockLock 讲的也是这事。 评测想复现结果，这类开关很关键。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8999">https://github.com/flashinfer-ai/flashinfer/pull/8999</a></p>
+<p>其余几条全是 cake 内核打磨。 cake 是它家的注意力内核系列。</p>
+<p><strong>其余几家</strong></p>
+<p>TRT-LLM 合入 1 条，只是测试。 Dynamo 合入 1 条，也只是测试。 llama.cpp 合入 3 条，都是小修补。 LMDeploy、TGI、Mooncake 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没出</strong></p>
+<p>最新发表还是 11 月 5 日那批。 API 核过，最新是 11 月 5 日 18:59。 下一批按惯例在美东时间今晚 8 点出。 也就是你这边今天下午 5 点。 03 点版再看。</p>
+<h2>业内新闻</h2>
+<p><strong>Kinference：给 vLLM 配了个交通指挥</strong></p>
+<p>Buoyant 发布了 Kinference。 Buoyant 就是做 Linkerd 的那家公司。 Kinference 是个开源控制平面。 控制平面就是管调度、不干活的那层。 它坐在 K8s 和一群 vLLM 前面。 决定每个请求该去哪台机器。 它会看 KV 缓存，尽量把请求发到有现成草稿纸的机器上。 KV 缓存就是解码时留的草稿纸。 实测数据挺亮眼。 共享前缀的场景下，首字延迟从 6.88 秒掉到 0.31 秒。 多轮对话的端到端延迟少了 32%。 现在是 v0.1.0-alpha.7，还很早期。 只支持 vLLM，SGLang 还在排队。 来源：<a href="https://www.marktechpost.com/2026/11/07/buoyant-kinference-open-source-inference-control-plane-kubernetes-vllm/">https://www.marktechpost.com/2026/11/07/buoyant-kinference-open-source-inference-control-plane-kubernetes-vllm/</a></p>
+<h2>访谈与深度</h2>
+<p>X、HN、Reddit、中文媒体都扫了。 窗口内没有新的访谈和深度内容。 Latent Space 最新还是之前那期。 内容报过，不重复。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 23 点版、21 点版去重。 Blackfuel 巴塞罗那机房 21 点版报过。 Kimi K3.1 Pro 权重已报过。 KVGuard 解读 23 点版报过。 Thaw、Flide、OpenJev 都是旧闻，不报。 其余合入均为窗口内首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-07-0100/">01点版</a></p></body></html>
