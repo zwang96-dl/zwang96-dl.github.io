@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月7日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-07"/>
+<meta name="doc-ts" content="2026-11-07T19:00:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-07（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-07（11点版）</h1>
+<p>11点版来了。</p>
+<p>这轮比 09点版热闹一点。 Qwen 4 还是没来。 但隔壁 Qoder 先悄悄上了一个神秘模型。 框架那边合入不多。 多模态相关的有两条。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，一个没动</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 还是 v1.6.2。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 llama.cpp 还是 b12189。 没有新快照。 来源：GitHub releases</p>
+<p><strong>SGLang：1 条，多模态小修补</strong></p>
+<p>SGLang 合入 #49006。 rust-server 把图片细节提示传给多模态处理器。 rust-server 是 SGLang 的 Rust 重写版服务端。 这条是那条长链路上的最后一环。 改动很小，先记一笔。 来源：<a href="https://github.com/sgl-project/sglang/pull/49006">https://github.com/sgl-project/sglang/pull/49006</a></p>
+<p><strong>Dynamo：1 条，多模态 worker 的修补</strong></p>
+<p>Dynamo 合入 #18053。 修的是 SGLang 的多模态 worker。 开思考加强制工具调用时，前后端会抢边界。 原因是推理门控的信息没公示。 现在按 worker 角色公示门控。 两边不再打架。 H100 上拿 Qwen3.5-4B 实测，6 个场景全过。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18053">https://github.com/ai-dynamo/dynamo/pull/18053</a></p>
+<p><strong>llama.cpp：1 条，新支持一个多模态模型</strong></p>
+<p>llama.cpp 合入 #31819。 mtmd 支持 MageVL-Cowork 模型。 mtmd 是 llama.cpp 里处理多模态的那块。 MageVL-Cowork 是微软的多模态模型。 RoPE（旋转位置编码）还要再打磨。 Metal 上还有个小偏差待修。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31819">https://github.com/ggml-org/llama.cpp/pull/31819</a></p>
+<p><strong>FlashInfer：4 条，全是 cake 内核打磨</strong></p>
+<p>FlashInfer 合入 #9101。 FP8 行式 GEMM 加 all-reduce 换了新布局。 覆盖 SM90 的 2 卡、4 卡、8 卡并行。 SM90 就是 H100 那代卡的编号。 FlashInfer 还合入 #9103。 GDN 确定性训练里，q 和 k 改成原地读。 GDN 是一种省显存的注意力算法。 其余两条是修补和开关收口。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9101">https://github.com/flashinfer-ai/flashinfer/pull/9101</a></p>
+<p><strong>vLLM：4 条，全是小活</strong></p>
+<p>vLLM 合入 #66228。 MiniMax-M3 的内核版本 bump 了一下。 vLLM 还合入 #66100。 CPU 算子挪了个位置，纯重构。 vLLM 还合入 #65957。 ROCm 的 CI 缓存改了改。 vLLM 还合入 #65743。 删了一批死代码。 来源：<a href="https://github.com/vllm-project/vllm/pull/66228">https://github.com/vllm-project/vllm/pull/66228</a></p>
+<p><strong>其余几家</strong></p>
+<p>TRT-LLM、LMDeploy、TGI 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没出</strong></p>
+<p>最新发表还是 11 月 5 日那批。 下一批按惯例在美东时间今晚 8 点出。 也就是你这边今天下午 5 点。 17 点版再看。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：还是没来，预告帖破 220 万浏览</strong></p>
+<p>11 月 6 日那张海报，浏览量已经破 220 万。 点赞超过 1.7 万。 但 HF 上还是没有 Qwen 4 的仓库。 传的下周发窗口，明天就关了。 等官宣再说，别按传言排期。 来源：<a href="https://pasqualepillitteri.it/zh/news/30993/qwen4-teaser-the-becoming-begins-zh">https://pasqualepillitteri.it/zh/news/30993/qwen4-teaser-the-becoming-begins-zh</a></p>
+<p><strong>Qoduck：Qoder 悄悄上了一个神秘模型</strong></p>
+<p>Qoder 是阿里的编程助手应用。 昨天傍晚，它的选择器里多了一个新模型。 名字叫 Qoduck。 个人用户限时免费。 官方页面自己都说，身份还没公开。 阿里云官方账号今天凌晨转发了这条消息。 只留了一句，别问它从哪来。 时间点卡在 Qwen 预告第二天。 有人猜这就是 Qwen 4。 也有早期对比说，连 Qwen 4 Flash 都不是。 没有参数，没有跑分，没有价格。 先当个彩蛋看，别当官宣。 来源：<a href="https://cellcog.ai/blog/qwen-4-release-date/">https://cellcog.ai/blog/qwen-4-release-date/</a></p>
+<p><strong>Qwen 4 preview：有人自称提前玩到了</strong></p>
+<p>WorldofAI 今天发了个视频。 作者说自己拿到了 Qwen 4 preview。 在 Qwen Code 里跑了一圈。 还说合作方手滑发过一张宣传图。 图上写着 100 万 token 上下文。 还支持图片和工具调用。 输入输出 token 免费。 图已经删了，消息没法核实。 作者猜下周发，内测先玩两天。 全是二手传言，看看就好。 来源：<a href="https://iamag.it/news/qwen-4-preview-leak-max-test-arena">https://iamag.it/news/qwen-4-preview-leak-max-test-arena</a></p>
+<p><strong>Saber：Rust 写的新引擎，专跑 AMD 消费卡</strong></p>
+<p>Saber 是个新推理引擎，用 Rust 写的。 目标是 AMD 的 R9700 消费卡。 Qwen3.8 27B prefill 每秒 6645 token。 decode 峰值 316 token 每秒。 测试机是两张 R9700，加一颗 9900X。 数字来自 Reddit 帖子，不是官方跑分。 但 AMD 消费卡能跑大模型，值得留意。 来源：<a href="https://daily.rclabs.in/trackers/benchmarks">https://daily.rclabs.in/trackers/benchmarks</a></p>
+<h2>访谈与深度</h2>
+<p><strong>r/LocalLLaMA：本地推理引擎是不是太多了</strong></p>
+<p>去年 3 月，几个老引擎就够用了。 现在又冒出 Strata、Basalt、Maya 这些新名字。 楼主问大家都用什么，怎么跟得上更新。 讨论很快拐了个弯。 到底还需不需要追新引擎。 有人说 Strata 跑 Qwen 很香。 也有人说 llama.cpp 够用，别折腾。 想给本地推理选引擎的人，可以扫一眼。 来源：<a href="https://ai-release.org/posts/stoit-li-gnatsya-za-novymi-inference-dvizhkami-spor-v-r-localllama-8d2bbf97_en.html">https://ai-release.org/posts/stoit-li-gnatsya-za-novymi-inference-dvizhkami-spor-v-r-localllama-8d2bbf97_en.html</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 09 点版、07 点版、05 点版去重。 Qwen 4 海报，09 点版报过。 Latent Space 那期 S-1，07 点版报过。 BalanceRoute 的精读，07 点版报过。 其余合入均为窗口内首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-07-1100/">11点版</a></p></body></html>
