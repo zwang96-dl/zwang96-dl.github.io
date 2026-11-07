@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月6日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-06"/>
+<meta name="doc-ts" content="2026-11-07T01:04:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-06（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-06（17点版）</h1>
+<p>17点版来了。</p>
+<p>这轮没有新版本发布。 只有一处水位动了。 各家合入以小修打磨为主。 arXiv 新一批还没出来。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动一处</strong></p>
+<p>llama.cpp 快照升到 b12180。 发布时间是今天 23:18。 按惯例快照不算正式版。 正式版还是 v0.9.0。</p>
+<p>其余全平，没新版。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 Dynamo 还是 v1.6.2。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。</p>
+<p><strong>vLLM：9 条合入，都是小修</strong></p>
+<p>vLLM 合入 #65791。 把量化里的 silu_and_mul 向量化了。 大输入跑得更快。 silu 是一种激活函数。</p>
+<p>vLLM 还合入 #57823。 修了 MoE 路由的一个越界问题。 MoE 就是专家混合模型。 路由是决定 token 找哪个专家。</p>
+<p>其余几条是 DP 校验、启动和前端小修。</p>
+<p>#65792 给并行配置加了哈希校验。</p>
+<p>#64622 启动时跳过不必要的显存预估。</p>
+<p>#60308 拒收 Pillow 判定为炸弹的图片。</p>
+<p>Pillow 是常用的图片处理库。 来源：<a href="https://github.com/vllm-project/vllm/pull/65791">https://github.com/vllm-project/vllm/pull/65791</a></p>
+<p><strong>SGLang：15 条，几处值得看</strong></p>
+<p>SGLang 合入 #47930。 megakernel 开始支持 prefill 步了。 也支持了 extend 步。 megakernel 是把小核融成大核的打法。 像把零活拼成一条流水线。</p>
+<p>SGLang 还合入 #48971。 dsv4 的 MXFP8 矩阵乘改走 cuDNN 了。 只在 8K 行以上、CC 10.7 的卡上生效。 MXFP8 是一种 8 位浮点格式。 cuDNN 是英伟达的深度学习加速库。</p>
+<p>SGLang 还合入 #47695。 AMD 的 Quark int4 量化上了 ROCm。 还给 Strix Halo 加了编解码核。 Strix Halo 是 AMD 的 AI 笔记本芯片。 int4 就是 4 位整数量化。</p>
+<p>SGLang 还合入 #48241。 权重同步改成一份载荷服务所有 rank。 rank 就是并行里的每个分片。 省了重复打包的开销。</p>
+<p>多模态那边合入 #48507。 收图特征时限制每卡的显存拷贝量。 多出来的先放主机内存里。 主机内存就是 CPU 那边的内存。</p>
+<p>其余几条是 DSpark、指标和依赖小修。</p>
+<p>#48831 备好 DSpark 草稿注意力元数据。</p>
+<p>DSpark 是一种投机解码方案。</p>
+<p>#48513 把媒体准入计时交给多模态处理器。</p>
+<p>#48468 把 FlashInfer 升到 0.7.3。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47930">https://github.com/sgl-project/sglang/pull/47930</a></p>
+<p><strong>TRT-LLM：有处破坏性改动</strong></p>
+<p>TRT-LLM 合入 #20703。 checkpoint 格式改成字符串枚举了。 还精简了 checkpoint 读写接口。 checkpoint 就是模型存盘文件。 这是破坏性改动，升级前先看迁移说明。 另一条 #21671 只是 MiniMax 测试小修。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20703">https://github.com/NVIDIA/TensorRT-LLM/pull/20703</a></p>
+<p><strong>FlashInfer：11 条，cake 内核打磨</strong></p>
+<p>FlashInfer 合入 #9023。 SM120 上 64K 上下文的 decode 换了更快程序。 对应的是 RTX 5090 那档卡。 其余多是 cake 内核的性能和重构。 cake 是它家的注意力内核系列。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9023">https://github.com/flashinfer-ai/flashinfer/pull/9023</a></p>
+<p><strong>其余几家</strong></p>
+<p>Dynamo 只合入 1 条文档。 llama.cpp 合入 #31822。 给 Hexagon 融合了一处归一化残差加法。 Hexagon 是高通的手机芯片。 LMDeploy、TGI、Mooncake 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 新一批还没出来。 到 17:05 还是 11 月 6 日那批。 API 还被限流了，返回 429。 429 就是请求太频繁被暂时拦下。 19 点版再看新一批。 11 月 5 日那批论文之前几期已报过。 这轮不重复。</p>
+<h2>业内新闻</h2>
+<p>X、Hacker News、Reddit 都扫了。 窗口内没有 serving 新动向。 中文 AI 媒体也没有新料。 Latent Space 最新还是那期生物对话。 09 点版已经提过。 Kimi K3 的 8×B300 实测也报过。 不重复。</p>
+<h2>深读</h2>
+<p>本轮没有值得深读的新内容。 合入多是小修和打磨。 等 arXiv 新一批或有实测再说。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 15 点版、13 点版去重。 Kimi K3 权重和部署教程已报过。 8×B300 实测已报过。 llama.cpp 快照 b12180 是新内容。 其余合入均为窗口内首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-06-1700/">17点版</a></p></body></html>
