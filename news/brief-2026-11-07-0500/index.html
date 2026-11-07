@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月7日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-07"/>
+<meta name="doc-ts" content="2026-11-07T12:58:57"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-07（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-07（05点版）</h1>
+<p>05点版来了。</p>
+<p>深夜这轮还是很安静。 没有新版本，没有新论文。 但框架合入有两条跟 decode 并行有关，值得看一眼。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了一个快照</strong></p>
+<p>llama.cpp 的每日快照从 b12185 涨到 b12189。 每日快照就是每天自动打的构建号。 不算正式发版，但能看出主线在动。 其余全平：vLLM v0.33.0，SGLang v0.5.23。 TRT-LLM v1.4.0rc3，LMDeploy v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 还是 v0.7.4rc1，正式版 v0.7.3。 来源：GitHub releases</p>
+<p><strong>SGLang：5 条，多模态那条最相关</strong></p>
+<p>SGLang 合入 #43886。 并行采样时，空的多媒体输入不再报错。 以前传了空的视频或音频列表会直接崩。 现在当成没传处理，请求维度也保住了。 并行采样就是一次出好几个答案。 这条补的是上轮 #41768 没盖到的边角。 来源：<a href="https://github.com/sgl-project/sglang/pull/43886">https://github.com/sgl-project/sglang/pull/43886</a></p>
+<p>SGLang 还合入 #47247。 DeepSeek v4.1 的 MoE 输出改走新路线。 以前是全量广播，再各取所需。 现在只传各家要的那份，通信量少一截。 MoE 就是模型里轮流上岗的那堆子网络。 CP 是把上下文切开，分给多卡算。 来源：<a href="https://github.com/sgl-project/sglang/pull/47247">https://github.com/sgl-project/sglang/pull/47247</a></p>
+<p>其余 3 条都是小活。</p>
+<p>#47538 让 SageMaker 的请求按内容分流。</p>
+<p>补全走补全接口，向量走向量接口。</p>
+<p>#47828 把模拟器的依赖改成按需加载。</p>
+<p>#48903 补了一组 Kandinsky 6 的精度测试。</p>
+<p><strong>vLLM：2 条，decode 通信那条值得记</strong></p>
+<p>vLLM 合入 #64994。 MLA decode 的卡间通信瘦身了。 以前每头传 514 个数，现在只传 130 个。 差不多砍到四分之一，省的是跨卡带宽。 做法是先在本地升维投影再传。 只改舍入误差，结果基本不变。 Kimi-K3 这类 MLA 模型直接受益。 来源：<a href="https://github.com/vllm-project/vllm/pull/64994">https://github.com/vllm-project/vllm/pull/64994</a></p>
+<p>vLLM 还合入 #65508。 ROCm 上 MiniMax-M3.1 的解码内核提速了。 用的是 MXFP8，一种 8 位量化格式。 只影响 AMD 卡。</p>
+<p><strong>FlashInfer：4 条，全是 cake 内核</strong></p>
+<p>FlashInfer 合入 #9091。 MoE 大核在新卡上换了更快的组合方式。 FlashInfer 还合入 #9090。 更多 BF16 注意力调用改走预编译程序。 FlashInfer 还合入 #9088。 读不了的稀疏索引表直接拒掉。 免得悄悄算错，宁可报错。 FlashInfer 还合入 #9086。 Blackwell 的 MSA 分页 FP8 预填充提速了。 cake 是它家的注意力内核系列。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9091">https://github.com/flashinfer-ai/flashinfer/pull/9091</a></p>
+<p><strong>其余几家</strong></p>
+<p>TRT-LLM、LMDeploy、TGI 零合入。 Dynamo 只有 1 条文档合入。 llama.cpp 有 2 条，都是小修补。</p>
+<p>#31852 修了 Metal 上的 GROUP_NORM。</p>
+<p>#30779 改了服务端槽位的访问顺序。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没出</strong></p>
+<p>最新发表还是 11 月 5 日那批。 API 核过，最新是 11 月 5 日 17:42。 下一批按惯例在美东时间今晚 8 点出。 也就是你这边今天下午 5 点。 17 点版再看。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有新料</strong></p>
+<p>X、HN、Reddit、中文媒体都没新东西。 Kinference、Mistral Large 4 都已报过。 Hy4、ERNIE 5.5 Flash 也都报过。</p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新内容</strong></p>
+<h2>去重脚注</h2>
+<p>本轮已与 03 点版、01 点版去重。 Kinference 01 点版报过。 Mistral Large 4、Hy4 均已报过。 ERNIE 5.5 Flash 也已报过。 Thaw 11 月 1 日 07 点版报过。 Spheron 的三方跑分是 8 月的老数据，不当新料报。 其余合入均为窗口内首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-07-0500/">05点版</a></p></body></html>
