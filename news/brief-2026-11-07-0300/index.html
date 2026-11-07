@@ -1,0 +1,72 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月7日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-07"/>
+<meta name="doc-ts" content="2026-11-07T10:58:45"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-07（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-07（03点版）</h1>
+<p>03点版来了。</p>
+<p>深夜这轮还是很安静。 没有新版本，没有新论文。 但 SGLang 有一条 PD 相关的合入值得看。 还有一篇 Paged Experts 的第三方实测，补了个并发短板。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：基本全平，只动了一个快照</strong></p>
+<p>llama.cpp 的每日快照从 b12182 涨到 b12185。 每日快照就是每天自动打的构建号。 不算正式发版，但能看出主线在动。 其余全平：vLLM v0.33.0，SGLang v0.5.23。 TRT-LLM v1.4.0rc3，LMDeploy v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 还是 v0.7.4rc1，正式版 v0.7.3。 来源：GitHub releases</p>
+<p><strong>SGLang：8 条，PD 那条最相关</strong></p>
+<p>SGLang 合入 #48375。 投机解码的 prefill 和 decode 两边，现在要对一下暗号。 暗号就是 spec_kv_layout，记录草稿 KV 的排布方式。 两边排布不一样就直接报错，不再悄悄算错。 这条跟你的 PD 解耦评估直接相关。 DSpark 和 DFlash 都是 DeepSeek 的投机解码方案。 来源：<a href="https://github.com/sgl-project/sglang/pull/48375">https://github.com/sgl-project/sglang/pull/48375</a></p>
+<p>其余 7 条全是 rust-server 那条线。 Rust 服务端就是 SGLang 正在用 Rust 重写服务端。 这批主要是启动校验、端口上报和配置收口。 比如 /generate 的返回里能看到当前 DP 排名了。 DP 排名就是数据并行里这台机器是第几号。 来源：<a href="https://github.com/sgl-project/sglang/pull/48572">https://github.com/sgl-project/sglang/pull/48572</a></p>
+<p><strong>vLLM：1 条，小修补</strong></p>
+<p>vLLM 合入 #66015。 修的是 DeepGEMM 的一个辅助函数。 DeepGEMM 是 DeepSeek 开源的矩阵乘法库。 MegaMoE 缓存了 SM 映射表之后，这个函数该停不停。 SM 映射表就是记录每块计算单元分工的表。 现在修好了，改动很小。 来源：<a href="https://github.com/vllm-project/vllm/pull/66015">https://github.com/vllm-project/vllm/pull/66015</a></p>
+<p><strong>FlashInfer：2 条，都是 cake 内核打磨</strong></p>
+<p>FlashInfer 合入 #9085。 cake 是它家的注意力内核系列。 这次把 Blackwell 新卡上的一类 prefill 换了条快路。 最快能快 1.18 倍。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9085">https://github.com/flashinfer-ai/flashinfer/pull/9085</a></p>
+<p>FlashInfer 还合入 #9079。 小尺寸反向传播改跑确定性程序。 结果不再随拼批变，复现评测更稳。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9079">https://github.com/flashinfer-ai/flashinfer/pull/9079</a></p>
+<p><strong>其余几家</strong></p>
+<p>TRT-LLM、Dynamo、llama.cpp 零合入。 LMDeploy、TGI、Mooncake 也零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没出</strong></p>
+<p>最新发表还是 11 月 5 日那批。 API 核过，最新是 11 月 5 日 18:59。 下一批按惯例在美东时间今晚 8 点出。 也就是你这边今天下午 5 点。 17 点版再看。</p>
+<h2>业内新闻</h2>
+<p><strong>窗口内没有新料</strong></p>
+<p>Blackfuel 巴塞罗那机房 21 点版报过。 Kinference 01 点版报过。 Kimi K3.1 Pro 权重已报过。 ERNIE 5.5 Flash、Hy4 也都报过。 X、HN、Reddit、中文媒体都没新东西。</p>
+<h2>访谈与深度</h2>
+<p><strong>Paged Experts 第三方实测：单人快，多人翻车</strong></p>
+<p>昨晚 dev.to 上出了一篇 Paged Experts 的实测解读。 Paged Experts 是 SGLang 0.5.23 的新功能。 它把 MoE 专家存在内存里，按需搬上显存。 MoE 专家就是模型里轮流上岗的那堆子网络。 小显存也能跑大模型，23 点版已经深读过。 这篇新在算了一笔账，还补了个并发短板。</p>
+<p>单人用确实快。 拿 Qwen3-30B-A3B 的 int4 版测的。 16GB 卡上能跑 205.6 tok/s。 tok/s 就是每秒吐多少个 token。 比 llama.cpp 调到最好还略快一点。 但 4 个人同时用就翻车了。 8GB 笔记本上只剩 11 tok/s，llama.cpp 还有 41。 作者给了一条选型公式。 常驻专家数 K 至少要大于并发数乘以 top_k。 top_k 就是每个 token 同时激活的专家数。 K 除以 top_k 小于 4 就输，大于等于 5 才赢。 单人自用不用管，多人共享先算好 K。 来源：<a href="https://dev.to/wolfsea2357/running-an-moe-model-larger-than-your-vram-sglang-paged-experts-the-pcie-math-and-the-4-request-1g9o">https://dev.to/wolfsea2357/running-an-moe-model-larger-than-your-vram-sglang-paged-experts-the-pcie-math-and-the-4-request-1g9o</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 01 点版、23 点版去重。 Blackfuel 巴塞罗那机房 21 点版报过。 Kinference 01 点版报过。 Kimi K3.1 Pro 权重已报过。 ERNIE 5.5 Flash、Hy4 都已报过。 Together Compiler 也已报过。 Paged Experts 本体 23 点版已深读。 本轮这篇是第三方实测解读，首次报出。 其余合入均为窗口内首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-07-0300/">03点版</a></p></body></html>
