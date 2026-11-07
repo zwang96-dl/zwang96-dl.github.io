@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月7日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-07"/>
+<meta name="doc-ts" content="2026-11-07T15:04:17"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-07（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-07（07点版）</h1>
+<p>07点版来了。</p>
+<p>清晨这轮还是很安静。 没有新版本，没有新论文。 但有两篇值得看的东西。 一篇是 DP 路由的论文精读。 一篇是 CNCF 讲推理冷启动的文章。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，一个没动</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 还是 v1.6.2。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 llama.cpp 还是 b12189。 没有新快照。 来源：GitHub releases</p>
+<p><strong>vLLM：2 条，都跟 sleep 模式有关</strong></p>
+<p>vLLM 合入 #66273。 Kimi-K3 的 latent-MoE 尾部融合。 在 sleep 模式下保住了。 sleep 模式就是让 GPU 休眠省电。 之前 #64583 把它关了。 因为二级休眠会丢掉融合内核的状态。</p>
+<p>#66010 修好后，状态能活下来。</p>
+<p>这次把开关恢复了。 来源：<a href="https://github.com/vllm-project/vllm/pull/66273">https://github.com/vllm-project/vllm/pull/66273</a></p>
+<p>vLLM 还合入 #66165。 二级休眠丢草稿权重时，现在会警告。 草稿模型是投机解码里先打草稿的小模型。 丢了它，醒来要重载。 警告里直接给了保留参数的开关。 来源：<a href="https://github.com/vllm-project/vllm/pull/66165">https://github.com/vllm-project/vllm/pull/66165</a></p>
+<p><strong>TRT-LLM：2 条，PD 那条值得记</strong></p>
+<p>TRT-LLM 合入 #21538。 原生 PD 解耦的 KV 传输加了回执 token。 接收方给每个发送方发 16 字节凭证。 每份结果都要对上凭证才认。 对不上就拒掉。 这就是给 KV 搬运加一道验货手续。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21538">https://github.com/NVIDIA/TensorRT-LLM/pull/21538</a></p>
+<p>TRT-LLM 还合入 #20813。 warmup 阶段复用采样同步和序列槽位。 warmup 就是正式开跑前的热身。 纯重构，没有行为变化。</p>
+<p><strong>FlashInfer：1 条，cake 内核打磨</strong></p>
+<p>FlashInfer 合入 #9089。 cake 是它家的注意力内核系列。 这次是 dsv4 在 sm_107a 上的 FP8 decode。 16 到 17 行的小批量，换三段切分合并。 sm_107a 就是 Rubin 那代卡的编号。</p>
+<p><strong>llama.cpp：1 条，SYCL 小修补</strong></p>
+<p>llama.cpp 合入 #30857。 SYCL 后端加了 f16 的 SWIGLU_OAI 支持。 SWIGLU 是模型里常用的激活结构。 只影响 Intel 那条线。</p>
+<p><strong>其余几家</strong></p>
+<p>SGLang、LMDeploy、TGI、Dynamo 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没出</strong></p>
+<p>最新发表还是 11 月 5 日那批。 下一批按惯例在美东时间今晚 8 点出。 也就是你这边今天下午 5 点。 17 点版再看。</p>
+<p><strong>BalanceRoute：DP 解码分活，路由做对多出 15%</strong></p>
+<p>港科大和华为的一篇论文。 NeurIPS 2026 接收。 今天中文媒体又报了一遍。 讲的是 DP 解码的负载均衡。 DP 是数据并行，模型复制多份各接请求。 解码每步都要等最慢的 worker。 这叫 barrier 同步，像接力等最后一个人。 分活不均，全员空等。 论文的办法是 F-score 打分。 分过去能省多少不均衡，就打多少分。 BR-0 不用预测，现算现分。 BR-H 往前看 80 步，顺带猜请求还能吐多长。 144 张昇腾 910C 上跑 DeepSeek-V3 671B。 相对最强的老办法，吞吐涨 15.4%。 卡越多赚得越多，16 组时涨到 34.5%。 精读笔记已写好，含原文 4 张图。 跟你的 PD 评估直接对口。 来源：<a href="https://arxiv.org/abs/2605.06113">https://arxiv.org/abs/2605.06113</a></p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：传的“下周发”窗口快关了，影子还没见着</strong></p>
+<p>传了半个月的 Qwen 4，还是没来。 “下周发”的说法来自 10 月 29 日发布会现场。 一位参会者转述了 CTO 的话。 算下来窗口是 11 月 2 日到 8 日。 今天已经 7 号了。 HF 和 Model Studio 上还是没影。 官方只确认过一件事。 Qwen 4 正在训练中。 四档名字都只是幻灯片上的。 没有权重，没有价格，没有模型卡。 等官宣再说，别按传言排期。 来源：<a href="https://bizscoreai.com/blog/qwen-4-release-alibaba-confirmed-rumored/">https://bizscoreai.com/blog/qwen-4-release-alibaba-confirmed-rumored/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>CNCF：推理服务启动慢，vLLM 和 SGLang 各有招</strong></p>
+<p>CNCF 11 月 6 日的一篇博文。 讲的是推理服务启动加速。 扩容时加一台机器，要等它能接请求才算数。 权重加载和初始化就是这段等待。 vLLM 的办法叫 Fast Start。 常驻一个权重守护进程。 权重处理好放显存里，新实例直接共享。 还支持 CRIU 快照恢复。 SGLang 那边也有权重缓存守护进程。 路线图叫 Fast Engine Recovery。 Dynamo 还有个独立的 Snapshot 项目。 文章把三家的路数一次讲清了。 来源：<a href="https://www.cncf.io/blog/2026/11/06/faster-llm-inference-startup-what-you-need-to-know/">https://www.cncf.io/blog/2026/11/06/faster-llm-inference-startup-what-you-need-to-know/</a></p>
+<p><strong>Latent Space 新单集：Anthropic 的 S-1 到底说了什么</strong></p>
+<p>Latent Space 今天刚出一期深挖。 嘉宾是 Altimeter 的 Jamin Ball。 聊 Anthropic 的 S-1 文件。 S-1 就是公司上市前交的招股书。 102 分钟，偏商业面。 推理 serving 的直接干货不多。 但想看 Anthropic 怎么赚钱，值得听。 来源：<a href="https://open.spotify.com/episode/4OZTn5I37vsr2MMXpAUob6">https://open.spotify.com/episode/4OZTn5I37vsr2MMXpAUob6</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 05 点版、03 点版、01 点版去重。 KVGuard 的论文和解读，23 点版报过。 Blackfuel 巴塞罗那部署，21 点版报过。 Together Compiler 之前已报过。 Mistral Large 4、Hy4 均已报过。 ERNIE 5.5 Flash 也已报过。 Thaw 11 月 1 日 07 点版报过。 其余合入均为窗口内首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-07-0700/">07点版</a></p></body></html>
