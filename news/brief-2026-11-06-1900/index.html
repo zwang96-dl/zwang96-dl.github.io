@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月6日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-06"/>
+<meta name="doc-ts" content="2026-11-07T03:04:03"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-06（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-06（19点版）</h1>
+<p>19点版来了。</p>
+<p>这轮没有新版本发布。 水位一处没动。 但有两篇实测文章值得看。 一篇讲 SGLang 的新功能。 一篇把六个引擎拉出来同台跑分。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 llama.cpp 快照还是 b12180。 正式版还是 v0.9.0。 TGI 还是 v3.3.7。 Dynamo 还是 v1.6.2。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。</p>
+<p><strong>vLLM：2 条合入</strong></p>
+<p>vLLM 合入 #66188。 给 MiniMax-M3.1-Flash 做了 MI355X 配方。 MI355X 是 AMD 的新推理卡。 还带了一组可选优化。 vLLM 还合入 #64829。 CPU 上的 GDN 投机解码加速了。 GDN 是一种投机解码方案。 改的是每步的循环更新。 来源：<a href="https://github.com/vllm-project/vllm/pull/66188">https://github.com/vllm-project/vllm/pull/66188</a></p>
+<p><strong>SGLang：11 条，Kimi-K3.1 占大头</strong></p>
+<p>SGLang 合入 #48710。 Kimi-K3.1 的 MegaMoE 上线了。 还带了可断点 prefill 图和 DFlash。 prefill 就是读题那一步。 DFlash 是一种投机解码的草稿器。 SGLang 还合入 #48709。 Kimi-K3.1 的 prefill 上下文并行。 SGLang 还合入 #48712。 Kimi-K3.1 的 prefill 图可以断点续跑。 SGLang 还合入 #48584。 decode 的 MoE 前端按 TP 分片了。 TP 就是张量并行。 SGLang 还合入 #45886。 InstantTensor 把加载时占的显存还给 KV。 KV 就是解码时留的草稿纸。 其余几条是 dsv4 注意力修补和 AMD 测试。 来源：<a href="https://github.com/sgl-project/sglang/pull/48710">https://github.com/sgl-project/sglang/pull/48710</a></p>
+<p><strong>TRT-LLM：2 条</strong></p>
+<p>TRT-LLM 合入 #21535。 Muse Spark 的 DFlash 草稿器来了。 带了拒绝采样和冷页压缩。 TRT-LLM 还合入 #18912。 Gemma4 支持可变窗口注意力了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21535">https://github.com/NVIDIA/TensorRT-LLM/pull/21535</a></p>
+<p><strong>Dynamo：10 条，基本是搬运</strong></p>
+<p>Dynamo 这轮合入 10 条。 9 条是 1.7.0 发布分支的 cherry-pick。 cherry-pick 就是把改动从主线挑过来。 内容是容器、前端、路由和算子小修。 没有新功能。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18348">https://github.com/ai-dynamo/dynamo/pull/18348</a></p>
+<p><strong>FlashInfer：16 条，全是 cake 内核</strong></p>
+<p>FlashInfer 合入 16 条。 基本是 cake 内核的性能打磨。 cake 是它家的注意力内核系列。 覆盖 FP8、反向传播和归一化。 还有一条加了 batch 不变注意力。 batch 不变就是结果不随 batch 大小变。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9047">https://github.com/flashinfer-ai/flashinfer/pull/9047</a></p>
+<p><strong>其余几家</strong></p>
+<p>llama.cpp、LMDeploy、TGI、Mooncake。 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没出</strong></p>
+<p>到 19:00，最新还是 11 月 5 日那批。 API 核过，最新发表是 11 月 5 日 18:59。 新一批比平时晚了 3 个小时。 21 点版再看。</p>
+<p><strong>值得深读：SGLang Paged Experts</strong></p>
+<p>SGLang 0.5.23 有个新开关。 名字叫 Paged Experts。 它让装不进显存的 MoE 模型，在小卡上跑起来。 专家平时住主机内存。 用哪个，就把哪个搬上显存算。 像一个小工作台，工具都在仓库里。 Qwen3-30B-A3B 在 16GB 卡上跑出 205.6 词每秒。 跟 CPU offload 比快 12 倍。 跟调优后的 llama.cpp 基本打平。 FP8 那档快将近 2 倍。 但有个前提：连续的词得爱用同一批专家。 不然 PCIe 根本搬不过来。 4 个并发请求时，K 不够大就翻车。 K 是显存里常驻的专家槽位数。 公式很干净：K 要大于等于 batch 乘 top_k。 最要命的是静默算错。 有两类旧 bug 都不报错，只悄悄吐错答案。 上这个功能前，先拿自己的格式跑精度测试。 精读笔记已写好，含原文 3 张图。 来源：<a href="https://dev.to/wolfsea2357/running-an-moe-model-larger-than-your-vram-sglang-paged-experts-the-pcie-math-and-the-4-request-1g9o">https://dev.to/wolfsea2357/running-an-moe-model-larger-than-your-vram-sglang-paged-experts-the-pcie-math-and-the-4-request-1g9o</a></p>
+<p><strong>六个引擎同台跑分，vLLM 赢了</strong></p>
+<p>有人在 AWS 的 L4 卡上横评了六个引擎。 同一块卡，同一个模型，同一套题。 模型是 Gemma 4 E2B。 vLLM 每档都是最快的。 单请求 275.3 词每秒。 64 并发 4516 词每秒。 SGLang 同条件是 2967。 草稿器是胜负手。 drafter 就是先让小模型打草稿的加速法。 它给 vLLM 提速 1.96 倍。 给 SGLang 提速 1.39 倍。 但 SGLang 的草稿器高并发反而拖后腿。 64 并发时只有不用草稿器的 0.69 倍。 成本也算出来了。 满载时每百万输出词 0.08 美元。 注意：SGLang 跑这个模型要打两个补丁。 来源：<a href="https://xbill999.medium.com/six-serving-engines-on-one-ec2-g6-gemma-4-e2b-on-an-nvidia-l4-8f4b719f1ecb">https://xbill999.medium.com/six-serving-engines-on-one-ec2-g6-gemma-4-e2b-on-an-nvidia-l4-8f4b719f1ecb</a></p>
+<h2>业内新闻</h2>
+<p><strong>Inkling 2 Small 来了，权重下周放出</strong></p>
+<p>Thinking Machines Lab 发布了新模型。 名字叫 Inkling 2 Small。 594B 参数，每次只激活 17B。 上下文 1M 词。 现在只能在它家的 Tinker 平台上用。 权重下周按 Apache 2.0 放出。 放出后，它会是美国那边分数最高的开源权重模型。 到时候 vLLM 和 SGLang 的适配值得盯。 来源：<a href="https://www.unite.ai/thinking-machines-lab-launches-inkling-2-small-with-open-weights-pending/">https://www.unite.ai/thinking-machines-lab-launches-inkling-2-small-with-open-weights-pending/</a></p>
+<p><strong>RTX Spark 在 Linux 下推理掉到 35%</strong></p>
+<p>HN 上在讨论一个坑。 RTX Spark 笔记本跑 Linux，推理速度只剩 35%。 原因是电源管理逻辑没进 Linux 驱动。 固件是给 Windows 做的加密固件。 修好要等英伟达移植驱动。 你之前关注过 DGX Spark，这事值得记一笔。 来源：<a href="https://news.ycombinator.com/item?id=50362905">https://news.ycombinator.com/item?id=50362905</a></p>
+<h2>访谈与深度</h2>
+<p>X、Reddit、中文媒体都扫了。 窗口内没有新的访谈和深度内容。 Latent Space 最新还是 11 月 4 日那期。 内容之前报过，不重复。</p>
+<h2>深读</h2>
+<p>本轮深读一篇：SGLang Paged Experts。 精读笔记已存好，含原文 3 张图。 全文：<a href="https://zwang96-dl.github.io/news/deep-20261107-sglang-paged-experts-moe/">SGLang Paged Experts 精读</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 17 点版、15 点版去重。 Kimi K3.1 Pro 权重和部署教程已报过。 8×B300 实测已报过。 Latent Space 11 月 4 日那期已报过。 Kinference 是 11 月 4 日旧闻，不报。 Flide 是 11 月 2 日旧闻，不报。 llama.cpp 快照 b12180 已报过。 其余合入均为窗口内首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-06-1900/">19点版</a></p></body></html>
