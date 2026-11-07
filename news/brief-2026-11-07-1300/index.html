@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月7日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-07"/>
+<meta name="doc-ts" content="2026-11-07T21:04:59"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-07（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-07（13点版）</h1>
+<p>13点版来了。</p>
+<p>这轮比 11 点版安静。 版本水位全平，合入都是小活。 但有两条新东西值得看。 一条是腾讯的投机解码新论文。 一条是 Google 开源的推理引擎。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，一个没动</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 还是 v1.6.2。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 llama.cpp 还是 b12189。 没有新快照。 来源：GitHub releases</p>
+<p><strong>vLLM：3 条，修编码器模型的 bug 最值得记</strong></p>
+<p>vLLM 合入 #65275。 修的是纯编码器模型开 FULL CUDA 图算错。 FULL CUDA 图就是把整段计算预先录好。 编码器模型没有 KV 缓存。 录图用的假 batch 会误导它。 现在按承诺的最大长度来录。 来源：<a href="https://github.com/vllm-project/vllm/pull/65275">https://github.com/vllm-project/vllm/pull/65275</a></p>
+<p>其余两条是小活。</p>
+<p>#66297 让 ROCm 的 Zen5 测试可跳过。</p>
+<p>#61813 只是换了上游的模型配置。</p>
+<p><strong>SGLang：3 条，日志那条最有用</strong></p>
+<p>SGLang 合入 #49023。 rust-server 开始记 JSON 日志。 请求按行记进日志目录。 OpenAI 格式的请求按原样记。 以后排障翻日志方便多了。 rust-server 是 SGLang 的 Rust 重写版服务端。 来源：<a href="https://github.com/sgl-project/sglang/pull/49023">https://github.com/sgl-project/sglang/pull/49023</a></p>
+<p>其余两条是文档和测试。</p>
+<p>#49087 更新了 AMD 的 cookbook 文档。</p>
+<p>#49016 只是把测试里的前端版本钉住。</p>
+<p><strong>FlashInfer：3 条，全是 cake 内核打磨</strong></p>
+<p>FlashInfer 合入 #9115。 GDN 确定性训练里，v 改成原地读。 GDN 是一种省显存的注意力算法。 FlashInfer 还合入 #9113。 DSA 索引器的 top-k 改成可复现。 FlashInfer 还合入 #9110。 NVFP4 累加器缓存做了加固。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9110">https://github.com/flashinfer-ai/flashinfer/pull/9110</a></p>
+<p><strong>其余几家</strong></p>
+<p>TRT-LLM、LMDeploy、llama.cpp 零合入。 Dynamo、TGI 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没出</strong></p>
+<p>最新发表还是 11 月 5 日那批。 下一批按惯例在美东时间今晚 8 点出。 也就是你这边今天下午 5 点。 17 点版再看。</p>
+<p><strong>DSpine：腾讯的投机解码新草稿器「值得深读」</strong></p>
+<p>投机解码就是先让小模型打草稿。 再让大模型一次批量改完。 并行草稿的问题是各位置互不知道对方写了啥。 前后接不上的词，大模型只认前缀。 断一次，后面整段全作废。 DSpine 的办法是每层都递话。 前一个位置刚猜出点眉目，就递给后一个。 像接力赛边跑边递棒，不用等全跑完。 Qwen3-8B 上平均接受长度从 3.77 涨到 4.82。 比最强的老办法还高一成。 SGLang 实测吞吐比 DFlash 高 23.3%。 代码和 Qwen3-8B 草稿权重都开源了。 这篇能帮你补投机解码的最新打法。 跟 SGLang 的 DSpark、DFlash 那条线直接接得上。 来源：<a href="https://arxiv.org/abs/2609.36173">https://arxiv.org/abs/2609.36173</a></p>
+<h2>业内新闻</h2>
+<p><strong>Google 开源 XSE：Python 里训，C++ 里跑</strong></p>
+<p>Google 把自家的推理引擎开源了。 名字叫 XSE，XLA Serving Engine 的缩写。 思路是 Python 里训，C++ 里跑。 模型先导出成 XLA SavedModel。 再由 C++ 服务加载执行。 Google 内部已经跑了超 600 万 QPS。 YouTube Shorts、Ads、Search 都在用。 单样本请求比优化过的 Python 服务快约 4.9 倍。 注意别会错意：它是一次性推理引擎。 推荐、视觉、小模型预测是它的活。 长上下文的大模型对话不归它管。 Google 自己也说这类活找 vLLM 和 SGLang。 来源：<a href="https://opensource.googleblog.com/2026/11/supercharging-xla-inference-xla-serving-engine.html">https://opensource.googleblog.com/2026/11/supercharging-xla-inference-xla-serving-engine.html</a></p>
+<p><strong>Qwen 4：还是没来，窗口明天就关了</strong></p>
+<p>传的下周发窗口，明天就关了。 HF 上还是没有 Qwen 4 的仓库。 Manifold 上押 11 月 9 日前发的概率只剩 10%。 等官宣再说，别按传言排期。 来源：<a href="https://cellcog.ai/blog/qwen-4-release-date/">https://cellcog.ai/blog/qwen-4-release-date/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>YouTube：推理服务器到底怎么同时接几百万请求</strong></p>
+<p>11 月 1 日上线的一期 35 分钟视频。 讲推理服务器怎么同时接几百万请求。 调度器、KV 缓存、采样器一个一个拆开讲。 拿 vLLM 和 SGLang 当例子。 还讲了分块读题和前缀缓存。 想系统补一遍 serving 原理的人，可以看这期。 来源：<a href="https://www.youtube.com/watch?v=T4SRu-trimA">https://www.youtube.com/watch?v=T4SRu-trimA</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 11 点版、09 点版、07 点版去重。 Qoduck、Saber、KVGuard 解读均已报过。 XSE、DSpine、serving 原理视频均为首次汇总。 其余合入均为窗口内首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-07-1300/">13点版</a></p></body></html>
