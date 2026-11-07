@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月6日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-06"/>
+<meta name="doc-ts" content="2026-11-07T05:08:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-06（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-06（21点版）</h1>
+<p>21点版来了。</p>
+<p>这轮没有大版本发布。 水位只有一处小动。 但有两组新跑分值得看。 一组是 GB300 上的。 一组是 Rubin 对 GB300 的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：基本全平</strong></p>
+<p>vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 还是 v1.6.2。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 只有 llama.cpp 动了。 快照从 b12180 升到 b12182。 改的是 meta 后端的小修补。 日常快照，不用在意。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b12182">https://github.com/ggml-org/llama.cpp/releases/tag/b12182</a></p>
+<p><strong>SGLang：12 条，Kimi-K3.1 继续占大头</strong></p>
+<p>SGLang 合入 #48739。 Kimi-K3.1 的 DSPARK 和 DFLASH。 现在能跑在 decode 上下文并行下了。 上下文并行就是把长上下文切开算。 DFlash 是一种投机解码的草稿器。 SGLang 还合入 #48740。 Kimi-K3.1 的 DCP decode reduce 更快了。 DCP 就是 decode 上下文并行。 SGLang 还合入 #48531。 MiniMax M3.1 的 FP8 计算更快了。 FP8 是一种 8 位量化格式。 SGLang 还合入 #49008。 rust-server 能按路由把请求发到指定卡上。 其余几条是 B200 调度和 MoE 小修。 来源：<a href="https://github.com/sgl-project/sglang/pull/48739">https://github.com/sgl-project/sglang/pull/48739</a></p>
+<p><strong>FlashInfer：12 条，全是 cake 内核</strong></p>
+<p>FlashInfer 合入 12 条。 基本是 cake 内核的性能打磨。 cake 是它家的注意力内核系列。 这次主攻 Rubin 和 GB300、B200。 Rubin 是英伟达的新架构。 有一条给 TRT-LLM 的 decode 加了可选优化。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9061">https://github.com/flashinfer-ai/flashinfer/pull/9061</a></p>
+<p><strong>其余几家</strong></p>
+<p>vLLM 合入 2 条。 一条是文档，一条是 XPU 测试跳过。 TRT-LLM 合入 1 条。 只是测试用例的小调整。 Dynamo 合入 2 条。 都是前端和解码的小修补。 LMDeploy 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批已出，但 API 限流没逐篇核对</strong></p>
+<p>11 月 6 日那批已经上线了。 cs.CL 一个分类就有 94 篇。 但 arXiv API 这轮限流了。 先报 503，后报 Rate exceeded。 没法逐篇筛标题。 23 点版再补筛。</p>
+<h2>业内新闻</h2>
+<p><strong>DeepSeek V4.1 Flash 在 GB300 上跑到 848 词每秒</strong></p>
+<p>Artificial Analysis 测了个新数。 DeepSeek V4.1 Flash 跑在 GB300 NVL72 上。 单个 agent 达到 848 词每秒。 之前是 596，涨了四成多。 秘诀是三件套。 vLLM 的新内核，加上投机解码，再加 Dynamo。 投机解码就是先让小模型打草稿。 Dynamo 是英伟达的推理调度框架。 来源：<a href="https://latent.space/p/ainews-anthropic-ipo-whither-now/">https://latent.space/p/ainews-anthropic-ipo-whither-now/</a></p>
+<p><strong>Rubin 对 GB300：单卡 5 倍</strong></p>
+<p>同一份榜单还测了 Rubin。 Rubin 是英伟达的新一代芯片。 单 agent 260 词每秒时。 每块卡的吞吐是 GB300 的 5 倍。 80 词每秒那档是 1.7 倍。 注意：这是厂商侧的测试口径。 数字看看就好，别当定论。 来源：<a href="https://latent.space/p/ainews-anthropic-ipo-whither-now/">https://latent.space/p/ainews-anthropic-ipo-whither-now/</a></p>
+<p><strong>Blackfuel 在巴塞罗那开了推理专属机房</strong></p>
+<p>Blackfuel 开了第一个推理专属部署。 地点在巴塞罗那。 用的全是 AMD MI355X 卡。 MI355X 是 AMD 的新推理卡。 软件栈就是 vLLM 加 SGLang。 客户按吞吐和延迟包容量。 按月付费，像租算力一样。 来源：<a href="https://www.europesays.com/spain/113190/">https://www.europesays.com/spain/113190/</a></p>
+<h2>访谈与深度</h2>
+<p>X、Reddit、中文媒体都扫了。 窗口内没有新的访谈和深度内容。 Latent Space 最新是 11 月 6 日这期。 内容上面已经报过，不重复。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 19 点版、17 点版去重。 KVGuard 的论文 11 月 5 日报过。 SIMPLE 能耗定律 11 月 3 日报过。 Paged Experts 是 19 点版的深读。 六引擎跑分 19 点版报过。 ERNIE 5.5、ZYFA、Together Compiler 都已报过。 Thaw、Flide、OpenJev 都是旧闻，不报。 其余合入均为窗口内首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-06-2100/">21点版</a></p></body></html>
