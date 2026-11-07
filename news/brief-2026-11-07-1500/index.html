@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月7日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-07"/>
+<meta name="doc-ts" content="2026-11-07T23:05:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-07（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-07（15点版）</h1>
+<p>15点版来了。</p>
+<p>这轮框架合入不少。 vLLM 删了老跑法。 SGLang 补了三个漏报的安全修复。 论文新一批还没出。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了一个快照</strong></p>
+<p>llama.cpp 每日快照从 b12189 涨到 b12192。 b12191 和 b12192 都在窗口里出的。 每日快照就是每天自动打的构建号。 不算正式发版。 其余全平：vLLM v0.33.0，SGLang v0.5.23。 TRT-LLM v1.4.0rc3，LMDeploy v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 Mooncake v0.3.14。 来源：GitHub releases</p>
+<p><strong>vLLM：3 条，删老跑法那条最值得记</strong></p>
+<p>vLLM 合入 #63373。 删掉了 Model Runner V1。 Model Runner 就是真正跑模型的那层。 V2 早就是默认了。 老版只剩一个环境变量能开。 这次连同只为它存在的代码一起删了。 Dual Batch Overlap 以后默认跑在 V2 上。 Dual Batch Overlap 是让两批请求重叠算的优化。 以后升级不用再惦记老跑法了。 来源：<a href="https://github.com/vllm-project/vllm/pull/63373">https://github.com/vllm-project/vllm/pull/63373</a></p>
+<p>vLLM 还合入 #66000。 修的是 Step5 的 MTP 投机解码。 Step5 是英伟达的新模型。 流水线并行大于 1 时，启动会报错。 现在跳过重复的配置校验。 还保住了目标模型的 CUDA 图设置。 CUDA 图就是把整段计算预先录好。 来源：<a href="https://github.com/vllm-project/vllm/pull/66000">https://github.com/vllm-project/vllm/pull/66000</a></p>
+<p>其余一条是小活。</p>
+<p>#63166 修 ROCm 上的一处测试失败。</p>
+<p>test_qwen.py 在 AITER 开启时报错。 AITER 是 AMD 的内核库。</p>
+<p><strong>SGLang：5 条，缓存上报那条最相关</strong></p>
+<p>SGLang 合入 #49030。 rust-server 开始上报缓存命中的 token 数。 开 --enable-cache-report 就能看到。 OpenAI 路由会直接报缓存了多少 token。 rust-server 是 SGLang 的 Rust 重写版服务端。 上轮刚合入 JSON 日志，这次是同一套组合拳。 以后看前缀缓存命中率，不用再自己翻日志算了。 跟你的前缀缓存评估直接相关。 来源：<a href="https://github.com/sgl-project/sglang/pull/49030">https://github.com/sgl-project/sglang/pull/49030</a></p>
+<p>SGLang 还合入 #49001。 MI450 的自定义 all-reduce 调优。 MI450 是 AMD 下一代卡。 all-reduce 是多卡之间同步数据的操作。 旧的调优表在 MI450 上比 RCCL 慢 21%。 这次换了 MI450 专用的表。 你的 MI350X 不受影响，但能看出 AMD 在给新卡铺路。 来源：<a href="https://github.com/sgl-project/sglang/pull/49001">https://github.com/sgl-project/sglang/pull/49001</a></p>
+<p>其余三条都是小修补。</p>
+<p>#47862 给每个模型配一份内置的 aiter 调优参数。</p>
+<p>#49092 修 kv-canary 的 warmup 传参。</p>
+<p>#49093 修 ernie55 的导入路径。</p>
+<p>kv-canary 是 SGLang 里探 KV 缓存状态的小工具。 warmup 就是正式开跑前的热身。</p>
+<p><strong>FlashInfer：5 条，全是 cake 内核打磨</strong></p>
+<p>FlashInfer 合入 #9120。 gated_act 的 MXFP8 内核换了新程序。 小调用更快，覆盖 SM100 和 SM107。 SM100 是 Blackwell 那代卡。 SM107 是 Rubin 那代卡。 FlashInfer 还合入 #9114。 NVFP4 的 MLA 分页解码宽路由瘦身了。 MLA 是 DeepSeek 那种省显存的注意力。 NVFP4 是一种 4 位浮点量化。 FlashInfer 还合入 #9116。 GQA 的 split backward 更快了。 结果逐位一致。 GQA 是分组查询注意力。 其余两条也是 cake 打磨。</p>
+<p>#9118 给 GDN 反向的伴随表计价。</p>
+<p>#9106 给因果卷积反向加更多 32 向量块。</p>
+<p>正向也加了 BF16 抽头。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9114">https://github.com/flashinfer-ai/flashinfer/pull/9114</a></p>
+<p><strong>llama.cpp：1 条，多模态音频的小修补</strong></p>
+<p>llama.cpp 合入 #31808。 mtmd 把 log-mel 计算挪进计算图。 mtmd 是 llama.cpp 里处理多模态的那块。 log-mel 是音频转特征的第一步。 以前音频预处理自己开线程。 请求一多，线程数会爆炸。 现在挪进计算图，统一调度。 还修了 Metal 上 DFT 的偏差。 DFT 是傅里叶变换。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31808">https://github.com/ggml-org/llama.cpp/pull/31808</a></p>
+<p><strong>其余几家</strong></p>
+<p>TRT-LLM、LMDeploy、TGI 零合入。 Dynamo、Mooncake 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没出</strong></p>
+<p>最新发表还是 11 月 5 日那批。 下一批按惯例在美东时间今晚 8 点出。 也就是你这边今天下午 5 点。 17 点版再看。</p>
+<p><strong>补报：SGLang 三个安全修复，之前几轮漏了</strong></p>
+<p>之前几轮漏了这三条，这轮补上。 SGLang 合入 #48518。 /server_info 接口会泄露管理密钥。 拿普通密钥的人也能看到 admin_api_key。 现在打码了。 日志、启动命令、崩溃转储里也一起打码。 跑 SGLang 的话，值得升一下。 来源：<a href="https://github.com/sgl-project/sglang/pull/48518">https://github.com/sgl-project/sglang/pull/48518</a></p>
+<p>SGLang 还合入 #48512。 rust-server 收了 --api-key 却不校验。 等于门上挂了锁却没锁上。 这次开始真正强制校验。 忽略的 flag 直接拒绝。 warmup 失败就退出。 来源：<a href="https://github.com/sgl-project/sglang/pull/48512">https://github.com/sgl-project/sglang/pull/48512</a></p>
+<p>SGLang 还合入 #48446。 批量请求共用同一份采样参数。 一个请求的截断会连累邻居。 现在每人一份，各改各的。 来源：<a href="https://github.com/sgl-project/sglang/pull/48446">https://github.com/sgl-project/sglang/pull/48446</a></p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：还是没来，新说法指向下周二</strong></p>
+<p>传的“下周发”窗口明天就关了。 HF 上还是没有 Qwen 4 的仓库。 社区新说法指向下周二 11 月 10 日。 官方只说过“正在训练”。 等官宣再说，别按传言排期。 来源：<a href="https://apimaster.ai/blog/qwen-4-api">https://apimaster.ai/blog/qwen-4-api</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新的深度内容</strong></p>
+<p>X、Reddit、HN、中文媒体窗口内无 serving 新料。 Latent Space 今天新出了一期。 但讲的是 Anthropic 上市文件。 跟 serving 无关，就不展开了。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 13 点版、11 点版、09 点版去重。 DSpine、XSE、六引擎跑分已报过。 Blackfuel、Kinference 也已报过。 Kimi K3.1 Pro、Cosmos 3 Nano 也已报过。 vLLM 删老跑法、SGLang 缓存上报首次汇总。 三个安全修复补报、Qwen 4 新说法也是首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-07-1500/">15点版</a></p></body></html>
