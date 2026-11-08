@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月8日 14:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-08"/>
+<meta name="doc-ts" content="2026-11-08T22:20:29"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-08（14点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-08（14点版）</h1>
+<p>14点版来了。</p>
+<p>周日下午，窗口很静。 框架没发新版，合入也只有几条小修。 但补报了两篇值得看的东西。 一篇是确定性推理的新论文。 一篇是冷启动优化的官方博客。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 Mooncake v0.3.14。 llama.cpp 还是 v0.9.0。 最新快照还是 b12211。 来源：GitHub releases</p>
+<p><strong>vLLM：窗口内零合入</strong></p>
+<p>上一条合入还是 13点版报过的 #63401。 之后再没动静。 周日下午本来就静。</p>
+<p><strong>SGLang：1 条，CI 小修</strong></p>
+<p>合入 #49201。 改的是测试重跑后的回复状态。 跟 serving 没关系。 一句话带过。 来源：<a href="https://github.com/sgl-project/sglang/pull/49201">https://github.com/sgl-project/sglang/pull/49201</a></p>
+<p><strong>FlashInfer：2 条，还是训练核</strong></p>
+<p>#9196、#9139。</p>
+<p>都是 cake 系列训练核打磨。 SM107 的 FP8 解码、MoE 分组矩阵乘。 跟推理 serving 关系不大。 一句话带过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9196">https://github.com/flashinfer-ai/flashinfer/pull/9196</a></p>
+<p><strong>TRT-LLM、Dynamo、LMDeploy、Mooncake：零合入</strong></p>
+<p>这四家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周日没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 下批周一出来再扫。</p>
+<p><strong>BlockLock：温度设 0 还飘？这篇给了更便宜的解法</strong></p>
+<p>这是补报，论文 11 月 4 日就发了。 之前几期漏了。 先说问题：同一个 prompt。 batch 里换几个邻居，结果就变了。 温度设 0 也救不了。 之前 Thinking Machines 那篇说过这事。 它的解法是全套 batch-invariant kernel。 代价是全场都慢。 BlockLock 换了个思路：只保住想保的那个请求。 不动别人。 办法是把它的执行形状钉死。 两种模式：Rows 是把 batch 切成固定宽度的行。 Pack 是把请求锚在末尾、前面塞隔离段。 都不用定制 kernel，普通框架就能跑。 数字很能打：相对 vLLM 的 batch-invariant 做法。 延迟降 53.5% 到 55%。 吞吐涨 115% 到 122%。 代价只有 5.4% 到 6.9% 的延迟。 五款稠密模型、三种卡上都做到 bitwise 一致。 为什么值得看：你的 PD 评估里精度门是硬指标。 batch 形状天天变就是精度变量。 这篇的思路能直接进精度门清单。 短板也说清楚：只测了稠密模型。 MoE 没测。 保证只在同一部署配置下成立。 换卡、换并行度要重验。 来源：<a href="https://arxiv.org/abs/2611.06977">https://arxiv.org/abs/2611.06977</a></p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：传的窗口今天关，还是没来</strong></p>
+<p>HF 上还是没有官方的 Qwen 4 仓库。 之前传的&quot;11 月 2 到 8 日&quot;窗口今天就关了。 社区新说法改到 11 月 10 日。 还是没官方口径。 别按传言排期。 来源：<a href="https://apimaster.ai/blog/qwen-4-api">https://apimaster.ai/blog/qwen-4-api</a></p>
+<p><strong>WeVisOne-VL：腾讯的新视觉模型，能直接上 vLLM</strong></p>
+<p>2B 和 4B 两个尺寸。 底座是 Qwen3-VL。 检测、OCR、分割、抠图一把抓。 不用再挂 SAM 那类外挂模型。 权重 Apache 2.0 开源。 原生支持 Transformers 和 vLLM。 4B 版在 Dense200 上拿 71.3 F1。 数字是官方自报。 注意一个短板：不存在的目标还会乱给框。 拒答率只有 52.6%。 来源：<a href="https://global1.news/tencent-wevisone-vl-unifies-detection-ocr-segmentation-and-matting">https://global1.news/tencent-wevisone-vl-unifies-detection-ocr-segmentation-and-matting</a></p>
+<h2>访谈与深度</h2>
+<p><strong>CNCF：冷启动优化，vLLM 和 SGLang 各走了一条路（补报）</strong></p>
+<p>博客 11 月 6 日发的，之前几期漏了。 先说 vLLM：Fast Start 是一套组合拳。 权重守护进程先把权重处理好、放显存里。 新引擎起来直接拿，不用重算。 还有 CRIU 快照，整个进程状态冻起来、直接恢复。 SGLang 这边：权重缓存守护进程，思路差不多。 还画了 Fast Engine Recovery 路线图。 想把初始化成本继续往下压。 为什么值得看：冷启动是你部署的隐性成本。 扩缩容、换模型都要过这一关。 两家的守护进程思路可以直接对照着看。 来源：<a href="https://www.cncf.io/blog/2026/11/06/faster-llm-inference-startup-what-you-need-to-know/">https://www.cncf.io/blog/2026/11/06/faster-llm-inference-startup-what-you-need-to-know/</a></p>
+<h2>值得深入学 Top 3</h2>
+<ol><li>BlockLock：确定性推理的新解法，便宜，不用定制 kernel，直接进你的精度门清单。</li><li>CNCF 冷启动博客：两家框架的快启思路对照看，扩缩容成本能少不少。</li><li>WeVisOne-VL：新视觉模型，vLLM 直接能跑，想试多模态新活可以拿它当靶子。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 13点版去重。 vLLM #65137、#65766、#63401 已报过。 SGLang #49152 已报过。 FlashInfer 八条已报过。 BlockLock、CNCF 冷启动博客、WeVisOne-VL 首次汇总。 Qwen 4 追踪更新。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-08-1400/">14点版</a></p></body></html>
