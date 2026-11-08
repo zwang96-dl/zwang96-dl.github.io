@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月7日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-07"/>
+<meta name="doc-ts" content="2026-11-08T04:58:22"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-07（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-07（21点版）</h1>
+<p>21点版来了。</p>
+<p>这轮很安静。 没有新版本，也没有新论文。 最值得看的是 FlashInfer 那条。 Rubin 卡上的 FP8 解码又抠了一点性能。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了快照</strong></p>
+<p>llama.cpp 快照从 b12198 涨到 b12199。 20:43 出的，窗口内唯一的水位变化。 每日快照就是每天自动打的构建号。 不算正式发版。 其余全平：vLLM v0.33.0，SGLang v0.5.23。 TRT-LLM v1.4.0rc3，LMDeploy v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 Mooncake v0.3.14。 来源：GitHub releases</p>
+<p><strong>vLLM、Dynamo、LMDeploy、Mooncake：零合入</strong></p>
+<p>这四家窗口内没有新合入。 vLLM 19 点那两条 20 点版已经报过。 这轮不再重复。</p>
+<p><strong>FlashInfer：1 条，Rubin 解码抠性能</strong></p>
+<p>FlashInfer 合入 #9136。 cake_dsv4 这条解码核改了合并方式。 SM107 就是 Rubin 那代卡的编号。 FP8 是一种 8 位浮点量化，省显存算得快。 改的是 1 到 8 行这种小批量解码。 一句话：小批量解码时分组合并更细了。 量不大，但 Rubin 的 FP8 解码路在持续打磨。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9136">https://github.com/flashinfer-ai/flashinfer/pull/9136</a></p>
+<p><strong>SGLang：1 条，还是图像生成</strong></p>
+<p>SGLang 合入 #47696。 扩散模型那条路，把单个打包序列走批量核。 FA3 就是 FlashAttention 3，一种注意力加速算法。 跟文本推理关系不大，一句话带过。 来源：<a href="https://github.com/sgl-project/sglang/pull/47696">https://github.com/sgl-project/sglang/pull/47696</a></p>
+<p><strong>TRT-LLM：1 条，纯 CI 噪音</strong></p>
+<p>TRT-LLM 合入 #21838。 只是在 A10 上豁免了一个失败用例。 跟功能无关，不展开。</p>
+<p><strong>llama.cpp：1 条，小修补</strong></p>
+<p>llama.cpp 合入 #31861。 工具调用参数里的非法 UTF-8 现在会被清洗掉。 UTF-8 就是一种常见的文本编码。 脏数据进来不再直接炸掉，更稳一点。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31861">https://github.com/ggml-org/llama.cpp/pull/31861</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 周末没有新批次。 下批周一出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：还是没来，窗口明天关</strong></p>
+<p>HF 上还是没有官方的 Qwen 4 仓库。 之前传的“11 月 2 到 8 日”窗口明天就关了。 社区“下周二 11 月 10 日”的说法还是没新证据。 等官宣再说，别按传言排期。 来源：<a href="https://felloai.com/qwen-4/">https://felloai.com/qwen-4/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新的深度内容</strong></p>
+<p>X、Reddit、HN、中文媒体窗口内无 serving 新料。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 20 点版、19 点版去重。 vLLM #66343、#65092 是 20 点版已报。 SGLang #48688、#47090 也是 20 点版已报。 FlashInfer #9136、SGLang #47696 首次汇总。 Qwen 4 仍在等官宣。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-07-2100/">21点版</a></p></body></html>
