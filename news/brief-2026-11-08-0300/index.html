@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月8日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-08"/>
+<meta name="doc-ts" content="2026-11-08T11:01:20"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-08（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-08（03点版）</h1>
+<p>03点版来了。</p>
+<p>这轮是周日凌晨档。 没有新版本，也没有新论文。 但 SGLang 合入了 4 条。 其中一条跟你前天看的 Paged Experts 直接相关。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>llama.cpp 快照还是 b12202。 那是 00:11 出的，01点版已报。 窗口内没有新快照。 每日快照就是每天自动打的构建号。 不算正式发版。 其余全平：vLLM v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 Mooncake v0.3.14。 来源：GitHub releases</p>
+<p><strong>vLLM、LMDeploy、Dynamo、Mooncake、TGI：零合入</strong></p>
+<p>这五家窗口内没有新合入。</p>
+<p><strong>SGLang：4 条，Paged Experts 那条最实在</strong></p>
+<p>SGLang 合入 #48642。 Paged Experts 启动更快了。 Paged Experts 是把专家放硬盘、按需搬上显存的打法。 以前每次启动都要重新加载、重新打包全部专家。 现在第一次启动把结果写到磁盘上。 以后启动直接读盘，不用重算。 Qwen3-30B-A3B 的加载时间从 34 秒降到 21.7 秒。 FP8 那版从 53 秒降到 29.3 秒。 小卡跑大模型，重启一次省一半时间。 来源：<a href="https://github.com/sgl-project/sglang/pull/48642">https://github.com/sgl-project/sglang/pull/48642</a></p>
+<p>SGLang 合入 #46483。 Kimi K3 在昇腾卡上解码少等一步。 以前解码每步都要等 CPU 同步序列长度。 现在直接从显存里读长度，不用等 CPU。 解码那条关键路径更顺了。 需要手动打开 FlashMLA 开关才生效。 来源：<a href="https://github.com/sgl-project/sglang/pull/46483">https://github.com/sgl-project/sglang/pull/46483</a></p>
+<p>SGLang 合入 #44955。 做图那条路，动态 LoRA 能同时挂多个了。 LoRA 是一种轻量微调，改小部分参数就能换风格。 以前一个目标只能挂一个动态适配器。 现在 Turbo 加风格可以一起挂了。 跟文本推理没关系，一句话带过。 来源：<a href="https://github.com/sgl-project/sglang/pull/44955">https://github.com/sgl-project/sglang/pull/44955</a></p>
+<p>SGLang 合入 #48370。 Gemma3 的归一化少跑几个核。 以前 q_norm 和 k_norm 各跑 10 个核。 现在融进一个核里，一步算完。 解码小步快一点，幅度不大。 来源：<a href="https://github.com/sgl-project/sglang/pull/48370">https://github.com/sgl-project/sglang/pull/48370</a></p>
+<p>#49154 只是 CI，不展开。</p>
+<p><strong>FlashInfer：4 条，1 条解码、3 条训练</strong></p>
+<p>FlashInfer 合入 #9150。 RTX PRO 6000 上 FP8 解码核换了路线。 4 个形状提速 1.09 到 1.66 倍。 平均约 1.41 倍。 只影响这张卡，别的不动。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9150">https://github.com/flashinfer-ai/flashinfer/pull/9150</a></p>
+<p>其余 3 条全是训练核。</p>
+<p>#9151、#9133、#9147。</p>
+<p>跟推理 serving 不沾边，不展开。</p>
+<p><strong>llama.cpp：2 条，都是小修补</strong></p>
+<p>llama.cpp 合入 #31854。 CPU 后端算 F16 矩阵乘时改走 F32。 F16 是 16 位浮点，省显存但精度低。 src1 改用 32 位，算得更准一点。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31854">https://github.com/ggml-org/llama.cpp/pull/31854</a></p>
+<p>llama.cpp 合入 #31578。 WebGPU 加了 COUNT_EQUAL 支持。 小众平台，一句话带过。</p>
+<p>#31529 只是 CI，不展开。</p>
+<p><strong>TRT-LLM：1 条，测试修补</strong></p>
+<p>TRT-LLM 合入 #21874。 Kimi K3 的测试里默认数据类型改对了。 只动测试，不展开。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周日没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 周末不发新批次。 下批周一出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>AWS：SageMaker 推理能切卡了（补报）</strong></p>
+<p>这条是 11 月 6 日的 AWS 博客。 之前几期没报过，这里补一句。 SageMaker 推理现在支持 MIG 切分。 MIG 是把一张卡切成几个独立小卡的技术。 一张卡最多切 7 份，各有各的算力和显存。 小模型不用再独占整张卡了。 多个模型可以合租一张卡，互不干扰。 只支持 inference components 那种多模型端点。 单模型端点和 serverless 暂时用不上。 来源：<a href="https://aws.amazon.com/blogs/machine-learning/sagemaker-inference-now-supports-multi-instance-gpu-to-maximize-gpu-utilization-for-model-endpoints/">https://aws.amazon.com/blogs/machine-learning/sagemaker-inference-now-supports-multi-instance-gpu-to-maximize-gpu-utilization-for-model-endpoints/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新的深度内容</strong></p>
+<p>Latent Space 最新还是 11 月 7 日那期。 讲 Anthropic 上市文件，07点版报过。 跟 serving 无关。 X、Reddit、HN、中文媒体窗口内无 serving 新料。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 01点版去重。 BlockLock、TPUv7 战报、XLA Serving 均已报过。 Kimi K3.1 Pro 权重、Qwen 4 也已报过。 SGLang #48642、#46483 首次汇总。</p>
+<p>#44955、#48370 首次汇总。</p>
+<p>FlashInfer #9150 首次汇总。</p>
+<p>#9151、#9133、#9147 首次汇总。</p>
+<p>llama.cpp #31854、#31578 首次汇总。 TRT-LLM #21874 首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-08-0300/">03点版</a></p></body></html>
