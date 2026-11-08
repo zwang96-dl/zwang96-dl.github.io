@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月7日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-07"/>
+<meta name="doc-ts" content="2026-11-08T01:00:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-07（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-07（17点版）</h1>
+<p>17点版来了。</p>
+<p>这轮很淡。 框架没发新版。 论文新一批还没出。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了两个快照</strong></p>
+<p>llama.cpp 快照从 b12192 涨到 b12194。 b12193 和 b12194 都在窗口里出的。 每日快照就是每天自动打的构建号。 不算正式发版。 其余全平：vLLM v0.33.0，SGLang v0.5.23。 TRT-LLM v1.4.0rc3，LMDeploy v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 还是 v0.7.4rc1。 正式版还是 v0.7.3。 Mooncake v0.3.14。 来源：GitHub releases</p>
+<p><strong>FlashInfer：5 条，全围着 Rubin 转</strong></p>
+<p>FlashInfer 合入 #9128。 给 Rubin 的 SM107 加了 FP8 解码程序。 SM107 是 Rubin 那代卡。 专门优化 64 头、多 token 预测的长行启动。 多 token 预测就是一次猜好几个 token 的提速法。 FlashInfer 还合入 #9127。 给 SM107 的 FP8 矩阵乘法换了新打包方式。 FP8 是一种 8 位浮点量化。 省显存、算得快。 其余三条也是 cake 打磨。</p>
+<p>#9126 给因果卷积反向换了新程序。</p>
+<p>#9111 把 KCP 反向改成默认不协作。</p>
+<p>#9125 是文档修补。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9128">https://github.com/flashinfer-ai/flashinfer/pull/9128</a></p>
+<p><strong>TRT-LLM：1 条，也是 Rubin</strong></p>
+<p>TRT-LLM 合入 #21590。 给 Rubin 的 GLM 模型加了个巨型融合内核。 巨型融合内核就是把好几步算子拼成一步跑。 跑得更快，显存来回少了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21590">https://github.com/NVIDIA/TensorRT-LLM/pull/21590</a></p>
+<p><strong>llama.cpp：5 条，都是小修补</strong></p>
+<p>llama.cpp 合入 #31859。 把每请求的代理日志从 info 降到 trace。 日志少了，刷屏没了。 还合入 #31781 和 #31857。 两条都是 Hexagon 平台清理。 Hexagon 是高通手机芯片里的 AI 加速器。 其余两条是 SYCL 相关。</p>
+<p>#31465 修了几种量化的四舍五入。</p>
+<p>#31285 拒绝会超显存的设备缓冲。</p>
+<p>SYCL 是英特尔那套跨平台并行框架。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31859">https://github.com/ggml-org/llama.cpp/pull/31859</a></p>
+<p><strong>vLLM、SGLang：一个只有 CI，一个零合入</strong></p>
+<p>vLLM 合入 2 条。 都是 ROCm 的 CI 小修。 CI 就是自动跑测试的那套流水线。 SGLang 零合入。 TRT-LLM、LMDeploy、TGI 零合入。 Dynamo、Mooncake 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没出</strong></p>
+<p>截至这轮发稿，最新还是 11 月 5 日那批。 按惯例今晚美东 8 点出。 也就是你这边下午 5 点。 API 里还没看到，19 点版再看。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：还是没来</strong></p>
+<p>HF 上还是没有官方的 Qwen 4 仓库。 搜到的都是蹭名字的无关仓库。 社区“下周二 11 月 10 日”的说法没新证据。 等官宣再说，别按传言排期。 来源：<a href="https://apimaster.ai/blog/qwen-4-api">https://apimaster.ai/blog/qwen-4-api</a></p>
+<p><strong>X 上那份本地跑分汇总：数字别当真</strong></p>
+<p>X 上有人汇总了 11 月 5-6 日的本地跑分帖。 里面有 DGX Spark 跑 SGLang 的数据。 模型是 DeepSeek V4.1 Flash。 还有 MI350X x8 跑 Kimi K3 的帖子。 但汇总自己都标了“方法不全”。 那条 MI350X 的帖子其实是在质疑一组好得离谱的数字。 不是实测报告。 看看就好，别拿来排期。 来源：<a href="https://www.diggtop.com/digests/x-local-model-bench-digest-2026-11-06">https://www.diggtop.com/digests/x-local-model-bench-digest-2026-11-06</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新的深度内容</strong></p>
+<p>X、Reddit、HN、中文媒体窗口内无 serving 新料。 Latent Space 新一期讲 Anthropic 上市文件。 跟 serving 无关，就不展开了。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 15 点版、13 点版、11 点版去重。 KVGuard、TorchTPU、ERNIE-5.5 均已报过。 Decisions API、Kimi K3.1 Pro 也已报过。 FlashInfer 的 Rubin 打磨首次汇总。 TRT-LLM 的 Rubin 内核、llama.cpp 快照也是首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-07-1700/">17点版</a></p></body></html>
