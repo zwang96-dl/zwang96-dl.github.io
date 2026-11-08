@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月7日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-07"/>
+<meta name="doc-ts" content="2026-11-08T06:59:16"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-07（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-07（23点版）</h1>
+<p>23点版来了。</p>
+<p>这轮是周六深夜档。 没有新版本，也没有新论文。 但合入有几条跟你沾边。 SGLang 给你的 MI350X 加了新模型。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了快照</strong></p>
+<p>llama.cpp 快照从 b12199 涨到 b12200。 22:39 出的，窗口内唯一的水位变化。 每日快照就是每天自动打的构建号。 不算正式发版。 其余全平：vLLM v0.33.0，SGLang v0.5.23。 TRT-LLM v1.4.0rc3，LMDeploy v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 Mooncake v0.3.14。 来源：GitHub releases</p>
+<p><strong>vLLM：2 条多模态修补</strong></p>
+<p>vLLM 合入 #66190。 Qwen2.5-Omni 的视频编码器预算改对了。 以前预算按固定值算，容易算错。 现在按处理器自己的视频上限来算。 读视频那步，显存分配更准了。 来源：<a href="https://github.com/vllm-project/vllm/pull/66190">https://github.com/vllm-project/vllm/pull/66190</a></p>
+<p>vLLM 合入 #64543。 dots.ocr 的视觉塔修了张量并行切分。 张量并行就是把一层算子拆到多张卡。 以前卡数大于 1 时 QKV 会切错。 现在切对了，多卡跑 OCR 更稳。 来源：<a href="https://github.com/vllm-project/vllm/pull/64543">https://github.com/vllm-project/vllm/pull/64543</a></p>
+<p>其余 2 条是测试和 CI，不展开。</p>
+<p><strong>SGLang：7 条，新模型支持最实在</strong></p>
+<p>SGLang 合入 #46693。 MiniMax-M3.1-Flash 登上 MI350X 和 MI355X。 gfx950 就是这两代 AMD 卡的代号。 你的 MI350X 正好在名单里。 想试这个模型，不用等适配了。 来源：<a href="https://github.com/sgl-project/sglang/pull/46693">https://github.com/sgl-project/sglang/pull/46693</a></p>
+<p>SGLang 合入 #49118。 撤回了低 M 的 BF16 矩阵乘自动调优。 BF16 是一种 16 位浮点格式。 自动调优就是跑前先试哪种切法快。 撤回说明这版调优有坑，先退回去。 来源：<a href="https://github.com/sgl-project/sglang/pull/49118">https://github.com/sgl-project/sglang/pull/49118</a></p>
+<p>SGLang 合入 #49019。 调度器改成只提交还在批里的请求结果。 调度器就是排队发活的那个管家。 半路退出的请求不再白占提交位。 SGLang 还合入 #49096。 大 MoE 模型启动时认了 FlashInfer 0.7.3 的配置。 其余 3 条是测试，不展开。</p>
+<p><strong>llama.cpp：1 条，投机解码小修</strong></p>
+<p>llama.cpp 合入 #31497。 草稿模型不再套用 MoE 缓存。 投机解码就是先让小模型打草稿。 MoE 缓存是给专家模型省算力的那套。 草稿模型用不上，套上去反而添乱。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31497">https://github.com/ggml-org/llama.cpp/pull/31497</a></p>
+<p><strong>FlashInfer：2 条，都是训练核</strong></p>
+<p>FlashInfer 合入 #9121 和 #9130。 两条都是训练用的注意力核打磨。 一条是确定性的打包变长 GQA 训练核。 一条是 Rubin 上的索引扫描程序。 跟推理 serving 关系不大，一句话带过。</p>
+<p><strong>TRT-LLM、LMDeploy、Dynamo、Mooncake：零合入</strong></p>
+<p>这四家窗口内没有合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 周末没有新批次。 D3D 那篇 11 月 5 日 19 点版已经报过。 下批周一出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：还是没来，窗口明天关</strong></p>
+<p>HF 上还是没有官方的 Qwen 4 仓库。 之前传的“11 月 2 到 8 日”窗口明天就关了。 社区“下周二 11 月 10 日”的说法还是没新证据。 等官宣再说，别按传言排期。 来源：<a href="https://felloai.com/qwen-4/">https://felloai.com/qwen-4/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新的深度内容</strong></p>
+<p>X、Reddit、HN、中文媒体窗口内无 serving 新料。 六引擎横评那篇 11 月 6 日已经报过。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 21 点版去重。 FlashInfer #9136、SGLang #47696 是 21 点版已报。 D3D、六引擎横评、Blackfuel 都是往期已报。 SGLang #46693、#49118、vLLM #66190、#64543 首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-07-2300/">23点版</a></p></body></html>
