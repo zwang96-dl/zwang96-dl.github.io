@@ -1,0 +1,81 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月8日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-08"/>
+<meta name="doc-ts" content="2026-11-08T13:00:09"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-08（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-08（05点版）</h1>
+<p>05点版来了。</p>
+<p>这轮还是周日凌晨档。 没有新版本，也没有新论文。 但 SGLang 和 vLLM 都有合入。 解码核和缓存那两条值得看一眼。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>llama.cpp 快照还是 b12202。 那是 00:11 出的，03点版已报。 窗口内没有新快照。 每日快照就是每天自动打的构建号。 不算正式发版。 其余全平：vLLM v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 Mooncake v0.3.14。 来源：GitHub releases</p>
+<p><strong>SGLang：6 条，解码核那条最实在</strong></p>
+<p>SGLang 合入 #49091。 MXFP4 解码核不再只认 Kimi K3.1。 MXFP4 是一种 4 位量化格式。 现在 DeepSeek V4 也能走这条核了。 以前这核只给 Kimi K3.1 的 TP8 写死。 TP8 就是 8 张卡一起算。 现在形状通用了，激活函数也能换。 还是手动开关，不默认开。 来源：<a href="https://github.com/sgl-project/sglang/pull/49091">https://github.com/sgl-project/sglang/pull/49091</a></p>
+<p>SGLang 合入 #48852。 统一内存的缓存页，释放后晚点再复用。 统一内存就是显存和内存共用一套页。 以前每次释放都要等一轮同步。 现在不等了，先记下来晚点再说。 调度器那条路更顺了。 跟它一组的还有 #48006、#48007、#48008。 三条都是重构：页账本、窗口槽位、子池命名。 合起来就是统一缓存的地基在加固。 跟你评估的 PD 解耦沾边。 PD 解耦就是 prefill 和 decode 分开跑。 来源：<a href="https://github.com/sgl-project/sglang/pull/48852">https://github.com/sgl-project/sglang/pull/48852</a></p>
+<p>SGLang 合入 #43739。 昇腾卡上 W4A8 的 MoE 量化能在线做了。 W4A8 是权重 4 位、激活 8 位的量化。 MoE 就是专家混合模型。 只影响昇腾那条路，一句话带过。 来源：<a href="https://github.com/sgl-project/sglang/pull/43739">https://github.com/sgl-project/sglang/pull/43739</a></p>
+<p><strong>vLLM：2 条，启动加速那条值得看</strong></p>
+<p>vLLM 合入 #65168。 守护进程热身缓存现在能换存储后端了。 守护进程就是常驻后台的服务进程。 热身缓存是启动时先备好的那份数据。 以前后端写死，现在可以插拔。 还多了一个 Mooncake 后端。 Mooncake 是跨节点传 KV 的那套。 卡和卡之间传数据更快了。 启动那步能省时间。 来源：<a href="https://github.com/vllm-project/vllm/pull/65168">https://github.com/vllm-project/vllm/pull/65168</a></p>
+<p>vLLM 合入 #65939。 Mooncake 查前缀时加了熔断器。 熔断器就是查太久就先断开保护。 小修补，一句话带过。 来源：<a href="https://github.com/vllm-project/vllm/pull/65939">https://github.com/vllm-project/vllm/pull/65939</a></p>
+<p><strong>FlashInfer：10 条，1 条解码、9 条打磨</strong></p>
+<p>FlashInfer 合入 #9156。 DeepSeek V4 的稀疏注意力解码程序补齐了。 稀疏注意力就是只算关键部分。 BF16 和 FP8 两种 KV 都覆盖了。 一句话带过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9156">https://github.com/flashinfer-ai/flashinfer/pull/9156</a></p>
+<p>其余 9 条全是 cake 系列核打磨。</p>
+<p>#9163、#9162、#9160、#9157、#9153。</p>
+<p>#9149、#9142、#9134、#9132。</p>
+<p>其中 8 条明确是训练核。</p>
+<p>#9160 是 FP8 注意力核。</p>
+<p>跟推理 serving 关系不大，不展开。</p>
+<p><strong>llama.cpp、TRT-LLM、LMDeploy、Dynamo、Mooncake、TGI：零合入</strong></p>
+<p>这六家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周日没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 周末不发新批次。 下批周一出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：还是没来，窗口今天关</strong></p>
+<p>HF 上还是没有官方的 Qwen 4 仓库。 之前传的“11 月 2 到 8 日”窗口今天就关了。 社区的新说法改成“下周二 11 月 10 日”。 还是没新证据。 等官宣再说，别按传言排期。 来源：<a href="https://techpilot.ai/qwen-4-release-date/">https://techpilot.ai/qwen-4-release-date/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：新一期出了，但跟 serving 无关</strong></p>
+<p>今天出了新一期，讲 GitHub 增长。 嘉宾是微软 CoreAI 的 Jay Parikh。 跟推理 serving 没关系，一句话带过。 来源：<a href="https://summify.io/discover/channels/latent-space-podcast">https://summify.io/discover/channels/latent-space-podcast</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 03点版去重。 Paged Experts 磁盘缓存、AWS MIG 均已报过。 六引擎横评、TorchTPU 也已报过。 SGLang #49091、#48852 首次汇总。</p>
+<p>#48006、#48007、#48008 首次汇总。</p>
+<p>#43739 首次汇总。</p>
+<p>vLLM #65168、#65939 首次汇总。 FlashInfer #9156 首次汇总。 其余 9 条 cake 核首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-08-0500/">05点版</a></p></body></html>
