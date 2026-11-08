@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月8日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-08"/>
+<meta name="doc-ts" content="2026-11-08T23:01:33"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-08（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-08（15点版）</h1>
+<p>15点版来了。</p>
+<p>周日下午还是静。 但 SGLang 憋了个大的。 Kimi K3.1 的 PD 解耦补上关键一块。 正好撞在你的评估线上。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 llama.cpp 还是 v0.9.0。 最新快照还是 b12211。 来源：GitHub releases</p>
+<p><strong>SGLang：4 条，Kimi K3.1 的 PD 解耦补齐了</strong></p>
+<p>先说最重要的一条：#48741。 Kimi K3.1 的 PD 解耦终于能在 DCP 下跑了。 DCP 就是 decode 上下文并行。 意思是 decode 的 KV 缓存分片存在多张卡上。 之前这条路是堵死的。 PD 一开就报错。 这回把口子打开了。 为什么值得看：你的 PD 评估要测的就是这个。 新架构的 PD 不是免费送的。 每换一种注意力，搬运就得重做一遍。 来源：<a href="https://github.com/sgl-project/sglang/pull/48741">https://github.com/sgl-project/sglang/pull/48741</a></p>
+<p>第二条：#49105。 HiCache 加 DFLASH 也能在 DCP 下跑了。 HiCache 是 SGLang 的主机内存 KV 缓存。 DFLASH 是 Kimi 的投机解码草稿器。 投机解码就是先让小模型打草稿。 之前 DCP 一开，这俩组合就起不来。 现在补上了。 来源：<a href="https://github.com/sgl-project/sglang/pull/49105">https://github.com/sgl-project/sglang/pull/49105</a></p>
+<p>第三条：#49151，调度器小修。 被拒的请求现在走统一的收尾流程。 以前有的路会漏掉释放。 PD 的 decode 和 prefill 都在里面。 KV 不够被拒的请求也在里面。 小修，但跟 PD 的稳健性有关。 来源：<a href="https://github.com/sgl-project/sglang/pull/49151">https://github.com/sgl-project/sglang/pull/49151</a></p>
+<p>第四条：#49149，CI 小修。 扩散模型的测试 lane 合并。 跟 serving 没关系。 一句话带过。</p>
+<p><strong>FlashInfer：1 条，还是训练核</strong></p>
+<p>#9195。</p>
+<p>cake 系列的门控激活核重调。 SM103 和 SM107 两档卡。 跟推理 serving 关系不大。 一句话带过。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9195">https://github.com/flashinfer-ai/flashinfer/pull/9195</a></p>
+<p><strong>vLLM、TRT-LLM、Dynamo、LMDeploy、Mooncake、TGI：零合入</strong></p>
+<p>这六家窗口内没有新合入。</p>
+<p><strong>llama.cpp：补报一条，Kimi K3.1 已能跑</strong></p>
+<p>11 月 6 日合入的 #31779。 llama.cpp 接了 Kimi K3.1 的文本模型。 首个带它的快照是 b12180。 之前只报了快照号，没点内容。 现在补上。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31779">https://github.com/ggml-org/llama.cpp/pull/31779</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周日没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 下批周一出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：传的窗口今天关，还是没来</strong></p>
+<p>HF 上还是没有官方的 Qwen 4 仓库。 11 月 6 日那个海报预热之后再没动静。 &quot;11 月 2 到 8 日&quot;这个窗口今天就关了。 社区新说法改到 11 月 10 日。 还是没官方口径。 别按传言排期。 来源：<a href="https://teamorouter.com/blogs/qwen4">https://teamorouter.com/blogs/qwen4</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈和深度内容</strong></p>
+<p>X、HN、Reddit、中文三家都没新料。 周日下午本来就静。</p>
+<h2>值得深入学</h2>
+<ol><li>SGLang #48741：Kimi K3.1 的 PD 解耦补齐了 DCP 这一块。</li></ol>
+<p>新注意力换一茬，PD 搬运就得重做一遍。 这篇把检查项列清楚了。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 14点版去重。 SGLang #48741、#49105、#49151、#49149 首次汇总。 FlashInfer #9195 首次汇总。 llama.cpp #31779 是 11 月 6 日的补报。 BlockLock、CNCF 冷启动博客、WeVisOne-VL 已报过。 Qwen 4 追踪更新。 arXiv 周日无新批次。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-08-1500/">15点版</a></p></body></html>
