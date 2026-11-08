@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月8日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-08"/>
+<meta name="doc-ts" content="2026-11-08T21:00:43"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-08（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-08（13点版）</h1>
+<p>13点版来了。</p>
+<p>周日中午，框架没发新版。 但 vLLM 合入一条大修补。 P/D 传 KV 走错路了，修完快 400 倍。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 llama.cpp 窗口内零提交。 上一张还是 11点版报过的 b12211。 其余全平：vLLM v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 Mooncake v0.3.14。 来源：GitHub releases</p>
+<p><strong>vLLM：P/D 传 KV 走错路，修完快 400 倍</strong></p>
+<p>先说 #65137。 这是本轮最值得看的一条。 同机 P/D 传 KV 悄悄走了 TCP。 TCP 就是走网线传数据，慢。 一次传输要 9.9 秒。 修完走 NVLink，只要 24 毫秒。 NVLink 是卡和卡之间的高速直连。 快了 400 多倍。 打个比方：同楼送文件。 之前绕了一趟外地才送到。 现在直接走楼内通道。 中招条件是用了可扩展 KV 缓存。 它是 vLLM 默认的缓存新架构。 验证用的 GLM-5.3-Flash。 1P1D 部署，8 张 B200。 同一批题从 5 分钟跑到 50 秒。 做 P/D 解耦的都该看一眼。 来源：<a href="https://github.com/vllm-project/vllm/pull/65137">https://github.com/vllm-project/vllm/pull/65137</a></p>
+<p><strong>vLLM：DeepSeek-V4 序列并行打通流水线</strong></p>
+<p>再说 #65766。 给 DeepSeek-V4 接上序列并行。 序列并行就是把长序列切开分给多张卡。 这次打通了流水线并行那条路。 流水线并行就是把模型切段分给多张卡。 之前两条路不能一起用。 现在能一起用了。 B300 上测的，解码快 7.8%。 混合负载快 12.9%。 精度没掉，GSM8K 跟之前差不多。 来源：<a href="https://github.com/vllm-project/vllm/pull/65766">https://github.com/vllm-project/vllm/pull/65766</a></p>
+<p><strong>vLLM：AMD 卡上 KV 缓存少算了几 GB</strong></p>
+<p>还有 #63401。 ROCm 上 KV 缓存算小了。 驱动把每次分配按 2MB 取整上报。 热身时一堆小分配攒下来。 显存看着少了好几 GB。 这回改成按真实用量算。 只影响 AMD 的独立显卡。 你的 MI350X 也在里面。 另外 #66313 升依赖、#65158 改 CI，都是小事。 来源：<a href="https://github.com/vllm-project/vllm/pull/63401">https://github.com/vllm-project/vllm/pull/63401</a></p>
+<p><strong>SGLang：1 条，Kimi-K3 在 AMD 上出乱码的修补</strong></p>
+<p>合入 #49152。 Kimi-K3 在新版 AITER 上会出乱码。 AITER 是 AMD 的加速核库。 门控模式传错了参数。 结果 GSM8K 直接 0 分。 答案全被截断。 这回合把参数传对了。 MI350X 上跑 K3 的要注意。 来源：<a href="https://github.com/sgl-project/sglang/pull/49152">https://github.com/sgl-project/sglang/pull/49152</a></p>
+<p><strong>FlashInfer：8 条，还是训练核</strong></p>
+<p>#9181、#9192、#8598、#9186。</p>
+<p>#9189、#9188、#9180、#9161。</p>
+<p>都是 cake 系列训练核打磨。 Rubin 那代卡占了大头。 跟推理 serving 关系不大。 一句话带过。</p>
+<p><strong>TRT-LLM、LMDeploy、Dynamo、Mooncake：零合入</strong></p>
+<p>这四家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 周末不发新批次。 下批周一出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：还是没来，传的窗口今天关</strong></p>
+<p>HF 上还是没有官方的 Qwen 4 仓库。 之前传的&quot;11 月 2 到 8 日&quot;窗口今天就关了。 社区还没传出新说法。 还是没新证据。 等官宣再说，别按传言排期。 来源：<a href="https://teamorouter.com/blogs/qwen4">https://teamorouter.com/blogs/qwen4</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 和 HN：窗口内没新东西</strong></p>
+<p>lmsysorg 和 vLLM 官方那边没新帖。 HN 上翻出来的都是报过的。 周日中午本来就静。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 11点版去重。 AWS 六引擎横评、llm-d 1.0 已报过。 Nodus 横评、TPUv7 战报已报过。 Kinference 也已报过。 vLLM #65137、#65766、#63401 首次汇总。 SGLang #49152 首次汇总。 FlashInfer 八条首次汇总。 编号是 #9181、#9192、#8598、#9186。</p>
+<p>#9189、#9188、#9180、#9161。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-08-1300/">13点版</a></p></body></html>
