@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月8日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-08"/>
+<meta name="doc-ts" content="2026-11-08T15:02:12"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-08（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-08（07点版）</h1>
+<p>07点版来了。</p>
+<p>这轮是周日清晨档。 框架合入不少，但没有新版本。 多模态编码器那两条值得看一眼。 Qwen 4 还是没来，窗口今天关。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：llama.cpp 快照连跳两格</strong></p>
+<p>llama.cpp 出了两个新快照。 b12206 是 14:01 出的。 b12207 是 14:20 出的。 两个都在窗口内。 每日快照就是每天自动打的构建号。 不算正式发版。 其余全平：vLLM v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 Mooncake v0.3.14。 来源：GitHub releases</p>
+<p><strong>vLLM：7 条，多模态编码器是主角</strong></p>
+<p>vLLM 合入 #65227。 多模态编码器跑得更顺了。 编码器就是把图片转成向量那部分。 以前大批量要拆成好几次重放。 拆多了反而比直接算还慢。 现在一个批次只重放一次。 预算档也切得更细了。 大批量改走直接算，不硬套图。 这组改动基于 GB200 上的实测。 来源：<a href="https://github.com/vllm-project/vllm/pull/65227">https://github.com/vllm-project/vllm/pull/65227</a></p>
+<p>vLLM 合入 #65351。 修了 Step3-VL 的一个小毛病。 Step3-VL 是个开源多模态模型。 图片的向量会被后面的重放盖掉。 现在修好了，不会再串味。 来源：<a href="https://github.com/vllm-project/vllm/pull/65351">https://github.com/vllm-project/vllm/pull/65351</a></p>
+<p>vLLM 合入 #62675。 Qwen4Exp 在 AMD 卡上修了个 bug。 Qwen4Exp 是 Qwen 4 的实验版后端。 n-gram 查表会读到过期数据。 答案会随服务器历史变来变去。 修完 300 条测试全稳了。 顺带一提，vLLM 里已有 Qwen 4 的代码。 模型还没发，适配已经先跑起来了。 来源：<a href="https://github.com/vllm-project/vllm/pull/62675">https://github.com/vllm-project/vllm/pull/62675</a></p>
+<p>vLLM 合入 #66388。 MOSS 转录加说话人分离走了上游配置。 MOSS 是开源的语音转录模型。 能分清一段录音里谁在说话。 只是配置层面的整理。 来源：<a href="https://github.com/vllm-project/vllm/pull/66388">https://github.com/vllm-project/vllm/pull/66388</a></p>
+<p>其余 3 条都是小修补。</p>
+<p>#65866、#65323、#66315。</p>
+<p>不展开。</p>
+<p><strong>SGLang：1 条，日志里能看见多模态了</strong></p>
+<p>SGLang 合入 #48800。 请求日志开始汇总多模态输入。 以前日志里看不出请求带没带图。 现在会记媒体有几份、多大。 图片、视频、音频都算。 不把原图塞进日志，只记个数和大小。 运维排障更方便了。 来源：<a href="https://github.com/sgl-project/sglang/pull/48800">https://github.com/sgl-project/sglang/pull/48800</a></p>
+<p><strong>llama.cpp：6 条，Zamba2 那条最实在</strong></p>
+<p>llama.cpp 合入 #31818。 Zamba2 在显卡上快了约 35%。 Zamba2 是个混合架构模型。 以前它的核心计算掉回 CPU 跑。 每秒只有 6 词左右。 现在补了状态 64 的快路径。 不再掉回 CPU 了。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31818">https://github.com/ggml-org/llama.cpp/pull/31818</a></p>
+<p>llama.cpp 合入 #31888。 MoE 缓存那条路，CPU 不用再空等了。 MoE 就是专家混合模型。 Gemma 4 生成快了 7% 到 9%。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31888">https://github.com/ggml-org/llama.cpp/pull/31888</a></p>
+<p>llama.cpp 合入 #31865。 多模态库 mtmd 做了大重构。 mtmd 是 llama.cpp 里处理图片音频那套。 删掉了老旧的 clip.h。 代码结构更干净了，功能没变。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31865">https://github.com/ggml-org/llama.cpp/pull/31865</a></p>
+<p>其余 3 条一句话带过。</p>
+<p>#31776 给国产 SpacemiT 芯片加了 MXFP4 加速。</p>
+<p>MXFP4 是一种 4 位量化格式。</p>
+<p>#31866 是 llamafile 加新精度支持。</p>
+<p>#31084 是 Top-K 选到相同分数时结果更稳定。</p>
+<p><strong>FlashInfer：10 条，基本是训练核打磨</strong></p>
+<p>FlashInfer 合入 #9167。 DeepSeek V4 解码在 Rubin 卡上微调了分片。 Rubin 是英伟达新一代架构。 只动 18 到 20 行那种小批量。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9167">https://github.com/flashinfer-ai/flashinfer/pull/9167</a></p>
+<p>其余 9 条全是 cake 系列训练核。</p>
+<p>#9164、#9152、#9173、#9165、#9171。</p>
+<p>#9166、#9169、#9138、#9141。</p>
+<p>跟推理 serving 关系不大，不展开。</p>
+<p><strong>TRT-LLM、LMDeploy、Dynamo、Mooncake、TGI：零合入</strong></p>
+<p>这五家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周日没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 周末不发新批次。 下批周一出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：还是没来，窗口今天关</strong></p>
+<p>之前传的“11 月 2 到 8 日”窗口今天就关了。 HF 上还是没有官方的 Qwen 4 仓库。 社区的新说法改成“下周二 11 月 10 日”。 还是没新证据。 等官宣再说，别按传言排期。 来源：<a href="https://teamorouter.com/blogs/qwen4">https://teamorouter.com/blogs/qwen4</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新的深度内容</strong></p>
+<p>Latent Space 最新还是 11 月 7 日那期。 讲 GitHub 增长，跟 serving 无关。 X、Reddit、HN、中文媒体窗口内无 serving 新料。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 05点版去重。 AWS 六引擎横评 11 月 6 日 19点版已报。 Kimi K3.1 Pro 权重、TPUv7 战报均已报过。 SGLang #48800 首次汇总。 vLLM #65227、#65351、#62675、#66388 首次汇总。 llama.cpp #31818、#31888、#31865 首次汇总。 FlashInfer #9167 首次汇总。 其余 cake 训练核首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-08-0700/">07点版</a></p></body></html>
