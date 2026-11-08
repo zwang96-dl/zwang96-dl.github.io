@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月8日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-08"/>
+<meta name="doc-ts" content="2026-11-08T16:59:44"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-08（09点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-08（09点版）</h1>
+<p>09点版来了。</p>
+<p>这轮是周日上午档。 框架没出新版本。 合入也只有零星几条。 但有篇没报过的横评值得补。 Qwen 4 的窗口今天就关了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 在动</strong></p>
+<p>llama.cpp 连出三个快照。 b12209 是 16:01 出的。 b12210 是 16:15 出的。 b12211 是 16:48 出的。 三个都在窗口内。 每日快照就是每天自动打的构建号。 不算正式发版。 其余全平：vLLM v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 Mooncake v0.3.14。 来源：GitHub releases</p>
+<p><strong>vLLM：1 条，睡觉省显存的补丁</strong></p>
+<p>vLLM 合入 #59994。 跟 sleep 有关。 sleep 就是让服务休眠让出显存。 之前休眠只备份了 KV 那部分。 KV 就是推理时留的草稿纸。 模型启动时建的 buffer 还留在卡上。 DeepSeek-V4-Flash 的草稿器那块就有 512MB。 现在这块也跟着下到 CPU。 醒来再搬回来。 休眠让出的显存更多了。 来源：<a href="https://github.com/vllm-project/vllm/pull/59994">https://github.com/vllm-project/vllm/pull/59994</a></p>
+<p><strong>FlashInfer：3 条，全是训练核</strong></p>
+<p>#9179、#9177、#9155。</p>
+<p>都是 cake 系列训练核打磨。 跟推理 serving 关系不大。 一句话带过。</p>
+<p><strong>SGLang、TRT-LLM、LMDeploy、Dynamo、Mooncake、TGI：零合入</strong></p>
+<p>这六家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周日没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 周末不发新批次。 下批周一出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：窗口今天关，还是没来</strong></p>
+<p>HF 上还是没有官方的 Qwen 4 仓库。 之前传的“11 月 2 到 8 日”窗口今天就关了。 社区的新说法改成“下周二 11 月 10 日”。 还是没新证据。 等官宣再说，别按传言排期。 来源：<a href="https://teamorouter.com/blogs/qwen4">https://teamorouter.com/blogs/qwen4</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Nodus 横评：vLLM 和 SGLang 到底谁快（11 月 7 日，之前漏报）</strong></p>
+<p>这篇把两家的公开数字重新对了一遍。 结论很实在：没有谁一直更快。 差距会跟着版本来回翻。 前缀共享超过六成，选 SGLang。 前缀就是多轮对话里重复的那段话。 SGLang 的 RadixAttention 能自动复用它。 TTFT 能低 20% 到 40%。 TTFT 就是第一个词出来的时间。 提示词各不相同，俩引擎吞吐只差 5%。 那就看生态和上手成本。 vLLM 的模型和硬件覆盖更广。 这篇直接对着你的评估问题。 想选型，先看自己流量的前缀重叠率。 来源：<a href="https://www.nodus-compute.ai/blog/vllm-vs-sglang/">https://www.nodus-compute.ai/blog/vllm-vs-sglang/</a></p>
+<p><strong>Latent Space：最新一期跟 serving 无关</strong></p>
+<p>11 月 7 日那期讲 Anthropic 的 S-1。 S-1 就是公司上市前交的招股书。 跟推理 serving 没关系。 一句话带过。 来源：<a href="https://open.spotify.com/show/2p7zZVwVF6Yk0Zsb4QmT7t">https://open.spotify.com/show/2p7zZVwVF6Yk0Zsb4QmT7t</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 07点版去重。 llm-d 1.0、Kimi K3 克隆缓存问题、CNCF 启动加速、Mistral Large 4、Inkling 2 均已报过。 SGLang Decisions API 11 月 6 日已报过。 AWS 六引擎横评 11 月 6 日 19点版已报。 vLLM #59994 首次汇总。 llama.cpp b12209、b12210、b12211 首次汇总。 FlashInfer #9179、#9177、#9155 首次汇总。 Nodus 横评首次汇总。 其余 cake 训练核首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-08-0900/">09点版</a></p></body></html>
