@@ -1,0 +1,219 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月9日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-09"/>
+<meta name="doc-ts" content="2026-11-09T23:05:51"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-09（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-09（15点版）</h1>
+<p>15点版来了。</p>
+<p>两小时里，框架合入了三十六条。</p>
+<p>头条是一篇六引擎实测横评。</p>
+<p>还有一个播客新单集。</p>
+<p>Qwen4 还是没来，但 vLLM 已经在备战。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。</p>
+<p>vLLM 还是 v0.33.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.3。</p>
+<p>rc 版还是 v0.7.4rc1。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>最新快照滚到 b12236。</p>
+<p>之前是 b12233。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：13 条，P/D 那条最值得看</strong></p>
+<p>先说 #65888。</p>
+<p>这是给 P/D 解耦修的路。</p>
+<p>P/D 解耦就是读题和解码分家干活。</p>
+<p>以前 KV 缓存从主机搬上显存，要改传输层。</p>
+<p>现在不用改了，搬完再拷一份进显存页。</p>
+<p>GB300 上实测，多轮 64K 对话。</p>
+<p>词间延迟从 11.36 毫秒降到 10.40 毫秒。</p>
+<p>GSM8K 跑完从 58 秒降到 42.4 秒。</p>
+<p>准确率还从 0.906 涨到 0.915。</p>
+<p>关键是传输量没涨，还是 1 倍。</p>
+<p>上一版方案要 3.4 倍。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65888">https://github.com/vllm-project/vllm/pull/65888</a></p>
+<p>第二条 #66319，跟你的 MI350 有关。</p>
+<p>Mamba 是一种线性注意力模型。</p>
+<p>它的缓存现在支持随机舍入。</p>
+<p>说白了，存低精度时四舍五入改成掷骰子。</p>
+<p>长期看误差不偏，精度更稳。</p>
+<p>只在 MI355 这代卡上开。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66319">https://github.com/vllm-project/vllm/pull/66319</a></p>
+<p>第三条 #66512，Qwen4 的影子来了。</p>
+<p>Qwen4 还没发布，但 vLLM 已经给它写内核了。</p>
+<p>新的稀疏注意力核跑 FP8 缓存。</p>
+<p>B200 上解码验证快 2.63 倍。</p>
+<p>读题快 1.37 到 1.42 倍。</p>
+<p>端到端每词时间中位数降 4.4%。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66512">https://github.com/vllm-project/vllm/pull/66512</a></p>
+<p>第四条 #61666，量化又多一种。</p>
+<p>MXFP6 是一种 6 位浮点量化。</p>
+<p>27B 的模型能塞进 32GB 的卡。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/61666">https://github.com/vllm-project/vllm/pull/61666</a></p>
+<p>第五条 #60531，跟确定性有关。</p>
+<p>统一注意力核以前在不同 batch 下结果会飘。</p>
+<p>现在保住了 batch 不变性。</p>
+<p>说白了，同一批请求换邻居，结果不变。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/60531">https://github.com/vllm-project/vllm/pull/60531</a></p>
+<p>其余八条一句话带过。</p>
+<p>#66081，修投机解码下结构化输出的草稿取回。</p>
+<p>#65972，MoE 跳过没用的填充行。</p>
+<p>#65744，聊天接口的工具参数校验收紧。</p>
+<p>#65576，主镜像装 AWS 高速网卡驱动。</p>
+<p>#64897，XPU 上 NaN 当负无穷处理。</p>
+<p>#64834、#66312、#66616，都是 CI 和测试。</p>
+<p><strong>SGLang：11 条，DCP 崩溃那条值得看</strong></p>
+<p>先说 #47529。</p>
+<p>这是 P/D 解耦的又一个静默坑。</p>
+<p>DCP 是解码上下文并行，多卡分上下文。</p>
+<p>开 RL 的专家返回时，服务器直接崩。</p>
+<p>原因是缓存槽位编号跨了多卡，表却只按一卡建。</p>
+<p>现在表按全量建，不崩了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47529">https://github.com/sgl-project/sglang/pull/47529</a></p>
+<p>第二条 #49388，DeepSeek 新模型能跑了。</p>
+<p>V4.1-Flash 的 2304 中间尺寸以前被拦。</p>
+<p>现在 MXFP4 路径放行。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49388">https://github.com/sgl-project/sglang/pull/49388</a></p>
+<p>第三条 #42790，投机解码省显存。</p>
+<p>Mamba 类模型的草稿状态，以前每词每请求都存一份。</p>
+<p>35B 的模型一个请求要几百 MB。</p>
+<p>现在能跳过，省下的显存还给 KV 缓存。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/42790">https://github.com/sgl-project/sglang/pull/42790</a></p>
+<p>其余八条一句话带过。</p>
+<p>#49399，ernie55 的 FlashMLA 走专用轮子。</p>
+<p>#49262，DeepSeek-V4.1 的 MegaMoE 写回优化。</p>
+<p>#47808，DeepSeek 配方暴露转换接口。</p>
+<p>#40962，投机解码的目标图移到草稿上下文外建。</p>
+<p>#37472，dspark 的校验计数修范围。</p>
+<p>#49362、#49398、#49394，都是依赖和 CI。</p>
+<p><strong>TRT-LLM：2 条，P/D 那条值得看</strong></p>
+<p>#21508，取消的 P/D 请求不再进调度。</p>
+<p>以前取消的请求还会再进一批，白占资源。</p>
+<p>现在调度直接跳过，等正常清理回收。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21508">https://github.com/NVIDIA/TensorRT-LLM/pull/21508</a></p>
+<p>#21947，分支同步，后台向。</p>
+<p><strong>Dynamo：1 条</strong></p>
+<p>#18452，内嵌引擎可以跳过 Dynamo 的日志配置。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18452">https://github.com/ai-dynamo/dynamo/pull/18452</a></p>
+<p><strong>FlashInfer：7 条，都是内核与测试</strong></p>
+<p>#9221，DeepSeek 的 FP8 32x32 缩放块能上 SM107。</p>
+<p>#8833，KDA 循环解码核加 FP32 状态。</p>
+<p>#6155，树验证核加 FP64 对照。</p>
+<p>其余四条是测试重组和文档。</p>
+<p>没有功能合入。</p>
+<p><strong>llama.cpp：2 条，都是多模态</strong></p>
+<p>#31965，Gemma 4 的音频流输入。</p>
+<p>#31964，加了个音频重采样助手。</p>
+<p>跟推理核心无关。</p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<p>窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还没到</strong></p>
+<p>按本地时间，今天 17 点那批才公布。</p>
+<p>到时再扫。</p>
+<p><strong>六引擎同台跑：一块 TPU 小芯片上，SGLang 赢了 2.5 倍</strong></p>
+<p>一个人把六个推理引擎，放在同一块谷歌 TPU v5e 上比。</p>
+<p>模型是 20 亿参数的 Gemma 4。</p>
+<p>单请求时大家差不多，SGLang-JAX 每秒 159.9 个词。</p>
+<p>vLLM 是 143.9 个词，差距不到 12%。</p>
+<p>64 个请求一起上，SGLang-JAX 每秒 4249 个词。</p>
+<p>vLLM 是 1689 个词，快了 2.52 倍。</p>
+<p>但有两个提醒。</p>
+<p>第一，SGLang 赢是打了补丁的。</p>
+<p>它本来跑不了这个模型，作者写了 190 行补丁。</p>
+<p>第二，它跑五次能差两倍，vLLM 波动不到 5%。</p>
+<p>说白了，一个上限高、一个稳得多。</p>
+<p>这篇跟你的引擎选型直接对口。</p>
+<p>精读笔记已生成，含原文 5 张表。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/deep-20261109-tpu-v5e-vllm-sglang/">六引擎同台：一块 TPU v5e 上 vLLM 与 SGLang 谁更快</a></p>
+<p><strong>Qwen4：还是没发，但 vLLM 已经在备战</strong></p>
+<p>Qwen4 还是没发。</p>
+<p>权重、接口、价格都没影。</p>
+<p>社区说法还是明天 11 月 10 日。</p>
+<p>仍没新证据，等官宣再说。</p>
+<p>不过 vLLM 这轮合入了 Qwen4 的实验内核。</p>
+<p>引擎侧已经在提前备战了。</p>
+<p>来源：<a href="https://www.versely.studio/blog/qwen-4-announced-at-apsara-2026">https://www.versely.studio/blog/qwen-4-announced-at-apsara-2026</a></p>
+<h2>业内新闻</h2>
+<p><strong>本轮没有新业内新闻</strong></p>
+<p>谷歌 TPU 两款新系统，13点版已经报过。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 新单集：前沿实验室都在买什么</strong></p>
+<p>今天出了一期新节目。</p>
+<p>主角是 Handshake AI，一家做 AI 训练数据的公司。</p>
+<p>一年做到近 10 亿美元年化收入。</p>
+<p>聊的是前沿实验室都在买什么数据。</p>
+<p>跟推理 serving 不直接相关，但能看清上游在烧什么钱。</p>
+<p>来源：<a href="https://open.spotify.com/episode/4gWSfgc8tqzh56F51F7D3y">https://open.spotify.com/episode/4gWSfgc8tqzh56F51F7D3y</a></p>
+<p>X、HN、Reddit 两小时里都静。</p>
+<h2>值得深入学</h2>
+<p><strong>六引擎同台：一块 TPU v5e 上 vLLM 与 SGLang 谁更快</strong></p>
+<p>这篇能帮你把引擎对比的方法论抄回家。</p>
+<p>同卡同权重同 prompt 再比，压测报重复波动。</p>
+<p>按并发分档看，别只看峰值倍数。</p>
+<p>精读笔记已生成，含原文 5 张表。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/deep-20261109-tpu-v5e-vllm-sglang/">六引擎同台：一块 TPU v5e 上 vLLM 与 SGLang 谁更快</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 13点版去重。</p>
+<p>vLLM 13 条首次汇总。</p>
+<p>#65888、#66512、#66319、#66312、#66081、#65972、#65744、#65576、#64897、#64834、#61666、#60531、#66616。</p>
+<p>SGLang 11 条首次汇总。</p>
+<p>#49399、#49398、#49394、#49388、#49362、#49262、#47808、#47529、#42790、#40962、#37472。</p>
+<p>TRT-LLM 2 条首次汇总。</p>
+<p>#21947、#21508。</p>
+<p>Dynamo 1 条首次汇总。</p>
+<p>#18452。</p>
+<p>FlashInfer 7 条首次汇总。</p>
+<p>#9291、#9237、#9221、#9215、#9006、#8833、#6155。</p>
+<p>llama.cpp 2 条首次汇总，都是多模态。</p>
+<p>#31965、#31964。</p>
+<p>LMDeploy、TGI 零合入。</p>
+<p>llama.cpp 快照 b12233 滚到 b12236。</p>
+<p>六引擎 TPU 横评、Latent Space 新单集，首次汇总。</p>
+<p>Qwen4 截至今天仍未发布，首次汇总。</p>
+<p>arXiv 新批次今天 17 点才公布。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-09-1500/">15点版</a></p></body></html>
