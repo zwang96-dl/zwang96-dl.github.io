@@ -1,0 +1,105 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月9日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-09"/>
+<meta name="doc-ts" content="2026-11-09T12:59:09"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-09（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-09（05点版）</h1>
+<p>05点版来了。</p>
+<p>半夜两小时，框架合入了三十多条。 头条是 SGLang 的 PD 内存大改。 正撞你的 PD 解耦评估线。 另外 Qwen4 的&quot;下周&quot;窗口关了，还是没发。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 正式版还是 v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 llama.cpp 还是 v0.9.0。 最新快照滚到 b12223。 之前是 b12212。 快照是每日自动打包，不算正式发版。 来源：GitHub releases</p>
+<p><strong>SGLang：10 条，统一内存那栈最值得看</strong></p>
+<p>先说 #48009 到 #48014。 这是六条一栈的重构。 改的是统一内存下的 PD 传输记账。 PD 解耦就是读题和生成分家跑。 以前 PD 传输一开，整片共享 KV 池就锁死。 池子不能整理，空闲也腾不出来。 现在改成按行记账。 哪行在搬就记哪行，搬完就放。 池子能正常回收和整理了。 跟你的 PD 解耦评估直接相关。 来源：<a href="https://github.com/sgl-project/sglang/pull/48009">https://github.com/sgl-project/sglang/pull/48009</a></p>
+<p>第二条 #46168。 Mooncake 直连按层恢复前缀时，host 端开销砍了。 Mooncake 是 KV 传输的开源库。 以前每池每行都要单独开会话。 现在一次批量开完，再分批搬数据。 来源：<a href="https://github.com/sgl-project/sglang/pull/46168">https://github.com/sgl-project/sglang/pull/46168</a></p>
+<p>第三条 #48786。 HiCache 回读用上 TMA 搬运了。 TMA 是 Blackwell 卡上的异步搬运引擎。 B200 上回读从 18 提到 51 GB/s。 快了 2.84 倍。 来源：<a href="https://github.com/sgl-project/sglang/pull/48786">https://github.com/sgl-project/sglang/pull/48786</a></p>
+<p>其余两条一句话带过。</p>
+<p>#47581，NPU 上 dspark 的调度核集成。</p>
+<p>#48871，NVFP4 MoE 的 blockscale 修补。</p>
+<p><strong>vLLM：5 条，都是后端小修</strong></p>
+<p>先说 #66545。 Transformers 后端支持分片采样了。 分片采样就是把采样计算拆到各卡上跑。 以前只有原生 Llama 能用。 现在后端模型也能用，输出对得上。 来源：<a href="https://github.com/vllm-project/vllm/pull/66545">https://github.com/vllm-project/vllm/pull/66545</a></p>
+<p>第二条 #65735。 转录接口进了 Transformers 后端。 VibeVoice-ASR 这类语音转文字模型能直接跑。 LibriSpeech 上词错率 2.07%。 来源：<a href="https://github.com/vllm-project/vllm/pull/65735">https://github.com/vllm-project/vllm/pull/65735</a></p>
+<p>其余三条一句话带过。</p>
+<p>#66092，内核翻译单元的文档要求。</p>
+<p>#61492，指标里死掉的抢占字段修了。</p>
+<p>#66117，不支持翻译的模型直接拒绝翻译请求。</p>
+<p><strong>TRT-LLM：3 条，全是基建</strong></p>
+<p>#21795，KV 缓存管理器的 teardown 修补。</p>
+<p>#21918，预合并测试里豁免 7 个失败用例。</p>
+<p>#21794，服务端测试暴露子进程输出。</p>
+<p>一句话带过。</p>
+<p><strong>FlashInfer：8 条，全是训练核</strong></p>
+<p>#9239、#9191、#9211、#9225、#9238、#9227、#9217、#9182。</p>
+<p>全是 cake 系列训练核提速。 跟推理 serving 关系不大。 一句话带过。</p>
+<p><strong>llama.cpp：8 条，小修</strong></p>
+<p>#31927，多 token 预测读目标隐状态改走设备缓冲。</p>
+<p>#31449，Granite 的 NVFP4 权重 scale 补上。</p>
+<p>#31567，Strix Halo 的 ROCm CI 跑起来了。</p>
+<p>其余五条一句话带过。</p>
+<p>#31940、#31936、#31419、#31662、#30711。</p>
+<p>测试、界面、后端小修。</p>
+<p><strong>LMDeploy、Dynamo、TGI：零合入</strong></p>
+<p>这三家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还没到</strong></p>
+<p>按本地时间，今晚 17 点那批才公布。 到时再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4：&quot;下周&quot;窗口关了，还是没发</strong></p>
+<p>10 月 29 日那场会上，阿里 CTO 说&quot;下周&quot;。 那个窗口就是 11 月 2 到 8 日。 昨天已经过了，还是没发。 社区说的 11 月 10 日仍无官方口径。 等官宣再说。 来源：<a href="https://teamorouter.com/blogs/qwen4">https://teamorouter.com/blogs/qwen4</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈和深度内容</strong></p>
+<p>半夜两小时，X、HN、Reddit 都静。 Spotify 也扫过。 Latent Space 最新一期还是 11 月 8 日的。 讲斯坦福怎么教 AI 原生工程。 不在 serving 线上。 之前报过的六引擎横评不再重复。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有新增深读</strong></p>
+<p>两小时窗口里没有新论文。 框架合入也都是点修和重构。 SGLang 统一内存那栈值得记一笔。 但它是代码重构，没有论文可读。 等白天那批再看。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 03点版去重。 vLLM 5 条首次汇总。</p>
+<p>#66545、#65735、#66092、#61492、#66117。</p>
+<p>SGLang 10 条首次汇总。</p>
+<p>#48014、#48013、#48012、#48011、#48010、#48009、#48786、#47581、#48871、#46168。</p>
+<p>TRT-LLM 3 条首次汇总。</p>
+<p>#21795、#21918、#21794。</p>
+<p>FlashInfer 8 条首次汇总。</p>
+<p>#9239、#9191、#9211、#9225、#9238、#9227、#9217、#9182。</p>
+<p>llama.cpp 8 条首次汇总。</p>
+<p>#31940、#31927、#31449、#31936、#31419、#31567、#31662、#30711。</p>
+<p>LMDeploy、Dynamo、TGI 零合入。 llama.cpp 快照 b12212 滚到 b12223。 Qwen4&quot;下周&quot;窗口已过仍未发布，首次汇总。 arXiv 新批次今晚 17 点才公布。 六引擎横评之前已报过。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-09-0500/">05点版</a></p></body></html>
