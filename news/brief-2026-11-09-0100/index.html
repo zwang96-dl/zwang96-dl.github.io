@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月9日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-09"/>
+<meta name="doc-ts" content="2026-11-09T09:00:05"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-09（01点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-09（01点版）</h1>
+<p>01点版来了。</p>
+<p>半夜两小时，动静不大。 版本水位全平。 框架那边合入了三十条。 头条是 AMD 卡上的投机解码提速。 正撞你的 MI350X 那条线。 另外英伟达给韩国四个开源模型出了部署配方。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 llama.cpp 还是 v0.9.0。 最新快照刚滚到 b12212。 快照是每日自动打包，不算正式发版。 来源：GitHub releases</p>
+<p><strong>vLLM：9 条，AMD 卡投机解码提速了</strong></p>
+<p>先说 #63096。 这是本轮最值得看的一条。 跟你的 MI350X 直接相关。 说的是投机解码的草稿循环。 投机解码就是小模型先猜、大模型再验。 AMD 的统一注意力后端以前不支持原地更新草稿元数据。 每步草稿都要重建元数据，还要多跑一轮图。 等于每猜一次就重排一次桌子。 现在改成复用同一套元数据。 MI355X 上实测，草稿循环快了 16% 到 19%。 k=3 那档，batch 1 从 571 微秒降到 463 微秒。 来源：<a href="https://github.com/vllm-project/vllm/pull/63096">https://github.com/vllm-project/vllm/pull/63096</a></p>
+<p>第二条 #66486。 MoE 加 LoRA 在数据并行加专家并行下算错了。 LoRA 是一种轻量微调方法。 MoE 就是专家混合模型。 三处地方都默认专家只看本地 batch。 跨卡分发的 token 拿到的却是上一批的槽位。 等于信封写错了收件人。 现在三处一起修，还补了 DP=2 加 EP 的端到端测试。 来源：<a href="https://github.com/vllm-project/vllm/pull/66486">https://github.com/vllm-project/vllm/pull/66486</a></p>
+<p>第三条 #66432。 Qwen2-VL 的视频预算补满了。 以前视频预算按整帧台阶涨。 能塞进上下文的视频也可能被拒。 现在预算直接填满上下文。 Qwen2.5-VL-3B 在 40000 上下文下。 预算从 32768 涨到 39999。 1760x990 的短片默认 32 帧也能跑了。 来源：<a href="https://github.com/vllm-project/vllm/pull/66432">https://github.com/vllm-project/vllm/pull/66432</a></p>
+<p>其余六条一句话带过。</p>
+<p>#64437，Gemma4 的 MoE LoRA 换了 3D 包装器。</p>
+<p>#65949，GPT-J 的 KV 量化缩放名映射修了。</p>
+<p>#66476、#66477，Rust 前端两处小修。</p>
+<p>#66483，bench 里加了采样计时。</p>
+<p>#66481，启动日志标出已禁用的扩容路由。</p>
+<p><strong>SGLang：8 条，MLA 换 KV 那块值得看</strong></p>
+<p>先说 #45727。 HiSparse 的 MLA 换核支持共享 KV 源了。 MLA 是一种省 KV 的注意力结构。 HiSparse 是它的稀疏换核工具。 以前只认请求自己的显存和热缓冲。 现在能直接读共享缓存里的设备 KV。 跨请求复用 KV 的路又通了一截。 来源：<a href="https://github.com/sgl-project/sglang/pull/45727">https://github.com/sgl-project/sglang/pull/45727</a></p>
+<p>第二条 #27267。 宿主内存池加了大页预检和分配模式。 大页就是操作系统的大块内存页。 KV 溢到宿主机内存时，分配更稳。 来源：<a href="https://github.com/sgl-project/sglang/pull/27267">https://github.com/sgl-project/sglang/pull/27267</a></p>
+<p>第三条 #47493。 DP 注意力里，草稿扩展前先裁掉多余的同步行。 DP 就是数据并行。 属于投机解码那条线的修补。 来源：<a href="https://github.com/sgl-project/sglang/pull/47493">https://github.com/sgl-project/sglang/pull/47493</a></p>
+<p>其余五条一句话带过。</p>
+<p>#46577，Inkling 模型跳过填充词的 KV 存储。</p>
+<p>#46663，Gemma4 的 Bolt E4B 和读题 CUDA 图修了。</p>
+<p>#48942，FP32 激活函数统一到一处。</p>
+<p>#49053，AMD MI35x 的 CI 跑上新机器。</p>
+<p>#49260，文档里的 AgentX 启动示例刷新。</p>
+<p><strong>TRT-LLM：5 条，PD 解耦那条最值得看</strong></p>
+<p>先说 #20903。 PD 解耦下，生成侧的语法匹配器建不出来会拖垮整个 worker。 PD 解耦就是读题和生成分家跑。 语法匹配器是管结构化输出的工具。 以前一个请求建失败，异常直接冲进执行循环。 整个 worker 停摆，后面的请求全遭殃。 现在按请求单独兜底。 坏的那个只返回错误，别的请求继续走。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20903">https://github.com/NVIDIA/TensorRT-LLM/pull/20903</a></p>
+<p>第二条 #21631。 RADIO 视频编码器的权重改成加载时校验。 以前每段视频都验一次，白白浪费时间。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21631">https://github.com/NVIDIA/TensorRT-LLM/pull/21631</a></p>
+<p>其余三条一句话带过。</p>
+<p>#21876，Qwen3.5 检查点加载的测试接口。</p>
+<p>#17808、#21817，都是测试基建。</p>
+<p><strong>FlashInfer：6 条，全是训练核</strong></p>
+<p>#9230、#9226、#9218、#9228、#9193、#9204。</p>
+<p>全是 cake 系列训练核提速。 跟推理 serving 关系不大。 一句话带过。</p>
+<p><strong>Mooncake：2 条</strong></p>
+<p>#5301，重复清理未注册缓冲的修补。</p>
+<p>#5043，删了走不到的死代码。</p>
+<p>一句话带过。</p>
+<p><strong>LMDeploy、Dynamo：零合入</strong></p>
+<p>这俩窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周日没有新批次</strong></p>
+<p>周一那批北京时间周二凌晨才公布。 按本地时间算，周一下午 5 点出来。 到时再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>英伟达：给韩国四个开源模型出了 Dynamo 配方</strong></p>
+<p>博客 11 月 8 日发的，23点版漏了。 Dynamo 是英伟达的分布式推理框架。 配方就是开箱即用的部署配置。 四个模型是 SK 电讯的 A.X K2。 LG 的 K-EXAONE 2.0。 Upstage 的 Solar Open 2。 Motif 的 Motif-3。 都针对 B200 优化。 官方说法是开箱即用，性能最多翻倍。 基线和 workload 都没给，别当实测读。 配方细节在文档里，四个模型各有配置。 来源：<a href="https://blogs.nvidia.com/blog/nvidia-dynamo-korea-open-models/">https://blogs.nvidia.com/blog/nvidia-dynamo-korea-open-models/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈和深度内容</strong></p>
+<p>半夜两小时，X、HN、Reddit 都静。 六引擎横评和 CNCF 冷启动博客之前都报过。 不再重复。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有新增深读</strong></p>
+<p>两小时窗口里没有新论文。 框架合入也都是点修。</p>
+<p>#63096 的 AMD 投机解码提速值得记一笔。</p>
+<p>但还够不上单独一篇深读。 等白天那批再看。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 23点版去重。 vLLM 9 条首次汇总。</p>
+<p>#66486、#66476、#65949、#66483、#66477、#64437、#66432、#63096、#66481。</p>
+<p>SGLang 8 条首次汇总。</p>
+<p>#45727、#48942、#49260、#49053、#27267、#46577、#46663、#47493。</p>
+<p>TRT-LLM 5 条首次汇总。</p>
+<p>#20903、#21631、#21876、#17808、#21817。</p>
+<p>FlashInfer 6 条首次汇总。 Mooncake 2 条首次汇总。 LMDeploy、Dynamo 零合入。 llama.cpp 快照 b12212。 英伟达 Dynamo 韩国配方首次汇总。 CNCF 冷启动博客、六引擎横评之前已报过。 arXiv 周日无新批次。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-09-0100/">01点版</a></p></body></html>
