@@ -1,0 +1,95 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月8日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-08"/>
+<meta name="doc-ts" content="2026-11-09T03:00:59"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-08（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-08（19点版）</h1>
+<p>19点版来了。</p>
+<p>周日晚上还是静。 版本水位全平。 但 vLLM 修了个 AMD 卡上的小毛病。 正好撞在你的 MI350X 上。 还有一篇六引擎横评刚发。 投机解码的收益，引擎之间差很多。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 llama.cpp 还是 v0.9.0。 最新快照还是 b12211。 来源：GitHub releases</p>
+<p><strong>vLLM：1 条，AMD 卡上 FP8 MoE 不再硬崩</strong></p>
+<p>先说 #66350。 这是本轮最值得看的一条。 跟你的 MI350X 直接相关。 说的是 FP8 MoE 的后端选择。 MoE 就是专家混合模型。 FP8 是一种 8 位量化精度。 AITER 是 AMD 的加速核库。 以前只要开了全局开关。 vLLM 就硬走 AITER。 某层用不了 AITER 就直接报错。 现在改成自动退回别的后端。 等于导航发现此路不通就换条路。 不再原地抛锚。 验证都在 gfx950 上跑的。 那就是 MI350 这一代卡。 顺带解开了 MI355 上一个模型的阻塞。 来源：<a href="https://github.com/vllm-project/vllm/pull/66350">https://github.com/vllm-project/vllm/pull/66350</a></p>
+<p>其余两条一句话带过。</p>
+<p>#66287，睡眠模式删了多余的兼容代码。</p>
+<p>#66441，CI 的文档字符串格式。</p>
+<p><strong>SGLang：17 条，多模态会话的竞态修了</strong></p>
+<p>先说 #49207。 多轮会话关早了会踩到正在读图的轮次。 会话就是一问一答攒起来的多轮对话。 前面轮次的图片特征还留在显存里。 后面的轮次正读着它们。 这时会话一关，特征就被提前释放了。 等于书还没读完就被抽走了。 现在关闭会先等读图的轮次跑完。 再关也不迟。 来源：<a href="https://github.com/sgl-project/sglang/pull/49207">https://github.com/sgl-project/sglang/pull/49207</a></p>
+<p>第二条 #48882。 NPU 上 DCP 加 PD 解耦终于能一起开了。 DCP 就是 decode 上下文并行。 NPU 是华为昇腾的卡。 之前配置校验直接拦掉这个组合。 现在只对 NPU 放行。 你的 H100 和 MI350X 用不上。 但 PD 加 DCP 这条路又通了一家。 来源：<a href="https://github.com/sgl-project/sglang/pull/48882">https://github.com/sgl-project/sglang/pull/48882</a></p>
+<p>第三条 #49088。 minimax-sparse 的 decode 索引核提速。 只在 Hopper 卡、8 卡并行那档。 模型本身很小众。 一句话带过就行。 来源：<a href="https://github.com/sgl-project/sglang/pull/49088">https://github.com/sgl-project/sglang/pull/49088</a></p>
+<p>其余 14 条一句话带过。</p>
+<p>#49171，删了残留的注意力配置。</p>
+<p>#49163，加了个代码清理技能文档。</p>
+<p>#49160，gemma4 的测试死锁修了。</p>
+<p>#48790、#47956、#46610，都是 XPU 相关。</p>
+<p>#48585、#48383、#48281，扩散模型提速。</p>
+<p>#48545，CPU 图模式的小修。</p>
+<p>#48211，API 返回里空值的小修。</p>
+<p>#48207，被拒请求重置专家路由起点。</p>
+<p>#45203，多模态张量搬运前先压紧。</p>
+<p>#44477，指标里 CPU 时钟重置的处理。</p>
+<p><strong>TRT-LLM：1 条，只有测试</strong></p>
+<p>#21810，解耦测试的豁免取消。</p>
+<p>跟功能没关系。 一句话带过。</p>
+<p><strong>FlashInfer：4 条，还是训练核</strong></p>
+<p>#9207、#9205、#9194、#9178。</p>
+<p>全是 cake 系列训练核打磨。 跟推理 serving 关系不大。 一句话带过。</p>
+<p><strong>Mooncake：2 条</strong></p>
+<p>#5274，批量提交改成要么全成、要么全不成。</p>
+<p>#5282，加了存储测试。</p>
+<p>一句话带过。</p>
+<p><strong>LMDeploy、llama.cpp、TGI、Dynamo：零合入</strong></p>
+<p>这四家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周日没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 下批周一出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：传的窗口今天关，还是没来</strong></p>
+<p>HF 上还是没有官方的 Qwen 4 仓库。 11 月 6 日那个海报预热之后再没动静。 &quot;11 月 2 到 8 日&quot;这个窗口今天就关了。 社区新说法改到 11 月 10 日周二。 还是没官方口径。 别按传言排期。 来源：<a href="https://teamorouter.com/blogs/qwen4">https://teamorouter.com/blogs/qwen4</a></p>
+<h2>访谈与深度</h2>
+<p><strong>六引擎横评：投机解码的收益，引擎说了算</strong></p>
+<p>这篇今天刚发，11 点 13 分上线。 作者在一张 8GB 的 RTX 3050 上。 同时测了六个推理引擎。 llama.cpp、vLLM、SGLang。 还有 mistral.rs、PyTorch、LiteRT-LM。 模型是 Gemma 4 E2B。 全都用同一份 4 位量化权重。 同一套题，同一套压测。 先说结论：答案质量几乎没差。 GSM8K 六家都在 0.899 到 0.903 之间。 草稿器开不开，分数也不动。 真正拉开差距的是投机解码。 投机解码就是先让小模型打草稿。 大模型只负责检查改错。 六家接受草稿的比例差不多。 但检查草稿的成本差很多。 结果：vLLM 快了 1.9 倍。 llama.cpp 快 1.35 倍。 SGLang 快 1.33 倍。 mistral.rs 反而掉到 0.72 倍。 单请求时 vLLM 加草稿器最快。 每秒 230.5 个 token。 不带草稿器压到 64 并发时。 vLLM 每秒 1651 个 token。 SGLang 每秒 1711 个。 SGLang 反超 3% 左右。 但 SGLang 的草稿器只在低并发时划算。 并发一高就拖后腿。 64 并发时只剩 0.3 到 0.49 倍。 还有个提醒：SGLang 跑这个模型要打两个补丁。 作者 11 月 6 日还在 L4 上测过一轮。 结论一致。 为什么值得看：草稿器的收益不只看草稿器。 引擎检查草稿的成本才是关键。 你的 PD 评估里投机解码是重点。 这篇把&quot;同接受率、不同收益&quot;讲透了。 注意范围：这是一张 8GB 小卡、2B 小模型。 数字别直接套到你的 H100 上。 方法论和结论方向值得参考。 来源：<a href="https://xbill999.medium.com/six-serving-engines-one-8-gb-gpu-gemma-4-e2b-on-an-rtx-3050-7559827f562c">https://xbill999.medium.com/six-serving-engines-one-8-gb-gpu-gemma-4-e2b-on-an-rtx-3050-7559827f562c</a> 同系列 L4 版：<a href="https://builder.aws.com/content/3LkJbIXPJxarzoZDc3HWg4ZzBZY/six-serving-engines-on-one-ec2-g6-gemma-4-e2b-on-an-nvidia-l4">https://builder.aws.com/content/3LkJbIXPJxarzoZDc3HWg4ZzBZY/six-serving-engines-on-one-ec2-g6-gemma-4-e2b-on-an-nvidia-l4</a></p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的新内容。 六引擎横评值得一读。 但它是小卡小模型的横评。 不做深读笔记。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 17点版去重。 vLLM #66350、#66287、#66441 首次汇总。 SGLang 17 条首次汇总。 TRT-LLM #21810、FlashInfer 4 条、Mooncake 2 条首次汇总。 LMDeploy、llama.cpp、TGI、Dynamo 零合入。 六引擎横评首次汇总。 Qwen 4 追踪更新。 arXiv 周日无新批次。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-08-1900/">19点版</a></p></body></html>
