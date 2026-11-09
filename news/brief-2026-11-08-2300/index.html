@@ -1,0 +1,118 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月8日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-08"/>
+<meta name="doc-ts" content="2026-11-09T07:09:04"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-08（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-08（23点版）</h1>
+<p>23点版来了。</p>
+<p>周日夜里还是静。 版本水位全平。 但 11 月 6 日那批论文刚露头。 之前几期漏了，今天补上。 头条是 SGLang 的 PD 修补。 一个静默写坏别人缓存的坑。 正撞你的 PD 评估线。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 llama.cpp 还是 v0.9.0。 最新快照还是 b12211。 来源：GitHub releases</p>
+<p><strong>vLLM：8 条，投机解码修了两个实坑</strong></p>
+<p>先说 #66177。 投机解码的流水线并行打通了。 投机解码就是小模型先猜、大模型再验。 以前 gpt-oss 加 EAGLE3 开流水线会直接拒绝启动。 EAGLE3 是一种投机解码的草稿方法。 现在 PP=2、PP=4 都能跑。 Qwen3-VL 加 EAGLE3 在 PP=2 下启动失败也修了。 Qwen3-VL 是通义的多模态模型。 接受长度跟不开流水线差不多。 来源：<a href="https://github.com/vllm-project/vllm/pull/66177">https://github.com/vllm-project/vllm/pull/66177</a></p>
+<p>第二条 #58094。 MTP 草稿的 RoPE 配置丢了。 RoPE 是旋转位置编码，管词的位置感。 MTP 是多词并行预测的草稿器。 用户传了扩展 RoPE 的参数。 目标模型用了，草稿模型没收到。 草稿一过原生长度，接受率直接掉到 0%。 现在配置会透传给草稿。 来源：<a href="https://github.com/vllm-project/vllm/pull/58094">https://github.com/vllm-project/vllm/pull/58094</a></p>
+<p>第三条 #66412。 NIXL 的 PD 精确度测试拆成三路并行跑。 NIXL 是英伟达的 KV 搬运库。 PD 就是 prefill 和 decode 分家跑。 原来单路跑一次要 65 分钟。 现在三路并行，每路 20 分钟左右。 解码侧还换成了纯解码 CUDA 图。 来源：<a href="https://github.com/vllm-project/vllm/pull/66412">https://github.com/vllm-project/vllm/pull/66412</a></p>
+<p>其余五条一句话带过。</p>
+<p>#66238，Qwen3-VL-4B 能在至强 6 上跑了。</p>
+<p>#66034，XPU 的 CI 任务迁移。</p>
+<p>#60609，XPU 内核升到 0.1.17。</p>
+<p>#60274，Rust 前端多了个开关。</p>
+<p>#51951，Inkling 模型的缓存块大小修了。</p>
+<p><strong>SGLang：11 条，PD 那条最值得看</strong></p>
+<p>先说 #49218。 这是本轮最值得看的一条。 PD 传 KV 失败时可能写坏别人的缓存。 KV 缓存就是读题后留下的草稿纸。 失败的请求先释放，暂存间还没注销。 这中间有个时间窗。 别的请求新到的 KV 块可能被写进活着的请求里。 等于别人家的草稿纸被悄悄改了。 不报错，只出错误答案。 修法很简单：先注销暂存间，再释放。 来源：<a href="https://github.com/sgl-project/sglang/pull/49218">https://github.com/sgl-project/sglang/pull/49218</a></p>
+<p>第二条 #46214。 混合滑动窗口模型在 ragged prefill 里补了窗口限制。 ragged prefill 是变长批量读题。 滑动窗口就是注意力只看最近一段。 之前这条路没加限制，算多了。 来源：<a href="https://github.com/sgl-project/sglang/pull/46214">https://github.com/sgl-project/sglang/pull/46214</a></p>
+<p>第三条 #49247。 DeepSeek v4.1 的 mega 后端修了个导入。 小修，不展开。</p>
+<p>其余八条一句话带过。</p>
+<p>#49239，文档侧边栏按字母排序。</p>
+<p>#49237，CI 的覆盖率失败不再连锁炸。</p>
+<p>#48936，Mooncake 专家并行的测试日志。</p>
+<p>#48812，权重校验改到活权重所在设备上比。</p>
+<p>#48583，Intel XPU 内核升到 0.6.0。</p>
+<p>#48364，CPU 上能跑 Intern-S2-Mobius 模型了。</p>
+<p>#47899，Qwen3.5 的 CPU offload 修了。</p>
+<p>#31447，机密计算里开了 FlashInfer 的 all-reduce 融合。</p>
+<p><strong>TRT-LLM：2 条，全是测试基建</strong></p>
+<p>#21418、#21323。</p>
+<p>挑测试文件、收窄性能测试范围。 跟功能没关系。 一句话带过。</p>
+<p><strong>FlashInfer：3 条，FP8 那条有点意思</strong></p>
+<p>先说 #9018。 小 KV 的 FP8 注意力分组算了。 FP8 是 8 位浮点，省显存省带宽。 短上下文的小 KV 以前算得不划算。 现在按组打包，Q 长度 1 到 3 统一走。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9018">https://github.com/flashinfer-ai/flashinfer/pull/9018</a></p>
+<p>其余两条一句话带过。</p>
+<p>#9213、#9208，都是 cake 系列训练核提速。</p>
+<p><strong>Mooncake：4 条，存储层打磨</strong></p>
+<p>先说 #5277。 RDMA 切片准备改成 worker 主动投递。 RDMA 是网卡直通显存的高速路。 流水线少等一拍。 来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5277">https://github.com/kvcache-ai/Mooncake/pull/5277</a></p>
+<p>其余三条一句话带过。</p>
+<p>#5201，POSIX 存储能直接读分布式文件副本。</p>
+<p>#4820，写盘多了个对齐直接写选项。</p>
+<p>#4490，本地磁盘层第一次不可恢复错误就隔离。</p>
+<p><strong>LMDeploy、llama.cpp、TGI、Dynamo：零合入</strong></p>
+<p>这四家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：11 月 6 日那批，之前几期漏了</strong></p>
+<p>周一凌晨公布的那批。 关键词扫出来 10 篇。 跟推理 serving 相关的有 7 篇。 今天一次补上。</p>
+<p>先说 Nebula。 它是第一套把位置无关缓存当一等公民的分布式系统。 位置无关缓存就是一段话换个位置也能复用。 RAG 和 agent 的长 prompt 里全是这种段。 中位数首字延迟平均降 61.4%。 前缀缓存漏掉的词，平均找回 76.1%。 值得深读，笔记在下面。 来源：<a href="https://arxiv.org/abs/2611.09474">https://arxiv.org/abs/2611.09474</a></p>
+<p>第二条 BitDecoding-FP4。 FP4 的 KV 缓存解码，算法和系统一起改。 FP4 是 4 位浮点，KV 能压得更小。 以前的 FP4 KV 系统要么精度掉得多。 要么查表开销大，速度上不去。 这篇把查询拆成两路 FP4 张量。 三处误差源一起治。 来源：<a href="https://arxiv.org/abs/2611.09825">https://arxiv.org/abs/2611.09825</a></p>
+<p>第三条 FOSCAR。 2 位和 4 位 KV 缓存的解码注意力加速。 低位 KV 省了显存流量，但不等于省时间。 现有 2 位融合核在 H100 上只跑到峰值 3 成。 瓶颈是每个值都要先反量化再算。 这篇把缩放和平移折到另一边去算。 不用逐个值反量化。 来源：<a href="https://arxiv.org/abs/2611.09722">https://arxiv.org/abs/2611.09722</a></p>
+<p>第四条 RidgeFill。 不用训练就能让读题变快。 读题就是 prefill，一次性处理全部输入。 它只精算模型下半层。 上半层的输入用岭回归现推。 岭回归是一种带惩罚的线性拟合。 每层自己的投影照常跑。 最后几千个词和每个解码步走全模型。 来源：<a href="https://arxiv.org/abs/2611.09709">https://arxiv.org/abs/2611.09709</a></p>
+<p>第五条 Transformer-FSQ。 KV 缓存的极端压缩。 键和值投影换成有限标量量化瓶颈。 缓存里每词只存一串离散整数码。 Qwen3-1.7B 存 20 万词要 21GB。 是模型权重的 6.6 倍。 这篇就是冲着这个来的。 来源：<a href="https://arxiv.org/abs/2611.09598">https://arxiv.org/abs/2611.09598</a></p>
+<p>第六条 DARIC。 也是位置无关的 KV 复用。 它按偏差分布挑要重算的词。 重算就是把一小部分词重新算一遍。 之前的方法要么挑词开销大。 要么生成质量掉。 来源：<a href="https://arxiv.org/abs/2611.09109">https://arxiv.org/abs/2611.09109</a></p>
+<p>第七条 Intent-Aware Caching。 按用户意图决定缓存留多久。 多轮对话里，意图不同，续聊概率也不同。 续聊概率高的多留一会儿。 来源：<a href="https://arxiv.org/abs/2611.09715">https://arxiv.org/abs/2611.09715</a></p>
+<p>另外两篇一句话带过。 MINE，熵编码压推理内存。 Scout Before You Route，用小模型读题先预测任务成败。</p>
+<h2>业内新闻</h2>
+<p><strong>TPUv7 的 AgentX 成绩出来了</strong></p>
+<p>SemiAnalysis 11 月 5 日报的。 TPUv7 是谷歌的新推理芯片。 AgentX 是测 agent 长上下文多轮推理的榜。 GLM-5.2 用 FP8 跑。 每美元 token 数是 B200 的 1.2 到 2.7 倍。 Qwen3.5 397B 那组，TPUv7 加 vLLM。 每美元性能是 GB300 NVL72 FP4 的 1.67 倍。 90 分位首字延迟 8.6 秒对 11.1 秒。 数字都是特定配置下的。 别当成通用排名读。 来源：<a href="https://www.neoteo.com/en/googles-tpuv7-benchmarks-depend-on-model-and-setup">https://www.neoteo.com/en/googles-tpuv7-benchmarks-depend-on-model-and-setup</a></p>
+<p><strong>黄仁勋：董事会启动独立调查</strong></p>
+<p>英伟达董事会 11 月 8 日宣布。 针对黄仁勋被外国情报盯上的报道启动独立调查。 调查由独立董事委员会负责。 黄仁勋同一天向员工发信。 承认了婚外情，表示全力配合。 董事会说，目前没有理由相信机密泄露。 也没人被指控。 国会三位委员会主席要求 11 月 18 日闭门简报。 这是英伟达公司新闻，不是 serving 技术。 但你之前问过黄仁勋近况，顺手提一句。 来源：<a href="https://people.com/nvidia-ceo-jensen-huang-admits-to-extramarital-affair-amid-chinese-spy-allegations-12243788">https://people.com/nvidia-ceo-jensen-huang-admits-to-extramarital-affair-amid-chinese-spy-allegations-12243788</a></p>
+<p><strong>Qwen 4：传的窗口关了，还是没来</strong></p>
+<p>11 月 2 到 8 日那个窗口今天关了。 HF 上还是没有官方的 Qwen 4 仓库。 社区新说法还是 11 月 10 日周二。 还是没官方口径。 别按传言排期。 来源：<a href="https://teamorouter.com/blogs/qwen4">https://teamorouter.com/blogs/qwen4</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈和深度内容</strong></p>
+<p>X、HN、Reddit 扫过。 两小时内没有新料。 周日晚上本来就静。</p>
+<h2>值得深入学</h2>
+<p><strong>Nebula：分布式位置无关缓存，首字延迟降六成</strong></p>
+<p>小红书、上交、北大 11 月 6 日的论文。 RAG 和 agent 的长 prompt 里。 检索到的文档、工具返回到处换位置。 前缀缓存认不出来，全得重算。 Nebula 把这些段当一等公民。 跨节点也能复用，还能并行读题。 4 个模型、4 套真实 workload。 中位数首字延迟平均降 61.4%。 前缀缓存漏掉的词平均找回 76.1%。 P99 首字延迟最多降 97.3%。 跟你的 PD 评估直接对口。 它就建在 SGLang 加 Dynamo 上。 分布式 KV 复用和并行读题的账本能直接抄。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 21点版去重。 vLLM 8 条首次汇总。</p>
+<p>#66412、#66238、#66177、#66034、#60609、#60274、#58094、#51951。</p>
+<p>SGLang 11 条首次汇总。</p>
+<p>#49247、#49239、#49237、#49218、#48936、#48812、#48583、#48364、#47899、#46214、#31447。</p>
+<p>TRT-LLM 2 条首次汇总。 FlashInfer 3 条首次汇总。 Mooncake 4 条首次汇总。 LMDeploy、llama.cpp、TGI、Dynamo 零合入。 arXiv 11 月 6 日那批首次汇总。 TPUv7 AgentX、Qwen 4 追踪更新。 黄仁勋董事会调查首次汇总。 Nebula 深读笔记已生成。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-08-2300/">23点版</a></p></body></html>
