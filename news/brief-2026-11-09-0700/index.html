@@ -1,0 +1,104 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月9日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-09"/>
+<meta name="doc-ts" content="2026-11-09T15:02:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-09（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-09（07点版）</h1>
+<p>07点版来了。</p>
+<p>清晨两小时，框架合入了二十一条。 头条是 vLLM 的 PD 新进展。 读题那侧终于能流水线并行了。 正撞你的 PD 解耦评估线。 另外谷歌今天发了两款新 TPU。 其中一款专治超长上下文。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 正式版还是 v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 llama.cpp 还是 v0.9.0。 最新快照滚到 b12224。 之前是 b12223。 快照是每日自动打包，不算正式发版。 来源：GitHub releases</p>
+<p><strong>vLLM：7 条，PD 那两条最值得看</strong></p>
+<p>先说 #64693。 读题那侧终于能流水线并行了。 PD 解耦就是读题和生成分家跑。 MoRIIO 是 AMD 卡上的 KV 搬运通道。 以前写模式下，读题实例开不了流水线并行。 各阶段抢同一个端口，后面的起不来。 各阶段的层号还都从零起。 写出去的层会落到解码侧的错位上。 现在每阶段只写自己那几层。 解码侧等所有阶段报到齐才开工。 GLM-5.2 和 GLM-5.3 上实测，8 张 MI355X。 流水线版的读题实例多装约 4 倍 KV 缓存。 吞吐高出四成上下。 跟你的 PD 解耦评估直接相关。 来源：<a href="https://github.com/vllm-project/vllm/pull/64693">https://github.com/vllm-project/vllm/pull/64693</a></p>
+<p>第二条 #66268。 MiniMax-M3.1-Flash 的 PD 配方来了。 配方就是开箱即用的部署配置。 1 个读题引擎带 2 个解码引擎。 12 张 MI355X 一组，走 MoRI-IO 传 KV。 并发 40 到 128 都有调好的参数。 同等交互延迟下，每卡总吞吐高 6% 到 32%。 对照组是 SemiAnalysis 的聚合跑法。 来源：<a href="https://github.com/vllm-project/vllm/pull/66268">https://github.com/vllm-project/vllm/pull/66268</a></p>
+<p>其余五条一句话带过。</p>
+<p>#66397，DeepSeek V4.1 的回放构建器改到预热时建。</p>
+<p>#66482，预热假跑现在每个流水线 rank 都跑一遍。</p>
+<p>#66548，AITER 测试的旧期望值修了。</p>
+<p>#66403，前端修了复用 prompt 时的渲染问题。</p>
+<p>#66518，睡眠模式的内存分配器接口改成可重写。</p>
+<p><strong>SGLang：2 条，投机解码那条值得看</strong></p>
+<p>先说 #47627。 长上下文的投机解码少了一道手续。 投机解码就是小模型先猜、大模型再验。 DeepSeek V4.1 的长上下文走另一条校验分支。 以前这条分支每步都要在图里重建元数据。 batch 为 1 时每步多花约 39 微秒。 现在元数据提前在草稿旁边建好。 长 agent 对话每步都省这一笔。 来源：<a href="https://github.com/sgl-project/sglang/pull/47627">https://github.com/sgl-project/sglang/pull/47627</a></p>
+<p>第二条 #49318。 NPU 上加了 GLM-5.3 的 PD 分离性能用例。 2 个读题配 2 个解码，32 卡规模。 测试用例，不影响线上行为。 来源：<a href="https://github.com/sgl-project/sglang/pull/49318">https://github.com/sgl-project/sglang/pull/49318</a></p>
+<p><strong>TRT-LLM：3 条，全是基建</strong></p>
+<p>#21910，建模 V2 的规则文档说清楚了。</p>
+<p>#21603，按改动范围挑建模 V2 的测试。</p>
+<p>#21249，解耦测试服务器改绑系统分配的端口。</p>
+<p>一句话带过。</p>
+<p><strong>FlashInfer：6 条，GB300 那条值得看</strong></p>
+<p>先说 #9253。 GB300 上的 NVFP4 注意力核又快了一点。 NVFP4 是一种 4 位量化格式。 分页上下文里，V 的反量化改走空闲线程。 长上下文那档平均快 7.2%。 最快的一档快 12%。 输出跟原来逐位一致。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9253">https://github.com/flashinfer-ai/flashinfer/pull/9253</a></p>
+<p>其余五条一句话带过。</p>
+<p>#9259、#9257、#9172、#9174、#9254。</p>
+<p>全是 cake 系列训练核提速。 跟推理 serving 关系不大。</p>
+<p><strong>llama.cpp：3 条，小修</strong></p>
+<p>#31824，zDNN 后端接受非 zDNN 张量。</p>
+<p>#28697，服务端修了 JSON schema 的包装判断。</p>
+<p>#30712，ggml 补了 TRI 算子的反向传播。</p>
+<p>一句话带过。</p>
+<p><strong>LMDeploy、Dynamo、TGI：零合入</strong></p>
+<p>这三家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还没到</strong></p>
+<p>按本地时间，今天 17 点那批才公布。 到时再扫。 最新还是 11 月 6 日那批。 05点版已经报过，不再重复。</p>
+<h2>业内新闻</h2>
+<p><strong>谷歌：两款新 TPU 今天发布</strong></p>
+<p>先说 TPU 8i Max。 它是给超长上下文准备的。 两颗 8i 芯片封进一个封装。 算力、片上内存、显存带宽都翻倍。 机柜里塞的算力也跟着翻倍。 再说 TPU 8tx。 它是给保密推理准备的。 数据在内存里算的时候也不解密。 延迟最多比 TPU 8t 低一半。 来源：<a href="https://blog.google/innovation-and-ai/infrastructure-and-cloud/global-network/tpu-8i-max-and-8tx/?ref=testingcatalog.com">https://blog.google/innovation-and-ai/infrastructure-and-cloud/global-network/tpu-8i-max-and-8tx/?ref=testingcatalog.com</a></p>
+<p>还有一个跟你直接相关的：TPU Sync 开源了。 它是 TPU 集群的模型状态层。 说白了就是统一管显存、内存和存储。 大 KV 缓存几毫秒就能挪下芯片。 读题和解码节点之间直接传上下文。 官方说法是 KV 传输延迟和首字延迟降九成以上。 这是厂商口径，别当实测读。 另外 vLLM 和 SGLang 的 TPU 后端开箱即用。 TorchTPU 上个月也开源了。 今天上午 9 点还有一场发布直播。 来源同上。</p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈和深度内容</strong></p>
+<p>清晨两小时，X、HN、Reddit 都静。 Spotify 也扫过。 Latent Space 最新一期还是 11 月 8 日的。 讲斯坦福怎么教 AI 原生工程。 不在 serving 线上。 六引擎横评之前报过，不再重复。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有新增深读</strong></p>
+<p>两小时窗口里没有新论文。 框架合入也都是点修和配方。 vLLM 的 #64693 值得记一笔。 但它是代码改动，没有论文可读。 谷歌 TPU 那篇是厂商发布。 TPU Sync 的细节等开源代码出来再看。 等今天 17 点那批论文再看。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 05点版去重。 vLLM 7 条首次汇总。</p>
+<p>#64693、#66268、#66397、#66482、#66548、#66403、#66518。</p>
+<p>SGLang 2 条首次汇总。</p>
+<p>#47627、#49318。</p>
+<p>TRT-LLM 3 条首次汇总。</p>
+<p>#21910、#21603、#21249。</p>
+<p>FlashInfer 6 条首次汇总。</p>
+<p>#9253、#9259、#9257、#9172、#9174、#9254。</p>
+<p>llama.cpp 3 条首次汇总。</p>
+<p>#31824、#28697、#30712。</p>
+<p>LMDeploy、Dynamo、TGI 零合入。 llama.cpp 快照 b12223 滚到 b12224。 谷歌 TPU 8tx 和 8i Max 今天发布，首次汇总。 arXiv 新批次今天 17 点才公布。 六引擎横评、英伟达韩国配方之前已报过。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-09-0700/">07点版</a></p></body></html>
