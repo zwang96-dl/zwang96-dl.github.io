@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月9日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-09"/>
+<meta name="doc-ts" content="2026-11-09T17:00:09"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-09（09点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-09（09点版）</h1>
+<p>09点版来了。</p>
+<p>两小时里，框架合入了二十三条。 头条是 GLM 模型在 H200 上的提速。 一张新配置表，吞吐涨了一成。 Qwen4 还是没发，等明天再看。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 正式版还是 v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 llama.cpp 还是 v0.9.0。 最新快照滚到 b12229。 之前是 b12224。 快照是每日自动打包，不算正式发版。 来源：GitHub releases</p>
+<p><strong>vLLM：10 条，H200 那条最值得看</strong></p>
+<p>先说 #66537。 GLM-5.3-Flash 在 H200 上变快了。 GLM-5.3 是智谱的新模型。 以前跑 8 卡并行，用的还是通用配置。 这回补了一张 H200 专用的配置表。 FP8 是一种 8 位量化格式，省显存还快。 实测结果：吞吐涨 10.9%。 p90 那档的单词耗时降 16%。 并发 16 时测的，别当满负载读。 来源：<a href="https://github.com/vllm-project/vllm/pull/66537">https://github.com/vllm-project/vllm/pull/66537</a></p>
+<p>第二条 #60390，跟 Qwen4 有关。 Qwen4Exp 是 Qwen4 架构的实验版。 它放 CPU 上的一张表，以前各副本自己存一份。 现在同机多副本共用一张表。 省内存，部署更轻。 权重还没发，引擎侧先把路铺好。 来源：<a href="https://github.com/vllm-project/vllm/pull/60390">https://github.com/vllm-project/vllm/pull/60390</a></p>
+<p>第三条 #65406，是个算错的修补。 MoE 就是专家混合模型。 专家下投影带了偏置。 以前张量并行下，每张卡都加一次偏置。 等于一笔账算了好几遍。 现在只有 0 号卡保留，结果算对了。 来源：<a href="https://github.com/vllm-project/vllm/pull/65406">https://github.com/vllm-project/vllm/pull/65406</a></p>
+<p>第四条 #66417，跟多模态向量有关。 CLIP 和 SigLIP 是图文向量模型。 以前走聊天接口发文本，向量会丢首尾标记。 同一段话，两种接口给出的向量不一样。 现在模板补上了标记，两边对齐了。 来源：<a href="https://github.com/vllm-project/vllm/pull/66417">https://github.com/vllm-project/vllm/pull/66417</a></p>
+<p>第五条 #63847，AMD 卡的采样核。 persistent_topk 是取前 k 个候选的核。 以前只在英伟达卡上跑得顺。 现在 MI350 这代也能跑了。 跟你的 MI350X 直接相关。 来源：<a href="https://github.com/vllm-project/vllm/pull/63847">https://github.com/vllm-project/vllm/pull/63847</a></p>
+<p>其余五条一句话带过。</p>
+<p>#66559，Phi3 模型迁到新后端。</p>
+<p>#66504，权重缓存测试改用空闲端口。</p>
+<p>#66425，升级依赖，修下载时的崩溃。</p>
+<p>#66413，微调方法 LoRA 能挂到输出层了。</p>
+<p>#63352，测试小修。</p>
+<p><strong>SGLang：1 条，缓存那条值得看</strong></p>
+<p>先说 #46934，修的是前缀缓存的漏命中。 前缀缓存就是旧的草稿纸接着用。 SWA 是滑动窗口注意力，只看最近一段。 KV 缓存是模型算一半的草稿纸。 解码侧把 KV 卸到内存后，下一轮本该命中。 以前短于一个窗口的命中直接丢了。 实测里，复用从 512 词涨到 768 词。 长对话里，每轮都省这一笔。 PD 解耦就是读题和生成分家跑。 跟你的 PD 解耦评估相关。 来源：<a href="https://github.com/sgl-project/sglang/pull/46934">https://github.com/sgl-project/sglang/pull/46934</a></p>
+<p><strong>TRT-LLM：1 条，小修</strong></p>
+<p>#21907，把统计采集挪出服务主循环。</p>
+<p>以前每轮统计会卡住流式输出半秒。 现在令牌一批批到，不再憋着一起发。 这是分支上的合入，主线早修过了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21907">https://github.com/NVIDIA/TensorRT-LLM/pull/21907</a></p>
+<p><strong>Dynamo：1 条，语音助手那条</strong></p>
+<p>#17520，给实时语音助手补工具。</p>
+<p>Dynamo 是英伟达的推理服务框架。 实时文本会话现在能调函数工具了。 读题还能先攒着，首字更快出来。 同一台引擎还能跑聊天补全。 配的是语音助手那套蓝图。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17520">https://github.com/ai-dynamo/dynamo/pull/17520</a></p>
+<p><strong>FlashInfer：10 条，全是训练核</strong></p>
+<p>全是 cake 系列训练核提速。 跟推理 serving 关系不大。 一句话带过：#9262 到 #9271。</p>
+<p><strong>LMDeploy、llama.cpp、TGI、Mooncake：零合入</strong></p>
+<p>这四家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还没到</strong></p>
+<p>按本地时间，今天 17 点那批才公布。 到时再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4：还是没发</strong></p>
+<p>Qwen4 还是没发。 今天又查了一遍，权重和接口都没影。 社区说法还是明天 11 月 10 日。 仍没新证据，等官宣再说。 来源：<a href="https://www.versely.studio/blog/qwen-4-announced-at-apsara-2026">https://www.versely.studio/blog/qwen-4-announced-at-apsara-2026</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈和深度内容</strong></p>
+<p>X、HN、Reddit 两小时里都静。 Latent Space 没有新单集。 最新一期还是 11 月 8 日那期。 07点版已经报过，不再重复。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有新增深读</strong></p>
+<p>两小时窗口里没有新论文。 框架合入也都是点修和配置。 SGLang 的 #46934 值得记一笔。 但它是代码修补，没有论文可读。 等今天 17 点那批论文再看。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 07点版去重。 vLLM 10 条首次汇总。</p>
+<p>#66559、#66537、#66504、#66425、#66417、#66413、#65406、#63847、#63352、#60390。</p>
+<p>SGLang 1 条首次汇总。</p>
+<p>#46934。</p>
+<p>TRT-LLM 1 条首次汇总。</p>
+<p>#21907。</p>
+<p>Dynamo 1 条首次汇总。</p>
+<p>#17520。</p>
+<p>FlashInfer 10 条首次汇总。</p>
+<p>#9262、#9263、#9264、#9265、#9266、#9267、#9268、#9269、#9270、#9271。</p>
+<p>LMDeploy、llama.cpp、TGI、Mooncake 零合入。 llama.cpp 快照 b12224 滚到 b12229。 Qwen4 截至今天仍未发布，首次汇总。 arXiv 新批次今天 17 点才公布。 Latent Space 还是 11 月 8 日那期，07点版已报过。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-09-0900/">09点版</a></p></body></html>
