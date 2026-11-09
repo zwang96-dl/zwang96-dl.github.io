@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · 多节点 PD 分离：别让 NCCL 悄悄走 TCP"/>
+<meta name="doc-description" content="&gt; 原文：Justin Aharoni《Multi-Node Prefill-Decode Disaggregation in vLLM: Avoiding TCP Fallbac"/>
+<meta name="doc-date" content="2026-11-09"/>
+<meta name="doc-ts" content="2026-11-09T01:03:36"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多节点 PD 分离：别让 NCCL 悄悄走 TCP</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多节点 PD 分离：别让 NCCL 悄悄走 TCP</h1>
+<blockquote><p>原文：Justin Aharoni《Multi-Node Prefill-Decode Disaggregation in vLLM: Avoiding TCP Fallbacks Across NCCL and RDMA》<br/>原文链接：<a href="https://medium.com/@jaharoni/multi-node-prefill-decode-disaggregation-in-vllm-avoiding-tcp-fallbacks-across-nccl-and-rdma-18c732c59097">https://medium.com/@jaharoni/multi-node-prefill-decode-disaggregation-in-vllm-avoiding-tcp-fallbacks-across-nccl-and-rdma-18c732c59097</a><br/>发布：2026-11-07，17点版深读（11 月 6 日发布、之前几期漏报的补读）<br/>来源说明：原文是 vLLM 社区 discuss.vllm.ai Thread #2637 的中文帖英译版</p></blockquote>
+<p>（原文无配图，本笔记不含图）</p>
+<h2>一句话人话版</h2>
+<p>PD 分离搬到两台机器上。 最怕的不是配错，是配错了还不报错。 NCCL 悄悄退回 TCP，首字延迟就抖起来。 这篇就讲怎么在出事前抓住它。</p>
+<h2>先说问题：两台机器分工，中间靠 KV 搬运</h2>
+<p>prefill 是读题，算力吃得满。 decode 是一词一词往外吐，显存带宽吃得满。 两件事抢同一块卡，互相拖后腿。 长上下文的 prefill 一来，正在吐词的 decode 就卡住。 解法是分家：两台机器各干各的。 1 号机只做 prefill，算完把 KV 缓存发过去。 2 号机只做 decode，拿到 KV 直接开始吐词。 KV 缓存就是读题后留下的草稿纸。 不搬它，2 号机就得把题重读一遍。 分家的代价是多了一次跨机器搬运。 搬运走哪条路，决定了分家划不划算。</p>
+<h2>核心方法：三招，接线、验路、别认错网卡</h2>
+<h3>1. 两节点怎么接线</h3>
+<p>1 号机是生产者，角色叫 <code>kv_producer</code>。 2 号机是消费者，角色叫 <code>kv_consumer</code>。 两边用 <code>kv_transfer_config</code> 指明搬运工具。 可选三样：<code>PyNcclConnector</code>、<code>Mooncake</code>、<code>NIXL</code>。 生产者先起，带上自己的地址和端口。 消费者后起，注册到同一个地址。 例子用的是 Qwen2.5-72B-Instruct。 每台 4 卡张量并行。 生产者命令的关键行：</p>
+<p><code>vllm serve Qwen/Qwen2.5-72B-Instruct --port 8100</code></p>
+<p><code>--tensor-parallel-size 4</code></p>
+<p><code>--kv-transfer-config &#x27;{&quot;kv_connector&quot;:&quot;PyNcclConnector&quot;,&quot;kv_role&quot;:&quot;kv_producer&quot;,&quot;kv_rank&quot;:0,&quot;kv_parallel_size&quot;:2,&quot;kv_ip&quot;:&quot;10.0.0.11&quot;,&quot;kv_port&quot;:14579}&#x27;</code></p>
+<p>消费者只改两处：端口换成 8200，角色换成 <code>kv_consumer</code>，rank 换成 1。 其余写法完全一样。 生产者算完 KV，直接写进消费者的显存。 消费者不用重读题，马上开始吐词。</p>
+<h3>2. 抓静默 TCP 回退：先验路再上线</h3>
+<p>这是全文最值钱的一招。 NCCL 找不到高速网，会悄悄退回 TCP。 不报错，不挂起，只是变慢。 72B 模型的 KV 一次能有几百 MB。 走 TCP 传这么大的块，首字延迟直接抖。 上线前先跑一次，带上这个环境变量：</p>
+<p><code>export NCCL_DEBUG=INFO</code></p>
+<p>跑第一个请求，看日志里这一行。 看到 <code>NET/IB/0</code>，就是走了 RDMA 快路。 RDMA 是网卡直通显存的高速路。 看到 <code>NET/Socket</code>，就是掉回了 TCP。 掉回去就别上线，先修网络配置。 这招的成本是一次试跑。 省的是上线后满屏抖动的首字延迟。</p>
+<h3>3. 多网卡别搞混：写死网卡名</h3>
+<p>很多机器不止一张网卡。 一张 1Gbps 的管理网卡管 SSH。 一张 100Gbps 的高速网卡跑 RDMA。 不写死名字，握手可能挂在慢的那张上。 启动前先定死这两样：</p>
+<p><code>export NCCL_SOCKET_IFNAME=ens1f0</code></p>
+<p><code>export GLOO_SOCKET_IFNAME=ens1f0</code></p>
+<p><code>ens1f0</code> 换成你自己的高速网卡名。 只设 NCCL 那一个还不够。 GLOO 也要设，不然启动握手会 hang 住。 这是作者点名的最常见启动故障之一。</p>
+<h2>关键数据</h2>
+<ul><li>72B 模型，长上下文请求的 KV 能有几百 MB。</li><li>数字只有这一条，文章没给跑分。</li><li>这篇是部署手册，不是性能论文。</li><li>别把它当成绩单读，当检查单用。</li></ul>
+<h2>跟你的研究方向的关联</h2>
+<p>你在评估 PD 解耦，多机是迟早要过的一关。 这篇的三招可以直接进部署检查单。 第一，上线前先跑一次 <code>NCCL_DEBUG=INFO</code>。 第二，日志认准 <code>NET/IB/0</code>，不是就停。 第三，网卡名写死，别让握手自己挑。 这三条跟 SGLang #49156 是同一类教训。 那边是 Mooncake 拒收被悄悄吞掉。 这边是 NCCL 退回 TCP 不吭声。 PD 的坑一半在算法，一半在这种静默失败。 你的评估矩阵里可以加一列：静默失败怎么暴露。 注意这篇只讲 vLLM 的 PyNcclConnector。 Mooncake 和 NIXL 两条路没展开。 72B 的例子也偏大，小模型搬运量没这么夸张。 但验路的方法三条路通用。</p>
+<h2>术语表</h2>
+<ul><li>prefill（读题）：一次性处理全部输入，算出 KV 缓存。</li><li>decode（吐词）：一个词一个词生成，严重依赖显存带宽。</li><li>PD 分离：prefill 和 decode 拆到不同机器上跑。</li><li>KV 缓存：读题后留下的键值草稿，decode 靠它接着写。</li><li>kv_producer（生产者）：只做 prefill、只发 KV 的那台。</li><li>kv_consumer（消费者）：只做 decode、只收 KV 的那台。</li><li>NCCL：英伟达的 GPU 间通信库，管跨卡传数据。</li><li>RDMA：网卡绕过 CPU 直通显存的高速传输。</li><li>TCP 回退：高速路不通时悄悄改走普通网路。</li><li>NCCL_DEBUG=INFO：让 NCCL 把走哪条路打印出来。</li><li>GLOO：PyTorch 的另一套分布式通信后端，管启动握手。</li><li>TTFT（首字延迟）：从发请求到第一个词出来的时间。</li><li>张量并行：一个模型切到多张卡上并行算。</li></ul>
+<h2>原文链接</h2>
+<ul><li>Medium 原文：<a href="https://medium.com/@jaharoni/multi-node-prefill-decode-disaggregation-in-vllm-avoiding-tcp-fallbacks-across-nccl-and-rdma-18c732c59097">https://medium.com/@jaharoni/multi-node-prefill-decode-disaggregation-in-vllm-avoiding-tcp-fallbacks-across-nccl-and-rdma-18c732c59097</a></li><li>vLLM 社区原帖：discuss.vllm.ai Thread #2637（vLLM 多节点的 PD 分离部署）</li></ul></body></html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月8日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-08"/>
+<meta name="doc-ts" content="2026-11-09T01:02:32"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-08（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-08（17点版）</h1>
+<p>17点版来了。</p>
+<p>周日傍晚还是静。 版本水位全平。 但 SGLang 修了个 PD 的静默坑。 还有一篇多节点 PD 实战帖值得看。 正好撞在你的评估线上。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 llama.cpp 还是 v0.9.0。 最新快照还是 b12211。 来源：GitHub releases</p>
+<p><strong>SGLang：4 条，PD 的静默坑修了</strong></p>
+<p>先说最重要的一条：#49156。 Mooncake 拒收 KV 缓存，启动直接失败。 KV 缓存就是模型读题后留下的草稿纸。 Mooncake 是 SGLang 搬运这份草稿的工具。 以前它拒收，SGLang 只记了条 debug 日志。 启动照常过，跑起来才出怪问题。 等于门锁坏了，保安只在本子上记一笔。 现在改成启动时就报错停住。 问题出在 RDMA 注册资源不够。 那是机器一侧的条件，不是 SGLang 的错。 但吞掉错误让排障贵了好几倍。 为什么值得看：你的 PD 评估要上多机。 Mooncake 注册失败是真会遇到的坑。 现在它会大声报错，不再悄悄放行。 来源：<a href="https://github.com/sgl-project/sglang/pull/49156">https://github.com/sgl-project/sglang/pull/49156</a></p>
+<p>其余三条一句话带过。</p>
+<p>#49204，session 重构，跟 serving 没关系。</p>
+<p>#49159 和 #49153，都是测试代码。</p>
+<p><strong>vLLM：2 条，英特尔 XPU 的 MoE 后端</strong></p>
+<p>#46871。</p>
+<p>给 XPU 加了 MoE 专家并行的后端。 XPU 就是英特尔的 GPU。 作者自己说了还是半成品。 端到端性能有退化，等自动调优。 DeepSeek 的 MLA 在 XPU 上还有数值问题。 现阶段跟你的 H100 和 MI350X 没关系。 一句话带过就行。 来源：<a href="https://github.com/vllm-project/vllm/pull/46871">https://github.com/vllm-project/vllm/pull/46871</a></p>
+<p>#66206 是 ROCm 测试代码。</p>
+<p>一句话带过。</p>
+<p><strong>Dynamo：1 条，路由配置写法变了</strong></p>
+<p>#18281。</p>
+<p>路由策略改成每个角色直接写明。 以前要套一层实例列表。 纯重构，行为没变。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18281">https://github.com/ai-dynamo/dynamo/pull/18281</a></p>
+<p><strong>Mooncake：2 条，都是 XPU 的 EP 相关</strong></p>
+<p>#5329 和 #5312。</p>
+<p>一个校验参数，一个拆构建。 都跟 XPU 的专家并行有关。 一句话带过。</p>
+<p><strong>FlashInfer：8 条，还是训练核</strong></p>
+<p>#9170、#9203、#9202 这些。</p>
+<p>全是 cake 系列训练核打磨。 跟推理 serving 关系不大。 一句话带过。</p>
+<p><strong>TRT-LLM、LMDeploy、llama.cpp：零合入</strong></p>
+<p>这三家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周日没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 下批周一出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：传的窗口今天关，还是没来</strong></p>
+<p>HF 上还是没有官方的 Qwen 4 仓库。 11 月 6 日那个海报预热之后再没动静。 &quot;11 月 2 到 8 日&quot;这个窗口今天就关了。 社区新说法改到 11 月 10 日周二。 还是没官方口径。 别按传言排期。 来源：<a href="https://teamorouter.com/blogs/qwen4">https://teamorouter.com/blogs/qwen4</a></p>
+<h2>访谈与深度</h2>
+<p><strong>多节点 PD 分离：最怕 NCCL 悄悄走 TCP（补报）</strong></p>
+<p>这篇 11 月 6 日就发了，之前几期漏了。 先说场景：PD 分离搬到两台机器上。 一台只做 prefill，一台只做 decode。 中间靠 KV 缓存搬运连起来。 坑在 NCCL 会悄悄退回 TCP。 NCCL 是 GPU 之间传数据的库。 TCP 就是普通网线那条慢路。 72B 模型的 KV 一次能有几百 MB。 走 TCP，首字延迟直接抖起来。 更糟的是它不报错，只是变慢。 查法就一行：先开 NCCL_DEBUG=INFO 跑一次。 日志里看到 NET/IB/0 就是走了 RDMA 快路。 看到 NET/Socket 就是掉回了 TCP。 还有个常见坑：多网卡的机器。 管理网卡和高速网卡别搞混。 启动命令里写死网卡名。 不然握手可能挂在慢的那张卡上。 为什么值得看：你的 PD 评估迟早要上多机。 这篇就是一张部署前的检查单。 三分钟能看完，照着抄就行。 来源：<a href="https://medium.com/@jaharoni/multi-node-prefill-decode-disaggregation-in-vllm-avoiding-tcp-fallbacks-across-nccl-and-rdma-18c732c59097">https://medium.com/@jaharoni/multi-node-prefill-decode-disaggregation-in-vllm-avoiding-tcp-fallbacks-across-nccl-and-rdma-18c732c59097</a></p>
+<h2>值得深入学</h2>
+<ol><li>多节点 PD 分离实战帖：NCCL 悄悄走 TCP 的坑，和部署前检查单。</li></ol>
+<p>直接对口你的多机 PD 评估。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 15点版去重。 SGLang #49156、#49204、#49159、#49153 首次汇总。 vLLM #46871、#66206 首次汇总。 Dynamo #18281、Mooncake #5329、#5312 首次汇总。 FlashInfer 8 条首次汇总。 多节点 PD 实战帖首次汇总。 Simon Mo 访谈、Revolut、Supermicro、GPUWorks 已报过。 Qwen 4 追踪更新。 arXiv 周日无新批次。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-08-1700/">17点版</a></p></body></html>
