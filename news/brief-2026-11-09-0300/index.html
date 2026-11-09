@@ -1,0 +1,117 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月9日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-09"/>
+<meta name="doc-ts" content="2026-11-09T11:00:06"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-09（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-09（03点版）</h1>
+<p>03点版来了。</p>
+<p>半夜两小时，框架那边合入了三十多条。 头条是两条 AMD 卡的干货。 一条让 KV 搬运不再拖累解码。 另一条给 Qwen4 铺好了引擎侧的路。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 llama.cpp 还是 v0.9.0。 最新快照还是 b12212。 快照是每日自动打包，不算正式发版。 来源：GitHub releases</p>
+<p><strong>vLLM：20 条，两条 AMD 卡的干货</strong></p>
+<p>先说 #65559。 KV 搬运改走专用通道了。 说的是 ROCm 上的 KV 卸载。 KV 卸载就是把放不下的草稿纸搬去内存。 以前搬家要占用计算单元跑搬运核。 旁边的解码跟着变慢，中位数慢 122%。 现在改走 SDMA 专用搬运引擎。 SDMA 就是 AMD 卡上的搬家专线。 解码只慢 0.4% 到 3.9%，基本没感觉。 搬运速度没变，还是 44 到 56 GB/s。 跟你的 MI350X 直接相关。 来源：<a href="https://github.com/vllm-project/vllm/pull/65559">https://github.com/vllm-project/vllm/pull/65559</a></p>
+<p>第二条 #56192。 KV 溢出到对象存储也能走 RDMA 了。 对象存储就是 S3 那类远端仓库。 以前这条路只能慢速走。 现在能用 NIXL 的加速引擎。 NIXL 是英伟达的 KV 传输库。 版本钉在 NIXL 1.5.2。 另外还修了个启动坑。 CPU 内存池超过 4 GiB 会注册失败。 现在按 4 GiB 切块注册，启动不崩了。 跟 PD 解耦那条线相关。 来源：<a href="https://github.com/vllm-project/vllm/pull/56192">https://github.com/vllm-project/vllm/pull/56192</a></p>
+<p>第三条 #64315。 Qwen4 的实验版跑上 DeepGEMM 了。 实验版叫 Qwen4Exp。 也就是 Qwen3.8-Flash-Next。 它的模型卡自己写着 Qwen4 架构预览版。 路由专家走 DeepGEMM MegaMoE 后端。 支持 MXFP8 和 MXFP4 两种量化。 需要开专家并行才能用。 权重还没发，引擎侧先把路铺好了。 来源：<a href="https://github.com/vllm-project/vllm/pull/64315">https://github.com/vllm-project/vllm/pull/64315</a></p>
+<p>第四条 #65524。 DeepSeek V4.1 的 prefill 小优化。 离 prompt 末尾够远的 prefill 块只重放一行。 后面的块不再读它跳过的行。 这是 #62817 的简化版。 来源：<a href="https://github.com/vllm-project/vllm/pull/65524">https://github.com/vllm-project/vllm/pull/65524</a></p>
+<p>其余十六条一句话带过。 Rust 前端一批：#65629 每请求输出通道更省内存。</p>
+<p>#66119 支持日志级别配置。</p>
+<p>#66106、#66107、#66103、#66104、#66105 是渲染与指标小修。</p>
+<p>#65864 非流式返回路由专家信息。</p>
+<p>#66478 扩容默认进开发模式。</p>
+<p>#66289，Qwen3.5 在老卡上把 FlashInfer 的 RMSNorm 换成 Triton。</p>
+<p>#65995，ROCm 上 AITER 预加载修补。</p>
+<p>#64041，用量里上报推理 token 和缓存 token。</p>
+<p>#66316、#66310、#66308，三条 MI355 的 CI 镜像。</p>
+<p>#54737，文档修补。</p>
+<p><strong>SGLang：3 条，Inkling 那条最值得看</strong></p>
+<p>先说 #49126。 Inkling 的多模态 serving 规范合入了。 图片和音频先占一个占位 token。 再按图像块或音频帧展开成一串 token。 算出来的结果跟老处理器完全一致。 Inkling 2 Small 的权重下周才放出来。 SGLang 这边先把多模态 serving 的路铺好。 跟你多模态那条线直接相关。 来源：<a href="https://github.com/sgl-project/sglang/pull/49126">https://github.com/sgl-project/sglang/pull/49126</a></p>
+<p>第二条 #43675。 Kimi-K3 的修补。 CUDA 图重载时派生权重缓冲会出错。 现在修了。 来源：<a href="https://github.com/sgl-project/sglang/pull/43675">https://github.com/sgl-project/sglang/pull/43675</a></p>
+<p>第三条 #48656。 ComfyUI 那边加载新模型单文件。 包括 FastH3 和 H3 FP8。 还有 Qwen-Image 2.1 Turbo。 跟 serving 关系不大。 来源：<a href="https://github.com/sgl-project/sglang/pull/48656">https://github.com/sgl-project/sglang/pull/48656</a></p>
+<p><strong>TRT-LLM：3 条，全是基建</strong></p>
+<p>#21325 引入 Pyrefly 做类型检查。</p>
+<p>#21026 修了 JSON 结构化输出示例的参数透传。</p>
+<p>#19333 是测试收尾流程的修补。</p>
+<p>一句话带过。</p>
+<p><strong>FlashInfer：8 条，训练核为主</strong></p>
+<p>#9231，FP8 上下文 LSE 在 B200 和 GB300 上更快。</p>
+<p>#9176，Kimi-K3 的 LatentMoE 在 TP8 解码尾巴上提速。</p>
+<p>#9236，BF16 分页上下文加了新程序。</p>
+<p>其余五条 #9243、#9241、#9240、#9235、#9223。 全是 cake 系列训练核提速。 跟推理 serving 关系不大。</p>
+<p><strong>Mooncake：1 条</strong></p>
+<p>#5330，XPU 的 ElasticBuffer 后端。</p>
+<p>节点内进程间通信用。 一句话带过。</p>
+<p><strong>llama.cpp：4 条，小修</strong></p>
+<p>#29413，RPC 加载更快。</p>
+<p>#30802，YaRN 截断配置补到多个后端。</p>
+<p>#31655，mtmd 口袋 TTS 支持温度设置。</p>
+<p>#31935，OpenCL 补了个头文件。</p>
+<p>一句话带过。</p>
+<p><strong>LMDeploy、TGI、Dynamo：零合入</strong></p>
+<p>这三家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还没到</strong></p>
+<p>按本地时间，今晚 17 点那批才公布。 到时再扫。 本轮关键词查询最新还是 11 月 6 日那批。 23点版已经报过，不再重复。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4：补报一条 11 月 6 日的动静</strong></p>
+<p>Qwen 官方账号 11 月 6 日发了条推文。 内容是&quot;北冥有鱼，其名为鲲&quot;。 被解读为 Qwen4 临近的信号。 加上 vLLM 刚合入的 Qwen4Exp 支持。 引擎侧已经铺好路了。 权重还是没发。 社区说的 11 月 10 日仍无官方口径。 来源：<a href="https://medium.com/data-science-in-your-pocket/qwen-4-is-stealth-announced-0f8217f0da38">https://medium.com/data-science-in-your-pocket/qwen-4-is-stealth-announced-0f8217f0da38</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈和深度内容</strong></p>
+<p>半夜两小时，X、HN、Reddit 都静。 Spotify 也扫过。 Latent Space 最新一期是 11 月 8 日的。 讲斯坦福怎么教 AI 原生工程。 不在 serving 线上。 六引擎横评和 Nodus 那篇之前都报过。 不再重复。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有新增深读</strong></p>
+<p>#65559 和 #56192 都是值得记的点修。</p>
+<p>但还够不上单独一篇深读。 等白天那批再看。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 01点版去重。 vLLM 20 条首次汇总。</p>
+<p>#66478、#66316、#66310、#66308、#66289、#66119、#66107、#66106、#66105、#66104、#66103、#65995、#65864、#65629、#65559、#65524、#64315、#64041、#56192、#54737。</p>
+<p>SGLang 3 条首次汇总。</p>
+<p>#49126、#48656、#43675。</p>
+<p>TRT-LLM 3 条首次汇总。</p>
+<p>#21325、#21026、#19333。</p>
+<p>FlashInfer 8 条首次汇总。</p>
+<p>#9243、#9241、#9240、#9236、#9235、#9231、#9223、#9176。</p>
+<p>Mooncake 1 条首次汇总。</p>
+<p>#5330。</p>
+<p>llama.cpp 4 条首次汇总。</p>
+<p>#31935、#31655、#30802、#29413。</p>
+<p>LMDeploy、TGI、Dynamo 零合入。 llama.cpp 快照还是 b12212。 Qwen4 鲲推文首次汇总。 arXiv 新批次今晚 17 点才公布。 六引擎横评、Nodus 对比之前已报过。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-09-0300/">03点版</a></p></body></html>
