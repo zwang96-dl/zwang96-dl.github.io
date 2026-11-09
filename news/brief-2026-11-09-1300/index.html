@@ -1,0 +1,248 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月9日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-09"/>
+<meta name="doc-ts" content="2026-11-09T21:03:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-09（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-09（13点版）</h1>
+<p>13点版来了。</p>
+<p>两小时里，框架合入了二十六条。</p>
+<p>头条是今天的三条新闻。</p>
+<p>Epoch AI 换了把尺子量推理卡。</p>
+<p>谷歌一次发了两款 TPU 新系统。</p>
+<p>还有一个推理服务的安全警报。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。</p>
+<p>vLLM 还是 v0.33.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.3。</p>
+<p>rc 版还是 v0.7.4rc1。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>最新快照滚到 b12233。</p>
+<p>之前是 b12230。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：5 条，MI350 那条最值得看</strong></p>
+<p>先说 #66400。</p>
+<p>这是给你的 MI350 修的。</p>
+<p>长提示词走 BF16 读题，以前进了错的内核。</p>
+<p>结果每次跑都不一样，等于算错了。</p>
+<p>现在改走稳定的持久内核。</p>
+<p>结果固定了，跟 FP32 参考只差 0.006。</p>
+<p>以前误差最大到 0.173。</p>
+<p>那个老闪烁的测试，60 次里坏 3 次。</p>
+<p>现在 60 次全过。</p>
+<p>还顺手删了一个主机同步。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66400">https://github.com/vllm-project/vllm/pull/66400</a></p>
+<p>第二条 #66546，跟投机解码有关。</p>
+<p>投机解码就是先让小模型打草稿。</p>
+<p>EAGLE3 是常用的草稿模型。</p>
+<p>现在它在流水线并行下也能用了。</p>
+<p>Transformers 后端跟原生实现对齐了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66546">https://github.com/vllm-project/vllm/pull/66546</a></p>
+<p>第三条 #59981，修机密计算下的解码。</p>
+<p>机密计算就是给数据加锁再跑。</p>
+<p>以前 V2 运行器在这种环境下会算出乱码。</p>
+<p>现在修好了，非机密环境不受影响。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/59981">https://github.com/vllm-project/vllm/pull/59981</a></p>
+<p>其余两条一句话带过。</p>
+<p>#65203，FlashAttention 跟上游同步。</p>
+<p>#66398，DiffusionGemma 的对数概率留在卡上。</p>
+<p><strong>SGLang：8 条，MTP 提速那条值得看</strong></p>
+<p>先说 #49135。</p>
+<p>MTP 是多词并行预测，投机解码的一种。</p>
+<p>验证阶段的第一步以前卡在关键路径上。</p>
+<p>现在改成直线代码，编译器能交错排布。</p>
+<p>N=32 时快 11%，N=64 时快 12%。</p>
+<p>结果跟以前逐位一致。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49135">https://github.com/sgl-project/sglang/pull/49135</a></p>
+<p>第二条 #49205，跟 AMD 新卡有关。</p>
+<p>MI450 是 AMD 下一代卡。</p>
+<p>16 卡并行时，集合通信快了 17% 到 31%。</p>
+<p>诀窍是先在芯片内归约。</p>
+<p>只有一半数据要过卡间链路。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49205">https://github.com/sgl-project/sglang/pull/49205</a></p>
+<p>第三条 #49253，修调度器暂停的 bug。</p>
+<p>暂停生成时，有些占着 KV 的请求漏收回。</p>
+<p>暂停就卡住，释放内存也失败。</p>
+<p>扩散模型恢复时还会直接崩。</p>
+<p>现在一次收干净，恢复也不崩了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49253">https://github.com/sgl-project/sglang/pull/49253</a></p>
+<p>第四条 #48984。</p>
+<p>DeepGEMM 预归一化改成一趟完成。</p>
+<p>还撤了一个 Rubin 解码的预留。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48984">https://github.com/sgl-project/sglang/pull/48984</a></p>
+<p>其余四条一句话带过。</p>
+<p>#48418，扩散模型的可回收缓存算进可用量。</p>
+<p>#47750，修评分的校验。</p>
+<p>#33059，AMD 的分页对齐。</p>
+<p>#49350，删了个已废弃的测试参数。</p>
+<p><strong>TRT-LLM：1 条</strong></p>
+<p>#21213，修 Helix 的集合通信。</p>
+<p>输入先保证连续，免得传错。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21213">https://github.com/NVIDIA/TensorRT-LLM/pull/21213</a></p>
+<p><strong>Dynamo：4 条，压测那条值得看</strong></p>
+<p>先说 #18135。</p>
+<p>混合 KV 布局的模型，以前自压测跑不完。</p>
+<p>前缀缓存的假种子没有真实状态。</p>
+<p>压测一启动就崩，反复重启。</p>
+<p>现在默认自动用真种子。</p>
+<p>Qwen3.5-4B 上 1989 个点全跑完了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18135">https://github.com/ai-dynamo/dynamo/pull/18135</a></p>
+<p>第二条 #18170。</p>
+<p>每个请求的性能指标，现在默认关着。</p>
+<p>要开得显式加开关。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18170">https://github.com/ai-dynamo/dynamo/pull/18170</a></p>
+<p>第三条 #17741。</p>
+<p>换了新版分词器依赖。</p>
+<p>Kimi K3 的分段提示词能缓存了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17741">https://github.com/ai-dynamo/dynamo/pull/17741</a></p>
+<p>第四条 #18253，16 位图片的前端小修。</p>
+<p><strong>FlashInfer：6 条，都是性能修补</strong></p>
+<p>#9287、#9284 是 MoE 训练核提速。</p>
+<p>#9261 跟 TRT-LLM 生成后端有关。</p>
+<p>#9229 修 KDA 的写屏障。</p>
+<p>#9222 恢复稀疏注意力的性能。</p>
+<p>#9024 是 CI 的范围收紧。</p>
+<p>没有功能合入。</p>
+<p><strong>llama.cpp：2 条，都是界面</strong></p>
+<p>#31952，侧边栏打不开会重试。</p>
+<p>#31949，手机上看着更像原生应用。</p>
+<p>跟推理核心无关。</p>
+<p><strong>LMDeploy：零合入</strong></p>
+<p>窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还没到</strong></p>
+<p>按本地时间，今天 17 点那批才公布。</p>
+<p>到时再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Epoch AI：只看算力，会低估 GB300 十倍</strong></p>
+<p>Epoch AI 今天发了个新指数，叫 IPI。</p>
+<p>它不问一秒能算多少次。</p>
+<p>它问一卡能同时伺候多少用户。</p>
+<p>答案很扎眼。</p>
+<p>GB300 一张卡的推理容量，约等于 25 张 H100。</p>
+<p>但它的 8 位算力只高 2.5 倍。</p>
+<p>差出来的 10 倍，藏在显存和互联里。</p>
+<p>说白了，推理的瓶颈不在算得快。</p>
+<p>瓶颈在数据搬得快不快。</p>
+<p>机架形态差距也很大。</p>
+<p>GB300 NVL72 得 1 分。</p>
+<p>H200 只有 0.12 分，差约 8 倍。</p>
+<p>同一代里也有差距。</p>
+<p>B300 得 0.54 分，NVL72 是它约 1.9 倍。</p>
+<p>差别在互联规模，72 卡一组对 8 卡一组。</p>
+<p>MI355X 得约 0.55 分。</p>
+<p>Rubin 的 VR200 得 2.18 分。</p>
+<p>单看 Kimi K3，差距更大。</p>
+<p>GB300 对 H200 的优势涨到约 46 倍。</p>
+<p>划重点：这些数是模型推算。</p>
+<p>不是真机实测，别当跑分读。</p>
+<p>来源：<a href="https://epoch.ai/publications/inference-performance-index">https://epoch.ai/publications/inference-performance-index</a></p>
+<p><strong>谷歌：一天发两款 TPU 新系统</strong></p>
+<p>谷歌今天扩了第八代 TPU。</p>
+<p>一款叫 TPU 8tx，管保密推理。</p>
+<p>数据和权重用的时候也锁着。</p>
+<p>用的是 8t 的芯片，配 AMD 五代 EPYC 主机。</p>
+<p>另一款叫 TPU 8i Max，管超大上下文。</p>
+<p>两颗 8i 芯片封进一个封装。</p>
+<p>算力、片上缓存、显存带宽都翻倍。</p>
+<p>今年谷歌已经发了四款 TPU 系统。</p>
+<p>价格和上市时间都没给。</p>
+<p>性能也全是厂商自己说的。</p>
+<p>来源：<a href="https://blog.google/innovation-and-ai/infrastructure-and-cloud/global-network/tpu-8i-max-and-8tx/?ref=testingcatalog.com">https://blog.google/innovation-and-ai/infrastructure-and-cloud/global-network/tpu-8i-max-and-8tx/?ref=testingcatalog.com</a></p>
+<p><strong>安全警报：GPUStack 有个 9.8 分的漏洞</strong></p>
+<p>GPUStack 是开源的 GPU 集群管理器。</p>
+<p>也管模型服务。</p>
+<p>CISA 今天把它一个认证绕过漏洞列入必修清单。</p>
+<p>编号 CVE-2026-102895，9.8 分。</p>
+<p>不用登录就能拿到管理员权限。</p>
+<p>还能通过推理后端执行代码。</p>
+<p>野外已经有人在利用了。</p>
+<p>2.2.0 版已修，2.2.0 之前全受影响。</p>
+<p>要求 11 月 12 日前处理完。</p>
+<p>自己搭过 GPUStack 的，赶紧升。</p>
+<p>来源：<a href="https://malice.ai/a/cisa-adds-gpustack-authentication-bypass-cve-2026-102895-to-kev-catalog">https://malice.ai/a/cisa-adds-gpustack-authentication-bypass-cve-2026-102895-to-kev-catalog</a></p>
+<p><strong>Qwen4：还是没发</strong></p>
+<p>Qwen4 还是没发。</p>
+<p>权重、接口、价格都没影。</p>
+<p>社区说法还是明天 11 月 10 日。</p>
+<p>仍没新证据，等官宣再说。</p>
+<p>来源：<a href="https://www.versely.studio/blog/qwen-4-announced-at-apsara-2026">https://www.versely.studio/blog/qwen-4-announced-at-apsara-2026</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈和深度内容</strong></p>
+<p>X、HN、Reddit 两小时里都静。</p>
+<p>Latent Space 没有新单集。</p>
+<p>最新一期还是 11 月 8 日那期。</p>
+<p>07点版已经报过，不再重复。</p>
+<h2>值得深入学</h2>
+<p><strong>Epoch AI 推理性能指数：只看算力会低估 GB300 十倍</strong></p>
+<p>这篇能帮你换把尺子量手里的卡。</p>
+<p>H100 和 MI350X 到底差在哪，FLOPS 说不清。</p>
+<p>这篇把显存、带宽、互联都算进一张表。</p>
+<p>并发换速度那张图，也能进你的调参器。</p>
+<p>精读笔记已生成，含原文 4 张图。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/deep-20261109-epoch-ai-ipi/">Epoch AI 推理性能指数：只看算力，会低估 GB300 十倍</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 11点版去重。</p>
+<p>vLLM 5 条首次汇总。</p>
+<p>#66400、#66546、#65203、#66398、#59981。</p>
+<p>SGLang 8 条首次汇总。</p>
+<p>#49253、#49205、#49135、#48984、#48418、#47750、#33059、#49350。</p>
+<p>TRT-LLM 1 条首次汇总。</p>
+<p>#21213。</p>
+<p>Dynamo 4 条首次汇总。</p>
+<p>#18253、#18170、#18135、#17741。</p>
+<p>FlashInfer 6 条首次汇总。</p>
+<p>#9287、#9284、#9261、#9229、#9222、#9024。</p>
+<p>llama.cpp 2 条首次汇总，都是界面。</p>
+<p>#31952、#31949。</p>
+<p>LMDeploy 零合入。</p>
+<p>llama.cpp 快照 b12230 滚到 b12233。</p>
+<p>Epoch AI 推理性能指数、谷歌 TPU 新系统，首次汇总。 GPUStack 安全警报，首次汇总。</p>
+<p>Qwen4 截至今天仍未发布，首次汇总。</p>
+<p>arXiv 新批次今天 17 点才公布。</p>
+<p>Latent Space 还是 11 月 8 日那期，07点版已报过。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-09-1300/">13点版</a></p></body></html>
