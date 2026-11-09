@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月8日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-08"/>
+<meta name="doc-ts" content="2026-11-09T04:59:37"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-08（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-08（21点版）</h1>
+<p>21点版来了。</p>
+<p>周日晚上还是静。 版本水位全平。 但 Kimi K3.1 的拼图又补一块。 这次轮到 vLLM 那边。 SGLang 那边 Mooncake 也提速了。 都撞在你的 PD 评估线上。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平</strong></p>
+<p>没有新版本发布。 vLLM 还是 v0.33.0。 SGLang 还是 v0.5.23。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI v3.3.7，Dynamo v1.6.2。 FlashInfer 正式版还是 v0.7.3。 rc 版还是 v0.7.4rc1。 llama.cpp 还是 v0.9.0。 最新快照还是 b12211。 来源：GitHub releases</p>
+<p><strong>vLLM：5 条，Kimi K3.1 的 TP8 拼图</strong></p>
+<p>先说 #66037。 这是本轮最大的一条。 Kimi K3.1 在 vLLM 里能跑 TP8 了。 TP8 就是 8 张卡一起分摊张量并行。 K3.1 是月之暗面的 2.8T MoE 模型。 MoE 就是专家混合模型。 这回改的是 KV 缓存和注意力那层。 KV 缓存就是模型读题后留下的草稿纸。 新做法叫打包混合 KV 行。 一层一层的页面不再各自留白。 拼成整行再存，省显存。 还加了核内块的槽位映射。 草稿器可以自己选要不要接进来。 DFlash 和 DSpark 都接了。 这是 K3.1 五拆里的第三拆。 前两拆已经合入。 后面还剩 ROCm、PD 和索引 top-k。 还有 DCP 那一拆。 等于说 K3.1 的 vLLM 支持快拼完了。 就差 PD 和 DCP 那两块。 来源：<a href="https://github.com/vllm-project/vllm/pull/66037">https://github.com/vllm-project/vllm/pull/66037</a></p>
+<p>第二条 #51006。 MoE 的路由器现在可以外挂了。 路由器就是决定 token 去哪个专家。 以前只能用内置那套。 现在能注册自己的实现。 想试新路由策略，不用改引擎本体。 来源：<a href="https://github.com/vllm-project/vllm/pull/51006">https://github.com/vllm-project/vllm/pull/51006</a></p>
+<p>其余三条一句话带过。</p>
+<p>#66461，Qwen4 实验模型的加载检查修了。</p>
+<p>#64499，CPU 上 DP 报错会说清原因。</p>
+<p>#66434，ROCm 的 CI 小修。</p>
+<p><strong>SGLang：5 条，Mooncake 搬 KV 提速了</strong></p>
+<p>先说 #45106。 Mooncake 搬 KV 缓存改成并行了。 Mooncake 是 SGLang 搬运 KV 的工具。 以前每层每池各调一次同步接口。 一次大约 3 微秒，串行等。 一层 72KB 的页面加 8KB 索引。 搬下来每路只有 12 到 14 GB 每秒。 远没跑满网卡。 新前缀短、旧前缀长的请求最吃亏。 多轮对话和 agent 都是这个形状。 搬运躲不到计算后面去。 直接顶在首字延迟上。 现在改成按层分组并行搬。 等于原来一辆车一趟趟拉。 现在多辆车同时拉。 来源：<a href="https://github.com/sgl-project/sglang/pull/45106">https://github.com/sgl-project/sglang/pull/45106</a></p>
+<p>第二条 #46552。 多模态缓存查表少算一次 key。 查表就是按 key 找有没有现成的图特征。 以前调用方算好了 key 传进来。 函数里又重算一遍。 现在直接用传进来的。 命中结果不变，纯省计算。 来源：<a href="https://github.com/sgl-project/sglang/pull/46552">https://github.com/sgl-project/sglang/pull/46552</a></p>
+<p>第三条 #46062。 DeepSeek v4.1 的注意力缓冲复用。 以前每层清零一次。 现在一张清零过的缓冲全模型共用。 来源：<a href="https://github.com/sgl-project/sglang/pull/46062">https://github.com/sgl-project/sglang/pull/46062</a></p>
+<p>其余两条一句话带过。</p>
+<p>#48879，文档里 Qwen3.8 的描述修了。</p>
+<p>#49220，NPU 的 CI 小修。</p>
+<p><strong>TRT-LLM：4 条，全是测试基建</strong></p>
+<p>#21905、#21898、#21691、#21223。</p>
+<p>豁免失败用例、迁测试结果、收窄参考。 跟功能没关系。 一句话带过。</p>
+<p><strong>FlashInfer：6 条，还是训练核为主</strong></p>
+<p>#9216、#9214、#9210、#9206、#9201。</p>
+<p>全是 cake 系列训练核打磨。 跟推理 serving 关系不大。</p>
+<p>#8666 例外：Prims-TS 上加了 FP8 路由 MoE。</p>
+<p>一句话带过。</p>
+<p><strong>Mooncake：4 条，AMD 传输异步化了</strong></p>
+<p>先说 #4953。 HipTransport 改成异步提交拷贝。 每张卡一个流加一个事件。 AMD 卡上的 KV 搬运少堵一点。 来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/4953">https://github.com/kvcache-ai/Mooncake/pull/4953</a></p>
+<p>第二条 #5266。 文档澄清了一件事。 nvlink_intra 不只走 NVLink。 PCIe 点对点也能用。 同机搬 KV 的拓扑多一种选择。 来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5266">https://github.com/kvcache-ai/Mooncake/pull/5266</a></p>
+<p>其余两条一句话带过。</p>
+<p>#5335，io_uring 暂存拷贝失败会上报。</p>
+<p>#5351，加了个 HIP 传输的代码负责人。</p>
+<p><strong>LMDeploy、llama.cpp、TGI、Dynamo：零合入</strong></p>
+<p>这四家窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周日没有新批次</strong></p>
+<p>最新还是 11 月 5 日那批。 下批周一出来再扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen 4：传的窗口今天关了，还是没来</strong></p>
+<p>HF 上还是没有官方的 Qwen 4 仓库。 11 月 6 日那个海报预热之后再没动静。 “11 月 2 到 8 日”这个窗口今天就关了。 社区新说法还是 11 月 10 日周二。 还是没官方口径。 别按传言排期。 有个小信号：vLLM 代码里已有 Qwen4Exp。 引擎侧在提前准备。 来源：<a href="https://teamorouter.com/blogs/qwen4">https://teamorouter.com/blogs/qwen4</a></p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈和深度内容</strong></p>
+<p>X、HN、Reddit 扫过。 两小时内没有新料。 周日晚上本来就静。</p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的新内容。 Kimi K3.1 的 TP8 拼图值得跟。 但它是代码合入，不是文章。 不做深读笔记。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 19点版去重。 vLLM 5 条首次汇总。</p>
+<p>#66037、#51006、#66461、#64499、#66434。</p>
+<p>SGLang 5 条首次汇总。</p>
+<p>#45106、#46552、#46062、#48879、#49220。</p>
+<p>TRT-LLM 4 条首次汇总。 FlashInfer 6 条首次汇总。 Mooncake 4 条首次汇总。 LMDeploy、llama.cpp、TGI、Dynamo 零合入。 Qwen 4 追踪更新。 arXiv 周日无新批次。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-08-2100/">21点版</a></p></body></html>
