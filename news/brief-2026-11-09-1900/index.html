@@ -1,0 +1,328 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月9日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-09"/>
+<meta name="doc-ts" content="2026-11-10T03:25:02"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-09（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-09（19点版）</h1>
+<p>19点版来了。</p>
+<p>两小时里，框架合入了四十八条。</p>
+<p>头条是 Kimi K3.1 的第四块拼图。</p>
+<p>还有一篇前缀缓存崩塌的论文，值得深读。</p>
+<p>Qwen4 还是没来，但官方发了句预热。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了快照</strong></p>
+<p>没有新版本发布。</p>
+<p>vLLM 还是 v0.33.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.3。</p>
+<p>rc 版还是 v0.7.4rc1。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>最新快照滚到 b12242。</p>
+<p>之前是 b12239。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：12 条，Kimi 那条最值得看</strong></p>
+<p>先说 #66532。</p>
+<p>Kimi K3.1 的第四块拼图到了。</p>
+<p>拼图一共六块，这是第四块。</p>
+<p>英伟达的专用解码来了，解码就是一个词一个词往外吐。</p>
+<p>AMD 那边也补上了模型文件。</p>
+<p>MI355X 上 8 卡并行能跑了。</p>
+<p>还剩两块：5/6 是 ROCm 的 P/D 和索引。</p>
+<p>6/6 是 P/D 的优化，最后合。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66532">https://github.com/vllm-project/vllm/pull/66532</a></p>
+<p>第二条 #65996，跟多模态有关。</p>
+<p>多模态前缀语言模型的注意力范围修好了。</p>
+<p>流水线切段时，视觉部分的范围以前会错。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65996">https://github.com/vllm-project/vllm/pull/65996</a></p>
+<p>第三条 #63432，跟投机解码有关。</p>
+<p>投机解码就是先让小模型打草稿。</p>
+<p>嵌套配置和 YaRN 草稿的旋转缓存修好了。</p>
+<p>YaRN 是一种拉长上下文的办法。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63432">https://github.com/vllm-project/vllm/pull/63432</a></p>
+<p>第四条 #64715，跟 AMD 卡有关。</p>
+<p>DeepSeek-V4.1-Flash 的 UMBP 单机模式通了。</p>
+<p>UMBP 是一种省显存的并行办法。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64715">https://github.com/vllm-project/vllm/pull/64715</a></p>
+<p>其余八条一句话带过。</p>
+<p>#66500，DeepSeek-V4.1 的 Engram 只查本地。</p>
+<p>#64403、#64001，都是 ROCm 上的修补。</p>
+<p>#65983，给 ERNIE 4.5 MoE 和 Falcon-H1 建绑定词表。</p>
+<p>#61725，异步 KV 加载每步加了上限。</p>
+<p>#66291、#66306、#66309，都是 CI 和测试。</p>
+<p><strong>SGLang：20 条，Rubin 和分页专家值得看</strong></p>
+<p>先说 #49422，跟 Rubin 卡有关。</p>
+<p>Rubin 是英伟达的新卡，SM107。</p>
+<p>Kimi K3.1 的稀疏注意力后端，以前在 Rubin 上起不来。</p>
+<p>现在放行了，K3.1 当天就能上 Rubin。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49422">https://github.com/sgl-project/sglang/pull/49422</a></p>
+<p>第二条 #48605，跟分页专家有关。</p>
+<p>分页专家就是 MoE 专家住主机内存，用哪个搬哪个。</p>
+<p>决策那步以前一个线程干，全组人闲着。</p>
+<p>现在整块一起算，空计划直接跳过。</p>
+<p>每层写回的数据从 1312 个整数降到 400 个。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48605">https://github.com/sgl-project/sglang/pull/48605</a></p>
+<p>第三条 #48613，跟草稿校验有关。</p>
+<p>DSpARK 的校验核跑在 BF16 的状态机上。</p>
+<p>状态机模型就是 Mamba 那类不用注意力的模型。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48613">https://github.com/sgl-project/sglang/pull/48613</a></p>
+<p>第四条 #48556，是个算错的修补。</p>
+<p>W4A16 和 W8A16 的 MoE 核，K 尾没掩码会越界。</p>
+<p>越界就是读到不该读的内存。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48556">https://github.com/sgl-project/sglang/pull/48556</a></p>
+<p>其余十六条一句话带过。</p>
+<p>#48860，计算图重放保留捕获的输入。</p>
+<p>#47620，HiCache 的预取超时每轮只投一次。</p>
+<p>HiCache 就是 SGLang 的分层缓存。</p>
+<p>#49374，路由专家缓存只留输出 rank。</p>
+<p>#49411，Kimi-K3.1 的内核从大 PR 里拆出来。</p>
+<p>#48126，昇腾 950 支持 MXFP8 的 KV 缓存。</p>
+<p>#46213，解码工作区可选配。</p>
+<p>#49225、#49224，都是扩散模型修补。</p>
+<p>#49346、#49235，都是测试。</p>
+<p>#48956，改了代码负责人名单。</p>
+<p>#48616、#49000、#47943，都是修补。</p>
+<p>#45859，上报启动信息。</p>
+<p>#46052，文档里修了两个死链。</p>
+<p><strong>TRT-LLM：4 条，Rubin 合回主线</strong></p>
+<p>先说 #21067。</p>
+<p>Rubin 分支的大件合回主线了。</p>
+<p>里面有 MLA 和 DSpark 这些大件。</p>
+<p>DSpark 是草稿模型那套东西。</p>
+<p>FP4 的 MLA 也在里面。</p>
+<p>另外两样 DWDP 和 Helix 也一起合进来了。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21067">https://github.com/NVIDIA/TensorRT-LLM/pull/21067</a></p>
+<p>其余三条都是修补和文档。</p>
+<p>#21790，钉住 sentencepiece 的版本。</p>
+<p>#21767，收敛上限悄悄截断。</p>
+<p>#21893，部署文档里嵌套 KV 缓存的内存配置。</p>
+<p><strong>Dynamo：2 条，都是小修补</strong></p>
+<p>#18345，依赖升级，顺手修了流式和语法。</p>
+<p>#18247，Kimi K3 的提示控制透传到 SGLang。</p>
+<p><strong>FlashInfer：9 条，逐批不变那条最值得看</strong></p>
+<p>先说 #9280。</p>
+<p>FP8 矩阵乘加了逐批不变模式。</p>
+<p>逐批不变就是同一行，不管 batch 多大，结果逐位一样。</p>
+<p>以前小 batch 和大 batch 算出来会差几位。</p>
+<p>现在修好了，跟你的确定性清单直接对口。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9280">https://github.com/flashinfer-ai/flashinfer/pull/9280</a></p>
+<p>第二条 #9148，跟采样有关。</p>
+<p>随机数生成器的预留改成串行化。</p>
+<p>对确定性也有帮助。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9148">https://github.com/flashinfer-ai/flashinfer/pull/9148</a></p>
+<p>第三条 #9276，通信核的解耦存储。</p>
+<p>SM90 上生产者那侧更快了。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9276">https://github.com/flashinfer-ai/flashinfer/pull/9276</a></p>
+<p>其余六条一句话带过。</p>
+<p>#9245，Blackwell 的 NVFP4 配置修正。</p>
+<p>#9197，Kimi 分阶段输出的校验。</p>
+<p>#7986，拒掉不支持的 MXFP8 设备。</p>
+<p>#9038、#9302、#8297，都是测试。</p>
+<p><strong>llama.cpp：零合入，快照滚了三格</strong></p>
+<p>窗口内没有新合入。</p>
+<p>快照从 b12239 滚到 b12242。</p>
+<p><strong>LMDeploy：1 条</strong></p>
+<p>#5075，支持 Intern-Decision 的 PyTorch 推理。</p>
+<p><strong>TGI：零合入</strong></p>
+<p>窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：11 月 9 日那批，23点版漏的补上</strong></p>
+<p>先说一句口径。</p>
+<p>11 月 9 日那批，23点版已经报了 7 篇正文。</p>
+<p>还一句话带过 2 篇。</p>
+<p>下面是剩下的，之前几期都没报过。</p>
+<p>更新的一批还没滚出来，21点版再扫。</p>
+<p><strong>Inside the Trap：突发让缓存归零（值得深读）</strong></p>
+<p>先说结论：缓存平时很香，突发一来就归零。</p>
+<p>前缀缓存就是多轮对话的省力招数。</p>
+<p>上一轮算过的草稿纸，下一轮接着用。</p>
+<p>但 200 个会话 60 秒内涌入，命中率直接掉到 0。</p>
+<p>7500 秒后还是 0，30 次实验全陷进去。</p>
+<p>无突发组和加 cap 组，30 次全都正常。</p>
+<p>理论也对上了：57 次被困运行，事先没调参数。</p>
+<p>平均提示词长度，50 次误差在 3% 以内。</p>
+<p>出路是客户端会话上限：300k 池用 20。</p>
+<p>9 次被困全救回，没丢一个会话。</p>
+<p>精读笔记已生成，含原文 3 张图。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/deep-20261110-prefix-cache-trap/">前缀缓存崩塌：一次突发，命中率归零</a></p>
+<p><strong>ResServe：FP4 掉的精度，用残差补回来</strong></p>
+<p>FP4 是 4 位浮点，省显存但掉精度。</p>
+<p>这篇把量化丢掉的信息单独算一份残差。</p>
+<p>解码时硬件有空，顺手把残差那份也算了。</p>
+<p>结果在片上合并，不用多跑一趟内存。</p>
+<p>B200 上实测：代码生成准确率，NVFP4 涨 15.04%。</p>
+<p>MXFP4 涨 53.57%，都是相对没补偿的版本。</p>
+<p>延迟只多 3.4% 以内，基本白捡。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.08713">https://arxiv.org/abs/2611.08713</a></p>
+<p><strong>TwinHash：Agent 的重复活，不只前缀能复用</strong></p>
+<p>Agent 一边生成一边调工具，老在重复算。</p>
+<p>工具输出、模型回复、KV 前缀，三处都有重复。</p>
+<p>以前只优化了前缀这一处。</p>
+<p>这篇给每个对象配两把钥匙：输入哈希认请求。</p>
+<p>输出指纹验内容，认准了才复用。</p>
+<p>被逐出显存的 KV 前缀，从内存取回也很快。</p>
+<p>Qwen3-32B 上首词延迟最多快 5.6 倍。</p>
+<p>端到端省 87% 时间、81% 能量。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.09254">https://arxiv.org/abs/2611.09254</a></p>
+<p><strong>DUET：扩散语言模型推理，双稀疏提速</strong></p>
+<p>扩散语言模型是一批词并行着改。</p>
+<p>改一轮，全块位置都要过一遍模型。</p>
+<p>历史越长，注意力越贵。</p>
+<p>这篇两处同时省：历史 KV 只留一小撮。</p>
+<p>每步只算可能被改的位置。</p>
+<p>32K 上下文，SDAR-8B 端到端快 2.41 倍。</p>
+<p>每步快 4.72 倍，精度基本不掉。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.09239">https://arxiv.org/abs/2611.09239</a></p>
+<p><strong>GPU 需要一个操作系统：数学单元只忙 6–11%</strong></p>
+<p>这篇是观点文，测了两个大开源模型。</p>
+<p>推理每步都在等显存，数学单元只忙 6–11%。</p>
+<p>作者说 GPU 缺一个操作系统来排班。</p>
+<p>急活优先跑，空闲塞点别的活。</p>
+<p>一个已落地的功能，能省出四分之一张卡。</p>
+<p>解码只慢 5%，跟真实任务混跑省十分之一。</p>
+<p>他们的研究系统更快：单请求比 vLLM 最优还快。</p>
+<p>共享 GPU 时只慢不到 2%。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.08720">https://arxiv.org/abs/2611.08720</a></p>
+<p><strong>CodeQuant2：推理模型的低精度量化，专治开头几步</strong></p>
+<p>推理模型越想越长，量化省钱就越重要。</p>
+<p>但激进量化在推理任务上容易崩。</p>
+<p>作者发现毛病在开头几步：激活波动特别大。</p>
+<p>校准时漏了这几步，就对不上真实分布。</p>
+<p>这篇用旋转加缩放治离群值，再按层调码本。</p>
+<p>配上定制的查找表核，比 BF16 快 2.85 倍。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.09868">https://arxiv.org/abs/2611.09868</a></p>
+<p><strong>MINE：熵编码压权重，4060 Ti 快 2.52 倍</strong></p>
+<p>这篇 23点版一句话提过，这里补数字。</p>
+<p>单流解码最吃显存带宽，权重无损压一压就快了。</p>
+<p>Llama-3.1-8B 跑 4060 Ti，快 2.52 倍。</p>
+<p>RTX 5090 上快 1.48 倍，已做成 vLLM 插件。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.09424">https://arxiv.org/abs/2611.09424</a></p>
+<p><strong>一句话组</strong></p>
+<p>MoE 负载均衡当成反馈控制来治。</p>
+<p>PID 控制器调路由偏置，非平稳数据也稳。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.09252">https://arxiv.org/abs/2611.09252</a></p>
+<p>推理服务是烧钱生意，隔离是省钱的办法。</p>
+<p>把贵请求和便宜请求分到不同机器，别互相拖累。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.08999">https://arxiv.org/abs/2611.08999</a></p>
+<p>Fused-Softmax 把 softmax 折进矩阵乘。</p>
+<p>MI355X 上 MXFP4 注意力比 BF16 快 3.2 倍。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.09225">https://arxiv.org/abs/2611.09225</a></p>
+<p>头自适应稀疏注意力：按注意力头的结构挑区域。</p>
+<p>不用训练，各头按自己的结构挑。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.09700">https://arxiv.org/abs/2611.09700</a></p>
+<p>AlterNet：MoE 加可学停机，深度按需调。</p>
+<p>难的任务多算几层，简单的早点停。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.08741">https://arxiv.org/abs/2611.08741</a></p>
+<p><strong>下一批已露头，21点版再扫</strong></p>
+<p>API 里已能看到几篇，还没滚进列表。</p>
+<p>确定性 Split-K 的 LoRA 推理复现，值得重点报。</p>
+<p>还有 PACE、AutoEMatic 几篇，到时一起扫。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4：还是没发，官方发了句预热</strong></p>
+<p>11 月 6 日，官方账号发了句预热。</p>
+<p>原话是“The becoming begins.”。</p>
+<p>没给参数，没给日期，就是一句预热。</p>
+<p>花旗的报告被韩媒转述：旗舰超 3 万亿参数。</p>
+<p>四档 11 月到 12 月分批出。</p>
+<p>社区说法还是明天 11 月 10 日。</p>
+<p>等官宣再说。</p>
+<p>来源：<a href="https://aicoder.com/news/news-20261106-x-discussion-alibaba-qwen-the-becoming-begins-qwen4-teaser">https://aicoder.com/news/news-20261106-x-discussion-alibaba-qwen-the-becoming-begins-qwen4-teaser</a></p>
+<p><strong>LG K-EXAONE 2.5：免费 API，750B 参数</strong></p>
+<p>LG 今天在首尔英伟达 AI 日上开放了免费 API。</p>
+<p>750B 总参数，31B 激活，512K 上下文。</p>
+<p>纯文本，韩英双语，接口跟 OpenAI 兼容。</p>
+<p>LG 称 8 周性能涨 70% 以上，这是自家口径。</p>
+<p>还在考虑用 Dynamo 提推理效率。</p>
+<p>英伟达已经有 K-EXAONE 2.0 的 Dynamo 配方。</p>
+<p>来源：<a href="https://aicoder.com/news/news-20261109-lg-k-exaone-2-5-free-api-750b-a31b-512k-swe-bench-pro-59-2">https://aicoder.com/news/news-20261109-lg-k-exaone-2-5-free-api-750b-a31b-512k-swe-bench-pro-59-2</a></p>
+<p><strong>Anthropic：Claude 5.2 双模型今天发布</strong></p>
+<p>输出比 5.1 快 30%，价格降了 20%。</p>
+<p>输入 8 美元，输出 40 美元，每百万词。</p>
+<p>两个名字是同一底座，两档安全策略。</p>
+<p>Fable 人人能用，Mythos 只给过审机构。</p>
+<p>官方称 1000 个智能体 30 小时内形式化证明了费马大定理。</p>
+<p>来源：<a href="https://www.reuters.com/technology/anthropic-unveils-new-fable-mythos-models-competition-heats-up-ahead-ipo-2026-11-09/">https://www.reuters.com/technology/anthropic-unveils-new-fable-mythos-models-competition-heats-up-ahead-ipo-2026-11-09/</a></p>
+<p><strong>X、HN、Reddit：两小时里静</strong></p>
+<p>关键账号今天没发新东西。</p>
+<p>HN 和 Reddit 也没翻出相关新帖。</p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈</strong></p>
+<p>Latent Space 的新单集，15点版已经报过。</p>
+<h2>值得深入学</h2>
+<p><strong>Inside the Trap：突发能让前缀缓存归零</strong></p>
+<p>这篇能帮你把过载清单补上一块。</p>
+<p>突发下的命中率、会话上限、全 miss 容量。</p>
+<p>三个数都能直接进评估和部署检查单。</p>
+<p>精读笔记已生成，含原文 3 张图。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/deep-20261110-prefix-cache-trap/">前缀缓存崩塌：一次突发，命中率归零</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 17点版去重。</p>
+<p>vLLM 12 条首次汇总。</p>
+<p>#66532、#65996、#63432、#64715、#66500、#64403、#64001、#65983、#61725、#66291、#66306、#66309。</p>
+<p>SGLang 20 条首次汇总。</p>
+<p>#49422、#48605、#48613、#48556、#48860、#47620、#49374、#49411、#48126、#46213、#49225、#49224、#49346、#49235、#48956、#48616、#49000、#47943、#45859、#46052。</p>
+<p>TRT-LLM 4 条首次汇总。</p>
+<p>#21067、#21790、#21767、#21893。</p>
+<p>Dynamo 2 条首次汇总。</p>
+<p>#18345、#18247。</p>
+<p>FlashInfer 9 条首次汇总。</p>
+<p>#9280、#9148、#9276、#9245、#9197、#7986、#9038、#9302、#8297。</p>
+<p>llama.cpp 零合入，快照 b12239 滚到 b12242。</p>
+<p>LMDeploy 1 条首次汇总。</p>
+<p>#5075。</p>
+<p>TGI 零合入。</p>
+<p>Inside the Trap、ResServe，首次汇总。</p>
+<p>TwinHash、DUET，首次汇总。</p>
+<p>CodeQuant2、MINE，首次汇总。</p>
+<p>GPU 需要一个操作系统，首次汇总。</p>
+<p>PID-Balancer，首次汇总。</p>
+<p>Capital Efficiency，首次汇总。</p>
+<p>Fused-Softmax，首次汇总。</p>
+<p>头自适应稀疏注意力、AlterNet，首次汇总。</p>
+<p>Qwen4 截至今天仍未发布，首次汇总。</p>
+<p>LG K-EXAONE 2.5，首次汇总。</p>
+<p>Claude Fable 5.2 和 Mythos 5.2，首次汇总。</p>
+<p>arXiv 更新的一批还没滚出来，21点版再扫。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-09-1900/">19点版</a></p></body></html>
