@@ -1,0 +1,104 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月10日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-10"/>
+<meta name="doc-ts" content="2026-11-10T21:04:34"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-10（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-10（13点版）</h1>
+<p>13点版来了。</p>
+<p>两小时里，框架合入了 25 条。头条是 SGLang 给新模型 muse-spark 加了 AMD 首日支持。Qwen4 还是没来。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没新发版</strong> vLLM 还是 v0.33.0。SGLang 还是 v0.5.23。TRT-LLM 还是 v1.4.0rc3。FlashInfer 还是 v0.7.4rc2。llama.cpp 快照滚到 b12255。快照是每日自动打包，不算正式发版。Dynamo 还是 v1.6.2。LMDeploy 还是 v0.18.0。TGI 还是 v3.3.7。</p>
+<p><strong>SGLang：7 条，muse-spark 那条最值得看</strong></p>
+<p>#47371，给 muse-spark 加了 AMD 首日支持。muse-spark 是刚接进 SGLang 的一个模型。首日支持就是新模型一到就能跑。里面有 MI355X 的 MoE 调优。MoE 是混合专家模型。还有注意力核和 BF16 矩阵乘。MI355X 是你手里那张 AMD 卡。等于新模型在 AMD 卡上开箱就能用。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47371">https://github.com/sgl-project/sglang/pull/47371</a></p>
+<p>#49593，文档更新。把 MiniMax 的 H3-Image 实测性能摆到台面上。H3-Image 是 MiniMax 的文生图模型。只改文档，没改代码。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49593">https://github.com/sgl-project/sglang/pull/49593</a></p>
+<p>#49192，修了路由器的计数。路由器就是 SGLang 的请求分发器。多模态请求里的图片，现在会计入访问日志。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49192">https://github.com/sgl-project/sglang/pull/49192</a></p>
+<p>其余四条一句话带过。#49573，跑分前先核对聊天模板。#49443、#49577、#49423，都是 CI 和测试。</p>
+<p><strong>vLLM：3 条，Kimi 那条最值得看</strong></p>
+<p>#66642，给 Kimi K3.1 Pro 加了 GB300 部署菜谱。菜谱就是照着抄就能跑的配置。里面有三套 P/D 解耦布局。P/D 解耦就是读题和生成分开跑。还配了 Mooncake 存草稿纸。Mooncake 是 KV 缓存传送工具。Kimi K3.1 Pro 是 2.8T 的开源大模型。权重 11 月 4 号就放出来了。这回补的是 GB300 上怎么跑。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66642">https://github.com/vllm-project/vllm/pull/66642</a></p>
+<p>#62791，修了跑分里的音频 token 统计。纯修补，不影响推理。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/62791">https://github.com/vllm-project/vllm/pull/62791</a></p>
+<p>#66854，CI 里给 MI355 的测试组加了个文件。纯杂活。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66854">https://github.com/vllm-project/vllm/pull/66854</a></p>
+<p><strong>TRT-LLM：7 条，Qwen4 那条最值得看</strong></p>
+<p>#21841，给 Qwen4-Exp 瘦身。Qwen4-Exp 是 Qwen4 架构的实验版。PLE 是推测解码里的一种并行方式。推测解码就是先让小模型打草稿。再让大模型改。改动砍掉了多余的填充和临时显存。划重点：代码里已经有 Qwen4 的影子了。但模型本身还没发布。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21841">https://github.com/NVIDIA/TensorRT-LLM/pull/21841</a></p>
+<p>#20238，接进了 Perplexity 的决策模型。名字叫 pplx-decider。决策模型就是帮你做选择的模型。底子是 Qwen3.5 的混合结构。最后输出 255 个决策分数。不是词表分数。说白了，它不写文章，只做判断。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20238">https://github.com/NVIDIA/TensorRT-LLM/pull/20238</a></p>
+<p>#20848，MiniMax-M3 的稀疏注意力提速。稀疏注意力就是只算重要的部分。每步少干点主机上的杂活。长上下文跑起来更顺。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20848">https://github.com/NVIDIA/TensorRT-LLM/pull/20848</a></p>
+<p>其余四条一句话带过。#21975，修了工具调用流式输出的解析。#22042，LTX-2 的许可证文档更新。#21934、#20908，都是基建杂活。</p>
+<p><strong>FlashInfer：2 条</strong></p>
+<p>#8414，BF16 矩阵乘的自动调优更聪明了。pdl=True 现在会扫所有后端。以前只扫支持 PDL 的核。PDL 是核与核之间的流水线加速。调优一次，跑起来更快。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8414">https://github.com/flashinfer-ai/flashinfer/pull/8414</a></p>
+<p>#8856，修了 Rubin 上 MTP 的等待范围。MTP 是多词元并行预测。等的时候从原来的范围收到集群范围。Rubin 是英伟达的新卡。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8856">https://github.com/flashinfer-ai/flashinfer/pull/8856</a></p>
+<p><strong>Dynamo：3 条，都是修补</strong></p>
+<p>#18425，SGLang 聊天处理器漏传了 logit_bias。logit_bias 是人为抬高或压低某些词的开关。现在传过去了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18425">https://github.com/ai-dynamo/dynamo/pull/18425</a></p>
+<p>#18465，前端解不出来的媒体格式，现在直接返回 400。以前可能含糊过去。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18465">https://github.com/ai-dynamo/dynamo/pull/18465</a></p>
+<p>#18316，GMS 插件里关掉的省内存请求，现在真的会被尊重。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18316">https://github.com/ai-dynamo/dynamo/pull/18316</a></p>
+<p><strong>llama.cpp：2 条，都是小活</strong></p>
+<p>#32040，修了多模态模块的字符串格式。顺手改了个名。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32040">https://github.com/ggml-org/llama.cpp/pull/32040</a></p>
+<p>#32030，CI 里把 ty 升到 0.0.100。纯杂活。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32030">https://github.com/ggml-org/llama.cpp/pull/32030</a></p>
+<p><strong>LMDeploy、TGI、Mooncake：零合入</strong> 窗口内没有新 PR。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没新批次。最新一篇还是 11 月 9 号的。下一批要等北京时间 11 月 11 号早上 8 点。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4 还是没来，但代码里已经有影子了</strong> 刚查了 HF 官方组织，最新上传还是 11 月 7 号的 Qwen3.8 量化版。HF 就是 Hugging Face，模型的大本营。社区之前猜今天 11 月 10 号发。截至 13 点，还没动静。倒是 TRT-LLM 代码里出现了 Qwen4-Exp。HF 上 Qwen3.8-Flash-Next 也挂着 qwen4_exp 标签。说明 Qwen4 的架构预览已经在各家工具里铺开了。模型本体还没发。 来源：<a href="https://huggingface.co/Qwen">https://huggingface.co/Qwen</a> 来源：<a href="https://apimaster.ai/blog/qwen-4-api">https://apimaster.ai/blog/qwen-4-api</a></p>
+<p><strong>Kimi K3.1 Pro 的权重早报过了</strong> 11 月 4 号就放出来了，2.8T 参数。这轮新的只是 vLLM 的 GB300 部署菜谱。见上面 vLLM 那条。</p>
+<p><strong>NEAR 那边没新进展</strong> SGLang 官方还是没公开回应。漏洞的 CVE 编号还是没公开。</p>
+<h2>访谈与深度</h2>
+<p>本轮没有新播客。Latent Space 最新一期还是 11 月 9 号那期。那期聊的是 Handshake AI。刚在 Spotify 节目页上核过。</p>
+<h2>值得深入学</h2>
+<p>本轮没有。合入以硬件适配和修补为主，没有新论文。</p>
+<h2>去重脚注</h2>
+<p>本轮与 11 点版去重。新合入首次汇总：SGLang 7 条（#47371、#49593、#49577、#49573、#49443、#49423、#49192）、vLLM 3 条（#66854、#66642、#62791）、TRT-LLM 7 条（#22042、#21975、#21934、#21841、#20908、#20848、#20238）、FlashInfer 2 条（#8856、#8414）、Dynamo 3 条（#18465、#18425、#18316）、llama.cpp 2 条（#32040、#32030）。LMDeploy、TGI、Mooncake 零合入。Qwen4 仍未发布，TRT-LLM 出现 Qwen4-Exp 代码为首次报道。Kimi K3.1 Pro 权重发布已在 11 月 9 日多期报过。NEAR 事件细节已在 9 点版报全。arXiv 无新批次。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-10-1300/">13点版</a></p>
+<h2>来源链接</h2>
+<ul><li>SGLang #47371：<a href="https://github.com/sgl-project/sglang/pull/47371">https://github.com/sgl-project/sglang/pull/47371</a></li><li>SGLang #49593：<a href="https://github.com/sgl-project/sglang/pull/49593">https://github.com/sgl-project/sglang/pull/49593</a></li><li>SGLang #49192：<a href="https://github.com/sgl-project/sglang/pull/49192">https://github.com/sgl-project/sglang/pull/49192</a></li><li>vLLM #66642：<a href="https://github.com/vllm-project/vllm/pull/66642">https://github.com/vllm-project/vllm/pull/66642</a></li><li>vLLM #62791：<a href="https://github.com/vllm-project/vllm/pull/62791">https://github.com/vllm-project/vllm/pull/62791</a></li><li>vLLM #66854：<a href="https://github.com/vllm-project/vllm/pull/66854">https://github.com/vllm-project/vllm/pull/66854</a></li><li>TRT-LLM #21841：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21841">https://github.com/NVIDIA/TensorRT-LLM/pull/21841</a></li><li>TRT-LLM #20238：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20238">https://github.com/NVIDIA/TensorRT-LLM/pull/20238</a></li><li>TRT-LLM #20848：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20848">https://github.com/NVIDIA/TensorRT-LLM/pull/20848</a></li><li>TRT-LLM #21975：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21975">https://github.com/NVIDIA/TensorRT-LLM/pull/21975</a></li><li>FlashInfer #8414：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8414">https://github.com/flashinfer-ai/flashinfer/pull/8414</a></li><li>FlashInfer #8856：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8856">https://github.com/flashinfer-ai/flashinfer/pull/8856</a></li><li>Dynamo #18425：<a href="https://github.com/ai-dynamo/dynamo/pull/18425">https://github.com/ai-dynamo/dynamo/pull/18425</a></li><li>Dynamo #18465：<a href="https://github.com/ai-dynamo/dynamo/pull/18465">https://github.com/ai-dynamo/dynamo/pull/18465</a></li><li>Dynamo #18316：<a href="https://github.com/ai-dynamo/dynamo/pull/18316">https://github.com/ai-dynamo/dynamo/pull/18316</a></li><li>llama.cpp #32040：<a href="https://github.com/ggml-org/llama.cpp/pull/32040">https://github.com/ggml-org/llama.cpp/pull/32040</a></li><li>llama.cpp #32030：<a href="https://github.com/ggml-org/llama.cpp/pull/32030">https://github.com/ggml-org/llama.cpp/pull/32030</a></li><li>Qwen4 动态（APIMaster）：<a href="https://apimaster.ai/blog/qwen-4-api">https://apimaster.ai/blog/qwen-4-api</a></li><li>Qwen HF 组织页：<a href="https://huggingface.co/Qwen">https://huggingface.co/Qwen</a></li></ul></body></html>
