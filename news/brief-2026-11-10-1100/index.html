@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月10日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-10"/>
+<meta name="doc-ts" content="2026-11-10T19:00:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-10（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-10（11点版）</h1>
+<p>11点版来了。</p>
+<p>两小时里，框架合入了 7 条。头条是 Dynamo 的解耦模拟修补。NEAR 那边云服务恢复了。Qwen4 还是没来。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没新发版</strong> vLLM 还是 v0.33.0。新 tag 还是 v0.34.0rc0。SGLang 还是 v0.5.23。TRT-LLM 还是 v1.4.0rc3。FlashInfer 还是 v0.7.4rc2。llama.cpp 快照滚到 b12254。快照是每日自动打包，不算正式发版。Dynamo 还是 v1.6.2。LMDeploy 还是 v0.18.0。TGI 还是 v3.3.7。</p>
+<p><strong>Dynamo：2 条，解耦模拟那条最值得看</strong></p>
+<p>#18384，跟 P/D 解耦的模拟有关。P/D 解耦就是读题和生成分开跑。mocker 是 Dynamo 的模拟器，没真机也能测。顺序解耦里，读题跑完就把结果发给解码。以前模拟器不认这份结果，提示要重算一遍。提示越长，模拟的首字时间虚高得越厉害。现在认了，模拟结果更接近真机。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18384">https://github.com/ai-dynamo/dynamo/pull/18384</a></p>
+<p>#18429，修了前端一个工具丢失的问题。Responses 是 OpenAI 风格的调用接口。调用时限定能用的工具，剩下的工具会从提示里掉出去。现在留住了，提示里的工具清单是全的。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18429">https://github.com/ai-dynamo/dynamo/pull/18429</a></p>
+<p><strong>FlashInfer：1 条</strong></p>
+<p>#9295，修了个采样开关的默认值。log_probs 是采样时词的概率分数。batch_invariant 是批大小不变模式，保证结果稳定。之前 #8999 把默认值错设成开，还会报错。现在改回关，以后换更快的核也有位置放。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9295">https://github.com/flashinfer-ai/flashinfer/pull/9295</a></p>
+<p><strong>llama.cpp：2 条，都是小活</strong></p>
+<p>#32022，改了聊天界面的侧边栏布局。Models、MCP 和 Settings 移到底部。手机上搜索变成右上角一个圆按钮。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32022">https://github.com/ggml-org/llama.cpp/pull/32022</a></p>
+<p>#32018，CUDA 里删了两个没用的参数。纯清理，行为没变。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32018">https://github.com/ggml-org/llama.cpp/pull/32018</a></p>
+<p><strong>vLLM：1 条</strong></p>
+<p>#66798，ROCm 测试里补了两个桩函数。纯测试杂活，不影响推理。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66798">https://github.com/vllm-project/vllm/pull/66798</a></p>
+<p><strong>SGLang、TRT-LLM、LMDeploy、TGI：零合入</strong> 窗口内没有新 PR。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没新批次。下一批要等北京时间 11 月 11 号早上 8 点。ServerBench 已在 11 月 5 号 23 点版报过。</p>
+<h2>业内新闻</h2>
+<p><strong>NEAR 的云服务恢复了，漏洞还是没点名</strong> 11 月 10 号，他们在 X 上确认了这事。之前泄露的 2 个 API 密钥已经吊销。受影响的用户都已单独通知。但漏洞到底是哪个，CVE 编号还是没公开。CVE 编号就是漏洞的身份证号。SGLang 官方到现在也没有公开回应。 来源：<a href="https://crypto.news/near-ai-cloud-restored-security-breach-user-data/">https://crypto.news/near-ai-cloud-restored-security-breach-user-data/</a> 来源：<a href="https://near.ai/blog/security-incident-report-sglang-vulnerability">https://near.ai/blog/security-incident-report-sglang-vulnerability</a></p>
+<p><strong>Qwen4 还是没来</strong> 刚查了 HF 官方组织，最新上传还是 10 月 9 号的图片模型。HF 就是 Hugging Face，模型的大本营。花旗 11 月 9 号出报告说，旗舰超 3 万亿参数就能明显跃升。4 款型号据说 11 到 12 月分批来。这只是分析师的预测，不是官宣。 来源：<a href="https://kimkj.com/en/daily-briefing-en/?mod=document&amp;amp;uid=21278">https://kimkj.com/en/daily-briefing-en/?mod=document&amp;amp;uid=21278</a></p>
+<h2>访谈与深度</h2>
+<p>本轮没有新播客。Latent Space 最新一期还是 11 月 9 号那期。那期聊的是 Handshake AI。</p>
+<h2>值得深入学</h2>
+<p>本轮没有。合入都是小修补和模拟器修正，没有新论文。</p>
+<h2>去重脚注</h2>
+<p>本轮与 9 点版去重。新合入首次汇总：Dynamo 2 条（#18384、#18429）、FlashInfer 1 条（#9295）、llama.cpp 2 条（#32022、#32018）、vLLM 1 条（#66798）。SGLang、TRT-LLM、LMDeploy、TGI 零合入。NEAR 云服务恢复、2 个 API 密钥吊销为首次报道。Qwen4 仍未发布，花旗 11 月 9 日预测为首次报道。ServerBench 已在 11 月 5 日 23 点版报过。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-10-1100/">11点版</a></p>
+<h2>来源链接</h2>
+<ul><li>Dynamo #18384：<a href="https://github.com/ai-dynamo/dynamo/pull/18384">https://github.com/ai-dynamo/dynamo/pull/18384</a></li><li>Dynamo #18429：<a href="https://github.com/ai-dynamo/dynamo/pull/18429">https://github.com/ai-dynamo/dynamo/pull/18429</a></li><li>FlashInfer #9295：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9295">https://github.com/flashinfer-ai/flashinfer/pull/9295</a></li><li>llama.cpp #32022：<a href="https://github.com/ggml-org/llama.cpp/pull/32022">https://github.com/ggml-org/llama.cpp/pull/32022</a></li><li>llama.cpp #32018：<a href="https://github.com/ggml-org/llama.cpp/pull/32018">https://github.com/ggml-org/llama.cpp/pull/32018</a></li><li>vLLM #66798：<a href="https://github.com/vllm-project/vllm/pull/66798">https://github.com/vllm-project/vllm/pull/66798</a></li><li>NEAR 云服务恢复（crypto.news）：<a href="https://crypto.news/near-ai-cloud-restored-security-breach-user-data/">https://crypto.news/near-ai-cloud-restored-security-breach-user-data/</a></li><li>NEAR 安全事件报告：<a href="https://near.ai/blog/security-incident-report-sglang-vulnerability">https://near.ai/blog/security-incident-report-sglang-vulnerability</a></li><li>Qwen4 与花旗预测（KimKj 日报）：<a href="https://kimkj.com/en/daily-briefing-en/?mod=document&amp;amp;uid=21278">https://kimkj.com/en/daily-briefing-en/?mod=document&amp;amp;uid=21278</a></li></ul></body></html>
