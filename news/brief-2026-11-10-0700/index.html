@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月10日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-10"/>
+<meta name="doc-ts" content="2026-11-10T14:59:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-10（7点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-10（7点版）</h1>
+<p>7点版来了。</p>
+<p>两小时里，框架合入了二十几条。头条是 SGLang 在 AMD 卡上的提速。vLLM 修了 INT8 混合量化。FlashInfer 上新了 FP8 GEMM。Qwen4 还是没发。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没新发版</strong> vLLM 还是 v0.33.0。SGLang 还是 v0.5.23。TRT-LLM 还是 v1.4.0rc3。FlashInfer rc 还是 v0.7.4rc2。llama.cpp 快照滚到 b12246。</p>
+<p><strong>vLLM：4 条，INT8 那条最值得看</strong></p>
+<p>#65177，修了静态激活 + 通道权重缩放的 INT8 MoE 分支。以前路由专家拿不到通道缩放，算错了。现在 split 了两面 flag。量化精度更稳【见 #65177】。</p>
+<p>#61076，给 sharded RDT 加了主机暂存和并行拉取。冷启动时权重走主机内存再散到 GPU，默认仍是 GPU 直流。</p>
+<p>#66201，修了 MiMo-V2 视频时间戳。原来全写成 00:00，现在按真实帧时间标。计时类任务准多了。</p>
+<p>#61076 详情见上。</p>
+<p><strong>SGLang：9 条，AMD 那条最值得看</strong></p>
+<p>#47398，gfx1250 上的 W4A8 MoE 混合策略。token 少于 320 用 Gluon，多的用 FlyDSL。gpt-oss-120b 在 MI355X 上，千 token 级别能快 1.7 倍【见 #47398】。</p>
+<p>#42977，Ascend 上 DSA 索引器分片。1M 上下文的预填充，索引这一步占 TTFT 的 83%。现在 query 按 rank 分片，速度翻 attn_tp 倍。</p>
+<p>#45262，Block-fp8 用 FlashInfer b12x。后验证机上，32K 进 1K 出的饱和从 0.766 提到 0.801 req/s。</p>
+<p>#49552，Day-0 接入 MiniMax-H3-Image。图生图 + 多图编辑，六步 PDD。</p>
+<p>其余几条是宇宙3 修正、SANA 视频序列并行、昇腾冒烟测试等小功能。</p>
+<p><strong>FlashInfer：1 条</strong></p>
+<p>#7495，新内核 mm_bf16_fp8 / mm_fp16_fp8。W8A16 的 FP8 GEMM，Hopper 和 Blackwell 直接算，不用把权重转成 FP16 副本。省显存【见 #7495】。</p>
+<p><strong>llama.cpp：3 条</strong></p>
+<p>#32012，UI 能把对话分组到侧边栏。纯界面改动。</p>
+<p><strong>TRT-LLM、LMDeploy、Dynamo、TGI：零合入</strong> 窗口内没有新 PR。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这一批没新东西。上一批 BridgeKV、Evolving Infra 在 23点版已报。下一批要等北京明早 8 点。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4 今天还是没来</strong> 谣言说 11 月 10 号。HF 官方号最近更新还是 11 月 7 号的 Qwen3.8 系列。X 上只有 teaser，没有日期【见 HF 模型列表】。等官宣。</p>
+<p><strong>HN：两小时里没新帖</strong> 搜了 Inference 相关的帖子，都是几星期前的。没有新鲜讨论【见 HN 搜索】。</p>
+<h2>访谈与深度</h2>
+<p>本轮没有新播客。新一期 Latent Space 还是 11 月 9 号的。</p>
+<h2>值得深入学</h2>
+<p><strong>SGLang #47398</strong> 能帮你解决什么问题：你现在盯 MI355X 的 P/D 解耦，这条直接给 Mixed MoE 的分界点。token 低和高段走不同内核，实测差 1.7 倍。和你研究的 P/D 流量配比直接相关。 链接：<a href="https://github.com/sgl-project/sglang/pull/47398">https://github.com/sgl-project/sglang/pull/47398</a></p>
+<p><strong>FlashInfer #7495</strong> 能帮你解决什么问题：FP8 权重不转 FP16，就能喂给 Blackwell 做 W8A16。省一次拷贝，省带宽。量化 serving 必看。 链接：<a href="https://github.com/flashinfer-ai/flashinfer/pull/7495">https://github.com/flashinfer-ai/flashinfer/pull/7495</a></p>
+<h2>去重脚注</h2>
+<p>本轮与 5点版去重。新合入首次汇总：vLLM 4 条（#65177、#61076、#66201、#61076）、SGLang 9 条（#47398、#42977、#45262、#49552、#49405、#49162、#49004、#48807、#42855）、FlashInfer 1 条（#7495）、llama.cpp 3 条（#32012、#32010、#31884）。Qwen4 仍未发布。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-10-0700/">7点版</a></p></body></html>
