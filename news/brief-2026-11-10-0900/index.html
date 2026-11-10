@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月10日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-10"/>
+<meta name="doc-ts" content="2026-11-10T17:01:16"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-10（9点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-10（9点版）</h1>
+<p>9点版来了。</p>
+<p>这轮头条有点沉重。SGLang 出了个安全漏洞，真被人打穿了。另一边，FP8 KV 缓存成了主题。Qwen4 还是没来。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没新发版</strong> vLLM 还是 v0.33.0。SGLang 还是 v0.5.23。TRT-LLM 还是 v1.4.0rc3。FlashInfer 还是 v0.7.4rc2。llama.cpp 快照滚到 b12248。</p>
+<p><strong>本轮主题：FP8 KV 缓存</strong> TRT-LLM 和 llama.cpp 这轮都上了 FP8 KV 缓存。KV 缓存就是模型的草稿纸，存着算过的注意力结果。压成 FP8，显存直接省一半。长上下文能塞更多。</p>
+<p>PrimsTS 注意力也能用 FP8 KV 缓存了。以前只有 MLA 那条路能享受，现在普通注意力也能省显存【见 #19396】。 llama.cpp #28392，也加了 FP8 KV 缓存支持。端侧和本地部署受益最大，小显存也能跑更长上下文【见 #28392】。</p>
+<p>#9033：MoE 专家并行的 MXFP4 默认值更聪明了。按专家填充率和 FC1 深度来选。说白了就是少调参【见 #9033】。</p>
+<p><strong>vLLM：3 条</strong></p>
+<p>#59025，给 FlashInfer 的 BF16 矩阵乘注册了 cudnn 后端。多一条算路，性能上有备选。</p>
+<p>#65724，Gemma 4 多模态统一版支持 mm_device_do_normalize。图文一起跑时归一化位置对了。</p>
+<p>#65975，Humming MoE 的激活函数改用快速 SiLU 指令。MoE 推理里的小加速。</p>
+<p><strong>llama.cpp：4 条</strong></p>
+<p>#28392，FP8 KV 缓存，见上。</p>
+<p>#32009，后端调度器能在参数兼容时复用。少建一次调度器，启动和切换更顺。</p>
+<p>#32015，采样链全部标成输出防混叠。修了个变量互相串台的隐患。</p>
+<p>#31896，给矩阵乘的 src1 精度加测试和开关。精度回归有抓手了。</p>
+<p><strong>Dynamo：1 条，都是基建</strong></p>
+<p>#17190，给 kube-api-linter 扩到全套 API 规范。纯工程杂活。</p>
+<p><strong>SGLang、LMDeploy、TGI：零合入</strong> 窗口内没有新 PR。</p>
+<h2>新技术与论文</h2>
+<p>arXiv 这轮没新批次。最新还是 11 月 9 号那批，23点版已报。下一批要等北京时间 11 月 11 号早上 8 点。</p>
+<h2>业内新闻</h2>
+<p><strong>SGLang 漏洞被真人打穿，NEAR AI 中招了</strong> 11 月 8 号，有人打进了 NEAR AI 的一台服务器。用的就是 SGLang 的远程代码执行漏洞。远程代码执行就是不用登录，直接在服务器上跑自己的代码。 攻击者从这台服务器摸进内网，下载了约 100 名用户的账号信息。包括邮箱、姓名，部分还有套餐和余额。 18 个老部署的 AI 智能体也被翻了。聊天记录、设置和日志都被看到。 更扎心的是，11 月 8 号当天跑在这台服务器上的请求都可能被偷看。包括开了保密模式的请求。 NEAR AI 说漏洞已经修了，凭证全换了，云服务也恢复了。漏洞也已经上报给 SGLang 官方。 但具体是哪个漏洞、CVE 编号是什么，NEAR 没公开。SGLang 官方目前也没有公开回应。 划重点：保密计算防的是运营方和宿主机偷看。防不住引擎自己有洞。洞在盒子里面，盒子再结实也没用。</p>
+<p><strong>英伟达把 Snapshot 单拎出来开源了</strong> Snapshot 就是给 GPU 工作负载做快照恢复的工具。原理像游戏存档：模型加载好的状态冻起来，下次直接读档。 它最早是 Dynamo 里的一部分，11 月 6 号发过博客。现在以 DSX AI 工厂平台开源组件的身份单独推出来。 厂商数字：Crusoe 那边 Pod 就绪从 8 分钟压到 31 秒。跑的是 GLM-5.3。Saturn Cloud：vLLM 启动从 2 分钟压到 6 秒。慢的那头从 8.5 分钟压到 34 秒。 恢复一次只要 3.6 到 42.7 秒，比冷启动快 8 到 36 倍。以上都是厂商联测口径，不是独立实测。</p>
+<p><strong>Zyphra 开源了个能在手机浏览器里说话的模型</strong> ZONOS3-Mini，11 月 9 号发布。800M 参数的稀疏 MoE 语音模型，每次推理只激活 100M。 Pixel 9 的浏览器里，不到 570 毫秒就能出第一句语音。Apache 2.0 协议，商用随便用。 服务端发布当天就支持 SGLang 和 vLLM。浏览器端走 WebGPU，不用装应用。</p>
+<p><strong>INFINITIX 要在 SC26 上首秀</strong> 11 月 17 到 19 号，芝加哥。主推 AI-Stack 智能调度，支持 P/D 解耦推理。P/D 解耦就是读题和生成分开跑，像流水线分工。 支持的引擎包括 llm-d、Dynamo、vLLM 和 SGLang。就是个厂商预告，细节等开展。</p>
+<p><strong>Qwen4 还是没来</strong> 传说的 11 月 10 号已经过了。北京时间都 11 月 11 号凌晨 1 点了。 HF 上还是没有官方的 Qwen4 仓库。Qwen 官方号最新上传还是 11 月 7 号的 Qwen3.8 系列。 搜到的所谓 Qwen4 模型全是第三方量化包。等官宣。</p>
+<h2>访谈与深度</h2>
+<p>本轮没有新播客。Latent Space 最新一期还是 11 月 9 号的。</p>
+<h2>值得深入学</h2>
+<p>本轮没有。没有新论文，合入都是小功能和修补。NEAR 那份报告是新闻稿篇幅，不值得做精读笔记。</p>
+<h2>去重脚注</h2>
+<p>本轮与 7点版去重。新合入首次汇总：vLLM 3 条（#59025、#65724、#65975）、TRT-LLM 1 条（#19396，另 1 条为杂活）、llama.cpp 4 条（#28392、#32015、#32009、#31896）、FlashInfer 1 条（#9033）、Dynamo 1 条基建（#17190）。SGLang、LMDeploy、TGI 零合入。NEAR 安全事件、英伟达 Snapshot、Zyphra ZONOS3-Mini、INFINITIX 均为首次报道。Qwen4 仍未发布。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-10-0900/">9点版</a></p>
+<h2>来源链接</h2>
+<ul><li>NEAR AI 官方事件报告：<a href="https://near.ai/blog/security-incident-report-sglang-vulnerability">https://near.ai/blog/security-incident-report-sglang-vulnerability</a></li><li>The Block：<a href="https://www.theblock.co/news/defi/2026-11-10-near-ai-security-breach-437002">https://www.theblock.co/news/defi/2026-11-10-near-ai-security-breach-437002</a></li><li>NVIDIA Snapshot（blockchain.news）：<a href="https://blockchain.news/news/nvidia-snapshot-gpu-workload-recovery">https://blockchain.news/news/nvidia-snapshot-gpu-workload-recovery</a></li><li>NVIDIA Dynamo Snapshot 官方博客：<a href="https://developer.nvidia.com/blog/nvidia-dynamo-snapshot-fast-startup-for-inference-workloads-on-kubernetes/">https://developer.nvidia.com/blog/nvidia-dynamo-snapshot-fast-startup-for-inference-workloads-on-kubernetes/</a></li><li>Zyphra ZONOS3-Mini（Cocoloop）：<a href="https://news.cocoloop.cn/en/2026/11/zyphra-zonos3-mini-browser-tts/">https://news.cocoloop.cn/en/2026/11/zyphra-zonos3-mini-browser-tts/</a></li><li>INFINITIX（PR Newswire）：<a href="https://www.prnewswire.com/news-releases/infinitix-to-debut-at-sc26-with-ai-stack-intelligent-scheduling-for-hpc-and-ai-workloads-302934676.html">https://www.prnewswire.com/news-releases/infinitix-to-debut-at-sc26-with-ai-stack-intelligent-scheduling-for-hpc-and-ai-workloads-302934676.html</a></li><li>vLLM #59025：<a href="https://github.com/vllm-project/vllm/pull/59025">https://github.com/vllm-project/vllm/pull/59025</a></li><li>vLLM #65724：<a href="https://github.com/vllm-project/vllm/pull/65724">https://github.com/vllm-project/vllm/pull/65724</a></li><li>vLLM #65975：<a href="https://github.com/vllm-project/vllm/pull/65975">https://github.com/vllm-project/vllm/pull/65975</a></li><li>TRT-LLM #19396：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19396">https://github.com/NVIDIA/TensorRT-LLM/pull/19396</a></li><li>llama.cpp #28392：<a href="https://github.com/ggml-org/llama.cpp/pull/28392">https://github.com/ggml-org/llama.cpp/pull/28392</a></li><li>llama.cpp #32009：<a href="https://github.com/ggml-org/llama.cpp/pull/32009">https://github.com/ggml-org/llama.cpp/pull/32009</a></li><li>llama.cpp #32015：<a href="https://github.com/ggml-org/llama.cpp/pull/32015">https://github.com/ggml-org/llama.cpp/pull/32015</a></li><li>llama.cpp #31896：<a href="https://github.com/ggml-org/llama.cpp/pull/31896">https://github.com/ggml-org/llama.cpp/pull/31896</a></li><li>FlashInfer #9033：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9033">https://github.com/flashinfer-ai/flashinfer/pull/9033</a></li><li>Dynamo #17190：<a href="https://github.com/ai-dynamo/dynamo/pull/17190">https://github.com/ai-dynamo/dynamo/pull/17190</a></li></ul></body></html>
