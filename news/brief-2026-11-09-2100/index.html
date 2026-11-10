@@ -1,0 +1,269 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月9日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-09"/>
+<meta name="doc-ts" content="2026-11-10T05:03:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-09（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-09（21点版）</h1>
+<p>21点版来了。</p>
+<p>两小时里，框架合入了十二条。</p>
+<p>头条是一篇 LoRA 确定性论文，值得深读。</p>
+<p>还有 PACE 和 AutoEMatic 两篇大文章。</p>
+<p>Qwen4 还是没来，明天再看。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没有新发布</strong></p>
+<p>vLLM 还是 v0.33.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.3。</p>
+<p>rc 版还是 v0.7.4rc1。</p>
+<p>llama.cpp 还是 b12242。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：6 条，老入口要退役了</strong></p>
+<p>先说 #66688。</p>
+<p>vLLM 的三个老入口要退役了。</p>
+<p>grpc_server、api_server、run_batch。</p>
+<p>v0.37.0 起删，2027 年清掉文件。</p>
+<p>以后统一用 vllm serve 和 vllm run_batch。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66688">https://github.com/vllm-project/vllm/pull/66688</a></p>
+<p>第二条 #66139，跟量化有关。</p>
+<p>Muse Spark 的 BF16 权重太大了。</p>
+<p>TP16 时每卡 93GB，塞不进 80GB 的 H100。</p>
+<p>现在路由专家可以在加载时压成 FP8。</p>
+<p>只压专家部分，别的权重不动。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66139">https://github.com/vllm-project/vllm/pull/66139</a></p>
+<p>第三条 #66690，跟多模态有关。</p>
+<p>Qwen2.5-Omni 支持像素在卡上归一化。</p>
+<p>图像和视频以 uint8 传上去，卡上再算。</p>
+<p>跟 Qwen2.5-VL 的做法对齐了。</p>
+<p>精度没变，llava-bench 困惑度还是 10.916。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66690">https://github.com/vllm-project/vllm/pull/66690</a></p>
+<p>其余三条一句话带过。</p>
+<p>#65842，MoE 共享专家只在 FP16 下分摊。</p>
+<p>#54548，前端渲染占位符来回转换不断链。</p>
+<p>#66710，ROCm 的 CI 测试修补。</p>
+<p><strong>SGLang：2 条，MI350X 那条值得看</strong></p>
+<p>先说 #45599，跟你的 MI350X 有关。</p>
+<p>确定性模式下，解码的矩阵乘是瓶颈。</p>
+<p>小 batch 时只开几个程序，大半张卡闲着。</p>
+<p>现在 K 维切成 4 段，固定顺序求和。</p>
+<p>小 batch 也能开 4 倍程序，卡不闲了。</p>
+<p>结果还跟 batch 无关，逐位一致。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/45599">https://github.com/sgl-project/sglang/pull/45599</a></p>
+<p>第二条 #48444，跟草稿校验有关。</p>
+<p>GDN 的状态每步都要折叠一次。</p>
+<p>B200 上，batch 512 时每步要 21 毫秒。</p>
+<p>现在改成攒着，默认还不开。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48444">https://github.com/sgl-project/sglang/pull/48444</a></p>
+<p><strong>TRT-LLM：2 条，视频生成那条值得看</strong></p>
+<p>先说 #20648。</p>
+<p>FastH3 视频生成模型能跑了。</p>
+<p>8 步出图，走 MiniMax 的视觉管线。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20648">https://github.com/NVIDIA/TensorRT-LLM/pull/20648</a></p>
+<p>第二条 #21949。</p>
+<p>低 M 的矩阵乘测试，适配 Rubin 的 SM107。</p>
+<p><strong>Dynamo：零合入</strong></p>
+<p>窗口内没有新合入。</p>
+<p>1.7.0 的发布分支还在收尾。</p>
+<p><strong>FlashInfer：2 条，都是 MoE 内核</strong></p>
+<p>先说 #9246。</p>
+<p>SM90 上 MoE 的宿主开销降了。</p>
+<p>以前每调一次要花 200 微秒在 CPU 上。</p>
+<p>Qwen3-30B-A3B 在 8 卡 H100 上跑。</p>
+<p>单请求的首字延迟，比 Triton 后端高 15%。</p>
+<p>就是被这 200 微秒拖的。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9246">https://github.com/flashinfer-ai/flashinfer/pull/9246</a></p>
+<p>第二条 #9212。</p>
+<p>NVFP4 的 LoRA 路径排掉一个不支持的分块。</p>
+<p>3073 个词、128 个专家时，以前会直接报错。</p>
+<p><strong>llama.cpp：零合入</strong></p>
+<p>窗口内没有新合入。</p>
+<p>快照还是 b12242。</p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<p>窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新一批 18 篇，全是没报过的</strong></p>
+<p><strong>LoRA 推理的可复现性：温度 0 也会飘（值得深读）</strong></p>
+<p>先说结论：温度设 0 也救不了 LoRA。</p>
+<p>同一输入重复跑，答案还会变。</p>
+<p>元凶是 shrink 那步的原子加法。</p>
+<p>shrink 就是把低秩结果乘回原维度。</p>
+<p>vLLM 默认切 8 份并行算，再拼起来。</p>
+<p>拼用原子加法：谁先到谁先加。</p>
+<p>浮点加法顺序一变，结果就差几位。</p>
+<p>差的那几位，卡在 BF16 舍入边界上就翻车。</p>
+<p>实测：shrink 输出在 97.61% 的比较里不同。</p>
+<p>GSM8K 上 17.30% 的输出变了，84 次对错翻转。</p>
+<p>MBPP 上 14.96% 变了，53 次对错翻转。</p>
+<p>毒性分类的概率，在 81.47% 的比较里变了。</p>
+<p>作者的确定性版只慢 1.02–2.62%。</p>
+<p>并行还在，顺序钉死了。</p>
+<p>精读笔记已生成，含原文 3 张图。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/deep-20261110-lora-det-splitk/">LoRA 推理的可复现性：Split-K 原子加法让温度 0 也飘</a></p>
+<p>来源：<a href="https://arxiv.org/abs/2611.10334">https://arxiv.org/abs/2611.10334</a></p>
+<p><strong>PACE：留对词还不够，位置远了也白搭</strong></p>
+<p>长 agent 会话攒到几百万词，一张卡装不下。</p>
+<p>大家都在比谁留的词更对。</p>
+<p>这篇说：留对了也不够。</p>
+<p>100K 词的编程会话，只留 2048 个词。</p>
+<p>需要的词 99% 以上都在，但准确率还是掉了。</p>
+<p>从 93% 掉到 64%，就因为离得远了。</p>
+<p>词在缓存里，但旋转位置离查询太远。</p>
+<p>模型够不着，等于没有。</p>
+<p>PACE 两招分治：规划器告诉缓存以后读什么。</p>
+<p>再把留下的词重新编号，距离永远压在 8K 内。</p>
+<p>100K 词上，隐藏测试通过 97%。</p>
+<p>H2O 只有 42%，SnapKV 只有 3%。</p>
+<p>1M 和 2M 词的会话，通过 99% 和 100%。</p>
+<p>KV 只要 0.7GB，全量要 147–295GB。</p>
+<p>代价是多花 9% 的时间。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.10240">https://arxiv.org/abs/2611.10240</a></p>
+<p><strong>AutoEMatic：精度不用提前定死，跑着调</strong></p>
+<p>量化精度以前都是推理前定死的。</p>
+<p>但每层、每个词，需要的精度一直在变。</p>
+<p>这篇让精度跟着跑：每步现选。</p>
+<p>信号有两个：下一个词的分布有多散。</p>
+<p>还有每层对隐藏状态改了多少。</p>
+<p>格式也现拼：2、4、6 位都从 NVFP4 派生。</p>
+<p>精度比纯 NVFP4 高 21.7%。</p>
+<p>GB300 上解码吞吐还保住 90–98%。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.10165">https://arxiv.org/abs/2611.10165</a></p>
+<p><strong>CVSA：稀疏注意力也要带质检</strong></p>
+<p>稀疏注意力只读一部分 KV，跑得快。</p>
+<p>但以前是开环：选错了也不知道。</p>
+<p>这篇发现质检信号就在核里现成。</p>
+<p>选中的词占了多少 softmax 权重，就叫覆盖率。</p>
+<p>覆盖率跟每步误差是严格对应的。</p>
+<p>覆盖够了就放行，不够就只补那几个头。</p>
+<p>不用草稿模型，也不用投机解码那套。</p>
+<p>LongBench 上离稠密注意力只差 1.13 分。</p>
+<p>128K 上下文，解码中位快 6.21 倍。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.10634">https://arxiv.org/abs/2611.10634</a></p>
+<p><strong>VerKV：KV 压缩也能给误差上保险</strong></p>
+<p>长上下文里，KV 缓存装不进显存。</p>
+<p>压了又怕算错，取回来又慢。</p>
+<p>这篇给压缩上了误差保证。</p>
+<p>卡上只留一小撮关键词，加一份全量速写。</p>
+<p>每次算完先估误差，够准就直接用。</p>
+<p>不够准再回 CPU 取，补到够准为止。</p>
+<p>32K 上下文，质量是稠密的 90–100%。</p>
+<p>显存少 8–32 倍，每词只取 2–23%。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.11319">https://arxiv.org/abs/2611.11319</a></p>
+<p><strong>一句话组</strong></p>
+<p>SemanticKV：视频 agent 的 KV 压缩，按语义留。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.11452">https://arxiv.org/abs/2611.11452</a></p>
+<p>EASE-KV：缓存里有，不等于模型真会用。</p>
+<p>因果编码比块编码，组合准确率高 25 个点。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.11299">https://arxiv.org/abs/2611.11299</a></p>
+<p>Zora：机器人动作生成，用检索当草稿。</p>
+<p>不用再训一个草稿模型，边端也能跑。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.11098">https://arxiv.org/abs/2611.11098</a></p>
+<p>高带宽闪存：存权重离卡近一点，能省卡吗。</p>
+<p>468 组对比里 98 组能少用卡，多数是短会话。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.11036">https://arxiv.org/abs/2611.11036</a></p>
+<p>Mirage：KV 共享会泄露提示词，靠首字时间猜。</p>
+<p>这篇用拓扑隔离加混淆，把泄露上界钉死。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.10756">https://arxiv.org/abs/2611.10756</a></p>
+<p>CALFA-KV：KV 压到 1 位，校准加锚点保精度。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.10511">https://arxiv.org/abs/2611.10511</a></p>
+<p>D-REAL：投机解码直接优化接受长度。</p>
+<p>不用 token 级目标，改算期望接受长度。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.10432">https://arxiv.org/abs/2611.10432</a></p>
+<p>D3Tree：扩散草稿树，只验值得验的分支。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.11371">https://arxiv.org/abs/2611.11371</a></p>
+<p>AdaOffload：多卡 MoE 专家卸载，跟着负载走。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.10219">https://arxiv.org/abs/2611.10219</a></p>
+<p>KV 的存储画像：11 条真实 trace 扫了一遍。</p>
+<p>缓存跨显存、内存、SSD 怎么放，有数了。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.10178">https://arxiv.org/abs/2611.10178</a></p>
+<p>CoMixKV：多智能体的 KV 量化，统一分预算。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.10096">https://arxiv.org/abs/2611.10096</a></p>
+<p>Scout：路由前先让小模型读一遍题。</p>
+<p>成功率和输出长度都能猜，推理开销省 29–61%。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.09028">https://arxiv.org/abs/2611.09028</a></p>
+<p>安全感知缓存路由：语义像，不等于能安全复用。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.10418">https://arxiv.org/abs/2611.10418</a></p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4：还是没发，明天再看</strong></p>
+<p>11 月 2–8 日的窗口已经过了，还是没发。</p>
+<p>社区说法还是明天 11 月 10 日。</p>
+<p>今天的核查还是老样子：HF 上没有模型。</p>
+<p>Model Studio 里也没有 API 和价格。</p>
+<p>等官宣再说。</p>
+<p>来源：<a href="https://www.versely.studio/blog/qwen-4-announced-at-apsara-2026">https://www.versely.studio/blog/qwen-4-announced-at-apsara-2026</a></p>
+<p><strong>X、HN、Reddit：两小时里静</strong></p>
+<p>关键账号没发新东西。</p>
+<p>HN 上也没有相关新帖。</p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈</strong></p>
+<p>Latent Space 的新单集，15点版已经报过。</p>
+<h2>值得深入学</h2>
+<p><strong>LoRA 推理的可复现性：温度 0 也会飘</strong></p>
+<p>这篇能帮你把确定性清单补上一块。</p>
+<p>LoRA 评测先看 shrink 实现，别只看温度。</p>
+<p>固定 batch 跑多次、报波动，换 batch 也要重测。</p>
+<p>精读笔记已生成，含原文 3 张图。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/deep-20261110-lora-det-splitk/">LoRA 推理的可复现性：Split-K 原子加法让温度 0 也飘</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 19点版去重。</p>
+<p>vLLM 6 条首次汇总。</p>
+<p>#66688、#66139、#66690、#65842、#54548、#66710。</p>
+<p>SGLang 2 条首次汇总。</p>
+<p>#45599、#48444。</p>
+<p>TRT-LLM 2 条首次汇总。</p>
+<p>#20648、#21949。</p>
+<p>Dynamo 零合入。</p>
+<p>FlashInfer 2 条首次汇总。</p>
+<p>#9246、#9212。</p>
+<p>llama.cpp 零合入，快照还是 b12242。</p>
+<p>LMDeploy、TGI 零合入。</p>
+<p>LoRA 确定性 Split-K、PACE、AutoEMatic，首次汇总。</p>
+<p>CVSA、VerKV，首次汇总。</p>
+<p>SemanticKV、EASE-KV、Zora，首次汇总。</p>
+<p>高带宽闪存、Mirage、CALFA-KV，首次汇总。</p>
+<p>D-REAL、D3Tree、AdaOffload，首次汇总。</p>
+<p>KV 存储画像、CoMixKV、Scout，首次汇总。</p>
+<p>安全感知缓存路由，首次汇总。</p>
+<p>Qwen4 截至今天仍未发布，首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-09-2100/">21点版</a></p></body></html>
