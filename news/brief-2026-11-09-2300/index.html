@@ -1,0 +1,273 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月9日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-09"/>
+<meta name="doc-ts" content="2026-11-10T07:05:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-09（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-09（23点版）</h1>
+<p>23点版来了。</p>
+<p>两小时里，框架合入了三十七条。</p>
+<p>头条是 BridgeKV，大模型读题、小模型吐词。</p>
+<p>还有 Evolving Infra。P/D 配比跟着 agent 负载动。</p>
+<p>Qwen4 还是没发，今天就是传说的日子。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：vLLM 的新 tag 露头了</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>新 tag v0.34.0rc0 在 11 月 8 日打出来了。</p>
+<p>下一轮 RC 已经开始转了。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>预发布多了个 v1.7.0-kimi-k3.1-pro-dev.1。</p>
+<p>FlashInfer 正式版还是 v0.7.3。</p>
+<p>rc 版还是 v0.7.4rc1。</p>
+<p>llama.cpp 还是 b12243。</p>
+<p>快照从 b12242 滚了一格。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：15 条，P/D 那条最值得看</strong></p>
+<p>先说 #65822，跟你的 P/D 解耦直接相关。</p>
+<p>MoRIIO 的 WRITE 模式，读题卡要把提示词的草稿纸写给解码卡。</p>
+<p>以前全量重写，解码卡已经有的块也照写不误。</p>
+<p>现在跳过解码卡前缀缓存里已有的块。</p>
+<p>MiniMax-M3.1-Flash，1P1D 在 MI355X 上跑。</p>
+<p>每请求写下去的 KV 从 1650MB 降到 130MB。</p>
+<p>写线程的忙时从 79% 降到 32%。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65822">https://github.com/vllm-project/vllm/pull/65822</a></p>
+<p>第二条 #66644，跟 AMD 卡有关。</p>
+<p>DeepSeek-V4.1 接上了 AITER MegaMoE。</p>
+<p>MI355X 上 DP8 加 EP8 能跑起来了。</p>
+<p>草稿层也一起带上了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66644">https://github.com/vllm-project/vllm/pull/66644</a></p>
+<p>第三条 #66654，跟 DeepSeek-V4.1 有关。</p>
+<p>预热之后，两个稀疏注意力核还在现编。</p>
+<p>Triton 对每步都变的数太较真。</p>
+<p>现在钉住不让它乱特化，热身完就不再编了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66654">https://github.com/vllm-project/vllm/pull/66654</a></p>
+<p>第四条 #66399，是 ROCm 上的一批修补。</p>
+<p>EPLB 跳过重排那步的卡间同步去掉了。</p>
+<p>GDN 读题的元数据、Moondream3 的开头词。</p>
+<p>还有 INT4 的符号问题，一起修了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66399">https://github.com/vllm-project/vllm/pull/66399</a></p>
+<p>其余十一条一句话带过。</p>
+<p>#66737，撤回 ZenCPU 那批测试。</p>
+<p>#66693，文件名规范化的小清理。</p>
+<p>#66661，MRv1 的剩余清理。</p>
+<p>#66529、#66528，Rust 前端工具调用参数流式写。</p>
+<p>#66390，dots.ocr 视觉编码器去掉卡间同步。</p>
+<p>#66257，Kimi K3 模式强制原生聊天编码。</p>
+<p>#65987，Llama-4 的 MoE 权重先排连续再拷卡。</p>
+<p>#64153、#63893，DSv4.1 在 ROCm 上的 Mono 性能调优。</p>
+<p>#51859，run-batch 的指标端口认 --host 参数。</p>
+<p><strong>SGLang：9 条，Kimi 那条值得看</strong></p>
+<p>先说 #49453，跟你的 MI350X 有关。</p>
+<p>Kimi-K3.1-Pro 的 MI35x 手册已对齐实测。对照的是 InferenceX 的数据。</p>
+<p>PD 命令挂上了 Ionic 提供方。</p>
+<p>Ionic 就是 AMD 的 Pollara 动词库。</p>
+<p>以前没它，PD 流量只能回落到 TCP。</p>
+<p>现在走高速直连了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49453">https://github.com/sgl-project/sglang/pull/49453</a></p>
+<p>第二条 #47857，跟昇腾卡有关。</p>
+<p>纯 MLA 模型以前开不了混合分块。</p>
+<p>混合分块就是一轮里读题和吐词混着跑。</p>
+<p>现在放行了，NPU 后端也能用了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47857">https://github.com/sgl-project/sglang/pull/47857</a></p>
+<p>第三条 #49436，跟草稿校验有关。</p>
+<p>DSpark 的延迟草稿 KV，只给还在跑的请求写。</p>
+<p>中途掉队的请求不再白写一份。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49436">https://github.com/sgl-project/sglang/pull/49436</a></p>
+<p>第四条 #45263，跟消费级卡有关。</p>
+<p>RTX PRO 5000 的 FP8 矩阵乘多了调好的配置。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/45263">https://github.com/sgl-project/sglang/pull/45263</a></p>
+<p>其余五条一句话带过。</p>
+<p>#49470、#49461，测试归属和崩溃转储修补。</p>
+<p>#49420，Rubin 的 SM107a 构建修补。</p>
+<p>#46944，MI35x 的 MXFP4 加 DSpark 夜间精度门。</p>
+<p>#44152，评分和向量接口加原始向量输出。</p>
+<p><strong>TRT-LLM：6 条，抢槽那条值得看</strong></p>
+<p>先说 #21334，跟调度有关。</p>
+<p>解码槽全满时，等着的请求怕赶不上首字时间。</p>
+<p>现在可以把住着的解码请求先暂停。</p>
+<p>急活先进来，住着的那个 KV 和状态都留着。</p>
+<p>等空了再接着跑，不用重算。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21334">https://github.com/NVIDIA/TensorRT-LLM/pull/21334</a></p>
+<p>第二条 #21423，跟 Rubin 卡有关。</p>
+<p>CuTe DSL 的 MLA 校验组放宽了。</p>
+<p>FP8 的多词校验组，头数在 64 到 128 之间。</p>
+<p>现在能绕过性能表的门槛，直接走快路。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21423">https://github.com/NVIDIA/TensorRT-LLM/pull/21423</a></p>
+<p>其余四条一句话带过。</p>
+<p>#21963，6 个失败用例豁免。</p>
+<p>#21923，非 2 的幂专家数也能跑 FP8 MoE。</p>
+<p>#21908，KDA 小块的修补。</p>
+<p>#21775，C++ 日志加了 keyed log-once。</p>
+<p><strong>Dynamo：2 条，都是小修补</strong></p>
+<p>#18490，文档链接修补。</p>
+<p>#17889，路由加了通用候选策略钩子。</p>
+<p><strong>FlashInfer：1 条，5090 那条</strong></p>
+<p>先说 #9313。</p>
+<p>RTX 5090 上 8 组解码形状换了更快的程序。</p>
+<p>都是分页的 FP8 多查询注意力核。</p>
+<p>只换了选型表，没加新程序。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9313">https://github.com/flashinfer-ai/flashinfer/pull/9313</a></p>
+<p><strong>llama.cpp：3 条，快照滚了一格</strong></p>
+<p>#31957，iGPU 的懒加载只在关掉 mmap 时才 fallback。</p>
+<p>#31574，SYCL 上 Alchemist 的融合注意力放行。</p>
+<p>#31540，CI 升级 oneAPI 和 oneDNN。</p>
+<p>快照从 b12242 滚到 b12243。</p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<p>窗口内没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新一批 9 篇，全是没报过的</strong></p>
+<p><strong>BridgeKV：大模型读题，小模型吐词（值得深读）</strong></p>
+<p>先说结论：读题和吐词，可以不是同一个模型。</p>
+<p>读题是算力活，吐词是显存活。</p>
+<p>P/D 解耦以前都用同一个模型分两拨卡。</p>
+<p>这篇直接换人：大模型只读题，小模型只吐词。</p>
+<p>中间拼一个轻量翻译模块。</p>
+<p>它把大模型的草稿纸，翻成小模型的格式。</p>
+<p>两个模型本身都不动，只训翻译模块。</p>
+<p>6 组模型配对、5 个数据集，30 组全赢。</p>
+<p>赢的是同等参数的小模型微调版。</p>
+<p>质量差最多补回 80%。</p>
+<p>A40 上，8B 读题、1B 吐词，请求快 3 倍。</p>
+<p>仿真里 70B 配 1B，快 33.86 倍。</p>
+<p>能耗降 27.5 倍。</p>
+<p>精读笔记已生成，含原文关键图。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/deep-20261110-bridgekv/">BridgeKV：大模型读题，小模型吐词，请求快 3 倍</a></p>
+<p>来源：<a href="https://arxiv.org/abs/2611.11761">https://arxiv.org/abs/2611.11761</a></p>
+<p><strong>Evolving Infra：P/D 配比跟着 agent 负载动</strong></p>
+<p>agent 的活一会儿多一会儿少。</p>
+<p>P/D 配比跟不上，就一边闲一边堵。</p>
+<p>缓存也一样：agent 还要用的 KV 被踢了。</p>
+<p>这篇让节点能在读题和吐词之间切换。</p>
+<p>在线规划器按活的构成调配比。</p>
+<p>缓存驱逐也看 agent 的上下文管理。</p>
+<p>256 张 GB300 上，GLM-5.2 和 Kimi K2.6。</p>
+<p>平均端到端延迟最多降 4.1 倍。</p>
+<p>P95 首字时间最多降 14 倍。</p>
+<p>对照组是 Dynamo，英伟达的生产框架。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.12304">https://arxiv.org/abs/2611.12304</a></p>
+<p><strong>Release Sooner：MoE 分发那步，别让卡干等</strong></p>
+<p>双批重叠能把 MoE 通信藏到另一批计算后面。</p>
+<p>但分发那步发完之前，卡一直被占着。</p>
+<p>这步占的时间藏不住，全露在外面。</p>
+<p>三种办法把发送进度甩给网卡或主机线程。</p>
+<p>GB300 NVL72 上，vLLM 的 P/D 解耦里。</p>
+<p>TPOT 中位数比默认降 15–25%。</p>
+<p>比 DeepEP v1 降 16–42%。</p>
+<p>TPOT 就是每吐一个词的平均时间。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.12362">https://arxiv.org/abs/2611.12362</a></p>
+<p><strong>DForkTree：扩散草稿树，分叉后别跑偏</strong></p>
+<p>扩散草稿一次给一整块词打草稿。</p>
+<p>树的好处在分叉上，可分叉后草稿容易跑偏。</p>
+<p>同一份草稿，顶着旧前缀算出的分布不准。</p>
+<p>这篇把每条分支重新锚定到自己的词上。</p>
+<p>不用再训，纯推理时改。</p>
+<p>Qwen3.5-4B 和 9B 上，比 DFlash 快 41.5%。</p>
+<p>比 DDTree 快 15.1%。</p>
+<p>相对自回归，最快 4.75 倍。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.12356">https://arxiv.org/abs/2611.12356</a></p>
+<p><strong>短语级投机解码：草稿单位从词改成短语</strong></p>
+<p>以前的草稿都在目标模型的词表里打转。</p>
+<p>一个节点就是一个词，短语永远拼不成一个单位。</p>
+<p>这篇换了单位：小模型直接猜一到三个词的短语。</p>
+<p>目标模型和分词器都不动，输出跟贪心解码一致。</p>
+<p>Qwen3-4B 上，GSM8K 快 2.391 倍。</p>
+<p>MATH-500 快 2.444 倍。</p>
+<p>草稿头只有 21.94M 参数。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.12464">https://arxiv.org/abs/2611.12464</a></p>
+<p><strong>KV 缓存翻译：模型接手对话，不用全文重读</strong></p>
+<p>一个模型接手另一个模型的对话，以前要全文重读。</p>
+<p>这篇把源模型的草稿纸直接翻成目标模型的格式。</p>
+<p>MLA 潜变量、线性注意力状态、稀疏索引都能翻。</p>
+<p>64K 词下，首字时间比全重读快 18.7 倍和 46.8 倍。</p>
+<p>长距离找回那根针，准确率从 0.09 提到 0.99。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.12062">https://arxiv.org/abs/2611.12062</a></p>
+<p><strong>一句话组</strong></p>
+<p>Ostinato：本地 agent 跑 MoE，专家住主机内存。每轮都让常驻专家在卡上算，读题快、吐词也不慢。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.11533">https://arxiv.org/abs/2611.11533</a></p>
+<p>Infrathon：给 agent 出的基建考题。150 轮，每轮 24 小时。Claude Opus 5.5 把 KV 压缩率提到 19.86%。原来只有 6.82%。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.11995">https://arxiv.org/abs/2611.11995</a></p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4：还是没发，今天就是传说的日子</strong></p>
+<p>社区说法是 11 月 10 日发。</p>
+<p>今天按北京时间已经是 11 月 10 日了。</p>
+<p>截至发稿，HF 上没有模型。</p>
+<p>Model Studio 里也没有 API 和价格。</p>
+<p>等官宣再说。</p>
+<p>来源：<a href="https://www.versely.studio/blog/qwen-4-announced-at-apsara-2026">https://www.versely.studio/blog/qwen-4-announced-at-apsara-2026</a></p>
+<p><strong>X、HN、Reddit：两小时里静</strong></p>
+<p>关键账号没发新东西。</p>
+<p>HN 上也没有相关新帖。</p>
+<h2>访谈与深度</h2>
+<p><strong>本轮没有新访谈</strong></p>
+<p>Latent Space 的新单集，15点版已经报过。</p>
+<h2>值得深入学</h2>
+<p><strong>BridgeKV：大模型读题，小模型吐词</strong></p>
+<p>这篇能帮你把 P/D 解耦的思路再拓宽一格。</p>
+<p>以前只想着同一模型分两拨卡。</p>
+<p>现在大小模型混搭也行，翻译模块是关键。</p>
+<p>切分点和质量门那套，可以直接进评估清单。</p>
+<p>精读笔记已生成，含原文关键图。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/deep-20261110-bridgekv/">BridgeKV：大模型读题，小模型吐词，请求快 3 倍</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 21点版去重。</p>
+<p>vLLM 15 条首次汇总。</p>
+<p>#65822、#66644、#66654、#66399、#66737、#66693、#66661、#66529、#66528、#66390、#66257、#65987、#64153、#63893、#51859。</p>
+<p>SGLang 9 条首次汇总。</p>
+<p>#49453、#47857、#49436、#45263、#49470、#49461、#49420、#46944、#44152。</p>
+<p>TRT-LLM 6 条首次汇总。</p>
+<p>#21334、#21423、#21963、#21923、#21908、#21775。</p>
+<p>Dynamo 2 条首次汇总。</p>
+<p>#18490、#17889。</p>
+<p>FlashInfer 1 条首次汇总。</p>
+<p>#9313。</p>
+<p>llama.cpp 3 条首次汇总。快照 b12242 滚到 b12243。</p>
+<p>#31957、#31574、#31540。</p>
+<p>LMDeploy、TGI 零合入。</p>
+<p>BridgeKV、Evolving Infra 首次汇总。</p>
+<p>Release Sooner 首次汇总。</p>
+<p>DForkTree、短语级投机解码、KV 缓存翻译，首次汇总。</p>
+<p>Ostinato、Infrathon，首次汇总。</p>
+<p>Qwen4 截至今天仍未发布，首次汇总。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-09-2300/">23点版</a></p></body></html>
