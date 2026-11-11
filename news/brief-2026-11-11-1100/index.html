@@ -1,0 +1,193 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月11日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-11T19:06:41"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-11（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-11（11点版）</h1>
+<p>11点版来了。</p>
+<p>两小时里，框架合入了十五条。</p>
+<p>头条是 SGLang 的读题索引器。</p>
+<p>长上下文读题，挑前 k 名那步快了两倍多。</p>
+<p>Modal 那边说，agent 强化学习能进生产了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没有新发布</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>release 挂在 v0.33.0rc3 的 tag 上。</p>
+<p>新 tag 还是 v0.34.0rc0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12287，今天 10 点 15 分发布。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：6 条，ROCm 读题那条最值得看</strong></p>
+<p>先说 #63878，跟 AMD 卡的读题有关。</p>
+<p>DSA 是 DeepSeek 用的稀疏注意力。</p>
+<p>读题时，它要先给每个 query 挑 key。</p>
+<p>挑之前得把索引 K 缓存抓出来。</p>
+<p>长请求切成小块，每块都重抓一遍。</p>
+<p>这次按元数据的标记跳过重复抓取。</p>
+<p>MI300X 上这部分重复读取没了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63878">https://github.com/vllm-project/vllm/pull/63878</a></p>
+<p>第二条 #64329，是个正确性修补。</p>
+<p>FP8 查询才该乘层的缩放系数。</p>
+<p>BF16 和 FP16 的查询也被乘了。</p>
+<p>检查点里系数不是 1，结果就悄悄算错。</p>
+<p>现在按查询类型给系数。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64329">https://github.com/vllm-project/vllm/pull/64329</a></p>
+<p>第三条 #66292，跟 GLM-5.3 有关。</p>
+<p>草稿模型的 KV 缓存改成 FP8。</p>
+<p>KV 缓存就是模型留的草稿纸。</p>
+<p>原来草稿还用 BF16，白白占地方。</p>
+<p>4 卡并行、48 个请求，每卡省 790MB。</p>
+<p>其余三条一句话带过。</p>
+<p>#66625、#66721，都是 AMD 验证过的模型配方文档。</p>
+<p>#67038，只是 CI 的测试文件固定。</p>
+<p><strong>SGLang：6 条，LiteTopK 那条最值得看</strong></p>
+<p>先说 #47469，跟长上下文读题有关。</p>
+<p>DSA 读题要先挑前 k 个 key。</p>
+<p>以前先把整张打分表写进显存。</p>
+<p>再单独跑一遍挑名次。</p>
+<p>上下文一长，这张表就大得吓人。</p>
+<p>这次改成边算边筛。</p>
+<p>先抽一小撮分数估个阈值。</p>
+<p>过线的才留下来进终选。</p>
+<p>打分表再也不用落地了。</p>
+<p>B300 上实测，32K 上下文快 2.45 倍。</p>
+<p>1M 上下文还有 1.58 倍。</p>
+<p>端到端 GLM-5.3，128K 首字快 12.7%。</p>
+<p>4 并发时输入吞吐涨 17.5%。</p>
+<p>默认关闭，想试要开环境变量。</p>
+<p>短上下文走老路，老路一样快。</p>
+<p>详细数据和做法见深读笔记。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47469">https://github.com/sgl-project/sglang/pull/47469</a></p>
+<p>第二条 #49497，跟自调优有关。</p>
+<p>启动自调优用全零假输入跑。</p>
+<p>所有 token 全挤到同一批专家。</p>
+<p>调出来的参数自然是偏的。</p>
+<p>现在换多样化的预热 token。</p>
+<p>其余四条一句话带过。</p>
+<p>#49476，top-k 内核换动态共享内存。</p>
+<p>个别工具链以前直接拒编。</p>
+<p>#49475，工具调用没写函数名。</p>
+<p>以前报 500，现在报 400。</p>
+<p>#49868，只是测试里的种子修补。</p>
+<p>#49614，只是 CI 的夜间跑分。</p>
+<p><strong>LMDeploy：1 条</strong></p>
+<p>#4999，跟昇腾后端有关。</p>
+<p>昇腾是华为 AI 芯片的后端。</p>
+<p>补了三个 GDN 的构建规格。</p>
+<p>GDN 是一种循环线性注意力。</p>
+<p>Qwen3.5 的 GDN 以前在昇腾上跑不起来。</p>
+<p>顺手修了 MTP 的状态拷贝和拒绝采样。</p>
+<p>MTP 就是一次多吐几个词的草稿机制。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/4999">https://github.com/InternLM/lmdeploy/pull/4999</a></p>
+<p><strong>llama.cpp：2 条</strong></p>
+<p>#32089，调度器每次预留都重建计算图结果。</p>
+<p>现在复用旧对象，只改上限再清零。</p>
+<p>省掉反复分配的开销。</p>
+<p>#32072，jinja 模板支持链式比较和参数解包。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32089">https://github.com/ggml-org/llama.cpp/pull/32089</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32072">https://github.com/ggml-org/llama.cpp/pull/32072</a></p>
+<p>TRT-LLM、TGI、Dynamo 零合入。</p>
+<p>FlashInfer、Mooncake 也是零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>上一批是 11 月 11 日 00:00 UTC 那批。</p>
+<p>01点版已经报过了。</p>
+<p>这轮查 arXiv 时接口返回 200。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>下一批约在今晚 16:00 PST 到。</p>
+<h2>业内新闻</h2>
+<p><strong>Modal：agent 强化学习，能进生产了</strong></p>
+<p>Modal 的 Jason Mancuso 讲的。</p>
+<p>在 AI Engineer 的节目上。</p>
+<p>做法是异步 GRPO。</p>
+<p>GRPO 是 DeepSeek 给 R1 用的强化学习方法。</p>
+<p>rollout 和训练并行跑，权重用 NCCL 流式同步。</p>
+<p>NCCL 是英伟达的卡间通信库。</p>
+<p>他加了三处修正：掩码重要性采样、分数中心化、top-P 掩码重放。</p>
+<p>Qwen 3.6 35B MoE 上，训练分数稳住了。</p>
+<p>成本账是，一块训练卡约配两块推理卡。</p>
+<p>底座是 Miles 加 SGLang。</p>
+<p>Miles 是 SGLang 团队的强化学习框架。</p>
+<p>注意，代码还没放出，说是很快就发。</p>
+<p>来源：<a href="https://www.startuphub.ai/ai-news/ai-research/2026/modal-says-agent-rl-is-ready-for-production">https://www.startuphub.ai/ai-news/ai-research/2026/modal-says-agent-rl-is-ready-for-production</a></p>
+<p>来源：<a href="https://www.sean-weldon.com/blog/2026-11-10-training-your-own-agent-models-with-rl-is-now-practical-jason-mancuso-modal">https://www.sean-weldon.com/blog/2026-11-10-training-your-own-agent-models-with-rl-is-now-practical-jason-mancuso-modal</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>最新一期还是 11 月 10 日那期。</p>
+<p>11 月 10 日 17 点版已经报过了。</p>
+<p>社交渠道本轮也没有新干货。</p>
+<p>只有几张通用的引擎对比图。</p>
+<h2>值得深入学</h2>
+<p><strong>LiteTopK：长上下文读题，挑名次那步终于不用写整张表了</strong></p>
+<p>这篇能帮你解决一个具体问题。</p>
+<p>DSA 读题时，挑前 k 名那步占了大头。</p>
+<p>1M 上下文里，SGLang 上它占读题时间的 70.9%。</p>
+<p>LiteTopK 用采样估阈值、边算边筛。</p>
+<p>临时显存从 32GB 压到 2.84GB。</p>
+<p>跟你的 P/D 解耦评估直接对口。</p>
+<p>读题池子本来就是解耦里最吃负载的环节。</p>
+<p>阈值估计、回退策略、短上下文走老路这三招，都能进评估清单。</p>
+<p>全文精读见深读笔记。</p>
+<p>原文：<a href="https://arxiv.org/abs/2607.11976">https://arxiv.org/abs/2607.11976</a></p>
+<p>落地：<a href="https://github.com/sgl-project/sglang/pull/47469">https://github.com/sgl-project/sglang/pull/47469</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 09 点版去重。</p>
+<p>vLLM 6 条首次汇总。</p>
+<p>#63878、#64329、#66292、#66625、#66721、#67038。</p>
+<p>SGLang 6 条首次汇总。</p>
+<p>#47469、#49475、#49476、#49497、#49614、#49868。</p>
+<p>LMDeploy 1 条首次汇总。</p>
+<p>#4999。</p>
+<p>llama.cpp 2 条首次汇总。</p>
+<p>#32072、#32089。</p>
+<p>TRT-LLM、TGI、Dynamo 零合入。</p>
+<p>FlashInfer、Mooncake 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回 200。</p>
+<p>Modal agent 强化学习首次汇总。</p>
+<p>Latent Space 无新单集。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-11-1100/">11点版</a></p></body></html>
