@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM 批量不变 MoE 调优：确定性模式的代价砍了一半"/>
+<meta name="doc-description" content="- 原文：vLLM 团队，GitHub PR #63627（2026-11-11 合入）"/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-11T23:02:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM 批量不变 MoE 调优：确定性模式的代价砍了一半</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM 批量不变 MoE 调优：确定性模式的代价砍了一半</h1>
+<ul><li>原文：vLLM 团队，GitHub PR #63627（2026-11-11 合入）</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/63627">https://github.com/vllm-project/vllm/pull/63627</a></li><li>作者：yifanFengg，标签 batch-invariance</li><li>说明：这篇是工程 PR，不是论文；数字全是作者自报</li><li>说明：原 PR 未附图，关键数字见下表</li></ul>
+<h2>一句话</h2>
+<p>确定性模式一直有个慢速档。</p>
+<p>开它之后，MoE 只能用一套固定配置。</p>
+<p>现在按架构查调优表，解码直接快了一倍。</p>
+<p>代价是：配置不能按 batch 大小分档。</p>
+<p>分档看着更快，但会破坏确定性。</p>
+<h2>人话解读</h2>
+<p>先讲确定性模式是什么。</p>
+<p>它就是批量不变模式。</p>
+<p>开关是 VLLM_BATCH_INVARIANT=1。</p>
+<p>开它之后，同样输入不管 batch 多大。</p>
+<p>输出逐位相同，一个字都不差。</p>
+<p>这对评估很重要。</p>
+<p>你要比两次跑分，先得保证输出不变。</p>
+<p>不然分不清是模型变了，还是 batch 变了。</p>
+<p>以前这模式有个短板。</p>
+<p>MoE 内核只用一套固定配置。</p>
+<p>配置就是分块大小那几个数。</p>
+<p>64x64x32，加 GROUP_SIZE_M 8，加 SPLIT_K 1。</p>
+<p>不管什么模型，什么 batch，全用这一套。</p>
+<p>固定配置求稳，但不求快。</p>
+<p>这篇就是给它配了一张调优表。</p>
+<p>按架构查表，一种模型形状配一套参数。</p>
+<p>形状就是专家那几块权重的尺寸。</p>
+<p>表是作者在 GB300 上扫出来的。</p>
+<p>扫的模型有三个 FP8 的。</p>
+<p>Qwen3-235B、DeepSeek-V3.1、GLM-5.3。</p>
+<p>还有一个 BF16 的，Qwen3-30B。</p>
+<p>不在表里的形状，还是用老固定配置。</p>
+<h2>核心方法</h2>
+<h3>1. 一张小表：一种形状一套配置</h3>
+<p>改动集中在两个文件。</p>
+<p>batch_invariant_configs.py 里加了一张表。</p>
+<p>键是架构族、精度、块形状、专家数。</p>
+<p>值就是那套调优好的配置。</p>
+<p>fused_moe.py 里改了默认配置的查找。</p>
+<p>开了确定性模式，就先查表。</p>
+<p>查到就用表里的，查不到就用老固定配置。</p>
+<p>表很小，只覆盖调过的几个形状。</p>
+<p>没有改非确定性那条路。</p>
+<h3>2. 扫表的方法：扫一遍，挑最快的</h3>
+<p>每个形状都扫一遍候选配置。</p>
+<p>分块 M 取 16、32、64、128。</p>
+<p>分块 N 取 64、128、256。</p>
+<p>num_warps 取 4 或 8。</p>
+<p>num_stages 取 2、3、4。</p>
+<p>分块 K 取 32、64、128。</p>
+<p>GROUP_SIZE_M 固定 8，SPLIT_K 固定 1。</p>
+<p>在 batch 大小 1 到 4096 之间跑。</p>
+<p>用 CUDA Graph 计时，每个点取 20 次中位数。</p>
+<p>先筛掉输出不对的。</p>
+<p>候选输出跟固定配置差超过 3% 的不要。</p>
+<p>剩下的里挑总时间最短的。</p>
+<h3>3. 关键发现：分档换配置会破坏确定性</h3>
+<p>第一版表是按 batch 大小分档的。</p>
+<p>batch 小用一套，batch 大换一套。</p>
+<p>像密集矩阵那张表一样。</p>
+<p>内核级检查看着没问题。</p>
+<p>8 行探测数据，随机 batch 从 1 到 16384。</p>
+<p>每档 5 个上下文，FP8 块量化。</p>
+<p>跨档边界，每行结果逐位相同。</p>
+<p>但模型级针尖测试挂了。</p>
+<p>针尖测试就是拿固定输出验确定性。</p>
+<p>分档加固定 K=128，5 次全挂。</p>
+<p>分档加 K=32，5 次挂 1 次。</p>
+<p>固定分块加 K=128，通过。</p>
+<p>一种形状一套配置，通过。</p>
+<p>结论很直接。</p>
+<p>在 Blackwell 上，Triton 融合 MoE 的逐行结果。</p>
+<p>跟分块配置有关，哪怕 K 方向的归约固定。</p>
+<p>真实激活值下，分档就是不安全。</p>
+<p>扫出来的数据也说明分档确实更快。</p>
+<p>Qwen3-235B 那个形状，batch 32 时。</p>
+<p>固定配置 381 微秒，单套调优 211 微秒。</p>
+<p>分档只要 132 微秒。</p>
+<p>但快不能要，确定性丢了就没意义。</p>
+<h3>4. 验证：精度和确定性都没丢</h3>
+<p>gsm8k 上跑了一遍。</p>
+<p>Qwen3-235B，5-shot，确定性模式。</p>
+<p>原来 0.8802，新表 0.8772。</p>
+<p>误差棒都是 0.009 左右，基本没变。</p>
+<p>确定性测试套件 6/6 通过。</p>
+<p>DeepSeek-V3.1 那组是 2/3 通过。</p>
+<p>但主分支也是 2/3，挂的是同一个 case。</p>
+<p>那是旧问题，不是这篇引入的。</p>
+<h2>关键数据</h2>
+<ul><li>Qwen3-235B-A22B-FP8，TP=4，4 张 GB300</li><li>Qwen3-235B，服务解码，并发 128：2435 涨到 3587 token/s</li><li>Qwen3-235B，服务解码，并发 128：涨 47.6%</li><li>Qwen3-235B，服务解码，并发 32：815 涨到 1177 token/s</li><li>Qwen3-235B，服务解码，并发 32：涨 44.7%</li><li>Qwen3-235B，读题 4096 词进 1 词出：3.71 涨到 5.64 请求每秒</li><li>Qwen3-235B，读题 4096 词进 1 词出：涨 52.0%</li><li>Qwen3-235B，离线吞吐，并发 128：2446 涨到 3667 token/s</li><li>Qwen3-235B，离线吞吐，并发 128：涨 49.9%</li><li>DeepSeek-V3.1 FP8，TP=4，4 张 GB300</li><li>DeepSeek-V3.1，服务解码，并发 128：1185 涨到 2480 token/s</li><li>DeepSeek-V3.1，服务解码，并发 128：涨 108.8%</li><li>DeepSeek-V3.1，服务解码，并发 32：452 涨到 933 token/s</li><li>DeepSeek-V3.1，服务解码，并发 32：涨 107.5%</li><li>DeepSeek-V3.1，读题 4096 词进 1 词出：2.64 涨到 3.50 请求每秒</li><li>DeepSeek-V3.1，读题 4096 词进 1 词出：涨 32.6%</li><li>DeepSeek-V3.1，离线吞吐，并发 128：1189 涨到 2560 token/s</li><li>DeepSeek-V3.1，离线吞吐，并发 128：涨 110.8%</li><li>Qwen3-30B-A3B BF16，TP=1</li><li>Qwen3-30B，服务解码，并发 128：6756 涨到 7145 token/s</li><li>Qwen3-30B，服务解码，并发 128：涨 5.8%</li><li>Qwen3-30B，读题 4096 词进 1 词出：12.37 涨到 14.18 请求每秒</li><li>Qwen3-30B，读题 4096 词进 1 词出：涨 14.6%</li><li>对照组，不开确定性模式，FlashInfer 路径</li><li>对照组，Qwen3-235B 解码并发 128：7351 token/s</li><li>对照组，DeepSeek-V3.1 解码并发 128：3807 token/s</li><li>对照组，新表 2480，比 3807 还差一半左右</li><li>精度，gsm8k，Qwen3-235B：0.8802 变到 0.8772</li><li>精度，误差棒 0.009，基本没变</li><li>确定性套件：新表 6/6 通过</li><li>分档方案：针尖测试 5 次全挂</li></ul>
+<h2>关键图表</h2>
+<p>原 PR 未附图。</p>
+<p>关键数字都在上表里。</p>
+<p>最值得看的是两组对比。</p>
+<p>一组是调优表对固定配置。</p>
+<p>DeepSeek-V3.1 解码翻倍，Qwen3-235B 涨近一半。</p>
+<p>另一组是新表对非确定性路径。</p>
+<p>Qwen3-235B 是 3587 对 7351。</p>
+<p>DeepSeek-V3.1 是 2480 对 3807。</p>
+<p>差距还在，只是小了一半。</p>
+<h2>跟研究方向的关联</h2>
+<p>这篇直接撞上你的确定性评估。</p>
+<p>三招能直接进评估清单。</p>
+<p>第一招：确定性模式的代价要单列。</p>
+<p>以前开批量不变，MoE 只能用固定配置。</p>
+<p>现在有调优表，DeepSeek 解码翻倍。</p>
+<p>评估里要分两档报。</p>
+<p>固定配置那档，和调优表那档。</p>
+<p>别把旧数字当成现在的代价。</p>
+<p>第二招：分档调优是个坑。</p>
+<p>按 batch 大小分档，看着能再快四成。</p>
+<p>但针尖测试 5 次全挂。</p>
+<p>内核级检查说没问题，模型级照样挂。</p>
+<p>评估清单里要加一问。</p>
+<p>调优表是不是一种形状一套配置。</p>
+<p>分档的方案，确定性测试必须重跑。</p>
+<p>第三招：差距还在，别报过头。</p>
+<p>不开确定性模式，同样 4 张卡。</p>
+<p>Qwen3-235B 是 7351，新表是 3587。</p>
+<p>DeepSeek-V3.1 是 3807，新表是 2480。</p>
+<p>确定性模式还是慢一半左右。</p>
+<p>报收益时，两档数字都要给。</p>
+<p>只给涨幅，会让人以为追平了。</p>
+<p>还有一个方向值得跟。</p>
+<p>这张表只调了 GB300 上的几个形状。</p>
+<p>H100、MI350X 上还没有。</p>
+<p>你的评估卡是 H100 和 MI350X。</p>
+<p>这张表在你那边的收益，要实测才知道。</p>
+<h2>术语表</h2>
+<ul><li>批量不变：同样输入不管 batch 多大，输出逐位相同</li><li>确定性模式：批量不变模式的开关，VLLM_BATCH_INVARIANT=1</li><li>MoE：专家混合模型，每层有多个专家，只激活几个</li><li>融合 MoE 内核：把 MoE 的计算并成一个内核跑</li><li>分块配置：BLOCK 大小、num_warps、num_stages 这几个数</li><li>GROUP_SIZE_M：分组大小，MoE 里按组算的一个参数</li><li>SPLIT_K：K 方向切几份并行归约</li><li>针尖测试：拿固定输出验确定性，batch 一变就验</li><li>逐位相同：每个数字的每一位都一样，不是约等于</li><li>CUDA Graph：把一串操作录下来反复放</li><li>FP8：8 位浮点数，省显存</li><li>BF16：16 位浮点数</li><li>TP=4：张量并行，模型切 4 张卡</li><li>gsm8k：小学数学题测试集，常用精度基准</li><li>GB300：英伟达 Blackwell 架构的服务器 GPU</li><li>SM 10.3：GB300 的算力架构版本</li><li>读题：prefill，把输入一次性算完</li><li>解码：decode，一个词一个词往外吐</li></ul>
+<h2>注意事项</h2>
+<ul><li>数字全是作者自报，没有第三方复现</li><li>表只调了 GB300 上的 4 个形状</li><li>Qwen3-30B 那组只涨 5.8%，MoE 占比小</li><li>分档方案内核级检查通过，模型级照样挂</li><li>DeepSeek 那组确定性 2/3，主分支也一样</li><li>对照组用的是 FlashInfer 路径，不是 Triton</li><li>读题那组是 4096 词进 1 词出，解码很短</li><li>原 PR 未附图，扫表原始数据在附件证据包里</li></ul></body></html>

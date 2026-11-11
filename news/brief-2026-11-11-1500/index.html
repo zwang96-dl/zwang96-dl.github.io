@@ -1,0 +1,176 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月11日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-11T23:03:18"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-11（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-11（15点版）</h1>
+<p>15点版来了。</p>
+<p>头条是 vLLM 的确定性模式终于不慢了。</p>
+<p>批量不变那档，解码直接快了一倍。</p>
+<p>这轮框架合入不少，TRT-LLM 接了个多模态新模型。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没有新发布</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>release 挂在 v0.33.0rc3 这个 tag 上。</p>
+<p>v0.34.0rc1 那个 tag，13点版报过了。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照还是 b12292。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：8 条，确定性模式那条最值得看</strong></p>
+<p>先说 #63627，是个性能调优。</p>
+<p>确定性模式就是批量不变模式。</p>
+<p>开它之后，同样输入不管 batch 多大，输出逐位相同。</p>
+<p>以前这模式下，MoE 内核只用一套固定配置。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>现在按架构查调优表，一种模型形状配一套参数。</p>
+<p>GB300 上测的，Qwen3-235B 解码快 47.6%。</p>
+<p>DeepSeek-V3.1 更夸张，直接翻倍还多。</p>
+<p>读题也快了三到五成。</p>
+<p>关键发现藏在验证里。</p>
+<p>按 batch 大小分档换配置，看着更快。</p>
+<p>但针尖测试 5 次全挂，确定性丢了。</p>
+<p>针尖测试就是验输出稳不稳。</p>
+<p>只有一种形状一套配置才稳，6/6 通过。</p>
+<p>gsm8k 分数基本没变。</p>
+<p>但也别高兴太早。</p>
+<p>不开确定性模式，同样 4 张卡能到 3806 token/s。</p>
+<p>现在 2480，差距还在，只是小了一半。</p>
+<p>其余七条一句话带过。</p>
+<p>#61869，DSv4.1 的 DSpark 草稿放到专用解码上。</p>
+<p>DSpark 就是跑草稿的小模型。</p>
+<p>#65077，Humming 线性层在新卡上用 FP8 激活。</p>
+<p>FP8 是 8 位浮点数，省显存。</p>
+<p>#66604，Kimi K3.1 的草稿 KV 按块写。</p>
+<p>#64767，NVFP4 格式的词表向量能加载了。</p>
+<p>NVFP4 是英伟达的 4 位量化格式。</p>
+<p>#63721，ROCm 的 MoE 融合加逐 token FP8 量化。</p>
+<p>#54820，ROCm 的 DSpark 占位分配。</p>
+<p>#65765，Rubin nightly 镜像升到 CUDA 13.5。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63627">https://github.com/vllm-project/vllm/pull/63627</a></p>
+<p><strong>SGLang：5 条，DeepSeek 那两条最值得看</strong></p>
+<p>#49499，DSV4 的读题 token 块按 batch 大小调。</p>
+<p>#48456，DSV4.1 的 Blackwell 解码，边路混合改成 BF16x3。</p>
+<p>BF16 是 16 位浮点数。</p>
+<p>#46185 和 #46186，是一对。</p>
+<p>DFlash 自适应验证系列的组件 2 和 3。</p>
+<p>DFlash 是推测解码的一种新玩法。</p>
+<p>推测解码就是先让实习生打草稿再让专家改。</p>
+<p>管的是验证那步怎么省活。</p>
+<p>#43583，comfyui 里能跑 LTX-2.5 和 LTX-2.3 了。</p>
+<p>来源：GitHub</p>
+<p><strong>TRT-LLM：4 条，Muse Spark Open 那条最值得看</strong></p>
+<p>#21049，接入 Muse Spark Open。</p>
+<p>这是个多模态新模型。</p>
+<p>推理和工具解析都接上了。</p>
+<p>effort 档位加了 minimal 和 xhigh。</p>
+<p>原生工具也能用了。</p>
+<p>其余三条是修补和测试。</p>
+<p>#21777，修 MPI worker 拆掉时的释放问题。</p>
+<p>#22126，Qwen3.5-4B 在 GB300 上的精度测试解禁。</p>
+<p>#22085，只是单元测试挪位置。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21049">https://github.com/NVIDIA/TensorRT-LLM/pull/21049</a></p>
+<p><strong>FlashInfer：1 条</strong></p>
+<p>#9357，gdn 的 delta-rule 内核进磁盘缓存。</p>
+<p>下次不用重新编译。</p>
+<p><strong>llama.cpp：4 条，全是小活</strong></p>
+<p>#32054、#31467、#32039，都是 UI 改动。</p>
+<p>#32038，只改了文档里的图片链接。</p>
+<p><strong>LMDeploy、Dynamo：零合入</strong></p>
+<p>两小时里两家都没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>上一批是 11 月 11 日 00:00 UTC 那批。</p>
+<p>01点版已经报过了。</p>
+<p>这轮查 arXiv 时接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>下一批约在今天 16:00 PST 到。</p>
+<h2>业内新闻</h2>
+<p><strong>本轮没有新消息</strong></p>
+<p>Qwen4 预览版 03点版报过了。</p>
+<p>NVIDIA Snapshot 11-10 的 09点版报过了。</p>
+<p>SGLang 漏洞的 CVE 编号，01点版也报过了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>最新一期还是 11 月 10 日那期。</p>
+<p>Spotify 上查过了，没有更新。</p>
+<p>X、Reddit、Hacker News 本轮也没有新干货。</p>
+<p>中文媒体也没有新东西。</p>
+<h2>值得深入学</h2>
+<p><strong>vLLM 批量不变 MoE 调优：确定性模式的代价砍了一半</strong></p>
+<p>这篇能帮你解决一个具体问题。</p>
+<p>你的确定性评估里，批量不变模式一直是个慢速档。</p>
+<p>以前开它，MoE 只能用一套固定配置。</p>
+<p>DeepSeek-V3.1 解码只有 1185 token/s。</p>
+<p>现在按架构查调优表，同一张卡直接到 2480。</p>
+<p>翻了一倍还多，读题也快了三成。</p>
+<p>关键教训是：分档换配置看着快，但会破坏确定性。</p>
+<p>针尖测试 5 次全挂，只有一种形状一套配置才稳。</p>
+<p>但也别高兴太早。</p>
+<p>不开确定性模式，同样 4 张卡能到 3806。</p>
+<p>差距还在，只是小了一半。</p>
+<p>全文精读见深读笔记。</p>
+<p>原文：<a href="https://github.com/vllm-project/vllm/pull/63627">https://github.com/vllm-project/vllm/pull/63627</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 13 点版去重。</p>
+<p>版本水位全平，没有新发布。</p>
+<p>vLLM 8 条首次汇总。</p>
+<p>#63627、#61869、#65077、#66604。</p>
+<p>#64767、#63721、#54820、#65765。</p>
+<p>SGLang 5 条首次汇总。</p>
+<p>#49499、#48456、#46185、#46186、#43583。</p>
+<p>TRT-LLM 4 条首次汇总。</p>
+<p>#21049、#21777、#22126、#22085。</p>
+<p>FlashInfer 1 条首次汇总。</p>
+<p>#9357。</p>
+<p>llama.cpp 4 条首次汇总。</p>
+<p>#32054、#32038、#31467、#32039。</p>
+<p>LMDeploy、Dynamo 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>SGLang 漏洞 CVE-2026-111391 已在 01点版报过。</p>
+<p>本轮不重复。</p>
+<p>Latent Space 无新单集。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-11-1500/">15点版</a></p></body></html>
