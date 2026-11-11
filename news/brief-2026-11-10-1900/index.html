@@ -1,0 +1,256 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月10日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-10"/>
+<meta name="doc-ts" content="2026-11-11T03:09:19"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-10（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-10（19点版）</h1>
+<p>19点版来了。</p>
+<p>两小时里，框架合入了四十一条。</p>
+<p>头条是 FlashInfer 发了正式版 v0.7.4。</p>
+<p>arXiv 新一批也到了，五篇都跟推理沾边。</p>
+<p>Qwen4 还是没来。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：FlashInfer 发了正式版</strong></p>
+<p>FlashInfer 正式版到了 v0.7.4。</p>
+<p>18 点 18 分发布，就在本轮窗口里。</p>
+<p>上个正式版是 v0.7.3。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>新 tag 还是 v0.34.0rc0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12274，18 点 52 分发布。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>FlashInfer v0.7.4：正式版，DeepSeek-V4 那条最值得看</strong></p>
+<p>先说大头：DeepSeek-V4 的稀疏 MLA 解码上了 Rubin。</p>
+<p>Rubin 是英伟达的新卡。</p>
+<p>稀疏 MLA 就是只算重要的注意力头。</p>
+<p>MXFP4 的专家并行 MoE 也上了 Rubin。</p>
+<p>MXFP4 是 4 位浮点量化，省显存。</p>
+<p>第二条：批量不变模式。</p>
+<p>一行的输出只跟输入和权重有关。</p>
+<p>跟 batch 大小、行位置、卡数都没关系。</p>
+<p>说白了，同一行不管怎么拼批，结果逐位一样。</p>
+<p>这对你的确定性评估很对口。</p>
+<p>RL 训练和推理的 logits 能逐位对上。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.4">https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.4</a></p>
+<p>其余亮点一句话带过。</p>
+<p>稀疏注意力多了 SDSA 索引器。</p>
+<p>MiniMax-M3 也拿到了上下文并行的索引器。</p>
+<p>Gemma 4 能用 NVFP4 的 KV 缓存解码。</p>
+<p>张量并行层把 FP8 矩阵乘和聚合融到一起了。</p>
+<p>投机解码的验证和采样在 Hopper 上更快了。</p>
+<p><strong>FlashInfer：4 条，NVFP4 那条值得看</strong></p>
+<p>先说 #6510，跟消费级卡有关。</p>
+<p>SM12x 的 NVFP4 融合 MoE 接进来了。</p>
+<p>SM12x 就是 Blackwell 消费级卡。</p>
+<p>RTX 50 系跑 MoE 又多一条快路。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6510">https://github.com/flashinfer-ai/flashinfer/pull/6510</a></p>
+<p>其余三条一句话带过。</p>
+<p>#9323，SDSA 的索引一次能接 2 的 20 次方个键。</p>
+<p>#9146，给双块 TGV 核加了集群退出屏障。</p>
+<p>#5328，文档换成了 AGENTS.md。</p>
+<p><strong>vLLM：14 条，Mooncake 那条最值得看</strong></p>
+<p>先说 #65943，跟 P/D 解耦直接相关。</p>
+<p>P/D 解耦就是读题和生成分开跑。</p>
+<p>Mooncake 的 KV 存储连接器，以前自己另起一套传输引擎。</p>
+<p>现在能复用 P/D 那套现成的引擎。</p>
+<p>一个 worker 只留一个引擎。</p>
+<p>不用再做一次 RDMA 初始化。</p>
+<p>不用再注册一遍 GPU 的 KV 缓存。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65943">https://github.com/vllm-project/vllm/pull/65943</a></p>
+<p>第二条 #64152，跟你的 MI355X 有关。</p>
+<p>DeepSeek-V4.1 的 Mono 解码。</p>
+<p>K1 调优路扩到 TP8。</p>
+<p>K1 是注意力里的一段计算。</p>
+<p>8 张 MI355X 上测过，跟通用版逐位一致。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64152">https://github.com/vllm-project/vllm/pull/64152</a></p>
+<p>第三条 #66203，跟 Muse Spark Open 有关。</p>
+<p>文档补了 DSpark 加专用解码模式的菜谱。</p>
+<p>还把 Kimi-K3.1 的低延迟解码从 AMD 上关掉了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66203">https://github.com/vllm-project/vllm/pull/66203</a></p>
+<p>其余十一条一句话带过。</p>
+<p>#66433，Kimi-K3.1-Pro 补了 B300 的 AgentX 预设。</p>
+<p>#65400，Kimi-K3 和 MiniMax-M3.1-Flash 支持 Rubin VR200。</p>
+<p>#63838，Kimi-K3 的注意力残差块银行常驻工作区。</p>
+<p>#62769，投机解码里自适应 DSpark 的决策跨 TP 对齐。</p>
+<p>#66876，ROCm 上 lut_b_moe 在线量化放开了。</p>
+<p>#66819，DomynEdge 混着用滑动和全注意力层。</p>
+<p>#66073，视频后端加了关键帧感知的采样。</p>
+<p>#64070，Qwen3.5 的文档整理。</p>
+<p>#66645、#65979、#64604，都是 CI 分片杂活。</p>
+<p><strong>SGLang：8 条，投机解码那条最值得看</strong></p>
+<p>先说 #44588，跟投机解码有关。</p>
+<p>投机解码就是先让小模型打草稿。</p>
+<p>再让大模型改，改得越少越快。</p>
+<p>DSpark 的验证会先剪掉没希望的草稿词。</p>
+<p>以前剪枝要靠草稿头给的置信度。</p>
+<p>现在多了在线估计器，边跑边拟合。</p>
+<p>没有置信度头的草稿器也能用同一套调度。</p>
+<p>先在 DeepSeek-V4.1-Flash 上验证过。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/44588">https://github.com/sgl-project/sglang/pull/44588</a></p>
+<p>第二条 #46965，跟 Gemma-4 有关。</p>
+<p>FlashAttention 4 现在能读 FP8 缓存了。</p>
+<p>在 H100 上，头维度 256 和 512 都支持。</p>
+<p>KV 池子直接翻倍。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46965">https://github.com/sgl-project/sglang/pull/46965</a></p>
+<p>第三条 #49661 和 #49660，是一组清理。</p>
+<p>MXFP4 的 MoE 权重反量化改成即时编译核。</p>
+<p>MoE 的旧后端也删掉了。</p>
+<p>这是 17 点版 #49659 那轮清理的续集。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49661">https://github.com/sgl-project/sglang/pull/49661</a></p>
+<p>其余四条一句话带过。</p>
+<p>#49655，约束解码里拒掉一个词不再污染匹配器。</p>
+<p>#49365，跨节点聚合的推送改成单字纪元。</p>
+<p>#49337，MoE 的 GPTQ 和 AWQ 核修了缩放网格校验。</p>
+<p>#30893，稀疏注意力统一了设备池映射。</p>
+<p><strong>TRT-LLM：7 条，都是小修补</strong></p>
+<p>先说 #21853，跟 Qwen4 有关。</p>
+<p>Qwen4 中间行的 GEMM 核，锁的范围收到集群级。</p>
+<p>GEMM 就是矩阵乘。</p>
+<p>代码里又有 Qwen4 的影子了。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21853">https://github.com/NVIDIA/TensorRT-LLM/pull/21853</a></p>
+<p>其余六条一句话带过。</p>
+<p>#21993，Gemma4 的测试跳过 KV 主机层。</p>
+<p>#21896、#21894，都是文档措辞修正。</p>
+<p>#21717、#21704、#21189，都是测试基建。</p>
+<p><strong>Dynamo：8 条，大半是 1.7.0 的回灌</strong></p>
+<p>先说 #18055，跟路由器有关。</p>
+<p>dynamo-kv-router 拆成了三个 crate。</p>
+<p>crate 就是 Rust 的包。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18055">https://github.com/ai-dynamo/dynamo/pull/18055</a></p>
+<p>其余七条一句话带过。</p>
+<p>#18539、#18525、#18531、#18524，都是 1.7.0 分支回灌。</p>
+<p>回灌的就是 17 点版和 13 点版报过的修补。</p>
+<p>#18541，修复后端空刷新的分块按选项序号比对。</p>
+<p>#18500，路由器日志记下双层默认模式。</p>
+<p>#18485，Kimi K3 的工具调用 ID 唯一化。</p>
+<p><strong>llama.cpp、LMDeploy、TGI：零合入</strong></p>
+<p>窗口内没有新 PR。</p>
+<p>llama.cpp 快照滚到 b12274。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新一批到了，五篇都沾边</strong></p>
+<p>先说最值得看的，见文末「值得深入学」。</p>
+<p>其余四篇一句话带过。</p>
+<p>ForeSpark：并行草稿器一次写一整块词。</p>
+<p>草稿写太多，验证不过就白写。</p>
+<p>高负载时草稿能吃掉 40% 的步时间。</p>
+<p>这篇把草稿预算和验证预算一起排。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.13442">https://arxiv.org/abs/2611.13442</a></p>
+<p>SHADOWPREFILL：agent 每步可能换模型。</p>
+<p>一换模型，前缀缓存就作废。</p>
+<p>命中率从 80–89% 掉到 44–65%。</p>
+<p>一次换模型调用慢 1.5–3.2 倍。</p>
+<p>这篇提前在没选中的模型上预热。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.13176">https://arxiv.org/abs/2611.13176</a></p>
+<p>Decode Token Parallelism：解码注意力新拆法。</p>
+<p>数据并行复制权重，挤占 KV 容量。</p>
+<p>张量并行在 KV 头数那儿就卡住了。</p>
+<p>这篇按词元拆解码注意力，省显存。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.13293">https://arxiv.org/abs/2611.13293</a></p>
+<p>Placing LLM Lookup Tables 讲的是查表。</p>
+<p>DeepSeek-V4.1 的 Engram 表怎么放。</p>
+<p>203GB 的表现在住在主机内存里。</p>
+<p>一个 4 卡进程 223GB 内存，表占了 190GB。</p>
+<p>这篇按每层的预取死线分层放表。</p>
+<p>还给 SGLang 做了个 SlackTier。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.13413">https://arxiv.org/abs/2611.13413</a></p>
+<p>再补一篇：Looping Deeper 不长 KV 缓存。</p>
+<p>循环加深不加缓存，编码器解码器结构。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.13378">https://arxiv.org/abs/2611.13378</a></p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4：还是没发</strong></p>
+<p>HF 官方组织最新上传还是 11 月 7 号的 Qwen3.8。</p>
+<p>社区猜的 11 月 10 号已经过了。</p>
+<p>截至发稿，HF 上没有 Qwen4 的仓库。</p>
+<p>等官宣再说。</p>
+<p>来源：<a href="https://huggingface.co/Qwen">https://huggingface.co/Qwen</a></p>
+<h2>值得深入学</h2>
+<p><strong>前缀缓存也会“卡死”：一次小突发，命中率掉到一成</strong></p>
+<p>这篇是微软的 Wen Huang 写的。</p>
+<p>arXiv:2611.13412，11 月 10 号提交。</p>
+<p>它跟你研究的 PD 和前缀缓存直接对口。</p>
+<p>agent 会话是闭环：每轮上下文都变长。</p>
+<p>命中时只补一千来个词。</p>
+<p>没命中要重算 1–4 万词的上下文。</p>
+<p>差 10–40 倍的活。</p>
+<p>实验是 vLLM 0.20 跑 Qwen3-8B。</p>
+<p>KV 池 400K 词，负载本来跑得好好的。</p>
+<p>只加 5 分钟、1.5 倍的额外到达。</p>
+<p>命中率就掉到一成左右，吞吐剩一半。</p>
+<p>积压接着涨 70 分钟，停不下来。</p>
+<p>没加突发的那组一直健康。</p>
+<p>12 组配对里 9 组都陷进去，没有反方向的。</p>
+<p>说白了，突发走了，烂摊子留下了。</p>
+<p>机理是个死循环。</p>
+<p>服务一慢，会话在系统里越攒越多。</p>
+<p>攒多了，上下文总量就超过 KV 池。</p>
+<p>LRU 把前缀清掉，下一轮全得重算。</p>
+<p>重算更慢，攒得更多。</p>
+<p>论文还给了出路，效果分得很清。</p>
+<p>只卡新请求进门：7 组只救回 1 组。</p>
+<p>按池子容量挂起已接的会话：7 组全救回。</p>
+<p>预算器那组最快，5 分钟内命中率回 0.93 以上。</p>
+<p>17 组塌掉的实验全救回。</p>
+<p>更狠的是，预算器从头开着就一次都没塌过。</p>
+<p>CPU 卸载层只能拖延，拦不住。</p>
+<p>深读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261111-prefix-cache-burst/">前缀缓存突发：一次小突发，服务卡死 70 分钟</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 17 点版去重。</p>
+<p>FlashInfer v0.7.4 正式版首次汇总。</p>
+<p>SGLang 8 条首次汇总。</p>
+<p>#30893、#44588、#46965、#49337、#49365、#49655、#49660、#49661。</p>
+<p>vLLM 14 条首次汇总。</p>
+<p>#62769、#63838、#64070、#64152、#64604、#65400、#65943、#65979、#66073、#66203、#66433、#66645、#66819、#66876。</p>
+<p>TRT-LLM 7 条首次汇总。</p>
+<p>#21189、#21704、#21717、#21853、#21894、#21896、#21993。</p>
+<p>Dynamo 8 条首次汇总。</p>
+<p>#18055、#18485、#18500、#18524、#18525、#18531、#18539、#18541。</p>
+<p>FlashInfer 4 条首次汇总。</p>
+<p>#5328、#6510、#9146、#9323。</p>
+<p>llama.cpp、LMDeploy、TGI 零合入。</p>
+<p>arXiv 新一批 6 篇首次汇总。</p>
+<p>Qwen4 仍未发布。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-10-1900/">19点版</a></p></body></html>
