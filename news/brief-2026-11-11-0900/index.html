@@ -1,0 +1,193 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月11日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-11T17:02:47"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-11（09点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-11（09点版）</h1>
+<p>09点版来了。</p>
+<p>两小时里，框架合入了十五条。</p>
+<p>头条是英伟达的一篇新博客。</p>
+<p>MoE 读题时的负载不均，有解了。</p>
+<p>vLLM 那边，多模态前缀缓存也补上了。</p>
+<p>SGLang 峰会明天开幕。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没有新发布</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>release 挂在 v0.33.0rc3 的 tag 上。</p>
+<p>新 tag 还是 v0.34.0rc0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照还是 b12284，今天 5 点 13 分发布。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：7 条，多模态前缀那条最值得看</strong></p>
+<p>先说 #46558，跟多模态前缀缓存有关。</p>
+<p>前缀缓存就是把算过的历史先存着。</p>
+<p>下次遇到相同的开头，直接复用。</p>
+<p>多模态的对话里，图片部分也有前缀。</p>
+<p>这次让 FlashInfer 原生接管这部分。</p>
+<p>FlashInfer 是英伟达系的推理内核库。</p>
+<p>好处是省显存，不用再拼大掩码。</p>
+<p>注意，省的是内存，不是算力。</p>
+<p>读题还是要把整张表走一遍。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/46558">https://github.com/vllm-project/vllm/pull/46558</a></p>
+<p>第二条 #64087，是个正确性修补。</p>
+<p>KV 缓存就是模型留的草稿纸。</p>
+<p>单个 token 的 KV 超过 512 个小块，旧内核会漏写几行。</p>
+<p>漏了就读到过期数据，结果悄悄变差。</p>
+<p>这次把漏写的循环补上了。</p>
+<p>报错的三个 case 现在都对得上。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64087">https://github.com/vllm-project/vllm/pull/64087</a></p>
+<p>第三条 #63724，是 AMD 卡的提速。</p>
+<p>给路由器的矩阵乘法开了加速。</p>
+<p>跑在 MI300 系列卡上。</p>
+<p>其余四条一句话带过。</p>
+<p>#49539，AutoGPTQ 下没量化的专家保持原样。</p>
+<p>#66624，SigLIP2 换回自己的聊天模板。</p>
+<p>#66986，修了一个 FlashInfer 的竞态。</p>
+<p>#55229，断点续跑时不再配错集合通信。</p>
+<p><strong>SGLang：2 条，扩散训练那条最值得看</strong></p>
+<p>先说 #49877，跟扩散模型训练有关。</p>
+<p>扩散模型就是画图和生成视频的模型。</p>
+<p>训练 rollout 时，生成的图和视频占了大头。</p>
+<p>SD3.5 占 79%，视频任务能占到 97%。</p>
+<p>以前这些都塞在返回里直接传回来。</p>
+<p>现在改走输出存储，响应里只留个标记。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49877">https://github.com/sgl-project/sglang/pull/49877</a></p>
+<p>第二条 #49825 一句话带过。</p>
+<p>HiCache 是分层 KV 缓存。</p>
+<p>模拟器里换掉的存储 worker 不再被误杀。</p>
+<p><strong>TRT-LLM：4 条，MoE 负载均衡博客最值得看</strong></p>
+<p>先说 #21492，是一篇新技术博客。</p>
+<p>名字叫 ISER-MoE，讲 MoE 读题的负载均衡。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>读题时，热门专家都挤在少数几张卡上。</p>
+<p>最忙的卡比平均忙 1.44 倍。</p>
+<p>整层都得等它，别的卡空转。</p>
+<p>这篇博客的办法是：把热门专家复制几份。</p>
+<p>分给空闲的卡，顺带用交换机组播发权重。</p>
+<p>一个字节只从源卡发一次。</p>
+<p>实测读题吞吐涨 6.9%，接近完美均衡的 99.2%。</p>
+<p>详细数据和做法见深读笔记。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog32_ISER-MoE_In-Switch_Expert_Replication_for_Load-Balanced_MoE_Prefill.md">https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog32_ISER-MoE_In-Switch_Expert_Replication_for_Load-Balanced_MoE_Prefill.md</a></p>
+<p>第二条 #20487，跟投机解码有关。</p>
+<p>投机解码就是先让小模型打草稿。</p>
+<p>n-gram 池子是草稿的备选库。</p>
+<p>修了两个逻辑毛病：剪枝漏删、单匹配被破坏。</p>
+<p>其余两条一句话带过。</p>
+<p>#21961，bench_moe 的钩子能接 input_ids 了。</p>
+<p>#22052，只是测试超时时间调大。</p>
+<p><strong>llama.cpp：1 条</strong></p>
+<p>#32053，聊天里的 TTS 模型能自定义文本归一化了。</p>
+<p>TTS 就是文字转语音。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32053">https://github.com/ggml-org/llama.cpp/pull/32053</a></p>
+<p><strong>Mooncake：1 条</strong></p>
+<p>#5411，只是构建目标和打包对齐。</p>
+<p>LMDeploy、TGI、Dynamo、FlashInfer：零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>上一批是 11 月 11 日 00:00 UTC 那批。</p>
+<p>01点版已经报过了。</p>
+<p>这轮查 arXiv 时接口返回 200。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>下一批约在今晚 16:00 PST 到。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4 预览：第三方按量计费通道开了</strong></p>
+<p>03点版报了发布，05点版报了进 Qwen Chat。</p>
+<p>这轮补个新进展：第三方也能按 token 卖了。</p>
+<p>AIHubMix 率先上线了这个通道。</p>
+<p>AIHubMix 是个第三方 API 聚合平台。</p>
+<p>输入每百万 token 0.353 美元。</p>
+<p>输出每百万 token 1.059 美元。</p>
+<p>官方自己还没公布按量价格。</p>
+<p>同一家还测出一个毛病：偶尔会返回空内容。</p>
+<p>300 个 token 全是空，什么都没写。</p>
+<p>来源：<a href="https://aihubmix.medium.com/qwen4-max-previews-first-surprise-a-300-token-reply-with-nothing-in-it-28bcb1dd3666">https://aihubmix.medium.com/qwen4-max-previews-first-surprise-a-300-token-reply-with-nothing-in-it-28bcb1dd3666</a></p>
+<p><strong>SGLang 峰会：明天开幕，主舞台日程出炉</strong></p>
+<p>11 月 12 到 13 号，旧金山 Fort Mason。</p>
+<p>明天上午 10 点开场，主角是 SGLang 和 Miles。</p>
+<p>Miles 是 SGLang 团队的强化学习框架。</p>
+<p>炉边谈排了一整天。</p>
+<p>AMD 的 Vamsi Boppana 打头阵。</p>
+<p>OpenAI 的 Lilian Weng，聊递归自我改进。</p>
+<p>下午还有 Soumith Chintala。</p>
+<p>英特尔 CEO 陈立武，四点压轴聊硬件。</p>
+<p>后天还有 Perplexity 的 Aravind Srinivas。</p>
+<p>Full Pass 已经卖完，Expo Pass 还能买。</p>
+<p>来源：<a href="https://www.sglang.io/summit">https://www.sglang.io/summit</a></p>
+<h2>访谈与深度</h2>
+<p>本轮没有新播客单集。</p>
+<p>Latent Space 最新一期还是 11 月 10 日那期。</p>
+<p>11 月 10 日 17 点版已经报过了。</p>
+<h2>值得深入学</h2>
+<p><strong>ISER-MoE：MoE 读题负载均衡，终于有每层都重算的办法</strong></p>
+<p>这篇能帮你解决一个具体问题。</p>
+<p>MoE 读题时，热门专家在哪层、哪个 batch 冒头，事先猜不准。</p>
+<p>静态均衡表只能去掉大头，剩下的漂移还在。</p>
+<p>这篇每层每轮都重排，实测把超额负载去掉了 98–99%。</p>
+<p>跟你的 P/D 解耦评估直接对口。</p>
+<p>读题池子本来就是解耦里最吃负载的环节。</p>
+<p>热专家复制、交换机组播、共享专家掩护复制这三招，都能进评估清单。</p>
+<p>全文精读见深读笔记。</p>
+<p>原文：<a href="https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog32_ISER-MoE_In-Switch_Expert_Replication_for_Load-Balanced_MoE_Prefill.md">https://github.com/NVIDIA/TensorRT-LLM/blob/main/docs/source/blogs/tech_blog/blog32_ISER-MoE_In-Switch_Expert_Replication_for_Load-Balanced_MoE_Prefill.md</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 07 点版去重。</p>
+<p>vLLM 7 条首次汇总。</p>
+<p>#46558、#49539、#55229、#63724、#64087、#66624、#66986。</p>
+<p>SGLang 2 条首次汇总。</p>
+<p>#49825、#49877。</p>
+<p>TRT-LLM 4 条首次汇总。</p>
+<p>#20487、#21492、#21961、#22052。</p>
+<p>llama.cpp 1 条首次汇总。</p>
+<p>#32053。</p>
+<p>Mooncake 1 条首次汇总。</p>
+<p>#5411。</p>
+<p>LMDeploy、TGI、Dynamo、FlashInfer 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回 200。</p>
+<p>Qwen4 第三方按量通道首次汇总。</p>
+<p>SGLang 峰会主舞台日程首次汇总。</p>
+<p>Latent Space 无新单集。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-11-0900/">09点版</a></p></body></html>
