@@ -1,0 +1,281 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月11日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-11T09:00:10"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-11（01点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-11（01点版）</h1>
+<p>01点版来了。</p>
+<p>两小时里，框架合入了三十六条。</p>
+<p>头条是投机解码的训练目标，终于对准了真指标。</p>
+<p>Qwen4 还是没来。</p>
+<p>SGLang 峰会明天开幕。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没有新发布</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>release 挂在 v0.33.0rc3 的 tag 上。</p>
+<p>新 tag 还是 v0.34.0rc0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照还是 b12283，昨晚 22 点 17 分发布。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：13 条，多模态修补那条最值得看</strong></p>
+<p>先说 #66833，跟多模态模型有关。</p>
+<p>M-RoPE 是一种多模态旋转位置编码。</p>
+<p>Qwen-VL 这类看图说话的模型就用它。</p>
+<p>CUDA graphs 下，这类模型以前会出问题。</p>
+<p>CUDA graphs 就是把一串核调用打包成一张图。</p>
+<p>打包了跑得快，但位置编码算不对。</p>
+<p>现在修好了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66833">https://github.com/vllm-project/vllm/pull/66833</a></p>
+<p>第二条 #66809，是个融合小优化。</p>
+<p>GLU 激活跟下投影的输入量化，现在融成一步。</p>
+<p>GLU 是一种门控激活函数。</p>
+<p>少跑一次核，省一次读写。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66809">https://github.com/vllm-project/vllm/pull/66809</a></p>
+<p>第三组是 Rust 前端，四条一起报。</p>
+<p>Rust 前端是 vLLM 新写的前端服务层。</p>
+<p>#66980，没有工具时也能直接定 tool_choice。</p>
+<p>#66979，定期统计行里开始记完结请求数。</p>
+<p>#66780，权重版本按每次输出单独记增量。</p>
+<p>#66539，支持 JSON 格式的日志。</p>
+<p>其余五条一句话带过。</p>
+<p>#66007，GraniteMoeHybrid 的流水线并行启动修补。</p>
+<p>#65976，Anthropic 的 max_tokens=0 预热现在会报清楚的错。</p>
+<p>#65936，Olmo3 的工具解析里，以小于号开头的纯文本能正常流出来了。</p>
+<p>#66853，批量聊天补全的输出现在会打日志。</p>
+<p>#65446，torch.compile 的缓存图检查里，只盯缓冲区更新那一项。</p>
+<p>#66568、#66952 是 XPU 的测试修补。</p>
+<p><strong>SGLang：15 条，路由器那条最值得看</strong></p>
+<p>先说 #49727，跟 sgl-router 有关。</p>
+<p>sgl-router 是 SGLang 的请求路由器。</p>
+<p>这次补上了生产级 API 兼容。</p>
+<p>路由就是请求来了，先分到哪台机器上。</p>
+<p>生产级的意思是能直接对接现有的网关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49727">https://github.com/sgl-project/sglang/pull/49727</a></p>
+<p>第二条 #49458，跟多模态有关。</p>
+<p>Kimi-K3 现在支持视频了。</p>
+<p>办法是按帧采样，视频先抽成几张图再喂模型。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49458">https://github.com/sgl-project/sglang/pull/49458</a></p>
+<p>第三组是 NPU 的两条，跟权重缓存有关。</p>
+<p>#41495，NPU 上支持权重缓存。</p>
+<p>#40141，NPU 启动时可以一边加载权重一边干活。</p>
+<p>第四组是扩散模型，六条一起报。</p>
+<p>扩散模型就是文生图那类模型。</p>
+<p>#49504，串行 CFG 的分支共用时间步调制。</p>
+<p>CFG 是分类器无关引导，控制生成往提示词上靠。</p>
+<p>#49570，亮色编辑图进 VAE 之前不再多归一化一次。</p>
+<p>VAE 是把图压成隐向量的编解码器。</p>
+<p>#49447，FLUX.2 的编辑输出按原图尺寸定。</p>
+<p>#49444，FLUX.2 的检查点按常驻自动分层定尺寸。</p>
+<p>#48200，文档里写了 MP4 编码更快的环境变量。</p>
+<p>#49718，5090 的扩散基线刷了两组新数据。</p>
+<p>其余四条一句话带过。</p>
+<p>#49534，AMD 夜间测试跑 AgentX 的 Qwen3.5 MXFP4 MTP 曲线。</p>
+<p>MTP 是多词并行预测，一次多吐几个词。</p>
+<p>#47911，AMD 的向量化 5D KV 布局跳过不用的解码工作区。</p>
+<p>#49758，logprob 起始位置小于负一，现在会返回 400。</p>
+<p>#49756，流水线并行时，调度器接收间隔大于一会被拒绝。</p>
+<p>#49755，sgl-router 文档里删了一条本地设计文档路径。</p>
+<p><strong>TRT-LLM：3 条，编解码交接那条最值得看</strong></p>
+<p>先说 #21768，跟多模态有关。</p>
+<p>编码器到解码器的交接，现在在 PyExecutor 里钉死了。</p>
+<p>编码器负责读图读题，解码器负责往外吐词。</p>
+<p>交接钉死的意思是两边的衔接点固定下来。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21768">https://github.com/NVIDIA/TensorRT-LLM/pull/21768</a></p>
+<p>第二条 #21047，是个新功能。</p>
+<p>Gumbel-max 文本水印，支持投机解码了。</p>
+<p>文本水印就是在生成的词里悄悄留记号。</p>
+<p>以后能查出一段文字是不是机器写的。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21047">https://github.com/NVIDIA/TensorRT-LLM/pull/21047</a></p>
+<p>第三条 #21406，trtllm-serve 加了一批路由和中间件的快照测试。</p>
+<p><strong>llama.cpp：4 条，全是 CUDA 提速</strong></p>
+<p>#31959，行数少、批量小时，BF16 矩阵走 MMVF。</p>
+<p>MMVF 是一种矩阵乘向量融合核。</p>
+<p>小批量时，矩阵乘退化成矩阵乘向量。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31959">https://github.com/ggml-org/llama.cpp/pull/31959</a></p>
+<p>#30285，FlashAttention 的 CUDA 核多了 40 和 72 两种头尺寸。</p>
+<p>#28413，CUDA 加了 OCP FP8 支持。</p>
+<p>OCP FP8 是一种 8 位浮点标准。</p>
+<p>#27997，老卡 sm70 的 FlashAttention 多了一组配置。</p>
+<p><strong>Dynamo：1 条</strong></p>
+<p>#18442，TRT-LLM 后端现在能接同时带图和视频的请求。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18442">https://github.com/ai-dynamo/dynamo/pull/18442</a></p>
+<p>LMDeploy、TGI、FlashInfer、Mooncake：零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新一批到了，五篇都沾边</strong></p>
+<p>先说最值得看的，见文末「值得深入学」。</p>
+<p><strong>DForkTree：草稿树分叉的地方，重新锚定一下</strong></p>
+<p>这篇是 arXiv:2611.12356，11 月 10 号提交。</p>
+<p>投机解码里，草稿模型先写几步。</p>
+<p>大模型再一起验证，写得越准越快。</p>
+<p>块扩散草稿器一次能写一整块。</p>
+<p>再从每步的分布里长出一棵草稿树。</p>
+<p>树比链子强的地方，只在分叉的枝上。</p>
+<p>但分叉之后，草稿器的头号答案准确率从 89% 跌到 18%。</p>
+<p>候选名单里经常没有正确的词。</p>
+<p>问题不在草稿器不知道答案。</p>
+<p>而在它一直按着主干的前缀在猜。</p>
+<p>同一棵草稿器，从分叉点重跑一次，往往就猜对了。</p>
+<p>DForkTree 不用重训，办法是重新锚定。</p>
+<p>每条分叉按自己的词重新定起点。</p>
+<p>再补一个 n-gram 记忆，帮着找回候选。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.12356">https://arxiv.org/abs/2611.12356</a></p>
+<p><strong>短语级投机解码：草稿的单位，从词改成短语</strong></p>
+<p>这篇是 arXiv:2611.12464，11 月 10 号提交。</p>
+<p>投机解码的草稿，一直按目标模型的词表来写。</p>
+<p>一个节点就是一个词。</p>
+<p>但分词器先按空格切，再学合并。</p>
+<p>所以多词短语永远成不了一个词。</p>
+<p>比如 Qwen3-4B 里，&quot;United States of America&quot; 是四个词。</p>
+<p>相邻两个词拼起来，词表里也没有。</p>
+<p>这篇换了个单位。</p>
+<p>一个小 MLP 头读目标模型的隐状态。</p>
+<p>直接预测一到三个词的短语。</p>
+<p>短语存在单独的草稿词表里。</p>
+<p>再按最长匹配展开回目标模型的词。</p>
+<p>目标模型本身冻住不动，不用重训。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.12464">https://arxiv.org/abs/2611.12464</a></p>
+<p><strong>MoE 专家分工：看神经元那层，比看路由更清楚</strong></p>
+<p>这篇是 arXiv:2611.13975，11 月 10 号提交。</p>
+<p>MoE 模型里，专家到底按什么分工，一直有争论。</p>
+<p>有的说是按领域，有的说是按词本身。</p>
+<p>这篇跳过路由，直接看神经元那层。</p>
+<p>办法叫 RAMP，按路由加权的幅度画像。</p>
+<p>同一领域里，不同数据挑出的专用神经元重合 58% 到 74%。</p>
+<p>跨领域只有 15% 到 24%。</p>
+<p>训练过程中，神经元的重要性还在不停重排。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.13975">https://arxiv.org/abs/2611.13975</a></p>
+<p><strong>一个字节一个词：27B 模型改成纯字节级</strong></p>
+<p>这篇是 arXiv:2611.13607，11 月 10 号提交。</p>
+<p>字节级 BPE 会把中文切得很碎。</p>
+<p>Qwen3.8 在中文维基上，平均一个词只有 3.84 个字节。</p>
+<p>64% 的词是单个汉字，拼写信息也被藏起来了。</p>
+<p>这篇问了一句：能不能直接把训好的模型改成纯字节级？</p>
+<p>起点是 Qwen3.8-27B，词表从 248320 砍到 384。</p>
+<p>只留 256 个字节符号加特殊符号。</p>
+<p>其他权重一动不动，再训两阶段课程。</p>
+<p>监督数据全是原模型自己生成的。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.13607">https://arxiv.org/abs/2611.13607</a></p>
+<p>还有一篇先不报。</p>
+<p>arXiv:2611.13578 的标题和摘要对不上号。</p>
+<p>标题写的是 POEM，长上下文读题的稀疏注意力。</p>
+<p>摘要却是另一篇越狱防御论文 TERM。</p>
+<p>等 arXiv 修好再说，不拿错的号报。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4：还是没发</strong></p>
+<p>HF 的 Qwen 组织里搜 qwen4，结果是空的。</p>
+<p>社区猜的 11 月 10 号已经过了。</p>
+<p>官方最后一句话还是 9 月 22 号那句&quot;正在训练&quot;。</p>
+<p>等官宣再说。</p>
+<p>来源：<a href="https://huggingface.co/Qwen">https://huggingface.co/Qwen</a></p>
+<p><strong>SGLang 峰会：明天开幕</strong></p>
+<p>11 月 12 到 13 号，旧金山 Fort Mason。</p>
+<p>100 多位演讲者，英特尔 CEO 陈立武在列。</p>
+<p>OpenAI 的 Lilian Weng、Perplexity 的 Aravind Srinivas 也来。</p>
+<p>Sponsor 展位和 Full Pass 已经卖完了。</p>
+<p>Expo Pass 还能买，主舞台有直播。</p>
+<p>来源：<a href="https://www.sglang.io/summit">https://www.sglang.io/summit</a></p>
+<p><strong>NEAR 漏洞跟进：另一处已公开的漏洞还没修</strong></p>
+<p>NEAR 那起是 11 月 8 号的事，之前报过了。</p>
+<p>新消息是另一处已经公开的漏洞。</p>
+<p>CVE-2026-111391，dumper 过滤器里的 eval() 远程执行。</p>
+<p>GitHub issue #44188 仍然开着。</p>
+<p>维护者到现在还没回。</p>
+<p>没有证据表明这就是 NEAR 用的那个漏洞。</p>
+<p>但自建 SGLang 服务的团队，最好先查一下暴露面。</p>
+<p>来源：<a href="https://aicyberbrief.com/article/near-ai-breached-through-an-sglang-code-execution-flaw-even-confidential-mode-requests-may-have-been-seen">https://aicyberbrief.com/article/near-ai-breached-through-an-sglang-code-execution-flaw-even-confidential-mode-requests-may-have-been-seen</a></p>
+<h2>值得深入学</h2>
+<p><strong>投机解码的训练目标，终于对准了真指标</strong></p>
+<p>这篇是 Yu Tian 一人写的。</p>
+<p>arXiv:2611.14399，11 月 10 号提交。</p>
+<p>投机解码快不快，看的是平均接受长度。</p>
+<p>接受长度就是大模型一轮验证，能收下几个草稿词。</p>
+<p>收得越多，验证轮数越少，速度越快。</p>
+<p>但以前训草稿模型，目标都不是这个数。</p>
+<p>交叉熵、KL 散度，都是在比分布像不像。</p>
+<p>新出的块级目标想直接优化接受长度。</p>
+<p>可它们算的还是近似值，不是真值。</p>
+<p>问题出在分叉上。</p>
+<p>一个词被收下，不光延长了前缀。</p>
+<p>还决定了后面验证走哪条分支。</p>
+<p>旧目标把后面几步的接受率平均了一下。</p>
+<p>分支依赖就被平均没了。</p>
+<p>协方差一变号，梯度方向都能反过来。</p>
+<p>这篇把真值算出来了。</p>
+<p>办法叫 REAL，路径加权加 Rao-Blackwellization。</p>
+<p>路径加权就是按真实走过的分支算期望。</p>
+<p>Rao-Blackwellization 是降方差的技巧。</p>
+<p>目标是 Qwen3.6-35B-A3B，草稿器是 Domino。</p>
+<p>9 个任务子集、5 个随机种子，REAL 平均接受长度 4.792。</p>
+<p>基线在 4.657 到 4.749 之间，全都输了。</p>
+<p>只改训练损失，不用动草稿器结构。</p>
+<p>推理流程也不用改，代码已经开源。</p>
+<p>跟你研究的投机解码直接对口。</p>
+<p>EAGLE、DFlash、DSpark 都是同一条线。</p>
+<p>训草稿模型的目标函数，值得按这篇重对一遍。</p>
+<p>精读笔记已生成，见深度阅读目录。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.14399">https://arxiv.org/abs/2611.14399</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 23 点版去重。</p>
+<p>vLLM 13 条首次汇总。</p>
+<p>#65446、#65936、#65976、#66007、#66539、#66568、#66780、#66809、#66833、#66853、#66952、#66979、#66980。</p>
+<p>SGLang 15 条首次汇总。</p>
+<p>#40141、#41495、#47911、#48200、#49444、#49447、#49458、#49504、#49534、#49570、#49718、#49727、#49755、#49756、#49758。</p>
+<p>TRT-LLM 3 条首次汇总。</p>
+<p>#21047、#21406、#21768。</p>
+<p>llama.cpp 4 条首次汇总。</p>
+<p>#27997、#28413、#30285、#31959。</p>
+<p>Dynamo 1 条首次汇总。</p>
+<p>#18442。</p>
+<p>LMDeploy、TGI、FlashInfer、Mooncake 零合入。</p>
+<p>arXiv 新论文 5 篇首次汇总。</p>
+<p>2611.14399、2611.12356、2611.12464、2611.13607、2611.13975。</p>
+<p>2611.14399 已做精读笔记。</p>
+<p>2611.13578 标题摘要对不上，暂不报。</p>
+<p>Qwen4 仍未发布。</p>
+<p>SGLang 峰会 11 月 12 日开幕。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-11-0100/">01点版</a></p></body></html>
