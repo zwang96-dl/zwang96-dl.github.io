@@ -1,0 +1,254 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月11日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-11T11:00:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-11（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-11（03点版）</h1>
+<p>03点版来了。</p>
+<p>两小时里，框架合入了二十六条。</p>
+<p>头条是 Qwen4 终于露面了，虽然只是预览版。</p>
+<p>还有一篇实测，正好撞上你的前缀缓存研究。</p>
+<p>SGLang 峰会明天开幕。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没有新发布</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>release 挂在 v0.33.0rc3 的 tag 上。</p>
+<p>新 tag 还是 v0.34.0rc0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照还是 b12283，昨晚 22 点 17 分发布。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：6 条，懒卸载那条最值得看</strong></p>
+<p>先说 #61797，跟前缀缓存有关。</p>
+<p>前缀缓存就是把算过的历史先存着。</p>
+<p>下次遇到相同的开头，直接复用，不用重算。</p>
+<p>这次加了懒卸载：GPU 空闲队列里的块。</p>
+<p>挑出能复用的，慢慢挪到别处存着。</p>
+<p>全注意力前缀链先合上，源块钉住不动。</p>
+<p>传完了才放行，每秒只扫一次队列。</p>
+<p>说白了，显存腾地方时，好草稿纸先搬走。</p>
+<p>不是等到被踢出去，才想起来抢救。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/61797">https://github.com/vllm-project/vllm/pull/61797</a></p>
+<p>第二条 #66994，跟批量不变性有关。</p>
+<p>批量不变性就是同一请求，不管怎么拼批。</p>
+<p>结果逐位都一样，这是确定性评估的底线。</p>
+<p>多模态 OCR 的抢占测试，以前跑不过。</p>
+<p>因为某一步输出随批量大小变了半个数。</p>
+<p>现在测试改成按批量不变的方式跑。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66994">https://github.com/vllm-project/vllm/pull/66994</a></p>
+<p>第三条 #66196，跟 P/D 解耦测试有关。</p>
+<p>P/D 解耦就是读题和生成分开跑。</p>
+<p>NIXL 是英伟达的卡间传输库。</p>
+<p>P/D 交接就靠它搬 KV 缓存。</p>
+<p>这次把 NIXL 的精度 sweep 改成 pytest。</p>
+<p>还能自动分片跑，原来是手写 bash 循环。</p>
+<p>其余三条一句话带过。</p>
+<p>#66489，空消息列表现在直接报 400。</p>
+<p>以前会跑完一轮生成，才报 500 错。</p>
+<p>#66781，Rust 前端多跑一批 Python 测试。</p>
+<p>#65541，Rust 的压测结果文件跟 Python 对齐。</p>
+<p><strong>SGLang：8 条，Kimi-K3 那条最值得看</strong></p>
+<p>先说 #41794，跟 Kimi-K3 有关。</p>
+<p>KDA 是一种新注意力，带状态递推。</p>
+<p>AMD 卡上有融合的 KDA 解码核。</p>
+<p>投影、卷积、状态更新、归一化一次跑完。</p>
+<p>但部署的 Quark 权重一直没触发这条快路。</p>
+<p>解码悄悄走没融合的老路，每步多几次启动。</p>
+<p>现在 BF16 状态加 Quark 权重，融合核终于生效。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/41794">https://github.com/sgl-project/sglang/pull/41794</a></p>
+<p>第二条 #49567，也是 AMD 的提速。</p>
+<p>注意力输出现在直接写进调用方给的 buffer。</p>
+<p>以前先写临时 buffer，再拷一次。</p>
+<p>拷贝省了，breakable 的读题图也少绕一圈。</p>
+<p>第三条 #46830，跟 DSA 有关。</p>
+<p>DSA 是 DeepSeek 的稀疏注意力。</p>
+<p>rank 走岔路的 eager 路径上，host 同步删了。</p>
+<p>host 同步就是 CPU 等 GPU 回话，越少越好。</p>
+<p>第四条 #46820，KV 指标背压不再堵调度器。</p>
+<p>指标就是监控用的数字，背压是下游顶住。</p>
+<p>以前指标顶住了，调度器跟着停摆。</p>
+<p>现在监控慢了，调度照常走。</p>
+<p>其余四条一句话带过。</p>
+<p>#49574，MiniMax-H3 扩散模型的加载修补。</p>
+<p>公开的 H3-Image 快照之前起不来。</p>
+<p>#47096，工具调用回放并进前一条评论消息。</p>
+<p>#49787，文档里 AgentX 改名 InferenceX。</p>
+<p>#49750，NPU 镜像 tag 升到 2026.11.0.post3。</p>
+<p><strong>TRT-LLM：5 条，DSA 索引器那条最值得看</strong></p>
+<p>先说 #21892，跟 DSA 读题有关。</p>
+<p>DSA 读题时要给每个查询行挑 top-k 的键。</p>
+<p>top-k 就是只留最相关的几个。</p>
+<p>以前要先把整个 logits 矩阵算出来。</p>
+<p>logits 就是每个词的打分。</p>
+<p>现在融合索引器直接挑，不物化大矩阵。</p>
+<p>还替换了 DeepGEMM 的那对核。</p>
+<p>只在 SM100 和 SM103 上，默认关闭。</p>
+<p>SM100 就是 Blackwell 架构的卡。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21892">https://github.com/NVIDIA/TensorRT-LLM/pull/21892</a></p>
+<p>第二条 #22050，是个修补。</p>
+<p>全上下文解码跟 PrimTS 的新接口对齐。</p>
+<p>PrimTS 是 TRT-LLM 里的一套运行时。</p>
+<p>其余三条都是基建。</p>
+<p>#22101，Slurm runner 固定在各自并行分支。</p>
+<p>#22094，pre-merge 豁免一个失败用例。</p>
+<p>#22081，删了 Nemotron V3 的几条并行配置。</p>
+<p><strong>llama.cpp：6 条，CPU 精度那条最值得看</strong></p>
+<p>先说 #29810，跟 CPU 推理有关。</p>
+<p>单块的 CPU 注意力核，V 的累加以前用 F16。</p>
+<p>F16 就是 16 位浮点，精度低。</p>
+<p>长上下文会丢精度，甚至溢出成无穷大。</p>
+<p>现在改成 F32 累加，跟分块核保持一致。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/29810">https://github.com/ggml-org/llama.cpp/pull/29810</a></p>
+<p>第二条 #31526，Vulkan 的 KV 反量化优化。</p>
+<p>反量化就是把压过的 KV 再展开算。</p>
+<p>现在能跟 CM2 配合开了。</p>
+<p>其余四条一句话带过。</p>
+<p>#32077，KV 缓存测试只用公开 API。</p>
+<p>#32060，安卓聊天编辑器打开虚拟键盘。</p>
+<p>#32008，Vulkan 的设备故障 buffer 分配。</p>
+<p>#31877，WebGPU 加了 PAD_REFLECT_1D 支持。</p>
+<p><strong>Dynamo：1 条</strong></p>
+<p>#18553，只是测试修补。</p>
+<p>工具分发的流式测试里补了 model_eos。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18553">https://github.com/ai-dynamo/dynamo/pull/18553</a></p>
+<p>LMDeploy、TGI、FlashInfer：零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>上一批是 11 月 11 日 00:00 UTC 那批。</p>
+<p>01点版已经报过了。</p>
+<p>下一批约在今晚 16:00 PST 到。</p>
+<p><strong>一篇实测：agent 跑起来，vLLM 和 SGLang 一半的活都在白干</strong></p>
+<p>这是昨晚的一篇实测，之前几期漏报了。</p>
+<p>作者 Nahuel Nucera，自己写了个 Rust 引擎。</p>
+<p>约 1700 行，专为 agent 会话设计。</p>
+<p>思路很简单：会话的 KV 缓存留在显存里。</p>
+<p>KV 缓存就是算过的历史草稿纸。</p>
+<p>agent 每轮都把整段历史重发一遍。</p>
+<p>中位数 60 轮，历史能长到几万个词。</p>
+<p>工具一跑，历史就被 LRU 踢出显存。</p>
+<p>LRU 就是最久没用的先踢掉。</p>
+<p>回来又得全重算，等于白干一半活。</p>
+<p>实测 24 个真实 coding agent 会话。</p>
+<p>791 轮，Qwen3-8B，一张 L40S。</p>
+<p>工具等 0.5 秒时，Rust 引擎比 SGLang 快 1.31 倍。</p>
+<p>比 vLLM 快 1.45 倍，首字快约 5 倍。</p>
+<p>vLLM 和 SGLang 有 51% 到 55% 的词是重算。</p>
+<p>Rust 引擎只有 8% 到 16%。</p>
+<p>工具等 5 秒时，优势缩到 1.13 倍。</p>
+<p>等 60 秒时，基本打平，首字反而更慢。</p>
+<p>说白了，agent 回来得快，留着草稿纸就赚。</p>
+<p>回来得慢，留着也是占地方。</p>
+<p>这篇跟你的前缀缓存研究直接撞上。</p>
+<p>精读笔记已生成，见文末「值得深入学」。</p>
+<p>来源：<a href="https://dev.to/nahuel990/why-vllm-and-sglang-might-not-be-the-best-option-to-run-ai-agents-5ehb">https://dev.to/nahuel990/why-vllm-and-sglang-might-not-be-the-best-option-to-run-ai-agents-5ehb</a></p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4：来了，是预览版</strong></p>
+<p>Qwen 官方账号今天凌晨 02:01 UTC 发了。</p>
+<p>也就是昨天 18:01 PST。</p>
+<p>Qwen4-Max 先上预览，不是正式发版。</p>
+<p>上下文 100 万词，输出最多 393216 词。</p>
+<p>能读文字、图片和视频，主打写代码和 agent。</p>
+<p>入口有五个：Token Plan、QwenWork、Qoder。</p>
+<p>还有 Qwen App 和 QwenStudio。</p>
+<p>模型 ID 是 qwen4-max-preview。</p>
+<p>预览 11 月 25 日截止，到期就下线。</p>
+<p>没有权重，没有跑分，没有参数量。</p>
+<p>连按量价格都没给，27B、Flash 和 Plus 还没来。</p>
+<p>说白了，先让你试手感，正式版还得等。</p>
+<p>来源：<a href="https://xenospectrum.com/en/qwen4-max-preview-specs-limitations/">https://xenospectrum.com/en/qwen4-max-preview-specs-limitations/</a></p>
+<p>来源：<a href="https://cellcog.ai/blog/qwen-4-release-date/">https://cellcog.ai/blog/qwen-4-release-date/</a></p>
+<p><strong>NEAR 漏洞跟进：没收到通知就不用动</strong></p>
+<p>NEAR 11 月 10 日更新了事件报告。</p>
+<p>没收到公司通知的用户，什么都不用做。</p>
+<p>NEAR Cloud 的访问已经恢复。</p>
+<p>漏洞本身还是没公开到底是哪个。</p>
+<p>自建 SGLang 服务的团队，暴露面还是先查一下。</p>
+<p>来源：<a href="https://neuralcoretech.com/near-ai-breach-sglang-rce-vulnerability/">https://neuralcoretech.com/near-ai-breach-sglang-rce-vulnerability/</a></p>
+<p><strong>SGLang 峰会：明天开幕</strong></p>
+<p>11 月 12 到 13 号，旧金山 Fort Mason。</p>
+<p>100 多位演讲者，英特尔 CEO 陈立武在列。</p>
+<p>OpenAI 的 Lilian Weng、Perplexity 的 Aravind Srinivas 也来。</p>
+<p>Sponsor 展位和 Full Pass 已经卖完了。</p>
+<p>Expo Pass 还能买，主舞台有直播。</p>
+<p>来源：<a href="https://www.sglang.io/summit">https://www.sglang.io/summit</a></p>
+<h2>值得深入学</h2>
+<p><strong>Agent 会话的草稿纸，留在显存里才划算</strong></p>
+<p>作者 Nahuel Nucera，dev.to 文章加同名论文。</p>
+<p>2026-11-11 发布，代码和论文都开源了。</p>
+<p>24 个真实 agent 会话、791 轮，同卡同模型同显存。</p>
+<p>工具等 0.5 秒时，全程快 1.31 倍、首字快约 5 倍。</p>
+<p>重算的历史从一半多，压到 8% 到 16%。</p>
+<p>工具等 60 秒时，优势全没了。</p>
+<p>三条固定策略全败，跨会话共享前缀才扳回平手。</p>
+<p>这篇能帮你回答一个实际问题。</p>
+<p>agent 场景下，前缀缓存到底该留多久。</p>
+<p>留的判断标准、三个失败策略、复用率的算法。</p>
+<p>都能直接进你的 PD 解耦评估清单。</p>
+<p>但只测了一个模型、一张卡、一种负载。</p>
+<p>CPU 卸载和 SGLang 流式会话都没测。</p>
+<p>精读笔记已生成，见深度阅读目录。</p>
+<p>来源：<a href="https://dev.to/nahuel990/why-vllm-and-sglang-might-not-be-the-best-option-to-run-ai-agents-5ehb">https://dev.to/nahuel990/why-vllm-and-sglang-might-not-be-the-best-option-to-run-ai-agents-5ehb</a></p>
+<p>论文：<a href="https://github.com/Nahuel990/agent-session-engine">https://github.com/Nahuel990/agent-session-engine</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 01 点版去重。</p>
+<p>vLLM 6 条首次汇总。</p>
+<p>#61797、#65541、#66196、#66489、#66781、#66994。</p>
+<p>SGLang 8 条首次汇总。</p>
+<p>#41794、#46820、#46830、#47096、#49567、#49574、#49750、#49787。</p>
+<p>TRT-LLM 5 条首次汇总。</p>
+<p>#21892、#22050、#22081、#22094、#22101。</p>
+<p>llama.cpp 6 条首次汇总。</p>
+<p>#29810、#31526、#31877、#32008、#32060、#32077。</p>
+<p>Dynamo 1 条首次汇总。</p>
+<p>#18553。</p>
+<p>LMDeploy、TGI、FlashInfer 零合入。</p>
+<p>arXiv 本轮无新批次。</p>
+<p>dev.to agent 会话实测首次汇总，已做精读笔记。</p>
+<p>Qwen4-Max 预览版首次汇总。</p>
+<p>NEAR 事件 11 月 10 日更新首次汇总。</p>
+<p>SGLang 峰会 11 月 12 日开幕。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-11-0300/">03点版</a></p></body></html>

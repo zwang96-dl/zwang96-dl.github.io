@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · Agent 会话的草稿纸，留在显存里才划算"/>
+<meta name="doc-description" content="- 作者：Nahuel Nucera，dev.to 文章 + 同名论文"/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-11T11:01:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Agent 会话的草稿纸，留在显存里才划算</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>Agent 会话的草稿纸，留在显存里才划算</h1>
+<ul><li>作者：Nahuel Nucera，dev.to 文章 + 同名论文</li><li>原文链接：<a href="https://dev.to/nahuel990/why-vllm-and-sglang-might-not-be-the-best-option-to-run-ai-agents-5ehb">https://dev.to/nahuel990/why-vllm-and-sglang-might-not-be-the-best-option-to-run-ai-agents-5ehb</a></li><li>论文：<a href="https://github.com/Nahuel990/agent-session-engine（paper/main.pdf，共">https://github.com/Nahuel990/agent-session-engine（paper/main.pdf，共</a> 10 页）</li><li>代码：<a href="https://github.com/Nahuel990/agent-session-engine">https://github.com/Nahuel990/agent-session-engine</a></li><li>深读来源：03点版简报，11 月 11 日那批新内容</li></ul>
+<blockquote><p>原文无配图，只有三张表。</p></blockquote>
+<p>&gt;</p>
+<blockquote><p>关键两张已抄录在下面，本笔记不含图。</p></blockquote>
+<h2>一句话</h2>
+<p>Agent 每轮都把整段历史重发一遍。</p>
+<p>工具一跑，历史就被缓存踢出显存。</p>
+<p>回来又得全重算，一半的活都在白干。</p>
+<p>留着会话的草稿纸，回来得快就赚大了。</p>
+<h2>人话解读</h2>
+<p>Coding agent 的工作方式很固定。</p>
+<p>先把整段对话发给模型。</p>
+<p>模型回一个工具调用，比如跑命令、改文件。</p>
+<p>Agent 跑完工具，把结果贴回对话。</p>
+<p>再把整段对话重新发一遍。</p>
+<p>中位数 60 轮，历史能长到几万个词。</p>
+<p>每一轮，引擎都要拿到整段历史的 KV 缓存。</p>
+<p>KV 缓存就是算过的历史草稿纸。</p>
+<p>如果上轮的缓存还在显存里。</p>
+<p>这一轮只算新增的几个词就行。</p>
+<p>如果缓存被踢出去了。</p>
+<p>整段历史得从头再算一遍。</p>
+<p>vLLM 和 SGLang 都有前缀缓存。</p>
+<p>前缀缓存就是把算过的开头先存着。</p>
+<p>但它们不知道这个请求还会回来。</p>
+<p>Agent 等工具的那半秒，在缓存眼里就是闲置。</p>
+<p>内存一紧，历史就是最先被踢的那个。</p>
+<p>踢掉容易，回来重算的代价却很大。</p>
+<p>作者自己写了个 Rust 引擎，约 1700 行。</p>
+<p>会话是一等公民，KV 缓存按会话留着。</p>
+<p>跨会话还能共享公共前缀。</p>
+<p>新会话进来之前，先看显存还装不装得下。</p>
+<p>装不下就先不接，这叫会话级准入。</p>
+<h2>核心方法</h2>
+<ul><li>工作负载是真实轨迹，不是合成数据。</li><li>24 个 coding agent 会话，共 791 轮。</li><li>来源是 SWE-rebench-OpenHands 数据集。</li><li>每轮生成 256 个词，忽略结束符。</li><li>三个引擎做同样的活，方便横向比。</li><li>模型是 Qwen3-8B，BF16 精度。</li><li>一张英伟达 L40S，KV 缓存统一 173200 个词。</li><li>vLLM 是 0.33.0，SGLang 是 0.5.23。</li><li>工具等待固定三档：0.5 秒、5 秒、60 秒。</li><li>0.5 秒接近实测的工具调用中位数。</li><li>每种配置跑两遍，波动看得见。</li><li>每个策略改动前，先写下通过标准。</li><li>看到结果再改标准，这事作者明令禁止。</li></ul>
+<h2>关键数据</h2>
+<p>表 1：24 个会话全跑完的总时间，单位秒，越小越好。</p>
+<table><thead><tr><th>引擎</th><th>工具等 0.5 秒</th><th>工具等 5 秒</th><th>工具等 60 秒</th></tr></thead><tbody><tr><td>vLLM 0.33.0</td><td>2264 / 2222</td><td>2342 / 2333</td><td>4106 / 4128</td></tr><tr><td>SGLang 0.5.23 LRU</td><td>2013 / 2048</td><td>2179 / 2154</td><td>4069 / 4154</td></tr><tr><td>SGLang 0.5.23 TLRU</td><td>2067 / 2024</td><td>2121 / 2152</td><td>4078 / 4093</td></tr><tr><td>Rust 会话引擎</td><td>1506 / 1586</td><td>1868 / 1908</td><td>4083 / 4011</td></tr></tbody></table>
+<p>0.5 秒档，Rust 引擎比最强基线快 1.31 倍。</p>
+<p>比 vLLM 快 1.45 倍，两次运行都赢了全部基线。</p>
+<p>5 秒档，优势缩到 1.13 倍，比 vLLM 快 1.24 倍。</p>
+<p>60 秒档，全部引擎差距在 2% 以内，基本打平。</p>
+<p>表 2：首字延迟中位数，和重算历史的占比。</p>
+<p>0.5 秒档，vLLM 首字中位数 28.6 秒。</p>
+<p>SGLang LRU 是 35.0 秒，TLRU 是 36.3 秒。</p>
+<p>Rust 引擎只有 4.5 秒，快约 5 倍。</p>
+<p>重算历史占比上，vLLM 是 55%，SGLang 约 51%。</p>
+<p>Rust 引擎只有 7.5% 到 15.6%。</p>
+<p>5 秒档，Rust 引擎首字 5.1 秒，重算 19% 到 23%。</p>
+<p>基线首字 25 到 29 秒，重算还是过半。</p>
+<p>60 秒档，Rust 引擎首字 11.5 到 13.8 秒。</p>
+<p>反而比 vLLM 的 3.5 秒慢，重算占比也回到 55%。</p>
+<p>作者的解释是准入规则在排队。</p>
+<p>基线先到先得，Rust 引擎让新会话等。</p>
+<p>等工具的会话少了，队列本来就短。</p>
+<p>留缓存的收益没了，排队的代价还在。</p>
+<p>三条固定策略，全都没跑赢基线。</p>
+<p>固定钉 30 秒：60 秒档重算 85%，比 vLLM 慢 1.3 倍。</p>
+<p>按工具自适应钉：60 秒档比 vLLM 慢 1.6 倍。</p>
+<p>首字 P90 超过 4 分钟，闲置会话堵住了新请求。</p>
+<p>加了上限的钉：60 秒档只比 vLLM 慢 3% 到 4%。</p>
+<p>还是没过作者自己定的通过线。</p>
+<p>最后是跨会话共享前缀，起了关键作用。</p>
+<p>60 秒档从慢 3% 到 4%，扳回平手。</p>
+<p>5 秒档从 2097 秒降到 1888 秒。</p>
+<p>还有一个诚实数字：Rust 引擎本身并不快。</p>
+<p>纯解码比 vLLM 慢 15% 到 21%。</p>
+<p>赢全靠少干活，不是核跑得快。</p>
+<h2>跟研究方向的关联</h2>
+<p>这篇跟前缀缓存评估直接对口。</p>
+<p>Agent 场景下，缓存的命题变了。</p>
+<p>不再是命中率越高越好。</p>
+<p>而是会话回来之前，缓存能不能活着。</p>
+<p>三个数字可以直接进评估清单。</p>
+<p>第一是重算历史占比，超过一半就是报警线。</p>
+<p>第二是工具等待时间，0.5 秒和 60 秒是两个世界。</p>
+<p>第三是首字延迟中位数，agent 场景下它比总时间更敏感。</p>
+<p>两个检查手段也可以直接抄。</p>
+<p>vLLM 开 --enable-prompt-tokens-details。</p>
+<p>SGLang 开 --enable-cache-report。</p>
+<p>都能看到每个请求复用了多少词。</p>
+<p>复用率过半，说明一半的钱花在重算上。</p>
+<p>PD 解耦评估也能借这篇的思路。</p>
+<p>读题卡和解码卡分开之后。</p>
+<p>会话的草稿纸该放哪边，值得单列一项。</p>
+<p>解码卡上留着会话，读题卡只算增量。</p>
+<p>这正是 P/D 解耦想省的那部分。</p>
+<p>还有一个提醒：TLRU 只比 LRU 好约 1%。</p>
+<p>TLRU 是一种优化的淘汰策略。</p>
+<p>在真实 agent 轨迹上，它几乎没拉开差距。</p>
+<p>换淘汰策略之前，先看重算占比。</p>
+<p>占比没下来，换策略也是白换。</p>
+<h2>局限与提醒</h2>
+<ul><li>只测了一个模型：Qwen3-8B。</li><li>只测了一张卡：英伟达 L40S。</li><li>只测了一种负载：24 个会话同时跑。</li><li>工具等待是固定的三档，没测混合分布。</li><li>真实工具调用有长尾，短和长的一起来。</li><li>没测 CPU 卸载：LMCache 和 HiCache 都没上。</li><li>没测 SGLang 的流式会话，可能缩小差距。</li><li>TLRU 的配置没按作者推荐的方法调。</li><li>vLLM 和 SGLang 拒绝超过 32768 词的提示词。</li><li>Rust 引擎不拒绝，多跑了两三轮。</li><li>两次运行的波动最高 7.7%，方差没刻画全。</li><li>数字全是作者自报，单机实测非线上服务。</li></ul>
+<h2>术语表</h2>
+<ul><li>KV 缓存：算过的历史草稿纸，存着下轮复用。</li><li>前缀缓存：把算过的开头存着，相同开头直接复用。</li><li>LRU：最久没用的先踢掉，一种淘汰策略。</li><li>TLRU：按尾巴优化的淘汰策略，先踢会话尾部。</li><li>首字延迟：从发请求到收到第一个词的时间。</li><li>P90：90% 的请求都比这个数快。</li><li>会话级准入：新会话进来前，先看显存装不装得下。</li><li>固定钉：会话缓存强制留在显存一段固定时间。</li><li>跨会话共享：不同会话共用相同的公共前缀。</li><li>BF16：16 位浮点格式，省显存、精度略低。</li><li>L40S：英伟达一张数据中心显卡。</li></ul></body></html>
