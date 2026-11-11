@@ -1,0 +1,197 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月10日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-10"/>
+<meta name="doc-ts" content="2026-11-11T01:04:23"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-10（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-10（17点版）</h1>
+<p>17点版来了。</p>
+<p>两小时里，框架合入了二十一条。</p>
+<p>头条是马斯克又补了一句：Grok 4.8 拼不过 Opus 5.5。</p>
+<p>Qwen4 还是没来。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没有新发布</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>新 tag 还是 v0.34.0rc0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.3。</p>
+<p>rc 版还是 v0.7.4rc2。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12262，15 点 04 分发布。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：11 条，跨节点那条最值得看</strong></p>
+<p>先说 #49524，跟多卡解码有关。</p>
+<p>TP 组跨了两个节点时，logits 聚合会退回慢路。</p>
+<p>logits 就是每个词的打分。</p>
+<p>以前走 NCCL 环，每步验证要花约 20 微秒。</p>
+<p>现在认出同一 NVLink 圈子，直接走共享内存。</p>
+<p>只要约 8 微秒，快了一倍多。</p>
+<p>NVLink 是英伟达卡之间的高速直连。</p>
+<p>拿 DeepSeek-V4.1-Flash 举例。</p>
+<p>TP8 解码时，每步验证省约 12 微秒。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49524">https://github.com/sgl-project/sglang/pull/49524</a></p>
+<p>第二条 #49659，跟 MXFP8 量化有关。</p>
+<p>MXFP8 是 8 位浮点量化，省显存。</p>
+<p>在线量化权重以前依赖 triton_kernels 这个包。</p>
+<p>现在改成自研的即时编译核。</p>
+<p>即时编译就是用时现编，不用提前备好。</p>
+<p>改完能少带一个外部依赖。</p>
+<p>这是四步清理的第一步。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49659">https://github.com/sgl-project/sglang/pull/49659</a></p>
+<p>其余九条一句话带过。</p>
+<p>#49670，给 Kimi K3.1 加了 B300 的测试。</p>
+<p>#49642，大核测试改到 GB300 机器上跑。</p>
+<p>#49623，调度器里每个请求记下自己属于哪个队列。</p>
+<p>#49622，流式读题的 4xx 报错现在能原样传给客户端。</p>
+<p>#49568，文档：一个核只实现一份契约。</p>
+<p>#49538，删了 SM120 的一条 MoE 小矩阵路由。</p>
+<p>#49442，文生图编辑多出几张图时一张一张出。</p>
+<p>#49397，调度器挂了，服务现在会直接退出。</p>
+<p>#49647，测试里钉住一个草稿头的数据类型。</p>
+<p><strong>TRT-LLM：3 条，草稿模型那条值得看</strong></p>
+<p>先说 #22051，跟投机解码有关。</p>
+<p>投机解码就是先让小模型打草稿。</p>
+<p>再让大模型改，改得越少越快。</p>
+<p>DSpark 是这里的草稿模型。</p>
+<p>聚合模式下，草稿模型的缓存复用会掉链子。</p>
+<p>它读不到复用的前缀，只能从头猜。</p>
+<p>接受长度悄悄变短，速度白白损失。</p>
+<p>现在加了检查，配不上就直接报错。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22051">https://github.com/NVIDIA/TensorRT-LLM/pull/22051</a></p>
+<p>其余两条一句话带过。</p>
+<p>#22002，12 个失败的 CPU 测试用例先挂起。</p>
+<p>#21994，解耦取消的测试夹具对齐了批量状态。</p>
+<p><strong>Dynamo：5 条，取消那条最值得看</strong></p>
+<p>先说 #18475，跟 P/D 解耦有关。</p>
+<p>P/D 解耦就是读题和生成分开跑。</p>
+<p>客户端在第一个词出来前断开。</p>
+<p>解码端以前不知道，还在继续算。</p>
+<p>现在取消信号能传到远程读题端。</p>
+<p>白算的活省下来了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18475">https://github.com/ai-dynamo/dynamo/pull/18475</a></p>
+<p>第二条 #18426，跟多模态有关。</p>
+<p>带图的请求里，logit_bias 以前传丢了。</p>
+<p>logit_bias 是人为抬高或压低某些词的开关。</p>
+<p>开关卡在编码端，到不了解码端。</p>
+<p>输出结果就没按你的偏好走。</p>
+<p>现在在两种拆分拓扑下都传过去了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18426">https://github.com/ai-dynamo/dynamo/pull/18426</a></p>
+<p>其余三条一句话带过。</p>
+<p>#18526，1.7.0 分支上省内存请求现在会被尊重。</p>
+<p>#18508，性能分析器按 Hub 的文件选择算检查点大小。</p>
+<p>#18493，Anthropic 的拒答文本现在会保留在回复里。</p>
+<p><strong>FlashInfer：2 条，自动调优那条值得看</strong></p>
+<p>先说 #9331，是个回滚修补。</p>
+<p>自动调优只在小 token 数上调过。</p>
+<p>比如只调到 256 个词。</p>
+<p>大到 8 千到 1 万 6 的读题调用。</p>
+<p>以前会错用小尺寸调好的策略。</p>
+<p>现在在 0.7.4 分支上撤回了这个改动。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9331">https://github.com/flashinfer-ai/flashinfer/pull/9331</a></p>
+<p>另一条 #9288，测试杂活。</p>
+<p>Windows 上跳过 Linux 的测试用例。</p>
+<p><strong>vLLM、llama.cpp、LMDeploy、TGI：零合入</strong></p>
+<p>窗口内没有新 PR。</p>
+<p>llama.cpp 的快照滚到了 b12262。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：本轮没有新论文</strong></p>
+<p>API 里最新还是 11 月 9 号的稿子。</p>
+<p>新一批还没入库，明早再看。</p>
+<h2>业内新闻</h2>
+<p><strong>马斯克补刀：Grok 4.8 拼不过 Opus 5.5</strong></p>
+<p>周二他在 X 上回网友提问。</p>
+<p>原话是 Grok 4.8 比不上 Opus 5.5。</p>
+<p>Opus 5.5 是 Anthropic 的模型。</p>
+<p>他管它叫杰作。</p>
+<p>他还说 Grok 5 两三个月后能超过它。</p>
+<p>还是没给分数，也没给日期。</p>
+<p>来源：<a href="https://decrypt.co/382956/elon-musk-calls-claude-opus-5-5-masterpiece-grok-wont-match">https://decrypt.co/382956/elon-musk-calls-claude-opus-5-5-masterpiece-grok-wont-match</a></p>
+<p><strong>Qwen4：还是没发</strong></p>
+<p>HF 官方组织最新上传还是 11 月 7 号的 Qwen3.8。</p>
+<p>社区之前猜今天 11 月 10 号发。</p>
+<p>截至发稿，HF 上没有 Qwen4 的仓库。</p>
+<p>等官宣再说。</p>
+<p>来源：<a href="https://huggingface.co/Qwen">https://huggingface.co/Qwen</a></p>
+<p><strong>NEAR 事件补个数字：约 100 名用户受影响</strong></p>
+<p>11 月 9 号的安全报告里写了细节。</p>
+<p>攻击者 11 月 8 号利用 SGLang 的漏洞进了服务器。</p>
+<p>约 100 名用户的账号信息被下载。</p>
+<p>里面有邮箱、名字，有的还有套餐和余额。</p>
+<p>另外 18 个旧版 agent 也被未授权访问。</p>
+<p>云服务已经恢复，密钥都已吊销。</p>
+<p>漏洞的 CVE 编号还是没公开。</p>
+<p>来源：<a href="https://cryptonews.net/news/security/33728684/">https://cryptonews.net/news/security/33728684/</a></p>
+<p><strong>Anthropic 每个月给 SpaceX 交 12.5 亿美元</strong></p>
+<p>SpaceX 的招股书里写了这笔账。</p>
+<p>Anthropic 每个月付 12.5 亿美元买算力。</p>
+<p>算力就是跑模型要用的 GPU 时间。</p>
+<p>这笔钱是目前公开的最大一笔算力单。</p>
+<p>来源：<a href="https://theinference.org/article/xai-s-grok-4-8-entered-training-57-days-late-with-no-price-card-anthropic-pays-spacex-1-25-billion-a-month">https://theinference.org/article/xai-s-grok-4-8-entered-training-57-days-late-with-no-price-card-anthropic-pays-spacex-1-25-billion-a-month</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 出了新一期</strong></p>
+<p>11 月 10 号上线，聊的是给 agent 做设计。</p>
+<p>嘉宾是 Resend 的创始人 Zeno Rocha。</p>
+<p>主题是 agent 时代的产品设计。</p>
+<p>跟推理 serving 关系不大，顺手提一句。</p>
+<p>来源：<a href="https://podfriend.com/podcast/latent-space-the-ai-engineer-podcast">https://podfriend.com/podcast/latent-space-the-ai-engineer-podcast</a></p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的。</p>
+<p>合入多是性能和修补，没有新论文。</p>
+<p>RTX 3050 那篇横评，11 月 8 日 19 点版已报过。不再重复。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 15 点版去重。</p>
+<p>SGLang 11 条首次汇总。</p>
+<p>#49397、#49442、#49524、#49538、#49568、#49622、#49623、#49642、#49647、#49659、#49670。</p>
+<p>TRT-LLM 3 条首次汇总。</p>
+<p>#21994、#22002、#22051。</p>
+<p>Dynamo 5 条首次汇总。</p>
+<p>#18426、#18475、#18493、#18508、#18526。</p>
+<p>FlashInfer 2 条首次汇总。</p>
+<p>#9288、#9331。</p>
+<p>vLLM、llama.cpp、LMDeploy、TGI 零合入。</p>
+<p>马斯克 Grok 4.8 补刀、Qwen4 仍未发布，首次汇总。</p>
+<p>NEAR 事件细节、Anthropic 算力账单，首次汇总。</p>
+<p>arXiv 本轮没有新批次。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-10-1700/">17点版</a></p></body></html>
