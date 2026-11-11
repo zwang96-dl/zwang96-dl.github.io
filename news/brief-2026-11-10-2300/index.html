@@ -1,0 +1,236 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月10日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-10"/>
+<meta name="doc-ts" content="2026-11-11T07:05:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-10（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-10（23点版）</h1>
+<p>23点版来了。</p>
+<p>两小时里，框架合入了二十七条。</p>
+<p>头条是模型升级后，旧草稿纸还能不能用。</p>
+<p>arXiv 新一批到了，两篇都跟 KV 缓存沾边。</p>
+<p>Qwen4 还是没来。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没有新发布</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>release 挂在 v0.33.0rc3 的 tag 上。</p>
+<p>新 tag 还是 v0.34.0rc0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12283，22 点 17 分发布。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：7 条，MXFP4 那条最值得看</strong></p>
+<p>先说 #61530，跟 DeepSeek-V4.1 有关。</p>
+<p>MXFP4 是一种 4 位浮点量化，省显存。</p>
+<p>Engram 是 V4.1 里查表用的嵌入表。</p>
+<p>这次支持把 MXFP4 打包的 Engram 表读进来。</p>
+<p>一张 256 个数的行，存 264 字节压到 136 字节。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/61530">https://github.com/vllm-project/vllm/pull/61530</a></p>
+<p>第二条 #65755，是个修补。</p>
+<p>Step5 的流水线边界上，FP32 残差会被截断。</p>
+<p>残差就是每层留下的余数，截了就丢精度。</p>
+<p>现在修好了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65755">https://github.com/vllm-project/vllm/pull/65755</a></p>
+<p>其余五条一句话带过。</p>
+<p>#66848，DeepSeek-V4.1 的分词器遇到未知角色会报错。</p>
+<p>#65029，请求被校验器拒了，现在会报第几行。</p>
+<p>#63357，聊天去渲染会按要求回显角色。</p>
+<p>#66758，XPU 的 Dots OCR 测试修补。</p>
+<p>#66924，XPU 的 CI 跳过没装 lmcache 的测试。</p>
+<p><strong>SGLang：12 条，投机解码那条最值得看</strong></p>
+<p>先说 #44115，跟 EAGLE 投机解码有关。</p>
+<p>EAGLE 是投机解码的一种，草稿模型先写几步。</p>
+<p>验证那步以前按最坏情况排核，浪费算力。</p>
+<p>现在把每请求固定行数告诉规划器。</p>
+<p>验证核按实际行数排，快了不少。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/44115">https://github.com/sgl-project/sglang/pull/44115</a></p>
+<p>第二条 #49722，跟 P/D 解耦有关。</p>
+<p>P/D 解耦就是读题和生成分开跑。</p>
+<p>流水线并行的读题循环里，中途取消的分块读题现在会处理。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49722">https://github.com/sgl-project/sglang/pull/49722</a></p>
+<p>第三条 #48959，跟扩散 RL 有关。</p>
+<p>扩散 RL 就是用强化学习训文生图这类模型。</p>
+<p>训练 rollout 的大张量现在进统一输出仓。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48959">https://github.com/sgl-project/sglang/pull/48959</a></p>
+<p>第四条 #48385，跟多模态有关。</p>
+<p>多模态位置上的占位 token，现在不会被别的 token 顶掉。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48385">https://github.com/sgl-project/sglang/pull/48385</a></p>
+<p>其余八条一句话带过。</p>
+<p>#49428，AMD 上 DSpark 的单核版本钉住了。</p>
+<p>#49414，top_logprobs 的上限锁在词表大小内。</p>
+<p>#49677，调度器改请求列表只走统一入口。</p>
+<p>#49693，扩散 RL 的中间张量也进输出仓。</p>
+<p>#49620，AMD 夜间测试砍掉老模型。</p>
+<p>#49716，Kimi-K3.1-Pro 的菜谱文档删了过期参数。</p>
+<p>#48316，CPU 卸载时 DSA 索引参数留在卡上。</p>
+<p>#47923，ROCm 镜像里装了 fastokens。</p>
+<p><strong>TRT-LLM：4 条，稀疏 KV 卸载那条最值得看</strong></p>
+<p>先说 #21350，跟 KV 缓存卸载有关。</p>
+<p>KV 缓存就是模型读题后留下的草稿纸。</p>
+<p>DeepSeek-V4 Flash 的稀疏 KV，现在能卸到主机内存。</p>
+<p>GLM-5.2 也一样。</p>
+<p>解码时只把索引器选中的单元取回卡上。</p>
+<p>卡上只留每请求的工作集，显存省下来了。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21350">https://github.com/NVIDIA/TensorRT-LLM/pull/21350</a></p>
+<p>第二条 #21807，是篇技术博客。</p>
+<p>Dense DWDP：把分布式权重数据并行扩到稠密权重上。</p>
+<p>跑在 Vera Rubin NVL72 上，英伟达的新机柜。</p>
+<p>博客编号 31，配了四张图。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21807">https://github.com/NVIDIA/TensorRT-LLM/pull/21807</a></p>
+<p>其余两条一句话带过。</p>
+<p>#20767，MX 量化的 Qwen3 稠密配置支持绑定词嵌入。</p>
+<p>#21990，删了 DSpark AgentX 的性能用例。</p>
+<p><strong>llama.cpp、Dynamo：各 1 条</strong></p>
+<p>llama.cpp #31784，SYCL 的 CLAMP 修了。</p>
+<p>CLAMP 是个截断操作，带步长的视图以前不支持。</p>
+<p>快照滚到 b12283。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31784">https://github.com/ggml-org/llama.cpp/pull/31784</a></p>
+<p>Dynamo #18362，算子开始吃编译器给的 LPX 放置单元。</p>
+<p>LPX 是布局放置的单元，编译器说了算。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18362">https://github.com/ai-dynamo/dynamo/pull/18362</a></p>
+<p><strong>FlashInfer、Mooncake：各 1 条</strong></p>
+<p>FlashInfer #9307，文档杂活。</p>
+<p>API 文档修了一处，检查器的指引也改了。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9307">https://github.com/flashinfer-ai/flashinfer/pull/9307</a></p>
+<p>Mooncake #5271，运行时 KV 重分片支持 SSM。</p>
+<p>卷积缓存也能分。</p>
+<p>SSM 就是 Mamba 那类不用注意力的模型。</p>
+<p>重分片就是 KV 缓存搬家时重新切块。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5271">https://github.com/kvcache-ai/Mooncake/pull/5271</a></p>
+<p>LMDeploy、TGI：零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新一批到了，三篇都沾边</strong></p>
+<p>先说最值得看的，见文末「值得深入学」。</p>
+<p>其余两篇都在下面。</p>
+<p><strong>KV 缓存还能跨模型翻译：MLA、线性注意力、稀疏索引器全打通</strong></p>
+<p>这篇是 arXiv:2611.12062，11 月 9 号提交。</p>
+<p>模型接手另一个模型的对话，以前得把历史全重读一遍。</p>
+<p>KV 缓存翻译就是把旧缓存的格式，翻成新模型能用的格式。</p>
+<p>不用重读，接着聊。</p>
+<p>GQA 那种老格式早就有人做通了。</p>
+<p>这篇啃的是新格式。</p>
+<p>MLA 的压缩隐向量、线性注意力的定长状态、稀疏注意力的索引器。</p>
+<p>MLA 的隐向量用逐词线性映射翻。</p>
+<p>线性注意力的循环状态用闭式修正直接拷。</p>
+<p>长距离找回针得认出词身份。</p>
+<p>从源模型的第 0 层 MLA 隐向量反解词 ID。</p>
+<p>针的召回率从 0.09 提到 0.99。</p>
+<p>64K 前缀时，首字时间比全重读短 18.7 到 46.8 倍。</p>
+<p>两对混合模型都测了，16B 到 48B 规模，双向都通。</p>
+<p>跟你研究的 BridgeKV 是同一条线。</p>
+<p>BridgeKV 是大模型读题、小模型接着写。</p>
+<p>这篇是缓存翻译的通用解法，值得一起读。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.12062">https://arxiv.org/abs/2611.12062</a></p>
+<p><strong>Infrathon：让 agent 帮你调 infra</strong></p>
+<p>arXiv:2611.11995，11 月 9 号提交。</p>
+<p>这是一套长时程 infra 优化基准。</p>
+<p>150 次运行，每次给 24 小时预算。</p>
+<p>总共烧了 1 万多个 GPU 小时。</p>
+<p>六个模型轮着上，排名随评估时长变。</p>
+<p>135 次运行在后半程还在进步。</p>
+<p>短评估会漏掉真正的优化。</p>
+<p>有个亮眼数字。Claude Opus 5.5 上手调了一把。</p>
+<p>KV 缓存压缩率从 6.82% 提到 19.86%。</p>
+<p>比人类设计的 Quant-VideoGen 编解码器强不少。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.11995">https://arxiv.org/abs/2611.11995</a></p>
+<h2>业内新闻</h2>
+<p><strong>Qwen4：还是没发</strong></p>
+<p>HF 官方组织还是没有 Qwen4 的仓库。</p>
+<p>11 月 6 号那条预热推文，还是唯一的官方动作。</p>
+<p>社区猜的 11 月 10 号已经过了。</p>
+<p>等官宣再说。</p>
+<p>来源：<a href="https://huggingface.co/Qwen">https://huggingface.co/Qwen</a></p>
+<h2>值得深入学</h2>
+<p><strong>模型升级了，旧草稿纸还能用吗？首字延迟快 2 到 5 倍</strong></p>
+<p>这篇是 Rank Computing 的三位作者。</p>
+<p>arXiv:2611.14051，11 月 10 号提交。</p>
+<p>模型一升级，权重变了，旧缓存按理就作废了。</p>
+<p>这篇直接拿旧缓存喂新模型，看看到底行不行。</p>
+<p>四个升级组合都测了。</p>
+<p>主角是 DeepSeek-V4-Flash 到 Flash-0731。</p>
+<p>结论分两面。</p>
+<p>能用：长前缀问答里，首字延迟中位数快 2.10 到 5.08 倍。</p>
+<p>HotpotQA 快 5.08 倍。</p>
+<p>2WikiMQA 快 2.10 倍。</p>
+<p>MultiFieldQA-en 快 2.51 倍。</p>
+<p>分数基本保住，MultiFieldQA-en 还涨了一点。</p>
+<p>不能全信：单字检索任务里，前缀越长越容易翻车。</p>
+<p>32K 前缀时，V4-Flash 的有害翻转率 26.53%。</p>
+<p>Qwen 那组更惨，78.30%。</p>
+<p>但 GLM 和 V4.1-Flash 两组几乎全保住。</p>
+<p>新指标 FCD 专门量行为跑偏。</p>
+<p>FCD 就是新旧缓存下，下一个词的分布差多远。</p>
+<p>自然文本续写里，FCD 一直在 3 左右，很稳。</p>
+<p>单字检索里，32K 前缀时 FCD 涨到 30.62。</p>
+<p>说白了，聊天续写可以放心复用，精确找针得小心。</p>
+<p>跟你研究的两个方向都对口。</p>
+<p>前缀缓存的命是跨版本复用，这篇给了实测边界。</p>
+<p>BridgeKV 那条线也一样，缓存翻译和复用是一体两面。</p>
+<p>精读笔记已生成，见深度阅读目录。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.14051">https://arxiv.org/abs/2611.14051</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 21 点版去重。</p>
+<p>vLLM 7 条首次汇总。</p>
+<p>#61530、#63357、#65029、#65755、#66758、#66848、#66924。</p>
+<p>SGLang 12 条首次汇总。</p>
+<p>#44115、#47923、#48316、#48385、#48959、#49414、#49428、#49620、#49677、#49693、#49716、#49722。</p>
+<p>TRT-LLM 4 条首次汇总。</p>
+<p>#20767、#21350、#21807、#21990。</p>
+<p>llama.cpp 1 条首次汇总。</p>
+<p>#31784。</p>
+<p>快照 b12283 首次汇总。</p>
+<p>Dynamo 1 条首次汇总。</p>
+<p>#18362。</p>
+<p>FlashInfer 1 条首次汇总。</p>
+<p>#9307。</p>
+<p>Mooncake 1 条首次汇总。</p>
+<p>#5271。</p>
+<p>LMDeploy、TGI 零合入。</p>
+<p>arXiv 新论文 3 篇首次汇总。</p>
+<p>2611.14051、2611.12062、2611.11995。</p>
+<p>2611.14051 已做精读笔记。</p>
+<p>Qwen4 仍未发布。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-10-2300/">23点版</a></p></body></html>
