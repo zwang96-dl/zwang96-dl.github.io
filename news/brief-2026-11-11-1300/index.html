@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月11日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-11T21:02:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-11（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-11（13点版）</h1>
+<p>13点版来了。</p>
+<p>头条是 vLLM 的编码器解耦。</p>
+<p>多模态服务终于能把看图这步单独拆出来养了。</p>
+<p>这轮框架合入很少。</p>
+<p>但 vLLM 悄悄冒出一个新 tag。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：vLLM 冒出 v0.34.0rc1</strong></p>
+<p>vLLM 正式版还是 v0.33.0rc3。</p>
+<p>新 tag 是 v0.34.0rc1。</p>
+<p>今天 11 点 37 分刚出现。</p>
+<p>rc 是候选版，还不是正式发布。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>v1.7.0 的开发标签已经出现。</p>
+<p>那是预发布，不算正式版。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12292。</p>
+<p>今天 12 点 15 分发布。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM、SGLang：零合入</strong></p>
+<p>两小时里两家都没合入新 PR。</p>
+<p>TRT-LLM、LMDeploy 也是零合入。</p>
+<p>Dynamo 同样零合入。</p>
+<p><strong>llama.cpp：4 条，安全修补最值得看</strong></p>
+<p>先说 #32098，是个安全修补。</p>
+<p>服务器的跨域配置有漏洞。</p>
+<p>攻击者能借 DNS 重新绑定绕过它。</p>
+<p>现在修好了，顺手加了防护。</p>
+<p>其余三条一句话带过。</p>
+<p>#32106，把 LibreSSL 升到 4.4.1。</p>
+<p>#32103，修 Metal 内核的越界读。</p>
+<p>#32096，只是 CI 的测试模型迁移。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32098">https://github.com/ggml-org/llama.cpp/pull/32098</a></p>
+<p><strong>FlashInfer：1 条文档</strong></p>
+<p>#9369，只是文档里的表格重生成。</p>
+<p>跟批量不变模式的 MoE 激活矩阵有关。</p>
+<p>没有代码改动。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>上一批是 11 月 11 日 00:00 UTC 那批。</p>
+<p>01点版已经报过了。</p>
+<p>这轮查 arXiv 时接口返回 200。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>下一批约在今天 16:00 PST 到。</p>
+<h2>业内新闻</h2>
+<p><strong>LongCat-2.5：权重上线了，MIT 协议随便用</strong></p>
+<p>美团 11 月 9 日把权重放上 Hugging Face。</p>
+<p>模型本身 11 月 2 日就发布了。</p>
+<p>这次是权重真的能下载了。</p>
+<p>1.6 万亿总参数，每 token 激活 480 亿。</p>
+<p>原生多模态 MoE，百万 token 上下文。</p>
+<p>W4A4 量化版也一起放出来了。</p>
+<p>量化后读题和解码都快约 43%。</p>
+<p>部署说明目前只给了 NPU 路线。</p>
+<p>走的是 SGLang-FluentLLM。</p>
+<p>提醒一句，分数全是美团自测。</p>
+<p>四项第一，没有独立复核。</p>
+<p>来源：<a href="https://huggingface.co/meituan-longcat/LongCat-2.5">https://huggingface.co/meituan-longcat/LongCat-2.5</a></p>
+<p>来源：<a href="https://www.neuraldaily.news/en/a/longcat-2-5-a-1-6t-open-agent-model-under-mit">https://www.neuraldaily.news/en/a/longcat-2-5-a-1-6t-open-agent-model-under-mit</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>最新一期还是 11 月 10 日那期。</p>
+<p>Spotify 上查过了，没有更新。</p>
+<p>X、Reddit、Hacker News 本轮也没有新干货。</p>
+<h2>值得深入学</h2>
+<p><strong>EPD：多模态服务终于能把看图单独拆出来了</strong></p>
+<p>这篇能帮你解决一个具体问题。</p>
+<p>你的评估里，编码器一直是第三个变量。</p>
+<p>以前它跟读题绑在同一批卡上。</p>
+<p>图一多，读题和吐词全跟着抖。</p>
+<p>EPD 把编码、读题、解码拆成三拨实例。</p>
+<p>图多就加编码器，话多就加解码器。</p>
+<p>DeepSeek V4.1 Flash 上测的。</p>
+<p>并发 64 到 128 时，首字快 44–47%。</p>
+<p>每卡吞吐还涨了 6.6–9.5%。</p>
+<p>元数据直传、跨编码器复用、失败隔离这几招，都能进评估清单。</p>
+<p>全文精读见深读笔记。</p>
+<p>原文：<a href="https://vllm.ai/blog/2026-11-11-encoder-disaggregation-epd">https://vllm.ai/blog/2026-11-11-encoder-disaggregation-epd</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 11 点版去重。</p>
+<p>vLLM 新 tag v0.34.0rc1 首次汇总。</p>
+<p>llama.cpp 4 条首次汇总。</p>
+<p>#32098、#32096、#32103、#32106。</p>
+<p>FlashInfer 1 条文档首次汇总。</p>
+<p>#9369。</p>
+<p>vLLM、SGLang 零合入。</p>
+<p>TRT-LLM、LMDeploy、Dynamo 也是零合入。</p>
+<p>arXiv 本轮无新批次，接口返回 200。</p>
+<p>LongCat-2.5 权重上线首次汇总。</p>
+<p>Latent Space 无新单集。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-11-1300/">13点版</a></p></body></html>
