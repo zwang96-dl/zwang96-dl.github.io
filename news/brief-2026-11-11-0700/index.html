@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月11日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-11T15:02:03"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-11（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-11（07点版）</h1>
+<p>07点版来了。</p>
+<p>两小时里，框架合入了二十三条。</p>
+<p>头条是苹果要把你桌上的 Mac 变成推理服务器。</p>
+<p>TRT-LLM 修了 P/D 解耦的一个漏内存毛病。</p>
+<p>SGLang 峰会明天开幕。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没有新发布</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>release 挂在 v0.33.0rc3 的 tag 上。</p>
+<p>新 tag 还是 v0.34.0rc0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12284，今天 5 点 13 分发布。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：4 条，Ling VL 视频那条最值得看</strong></p>
+<p>先说 #65848，跟多模态模型有关。</p>
+<p>Ling VL 是智谱的看图说话模型。</p>
+<p>vLLM 现在能直接喂带时间戳的视频了。</p>
+<p>多段视频、图文混着来都行。</p>
+<p>YaRN 是拉长上下文的办法，也接进来了。</p>
+<p>视觉部分还能拆到多卡上并行算。</p>
+<p>说白了，看视频的模型在 vLLM 里更好使了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65848">https://github.com/vllm-project/vllm/pull/65848</a></p>
+<p>第二条 #63383，是 AMD 消费级显卡的利好。</p>
+<p>RDNA 是 AMD 消费级显卡的架构名。</p>
+<p>这回给它配了专用注意力后端。</p>
+<p>解码和读题都有了专用核。</p>
+<p>默认不启用，想试要手动开。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63383">https://github.com/vllm-project/vllm/pull/63383</a></p>
+<p>第三条 #58986，跟 GLM-5.3-Flash 有关。</p>
+<p>给 H20 卡调了一套专家模型配置。</p>
+<p>block-FP8 是一种 8 位浮点量化。</p>
+<p>288 个专家，跑在 4 卡并行下。</p>
+<p>就是让这模型在 H20 上跑得更顺。</p>
+<p>第四条 #67026 一句话带过。</p>
+<p>只是个 CI 提醒，跟模型无关。</p>
+<p><strong>SGLang：10 条，EAGLE 验证那条最值得看</strong></p>
+<p>先说 #47513，跟投机解码有关。</p>
+<p>投机解码就是先让小模型打草稿。</p>
+<p>再让大模型改，改得越少越快。</p>
+<p>EAGLE 是这里的草稿模型。</p>
+<p>验证那步以前走慢路子。</p>
+<p>18 层全注意力每步要花 5.4 毫秒。</p>
+<p>gpt-oss 每层都有注意力汇点。</p>
+<p>注意力汇点就是开头几个总被盯着的位置。</p>
+<p>分片验证核现在也能处理汇点了。</p>
+<p>英伟达新卡上跑 gpt-oss 会快一截。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47513">https://github.com/sgl-project/sglang/pull/47513</a></p>
+<p>第二条 #48891，跟稀疏 MLA 读题有关。</p>
+<p>MLA 是 DeepSeek 那种注意力。</p>
+<p>稀疏就是只算关键部分。</p>
+<p>这次针对小头数做了优化。</p>
+<p>跑在 Blackwell 架构的卡上。</p>
+<p>第三条 #49531，跟 GLM-4.7-Flash 有关。</p>
+<p>W4A16 是一种 4 位权重量化。</p>
+<p>能直接加载这种压缩过的权重了。</p>
+<p>第四组是扩散模型三条，一起报。</p>
+<p>扩散模型就是画图和生成视频的模型。</p>
+<p>#49440，训练 rollout 能在中途叫停。</p>
+<p>rollout 是强化学习里让模型自己跑一轮。</p>
+<p>#49143，能跳过 VAE 解码，只返回轨迹。</p>
+<p>VAE 是把 latent 变成画面的解码器。</p>
+<p>#49219，SANA-Video 2.0 的锚点注意力跑在 BF16 下。</p>
+<p>BF16 是一种 16 位浮点精度。</p>
+<p>说白了，都是给视频生成训模型省算力。</p>
+<p>其余三条一句话带过。</p>
+<p>#49370，只是代码重构，挪了个位置。</p>
+<p>#49389、#49387，AMD 的 CI 任务挪到了 Spur 跑道上。</p>
+<p>#44236，监控指标里补了一个待分配用量。</p>
+<p><strong>TRT-LLM：4 条，KV 回收那条最值得看</strong></p>
+<p>先说 #21909，跟 P/D 解耦有关。</p>
+<p>P/D 解耦就是读题和生成分开跑。</p>
+<p>传 KV 缓存中途失败或超时，显存以前会漏。</p>
+<p>漏就是占着不还，越积越多。</p>
+<p>这次把两种漏法都堵上了。</p>
+<p>空闲的解码机也不会再被卡住。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21909">https://github.com/NVIDIA/TensorRT-LLM/pull/21909</a></p>
+<p>其余三条一句话带过。</p>
+<p>#22102，构建参数和测试配置本地化。</p>
+<p>#22032，GLM-5.2 的精度引擎环境变量收窄了。</p>
+<p>#21929，性能测试里删了 Wan2.1。</p>
+<p><strong>llama.cpp：3 条，都是小修补</strong></p>
+<p>#32078，清理了几处图节点。</p>
+<p>#32005，Windows 发布包补了几个运行库。</p>
+<p>#32084，只是 CI 清理。</p>
+<p><strong>FlashInfer：1 条</strong></p>
+<p>#9351，跟 cuDNN 9.24 有关。</p>
+<p>cuDNN 是英伟达的深度学习加速库。</p>
+<p>分页预填充的准备工作现在能复用了。</p>
+<p>以前每次热启动都要重做一遍。</p>
+<p>现在复用旧计划，不用每次重做。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9351">https://github.com/flashinfer-ai/flashinfer/pull/9351</a></p>
+<p><strong>Mooncake：1 条</strong></p>
+<p>#5078，只是 CI 接了新的测试跑道。</p>
+<p>LMDeploy、TGI、Dynamo：零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>上一批是 11 月 11 日 00:00 UTC 那批。</p>
+<p>03点版已经报过了。</p>
+<p>这轮查 arXiv 时接口恢复了，返回 200。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>下一批约在今晚 16:00 PST 到。</p>
+<h2>业内新闻</h2>
+<p><strong>苹果 Claris Harbor：把 Mac 变成私人推理服务器</strong></p>
+<p>苹果的子公司 Claris 在测一个新应用。</p>
+<p>名字叫 Harbor，港湾的意思。</p>
+<p>能把你桌上的 Mac 变成私人推理服务器。</p>
+<p>开源权重模型直接在本地跑。</p>
+<p>数据不出你的机器，也不按 token 收费。</p>
+<p>多台 Mac 用雷电 5 连起来，能拼显存。</p>
+<p>显存就是装模型的那块内存。</p>
+<p>拼起来能跑更大的模型，或者同时接更多请求。</p>
+<p>现在只是私下预览，要填表等名额。</p>
+<p>没有价格，也没有发布时间。</p>
+<p>来源：<a href="https://www.macrumors.com/2026/11/10/apple-claris-harbor-app/">https://www.macrumors.com/2026/11/10/apple-claris-harbor-app/</a></p>
+<p>来源：<a href="https://9to5mac.com/2026/11/10/apple-has-new-mac-app-coming-to-make-running-local-ai-models-easy/">https://9to5mac.com/2026/11/10/apple-has-new-mac-app-coming-to-make-running-local-ai-models-easy/</a></p>
+<h2>访谈与深度</h2>
+<p>本轮没有新播客单集。</p>
+<p>Latent Space 最新一期还是 11 月 10 日那期。</p>
+<p>11 月 10 日 17 点版已经报过了。</p>
+<h2>值得深入学</h2>
+<p>本轮没有值得单独成篇的内容。</p>
+<p>几条 PR 都是增量修补。</p>
+<p>没有新论文，也没有新实测。</p>
+<p>宁缺毋滥，这轮不做深读笔记。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 05 点版去重。</p>
+<p>vLLM 4 条首次汇总。</p>
+<p>#58986、#63383、#65848、#67026。</p>
+<p>SGLang 10 条首次汇总。</p>
+<p>#44236、#47513、#48891、#49143、#49219、#49370、#49387、#49389、#49440、#49531。</p>
+<p>TRT-LLM 4 条首次汇总。</p>
+<p>#21909、#21929、#22032、#22102。</p>
+<p>llama.cpp 3 条首次汇总。</p>
+<p>#32005、#32078、#32084。</p>
+<p>FlashInfer 1 条首次汇总。</p>
+<p>#9351。</p>
+<p>Mooncake 1 条首次汇总。</p>
+<p>#5078。</p>
+<p>LMDeploy、TGI、Dynamo 零合入。</p>
+<p>arXiv 本轮无新批次，接口恢复 200。</p>
+<p>Apple Claris Harbor 首次汇总。</p>
+<p>Latent Space 无新单集。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-11-0700/">07点版</a></p></body></html>
