@@ -1,0 +1,258 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月12日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-12"/>
+<meta name="doc-ts" content="2026-11-12T19:02:09"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-12（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-12（11点版）</h1>
+<p>11点版来了。</p>
+<p>头条就一个：SGLang v1.0 官宣了。</p>
+<p>正式 release 还没挂上 GitHub。</p>
+<p>细节也还在路上。</p>
+<p>但这是今天 Summit 开场放的大招。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：v1.0 官宣了，但还没发版</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>但 v1.0 已经在 Summit 上官宣了。</p>
+<p>GitHub 的 release 对象还没建。</p>
+<p>等它挂出来再报一次。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12321。</p>
+<p>9 点版时还是 b12319。</p>
+<p>中间还经过 b12320。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang v1.0：开场十分钟就扔出来了</strong></p>
+<p>主舞台 10 点开场，郑连敏和盛颖先讲。</p>
+<p>LinkedIn 上 10 点 25 分就发了官宣。</p>
+<p>v1.0 主打三件事。</p>
+<p>第一，跑得更快。</p>
+<p>零开销调度，关键路径用 Rust 重写了。</p>
+<p>推测解码和 megakernel 也打包进来。</p>
+<p>推测解码就是小模型先打草稿，大模型再改。</p>
+<p>第二，内存更会过日子。</p>
+<p>混合模型的统一内存，配上分层缓存。</p>
+<p>长对话历史能存在显存外头，随用随取。</p>
+<p>第三，扩缩更灵活。</p>
+<p>读题解码分离和灵活并行都算在内。</p>
+<p>读题解码分离就是读题和吐字分开跑。</p>
+<p>官宣还给了两个数。</p>
+<p>330 多家机构在用。</p>
+<p>217 个模型首日就支持。</p>
+<p>但要注意，细节还没放出来。</p>
+<p>LinkedIn 原话是 Details coming soon。</p>
+<p>GitHub 上 v1.0 的 tag 和 release 都还没影。</p>
+<p>所以这轮先报官宣，不报发版。</p>
+<p>来源：<a href="https://www.linkedin.com/company/sgl-project">https://www.linkedin.com/company/sgl-project</a></p>
+<p><strong>vLLM：6 条，Kimi K3.1 Pro 那条最值得看</strong></p>
+<p>先说 #65685。</p>
+<p>Kimi K3.1 Pro 的支持拼到 5/6 了。</p>
+<p>这回是 ROCm 上的 DCP、P/D 和索引器。</p>
+<p>DCP 是动态上下文并行。</p>
+<p>P/D 就是读题解码分离。</p>
+<p>索引器管着稀疏注意力的 top-k。</p>
+<p>前面四块已经合入了。</p>
+<p>还剩 6/6 那块做 DCP 优化。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65685">https://github.com/vllm-project/vllm/pull/65685</a></p>
+<p>再说 #67205。</p>
+<p>张量化模型能跨实现加载了。</p>
+<p>张量化就是把权重先序列化存盘。</p>
+<p>以前 native 存的只能 native 读。</p>
+<p>现在 Transformers 后端也能读，反过来也行。</p>
+<p>再说 #50449。</p>
+<p>视觉编码器的注意力后端统一选了。</p>
+<p>ViT 就是视觉编码器。</p>
+<p>再说 #67226。</p>
+<p>ROCm 那边绕了个 LLVM 的毛病。</p>
+<p>解码核的寄存器溢了。</p>
+<p>先绕过去再说。</p>
+<p>再说 #66348。</p>
+<p>修了个小 bug。</p>
+<p>带系统消息的对话，granite 模型能正常渲染了。</p>
+<p>#67263 只是 CI，跳过一个 ROCm 测试。</p>
+<p><strong>SGLang：3 条，都是小修补</strong></p>
+<p>#50144，给 JIT 加了行号信息。</p>
+<p>方便 profiler 定位源码。</p>
+<p>#49972，只是 CI。</p>
+<p>给 fa3 加了发版流程。</p>
+<p>#49894，修了个权限口子。</p>
+<p>API key 现在也管到 tokenizer 工人和 WebSocket 路由了。</p>
+<p>今天团队都在 Summit 会场。</p>
+<p>合入少很正常。</p>
+<p><strong>TRT-LLM：5 条，KV 那条跟 PD 有关</strong></p>
+<p>#21784，修了个 KV 池释放顺序。</p>
+<p>做性能分析的 KV 池，要先于 NIXL 注销释放。</p>
+<p>NIXL 是跨机器传 KV 的库。</p>
+<p>顺序错了会留隐患。</p>
+<p>#20840，MoE 的缓存工作区，退出时释放。</p>
+<p>#21029，FastWan 采样默认值，预热时按默认走。</p>
+<p>#20038，加了个测试。</p>
+<p>Kimi K3 的 MMMU 准确率，跑在 KV 缓存管理器 V2 上。</p>
+<p>#21970 只是 infra 机器人发的报告。</p>
+<p><strong>Dynamo：7 条，多模态路由那条最值得看</strong></p>
+<p>先说 #17121。</p>
+<p>GLM-5.3-Flash 的图片路由接进来了。</p>
+<p>Dynamo 的 Rust 前端现在会看图了。</p>
+<p>按检查点里的元数据数图片 token。</p>
+<p>排版不对就退回纯文本路由。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17121">https://github.com/ai-dynamo/dynamo/pull/17121</a></p>
+<p>再说 #18540。</p>
+<p>路由器的性能修补。</p>
+<p>请求排队时先算好负载。</p>
+<p>再说 #16990。</p>
+<p>KV 路由那边，worker 下线走 FIFO 队列改状态。</p>
+<p>其余四条一句话带过。</p>
+<p>#18314，SGLang 那边越界的停用词先拦下来。</p>
+<p>#18230，前端返回图片时不再逐字节转义。</p>
+<p>#18213，带推理内容的助手消息能正常收了。</p>
+<p>#18668，vLLM 那边自定义模板加校验。</p>
+<p><strong>FlashInfer：5 条，KV 量化那条最值得看</strong></p>
+<p>先说 #6863。</p>
+<p>加了个 FP8 的 KV 量化写入算子。</p>
+<p>按每个 token、每个头分别算缩放。</p>
+<p>FP8 是 8 位浮点，省显存。</p>
+<p>正好配 FA2 那边的读取路径。</p>
+<p>跟你评估的 KV 量化直接相关。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6863">https://github.com/flashinfer-ai/flashinfer/pull/6863</a></p>
+<p>再说 #9402。</p>
+<p>Rubin 上的 MoE 调参，候选排序去重了。</p>
+<p>小预算也不容易错过好组合。</p>
+<p>其余三条一句话带过。</p>
+<p>#8545，自动调参的桶映射修了。</p>
+<p>#9368，跑分脚本认 batch_invariant 后端了。</p>
+<p>#4312，FA2 预填充的头维度先校验。</p>
+<p><strong>llama.cpp、LMDeploy、TGI：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<p>llama.cpp 只有快照在滚。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次又鸽了</strong></p>
+<p>接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>原定 11 月 11 日 16:00 PST 到。</p>
+<p>现在已经晚了 19 小时。</p>
+<p>9 点版时晚 17 小时。</p>
+<p>下轮再看。</p>
+<p><strong>SGLang 统一内存博客：值得深读</strong></p>
+<p>这篇是 10 月 22 日发的。</p>
+<p>但今天 v1.0 把它抬成主角了。</p>
+<p>混合模型里，全注意力 KV 和循环状态抢显存。</p>
+<p>以前各划一块地，经常一边满一边空。</p>
+<p>统一内存改成一整块共享池。</p>
+<p>两边按需取，谁缺谁拿。</p>
+<p>实测数据在 RTX 5090 上跑的。</p>
+<p>Qwen3.5-4B，28 个前缀里保住 19 个。</p>
+<p>以前只能保住 10 个。</p>
+<p>回头请求的耗时少了 37.9%。</p>
+<p>全文精读见深读笔记。</p>
+<p>原文：<a href="https://www.sglang.io/blog/unified-memory">https://www.sglang.io/blog/unified-memory</a></p>
+<h2>业内新闻</h2>
+<p><strong>SGLang Summit：正在开，开幕就放大招</strong></p>
+<p>主舞台 10 点开场，v1.0 就是开场宣布的。</p>
+<p>下午 16 点是英特尔 CEO 陈立武的炉边谈。</p>
+<p>明天还有 Periodic Labs 的 Liam Fedus。</p>
+<p>Full Pass 早卖完了。</p>
+<p>Expo Pass 还能买。</p>
+<p>主舞台在场馆里有直播。</p>
+<p>来源：<a href="https://www.sglang.io/summit">https://www.sglang.io/summit</a></p>
+<p><strong>Latent Space：新文章聊决策模型</strong></p>
+<p>今天发了一篇《The Jev Revolution》。</p>
+<p>讲的是 system one 模型。</p>
+<p>system one 模型就是不生成文字，只做判断打分。</p>
+<p>谷歌刚发了 Gemini Decision 1。</p>
+<p>一次能答 1000 道判断题。</p>
+<p>每百万输入只要 0.10 美元。</p>
+<p>端到端约 200 毫秒。</p>
+<p>这跟推理 serving 的关系是间接的。</p>
+<p>但这类小模型以后可能也要上 serving 栈。</p>
+<p>先记一笔，不展开。</p>
+<p>来源：<a href="https://latent.space/p/jev-revolution/">https://latent.space/p/jev-revolution/</a></p>
+<p>来源：<a href="http://latent.space/p/ainews-d-day-decision-models-day/">http://latent.space/p/ainews-d-day-decision-models-day/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 大V：本轮没有新帖</strong></p>
+<p>lmsysorg 的 v1.0 官宣走的是 LinkedIn。</p>
+<p>X 上还没看到同款。</p>
+<p>vLLM 官方、karpathy 都没动静。</p>
+<p><strong>Latent Space 播客：本轮没有新单集</strong></p>
+<p>最新还是 11 月 10 日那期。</p>
+<p>Zeno Rocha 那期，11 月 10 日 17 点版报过了。</p>
+<p>Spotify 上查过，节目单没变。</p>
+<p><strong>Hacker News：搜出来的还是旧帖</strong></p>
+<p>没有新料。</p>
+<p><strong>Reddit：没有新料</strong></p>
+<p><strong>中文媒体：没有新料</strong></p>
+<p>v1.0 刚官宣半小时，中文媒体还没跟上。</p>
+<h2>值得深入学</h2>
+<p><strong>SGLang 统一内存：跟你的缓存评估直接相关</strong></p>
+<p>这篇能帮你解决一个具体问题。</p>
+<p>混合模型上 KV 和循环状态怎么分显存。</p>
+<p>以前固定切分，经常一边满一边空。</p>
+<p>统一内存改成共享池，按需取。</p>
+<p>实测 28 个前缀保住 19 个，以前 10 个。</p>
+<p>回头请求快了 37.9%。</p>
+<p>代价也很小，解码间隔只慢 1.32% 以内。</p>
+<p>全文精读见深读笔记。</p>
+<p>原文：<a href="https://www.sglang.io/blog/unified-memory">https://www.sglang.io/blog/unified-memory</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 9 点版去重。</p>
+<p>版本水位：SGLang v1.0 官宣，未发版。</p>
+<p>其余正式版全平，没有新发布。</p>
+<p>llama.cpp 快照 b12319 滚到 b12321。</p>
+<p>vLLM 6 条首次汇总。</p>
+<p>#65685、#67205、#50449、#67226、#66348、#67263。</p>
+<p>SGLang 3 条首次汇总。</p>
+<p>#50144、#49972、#49894。</p>
+<p>TRT-LLM 5 条首次汇总。</p>
+<p>#21784、#20840、#21029、#20038、#21970。</p>
+<p>Dynamo 7 条首次汇总。</p>
+<p>#17121、#18540、#16990、#18314、#18230、#18213、#18668。</p>
+<p>FlashInfer 5 条首次汇总。</p>
+<p>#6863、#9402、#8545、#9368、#4312。</p>
+<p>llama.cpp、LMDeploy、TGI 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>SGLang Summit 开幕、MACaQ 深读，之前都报过。</p>
+<p>Latent Space 11 月 10 日那期也不再重复。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-12-1100/">11点版</a></p></body></html>
