@@ -1,0 +1,200 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月12日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-12"/>
+<meta name="doc-ts" content="2026-11-12T09:00:15"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-12（1点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-12（1点版）</h1>
+<p>1点版来了。</p>
+<p>深夜这轮很安静。</p>
+<p>框架合入不少，但没出大新闻。</p>
+<p>arXiv 新批次又鸽了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：vLLM 预发布滚到 rc2</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 滚到 v0.34.0rc2。</p>
+<p>rc2 是 11 月 11 日 22:21 打的 tag。</p>
+<p>rc1 也是同一天。</p>
+<p>注意，rc 系列目前只有 tag。</p>
+<p>GitHub 上还没有对应的 release 对象。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12317。</p>
+<p>23点版时还是 b12316。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：6 条，KV Offload 那条最值得看</strong></p>
+<p>先说 #66391。</p>
+<p>KV Offload 是把 KV 缓存往显存外挪。</p>
+<p>这回把共享的分层区域拆开了。</p>
+<p>调度器也不再提前占坑。</p>
+<p>说白了，缓存分层更干净了。</p>
+<p>跟你评估的缓存方案直接相关。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66391">https://github.com/vllm-project/vllm/pull/66391</a></p>
+<p>再说 #67184。</p>
+<p>MiniMax-M3.1-Flash 的 GB300 预设同步了。</p>
+<p>预设来自 Dynamo 的 AgentX。</p>
+<p>跟昨天 Rubin 那条线呼应上了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67184">https://github.com/vllm-project/vllm/pull/67184</a></p>
+<p>其余四条一句话带过。</p>
+<p>#67035，删了 TeleChat2 和 TeleChat3 的支持。</p>
+<p>#64765，改用 flashinfer-python 自带的 b12x 包。</p>
+<p>#66561，修补：1 到 10 MiB 的小显存块能复用了。</p>
+<p>#62656，XPU 的两项端到端测试重新启用。</p>
+<p><strong>SGLang：5 条，稀疏 MLA 那条最值得看</strong></p>
+<p>先说 #48602。</p>
+<p>加了个可选的稀疏 MLA 后端。</p>
+<p>MLA 是 DeepSeek 那种压缩注意力。</p>
+<p>后端用的是 FlashInfer 的 Prims-TS。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48602">https://github.com/sgl-project/sglang/pull/48602</a></p>
+<p>再说 #49923。</p>
+<p>kimi-k3 的路由元数据换了个核来算。</p>
+<p>用的是 1024 线程的 PDL 核。</p>
+<p>PDL 是让核与核重叠干活的办法。</p>
+<p>#45947 也跟缓存有关。</p>
+<p>KV cache 分片里加了门控 allgather。</p>
+<p>allgather 是多卡之间互相同步一份数据。</p>
+<p>其余两条是文档。</p>
+<p>#49675 修了扩散模型的功能指南。</p>
+<p>#49983 只是换了 README 的 logo。</p>
+<p><strong>TRT-LLM：4 条，冷页压缩那条最值得看</strong></p>
+<p>先说 #20197。</p>
+<p>冷页 KV 缓存压缩支持混精度。</p>
+<p>冷页就是很久没人翻的缓存页。</p>
+<p>现在可以只对开头和结尾的页用高精度。</p>
+<p>中间的页用低精度，省显存。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20197">https://github.com/NVIDIA/TensorRT-LLM/pull/20197</a></p>
+<p>其余三条一句话带过。</p>
+<p>#22028，FlashMLA 编译时不用可重定位设备代码。</p>
+<p>#20110，修了 BF16 all-reduce 精度测试的参考值。</p>
+<p>#22087，测试类：Qwen3.5 VL 的单测恢复了。</p>
+<p><strong>LMDeploy：1 条小修补</strong></p>
+<p>#5110，GLM-5.3 Flash 的设置开始生效了。</p>
+<p>dense-prefill opt-out 就是允许关掉稠密预填充。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5110">https://github.com/InternLM/lmdeploy/pull/5110</a></p>
+<p><strong>llama.cpp：5 条，聊天 UI 占了两条</strong></p>
+<p>先说 #32051。</p>
+<p>聊天 UI 加了搜索功能。</p>
+<p>#31915 重构了 Gemma4 的 schema 规则。</p>
+<p>schema 是管输出格式的规矩。</p>
+<p>#32119 改了服务端工具运行时的处理。</p>
+<p>#32112 修了 UI 构建时下载品牌包的问题。</p>
+<p>#32043 是内部清理：不碰没用过的图元数据页。</p>
+<p><strong>FlashInfer：2 条，都是注意力那块</strong></p>
+<p>#9386，SM100 的 D256 分页 GQA 通过实测准入。</p>
+<p>SM100 是 Blackwell 那代卡的架构号。</p>
+<p>#9385，Muse Spark 那个归一化核的 PDL 路径重切了。</p>
+<p>来源：GitHub</p>
+<p><strong>Dynamo：1 条清理</strong></p>
+<p>#16318，删了过时的 DCD 控制器适配代码。</p>
+<p><strong>TGI：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还是没刷出来</strong></p>
+<p>接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>新一批原定 11 月 11 日 16:00 PST 到。</p>
+<p>现在 1:00 了，已经晚了 9 小时。</p>
+<p>下轮再看。</p>
+<p><strong>六引擎同台：老卡 T4 上 vLLM 还是最快</strong></p>
+<p>这篇是 11 月 11 日 19:31 发的。</p>
+<p>23点版漏了，这里补上。</p>
+<p>作者在单张 Tesla T4 上跑 Gemma 4 E2B。</p>
+<p>六个引擎同台比拼。</p>
+<p>单请求：vLLM 193 tok/s，SGLang 108.8。</p>
+<p>批量：vLLM 1165，SGLang 908.6。</p>
+<p>说白了，老卡上 vLLM 领先两到三成。</p>
+<p>提醒一句，这是作者自测、单卡老卡。</p>
+<p>别外推到 H100 那种大卡上。</p>
+<p>来源：<a href="https://lalatenduswain.medium.com/six-serving-engines-on-one-tesla-t4-gemma-4-e2b-on-a-turing-gpu-4f1386317bb8">https://lalatenduswain.medium.com/six-serving-engines-on-one-tesla-t4-gemma-4-e2b-on-a-turing-gpu-4f1386317bb8</a></p>
+<h2>业内新闻</h2>
+<p><strong>CoreWeave 升了 CNCF 白金会员</strong></p>
+<p>消息是 11 月 11 日 23:53 发的。</p>
+<p>刚好在 23点版之后。</p>
+<p>CoreWeave 在 KubeCon 上宣布的。</p>
+<p>它的工程师在给 vLLM、SGLang 打补丁。</p>
+<p>目标是新模型发布当天就能跑起来。</p>
+<p>它参与的 llm-d 项目 1.0 版已发。</p>
+<p>llm-d 负责在 K8s 上分发推理请求。</p>
+<p>K8s 就是管容器的那套编排系统。</p>
+<p>来源：<a href="https://www.tokenpost.com/news/technology/55104">https://www.tokenpost.com/news/technology/55104</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：本轮没有新文章</strong></p>
+<p>最新一篇还是 D-Day 那篇。</p>
+<p>23点版已经报过了。</p>
+<p><strong>Latent Space 播客：本轮没有新单集</strong></p>
+<p>最新一期还是 11 月 10 日那期。</p>
+<p>聊的是 Resend 的 Zeno Rocha。</p>
+<p>10号 17点版报过了。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有单独成篇的深读</strong></p>
+<p>TRT-LLM 的冷页压缩值得跟进。</p>
+<p>但目前只有 PR 标题，没有细节。</p>
+<p>SGLang 的稀疏 MLA 后端也一样。</p>
+<p>等有技术博客或论文再精读。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 23 点版去重。</p>
+<p>版本水位：vLLM 预发布 tag 滚到 v0.34.0rc2。</p>
+<p>llama.cpp 快照滚到 b12317。</p>
+<p>其余全平，没有新发布。</p>
+<p>vLLM 6 条首次汇总。</p>
+<p>#66391、#67184、#67035、#64765、#66561、#62656。</p>
+<p>SGLang 5 条首次汇总。</p>
+<p>#48602、#49923、#45947、#49675、#49983。</p>
+<p>TRT-LLM 4 条首次汇总。</p>
+<p>#20197、#22028、#20110、#22087。</p>
+<p>LMDeploy 1 条首次汇总。</p>
+<p>#5110。</p>
+<p>llama.cpp 5 条首次汇总。</p>
+<p>#32051、#32119、#32112、#31915、#32043。</p>
+<p>FlashInfer 2 条首次汇总。</p>
+<p>#9386、#9385。</p>
+<p>Dynamo 1 条首次汇总。</p>
+<p>#16318。</p>
+<p>TGI 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>六引擎 T4 横评、CoreWeave 首次汇总。</p>
+<p>ZONOS3-Mini 已在 11 月 10 日 09 点版报过，不重复。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-12-0100/">1点版</a></p></body></html>
