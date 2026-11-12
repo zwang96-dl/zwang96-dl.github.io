@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月12日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-12"/>
+<meta name="doc-ts" content="2026-11-12T20:59:16"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-12（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-12（13点版）</h1>
+<p>13点版来了。</p>
+<p>头条：SGLang 刚拉了个大联盟。</p>
+<p>八家大厂一起站台，阵容不小。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：基本没动，只有快照在滚</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 的 tag 和 release 还是没挂出来。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12323。</p>
+<p>11 点版时还是 b12321。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：只合了 1 条，小修补</strong></p>
+<p>#67212，修了个构建问题。</p>
+<p>参数没给 dtype 时，按参数自己的 dtype 走。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67212">https://github.com/vllm-project/vllm/pull/67212</a></p>
+<p><strong>SGLang：2 条，都跟路由器有关</strong></p>
+<p>先说 #50052。</p>
+<p>它补了 sgl-router 里 PD 的缺口。</p>
+<p>PD 就是读题解码分离。</p>
+<p>这条是为替换 sgl-model-gateway 扫清障碍。</p>
+<p>跟你评估的 PD 部署直接相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50052">https://github.com/sgl-project/sglang/pull/50052</a></p>
+<p>再说 #50161。</p>
+<p>请求体的大小上限，现在能配了。</p>
+<p>通过环境变量 SGLANG_ROUTER_MAX_BODY_BYTES 调。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50161">https://github.com/sgl-project/sglang/pull/50161</a></p>
+<p><strong>Dynamo：1 条，流式路径提速</strong></p>
+<p>#18482，删了逐 token 的响应拷贝。</p>
+<p>worker 回包的路上少了一道复制。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18482">https://github.com/ai-dynamo/dynamo/pull/18482</a></p>
+<p><strong>FlashInfer：1 条，跟打包有关</strong></p>
+<p>#9392，补了构建文件。</p>
+<p>Muse Spark 的归一化和 MoE 收尾后端。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9392">https://github.com/flashinfer-ai/flashinfer/pull/9392</a></p>
+<p><strong>TRT-LLM、LMDeploy、llama.cpp：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还在鸽</strong></p>
+<p>接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>原定 11 月 11 日 16:00 PST 到。</p>
+<p>现在已经晚了 21 小时。</p>
+<p>下轮再看。</p>
+<p><strong>vLLM 的 LibTorch 稳定 ABI：值得深读</strong></p>
+<p>这是 11 月 6 日的官方博客。</p>
+<p>之前几期漏报了，这轮补上。</p>
+<p>核心就一句话。</p>
+<p>以后换 PyTorch，不用重编 vLLM 了。</p>
+<p>以前 torch 一升级，vLLM 就得跟着重编。</p>
+<p>少则一个月，多则两个月。</p>
+<p>现在 v0.33.0 的轮子已经是稳定 ABI。</p>
+<p>换个兼容的新 torch，直接装上就能跑。</p>
+<p>官方还实测了。</p>
+<p>同一份 vLLM，先跑 torch 2.14.1。</p>
+<p>再升到 2.15.0，不重编，照样出结果。</p>
+<p>代价很小。</p>
+<p>多了一层薄薄的类型转换。</p>
+<p>热身后基本感觉不到。</p>
+<p>但要注意一个坑。</p>
+<p>PyPI 上的包元数据还锁着 torch 2.14.0。</p>
+<p>想换版本，得自己手动装 torch。</p>
+<p>全文精读见深读笔记。</p>
+<p>原文：<a href="https://vllm.ai/blog/2026-11-06-stable-abi-cuda">https://vllm.ai/blog/2026-11-06-stable-abi-cuda</a></p>
+<p><strong>TokenSpeed 跑 Kimi K3：每卡 331 token 每秒</strong></p>
+<p>这是 Latent Space 11 月 11 日那篇文章里的数据。</p>
+<p>TokenSpeed 用 NVFP4 跑 Kimi K3。</p>
+<p>32 张 GB300，每卡 331 token 每秒。</p>
+<p>比 DCP8 的基线快了 1.92 倍。</p>
+<p>NVFP4 就是 4 位浮点量化，省显存提速度。</p>
+<p>数字是厂商侧的说法，先记一笔。</p>
+<p>来源：<a href="http://latent.space/p/ainews-mercor-750m-series-d-at-20b-valuation-3b-run-rate/">http://latent.space/p/ainews-mercor-750m-series-d-at-20b-valuation-3b-run-rate/</a></p>
+<h2>业内新闻</h2>
+<p><strong>SGLang 联盟成立了，八家大厂一起站台</strong></p>
+<p>LMSYS 刚宣布成立 SGLang 联盟。</p>
+<p>创始成员有英伟达、AMD、英特尔。</p>
+<p>还有谷歌、Meta、Cloudflare。</p>
+<p>Modal 和 RadixArk 也在里头。</p>
+<p>联盟要一起定 SGLang 的路线图。</p>
+<p>说白了，SGLang 从社区项目升级了。</p>
+<p>现在背后站着整个推理产业链。</p>
+<p>德勤还给了个数字。</p>
+<p>2026 年推理要占 AI 算力的三分之二。</p>
+<p>去年这个数还只有一半。</p>
+<p>来源：<a href="https://www.businesswire.com/news/home/20261112052367/en/LMSYS-Org-Launches-SGLang-Consortium-with-NVIDIA-AMD-Intel-Google-Meta-Cloudflare-Modal-and-RadixArk-to-Advance-Open-Source-AI-Inference">https://www.businesswire.com/news/home/20261112052367/en/LMSYS-Org-Launches-SGLang-Consortium-with-NVIDIA-AMD-Intel-Google-Meta-Cloudflare-Modal-and-RadixArk-to-Advance-Open-Source-AI-Inference</a></p>
+<p><strong>SGLang Summit：下午还有重头戏</strong></p>
+<p>16 点是英特尔 CEO 陈立武的炉边谈。</p>
+<p>聊下一代 AI 硬件。</p>
+<p>明天是 Periodic Labs 的 Liam Fedus。</p>
+<p>聊新兴 AI 实验室。</p>
+<p>来源：<a href="https://www.sglang.io/summit">https://www.sglang.io/summit</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：Mercor 那篇里藏了 serving 干货</strong></p>
+<p>11 月 11 日的文章，主标题是融资。</p>
+<p>Mercor 拿了 7.5 亿美元 D 轮。</p>
+<p>估值 200 亿美元，年收入 30 亿美元。</p>
+<p>但文里顺手提了两件 serving 的事。</p>
+<p>一件是上面说的 TokenSpeed 跑 Kimi K3。</p>
+<p>另一件是 vLLM 换了 LibTorch 稳定 ABI。</p>
+<p>来源：<a href="http://latent.space/p/ainews-mercor-750m-series-d-at-20b-valuation-3b-run-rate/">http://latent.space/p/ainews-mercor-750m-series-d-at-20b-valuation-3b-run-rate/</a></p>
+<p><strong>X 大V：本轮没有新帖</strong></p>
+<p>lmsysorg、vLLM 官方、karpathy 都没动静。</p>
+<p>v1.0 的官宣目前只在 LinkedIn 上。</p>
+<p><strong>Latent Space 播客：本轮没有新单集</strong></p>
+<p>最新还是 11 月 10 日那期。</p>
+<p>Zeno Rocha 那期，11 月 10 日 17 点版报过了。</p>
+<p><strong>Hacker News：没有新料</strong></p>
+<p><strong>Reddit：没有新料</strong></p>
+<p><strong>中文媒体：没有新料</strong></p>
+<p>v1.0 和联盟的消息，中文媒体还没跟上。</p>
+<h2>值得深入学</h2>
+<p><strong>vLLM 稳定 ABI：能帮你省掉重编的等待</strong></p>
+<p>这篇能帮你解决一个实际问题。</p>
+<p>以后 torch 出了新版，不用干等 vLLM 适配。</p>
+<p>直接换 torch 轮子，vLLM 照常跑。</p>
+<p>以前每次等 33 到 60 天。</p>
+<p>现在这个等待基本没了。</p>
+<p>对你评估 vLLM 的运维成本很关键。</p>
+<p>全文精读见深读笔记。</p>
+<p>原文：<a href="https://vllm.ai/blog/2026-11-06-stable-abi-cuda">https://vllm.ai/blog/2026-11-06-stable-abi-cuda</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 11 点版去重。</p>
+<p>版本水位：除 llama.cpp 快照外全平。</p>
+<p>SGLang v1.0 仍未发版。</p>
+<p>联盟成立首次报。</p>
+<p>vLLM 1 条首次汇总：#67212。</p>
+<p>SGLang 2 条首次汇总：#50161、#50052。</p>
+<p>Dynamo 1 条首次汇总：#18482。</p>
+<p>FlashInfer 1 条首次汇总：#9392。</p>
+<p>TRT-LLM、LMDeploy、llama.cpp 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>vLLM 稳定 ABI 博客、TokenSpeed 数据首次报。</p>
+<p>统一内存深读、Latent Space 决策模型文章，之前都报过。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-12-1300/">13点版</a></p></body></html>
