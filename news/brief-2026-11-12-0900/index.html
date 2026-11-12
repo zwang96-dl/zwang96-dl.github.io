@@ -1,0 +1,206 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月12日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-12"/>
+<meta name="doc-ts" content="2026-11-12T17:09:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-12（9点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-12（9点版）</h1>
+<p>9点版来了。</p>
+<p>SGLang Summit 一个小时后开幕。</p>
+<p>vLLM 这轮 GLM-5.3 性能两连发。</p>
+<p>华为还开源了一个量化器。</p>
+<p>arXiv 新批次继续鸽。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 快照动了</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12319。</p>
+<p>7 点版时还是 b12318。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：9 条，GLM-5.3 两连发最值得看</strong></p>
+<p>先说 #67099。</p>
+<p>GLM-5.3 的低延迟模式默认开了。</p>
+<p>latency_specialized 是低延迟专用模式。</p>
+<p>以前要手动开，现在默认开了。</p>
+<p>现在批量小于 64 就自动用。</p>
+<p>端到端吞吐涨 27%。</p>
+<p>AIME25 准确率没变，还是 0.6667。</p>
+<p>说白了，小批量时换条更省事的路。</p>
+<p>数字是作者自报的。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67099">https://github.com/vllm-project/vllm/pull/67099</a></p>
+<p>再说 #67104。</p>
+<p>还是 GLM-5.3 的性能。</p>
+<p>MTP 那步跳过没用的行。</p>
+<p>MTP 是多 token 预测。</p>
+<p>端到端吞吐涨 4.2%。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67104">https://github.com/vllm-project/vllm/pull/67104</a></p>
+<p>再说 #66318。</p>
+<p>Mamba2 的推测解码上了 Triton 后端。</p>
+<p>Mamba2 是一种循环结构模型。</p>
+<p>推测解码就是先让小模型打草稿，再让大模型改。</p>
+<p>以前这条路只支持 FlashInfer。</p>
+<p>现在 Triton 也能走了。</p>
+<p>还顺手加了 MI355 的 nightly 测试。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66318">https://github.com/vllm-project/vllm/pull/66318</a></p>
+<p>再说 #67269。</p>
+<p>只是个配方改动。</p>
+<p>Muse Spark 的 MegaMoE 默认开了。</p>
+<p>MegaMoE 是超大专家并行的一种配法。</p>
+<p>B300 上的专用解码也露出来了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67269">https://github.com/vllm-project/vllm/pull/67269</a></p>
+<p>再说 #66384。</p>
+<p>Mooncake 那条 KV 连接器的修补。</p>
+<p>Mooncake 是跨机器传 KV 缓存的系统。</p>
+<p>请求被抢占后重新接纳，留在上报那步处理。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66384">https://github.com/vllm-project/vllm/pull/66384</a></p>
+<p>其余四条一句话带过。</p>
+<p>#66047，ROCm 上 DSv4.1 的稀疏索引解码行分片了。</p>
+<p>#67092 只是文档，删了 RunLLM 小部件。</p>
+<p>#67085 删死代码。</p>
+<p>#64056，量化配置覆盖的修补。</p>
+<p><strong>SGLang：只有 1 条 CI</strong></p>
+<p>#49706，扩散模型那边，MiniMax-H3-Image 进了 B200 测试套件。</p>
+<p>今天 Summit 开幕，团队都在会场。</p>
+<p><strong>TRT-LLM：2 条，都是修补</strong></p>
+<p>#22106，MXFP4 的 MoE 输入量化，改用原始 FC1 缩放。</p>
+<p>MXFP4 是一种 4 位浮点量化格式。</p>
+<p>#21933，编码器每步守住 token 上限和 batch 上限。</p>
+<p><strong>Dynamo：1 条，多目标搜索打通了</strong></p>
+<p>#17611，部署请求里能同时盯两个目标了。</p>
+<p>一个是每块卡的吞吐。</p>
+<p>一个是每个用户的吞吐。</p>
+<p>以前 Pareto 模式只是个空壳。</p>
+<p>Pareto 是多目标优化。</p>
+<p>现在端到端走通了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17611">https://github.com/ai-dynamo/dynamo/pull/17611</a></p>
+<p><strong>llama.cpp：2 条</strong></p>
+<p>#32094，Hexagon 加了 Q5_0 和 Q5_1 支持。</p>
+<p>Hexagon 是高通的芯片。</p>
+<p>Q5 是 5 位量化格式。</p>
+<p>#32025，服务端那边，客户端断开或超时就取消 MCP 工具调用。</p>
+<p>MCP 是模型调外部工具的协议。</p>
+<p><strong>LMDeploy、TGI、FlashInfer：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还是没刷出来</strong></p>
+<p>接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>原定 11 月 11 日 16:00 PST 到。</p>
+<p>现在已经晚了 17 小时。</p>
+<p>下轮再看。</p>
+<p><strong>华为开源 MACaQ：量化器，值得深读</strong></p>
+<p>华为把内部用的量化器开源了。</p>
+<p>MACaQ 是模型无关校准量化。</p>
+<p>MXFP4 W4A4，权重和激活都压到 4 位。</p>
+<p>每层独立处理，不用跨层传变换。</p>
+<p>122B 的模型，64 分钟量化完。</p>
+<p>只占 32.5GB 显存。</p>
+<p>vLLM 上 Qwen3-32B 的端到端开销只有 2.3%。</p>
+<p>读题快 2.58 倍，解码快 3.06 倍。</p>
+<p>产出的 GGUF，llama.cpp 直接能跑。</p>
+<p>论文 11 月 7 日提交。</p>
+<p>仓库是 huawei-csl/MACaQ。</p>
+<p>11 月 10 日建库。</p>
+<p>数字均为作者自报。</p>
+<p>全文精读见深读笔记。</p>
+<p>原文：<a href="https://arxiv.org/abs/2611.10649">https://arxiv.org/abs/2611.10649</a></p>
+<p>仓库：<a href="https://github.com/huawei-csl/MACaQ">https://github.com/huawei-csl/MACaQ</a></p>
+<h2>业内新闻</h2>
+<p><strong>SGLang Summit 一个小时后开幕</strong></p>
+<p>主舞台 10:00 开场。</p>
+<p>下午 16:00 是英特尔 CEO 陈立武的炉边谈。</p>
+<p>Full Pass 早卖完了。</p>
+<p>Expo Pass 还能买。</p>
+<p>主舞台在场馆里有直播。</p>
+<p>7 点版报过，这里只提醒一句。</p>
+<p>来源：<a href="https://www.sglang.io/summit#agenda">https://www.sglang.io/summit#agenda</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 大V：本轮没有新帖</strong></p>
+<p>lmsysorg、vLLM 官方、karpathy 都没动静。</p>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>最新还是 11 月 10 日那期。</p>
+<p>Zeno Rocha 那期，11 月 10 日 17 点版报过了。</p>
+<p><strong>Hacker News：搜出来的还是旧帖</strong></p>
+<p>没有新料。</p>
+<p><strong>Reddit：没有新料</strong></p>
+<p>xbill 的三篇小卡横评之前都报过。</p>
+<p><strong>中文媒体：没有新料</strong></p>
+<p>Nucera 那篇 agent 实测，11 月 11 日已经做成深读了。</p>
+<h2>值得深入学</h2>
+<p><strong>华为 MACaQ：量化器，值得精读</strong></p>
+<p>这篇能帮你解决一个具体问题。</p>
+<p>你的量化评估里，W4A4 一直缺一个跨架构的现成工具。</p>
+<p>MACaQ 模型无关，文本、图像、视频、语音全吃。</p>
+<p>122B 模型 64 分钟量化完，32.5GB 显存就够。</p>
+<p>vLLM 后端开销只有 2.3%。</p>
+<p>读题和解码还各快两倍多。</p>
+<p>全文精读见深读笔记。</p>
+<p>原文：<a href="https://arxiv.org/abs/2611.10649">https://arxiv.org/abs/2611.10649</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 7 点版去重。</p>
+<p>版本水位：只有 llama.cpp 快照滚到 b12319。</p>
+<p>其余全平，没有新发布。</p>
+<p>vLLM 9 条首次汇总。</p>
+<p>#67269、#67104、#67099、#67092、#67085。</p>
+<p>#66384、#66318、#66047、#64056。</p>
+<p>SGLang 1 条首次汇总。</p>
+<p>#49706。</p>
+<p>TRT-LLM 2 条首次汇总。</p>
+<p>#22106、#21933。</p>
+<p>Dynamo 1 条首次汇总。</p>
+<p>#17611。</p>
+<p>llama.cpp 2 条首次汇总。</p>
+<p>#32094、#32025。</p>
+<p>LMDeploy、TGI、FlashInfer 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>SGLang Summit、T4 横评、L4 横评，之前都报过。</p>
+<p>Nucera agent 实测不再重复。</p>
+<p>Latent Space 11 月 10 日那期也不再重复。</p>
+<p>网上几篇 SGLang vs vLLM 对比文水位还是旧的。</p>
+<p>写 vLLM 稳定版是 v0.32.0，不引用。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-12-0900/">9点版</a></p></body></html>
