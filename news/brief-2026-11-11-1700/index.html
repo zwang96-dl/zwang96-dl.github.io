@@ -1,0 +1,158 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月11日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-12T01:00:37"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-11（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-11（17点版）</h1>
+<p>17点版来了。</p>
+<p>这轮没有大新闻，主角是框架的小步快跑。</p>
+<p>vLLM 修了一组 KV 缓存的毛病。</p>
+<p>SGLang 给 Kimi 新模型加了量化支持。</p>
+<p>另外还有一份 Qwen 新模型自托管指南。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没有新发布</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>release 挂在 v0.33.0rc3 这个 tag 上。</p>
+<p>v0.34.0rc1 那个 tag，13点版报过了。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照还是 b12292。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：7 条，可扩展 KV 缓存那三条最值得看</strong></p>
+<p>先说 #66731、#66704、#66523。</p>
+<p>三条都是修可扩展 KV 缓存的。</p>
+<p>可扩展 KV 缓存，就是草稿纸不够能再续。</p>
+<p>不用一开始就把显存占满。</p>
+<p>#66731 是按整份 token 预算留空间。</p>
+<p>#66704 是加了个提醒。</p>
+<p>显存利用率设太高会扣掉缓存的份。</p>
+<p>#66523 是热身占的块提前还回去。</p>
+<p>免得 CUDA 图捕获时还占着。</p>
+<p>CUDA 图就是把一串操作打包一次下发。</p>
+<p>其余四条一句话带过。</p>
+<p>#64560，ROCm 的 MLA 解码融了几个算子。</p>
+<p>MLA 是多头隐注意力，省显存的注意力。</p>
+<p>#64061，DeepGEMM 的 Mega MoE 跑上 SM90。</p>
+<p>SM90 就是 Hopper 那代卡。</p>
+<p>专家换成 MXFP4 格式。</p>
+<p>MXFP4 是 4 位浮点数，更省显存。</p>
+<p>#66274，Triton 融合 MoE 的缩放广播修了。</p>
+<p>#60035，平均池化在批量不变模式下修稳了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66731">https://github.com/vllm-project/vllm/pull/66731</a></p>
+<p><strong>SGLang：3 条，Kimi 那条最值得看</strong></p>
+<p>#49851，Kimi-K3.1-Pro 接了 ModelOpt 的 MXFP8。</p>
+<p>MXFP8 是英伟达的 8 位量化格式。</p>
+<p>说白了，Kimi 的新旗舰能在 SGLang 上省显存跑了。</p>
+<p>#49931，非量化模型的小批量 BF16 性能恢复了。</p>
+<p>BF16 是 16 位浮点数。</p>
+<p>#49922，top-k 合并那步改到共享内存里做。</p>
+<p>来源：GitHub</p>
+<p><strong>FlashInfer：1 条</strong></p>
+<p>#9003，SM107 的矩阵乘加了 MXFP8 输出。</p>
+<p><strong>llama.cpp：1 条</strong></p>
+<p>#32046，OpenCL 给 Adreno 加了分解注意力。</p>
+<p>Adreno 是高通手机 GPU。</p>
+<p><strong>TRT-LLM：3 条，都是测试豁免</strong></p>
+<p>#22128、#22122、#21968。</p>
+<p>全是测试用例的豁免和恢复。</p>
+<p>没有功能变化。</p>
+<p><strong>LMDeploy、Dynamo：零合入</strong></p>
+<p>两小时里两家都没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮还没有新批次</strong></p>
+<p>接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>新一批原定今天 16:00 PST 到。</p>
+<p>现在还没刷出来，下轮再看。</p>
+<h2>业内新闻</h2>
+<p><strong>本轮没有新消息</strong></p>
+<p>Qwen4 预览版 03点版报过了。</p>
+<p>SGLang 峰会明天开幕，03点版也报过了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Qwen3.8-Flash-Next 自托管指南：手把手教你上机</strong></p>
+<p>这份指南教你自己搭服务。</p>
+<p>搭的是 Qwen3.8-Flash-Next。</p>
+<p>它是 Qwen4 架构的预览版。</p>
+<p>vLLM 和 SGLang 的配方都给了。</p>
+<p>FP8 权重 172.78 GB。</p>
+<p>BF16 权重 335.28 GB。</p>
+<p>SGLang 那边，H200、GB300 用 TP4。</p>
+<p>TP4 就是 4 卡并行。</p>
+<p>MI350X、MI355X 用 TP8。</p>
+<p>单张 RTX PRO 6000 也能跑 NVFP4。</p>
+<p>n-gram 表格放内存里就行。</p>
+<p>想自己上手摸 Qwen4 架构，这篇可以直接照着抄。</p>
+<p>来源：<a href="https://www.ssdnodes.com/learn/what-it-takes-to-self-host-qwen-3-8-flash-next">https://www.ssdnodes.com/learn/what-it-takes-to-self-host-qwen-3-8-flash-next</a></p>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>最新一期还是 11 月 10 日那期。</p>
+<p>聊的是 Resend 的 Zeno Rocha。</p>
+<p>10号 17点版报过了。</p>
+<p>Spotify 上查过了，没有更新。</p>
+<p>X、Reddit、Hacker News 本轮也没有新干货。</p>
+<p>中文媒体也没有新东西。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有</strong></p>
+<p>合入都是小修补和量化适配。</p>
+<p>没有新论文，也没有值得精读的长文。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 15 点版去重。</p>
+<p>版本水位全平，没有新发布。</p>
+<p>vLLM 7 条首次汇总。</p>
+<p>#66731、#66704、#66523、#64560。</p>
+<p>#64061、#66274、#60035。</p>
+<p>SGLang 3 条首次汇总。</p>
+<p>#49851、#49931、#49922。</p>
+<p>FlashInfer 1 条首次汇总。</p>
+<p>#9003。</p>
+<p>llama.cpp 1 条首次汇总。</p>
+<p>#32046。</p>
+<p>TRT-LLM 3 条首次汇总，全是测试豁免。</p>
+<p>LMDeploy、Dynamo 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>Qwen4 预览版 03点版报过，本轮不重复。</p>
+<p>SGLang 峰会 03点版报过，本轮不重复。</p>
+<p>Latent Space 无新单集。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-11-1700/">17点版</a></p></body></html>
