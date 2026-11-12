@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月11日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-12T07:01:51"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-11（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-11（23点版）</h1>
+<p>23点版来了。</p>
+<p>头条是决策模型出道了。</p>
+<p>谷歌的 Gemini Decision 1 一次能答 1000 道题。</p>
+<p>它不逐字生成答案，直接给选择。</p>
+<p>这轮框架合入不多，但 Rubin 的数字很抢眼。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 快照动了</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>release 挂在 v0.33.0rc3 这个 tag 上。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12316。</p>
+<p>21点版时还是 b12308。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：5 条，PD 解耦那条最值得看</strong></p>
+<p>先说 #66646。</p>
+<p>MiniMax-M3 的宽专家并行测试太慢了。</p>
+<p>一次评估要跑 1 小时 37 分钟。</p>
+<p>原因是 MoE 内核每次都按整块缓冲算账。</p>
+<p>现在给读题和解码各设了 token 预算。</p>
+<p>评估几分钟就跑完了。</p>
+<p>跟你评估的 PD 解耦直接相关。</p>
+<p>宽专家并行那条路的测试成本下来了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66646">https://github.com/vllm-project/vllm/pull/66646</a></p>
+<p>再说 #65932，是个修补。</p>
+<p>多个请求同时截断文本会串台。</p>
+<p>现在每个请求用自己的分词器。</p>
+<p>#66692 和 #66691 是一对。</p>
+<p>xgrammar 升到新版。</p>
+<p>结构化输出里 Lark 语法的答案能直接拼出来。</p>
+<p>xgrammar 是管结构化输出的工具。</p>
+<p>#67071 只是文档和测试。</p>
+<p>可扩展 KV 缓存的例子不再硬设显存利用率。</p>
+<p><strong>SGLang：5 条，Muse Spark 那条最值得看</strong></p>
+<p>先说 #49704。</p>
+<p>Muse Spark 是个开源模型。</p>
+<p>它在 AMD 的 MI355X 卡上做了读题和解码优化。</p>
+<p>MI355X 是 AMD 的新卡。</p>
+<p>注意力换了均衡负载的验证核。</p>
+<p>MoE 换了新的矩阵乘法核。</p>
+<p>GSM8K 全量 1319 道题跑过，没翻车。</p>
+<p>来源：GitHub</p>
+<p>#49762 也值得看。</p>
+<p>minimax-h3 的高质量模式配了按步走的缓存策略。</p>
+<p>#47253 是扩散模型那边的优化。</p>
+<p>SANA-Video 的层归一化融合开了 eager 验证。</p>
+<p>其余两条一句话带过。</p>
+<p>#47491，AMD 调度器的 GPU 活儿留在前向流上。</p>
+<p>#49867，只是代码负责人名单。</p>
+<p><strong>LMDeploy：1 条小修补</strong></p>
+<p>#5126，流式聊天回复不再丢 Unicode 字符。</p>
+<p>来源：GitHub</p>
+<p><strong>FlashInfer：2 条，都是注意力那块</strong></p>
+<p>#9376，删了 cuDNN 的旧兼容路径。</p>
+<p>#9382，SM100 的分页自动调优范围拓宽了。</p>
+<p>SM100 是 Blackwell 那代卡的架构号。</p>
+<p>来源：GitHub</p>
+<p><strong>llama.cpp：4 条，SYCL 占了两条</strong></p>
+<p>先说 #31873，是个修补。</p>
+<p>SYCL 后端跑 4GB 以上的模型会吐垃圾输出。</p>
+<p>现在修好了。</p>
+<p>SYCL 是英特尔那边的 GPU 接口。</p>
+<p>#32013 也是 SYCL 的，设备号改成缓存的。</p>
+<p>#31919 给 CUDA 加了调试用的缓冲池。</p>
+<p>#30947 给 OpenCL 加了个新的矩阵乘法核。</p>
+<p><strong>TRT-LLM、TGI、Dynamo：零合入</strong></p>
+<p>两小时里三家都没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还是没刷出来</strong></p>
+<p>接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>新一批原定今天 16:00 PST 到。</p>
+<p>现在 23:00 了，还没刷出来。</p>
+<p>下轮再看。</p>
+<h2>业内新闻</h2>
+<p><strong>Gemini Decision 1：决策模型出道，一次答 1000 道题</strong></p>
+<p>谷歌今天发布了 Gemini Decision 1。</p>
+<p>它是个决策模型，专门做选择题。</p>
+<p>做法是不逐字生成，直接给答案打分。</p>
+<p>一次请求最多能问 1000 道题。</p>
+<p>上下文 256K，端到端 150 到 250 毫秒。</p>
+<p>输入每百万 token 只要 0.1 美元。</p>
+<p>输出不收费。</p>
+<p>谷歌自测 7 项赢了 5 项。</p>
+<p>Jev 是 TypeSafe 的决策模型。</p>
+<p>独立评测的说法要冷静些。</p>
+<p>Artificial Analysis 给它 66 分。</p>
+<p>跟 Jev 持平，比第一名低 7 分。</p>
+<p>Cloudflare 的用法最值得抄。</p>
+<p>小决策模型管选工具和扒日志。</p>
+<p>大推理模型只管诊断。</p>
+<p>原来 6 次调用变 1 次。</p>
+<p>4 万 token 变 1800。</p>
+<p>说白了，以前请大厨每道菜现炒。</p>
+<p>现在先让领班把单分好类。</p>
+<p>大厨只炒真正难的那道。</p>
+<p>跟你评估的 agent 服务直接相关。</p>
+<p>工具调用这步的账能省一大截。</p>
+<p>来源：<a href="https://latent.space/p/ainews-d-day-decision-models-day/">https://latent.space/p/ainews-d-day-decision-models-day/</a></p>
+<p><strong>Rubin 的数字：vLLM 和 SGLang 都报了 10 倍</strong></p>
+<p>SemiAnalysis 的说法是这样。</p>
+<p>vLLM 在 Rubin NVL72 上跑 MiniMax-M3.1-Flash。</p>
+<p>每芯片吞吐是 GB300 的 10.2 倍。</p>
+<p>性价比好 6.5 倍。</p>
+<p>SGLang 那边不到 5 天就拿到最高 10 倍。</p>
+<p>Rubin 是英伟达的新机柜。</p>
+<p>这些数字来自分析机构和厂商自报。</p>
+<p>当参考就行，别当实测。</p>
+<p>TPU 那边也有新数字。</p>
+<p>TPU 8i Max 单芯片带 384GB 显存。</p>
+<p>带宽比上一代翻倍。</p>
+<p>SGLang 的 TPU 分支跑在单台 TPU v7 上。</p>
+<p>跑的模型是 Muse Spark Open。</p>
+<p>小批量解码快 3 倍。</p>
+<p>agent 吞吐最高多 77%。</p>
+<p>来源：<a href="https://latent.space/p/ainews-d-day-decision-models-day/">https://latent.space/p/ainews-d-day-decision-models-day/</a></p>
+<p><strong>SGLang 安全跟进：漏洞有了编号，官方还没发公告</strong></p>
+<p>NEAR 事件那个漏洞有了 CVE 编号。</p>
+<p>CVE-2026-111391。</p>
+<p>问题出在 dumper 过滤器的 eval() 调用。</p>
+<p>eval() 就是直接执行字符串代码。</p>
+<p>截至 11 月 11 日，SGLang 官方还没发安全公告。</p>
+<p>到底哪些版本中招，还对不上号。</p>
+<p>自己搭 SGLang 服务的，先别把端口暴露出去。</p>
+<p>来源：<a href="https://aicyberbrief.com/article/near-ai-breached-through-an-sglang-code-execution-flaw-even-confidential-mode-requests-may-have-been-seen">https://aicyberbrief.com/article/near-ai-breached-through-an-sglang-code-execution-flaw-even-confidential-mode-requests-may-have-been-seen</a></p>
+<p><strong>推理商开始自己买芯片了</strong></p>
+<p>Fal 和 Baseten 据报在自己买芯片。</p>
+<p>原因是云上抢不到配额。</p>
+<p>推理服务商缺卡，已经开始囤硬件了。</p>
+<p>来源：<a href="https://latent.space/p/ainews-d-day-decision-models-day/">https://latent.space/p/ainews-d-day-decision-models-day/</a></p>
+<p><strong>Claude Fable 5.2：Agent Arena 拿了第一</strong></p>
+<p>Fable 5.2 在 Agent Arena 上排第一。</p>
+<p>比第二名 Opus 5.5 高出一大截。</p>
+<p>编码、办公、聊天三项都是第一。</p>
+<p>来源：<a href="https://latent.space/p/ainews-d-day-decision-models-day/">https://latent.space/p/ainews-d-day-decision-models-day/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Jev 革命：决策模型正在变成新工种</strong></p>
+<p>Latent Space 今晚发了篇 Jev 的文章。</p>
+<p>Jev 是 TypeSafe 的决策模型产品。</p>
+<p>创始人 Diogo Almeida 今天在峰会上做了主题演讲。</p>
+<p>他的说法是，决策模型是&quot;可靠的智能&quot;。</p>
+<p>该用来&quot;把一切都自动化&quot;。</p>
+<p>TypeSafe 的年收入已经过了 1 亿美元。</p>
+<p>这篇文章 21:08 PST 才发布。</p>
+<p>算是本轮最新鲜的一篇。</p>
+<p>来源：<a href="https://latent.space/p/jev-revolution/">https://latent.space/p/jev-revolution/</a></p>
+<p><strong>Latent Space 播客：本轮没有新单集</strong></p>
+<p>最新一期还是 11 月 10 日那期。</p>
+<p>聊的是 Resend 的 Zeno Rocha。</p>
+<p>10号 17点版报过了。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有单独成篇的深读</strong></p>
+<p>决策模型这条值得跟进。</p>
+<p>但谷歌和 TypeSafe 都还没放出完整技术细节。</p>
+<p>等有论文或技术博客再精读。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 21 点版去重。</p>
+<p>版本水位：只有 llama.cpp 快照滚到 b12316。</p>
+<p>其余全平，没有新发布。</p>
+<p>vLLM 5 条首次汇总。</p>
+<p>#66646、#65932、#66692、#66691、#67071。</p>
+<p>SGLang 5 条首次汇总。</p>
+<p>#49704、#49762、#47253、#47491、#49867。</p>
+<p>LMDeploy 1 条首次汇总。</p>
+<p>#5126。</p>
+<p>FlashInfer 2 条首次汇总。</p>
+<p>#9376、#9382。</p>
+<p>llama.cpp 4 条首次汇总。</p>
+<p>#31873、#32013、#31919、#30947。</p>
+<p>TRT-LLM、TGI、Dynamo 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>Gemini Decision 1、Rubin 数字、CVE 编号首次汇总。</p>
+<p>Jev 文章首次汇总。</p>
+<p>Latent Space 播客无新单集。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-11-2300/">23点版</a></p></body></html>
