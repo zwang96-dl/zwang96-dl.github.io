@@ -1,0 +1,201 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月12日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-12"/>
+<meta name="doc-ts" content="2026-11-12T10:58:10"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-12（3点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-12（3点版）</h1>
+<p>3点版来了。</p>
+<p>深夜这轮还是很安静。</p>
+<p>框架合入不少，但没出大新闻。</p>
+<p>arXiv 新批次继续鸽。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全平，没有新发布</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照还是 b12317，没滚。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：6 条，P/D 代理那条最值得看</strong></p>
+<p>先说 #67150。</p>
+<p>P/D 代理修了流式返回。</p>
+<p>P/D 就是读题和解码分开跑。</p>
+<p>以前流式请求的返回类型不对。</p>
+<p>现在按 text/event-stream 正确返回。</p>
+<p>说白了，PD 部署里流式输出不断线了。</p>
+<p>跟你评估的 PD 解耦直接相关。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67150">https://github.com/vllm-project/vllm/pull/67150</a></p>
+<p>再说 #67080。</p>
+<p>KV 连接器那条跟 Mooncake 有关。</p>
+<p>Mooncake 是跨机器传 KV 缓存的系统。</p>
+<p>以前存之前没查过就先存。</p>
+<p>现在查不到就跳过，不白存。</p>
+<p>缓存外存那条路更干净了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67080">https://github.com/vllm-project/vllm/pull/67080</a></p>
+<p>再说 #65993。</p>
+<p>Rust 前端那条。</p>
+<p>Rust 前端就是用 Rust 写的前端。</p>
+<p>引擎外渲染器现在同时支持多模态和 LoRA。</p>
+<p>LoRA 是低成本微调的办法。</p>
+<p>多模态加微调那条路打通了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65993">https://github.com/vllm-project/vllm/pull/65993</a></p>
+<p>其余三条一句话带过。</p>
+<p>#63727，ROCm 上 Muse Spark 的 FP8 融合 MoE 配了新参数。</p>
+<p>FP8 是 8 位浮点，省显存。</p>
+<p>#62603，SM90 上块 FP8 的 MegaMoE 走 FlashInfer 的 MoE-EP。</p>
+<p>SM90 就是 Hopper 那代卡。</p>
+<p>#66777，修补：SageMaker 的报错按请求类型正确返回。</p>
+<p><strong>SGLang：5 条，推测解码过 PD 那条最值得看</strong></p>
+<p>先说 #49665。</p>
+<p>推测解码的草稿 KV 也能过 PD 传了。</p>
+<p>dflash 是 SGLang 的推测解码方案。</p>
+<p>推测解码就是先让小模型打草稿再让大模型改。</p>
+<p>以前草稿的 KV 只留在本机。</p>
+<p>现在读题那台机器能把草稿 KV 传给解码那台。</p>
+<p>K3.1 同机部署上，目标 KV 多了 15%。</p>
+<p>说白了，PD 拆开后，推测解码的加速不丢了。</p>
+<p>跟你评估的 PD 解耦直接相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49665">https://github.com/sgl-project/sglang/pull/49665</a></p>
+<p>再说 #50018。</p>
+<p>GLM-5.3-Flash 的默认内存分法改了。</p>
+<p>以前状态池占了九成内存。</p>
+<p>KV 池太小，多轮会话每轮都被清掉。</p>
+<p>前缀缓存命中率跌到 0.056。</p>
+<p>现在状态池只占四分之一。</p>
+<p>剩下的都给 KV 池。</p>
+<p>多轮 agent 会话的缓存终于留得住了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50018">https://github.com/sgl-project/sglang/pull/50018</a></p>
+<p>其余三条一句话带过。</p>
+<p>#48947，小批量读题也能跑层归一化并行。</p>
+<p>#47267，dflash 的候选 top-k 改到目标模型的头分片上算。</p>
+<p>#50055 只是 CI 杂活：NPU 的精度测试升级了。</p>
+<p><strong>TRT-LLM：7 条，长多轮提示词那条最值得看</strong></p>
+<p>先说 #21308。</p>
+<p>长多轮对话每轮的提示词处理变便宜了。</p>
+<p>提示词就是每次发给模型的输入。</p>
+<p>多轮 agent 会话里，历史越攒越长。</p>
+<p>每轮重复处理历史的开销下来了。</p>
+<p>跟 agent 场景的长会话直接相关。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21308">https://github.com/NVIDIA/TensorRT-LLM/pull/21308</a></p>
+<p>其余六条一句话带过。</p>
+<p>#21791，DeepGEMM 和 CuTe 的预热核每台机器只建一次。</p>
+<p>#21612，NIXL 传完状态就放掉句柄，不再攥着 GIL。</p>
+<p>GIL 是 Python 的全局锁。</p>
+<p>#21863，GQA 分段解码的工作区按 FlashInfer 的统计量重新算了。</p>
+<p>GQA 是分组查询注意力。</p>
+<p>#22174、#22103、#19212 都是修补和测试。</p>
+<p><strong>llama.cpp：5 条，预填充加速那条最值得看</strong></p>
+<p>先说 #26048。</p>
+<p>CUDA 上 NVFP4 的预填充快了。</p>
+<p>NVFP4 是 4 位浮点格式。</p>
+<p>权重缩放那步融进了矩阵乘法的收尾里。</p>
+<p>预填充就是读题那一步。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/26048">https://github.com/ggml-org/llama.cpp/pull/26048</a></p>
+<p>其余四条一句话带过。</p>
+<p>#32128，ARM 的 NEON 上用了 4x4 的矩阵乘法小块。</p>
+<p>NEON 是 ARM 的向量指令集。</p>
+<p>#32100，后端只预取前面已经算过的输入。</p>
+<p>#31897，门控 DeltaNet 走 SpacemiT 的 RVV 核。</p>
+<p>RVV 是 RISC-V 的向量扩展。</p>
+<p>#29357，Vulkan 上英特尔的 FA 核支持预填充。</p>
+<p>FA 就是 FlashAttention。</p>
+<p><strong>LMDeploy、TGI、Dynamo、FlashInfer：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还是没刷出来</strong></p>
+<p>接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>新一批原定 11 月 11 日 16:00 PST 到。</p>
+<p>现在 3:00 了，已经晚了 11 小时。</p>
+<p>下轮再看。</p>
+<p><strong>华为 MACaQ：量化新工具开源了</strong></p>
+<p>MACaQ 是华为云出的后训练量化框架。</p>
+<p>122B 的模型 64 分钟就能压到 W4A4。</p>
+<p>W4A4 是 4 位权重加 4 位激活。</p>
+<p>只用 32.5GB 显存。</p>
+<p>支持 vLLM 和 llama.cpp。</p>
+<p>Qwen3.8-27B 上，读题快 2.33 倍，解码快 2.58 倍。</p>
+<p>提醒一句，这是官方自报的数字。</p>
+<p>还没看到第三方复现。</p>
+<p>来源：<a href="https://aiweekly.co/alerts/huawei-open-sources-macaq-quantizes-122b-model-in-64-minutes">https://aiweekly.co/alerts/huawei-open-sources-macaq-quantizes-122b-model-in-64-minutes</a></p>
+<p>仓库：<a href="https://github.com/huawei-csl/MACaQ">https://github.com/huawei-csl/MACaQ</a></p>
+<h2>业内新闻</h2>
+<p><strong>本轮没有新消息</strong></p>
+<p>CoreWeave 那条 1 点版报过了。</p>
+<p>ZONOS3-Mini 也是旧闻了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：本轮没有新文章</strong></p>
+<p>最新一篇还是 D-Day 那篇。</p>
+<p>23 点版已经报过了。</p>
+<p><strong>Latent Space 播客：本轮没有新单集</strong></p>
+<p>最新一期还是 11 月 10 日那期。</p>
+<p>10 号 17 点版报过了。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有单独成篇的深读</strong></p>
+<p>SGLang 的 dflash 草稿 KV 过 PD 值得跟进。</p>
+<p>但目前只有 PR 正文，没有技术博客或论文。</p>
+<p>等有更完整的材料再精读。</p>
+<p>GLM-5.3-Flash 的内存分法那条也一样。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 1 点版去重。</p>
+<p>版本水位全平，没有新发布。</p>
+<p>vLLM 6 条首次汇总。</p>
+<p>#67150、#67080、#66777、#65993、#63727、#62603。</p>
+<p>SGLang 5 条首次汇总。</p>
+<p>#49665、#50018、#48947、#47267、#50055。</p>
+<p>TRT-LLM 7 条首次汇总。</p>
+<p>#22174、#22103、#21863、#21791、#21612、#21308、#19212。</p>
+<p>llama.cpp 5 条首次汇总。</p>
+<p>#32128、#32100、#31897、#29357、#26048。</p>
+<p>LMDeploy、TGI、Dynamo、FlashInfer 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>华为 MACaQ 首次汇总。</p>
+<p>X 扫了一圈无新帖。</p>
+<p>Latent Space 无更新。</p>
+<p>ZONOS3-Mini 在 11 月 10 日 09 点版报过。</p>
+<p>particula 对比文章在 11 月 11 日 21 点版报过。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-12-0300/">3点版</a></p></body></html>
