@@ -1,0 +1,224 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月11日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-11"/>
+<meta name="doc-ts" content="2026-11-12T04:59:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-11（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-11（21点版）</h1>
+<p>21点版来了。</p>
+<p>头条是英伟达的 Snapshot。</p>
+<p>推理服务冷启动几分钟。</p>
+<p>它能压到几十秒。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 快照动了</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>release 挂在 v0.33.0rc3 这个 tag 上。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12308。</p>
+<p>19点版时还是 b12303。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：14 条，KV 缓存外接那条最值得看</strong></p>
+<p>先说 #66674。</p>
+<p>KV 连接器现在能把草稿纸导出给外部。</p>
+<p>KV 缓存就是草稿纸。</p>
+<p>LMCache 这类多进程共享缓存能直接接上。</p>
+<p>跨进程复用草稿纸又顺了一步。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66674">https://github.com/vllm-project/vllm/pull/66674</a></p>
+<p>再说 #66638。</p>
+<p>多页 Unlimited-OCR-2 请求进了处理器缓存。</p>
+<p>Unlimited-OCR-2 是百页文档那个模型。</p>
+<p>同一份文档反复问，不用每次重算。</p>
+<p>11点版深读讲过它。</p>
+<p>#66036 也值得看。</p>
+<p>ROCm 上 DeepSeek V4 系列开了 FP8 KV 缓存。</p>
+<p>FP8 是 8 位浮点，省显存。</p>
+<p>走的是稀疏 MLA 那条路。</p>
+<p>#67040 是 GLM-5.3 的性能优化。</p>
+<p>DeepGEMM 的 BF16 MegaMoE 接上了。</p>
+<p>BF16 是 16 位浮点。</p>
+<p>没量化的权重也能跑这条快路。</p>
+<p>#60321 补了 mxfp4 的 MLA KV 缓存。</p>
+<p>mxfp4 是 4 位浮点格式。</p>
+<p>读写两条路都通了。</p>
+<p>Rust 前端两条放一起说。</p>
+<p>#66767 按 token 认 MiniMax M3 的标记。</p>
+<p>#66531 让 M3 的工具调用参数流式吐出来。</p>
+<p>其余七条一句话带过。</p>
+<p>#54899，ROCm 的 MLA 解码头数按原生块对齐。</p>
+<p>#66859，MoE 的路由缩放开关改成枚举。</p>
+<p>#66978，XPU 的测试用例加长提示词。</p>
+<p>#65521，GLM-5.3 用 FlashInfer 的 mega mHC。</p>
+<p>#67107，ROCm 的 top-k 路由走 AITER。</p>
+<p>#67081，关机时清理编译模型的字节码钩子。</p>
+<p>#66325，流式输出每块少做点活。</p>
+<p><strong>SGLang：13 条，DCP 解码那条最值得看</strong></p>
+<p>先说 #49980。</p>
+<p>DCP 解码用上原生 FlashMLA。</p>
+<p>DCP 是解耦读题那块的代号。</p>
+<p>预计算排程也一起上了。</p>
+<p>来源：GitHub</p>
+<p>#49664 也值得看。</p>
+<p>dflash 的滑动窗口草稿 KV 放进环形缓冲。</p>
+<p>dflash 是推测解码的一种。</p>
+<p>每个请求各用各的圈，不串。</p>
+<p>#49771 是依赖升级。</p>
+<p>FlashInfer 升到 0.7.4。</p>
+<p>扩散模型两条放一起说。</p>
+<p>#49308，nomas 的均方归约融成一个核。</p>
+<p>#49391，joy 的大图更新复用 FP32 残差门。</p>
+<p>其余八条一句话带过。</p>
+<p>#47934，NPU 上 dsv4 的状态用对端行传。</p>
+<p>#49987、#49908，都是测试。</p>
+<p>#50003，Kimi-K3.1 分支去掉请求结束才备的 Mamba。</p>
+<p>#47093，Anthropic 的思考模式不用预算也能开。</p>
+<p>#48840、#48846，hisparse 的两处小修。</p>
+<p>#47870，AMD 的 ct-fp8-moe 权重打上已洗牌标记。</p>
+<p><strong>TRT-LLM：1 条，只有文档</strong></p>
+<p>#21895，给运行时推测控制补文档。</p>
+<p>没有功能变化。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21895">https://github.com/NVIDIA/TensorRT-LLM/pull/21895</a></p>
+<p><strong>Dynamo：5 条，全围着路由转</strong></p>
+<p>先说 #16078。</p>
+<p>KV 路由把每 rank 常驻块数暴露出来。</p>
+<p>选择插件能按真实占用挑节点。</p>
+<p>#17441 是个修补。</p>
+<p>聚合提示词的 logprobs 不再给缓存积分。</p>
+<p>其余三条都是性能。</p>
+<p>#18528，没人读解码成本就跳过提示词重叠深度。</p>
+<p>#18538，调度器批量接排队的命令。</p>
+<p>#18533，服务发现只读写 etcd 里要的那部分。</p>
+<p><strong>FlashInfer：1 条小修补</strong></p>
+<p>#9371，分页回退拒绝不支持的独立查询长度。</p>
+<p>来源：GitHub</p>
+<p><strong>llama.cpp：快照 b12308，合入 1 条</strong></p>
+<p>#32067，CUDA 跳过空的 MoE 块。</p>
+<p>MMQ 的 stream-k 修正里省点活。</p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<p>两小时里两家都没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还是没刷出来</strong></p>
+<p>接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>新一批原定今天 16:00 PST 到。</p>
+<p>现在 21:00 了，还没刷出来。</p>
+<p>下轮再看。</p>
+<h2>业内新闻</h2>
+<p><strong>NVIDIA Snapshot：冷启动几分钟，恢复只要几十秒</strong></p>
+<p>这篇是今晚的头条。</p>
+<p>英伟达 11 月 10 日在 KubeCon 发布了 Snapshot。</p>
+<p>它是 DSX 平台的新开源组件。</p>
+<p>做法像给推理服务拍快照。</p>
+<p>初始化好的 worker，连 CPU 带 GPU 内存整个存下来。</p>
+<p>扩容或故障恢复时直接还原。</p>
+<p>不用重新加载权重、编译内核、抓 CUDA 图。</p>
+<p>B200 上三家引擎都测了。</p>
+<p>vLLM、SGLang、TRT-LLM 全在内。</p>
+<p>恢复只要 3.6 到 42.7 秒。</p>
+<p>冷启动最长要 19 分钟。</p>
+<p>最快快了 36 倍。</p>
+<p>DeepSeek-V4.1-Flash 那组最夸张。</p>
+<p>vLLM 上冷启动 1110 秒，恢复只要 31 秒。</p>
+<p>Crusoe 的实测也对得上。</p>
+<p>GLM-5.3 从 8 分钟压到 31 秒。</p>
+<p>Saturn Cloud 的 vLLM 也一样。</p>
+<p>从 2 到 8.5 分钟压到 6 到 34 秒。</p>
+<p>代价是快照本身不便宜。</p>
+<p>8 卡大模型要 600GB 到 1TB 存储。</p>
+<p>做一次要 15 秒到 5.5 分钟。</p>
+<p>但做一次就能反复用，第一次恢复就回本。</p>
+<p>注意口径：恢复计时不含拉镜像和配机器。</p>
+<p>KV 缓存也不在快照里，恢复前先释放。</p>
+<p>跟你评估直接相关。</p>
+<p>PD 解耦扩容时，解码池冷启动那几分钟能省下来。</p>
+<p>弹性伸缩的账要重算一遍。</p>
+<p>全文精读见深读笔记。</p>
+<p>来源：<a href="https://developer.nvidia.com/blog/start-and-restore-gpu-workloads-in-seconds-with-nvidia-snapshot/">https://developer.nvidia.com/blog/start-and-restore-gpu-workloads-in-seconds-with-nvidia-snapshot/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>最新一期还是 11 月 10 日那期。</p>
+<p>聊的是 Resend 的 Zeno Rocha。</p>
+<p>10号 17点版报过了。</p>
+<p>Spotify 上查过了，没有更新。</p>
+<p>X、Reddit、Hacker News 本轮也没有新干货。</p>
+<p>particula.tech 那篇对比文今天更新了。</p>
+<p>比的是 SGLang 和 vLLM。</p>
+<p>数字还是厂商自报那套，当参考就行。</p>
+<p>来源：<a href="https://particula.tech/blog/sglang-vs-vllm-inference-engine-comparison">https://particula.tech/blog/sglang-vs-vllm-inference-engine-comparison</a></p>
+<h2>值得深入学</h2>
+<p><strong>NVIDIA Snapshot：冷启动账本，值得精读</strong></p>
+<p>这篇能帮你解决一个具体问题。</p>
+<p>你的 PD 解耦评估里，扩容和故障恢复的冷启动一直是暗成本。</p>
+<p>这篇给了实测数字：恢复 3.6 到 42.7 秒，最快快 36 倍。</p>
+<p>三张表把时间拆到每一步。</p>
+<p>哪一步最贵、快照一次多少钱，一眼看清。</p>
+<p>全文精读见深读笔记。</p>
+<p>原文：<a href="https://developer.nvidia.com/blog/start-and-restore-gpu-workloads-in-seconds-with-nvidia-snapshot/">https://developer.nvidia.com/blog/start-and-restore-gpu-workloads-in-seconds-with-nvidia-snapshot/</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 19 点版去重。</p>
+<p>版本水位：只有 llama.cpp 快照滚到 b12308。</p>
+<p>其余全平，没有新发布。</p>
+<p>vLLM 14 条首次汇总。</p>
+<p>#66674、#66638、#66036、#67040、#60321。</p>
+<p>#66767、#66531、#54899、#66859、#66978。</p>
+<p>#65521、#67107、#67081、#66325。</p>
+<p>SGLang 13 条首次汇总。</p>
+<p>#49980、#49664、#49771、#49308、#49391。</p>
+<p>#47934、#49987、#50003、#49908、#47093。</p>
+<p>#48840、#48846、#47870。</p>
+<p>TRT-LLM 1 条首次汇总。</p>
+<p>#21895。</p>
+<p>Dynamo 5 条首次汇总。</p>
+<p>#16078、#17441、#18528、#18538、#18533。</p>
+<p>FlashInfer 1 条首次汇总。</p>
+<p>#9371。</p>
+<p>llama.cpp 1 条首次汇总。</p>
+<p>#32067。</p>
+<p>LMDeploy、TGI 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>NVIDIA Snapshot 首次汇总。</p>
+<p>Latent Space 无新单集。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-11-2100/">21点版</a></p></body></html>
