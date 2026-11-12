@@ -1,0 +1,270 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月12日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-12"/>
+<meta name="doc-ts" content="2026-11-12T23:04:20"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-12（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-12（15点版）</h1>
+<p>15点版来了。</p>
+<p>头条：SGLang 登上了亚马逊的芯片。</p>
+<p>Trainium 也能跑 SGLang 了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：FlashInfer 冒了个新预发布</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 的 tag 和 release 还是没挂出来。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 出了 v0.7.5rc1。</p>
+<p>今天 14 点 21 分刚发。</p>
+<p>正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12329。</p>
+<p>13 点版时还是 b12323。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>FlashInfer v0.7.5rc1：确定性那块值得看</strong></p>
+<p>先说 batch_invariant。</p>
+<p>MXFP4 和 NVFP4 的矩阵乘法，现在也支持这个模式了。</p>
+<p>batch_invariant 就是 batch 大小变了，结果也不变。</p>
+<p>这正是你做确定性评估要的东西。</p>
+<p>之前 v0.7.4 刚把批量不变模式带进来。</p>
+<p>这回又补了两种 4 位量化的支持。</p>
+<p>再说 MoE 那边。</p>
+<p>SM90 上的 MXFP4 和 NVFP4 拉取更快了。</p>
+<p>MegaMoE 的 token 分片也调过。</p>
+<p>还有个融合算子。</p>
+<p>FP8 矩阵乘法和 all-reduce 合成一步。</p>
+<p>all-reduce 就是多卡之间汇总数据。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.5rc1">https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.5rc1</a></p>
+<p><strong>vLLM：8 条，推测解码占了两条</strong></p>
+<p>先说 #66063。</p>
+<p>流水线并行里，草稿模型现在只占一个 stage。</p>
+<p>stage 就是流水线里的一段。</p>
+<p>以前草稿模型可能跨好几段。</p>
+<p>现在收成一段，调度更干净。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66063">https://github.com/vllm-project/vllm/pull/66063</a></p>
+<p>再说 #62964。</p>
+<p>修了推测解码里 FlashInfer 的 CUDA 图。</p>
+<p>草稿模型头数不一样时，图也能留住。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/62964">https://github.com/vllm-project/vllm/pull/62964</a></p>
+<p>再说 #61243。</p>
+<p>GLM-5.3-Flash 的 HiSparse 支持合入了。</p>
+<p>HiSparse 是稀疏注意力的加速路子。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/61243">https://github.com/vllm-project/vllm/pull/61243</a></p>
+<p>其余五条一句话带过。</p>
+<p>#67068，弹性 EP 重启引擎前先重建日志。</p>
+<p>#67319 和 #67322，Inkling 2 Small 的配方。</p>
+<p>#66830 和 #66910，都是 CI。</p>
+<p><strong>SGLang：4 条，分层缓存那条跟你有关</strong></p>
+<p>先说 #50056。</p>
+<p>修了 hicache 预取时的 key 计算。</p>
+<p>hicache 就是分层缓存。</p>
+<p>热数据放显存，冷数据放外面。</p>
+<p>key 算错了，预取就取错东西。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50056">https://github.com/sgl-project/sglang/pull/50056</a></p>
+<p>再说 #50185。</p>
+<p>Inkling-2-Small 的部署配方也来了。</p>
+<p>vLLM 那边同款配方刚合入。</p>
+<p>两边都盯上了这个小模型。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50185">https://github.com/sgl-project/sglang/pull/50185</a></p>
+<p>其余两条一句话带过。</p>
+<p>#50193 是 CI，给 fa3 打包补了个轮子。</p>
+<p>#49927 是文档，讲工具解析的流式补全。</p>
+<p><strong>TRT-LLM：2 条，PD 集群那条值得看</strong></p>
+<p>先说 #21716。</p>
+<p>PD 集群的存储，现在支持 etcd 凭证和 TLS。</p>
+<p>etcd 就是存集群配置的键值库。</p>
+<p>TLS 就是加密传输。</p>
+<p>PD 集群跨机器传 KV，更安全了。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21716">https://github.com/NVIDIA/TensorRT-LLM/pull/21716</a></p>
+<p>再说 #22197。</p>
+<p>修了严格接受核的特化问题。</p>
+<p>严格接受是推测解码里验草稿的环节。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22197">https://github.com/NVIDIA/TensorRT-LLM/pull/22197</a></p>
+<p><strong>Dynamo：10 条，路由和 PD 占大头</strong></p>
+<p>先说 #17597。</p>
+<p>全局路由器的池子，现在能当路由核心的 worker。</p>
+<p>worker 就是干活的进程。</p>
+<p>路由策略可以插拔了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17597">https://github.com/ai-dynamo/dynamo/pull/17597</a></p>
+<p>再说 #18419。</p>
+<p>文档里讲清楚了一件事。</p>
+<p>同一台机器上的 PD pod，KV 走 TCP 传。</p>
+<p>pod 就是一组容器。</p>
+<p>同机还走 TCP，听着绕，但有原因。</p>
+<p>跟你评估 PD 部署的传输开销直接相关。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18419">https://github.com/ai-dynamo/dynamo/pull/18419</a></p>
+<p>再说 #18408。</p>
+<p>引擎输出里的大字段，现在装箱了。</p>
+<p>性能小修补。</p>
+<p>其余七条一句话带过。</p>
+<p>#18377，Anthropic 那边工具调用的用量上报。</p>
+<p>#18585，构建修补。</p>
+<p>#18670、#18614、#18478。</p>
+<p>都是 1.7.0 分支的 cherry-pick。</p>
+<p>#18322，名字太长截短。</p>
+<p>#18687，只是测试。</p>
+<p><strong>llama.cpp：4 条，都是修补</strong></p>
+<p>#32011，Hexagon 在 Windows ARM64 上能编了。</p>
+<p>其余三条都是服务端 CI。</p>
+<p>#32168、#32167、#32166。</p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还在鸽</strong></p>
+<p>接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>原定 11 月 11 日 16:00 PST 到。</p>
+<p>现在已经晚了 23 小时。</p>
+<p>13 点版时晚 21 小时。</p>
+<p>下轮再看。</p>
+<p><strong>vLLM 的 EPD：首字时间砍了快一半</strong></p>
+<p>这是 Latent Space 11 月 11 日那篇里的数据。</p>
+<p>EPD 就是编码器也拆出来，单独跑。</p>
+<p>DeepSeek V4.1 Flash 上测的。</p>
+<p>并发 64 到 128 之间。</p>
+<p>P90 首字时间降了 44% 到 47%。</p>
+<p>每卡吞吐涨了 6.6% 到 9.5%。</p>
+<p>用的办法是 Mooncake 和 NIXL 传 embedding。</p>
+<p>embedding 就是编码器吐出来的向量。</p>
+<p>再加跨编码器的缓存。</p>
+<p>这组数跟你正在评估的 EPD 直接对得上。</p>
+<p>11 月 11 日那篇 EPD 深读讲的是 InternVL。</p>
+<p>这组是同一套路在 DeepSeek 上的数。</p>
+<p>来源：<a href="http://latent.space/p/ainews-d-day-decision-models-day/">http://latent.space/p/ainews-d-day-decision-models-day/</a></p>
+<p><strong>NaiveAI 实测：快是真快，话痨也是真话痨</strong></p>
+<p>这是 Latent Space 11 月 10 日的实测文章。</p>
+<p>之前几期漏报了，这轮补上。</p>
+<p>Naive-N0.5-Flash 是个 309B 的 MoE 模型。</p>
+<p>每次只激活 15.5B 参数。</p>
+<p>它没有一层全注意力。</p>
+<p>全靠滑窗注意力和稀疏注意力。</p>
+<p>滑窗就是只看附近的 128 个 token。</p>
+<p>稀疏层只挑最相关的 2048 个 token 算。</p>
+<p>配的推理引擎叫 NaiveRT。</p>
+<p>官方说最快能到 2000 token 每秒。</p>
+<p>Latent Space 实测的中位数是 3.1 秒答完。</p>
+<p>GLM 5.3 Flash 是 5.3 秒。</p>
+<p>DeepSeek V4.1 Flash 是 10.1 秒。</p>
+<p>但有个坑。</p>
+<p>难题上它能吐 10 万多个 token。</p>
+<p>比别人多 9 到 11 倍。</p>
+<p>说白了，速度是拿话痨换来的。</p>
+<p>推测解码一轮只要 3.4 毫秒。</p>
+<p>SGLang 同条件下是 12.3 毫秒。</p>
+<p>数字是实测和厂商说法混着来的，先记一笔。</p>
+<p>来源：<a href="http://latent.space/p/naiveai/">http://latent.space/p/naiveai/</a></p>
+<h2>业内新闻</h2>
+<p><strong>SGLang-Neuron v0.1.0：Trainium 也能跑 SGLang 了</strong></p>
+<p>亚马逊今天刚宣布公开预览。</p>
+<p>SGLang 的 serving 栈，现在能跑在 Trainium 上。</p>
+<p>Trainium 是亚马逊自研的 AI 芯片。</p>
+<p>支持 Trainium2 和 Trainium3。</p>
+<p>接口跟你在 GPU 上用的那套一模一样。</p>
+<p>不用改代码，换个后端就能跑。</p>
+<p>PD 解耦也支持。</p>
+<p>说白了，SGLang 又多了一块硬件地盘。</p>
+<p>这是 SGLang 团队和 Annapurna Labs 一起做的。</p>
+<p>走 AWS 的深度学习容器就能用。</p>
+<p>来源：<a href="https://aws.amazon.com/blogs/machine-learning/deploy-frontier-ai-models-on-aws-trainium-with-sglang-neuron/">https://aws.amazon.com/blogs/machine-learning/deploy-frontier-ai-models-on-aws-trainium-with-sglang-neuron/</a></p>
+<p><strong>SGLang Summit：一个小时后有重头戏</strong></p>
+<p>16 点是英特尔 CEO 陈立武的炉边谈。</p>
+<p>聊下一代 AI 硬件。</p>
+<p>明天是 Periodic Labs 的 Liam Fedus。</p>
+<p>聊新兴 AI 实验室。</p>
+<p>来源：<a href="https://www.sglang.io/summit">https://www.sglang.io/summit</a></p>
+<p><strong>ERNIE 5.5 Flash：开源权重定在 11 月 25 日</strong></p>
+<p>Reddit 上有人贴了百度的公告截图。</p>
+<p>ERNIE 5.5 Flash 预览版已经上线。</p>
+<p>开源权重定在 11 月 25 日放出。</p>
+<p>280B 总参数，每次激活 14B。</p>
+<p>上下文 1M token。</p>
+<p>官方说生成速度超过 200 token 每秒。</p>
+<p>来源：<a href="http://latent.space/p/ainews-d-day-decision-models-day/">http://latent.space/p/ainews-d-day-decision-models-day/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 播客：本轮没有新单集</strong></p>
+<p>最新还是 11 月 10 日那期。</p>
+<p>Zeno Rocha 那期，11 月 10 日 17 点版报过了。</p>
+<p><strong>X 大V：本轮没有新帖</strong></p>
+<p>lmsysorg 的动静都在 LinkedIn 上。</p>
+<p>vLLM 官方、karpathy 都没动静。</p>
+<p><strong>Hacker News：没有新料</strong></p>
+<p>Thaw 那篇 11 月 7 日已经报过。</p>
+<p><strong>Reddit：三条小料</strong></p>
+<p>先说 Unsloth Dynamic v3.1。</p>
+<p>Qwen3.8-27B 的 GGUF 量化包更新了。</p>
+<p>官方说精度比上一代高 5% 到 10%。</p>
+<p>数字是厂商说法，先记一笔。</p>
+<p>再说 GLM 5.3 Flash 的野路子玩法。</p>
+<p>有人用 40 台迷你主机组了个集群。</p>
+<p>USB 3 当互联，成本约 5000 美元。</p>
+<p>跑出 14 token 每秒。</p>
+<p>图一乐，离实用还远。</p>
+<p>来源：<a href="http://latent.space/p/ainews-d-day-decision-models-day/">http://latent.space/p/ainews-d-day-decision-models-day/</a></p>
+<p><strong>中文媒体：没有新料</strong></p>
+<p>v1.0 和联盟的消息，中文媒体还没跟上。</p>
+<p>SGLang-Neuron 今天刚出，也还没见中文报道。</p>
+<h2>值得深入学</h2>
+<p>本轮没有新的深读。</p>
+<p>EPD 那组数，可以对照 11 月 11 日的 EPD 深读看。</p>
+<p>那篇讲的是 InternVL 上的路子。</p>
+<p>FlashInfer 的批量不变模式，之前那期讲过思路。</p>
+<p>这轮只是补了两种量化的支持。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 13 点版去重。</p>
+<p>版本水位：FlashInfer 出了 v0.7.5rc1，其余全平。</p>
+<p>SGLang v1.0 仍未发版。</p>
+<p>SGLang-Neuron v0.1.0 首次报。</p>
+<p>vLLM EPD 的 DeepSeek 数、NaiveAI 实测首次报。</p>
+<p>Rubin 数字、TPU 数字，11 月 11 日 23 点版已报过。</p>
+<p>Thaw，11 月 7 日已报过。</p>
+<p>vLLM 8 条首次汇总：#61243、#66063、#62964、#67068、#67319、#67322、#66830、#66910。</p>
+<p>SGLang 4 条首次汇总：#50056、#50185、#50193、#49927。</p>
+<p>TRT-LLM 2 条首次汇总：#21716、#22197。</p>
+<p>Dynamo 10 条首次汇总：#17597、#18419、#18408、#18377、#18585、#18670、#18614、#18478、#18322、#18687。</p>
+<p>llama.cpp 4 条首次汇总：#32011、#32168、#32167、#32166。</p>
+<p>FlashInfer 12 条首次汇总：#6851、#7203、#6890、#9049、#9394、#9407、#9416、#9393、#9388、#9412、#9418、#8405。</p>
+<p>LMDeploy、TGI 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-12-1500/">15点版</a></p></body></html>
