@@ -1,0 +1,254 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月12日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-12"/>
+<meta name="doc-ts" content="2026-11-12T12:59:34"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-12（5点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-12（5点版）</h1>
+<p>5点版来了。</p>
+<p>深夜这轮还是很安静。</p>
+<p>框架合入不少，但没出大新闻。</p>
+<p>arXiv 新批次继续鸽。</p>
+<p>不过有一条实测值得看。</p>
+<p>单张 5090 跑 256K 上下文，实测跑通了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 快照动了</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12318。</p>
+<p>3 点版时还是 b12317。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：8 条，KV 缓存淘汰那条最值得看</strong></p>
+<p>先说 #67098。</p>
+<p>KV 缓存外存到 CPU 那层，淘汰策略修了。</p>
+<p>KV 缓存就是草稿纸。</p>
+<p>ARC 是自适应替换缓存。</p>
+<p>以前 ARC 策略先扔正在跑的请求的前几块。</p>
+<p>可查缓存要从第 0 块连续往后找。</p>
+<p>前几块没了，后面的块就查不到了。</p>
+<p>白占着地方，却一次也命中不了。</p>
+<p>现在改成从尾巴开始扔。</p>
+<p>复现里够不着的块从 252 个清到 0。</p>
+<p>说白了，CPU 那层草稿纸不再白占地方了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67098">https://github.com/vllm-project/vllm/pull/67098</a></p>
+<p>再说 #65535。</p>
+<p>多模态那条，修了个会崩引擎的 bug。</p>
+<p>预先算好的图文向量，以前会走编码器那张加速图。</p>
+<p>加速图就是提前排好的计算表。</p>
+<p>结果直接把引擎崩了。</p>
+<p>现在这类请求改走慢速的老实路。</p>
+<p>像素输入照常走加速图，不受影响。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65535">https://github.com/vllm-project/vllm/pull/65535</a></p>
+<p>其余六条一句话带过。</p>
+<p>#58619、#67152，都是 KV 外存那条线的修补。</p>
+<p>混合模型在解码并行下也能分段外存了。</p>
+<p>#66608，多模态：视频帧数只传个数，不再多传。</p>
+<p>#66773，Rust 前端：引擎彻底挂了就直接退出。</p>
+<p>#66891，工具返回的图片能在渲染器里显示了。</p>
+<p>#61872，ROCm 上 MoE 的权重补齐被之前改动弄丢了，现在补回来。</p>
+<p><strong>SGLang：13 条，混合模型缓存那条最值得看</strong></p>
+<p>先说 #49430。</p>
+<p>混合模型的前缀缓存，淘汰规则升级了。</p>
+<p>混合模型就是注意力和 Mamba 层混着用的模型。</p>
+<p>Mamba 是不用注意力的循环结构。</p>
+<p>缓存一个前缀，要同时留住 KV 和循环状态。</p>
+<p>可循环状态的池子比 KV 池小得多。</p>
+<p>GLM-5.3-Flash 的例子里，状态位只有 419 个。</p>
+<p>KV 那边却能装将近 300 万个 token。</p>
+<p>以前一次只扔一个状态，KV 还留着。</p>
+<p>agent 跑完工具回来，常发现状态没了。</p>
+<p>前缀还在，却接不上，只好重算。</p>
+<p>现在按 GreedyDual-Size 策略成批淘汰。</p>
+<p>GreedyDual-Size 就是按性价比挑着扔的算法。</p>
+<p>状态和 KV 一起走，缓存才真正能续上。</p>
+<p>跟 agent 的多轮会话直接相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49430">https://github.com/sgl-project/sglang/pull/49430</a></p>
+<p>再说 #49669。</p>
+<p>PD 解耦那条，修了个越界口子。</p>
+<p>PD 就是读题和解码分开跑。</p>
+<p>交接时有个长度上限，本来该卡住超长提示词。</p>
+<p>可上限取的是整个池子的容量。</p>
+<p>离容量只差一两页的提示词也能混进来。</p>
+<p>进来后一算账就超了，直接报错。</p>
+<p>现在按实际能接的上限卡。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49669">https://github.com/sgl-project/sglang/pull/49669</a></p>
+<p>再说 #48996。</p>
+<p>MI355X 上 KV 缓存默认改成 FP8 了。</p>
+<p>FP8 是 8 位浮点，省显存。</p>
+<p>MI355X 是 AMD 的新卡。</p>
+<p>以前默认用 BF16，16 位浮点。</p>
+<p>那条稀疏 MLA 快路只认 FP8。</p>
+<p>现在不用手动加参数了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48996">https://github.com/sgl-project/sglang/pull/48996</a></p>
+<p>其余十条一句话带过。</p>
+<p>#48412，流水线并行下，MoE 的专家路由记录能跨阶段接力了。</p>
+<p>流水线并行就是把模型切成几段分卡跑。</p>
+<p>#48031，昇腾 NPU 上，MLA 和 DeepSeek V4 的缓存传输打通了。</p>
+<p>#41501、#49354、#49456、#49808、#49714。</p>
+<p>五条都是扩散模型那边的优化。</p>
+<p>扩散模型就是画图和视频生成那类模型。</p>
+<p>#50081 只是文档：AgentX 的启动手册更新了。</p>
+<p>#50108、#49544，都是 CI 和测试杂活。</p>
+<p><strong>TRT-LLM：3 条，Qwen3.8 那条最值得看</strong></p>
+<p>先说 #21346。</p>
+<p>Qwen3.8-Flash-Next 的 FP8 模型，热身就崩。</p>
+<p>热身就是正式跑之前先试跑一遍。</p>
+<p>原因是 FP8 的查表还没反量化就先清零。</p>
+<p>PyTorch 没有 FP8 的清零核，直接报错。</p>
+<p>现在改成按字节清零，热身能过了。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21346">https://github.com/NVIDIA/TensorRT-LLM/pull/21346</a></p>
+<p>其余两条一句话带过。</p>
+<p>#19996，agent-flow 那条线开了 MX 量化的选项。</p>
+<p>MX 是微缩放浮点格式。</p>
+<p>#21976，只是跟进之前评审的意见。</p>
+<p><strong>LMDeploy：1 条</strong></p>
+<p>#5115，GLM-5.3 Flash 的 KPool 能选 BF16 了。</p>
+<p>KPool 就是存键向量的池子。</p>
+<p>以前默认走 FP8 的旋转路径。</p>
+<p>现在加了个环境变量开关，能切到 BF16 不旋转。</p>
+<p>对齐训练那边的索引器用的。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5115">https://github.com/InternLM/lmdeploy/pull/5115</a></p>
+<p><strong>llama.cpp：9 条，服务器安全加固那批最值得看</strong></p>
+<p>先说 #32115、#32113、#32120。</p>
+<p>三条都是堵服务器的安全口子。</p>
+<p>以前跨域代理和媒体链接能访问本机地址。</p>
+<p>等于外网能顺着服务器摸到你内网。</p>
+<p>现在一律不让碰本机地址了。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32115">https://github.com/ggml-org/llama.cpp/pull/32115</a></p>
+<p><a href="https://github.com/ggml-org/llama.cpp/pull/32113">https://github.com/ggml-org/llama.cpp/pull/32113</a></p>
+<p><a href="https://github.com/ggml-org/llama.cpp/pull/32120">https://github.com/ggml-org/llama.cpp/pull/32120</a></p>
+<p>再说 #32133。</p>
+<p>服务器空闲睡觉那条，修了个会丢请求的 bug。</p>
+<p>以前请求刚到，空闲计时器一到就睡。</p>
+<p>模型一卸，正在跑的请求就没了。</p>
+<p>现在有请求在跑就不睡，等跑完再说。</p>
+<p>这个 bug 是 Trend Micro 的零日计划报上来的。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32133">https://github.com/ggml-org/llama.cpp/pull/32133</a></p>
+<p>其余五条一句话带过。</p>
+<p>#32129、#32130、#32131、#32132。</p>
+<p>四条都是多模态那边的校验收紧。</p>
+<p>缺关键张量或格式不对，现在直接报错。</p>
+<p>#32138 只是 CI 杂活。</p>
+<p><strong>Dynamo：3 条，KV 路由那组最值得看</strong></p>
+<p>#17359、#17360、#17647 是一组。</p>
+<p>路由器的 KV 感知选人，改成可插拔的了。</p>
+<p>KV 感知就是挑手里有现成缓存的那台机器。</p>
+<p>以前这套逻辑焊死在路由器里。</p>
+<p>现在抽成 hint policy，部署能自己换规则。</p>
+<p>跟 PD 部署里&quot;去哪台机器拿缓存&quot;直接相关。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17359">https://github.com/ai-dynamo/dynamo/pull/17359</a></p>
+<p><a href="https://github.com/ai-dynamo/dynamo/pull/17360">https://github.com/ai-dynamo/dynamo/pull/17360</a></p>
+<p><a href="https://github.com/ai-dynamo/dynamo/pull/17647">https://github.com/ai-dynamo/dynamo/pull/17647</a></p>
+<p><strong>Mooncake：1 条</strong></p>
+<p>#5457，大页内存的网卡段改成并行填充了。</p>
+<p>启动那步能快一点。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5457">https://github.com/kvcache-ai/Mooncake/pull/5457</a></p>
+<p><strong>TGI、FlashInfer：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还是没刷出来</strong></p>
+<p>接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>新一批原定 11 月 11 日 16:00 PST 到。</p>
+<p>现在 5:00 了，已经晚了 13 小时。</p>
+<p>下轮再看。</p>
+<h2>业内新闻</h2>
+<p><strong>单张 5090 跑 256K 上下文，实测跑通了</strong></p>
+<p>Groot-19B-A3B 这个模型，FP8 版 20.9GB。</p>
+<p>一台 RTX 5090 上，用 vLLM 0.32.0 跑起来了。</p>
+<p>262,144 个 token 的上下文全开。</p>
+<p>20 万 token 的提示词也答对了。</p>
+<p>账是这么算的：权重占 19.7GB。</p>
+<p>剩 6.8GB 给 KV 缓存，能装 30.7 万个 token。</p>
+<p>刚好够一整窗，再多 4.5 万个 token 的富余。</p>
+<p>说白了，消费级单卡跑超长上下文，内存账能算得过来。</p>
+<p>但有个坑：这模型每答必先想一通。</p>
+<p>300 字的小作文，思考占了 2000 到 7000 个 token。</p>
+<p>上限设紧了，答案还没出来就被截断。</p>
+<p>来源：<a href="https://dev.to/inferencekey/serving-groot-19b-a3b-at-256k-on-one-rtx-5090-the-memory-budget-and-the-thinking-trap-4b2">https://dev.to/inferencekey/serving-groot-19b-a3b-at-256k-on-one-rtx-5090-the-memory-budget-and-the-thinking-trap-4b2</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 大V：本轮没有新帖</strong></p>
+<p>lmsysorg、vLLM 官方、karpathy 那几家都没动静。</p>
+<p><strong>Latent Space：本轮没有新文章</strong></p>
+<p>最新一篇还是 D-Day 那篇。</p>
+<p>23 点版已经报过了。</p>
+<p><strong>Hacker News：搜出来的都是旧帖</strong></p>
+<p>vLLM-mlx 那篇 9 月就报过了。</p>
+<p>其余几篇也是旧闻。</p>
+<p><strong>中文媒体：没有新料</strong></p>
+<p>LongCat-2.5 是 11 月 11 日 13 点版报过的。</p>
+<p>MACaQ 是 3 点版报过的。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有单独成篇的深读</strong></p>
+<p>SGLang 的 Mamba 状态淘汰那条值得跟进。</p>
+<p>但目前只有 PR 正文，没有技术博客或论文。</p>
+<p>等有更完整的材料再精读。</p>
+<p>Dynamo 的 KV 路由可插拔那组也一样。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 3 点版去重。</p>
+<p>版本水位只有 llama.cpp 快照动了。</p>
+<p>b12317 滚到 b12318。</p>
+<p>vLLM 8 条首次汇总。</p>
+<p>#65535、#58619、#67098、#67152、#66608、#66773、#66891、#61872。</p>
+<p>SGLang 13 条首次汇总。</p>
+<p>#50108、#48996、#48031、#41501、#49430、#48412、#49354、#49456、#49808、#49714、#50081、#49544、#49669。</p>
+<p>TRT-LLM 3 条首次汇总。</p>
+<p>#21346、#19996、#21976。</p>
+<p>LMDeploy 1 条首次汇总。</p>
+<p>#5115。</p>
+<p>llama.cpp 9 条首次汇总。</p>
+<p>#32138、#32115、#32113、#32120、#32133、#32131、#32132、#32129、#32130。</p>
+<p>Dynamo 3 条首次汇总。</p>
+<p>#17360、#17647、#17359。</p>
+<p>Mooncake 1 条首次汇总。</p>
+<p>#5457。</p>
+<p>TGI、FlashInfer 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>Groot-19B-A3B 单卡实测首次汇总。</p>
+<p>X、Latent Space、HN、中文媒体本轮无新料。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-12-0500/">5点版</a></p></body></html>
