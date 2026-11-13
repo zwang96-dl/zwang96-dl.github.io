@@ -1,0 +1,108 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月13日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-13"/>
+<meta name="doc-ts" content="2026-11-13T23:01:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-13（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-13（15点版）</h1>
+<p>15点版来了，头条是 vLLM 的新预发布。</p>
+<h2>框架更新</h2>
+<p><strong>头条：vLLM 的 v0.34.0rc3 来了，带着 Mistral Large 4</strong></p>
+<p>vLLM 刚打了 v0.34.0rc3 的 tag。 时间是今天 14 点 41 分。 头号内容是 Mistral Large 4 进了分支。 这个 1T 参数的大家伙，9 点版深读过。 现在不用专用镜像了，预发布分支直接支持。 来源：<a href="https://github.com/vllm-project/vllm/pull/67568">https://github.com/vllm-project/vllm/pull/67568</a></p>
+<p>再说 #67485。 启动时算 KV 缓存大小会爆内存。 原因是预热内核占的显存没及时还。 这回预热完就释放，不再顶着启动。 来源：<a href="https://github.com/vllm-project/vllm/pull/67485">https://github.com/vllm-project/vllm/pull/67485</a></p>
+<p>再说 #67312。 Transformers 后端接上了 DeepStack。 DeepStack 是视觉特征那套东西。 多模态模型读图更顺了。 来源：<a href="https://github.com/vllm-project/vllm/pull/67312">https://github.com/vllm-project/vllm/pull/67312</a></p>
+<p>再说 #67296。 KV 缓存留了点弹性余量。 实测里分配器碎片会吃掉一块。 留余量，省得跑着跑着不够用。 来源：<a href="https://github.com/vllm-project/vllm/pull/67296">https://github.com/vllm-project/vllm/pull/67296</a></p>
+<p>其余一句话带过。</p>
+<p>#66051，AMD 卡上 DSpark 采样改成一轮只发射一次。</p>
+<p>#64777，EAGLE 推测解码按目标核的块大小走。</p>
+<p>#67553，CI 拆分。</p>
+<p><strong>版本水位：vLLM 预发布进了 rc3</strong></p>
+<p>vLLM 预发布从 rc2 滚到 rc3。 正式版还是 v0.33.0。 SGLang 还是 v0.5.23。 v1.0 的 tag 还没挂出来。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 正式版还是 v1.6.2。 FlashInfer 预发布还是 v0.7.5rc1。 llama.cpp 正式版还是 v1.0.0。 快照从 b12366 滚到 b12368。 来源：GitHub releases、tags</p>
+<p><strong>SGLang：13 条，Rust 那边批量落地</strong></p>
+<p>先说大头。 13 条里一大半是 rust-server。 v1.0 把关键路径改成 Rust。 这轮就是那批活儿陆续合入。 多模态请求失败、媒体复用、限流拒绝这些边边角角都在修。 来源：<a href="https://github.com/sgl-project/sglang/pull/50199">https://github.com/sgl-project/sglang/pull/50199</a></p>
+<p>再说 #50394。 FA3 加载器恢复了。 来源：<a href="https://github.com/sgl-project/sglang/pull/50394">https://github.com/sgl-project/sglang/pull/50394</a></p>
+<p>再说 #49633。 分层缓存往 host 传索引改走固定内存。 来源：<a href="https://github.com/sgl-project/sglang/pull/49633">https://github.com/sgl-project/sglang/pull/49633</a></p>
+<p>再说 #49631。 负载快照先编码再加锁。 来源：<a href="https://github.com/sgl-project/sglang/pull/49631">https://github.com/sgl-project/sglang/pull/49631</a></p>
+<p>其余一句话带过。</p>
+<p>#50204、#50190、#50189、#49907、#49663、#49653、#49650、#49640、#49635。</p>
+<p><strong>TRT-LLM：3 条，多模态那条值得看</strong></p>
+<p>先说 #21986。 多模态的每个输入项，生命周期被钉死了。 在线、排队、预取三种编码路径都管到。 说白了，图片、视频这些输入不会提前被释放。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21986">https://github.com/NVIDIA/TensorRT-LLM/pull/21986</a></p>
+<p>其余两条是基建和文档。</p>
+<p>#22272、#22270。</p>
+<p><strong>Dynamo：9 条，大多是 1.7.0 分支的 cherry-pick</strong></p>
+<p>先说 #18742。 企业版 vLLM 运行时进了 CI。 13 点版报过 #16786。 这条标题里就挂着 #16786。 算同一改动的后续合入。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18742">https://github.com/ai-dynamo/dynamo/pull/18742</a></p>
+<p>其余一句话带过。</p>
+<p>#18734、#18712、#18708、#18695、#18678、#18644、#17922、#16215。</p>
+<p>多是修补、文档和测试。</p>
+<p><strong>FlashInfer、Mooncake：小修</strong></p>
+<p>FlashInfer 3 条。</p>
+<p>#9408，trace 检测原地改写。</p>
+<p>#9459、#9374，都是测试。</p>
+<p>Mooncake 1 条。</p>
+<p>#5280，经典垫片认 EFA 协议。</p>
+<p>来源：GitHub</p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次 16 点到，本轮先补一篇漏报</strong></p>
+<p>新批次约在 00:00 UTC 到。 换算过来是今天 16 点。 本轮还没到，先补一篇 11 月 12 日批次漏掉的。</p>
+<p>先说 Synthesis Smuggling。 攻击方的大模型会偷偷推断你的隐私。 再把推断结果藏进看似无害的回答里。 用户不知不觉就把隐私发出去了。 这跟推理服务直接相关。 输出侧也得防着这种偷运。 来源：<a href="https://arxiv.org/abs/2611.17280">https://arxiv.org/abs/2611.17280</a></p>
+<p><strong>峰会花絮：SGLang 的 PR 现在 95% 是 agent 写的</strong></p>
+<p>Miles v0.2 跟 SGLang v1.0 一起发布了。 Miles 是 SGLang 团队的强化学习框架。 现场幻灯片还放了个数字。 现在合入的 PR 里，约 95% 是 agent 写的。 一年前还是全手写。 328 个 PR 是经 Review Inbox 审过的。 划重点：这是峰会现场的说法。 转述自 X 帖的汇总，还没见官方通稿。 来源：<a href="https://agihunt.info/en/p/1a1d1386494700a720c6aa4d139">https://agihunt.info/en/p/1a1d1386494700a720c6aa4d139</a></p>
+<h2>业内新闻</h2>
+<p><strong>英伟达后续：周五盘前涨了超 2%</strong></p>
+<p>先说股价。 周五盘前涨了超 2%。 昨天收盘跌 4.34%，报 166.19 美元。 市场在消化换帅的消息。 来源：<a href="https://el7.ai/en/news/2026-11-13-nvidia-shares-rise-2-after-jensen-huang-resigns-colette-kress-named-interim-ceo">https://el7.ai/en/news/2026-11-13-nvidia-shares-rise-2-after-jensen-huang-resigns-colette-kress-named-interim-ceo</a></p>
+<p>再说表态。 Kress 说要在 Huang 打下的基础上继续干。 董事会说永久 CEO 内外都找。 内部候选包括 Kress 和 Ian Buck。 Ian Buck 管 AI 硬件和软件产品。 来源：<a href="https://www.intelligentcio.com/north-america/2026/11/13/nvidia-names-colette-kress-interim-ceo-as-board-launches-search-for-huang-successor/">https://www.intelligentcio.com/north-america/2026/11/13/nvidia-names-colette-kress-interim-ceo-as-board-launches-search-for-huang-successor/</a></p>
+<p>再说一个冷数字。 Bernstein 把目标价砍了一半。 从 400 美元砍到 200 美元。 公司市值刚过 4 万亿美元。 财报还是 11 月 17 日发。 之前报过，这里不再展开。 来源：<a href="https://www.technology.org/2026/11/13/jensen-huang-resigns-nvidia-ceo-colette-kress-interim/">https://www.technology.org/2026/11/13/jensen-huang-resigns-nvidia-ceo-colette-kress-interim/</a></p>
+<p><strong>SGLang Summit：第二天结束了，实录还没出</strong></p>
+<p>Liam Fedus 的炉边谈在今天上午。 聊新兴 AI 实验室那场。 现在刚结束，网上暂无实录。 要点整理出来后，下轮再报。 来源：<a href="https://www.sglang.io/summit#agenda">https://www.sglang.io/summit#agenda</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 大V：本轮没新帖</strong></p>
+<p>lmsysorg、vLLM 官方都没动静。 karpathy 最新还是 11 月 1 日那条。 jimfan 也没动静。</p>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>最新还是 11 月 10 日那期。 聊 Resend 怎么给 agent 做文档。 来源：<a href="https://podbay.fm/p/latent-space-the-ai-engineer-podcast">https://podbay.fm/p/latent-space-the-ai-engineer-podcast</a></p>
+<p><strong>Reddit：llama.cpp 1.0 的帖子还是当日最热</strong></p>
+<p>Merve 发的那帖，成了当天窜得最快的帖子。 她是 Hugging Face 的工程师。 底下呼声最高的还是要人。 大家想要更多维护者。 11 点版报过，这里不再展开。 来源：<a href="https://aifrontierpost.com/articles/llama-cpp-v1-0-release/">https://aifrontierpost.com/articles/llama-cpp-v1-0-release/</a></p>
+<p><strong>中文媒体：还没见到 llama.cpp 1.0 的稿</strong></p>
+<p>机器之心、量子位都没发。</p>
+<h2>值得深入学</h2>
+<p>本轮没有新的值得深读。 Mistral Large 4 进 rc3，是 9 点版深读的后续落地。 想看的话，翻 9 点版的链接。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 13 点版去重。 版本水位：vLLM 预发布 rc2 滚到 rc3，其余正式版全没动；llama.cpp 快照 b12366 滚到 b12368。 vLLM 7 条首次汇总：#67568、#67485、#67312、#67296、#66051、#64777、#67553。 SGLang 13 条首次汇总：#50394、#50204、#50199、#50190、#50189、#49907、#49663、#49653、#49650、#49640、#49635、#49633、#49631。 TRT-LLM 3 条首次汇总：#22272、#22270、#21986。 Dynamo 9 条首次汇总：#18742、#18734、#18712、#18708、#18695、#18678、#18644、#17922、#16215。 FlashInfer 3 条首次汇总：#9459、#9408、#9374。 Mooncake 1 条首次汇总：#5280。 LMDeploy、TGI 零合入。 Synthesis Smuggling 是 11 月 12 日批次漏报的首次补报。 Miles v0.2、SGLang 95% agent 写 PR 是首次报。 英伟达：周五盘前涨超 2%、Kress 表态、Ian Buck 候选、Bernstein 砍目标价是首次报；收盘价、8-K 时间线、财报 11 月 17 日是之前报过的。 SGLang Summit 第二天、Liam Fedus 炉边谈是 11 点版、13 点版报过的。 arXiv 本轮没新批次，新批次约 16 点到。 Latent Space 最新单集仍是 11 月 10 日那期。 Reddit 1.0 帖子当日最热是首次补；维护者呼声是 11 点版报过的。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-13-1500/">15点版</a></p></body></html>
