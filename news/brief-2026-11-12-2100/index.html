@@ -1,0 +1,259 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月12日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-12"/>
+<meta name="doc-ts" content="2026-11-13T05:08:15"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-12（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-12（21点版）</h1>
+<p>21点版来了。</p>
+<p>头条：vLLM 把新模型搬上 Rubin 了。</p>
+<p>主角是 DeepSeek-V4.1-Flash。</p>
+<p>一整个 72 卡机架，每卡每秒 170 万 token。</p>
+<p>每用户还分到 387 个。</p>
+<p>比 GB300 快 58 倍。</p>
+<p>但先别急着欢呼。</p>
+<p>58 倍只在某一个服务点上成立。</p>
+<p>换个点，只有 2.7 倍。</p>
+<p>这篇博客值得深读，笔记已经生成了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有快照动了</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 的 tag 和 release 还是没挂出来。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc1。</p>
+<p>正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12342。</p>
+<p>19 点版时还是 b12340。</p>
+<p>b12342 里有推测解码验证用的新内核。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：11 条，KV 缓存那条最值得看</strong></p>
+<p>先说 #61452。</p>
+<p>KV 缓存的分配策略搬家了。</p>
+<p>以前策略和张量布局绑在一起。</p>
+<p>现在布局只讲形状，策略交给管理器。</p>
+<p>这是 RFC #42449 的第二步。</p>
+<p>插件和外部维护者注意了。</p>
+<p>接口变了，旧代码要跟着改。</p>
+<p>官方给了个过渡垫片，先顶着用。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/61452">https://github.com/vllm-project/vllm/pull/61452</a></p>
+<p>再说 #66598。</p>
+<p>MI355X 上大读题 GEMM 的 tile 改了。</p>
+<p>MXFP8 原生线性层，256x256x128 的 tile。</p>
+<p>读题越大，收益越明显。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66598">https://github.com/vllm-project/vllm/pull/66598</a></p>
+<p>再说 #67050。</p>
+<p>MiMo-V2.6 的 ROCm 配方来了。</p>
+<p>开了统一注意力，还能选编码器并行。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67050">https://github.com/vllm-project/vllm/pull/67050</a></p>
+<p>再说 #66784。</p>
+<p>Qwen4Exp 和 Kimi KDA 的合并线性层。</p>
+<p>补齐时 padding 的处理修了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66784">https://github.com/vllm-project/vllm/pull/66784</a></p>
+<p>再说 #47652。</p>
+<p>Gemma 音频帧的尺寸和 token 计数。</p>
+<p>安全向的修补，别让坏输入钻空子。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/47652">https://github.com/vllm-project/vllm/pull/47652</a></p>
+<p>其余六条一句话带过。</p>
+<p>#67359，Rust 前端 generate 路支持纯文本输出。</p>
+<p>#67257，mock 引擎按要求回 logprobs。</p>
+<p>#66540，Rust 前端 generate 路支持停用词。</p>
+<p>#65191，Arm CPU 的 INT8 冒烟测试。</p>
+<p>#66414，Arm CPU 测试分片重排。</p>
+<p>#65840，Kimi-K3 的 KDA 元数据测试上 XPU。</p>
+<p><strong>SGLang：只合了 1 条</strong></p>
+<p>#44823，分块读题的续跑先停一停。</p>
+<p>分块或 KV 预算花完了，就把续跑挂起。</p>
+<p>别让它占着调度，等下轮再说。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/44823">https://github.com/sgl-project/sglang/pull/44823</a></p>
+<p><strong>TRT-LLM：5 条，读题挂死那条最值得看</strong></p>
+<p>先说 #21799。</p>
+<p>可打断读题的 NCCL 窗口挂死修了。</p>
+<p>Qwen3.5 那条排除规则背后藏着这个问题。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21799">https://github.com/NVIDIA/TensorRT-LLM/pull/21799</a></p>
+<p>再说 #21862。</p>
+<p>MoE 解码前沿的 Triton 路由 GEMM。</p>
+<p>非 2 的幂次隐藏尺寸，别往这条路走。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21862">https://github.com/NVIDIA/TensorRT-LLM/pull/21862</a></p>
+<p>再说 #21625。</p>
+<p>Kimi-K3 的工具解析器，只在真没声明工具时才警告。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21625">https://github.com/NVIDIA/TensorRT-LLM/pull/21625</a></p>
+<p>其余两条一句话带过。</p>
+<p>#21824，flashinfer-python 升到 0.7.3。</p>
+<p>#22219，合入后测试的 3 个失败用例先放过。</p>
+<p><strong>Dynamo：只合了 1 条</strong></p>
+<p>#18572，客户端断开时，取消挂起的图片编辑下载。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18572">https://github.com/ai-dynamo/dynamo/pull/18572</a></p>
+<p><strong>FlashInfer：只合了 1 条，确定性那块又进了一步</strong></p>
+<p>先说 #9365。</p>
+<p>采样那步也进了批量不变模式。</p>
+<p>sampling_from_probs，支持了。</p>
+<p>sampling_from_logits，也支持了。</p>
+<p>批量不变就是 batch 大小变了，结果也不变。</p>
+<p>这是你做确定性评估要的特性。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9365">https://github.com/flashinfer-ai/flashinfer/pull/9365</a></p>
+<p><strong>LMDeploy、TGI、llama.cpp：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮被限流了</strong></p>
+<p>接口返回 429，Rate exceeded。</p>
+<p>主批次还是 11 月 10 日那批。</p>
+<p>原定 11 月 11 日 16:00 PST 到。</p>
+<p>现在已经晚了约 29 小时。</p>
+<p>下轮再看。</p>
+<p><strong>Rubin 博客：V4.1-Flash 上机架了</strong></p>
+<p>一整个 Vera Rubin NVL72 机架。</p>
+<p>每卡每秒 170 万 token，每用户 387 个。</p>
+<p>比 GB300 快 58 倍，峰值到 252 万。</p>
+<p>单用户专线 1810 token 每秒。</p>
+<p>数字是 vLLM 自报，评测是 AgentX。</p>
+<p>AgentX 回放真实 agent 会话。</p>
+<p>但要注意，吞吐里算了缓存命中的输入。</p>
+<p>不是纯吐词的速度。</p>
+<p>这篇标了值得深读，笔记已生成。</p>
+<p>来源：<a href="https://vllm.ai/blog/2026-11-12-deepseek-v41-flash-vera-rubin">https://vllm.ai/blog/2026-11-12-deepseek-v41-flash-vera-rubin</a></p>
+<p><strong>Inkling 2 Small：权重开源了</strong></p>
+<p>Thinking Machines 今天放出了权重。</p>
+<p>594B 参数，17B 激活，Apache 2.0 协议。</p>
+<p>Hugging Face 上直接能下。</p>
+<p>NVFP4 主权重，另有 MXFP8 版。</p>
+<p>SGLang、vLLM 首日就支持了。</p>
+<p>19 点版报过 TokenSpeed 的首日支持。</p>
+<p>权重开源是今天的新进展。</p>
+<p>来源：<a href="https://aiparabellum.com/thinking-machines-releases-inkling-2-small-open-weights/">https://aiparabellum.com/thinking-machines-releases-inkling-2-small-open-weights/</a></p>
+<p><strong>Meta Muse Ember：给 agent 打杂的小模型</strong></p>
+<p>Meta 11 月 9 日发的，中文媒体今天才跟上。</p>
+<p>Muse 家最小最便宜的一款。</p>
+<p>专干 agent 天天重复的活。</p>
+<p>调工具、拆编码子任务、做路由、抽数据。</p>
+<p>1M 上下文，输入每百万 token 0.1 美元。</p>
+<p>输出 0.5 美元，缓存输入 0.004 美元。</p>
+<p>注意，0.1 美元只管 20 万 token 以内的请求。</p>
+<p>超了就三倍。</p>
+<p>独立评测里智力分 36，跟 Haiku 5.5 打平。</p>
+<p>权重不公开，只能调 API。</p>
+<p>来源：<a href="https://www.efeanidi.com/articles/meta-muse-ember-small-agent-model/">https://www.efeanidi.com/articles/meta-muse-ember-small-agent-model/</a></p>
+<h2>业内新闻</h2>
+<p><strong>黄仁勋后续：接班人选开始冒头</strong></p>
+<p>董事会 11 月 11 日就接受了辞呈。</p>
+<p>8-K 文件里写着，周四才对外宣布。</p>
+<p>收盘 166.19 美元，跌 4.34%。</p>
+<p>盘中一度跌超 13%。</p>
+<p>Bernstein 把目标价砍到 200 美元。</p>
+<p>原来是 400 美元，直接腰斩。</p>
+<p>预测市场上，副总裁 Ian Buck 最被看好。</p>
+<p>接任概率接近 40%。</p>
+<p>特朗普在 Truth Social 上点了库克的名。</p>
+<p>说只有库克适合接这个位子。</p>
+<p>库克 9 月刚卸任苹果 CEO。</p>
+<p>路透又报了第三段婚外情。</p>
+<p>当事人是另一位没具名的英伟达员工。</p>
+<p>Hacker News 讨论串冲到 2953 分。</p>
+<p>留言 2789 条，是当天最热的串。</p>
+<p>财报还是 11 月 17 日发。</p>
+<p>临时 CEO Kress 会主持电话会。</p>
+<p>来源：<a href="https://www.rohan-paul.com/p/jensen-huang-resigns-as-nvidia-ceo">https://www.rohan-paul.com/p/jensen-huang-resigns-as-nvidia-ceo</a></p>
+<p>来源：<a href="https://www.skimwire.com/nvidia-jensen-huang-resigns-colette-kress-interim-ceo/">https://www.skimwire.com/nvidia-jensen-huang-resigns-colette-kress-interim-ceo/</a></p>
+<p><strong>Latent Space 新文章：Jev 革命</strong></p>
+<p>AI Engineer Code Summit 上的主题。</p>
+<p>System One 模型，就是只给选择不写字的模型。</p>
+<p>Jev 的作者 Diogo Almeida 说。</p>
+<p>要把这类模型撒进代码各处。</p>
+<p>让软件自己变聪明，别再拼字符串碰运气。</p>
+<p>Cloudflare 的例子：六次大模型调用压成一次。</p>
+<p>4 万 token 压到 1800 个。</p>
+<p>决策模型这条线，之前 15 点版报过。</p>
+<p>这篇是 Summit 现场的跟进。</p>
+<p>来源：<a href="https://latent.space/p/jev-revolution/">https://latent.space/p/jev-revolution/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>SGLang Summit：陈立武纪要还没出</strong></p>
+<p>16 点的炉边谈已结束 5 小时。</p>
+<p>纪要、实录和视频都还没放出来。</p>
+<p>下轮有实录再报。</p>
+<p>明天是 Periodic Labs 的 Liam Fedus。</p>
+<p><strong>Latent Space 播客：本轮没有新单集</strong></p>
+<p>最新还是 11 月 10 日那期。</p>
+<p><strong>X 大V：本轮没有新帖</strong></p>
+<p>lmsysorg、vLLM 官方都没动静。</p>
+<p>karpathy、jimfan 也没动静。</p>
+<p><strong>Hacker News：没有新料</strong></p>
+<p>SGLang 那个 RCE 漏洞的事是 11 月 9 日披露的。</p>
+<p>之前报过了，不再重复。</p>
+<p><strong>Reddit：没有新料</strong></p>
+<p><strong>中文媒体：跟上了两条</strong></p>
+<p>黄仁勋辞任上了中文媒体。</p>
+<p>Muse Ember 也是中文媒体今天才跟上。</p>
+<p>SGLang v1.0 还是没见到中文媒体跟进。</p>
+<h2>值得深入学</h2>
+<p><strong>Rubin 深读已生成</strong></p>
+<p>PD 解耦的机架级实测，怎么抄都写进去了。</p>
+<p>机架共享 KV 池、按负载路由、Engram 表分片。</p>
+<p>四招能进你的 PD 解耦评估清单。</p>
+<p>笔记已生成，见深读目录。</p>
+<p><strong>Inkling 2 Small 权重：可以直接下了</strong></p>
+<p>Apache 2.0，SGLang 和 vLLM 首日支持。</p>
+<p>想跑 594B 的 NVFP4 版，可以试试。</p>
+<p><strong>Jev 那篇：可以当工具文翻</strong></p>
+<p>决策模型那条线，跟 agent 工具调用的账有关。</p>
+<p>不用整篇精读。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 19 点版去重。</p>
+<p>版本水位：只有 llama.cpp 快照动了，b12340 到 b12342。</p>
+<p>SGLang v1.0 仍未发版。</p>
+<p>vLLM 11 条首次汇总：#67359、#67257、#66784、#66598、#66540、#67050、#65191、#66414、#65840、#61452、#47652。</p>
+<p>SGLang 1 条首次汇总：#44823。</p>
+<p>TRT-LLM 5 条首次汇总：#22219、#21862、#21824、#21799、#21625。</p>
+<p>Dynamo 1 条首次汇总：#18572。</p>
+<p>FlashInfer 1 条首次汇总：#9365。</p>
+<p>LMDeploy、TGI、llama.cpp 零合入。</p>
+<p>arXiv 主批次仍未到，已晚约 29 小时。</p>
+<p>arXiv 接口这轮返回 429，下轮再试。</p>
+<p>Rubin 博客、Inkling 权重开源、Muse Ember 首次报。</p>
+<p>黄仁勋后续首次报。</p>
+<p>Jev 文章首次报。</p>
+<p>XSE 是 11 月 7 日报过的，不再重复。</p>
+<p>文心 5.5 是 15 点版报过的，不再重复。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-12-2100/">21点版</a></p></body></html>
