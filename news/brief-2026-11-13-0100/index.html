@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月13日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-13"/>
+<meta name="doc-ts" content="2026-11-13T08:58:18"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-13（1点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-13（1点版）</h1>
+<p>1点版来了，夜里很安静。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 的 tag 还没挂出来。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>预发布还是 v0.7.5rc1。</p>
+<p>llama.cpp 快照还是 b12345。</p>
+<p>23点版时就是 b12345。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：12 条，断点续跑那条最值得看</strong></p>
+<p>先说 #50265。</p>
+<p>服务挂了重起，未完成的请求能接着跑。</p>
+<p>以前重起就全丢了，现在可以选不断。</p>
+<p>像断电后文档自动恢复，不用重写。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/50265">https://github.com/vllm-project/vllm/pull/50265</a></p>
+<p>再说 #67005。</p>
+<p>稠密模型的动态推测解码，DP 模式下也留着。</p>
+<p>DP 就是数据并行，多卡分摊请求。</p>
+<p>推测解码是先让实习生打草稿再让专家改。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67005">https://github.com/vllm-project/vllm/pull/67005</a></p>
+<p>再说 #66219。</p>
+<p>GLM-5.3-Flash 的融合 RMSNorm 留住了。</p>
+<p>KDA 的 o_norm 那步，核还是合着的。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66219">https://github.com/vllm-project/vllm/pull/66219</a></p>
+<p>其余九条一句话带过。</p>
+<p>#65994，Rust 前端加了 Render 服务。</p>
+<p>#67002，M-RoPE 的位置准备修了。</p>
+<p>#67096，启动时 SIGTERM 能停掉 API 服务。</p>
+<p>#66855，CPU 上超大注意力段拆开算。</p>
+<p>#60112，编码器显存图回放超了就退回 eager。</p>
+<p>#61798，UMBP 的懒卸载测试。</p>
+<p>#67210，LoRA-MoE 重载测试留点显存。</p>
+<p>#67369，GLM5-next 融合专家测试钉在 stock decode。</p>
+<p>#67383，XPU 的 CI 小修补。</p>
+<p><strong>SGLang：12 条，KDA 和缓存那几条最值得看</strong></p>
+<p>先说 #50102。</p>
+<p>KDA 的 prefill 偏移量，各层复用同一份 int64。</p>
+<p>省了重复算。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50102">https://github.com/sgl-project/sglang/pull/50102</a></p>
+<p>再说 #50096。</p>
+<p>NPU 上 DSA 的 prefill 上下文并行，支持 FP8 的 KV。</p>
+<p>KV 就是草稿纸，FP8 是更省的记法。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50096">https://github.com/sgl-project/sglang/pull/50096</a></p>
+<p>再说 #49775、#49720、#49719。</p>
+<p>推测解码的草稿 KV 区，按草稿实际类型定大小。</p>
+<p>ReplaySSM 的环形缓冲，挪进请求自己的子池。</p>
+<p>缓存账算得更细了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49775">https://github.com/sgl-project/sglang/pull/49775</a></p>
+<p>其余七条一句话带过。</p>
+<p>#50267，NPU 部署教程补了三个模型。</p>
+<p>#50258、#50252，NPU 测试的小修补。</p>
+<p>#50237，inkling 的工具声明顺序。</p>
+<p>#49912，DSA 的页步长。</p>
+<p>#48773，AMD 的 topk-v2 短行选错修了。</p>
+<p>#42566，块 FP8 的 MoE 分片加载。</p>
+<p><strong>TRT-LLM：5 条，全是修补</strong></p>
+<p>#22179，KDA 链式核的双缓冲。</p>
+<p>#21614，停用词分词修了。</p>
+<p>#21340，bench 查不到显存就退回系统内存。</p>
+<p>#20987，音频采样数封顶。</p>
+<p>#22235，CI 授权用户。</p>
+<p><strong>FlashInfer：2 条，滑动窗口那条值得看</strong></p>
+<p>先说 #9411。</p>
+<p>注意力支持显式的 cuDNN 分页滑动窗口。</p>
+<p>滑动窗口就是只看最近一段，不全看。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9411">https://github.com/flashinfer-ai/flashinfer/pull/9411</a></p>
+<p>再说 #9441，CI 的小修补。</p>
+<p><strong>Dynamo：只合了 1 条</strong></p>
+<p>#17570，给 SGLang worker 加了实验性的撤出控制。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17570">https://github.com/ai-dynamo/dynamo/pull/17570</a></p>
+<p><strong>Mooncake：3 条，全是修补</strong></p>
+<p>#5454，Slingshot 上的 CXI 传输。</p>
+<p>#5243，Store-RS 的驱逐加围栏。</p>
+<p>#4603，结构化读取保留整数键。</p>
+<p><strong>llama.cpp：4 条，同步和 CI</strong></p>
+<p>#32189，同步 ggml。</p>
+<p>#32185，Windows CUDA 的 ccache。</p>
+<p>#32184，清掉旧例子。</p>
+<p>#32183，HIP 检查忽略 FP8 溢出。</p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：本轮没新批次</strong></p>
+<p>新批次约在 00:00 UTC 到。</p>
+<p>下一批要等明天凌晨，下轮再看。</p>
+<p>但上轮批次里还有两篇没报过，补上。</p>
+<p>先说 Broadcast, Don&#x27;t Replicate。</p>
+<p>数据中心里，权重每张卡都存一份。</p>
+<p>几万张卡，就是几万份重复。</p>
+<p>论文说别复制了，改广播。</p>
+<p>权重只存一份，光纤环路分发。</p>
+<p>MoE 的布局问题也谈了。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.17097">https://arxiv.org/abs/2611.17097</a></p>
+<p>再说 Reducing Batch Makespan。</p>
+<p>Agent 任务一波一波跑，推理和环境交互轮着来。</p>
+<p>论文把两边统筹起来排班。</p>
+<p>混合模型里，KV 和循环状态按负载分显存。</p>
+<p>按轨迹路由，缓存复用率更高。</p>
+<p>跑评测、造合成数据、RL rollout 都用得上。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.16661">https://arxiv.org/abs/2611.16661</a></p>
+<h2>业内新闻</h2>
+<p><strong>黄仁勋后续：本轮没新消息</strong></p>
+<p>接班人选还是之前那几位，没新点名。</p>
+<p><strong>SGLang Summit：第二天在今天</strong></p>
+<p>11 月 13 日是 Liam Fedus 那场。</p>
+<p>聊新兴 AI 实验室。</p>
+<p>凌晨还没开始，等白天再报。</p>
+<h2>访谈与深度</h2>
+<p><strong>X 大V：本轮没新帖</strong></p>
+<p>lmsysorg、vLLM 官方都没动静。</p>
+<p>karpathy、jimfan 也没动静。</p>
+<p><strong>Hacker News：没有新料</strong></p>
+<p>最热的还是黄仁勋那串，23点版报过。</p>
+<p><strong>Reddit：没有新料</strong></p>
+<p><strong>中文媒体：本轮没新跟进</strong></p>
+<p>机器之心、量子位都没见到新稿。</p>
+<p><strong>Latent Space：本轮没有新文章</strong></p>
+<p>最新还是 11 月 11 日那篇。</p>
+<h2>值得深入学</h2>
+<p><strong>两篇批次论文：可以翻，不用精读整篇</strong></p>
+<p>Broadcast 那篇，思路很野。</p>
+<p>权重广播能省多少显存，值得看一眼数字。</p>
+<p>Batch Makespan 那篇，跟 agent 批量跑任务直接相关。</p>
+<p>轨迹路由那招，能进你的缓存评估清单。</p>
+<p>本轮没生成深读笔记，宁缺毋滥。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 23点版去重。</p>
+<p>版本水位：全都没动。llama.cpp 还是 b12345。</p>
+<p>SGLang v1.0 仍未发版。</p>
+<p>vLLM 12 条首次汇总：#50265、#65994、#66219、#67002、#67005、#67096、#66855、#67210、#67369、#67383、#61798、#60112。</p>
+<p>SGLang 12 条首次汇总：#42566、#48773、#49719、#49720、#49775、#49912、#50096、#50102、#50237、#50252、#50258、#50267。</p>
+<p>TRT-LLM 5 条首次汇总：#20987、#21340、#21614、#22179、#22235。</p>
+<p>FlashInfer 2 条首次汇总：#9411、#9441。</p>
+<p>Dynamo 1 条首次汇总：#17570。</p>
+<p>Mooncake 3 条首次汇总：#4603、#5243、#5454。</p>
+<p>llama.cpp 4 条首次汇总：#32183、#32184、#32185、#32189。</p>
+<p>LMDeploy、TGI 零合入。</p>
+<p>arXiv 本轮没新批次。</p>
+<p>两篇批次论文是补报，23点版没提过。</p>
+<p>Parallel Prompting、Olifant 是 23点版报过的，不再重复。</p>
+<p>黄仁勋后续、SGLang Summit 是 23点版报过的，不再重复。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-13-0100/">1点版</a></p></body></html>
