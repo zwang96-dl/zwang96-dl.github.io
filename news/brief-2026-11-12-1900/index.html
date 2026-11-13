@@ -1,0 +1,255 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月12日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-12"/>
+<meta name="doc-ts" content="2026-11-13T03:10:48"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-12（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-12（19点版）</h1>
+<p>19点版来了。</p>
+<p>头条：英伟达换帅了。</p>
+<p>黄仁勋辞任 CEO，33 年任期结束。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有快照动了</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 的 tag 和 release 还是没挂出来。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc1。</p>
+<p>正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12340。</p>
+<p>17 点版时还是 b12336。</p>
+<p>b12340 里有 server 的 SSRF 修复。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：9 条，内核和前端各有一条值得看</strong></p>
+<p>先说 #65461。</p>
+<p>DeepSeek-V4.1 的 mono 解码，内核合并了一步。</p>
+<p>第 l 层 K2 和第 l+1 层 K1，合成一次启动。</p>
+<p>MI355X 上 39 个边界，覆盖了 34 个。</p>
+<p>每合并一个边界，省一次启动间隙。</p>
+<p>输出逐位一致，没变。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65461">https://github.com/vllm-project/vllm/pull/65461</a></p>
+<p>再说 #66593。</p>
+<p>推测解码里，FLy 的熵门控归一化了。</p>
+<p>熵门控就是拿不确定性决定要不要信草稿。</p>
+<p>以前阈值含义随 top-k 变。</p>
+<p>现在除以 log(k)，阈值在任意 top-k 下都一样。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66593">https://github.com/vllm-project/vllm/pull/66593</a></p>
+<p>再说 #67187。</p>
+<p>Rust 前端补了个断连检测。</p>
+<p>引擎被杀死又没发信号时，前端以前毫无察觉。</p>
+<p>在途请求一直挂着，健康检查还报 200。</p>
+<p>现在能检测到引擎已死，请求直接失败。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67187">https://github.com/vllm-project/vllm/pull/67187</a></p>
+<p>其余六条一句话带过。</p>
+<p>#67333，停掉向 LMCache 转发 shutdown。</p>
+<p>#67331，启动失败时关掉 executor。</p>
+<p>#67272，MiniMax-M3.1-Flash 的 MI355X 配方。</p>
+<p>#67256，修 mock engine 解析请求的辅助帧。</p>
+<p>#67148 和 #66982，都是 XPU 的 CI 和测试跳过。</p>
+<p><strong>SGLang：4 条，全是小修补</strong></p>
+<p>#50114，扩散模型 Cosmos3 的尺寸对齐。</p>
+<p>#50107，NPU 上 kimi-k3 跳过一处注册。</p>
+<p>#50101，SM100 上 QK 归一化和 RoPE 的舍入。</p>
+<p>#48998，ComfyUI 的离线 workflow 转换器。</p>
+<p><strong>TRT-LLM：10 条，Kimi K3 和 Cosmos3 各一条</strong></p>
+<p>先说 #21960。</p>
+<p>Kimi K3 的 SM107 MegaMoE 生成 tactic。</p>
+<p>每 rank 512 token 时的 tile 和调度。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21960">https://github.com/NVIDIA/TensorRT-LLM/pull/21960</a></p>
+<p>再说 #21288。</p>
+<p>Cosmos3 加了 SeaCache 步级缓存。</p>
+<p>可选开启，默认阈值 0.25。</p>
+<p>最多连续缓存 2 步。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21288">https://github.com/NVIDIA/TensorRT-LLM/pull/21288</a></p>
+<p>再说 #21977。</p>
+<p>MegaMoE 内置的 CuTe DSL kernel 和上游同步。</p>
+<p>为可选的权重本地化做准备。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21977">https://github.com/NVIDIA/TensorRT-LLM/pull/21977</a></p>
+<p>其余七条一句话带过。</p>
+<p>#22163，GLM-5.3-Flash 的 NVFP4 性能覆盖。</p>
+<p>#22009，KDA 的记录收进一次 Triton launch。</p>
+<p>#22210、#22201、#22184、#22086、#22006，都是测试和基建。</p>
+<p><strong>Dynamo：4 条，性能占了两条</strong></p>
+<p>先说 #18402。</p>
+<p>Ingress 直接调 worker 的 engine。</p>
+<p>以前每个请求都要过一道管道。</p>
+<p>现在少了一道复制和转发。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18402">https://github.com/ai-dynamo/dynamo/pull/18402</a></p>
+<p>再说 #18574。</p>
+<p>KV 路由器换了把更细的锁。</p>
+<p>以前每次改子节点列表都要换整个结构。</p>
+<p>线程一多，成本跟着涨。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18574">https://github.com/ai-dynamo/dynamo/pull/18574</a></p>
+<p>其余两条一句话带过。</p>
+<p>#18151，jemalloc 编进 Python 扩展。</p>
+<p>#18016，tool-call 的 schema 和单次调用限制。</p>
+<p><strong>FlashInfer：2 条，NVFP4 那条值得看</strong></p>
+<p>先说 #9260。</p>
+<p>FC2 之前能对 routing weights 加权了。</p>
+<p>按专家激活加权校准过的 checkpoint，能复现校准时的分布。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9260">https://github.com/flashinfer-ai/flashinfer/pull/9260</a></p>
+<p>再说 #9339。</p>
+<p>MegaMoE 在 SM107 上的 benchmark 扩展。</p>
+<p>能一次跑多个配置。</p>
+<p><strong>LMDeploy、TGI、llama.cpp：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：主批次还在鸽，两篇是跨库捞到的</strong></p>
+<p>接口返回正常。</p>
+<p>最新主批次还是 11 月 10 日那批。</p>
+<p>原定 11 月 11 日 16:00 PST 到。</p>
+<p>现在已经晚了约 27 小时。</p>
+<p>下轮再看。</p>
+<p>但跨库检索捞到两篇新的。</p>
+<p>先说 Tideway。</p>
+<p>家用电脑跑大 MoE，显存根本不够用。</p>
+<p>Tideway 把显存和内存当一个池子管。</p>
+<p>读题和解码分开布局，首字快 2.4 倍。</p>
+<p>端到端平均快 1.97 倍，解码吞吐高 1.61 倍。</p>
+<p>这篇标了值得深读，笔记已生成。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.14848">https://arxiv.org/abs/2611.14848</a></p>
+<p>再说 Edge-Native Multimodal RAG。</p>
+<p>消费级显卡上的多模态 RAG。</p>
+<p>NF4 量化加解耦的视觉编码。</p>
+<p>8.37GB 显存就跑通了。</p>
+<p>GPTQ 吞吐更高，但 2048 token 以上不稳定。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.14924">https://arxiv.org/abs/2611.14924</a></p>
+<p><strong>vLLM-Omni：MiniMax H3-Image 首日支持</strong></p>
+<p>4 张 Rubin 卡，原生 4K 图中位数 0.87 秒。</p>
+<p>另一档配置每小时出 6,115 张图。</p>
+<p>比 GB200 快 2.21 倍，比 GB300 快 1.64 倍。</p>
+<p>VAE 解码那步优化了 2.5 倍。</p>
+<p>AMD、Intel、华为、摩尔线程也都支持。</p>
+<p>来源：<a href="https://vllm.ai/blog/2026-11-12-minimax-h3-image-rubin">https://vllm.ai/blog/2026-11-12-minimax-h3-image-rubin</a></p>
+<h2>业内新闻</h2>
+<p><strong>黄仁勋辞任英伟达 CEO：33 年任期结束</strong></p>
+<p>董事会 11 月 12 日宣布，即刻生效。</p>
+<p>CFO Colette Kress 任临时 CEO。</p>
+<p>Harvey C. Jones 任首任董事长。</p>
+<p>背景是两起婚外情风波和董事会调查。</p>
+<p>其中一位被美方怀疑是中国间谍。</p>
+<p>黄仁勋已同意感恩节前赴国会作证。</p>
+<p>股价盘中一度跌超 13%，收盘跌 4.3%。</p>
+<p>三季度财报仍定 11 月 17 日发布。</p>
+<p>对推理服务的影响是间接的。</p>
+<p>英伟达的卡还是那批卡，运营照常。</p>
+<p>但掌舵人换了，长期路线要重新看。</p>
+<p>来源：<a href="https://www.usatoday.com/story/tech/2026/11/12/jensen-huang-nvidia-ceo-resigns-affair-investigation/92734431007/">https://www.usatoday.com/story/tech/2026/11/12/jensen-huang-nvidia-ceo-resigns-affair-investigation/92734431007/</a></p>
+<p>来源：<a href="https://www.cnn.com/2026/11/12/tech/jensen-huang-nvidia-resigns?cid=external-feeds_iluminar_meta">https://www.cnn.com/2026/11/12/tech/jensen-huang-nvidia-resigns?cid=external-feeds_iluminar_meta</a></p>
+<p>来源：<a href="https://www.wsj.com/business/nvidia-is-preparing-to-oust-nvidia-ceo-jensen-huang-30f421ad">https://www.wsj.com/business/nvidia-is-preparing-to-oust-nvidia-ceo-jensen-huang-30f421ad</a></p>
+<p><strong>AMD：新卡 MI450X，成绩叫板 Rubin</strong></p>
+<p>MI450X 是 288GB 显存版的 MI455X。</p>
+<p>算力和带宽都和 MI455X 一样。</p>
+<p>MI455X 跑 DeepSeek-R1，每卡 21,333 token 每秒。</p>
+<p>AMD 说比 Rubin NVL72 已公布的成绩高 30%。</p>
+<p>但要注意，这是 AMD 自家实验室测的。</p>
+<p>不是独立的 MLPerf 认证提交。</p>
+<p>股价当天涨了约 5.4%。</p>
+<p>来源：<a href="https://jbiznews.com/amd-introduces-new-ai-data-center-gpu-shares-rise-about-6/">https://jbiznews.com/amd-introduces-new-ai-data-center-gpu-shares-rise-about-6/</a></p>
+<p><strong>AMD 第六代 EPYC：256 核来了</strong></p>
+<p>旗舰 EPYC 9996，AMD 说比 Vera CPU 快 3.7 倍。</p>
+<p>CPU 卸载推理吞吐比上代高 1.8 倍。</p>
+<p>都是 AMD 自报，等独立实测。</p>
+<p>来源：<a href="https://www.networkworld.com/article/4247802/amd-takes-on-intel-and-nvidia-with-new-256-core-epyc-server-cpus.html">https://www.networkworld.com/article/4247802/amd-takes-on-intel-and-nvidia-with-new-256-core-epyc-server-cpus.html</a></p>
+<p><strong>Luminal：推理编译器公司拿了 2500 万美元</strong></p>
+<p>A 轮，Standard Capital 领投。</p>
+<p>产品是搜索编译器加托管推理。</p>
+<p>跨 NVIDIA、AMD 和专用芯片。</p>
+<p>拿 GPT-OSS 120B 测的，8 张 H100。</p>
+<p>8 张 H100 上，自称 36,000 token 每秒。</p>
+<p>对比 TRT-LLM 28,000、vLLM 26,000。</p>
+<p>数字是厂商自报，等独立验证。</p>
+<p>来源：<a href="https://www.unite.ai/luminal-lands-25m-series-a-as-standard-capital-leads-the-round/">https://www.unite.ai/luminal-lands-25m-series-a-as-standard-capital-leads-the-round/</a></p>
+<p><strong>TokenSpeed：Inkling 2 Small 首日支持</strong></p>
+<p>Thinking Machines 的新模型，594B 参数。</p>
+<p>4 张 B300 上单用户 476 token 每秒。</p>
+<p>DSPARK 推测解码下，比单跑目标模型快 75%。</p>
+<p>AIME26 89/90，GPQA-Diamond 92.2%。</p>
+<p>PD 解耦是下一步，作者说在做了。</p>
+<p>来源：<a href="https://lightseek.org/blog/tokenspeed-inkling-2">https://lightseek.org/blog/tokenspeed-inkling-2</a></p>
+<h2>访谈与深度</h2>
+<p><strong>SGLang Summit：陈立武那场纪要还没出</strong></p>
+<p>16 点的炉边谈已结束 3 小时。</p>
+<p>纪要、实录和视频都还没放出来。</p>
+<p>下轮有实录再报。</p>
+<p>明天是 Periodic Labs 的 Liam Fedus。</p>
+<p><strong>Latent Space：本轮没有新文章</strong></p>
+<p>最新还是 11 月 11 日那篇。</p>
+<p>决策模型那篇，15 点版报过了。</p>
+<p><strong>Latent Space 播客：本轮没有新单集</strong></p>
+<p>最新还是 11 月 10 日那期。</p>
+<p><strong>X 大V：本轮没有新帖</strong></p>
+<p>lmsysorg、vLLM 官方、karpathy、jimfan 都没动静。</p>
+<p><strong>Hacker News：没有新料</strong></p>
+<p><strong>Reddit：没有新料</strong></p>
+<p><strong>中文媒体：没有新料</strong></p>
+<p>SGLang v1.0 和黄仁勋的消息，中文媒体还没跟上。</p>
+<h2>值得深入学</h2>
+<p><strong>Tideway 深读已生成</strong></p>
+<p>家用电脑跑大 MoE，显存内存硬盘三级怎么分。</p>
+<p>分阶段布局、踢人先写回、图重放保分页。</p>
+<p>三招能进你的 PD 解耦评估清单。</p>
+<p>笔记已生成，见深读目录。</p>
+<p><strong>vLLM-Omni H3-Image 博客：可以当工具书翻</strong></p>
+<p>优化招数都写得很细，MXFP8、双缓冲、VAE 解码。</p>
+<p>不用整篇精读。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 17 点版去重。</p>
+<p>版本水位：只有 llama.cpp 快照动了，b12336 到 b12340。</p>
+<p>SGLang v1.0 仍未发版。</p>
+<p>vLLM 9 条首次汇总：#67333、#67331、#67272、#67256、#67187、#67148、#66982、#66593、#65461。</p>
+<p>SGLang 4 条首次汇总：#50114、#50107、#50101、#48998。</p>
+<p>TRT-LLM 10 条首次汇总：#22210、#22201、#22184、#22163、#22086、#22009、#22006、#21977、#21960、#21288。</p>
+<p>Dynamo 4 条首次汇总：#18574、#18402、#18151、#18016。</p>
+<p>FlashInfer 2 条首次汇总：#9339、#9260。</p>
+<p>LMDeploy、TGI、llama.cpp 零合入。</p>
+<p>arXiv 主批次仍未到，已晚约 27 小时。</p>
+<p>Tideway、Edge-Native RAG 首次报。</p>
+<p>vLLM-Omni H3-Image 博客首次报。</p>
+<p>黄仁勋辞任首次报，已按三线核验。</p>
+<p>AMD MI450X、EPYC 9006、Luminal、TokenSpeed 首次报。</p>
+<p>陈立武炉边谈纪要仍未出。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-12-1900/">19点版</a></p></body></html>
