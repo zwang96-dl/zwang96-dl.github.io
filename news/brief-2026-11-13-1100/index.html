@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月13日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-13"/>
+<meta name="doc-ts" content="2026-11-13T19:01:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-13（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-13（11点版）</h1>
+<p>11点版来了，头条是 vLLM 给视觉编码器提速。</p>
+<h2>框架更新</h2>
+<p><strong>头条：vLLM 给 Muse 视觉编码器提速</strong></p>
+<p>Muse 是个多模态模型系列。 它的视觉编码器以前每张图都要等 GPU 回话。 等一次，就卡一次，视频一多就慢。 这回 #64822 把布局挪到 host 上算。 GPU 和 CPU 之间不再来回同步。 两个编码器的同步都从 800 多次降到 0。 32 帧视频编码快了 1.15 到 1.22 倍。 输出跟原来逐位一致，没变味。 图片和正常服务不受影响。 来源：<a href="https://github.com/vllm-project/vllm/pull/64822">https://github.com/vllm-project/vllm/pull/64822</a></p>
+<p><strong>版本水位：只动了 llama.cpp 快照</strong></p>
+<p>llama.cpp 快照滚到 b12364。 9 点版时还是 b12361。 正式版还是 v1.0.0。 其余全都没动。 vLLM 正式版还是 v0.33.0。 预发布还是 v0.34.0rc2。 SGLang 还是 v0.5.23。 v1.0 的 tag 还没挂出来。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 正式版还是 v1.6.2。 FlashInfer 正式版还是 v0.7.4。 预发布还是 v0.7.5rc1。 来源：GitHub releases、tags</p>
+<p><strong>vLLM：9 条，量化那两条值得看</strong></p>
+<p>先说 #61815。 没量化的输出头，现在能在线压成 FP8。 输出头就是最后那层，负责吐词。 小激活参数的 MoE 模型上，它是大头。 每吐一个词，都要读它一遍。 压完，验证和解码都能快一点。 这是可选项，输出会变，自己选。 来源：<a href="https://github.com/vllm-project/vllm/pull/61815">https://github.com/vllm-project/vllm/pull/61815</a></p>
+<p>再说 #62515。 推测解码的自适应验证，接上了新后端。 针对 GLM-5.3-Flash，在 Hopper 卡上跑。 推测解码就是先让实习生打草稿再让专家改。 来源：<a href="https://github.com/vllm-project/vllm/pull/62515">https://github.com/vllm-project/vllm/pull/62515</a></p>
+<p>再说 #67041。 HiSparse 那边撤回了一个改动。 之前它强行换了 FlashInfer 的集合通信后端。 这回撤了，回到原来的做法。 来源：<a href="https://github.com/vllm-project/vllm/pull/67041">https://github.com/vllm-project/vllm/pull/67041</a></p>
+<p>其余五条一句话带过。</p>
+<p>#66803，在线重量化时跳过没必要的核分发。</p>
+<p>#67344，AMD 的 RDNA 卡上，KV 块改成 16 个 token。</p>
+<p>#67516，GLM-5.3-Flash 启动修补。</p>
+<p>#67466，MiniMax-M3.1-Flash 进 AMD 测试流水线。</p>
+<p>#66267，测试修补，恢复 PaddleOCR-VL 的覆盖。</p>
+<p><strong>SGLang：2 条，都是 AMD 卡上的小修</strong></p>
+<p>先说 #43136。 DCP 就是把上下文拆开算。 收集前缀时，改用 host 侧偏移量。 GPU 同步又少了一处。 来源：<a href="https://github.com/sgl-project/sglang/pull/43136">https://github.com/sgl-project/sglang/pull/43136</a></p>
+<p>再说 #47645。 CUDA 图回放时，草稿 token 的分片规划修了。 来源：<a href="https://github.com/sgl-project/sglang/pull/47645">https://github.com/sgl-project/sglang/pull/47645</a></p>
+<p><strong>TRT-LLM：5 条，Cosmos 那条值得看</strong></p>
+<p>先说 #21572。 Cosmos3-Edge 的 FP8 版能加载了。 这是个视频生成模型。 去噪的前 3 步和后 3 步用 W8A16。 中间步骤用 W8A8。 W8A16 就是权重 8 位、激活 16 位。 这样精度和速度能兼顾。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21572">https://github.com/NVIDIA/TensorRT-LLM/pull/21572</a></p>
+<p>再说 #22209 和 #22202。 推测解码那边的两个编译修补。 草稿提交核和门控归一化核，提前把变体编好。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22209">https://github.com/NVIDIA/TensorRT-LLM/pull/22209</a> 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22202">https://github.com/NVIDIA/TensorRT-LLM/pull/22202</a></p>
+<p>再说 #22191。 Mooncake 升到 0.3.14。 Mooncake 是 KV 传输用的缓存层。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22191">https://github.com/NVIDIA/TensorRT-LLM/pull/22191</a></p>
+<p>#22060 是流水线基建，跳过。</p>
+<p><strong>llama.cpp：1 条小修，快照动了</strong></p>
+<p>#30021，AMD 显卡的矩阵乘配置调优。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30021">https://github.com/ggml-org/llama.cpp/pull/30021</a></p>
+<p>补记一条 1.0 的细节。 Medium 的深挖补了几个点。 1.0 还带了 FP8 的 KV 缓存。 草稿纸也能用 8 位记，更省显存。 MoE 模型多了 host 侧专家缓存。 不常用的专家放内存里，用时再取。 新支持的模型里有 Kimi-K3.1-Pro。 来源：<a href="https://medium.com/data-science-in-your-pocket/llama-cpp-v1-0-0-local-ai-finally-gets-a-stable-foundation-8587fb5619ba">https://medium.com/data-science-in-your-pocket/llama-cpp-v1-0-0-local-ai-finally-gets-a-stable-foundation-8587fb5619ba</a></p>
+<p><strong>FlashInfer：2 条</strong></p>
+<p>先说 #9453。 H100 的分页注意力，FP16 也能走自动分发。 大活儿走 cuDNN，小活儿还留给 FA2 和 FA3。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9453">https://github.com/flashinfer-ai/flashinfer/pull/9453</a></p>
+<p>再说 #9020。 MXFP8 的矩阵乘调优器，现在会排 CuTe-DSL 和 cuDNN。 跑在 SM107 的卡上。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9020">https://github.com/flashinfer-ai/flashinfer/pull/9020</a></p>
+<p><strong>Dynamo：1 条，两行代码的提速</strong></p>
+<p>#18703，只删了两行。</p>
+<p>前端到 worker 的 TCP 缓冲，之前写死了 2MB。 系统上限只有 208KB，反而关了内核自调。 大 prompt 一多，请求要在前端等 0.1 到 0.4 秒。 现在交给内核自己调，等待没了。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18703">https://github.com/ai-dynamo/dynamo/pull/18703</a></p>
+<p><strong>LMDeploy、TGI、Mooncake：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次下午 4 点到</strong></p>
+<p>本轮没新批次。 最新一篇还是 11 月 12 日那批。 17 点版再看。</p>
+<h2>业内新闻</h2>
+<p><strong>英伟达后续：调查请了前联邦检察官</strong></p>
+<p>先说新细节。 董事会请了前联邦检察官 Joon Kim。 他带着 Wachtell 律所牵头做调查。 黄仁勋手下直接汇报的人超过 60 个。 公司一直没有明确的二把手。 来源：<a href="https://sfinquirer.com/2026/11/13/nvidia-jensen-huang-resigns-colette-kress-interim-ceo/">https://sfinquirer.com/2026/11/13/nvidia-jensen-huang-resigns-colette-kress-interim-ceo/</a></p>
+<p>再说财报。 还是 11 月 17 日发。 下午 1 点 20 分出数字。 2 点开电话会。 这是 Kress 临时接手后的第一场。 之前报过，这里不再展开。</p>
+<p><strong>SGLang Summit：第二天进行中</strong></p>
+<p>Liam Fedus 的炉边谈在今天 10 点半。 聊新兴 AI 实验室那场。 现在刚结束，网上暂无实录。 要点整理出来后，13 点版再报。 来源：<a href="https://www.sglang.io/summit#agenda">https://www.sglang.io/summit#agenda</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 大V：本轮没新帖</strong></p>
+<p>lmsysorg、vLLM 官方都没动静。 karpathy 最新还是 11 月 1 日那条。 jimfan 也没动静。</p>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>最新还是 11 月 10 日那期。 聊 Resend 怎么给 agent 做文档。 来源：<a href="https://latent.space/p/resend/">https://latent.space/p/resend/</a></p>
+<p><strong>Reddit：r/LocalLLaMA 还在转 1.0 的消息</strong></p>
+<p>热帖底下呼声最高的是要人。 大家想要更多维护者。 有人拿 Strata 来比。 它只跑 Qwen3.8-Flash-Next 一个模型。 在那台机器上，比 llama.cpp 快 2 到 2.6 倍。 代价是通用性，只认一个模型一种卡。 英伟达 Dory 模型的支持还在排队。 来源：<a href="https://aifrontierpost.com/articles/llama-cpp-v1-0-release/">https://aifrontierpost.com/articles/llama-cpp-v1-0-release/</a></p>
+<p><strong>中文媒体：还没见到 llama.cpp 1.0 的稿</strong></p>
+<p>机器之心、量子位都没发。</p>
+<h2>值得深入学</h2>
+<p>本轮没有新的值得深读。 9 点版的 Mistral Large 4 笔记已经生成了。 想看的话，翻 9 点版的链接。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 9 点版去重。 版本水位：只有 llama.cpp 快照滚到 b12364，其余全没动。 vLLM 9 条首次汇总：#64822、#62515、#61815、#67041、#66803、#67344、#67516、#67466、#66267。 SGLang 2 条首次汇总：#43136、#47645。 TRT-LLM 5 条首次汇总：#21572、#22209、#22202、#22191、#22060。 llama.cpp 1 条首次汇总：#30021。 FlashInfer 2 条首次汇总：#9453、#9020。 Dynamo 1 条首次汇总：#18703。 LMDeploy、TGI、Mooncake 零合入。 llama.cpp 1.0 的 FP8 KV 缓存和 MoE 专家缓存细节是首次补。 英伟达：Joon Kim 牵头调查、无明确二把手是首次报；财报 11 月 17 日是之前报过的。 SGLang Summit 第二天、Liam Fedus 10 点半炉边谈是 9 点版报过的。 arXiv 本轮没新批次。 Latent Space 最新单集仍是 11 月 10 日那期。 Reddit 维护者呼声和 Strata 对比是首次报。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-13-1100/">11点版</a></p></body></html>
