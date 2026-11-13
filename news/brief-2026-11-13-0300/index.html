@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月13日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-13"/>
+<meta name="doc-ts" content="2026-11-13T10:59:06"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-13（3点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-13（3点版）</h1>
+<p>3点版来了，夜里只有一件大事。</p>
+<h2>框架更新</h2>
+<p><strong>头条：llama.cpp 出 1.0 了</strong></p>
+<p>llama.cpp 刚发了 v1.0.0。</p>
+<p>这是它第一个 1.0 正式版。</p>
+<p>发布时间是今天凌晨 2 点 20 分。</p>
+<p>上一版还是 v0.9.0。</p>
+<p>从 2023 年 3 月算起，等了三年多。</p>
+<p>1.0 意味着接口稳了，可以放心钉版本。</p>
+<p>对你最有用的是 FP8 的 KV 缓存。</p>
+<p>KV 就是草稿纸，FP8 是更省的记法。</p>
+<p>草稿纸省一半，同样显存能多接请求。</p>
+<p>还有 NVFP4 的融合算子，门控和上投影合着算。</p>
+<p>Kimi-K3.1-Pro 的文本模型也能跑了。</p>
+<p>多模态那边，Kimi K3.1 的视觉也接上了。</p>
+<p>服务器多了语音合成接口，跟 OpenAI 兼容。</p>
+<p>MoE 缓存换了新策略，冷门专家放 CPU 跑。</p>
+<p>发布页只写了一句：更多消息在中欧时间下午 3 点出。</p>
+<p>也就是今天早上 6 点，留给白天那期跟。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/v1.0.0">https://github.com/ggml-org/llama.cpp/releases/tag/v1.0.0</a></p>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 的 tag 还没挂出来。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>预发布还是 v0.7.5rc1。</p>
+<p>llama.cpp 正式版跳到 v1.0.0。</p>
+<p>快照到了 b12360，v1.0.0 配套的是 b12359。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：6 条，MoE 那两条值得看</strong></p>
+<p>先说 #67181。</p>
+<p>DeepGEMM 升了个版本。</p>
+<p>修的是 MegaMoE 在 CUDA 图重放下的合并问题。</p>
+<p>CUDA 图就是把一串算子预先排好，一次下发。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67181">https://github.com/vllm-project/vllm/pull/67181</a></p>
+<p>再说 #52652。</p>
+<p>INT4 的融合 MoE 核走了张量描述符路径。</p>
+<p>XPU 默认开，sm100 可以选开。</p>
+<p>INT4 就是 4 位量化，更省显存。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/52652">https://github.com/vllm-project/vllm/pull/52652</a></p>
+<p>其余四条一句话带过。</p>
+<p>#67437、#65881，CI 的小修补。</p>
+<p>#67409，Rust 前端的测试夹具。</p>
+<p>#67295，类型注解的小修。</p>
+<p><strong>SGLang：3 条，Kimi 那条最值得看</strong></p>
+<p>先说 #49913。</p>
+<p>Kimi-K3.1 能跑在统一内存池上了。</p>
+<p>统一内存池就是各路缓存共用一块显存。</p>
+<p>跟你 11 月 12 日看的统一内存那篇深读正相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49913">https://github.com/sgl-project/sglang/pull/49913</a></p>
+<p>再说 #49966。</p>
+<p>内存缓存重构：同寿命的部件合成一个子池。</p>
+<p>缓存账算得更细了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49966">https://github.com/sgl-project/sglang/pull/49966</a></p>
+<p>再说 #49701，NPU 上 EPLB 的修补。</p>
+<p>EPLB 是专家并行的负载均衡。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49701">https://github.com/sgl-project/sglang/pull/49701</a></p>
+<p><strong>TRT-LLM：4 条，推测解码那条值得看</strong></p>
+<p>先说 #21972。</p>
+<p>混合推测模型的草稿 KV 池共用了。</p>
+<p>还修了 FP8 的 MLA 上下文输入。</p>
+<p>MLA 是 DeepSeek 那种压缩注意力。</p>
+<p>推测解码就是先让实习生打草稿再让专家改。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21972">https://github.com/NVIDIA/TensorRT-LLM/pull/21972</a></p>
+<p>再说 #21718。</p>
+<p>没量化的 MoE 能跑原生 BF16 的 cubin 了。</p>
+<p>专家数超过 128 的路由分层也修了。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21718">https://github.com/NVIDIA/TensorRT-LLM/pull/21718</a></p>
+<p>其余两条一句话带过。</p>
+<p>#22217，删了没排期的测试。</p>
+<p>#21486，认证的小修补。</p>
+<p><strong>LMDeploy、Mooncake：各 1 条，都是小事</strong></p>
+<p>LMDeploy #5132，只升了 xgrammar 的依赖。</p>
+<p>Mooncake #5380，文档里加了 AMD ATOM 的集成。</p>
+<p>FlashInfer、Dynamo、TGI：零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：本轮没新批次</strong></p>
+<p>新批次约在 00:00 UTC 到。</p>
+<p>下一批要等今天下午 4 点，5点版再看。</p>
+<h2>业内新闻</h2>
+<p><strong>黄仁勋后续：接班人名单又长了</strong></p>
+<p>外部人选多了三位。</p>
+<p>Arm 的 CEO Rene Haas。</p>
+<p>AMD 的 CEO 苏姿丰。</p>
+<p>美光的 CEO Sanjay Mehrotra。</p>
+<p>内部还多了 Groq 创始人 Jonathan Ross。</p>
+<p>他去年 12 月才加入英伟达。</p>
+<p>特朗普公开点名要苹果的库克来接。</p>
+<p>原话是&quot;一位传奇接替另一位传奇&quot;。</p>
+<p>华尔街的共识是：没人能穿上那件皮夹克。</p>
+<p>这是 Seaport 分析师 Jay Goldberg 的原话。</p>
+<p>英伟达有 60 位高管直接向黄仁勋汇报。</p>
+<p>接班梯队基本是空的。</p>
+<p>股价开盘跌了约 13%，市值一度跌破 4 万亿美元。</p>
+<p>收盘跌 4.34%，报 166.19 美元。</p>
+<p>财报还是 11 月 17 日发。</p>
+<p>众议院要求 11 月 18 日闭门简报。</p>
+<p>来源：<a href="https://yourstory.com/2026/11/who-will-succeed-jensen-huang-race-to-find-permanent-chief-begins">https://yourstory.com/2026/11/who-will-succeed-jensen-huang-race-to-find-permanent-chief-begins</a></p>
+<p>来源：<a href="https://www.mytoken.io/news/607632.html">https://www.mytoken.io/news/607632.html</a></p>
+<p><strong>SGLang Summit：第二天是今天</strong></p>
+<p>Liam Fedus 的炉边谈在今天。</p>
+<p>聊新兴 AI 实验室那场。</p>
+<p>白天才开，等下午的简报再报。</p>
+<h2>访谈与深度</h2>
+<p><strong>X 大V：本轮没新帖</strong></p>
+<p>lmsysorg、vLLM 官方都没动静。</p>
+<p>karpathy、jimfan 也没动静。</p>
+<p><strong>Hacker News：补一条之前漏的</strong></p>
+<p>有篇 4 天前的老帖，之前几期漏报了。</p>
+<p>标题是&quot;为什么 CUDA 翻译解锁不了 AMD 的真潜力&quot;。</p>
+<p>说白了：只靠翻译 CUDA 代码，AMD 跑不快。</p>
+<p>真想快，得给 AMD 原生写优化。</p>
+<p>帖子里举了 Kimi 的例子。</p>
+<p>Kimi 在 SGLang 上能跑，在 AMD 的 vLLM 上不行。</p>
+<p>模型一出，英伟达的补丁当天就到。</p>
+<p>AMD 的适配总要慢几拍。</p>
+<p>跟你的 MI350X 评估直接相关。</p>
+<p>来源：<a href="https://eliovp.com/why-cuda-translation-wont-unlock-amds-real-potential/">https://eliovp.com/why-cuda-translation-wont-unlock-amds-real-potential/</a></p>
+<p>讨论：<a href="https://news.ycombinator.com/item?id=45904178">https://news.ycombinator.com/item?id=45904178</a></p>
+<p><strong>Reddit：没有新料</strong></p>
+<p><strong>中文媒体：黄仁勋那串还是昨天的料</strong></p>
+<p>机器之心、量子位没见到 llama.cpp 1.0 的稿。</p>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>Spotify 上最新还是 11 月 10 日那期。</p>
+<p>文章最新还是 11 月 11 日那篇。</p>
+<h2>值得深入学</h2>
+<p><strong>llama.cpp v1.0.0：可以翻发布页，不用精读</strong></p>
+<p>1.0 的分量在版本号，不在单篇论文。</p>
+<p>FP8 KV 缓存那条，跟你的缓存评估直接相关。</p>
+<p>但发布页只是提交列表，没有方法论可挖。</p>
+<p>本轮没生成深读笔记，宁缺毋滥。</p>
+<p>早上 6 点官方还有补充消息，白天再看。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 1点版去重。</p>
+<p>版本水位：只有 llama.cpp 动了，正式版 v1.0.0。</p>
+<p>SGLang v1.0 仍未发版。</p>
+<p>vLLM 6 条首次汇总：#52652、#65881、#67181、#67295、#67409、#67437。</p>
+<p>SGLang 3 条首次汇总：#49701、#49913、#49966。</p>
+<p>TRT-LLM 4 条首次汇总：#21486、#21718、#21972、#22217。</p>
+<p>LMDeploy 1 条首次汇总：#5132。</p>
+<p>Mooncake 1 条首次汇总：#5380。</p>
+<p>FlashInfer、Dynamo、TGI 零合入。</p>
+<p>arXiv 本轮没新批次。</p>
+<p>黄仁勋接班人新名字是首次报：Haas、苏姿丰、Mehrotra、Jonathan Ross、库克。</p>
+<p>8-K、Harvey Jones、无接班计划、Srouji、Kagan、Ian Buck 是 23点版报过的，不再重复。</p>
+<p>SGLang 联盟、v1.0 官宣是 13点版报过的，不再重复。</p>
+<p>HN 的 CUDA 翻译帖是 4 天前的补报，之前各期都没提过。</p>
+<p>Latent Space 最新单集仍是 11 月 10 日那期。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-13-0300/">3点版</a></p></body></html>
