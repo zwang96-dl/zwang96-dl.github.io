@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月13日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-13"/>
+<meta name="doc-ts" content="2026-11-13T13:02:18"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-13（5点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-13（5点版）</h1>
+<p>5点版来了，头条是谷歌的新模型。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 正式版还是 v0.33.0。 预发布还是 v0.34.0rc2。 SGLang 还是 v0.5.23。 v1.0 的 tag 还没挂出来。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 正式版还是 v1.6.2。 FlashInfer 正式版还是 v0.7.4。 预发布还是 v0.7.5rc1。 llama.cpp 正式版还是 v1.0.0。 快照还是 b12360。 来源：GitHub releases、tags</p>
+<p><strong>vLLM：只合了 1 条</strong></p>
+<p>先说 #67061。 推测解码开着时，min_p 和 logit_bias 不再被拒。 以前设了这两个参数，请求直接报 400。 其实采样器早就支持，只是检查那关拦错了。 现在修好了。 推测解码就是先让实习生打草稿再让专家改。 来源：<a href="https://github.com/vllm-project/vllm/pull/67061">https://github.com/vllm-project/vllm/pull/67061</a></p>
+<p><strong>SGLang：只合了 1 条，还是文档</strong></p>
+<p>#50289，教程里刷新了一条上线记录。</p>
+<p>是 SemiAnalysis 的 AgentX。 代码没动，跳过。 来源：<a href="https://github.com/sgl-project/sglang/pull/50289">https://github.com/sgl-project/sglang/pull/50289</a></p>
+<p><strong>TRT-LLM：3 条，Qwen3-VL 那条最值得看</strong></p>
+<p>先说 #20497。 Qwen3-VL 的视频，在 E/PD 拆分下会丢时间戳。 E/PD 就是编码、预填、解码分开跑。 丢了时间戳，帧和帧的边界就乱了。 生成结果跟不拆分的对不上。 这条修的就是这个。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20497">https://github.com/NVIDIA/TensorRT-LLM/pull/20497</a></p>
+<p>再说 #21930。 Qwen3.8-Flash-Next 的 FP8 版，跑起来的一批小修。 FP8 是 8 位浮点，更省显存的记法。 还涉及 MNNVL 的一次性全归约。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21930">https://github.com/NVIDIA/TensorRT-LLM/pull/21930</a></p>
+<p>再说 #20916。 强化学习跑分那套工作，合回主线了。 测的是 Qwen3.5-397B，397B 参数的大模型。 GDN 混合迭代的 host 路径提速了。 GDN 是门控差分网络，一种混合结构。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20916">https://github.com/NVIDIA/TensorRT-LLM/pull/20916</a></p>
+<p><strong>llama.cpp：3 条，都是小修</strong></p>
+<p>先说 #29557。 语法匹配用左因子分解提速了。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/29557">https://github.com/ggml-org/llama.cpp/pull/29557</a></p>
+<p>再说 #29267。 Vulkan 后端加了设备保活选项。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/29267">https://github.com/ggml-org/llama.cpp/pull/29267</a></p>
+<p>再说 #31294。 推测解码的草稿采样参数，用错会警告。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31294">https://github.com/ggml-org/llama.cpp/pull/31294</a></p>
+<p><strong>Dynamo：只合了 1 条</strong></p>
+<p>#18611，支持搬家后的 SGLang 分词器助手函数。</p>
+<p>前端小修。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18611">https://github.com/ai-dynamo/dynamo/pull/18611</a></p>
+<p><strong>LMDeploy、FlashInfer、Mooncake、TGI：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：本轮没新批次</strong></p>
+<p>最新一篇还是 11 月 12 日的。 新批次约在今天下午 4 点到。 17点版再看。</p>
+<h2>业内新闻</h2>
+<p><strong>头条：谷歌发了 Gemini 4 Hydrogen</strong></p>
+<p>谷歌 11 月 12 日发了 Gemini 4 Hydrogen。 这是 Gemini 4 家族里快又便宜的那款。 接的是 Gemini 3.8 Flash 的班。 价格是输入 1.5 美元，输出 7.5 美元。 按每百万 token 算。 比 Claude Sonnet 5.5 便宜 25%。 上下文窗口 100 万 token。 谷歌自己的表上，10 项里 7 项赢了 Sonnet 5.5。 但这是谷歌自己挑的题，别全信。 独立榜单上，它跟 Sonnet 5.5 大致打平。 每任务成本 1.87 美元，只有对手的三分之一。 来源：<a href="https://officechai.com/ai/gemini-4-hydrogen-benchmarks/">https://officechai.com/ai/gemini-4-hydrogen-benchmarks/</a> 来源：<a href="https://agentspulse.github.io/tutorials/gemini-4-hydrogen-benchmarks/">https://agentspulse.github.io/tutorials/gemini-4-hydrogen-benchmarks/</a></p>
+<p><strong>黄仁勋后续：华尔街日报曝了句狠话</strong></p>
+<p>《华尔街日报》说，黄仁勋夏天开会时这么评价 Kress。 原话是&quot;像受惊的小鹿&quot;，说她顶不起战略。 Kress 是英伟达 CFO，现任临时 CEO。 这话是匿名信源说的，官方没认。 接班人这边又多了两个名字。 《英伟达之道》的作者 Tae Kim 点了两人。 一个是 Arm 的 CEO Rene Haas。 另一个是英伟达的 Ian Buck。 他说这两人最能接住这家公司。 Jeff Fisher 也被提到了，在英伟达干了 32 年。 董事会还在考虑双 CEO 共治的方案。 划重点：以上全是传闻，没有官方短名单。 来源：<a href="https://techcrunch.com/2026/11/13/jensen-huang-didnt-show-confidence-in-his-successor-report-says/">https://techcrunch.com/2026/11/13/jensen-huang-didnt-show-confidence-in-his-successor-report-says/</a> 来源：<a href="https://www.newkerala.com/news/a/nvidia-talent-thrive-without-jensen-huang-tae-kim-921.htm">https://www.newkerala.com/news/a/nvidia-talent-thrive-without-jensen-huang-tae-kim-921.htm</a></p>
+<p><strong>SGLang 接上了 IBM 的新芯片</strong></p>
+<p>AI 智能体一周就把 SGLang 接到了 IBM Spyre 上。 Spyre 是 IBM 的 AI 加速芯片。 只写了 1500 行插件代码。 以前这种适配要花好几个月。 新芯片想接进来，成本低多了。 来源：<a href="https://aitop.news/daily/2026-11-13">https://aitop.news/daily/2026-11-13</a></p>
+<p><strong>SGLang Summit：第二天是今天</strong></p>
+<p>Liam Fedus 的炉边谈在今天。 聊新兴 AI 实验室那场。 白天才开，等下午的简报再报。 来源：<a href="https://www.sglang.io/summit#agenda">https://www.sglang.io/summit#agenda</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 大V：本轮没新帖</strong></p>
+<p>lmsysorg、vLLM 官方都没动静。 karpathy、jimfan 也没动静。</p>
+<p><strong>Hacker News：本轮没新料</strong></p>
+<p>Thaw 那篇 11 月 12 日 15点版报过。 不再重复。</p>
+<p><strong>Reddit：没有新料</strong></p>
+<p><strong>中文媒体：还没见到 llama.cpp 1.0 的稿</strong></p>
+<p>机器之心、量子位都没发。 Gemini 4 Hydrogen 的中文稿也没见到。</p>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>Spotify 上最新还是 11 月 10 日那期。 文章最新还是 11 月 11 日那篇。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没生成深读笔记，宁缺毋滥</strong></p>
+<p>Gemini 4 是产品发布，不是论文。 没有方法论可挖。 TRT-LLM 那条 Qwen3-VL 修补，跟你的 PD 评估相关。 但只是修 bug，不值得精读。 llama.cpp 1.0 的补充消息，早上 6 点才出。 留给 7点版跟。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 3点版去重。 版本水位：全都没动，llama.cpp 正式版仍是 v1.0.0。 vLLM 1 条首次汇总：#67061。 SGLang 1 条首次汇总：#50289。 TRT-LLM 3 条首次汇总：#20497、#20916、#21930。 llama.cpp 3 条首次汇总：#29267、#29557、#31294。 Dynamo 1 条首次汇总：#18611。 LMDeploy、FlashInfer、Mooncake、TGI 零合入。 arXiv 本轮没新批次。 Gemini 4 Hydrogen 是首次报。 黄仁勋接班人：WSJ 那句评价、Tae Kim 的点名是首次报。 Jeff Fisher、双 CEO 方案也是首次报。 Haas、苏姿丰、Mehrotra 是 3点版报过的，不再重复。 Jonathan Ross、库克、Ian Buck 也是 3点版报过的。 SGLang 联盟、v1.0 官宣是 13点版报过的，不再重复。 SGLang 接 IBM Spyre 是首次报。 Thaw 是 11 月 12 日 15点版报过的，不再重复。 Latent Space 最新单集仍是 11 月 10 日那期。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-13-0500/">5点版</a></p></body></html>
