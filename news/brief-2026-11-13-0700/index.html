@@ -1,0 +1,95 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月13日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-13"/>
+<meta name="doc-ts" content="2026-11-13T15:08:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-13（7点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-13（7点版）</h1>
+<p>7点版来了，头条是 llama.cpp 1.0 的后续消息。</p>
+<h2>框架更新</h2>
+<p><strong>头条：llama.cpp 1.0 的博客来了</strong></p>
+<p>早上 6 点，Hugging Face 博客发了 1.0 的文章。 标题是《更坚实的地基》。 文章把 1.0 的意思说清楚了。 以后接口一变，大版本就跟着涨。 这叫语义化版本。 下游开发者可以放心钉版本。 1.0 支持 150 多种模型结构。 推测解码的主流方法也都支持。 分发渠道也铺开了。 Homebrew、conda-forge、Winget 都有。 Debian、Docker 也都有。 测试这块也加了码。 Hugging Face 的 Buckets 和 Jobs 撑着 CI。 英伟达、AMD、高通、Arm、IBM、英特尔都给了硬件。 一句话：1.0 不只是换个号。 它是给下游开发者的一句承诺。 来源：<a href="https://huggingface.co/blog/ggml-org/llama-cpp-v1">https://huggingface.co/blog/ggml-org/llama-cpp-v1</a> 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/v1.0.0">https://github.com/ggml-org/llama.cpp/releases/tag/v1.0.0</a></p>
+<p><strong>版本水位：只纠一个数字</strong></p>
+<p>llama.cpp 正式版还是 v1.0.0。 快照是 b12359，不是 b12360。 发布页上写的是 b12359。 5点版那个 b12360 说错了。 这里纠一下。 其余全都没动。 vLLM 正式版还是 v0.33.0。 预发布还是 v0.34.0rc2。 SGLang 还是 v0.5.23。 v1.0 的 tag 还没挂出来。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 正式版还是 v1.6.2。 FlashInfer 正式版还是 v0.7.4。 预发布还是 v0.7.5rc1。 来源：GitHub releases、tags</p>
+<p><strong>vLLM：5 条，GLM 那条值得看</strong></p>
+<p>先说 #67194。 GLM-5.3 的视觉部分，读题那步挪到 host 上算。 ViT 是视觉编码器，读图的那部分。 挪到 host 上，显存那边更松快。 来源：<a href="https://github.com/vllm-project/vllm/pull/67194">https://github.com/vllm-project/vllm/pull/67194</a></p>
+<p>其余四条一句话带过。</p>
+<p>#67378，文档更新。</p>
+<p>DeepSeek-V4.1-Flash 在 MI355X 上有了新预设。 还带 UMBP 的 KV 卸载。</p>
+<p>#67479，多模态修补。</p>
+<p>非本地字节序的向量不再丢值。</p>
+<p>#67288，跑分工具修了两个小 bug。</p>
+<p>#67420，UMBP 测试换了新接口。</p>
+<p><strong>SGLang：2 条</strong></p>
+<p>先说 #49600。 函数调用多了个解析器。 服务 Granite 4.2 这个模型。 函数调用就是让模型调工具。 来源：<a href="https://github.com/sgl-project/sglang/pull/49600">https://github.com/sgl-project/sglang/pull/49600</a></p>
+<p>再说 #46408。 多模态重构的第二步。 处理器改成按配置初始化。 来源：<a href="https://github.com/sgl-project/sglang/pull/46408">https://github.com/sgl-project/sglang/pull/46408</a></p>
+<p><strong>TRT-LLM：2 条，MXFP4 那条值得看</strong></p>
+<p>先说 #22108。 MXFP4 的 FP8 MoE 里，SwiGLU 的缩放修了。 这是个正确性修补。 算错了会悄悄变味。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22108">https://github.com/NVIDIA/TensorRT-LLM/pull/22108</a></p>
+<p>再说 #22187。 清理了一个退役的自动评审流程。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22187">https://github.com/NVIDIA/TensorRT-LLM/pull/22187</a></p>
+<p><strong>llama.cpp：2 条，都是小修</strong></p>
+<p>#31544，Vulkan 后端加了 TOP_K_MASK。</p>
+<p>#32135，RMSNorm 加了 BF16 支持。</p>
+<p>CPU 和 CUDA 都能用。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31544">https://github.com/ggml-org/llama.cpp/pull/31544</a> 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32135">https://github.com/ggml-org/llama.cpp/pull/32135</a></p>
+<p><strong>LMDeploy、TGI、Dynamo、FlashInfer、Mooncake：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次下午 4 点到</strong></p>
+<p>本轮没新批次。 但补一篇 11 月 12 日那批漏掉的。 Meta 的《视觉编码拆解》。 这篇直接对着你的研究方向。 它把视觉编码器拆成三个选择。 先说结论，预训练那步不重要。 从头训的编码器，跟预训练好的打平。 重要的是专门留给视觉的容量。 没编码器的模型，视觉问答落后 5.4 分。 OCR 上落后 13 分。 把同样的参数加回主干，也追不回来。 位置也能挪。 把视觉模块塞进主干最前面几层。 效果跟单独的编码器一样好。 视觉问答甚至还高了一点点。 45.0 分对 44.4 分。 对推理服务最有用的是首字时间。 单独编码器要先跑完图，主干才能开工。 这一步要多花约 165 毫秒。 塞进主干里，只多花约 85 毫秒。 等于首字快了一半。 这篇做了精读笔记。 来源：<a href="https://arxiv.org/abs/2611.17334">https://arxiv.org/abs/2611.17334</a></p>
+<h2>业内新闻</h2>
+<p><strong>英伟达接班人：本轮没新消息</strong></p>
+<p>特朗普点名了库克。 Harvey Jones 当了董事长。 财报还是 11 月 17 日发。 这些 19 点版、21 点版、23 点版都报过。 不再重复。</p>
+<p><strong>SGLang Summit：第二天是今天</strong></p>
+<p>Liam Fedus 的炉边谈在今天。 聊新兴 AI 实验室那场。 白天才开，等下午的简报再报。 来源：<a href="https://www.sglang.io/summit#agenda">https://www.sglang.io/summit#agenda</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 大V：本轮没新帖</strong></p>
+<p>lmsysorg、vLLM 官方都没动静。 karpathy 最新还是 11 月 1 日那条。 jimfan 也没动静。</p>
+<p><strong>Hacker News：上周那篇 llama.cpp 热帖值得翻</strong></p>
+<p>标题是《本地 LLM 生态不需要 Ollama》。 上周冲到 646 分。 作者列了 5 个多数人不知道的技巧。 KV 缓存量化那条最实在。 Q8_0 能把 70B 模型的草稿纸从 96GB 压到 38GB。 准确率基本不掉。 还有提示词缓存和多线性注意力。 提醒一句：这是社区文章，不是官方测试。 数字是作者自己报的。 来源：<a href="https://pengen.diewe.workers.dev/_cbd692d476c5faf3b61bcf/the-local-llm-ecosystem-doesnt-need-ollama-5-llamacpp-tricks-90-of-developers-are-missing-2olg">https://pengen.diewe.workers.dev/_cbd692d476c5faf3b61bcf/the-local-llm-ecosystem-doesnt-need-ollama-5-llamacpp-tricks-90-of-developers-are-missing-2olg</a></p>
+<p><strong>Reddit：r/LocalLLaMA 在转 1.0 的消息</strong></p>
+<p>没超出发布页的新料。 来源：<a href="https://readmex.ai/e/llama.cpp">https://readmex.ai/e/llama.cpp</a></p>
+<p><strong>中文媒体：还没见到 llama.cpp 1.0 的稿</strong></p>
+<p>机器之心、量子位都没发。 Gemini 4 Hydrogen 的中文稿也没见到。</p>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>Spotify 上最新还是 11 月 10 日那期。</p>
+<h2>值得深入学</h2>
+<p><strong>Meta 视觉编码拆解：值得精读</strong></p>
+<p>这篇能帮你解决一个具体问题。 你的 EPD 评估里，编码器一直是单独一关。 这篇说，编码器不一定非得单独放。 视觉容量塞进主干前面几层，效果一样。 首字还更快。 评估清单里可以加一条。 按架构分档：编码器外置和内置，拆分策略不一样。 全文精读见深读笔记。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 5点版去重。 版本水位：除 llama.cpp 快照纠为 b12359 外，全都没动。 llama.cpp 1.0 博客是首次报。 vLLM 5 条首次汇总：#67194、#67378、#67479、#67288、#67420。 SGLang 2 条首次汇总：#49600、#46408。 TRT-LLM 2 条首次汇总：#22108、#22187。 llama.cpp 2 条首次汇总：#31544、#32135。 LMDeploy、TGI、Dynamo、FlashInfer、Mooncake 零合入。 arXiv 本轮没新批次。 Meta 视觉编码拆解是 11 月 12 日那批漏报的，首次报。 英伟达接班人：特朗普点名库克是 21点版报过的。 Harvey Jones 当董事长是 19点版、23点版报过的。 11 月 17 日财报是 19点版报过的。 SGLang 联盟、v1.0 官宣是 13点版报过的，不再重复。 SGLang 接 IBM Spyre 是 5点版报过的。 Gemini 4 Hydrogen 是 5点版报过的。 Latent Space 最新单集仍是 11 月 10 日那期。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-13-0700/">7点版</a></p></body></html>
