@@ -1,0 +1,218 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月12日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-12"/>
+<meta name="doc-ts" content="2026-11-13T01:00:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-12（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-12（17点版）</h1>
+<p>17点版来了。</p>
+<p>头条：FlashInfer 又给确定性加码了。</p>
+<p>批量不变模式，现在扩到 BF16 的 MegaMoE 了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：基本没动，只有快照在滚</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 的 tag 和 release 还是没挂出来。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc1。</p>
+<p>正式版还是 v0.7.4。</p>
+<p>llama.cpp 还是 v0.9.0。</p>
+<p>快照滚到 b12336。</p>
+<p>15 点版时还是 b12329。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>FlashInfer：1 条，确定性那块又进了一步</strong></p>
+<p>先说 #9417。</p>
+<p>批量不变的 BF16 MegaMoE 来了。</p>
+<p>MegaMoE 就是大规模混合专家模型。</p>
+<p>这次覆盖 Blackwell 和 Rubin。</p>
+<p>批量不变就是 batch 大小变了，结果也不变。</p>
+<p>这是你做确定性评估要的特性。</p>
+<p>v0.7.4 先给了 FP8 和几种量化。</p>
+<p>v0.7.5rc1 又补了 MXFP4 和 NVFP4。</p>
+<p>这回 BF16 的 MegaMoE 也跟上了。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9417">https://github.com/flashinfer-ai/flashinfer/pull/9417</a></p>
+<p><strong>vLLM：5 条，推测解码和 KV 占了三条</strong></p>
+<p>先说 #64531。</p>
+<p>结构化输出加推测解码，流水线里的气泡没了。</p>
+<p>气泡就是调度空等的时间。</p>
+<p>DeepSeek-V4-Flash 上测的。</p>
+<p>配 dspark 草稿模型，异步调度。</p>
+<p>并发 64 时，端到端吞吐涨了 3%。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64531">https://github.com/vllm-project/vllm/pull/64531</a></p>
+<p>再说 #64286。</p>
+<p>KV 卸载多了个触发器。</p>
+<p>KV 卸载就是把 KV 缓存存到显存外面。</p>
+<p>以前存的时机是写死的。</p>
+<p>现在能按触发原因分开处理。</p>
+<p>比如交接时存一份，覆盖时再说。</p>
+<p>这是 KV 卸载重构的第一步。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64286">https://github.com/vllm-project/vllm/pull/64286</a></p>
+<p>再说 #65607。</p>
+<p>HiSparse 的协调器改成批量记账了。</p>
+<p>HiSparse 是稀疏注意力的加速路子。</p>
+<p>以前一页一页地更新常驻状态。</p>
+<p>上下文全在显存里时，一次调度要卡几十毫秒。</p>
+<p>所有跑着的请求都得等。</p>
+<p>现在改成批量操作，卡顿没了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65607">https://github.com/vllm-project/vllm/pull/65607</a></p>
+<p>其余两条一句话带过。</p>
+<p>#67279，关机时清掉 cuBLAS 的工作区。</p>
+<p>#65998，ROCm 上回退了一处 AITER 的改动。</p>
+<p><strong>SGLang：4 条，全是扩散模型那边的</strong></p>
+<p>先说 #49576。</p>
+<p>扩散模型里，条件缓存的淘汰改成 O(1) 了。</p>
+<p>条件缓存就是存着提示词算好的特征。</p>
+<p>上限也提到 4096 条。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49576">https://github.com/sgl-project/sglang/pull/49576</a></p>
+<p>再说 #49826。</p>
+<p>修了 minimax-h3 的参数保存。</p>
+<p>Cache-DiT 是扩散模型的缓存加速。</p>
+<p>每层的 AdaLN 参数，现在不会丢了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49826">https://github.com/sgl-project/sglang/pull/49826</a></p>
+<p>再说 #49417。</p>
+<p>这是扩散模型 joy 那边的优化。</p>
+<p>SM103 上，QK 归一化和 RoPE 都开了。</p>
+<p>RoPE 就是旋转位置编码。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49417">https://github.com/sgl-project/sglang/pull/49417</a></p>
+<p>其余一条是清理死代码，#49189。</p>
+<p><strong>TRT-LLM：2 条，推测解码那条值得看</strong></p>
+<p>先说 #21815。</p>
+<p>修了 MiniMax M3 的 Eagle3 草稿循环。</p>
+<p>Eagle3 就是推测解码的草稿模型。</p>
+<p>SM103 上张量并行 4 卡和 8 卡会初始化失败。</p>
+<p>原因是草稿循环少传了两个参数。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21815">https://github.com/NVIDIA/TensorRT-LLM/pull/21815</a></p>
+<p>再说 #21948。</p>
+<p>只是删了个过期的测试豁免。</p>
+<p><strong>Dynamo：7 条，仿真和前端占大头</strong></p>
+<p>先说 #18653。</p>
+<p>仿真现在能指定 KV 缓存和矩阵量化的精度了。</p>
+<p>仿真就是还没真跑，先算一算性能。</p>
+<p>以前 FP8 的 KV 缓存设不进去。</p>
+<p>仿真按 BF16 算，容量直接少一半。</p>
+<p>解码重的 H200 负载上，预测的每秒 token 数从 1945 掉到 1425。</p>
+<p>现在能如实设 FP8 了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18653">https://github.com/ai-dynamo/dynamo/pull/18653</a></p>
+<p>再说 #18459。</p>
+<p>自定义聊天处理器，正式成一等公民了。</p>
+<p>以前第三方想接自己的聊天引擎，得改源码。</p>
+<p>现在不用 monkeypatch 了。</p>
+<p>NeMo RL 的聊天引擎就是这么接进来的。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18459">https://github.com/ai-dynamo/dynamo/pull/18459</a></p>
+<p>再说 #18436。</p>
+<p>引导语法里，根规则走不下去的直接拒掉。</p>
+<p>引导语法就是限定输出格式的规则。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18436">https://github.com/ai-dynamo/dynamo/pull/18436</a></p>
+<p>其余四条一句话带过。</p>
+<p>#18694，Anthropic 流式里补了停止序列。</p>
+<p>#18693，15 点版报过的同机 PD 走 TCP 文档，1.7.0 分支的 cherry-pick。</p>
+<p>#18692，名字太长截短，1.7.0 分支的 cherry-pick。</p>
+<p>#18134，算子侧的 DGDR 覆盖。</p>
+<p><strong>llama.cpp：1 条，小修补</strong></p>
+<p>#30335，聊天里多认一种 K2 Horizon 的结束标记。</p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新批次还在鸽</strong></p>
+<p>接口返回正常。</p>
+<p>最新提交还是 11 月 10 日那批。</p>
+<p>原定 11 月 11 日 16:00 PST 到。</p>
+<p>现在已经晚了 25 小时。</p>
+<p>15 点版时晚 23 小时。</p>
+<p>下轮再看。</p>
+<h2>业内新闻</h2>
+<p><strong>SGLang Summit：陈立武的炉边谈刚结束</strong></p>
+<p>16 点那场，聊下一代 AI 硬件。</p>
+<p>刚结束半小时，纪要和视频还没出。</p>
+<p>下轮有实录再报。</p>
+<p>明天是 Periodic Labs 的 Liam Fedus。</p>
+<p>聊新兴 AI 实验室。</p>
+<p>来源：<a href="https://www.sglang.io/summit">https://www.sglang.io/summit</a></p>
+<h2>访谈与深度</h2>
+<p><strong>压测工具横评：今天刚出的一篇指南</strong></p>
+<p>Metarix 今天发了篇压测工具对比。</p>
+<p>vLLM 自带的 bench serve，适合调自己引擎的参数。</p>
+<p>SGLang 的 bench_serving，适合看吞吐和 SLO 达标率。</p>
+<p>GuideLLM 适合跨引擎扫一遍，做成报告。</p>
+<p>AIPerf 适合回放真实流量。</p>
+<p>还给了个六步方法。</p>
+<p>先定 p99 目标，再从低负载扫到饱和。</p>
+<p>这篇对你正在做的评估很实用。</p>
+<p>来源：<a href="https://metarix.io/benchmark-llm-inference">https://metarix.io/benchmark-llm-inference</a></p>
+<p><strong>Latent Space：本轮没有新文章</strong></p>
+<p>最新还是 11 月 11 日那篇。</p>
+<p>决策模型那篇，15 点版报过了。</p>
+<p><strong>Latent Space 播客：本轮没有新单集</strong></p>
+<p>最新还是 11 月 10 日那期。</p>
+<p><strong>X 大V：本轮没有新帖</strong></p>
+<p>lmsysorg 的动静还在 LinkedIn 上。</p>
+<p>v1.0、联盟、Neuron，三条都报过了。</p>
+<p>vLLM 官方、karpathy 都没动静。</p>
+<p><strong>Hacker News：没有新料</strong></p>
+<p><strong>Reddit：没有新料</strong></p>
+<p><strong>中文媒体：没有新料</strong></p>
+<p>v1.0 和联盟的消息，中文媒体还没跟上。</p>
+<h2>值得深入学</h2>
+<p>本轮没有新的深读。</p>
+<p>FlashInfer 的批量不变模式，这轮又扩了一块。</p>
+<p>思路还是 11 月 11 日那篇深读讲的。</p>
+<p>只是覆盖面从 FP8 和 4 位量化，扩到 BF16 的 MegaMoE。</p>
+<p>Metarix 那篇压测指南，可以当工具书翻。</p>
+<p>不用整篇精读。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 15 点版去重。</p>
+<p>版本水位：除 llama.cpp 快照外全平。</p>
+<p>SGLang v1.0 仍未发版。</p>
+<p>vLLM 5 条首次汇总：#64531、#64286、#65607、#67279、#65998。</p>
+<p>SGLang 4 条首次汇总：#49826、#49576、#49417、#49189。</p>
+<p>TRT-LLM 2 条首次汇总：#21815、#21948。</p>
+<p>Dynamo 7 条首次汇总：#18653、#18459、#18436、#18694、#18693、#18692、#18134。</p>
+<p>FlashInfer 1 条首次汇总：#9417。</p>
+<p>llama.cpp 1 条首次汇总：#30335。</p>
+<p>LMDeploy、TGI 零合入。</p>
+<p>arXiv 本轮无新批次，接口返回正常。</p>
+<p>Metarix 压测指南首次报。</p>
+<p>陈立武炉边谈刚结束，纪要未出。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-12-1700/">17点版</a></p></body></html>
