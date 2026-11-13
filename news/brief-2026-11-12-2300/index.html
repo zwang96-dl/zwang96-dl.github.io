@@ -1,0 +1,218 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月12日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-12"/>
+<meta name="doc-ts" content="2026-11-13T07:03:52"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-12（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-12（23点版）</h1>
+<p>23点版来了。</p>
+<p>头条：同一份文档，读一次就够了。</p>
+<p>一份长文档挂几十个问题。</p>
+<p>以前每个问题都要重读一遍草稿纸。</p>
+<p>现在并成一个请求，文档只读一次。</p>
+<p>CodeLlama-7B 上最快快 3.7 倍。</p>
+<p>这篇标了值得深读，笔记已经生成了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有快照动了</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布还是 v0.34.0rc2。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 官宣了，tag 还没挂出来。</p>
+<p>细节随后到，LinkedIn 帖子是这么说的。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 正式版还是 v0.7.4。</p>
+<p>预发布还是 v0.7.5rc1。</p>
+<p>llama.cpp 快照滚到 b12345。</p>
+<p>21 点版时还是 b12342。</p>
+<p>快照是每日自动打包，不算正式发版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：7 条，GLM-5.3-Flash 融合核最值得看</strong></p>
+<p>先说 #67235。</p>
+<p>GLM-5.3-Flash 的 q/k RMSNorm 加 RoPE。</p>
+<p>再加残差相加，全融进一个核里。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67235">https://github.com/vllm-project/vllm/pull/67235</a></p>
+<p>再说 #67286。</p>
+<p>编译配置里重复的区间端点修了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67286">https://github.com/vllm-project/vllm/pull/67286</a></p>
+<p>其余五条一句话带过。</p>
+<p>#66981，XPU 测试改成设备无关。</p>
+<p>#67346，文档里的错字和注释。</p>
+<p>#63405，离线 ColBERT 测试留点显存。</p>
+<p>#67311、#67326，都是 CI 的小修补。</p>
+<p><strong>SGLang：9 条，混合模型那两条最值得看</strong></p>
+<p>先说 #49886。</p>
+<p>混合 Mamba 的状态检查点改了。</p>
+<p>只在分叉点和请求结束时存。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49886">https://github.com/sgl-project/sglang/pull/49886</a></p>
+<p>再说 #49054。</p>
+<p>NPU 的 HiCache 接上了 Mooncake L3。</p>
+<p>DeepSeek-V4 和 GLM-5.2 都能用。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49054">https://github.com/sgl-project/sglang/pull/49054</a></p>
+<p>再说 #48350。</p>
+<p>Blackwell 上 MoE 换了 swap-AB。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48350">https://github.com/sgl-project/sglang/pull/48350</a></p>
+<p>再说 #49376。</p>
+<p>kimi-k3 的 q6 准备按并发限流。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49376">https://github.com/sgl-project/sglang/pull/49376</a></p>
+<p>其余五条一句话带过。</p>
+<p>#49951，解耦测试的握手端口挪开。</p>
+<p>#50016，两个依赖小版本升级。</p>
+<p>#49380，CPU 卸载的偏置拒掉。</p>
+<p>#50004，NPU 的 MoE 后端检查。</p>
+<p>#49699，解耦测试的草稿池。</p>
+<p><strong>TRT-LLM：3 条，全是测试</strong></p>
+<p>#22180，Qwen3.8 测试用真文本。</p>
+<p>#22076，TP2 MoE 的验收标准对齐。</p>
+<p>#22215，修好的 CI 检查取消豁免。</p>
+<p><strong>FlashInfer：只合了 1 条</strong></p>
+<p>先说 #9434。</p>
+<p>GDN 读题接受元素对齐的初始状态。</p>
+<p>还能做检查点。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9434">https://github.com/flashinfer-ai/flashinfer/pull/9434</a></p>
+<p><strong>Dynamo 等四家：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：限流解了，新批次到了</strong></p>
+<p>先说 Parallel Prompting。</p>
+<p>同一份文档，几十个问题并成一个请求。</p>
+<p>每个问题是一条独立的流。</p>
+<p>文档的草稿纸每步只读一次。</p>
+<p>CodeLlama-7B 上 A100 快 3.7 倍。</p>
+<p>A6000 上快 5.9 到 6.0 倍。</p>
+<p>144 组全赢，一组都没输。</p>
+<p>这篇标了值得深读，笔记已经生成了。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.15130">https://arxiv.org/abs/2611.15130</a></p>
+<p>再说 Olifant。</p>
+<p>推测解码的草稿模型，不用神经网络。</p>
+<p>查表分类器，CPU 上 0.3 毫秒出一个词。</p>
+<p>不用 GPU，不用反向传播。</p>
+<p>欧盟法律文本上接受率 38.1%。</p>
+<p>吞吐快 2.43 倍，每词能耗降 2.51 倍。</p>
+<p>带 KV 缓存时还能快 1.25 倍。</p>
+<p>每 100 个词只要 93 焦耳。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.16714">https://arxiv.org/abs/2611.16714</a></p>
+<p><strong>vLLM：Inkling 2 Small 首日支持，数字来了</strong></p>
+<p>594B 参数，17B 激活，多模态 MoE。</p>
+<p>自带 DSpark 推测器，每步草拟 7 个词。</p>
+<p>GB200 上 TP4 单用户每秒 630 个词。</p>
+<p>接受长度 3.5，LoRA 也支持。</p>
+<p>Agent 负载下前缀缓存命中率 91% 到 99%。</p>
+<p>上下文越长，命中率越高。</p>
+<p>32K 上下文，每卡每秒约 1070 个词。</p>
+<p>来源：<a href="https://vllm.ai/blog/2026-11-12-inkling2-small">https://vllm.ai/blog/2026-11-12-inkling2-small</a></p>
+<p><strong>SGLang v1.0：官宣了，包还没发</strong></p>
+<p>LinkedIn 帖子说细节随后到。</p>
+<p>330 多家组织在用。</p>
+<p>首日支持 217 个模型。</p>
+<p>tag 和 release 还是没挂出来。</p>
+<p>来源：<a href="https://www.linkedin.com/company/sgl-project/">https://www.linkedin.com/company/sgl-project/</a></p>
+<h2>业内新闻</h2>
+<p><strong>黄仁勋后续：接班人选开始点名</strong></p>
+<p>8-K 文件确认，董事会 11 月 11 日就接受了辞呈。</p>
+<p>Harvey Jones 成了英伟达史上第一位董事长。</p>
+<p>董事会说没有预设接班计划。</p>
+<p>内外人选都考虑，没给时间表。</p>
+<p>被点名的人有两位。</p>
+<p>苹果硬件主管 Johny Srouji。</p>
+<p>英伟达 CTO Michael Kagan。</p>
+<p>预测市场最看好 Ian Buck。</p>
+<p>路透又报了第三段婚外情。</p>
+<p>当事人是另一位没具名的员工。</p>
+<p>股价从 10 月高点跌了约 31%。</p>
+<p>现价约 164 美元。</p>
+<p>财报还是 11 月 17 日发。</p>
+<p>来源：<a href="https://www.usatoday.com/story/tech/2026/11/12/jensen-huang-nvidia-ceo-resigns-affair-investigation/92734431007/">https://www.usatoday.com/story/tech/2026/11/12/jensen-huang-nvidia-ceo-resigns-affair-investigation/92734431007/</a></p>
+<p>来源：<a href="https://www.barrons.com/articles/jensen-huang-buy-nvidia-stock-ee276ed1">https://www.barrons.com/articles/jensen-huang-buy-nvidia-stock-ee276ed1</a></p>
+<p><strong>SGLang Summit：第二天是 Liam Fedus</strong></p>
+<p>陈立武的炉边谈纪要还没出。</p>
+<p>第二天 11 月 13 日是 Liam Fedus。</p>
+<p>聊新兴 AI 实验室那场。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：新文章是 ArtCraft</strong></p>
+<p>AIE Code Summit 第二天的主题。</p>
+<p>ArtCraft 用 AI 把 Photoshop 重写成开源软件。</p>
+<p>跟推理 serving 关系不大，顺带一提。</p>
+<p>来源：<a href="https://latent.space/p/artcraft/">https://latent.space/p/artcraft/</a></p>
+<p><strong>X 大V：lmsysorg 发了 v1.0 的帖子</strong></p>
+<p>上面已经报过，不再重复。</p>
+<p>karpathy、jimfan 本轮没新帖。</p>
+<p><strong>Hacker News：没有新料</strong></p>
+<p>黄仁勋那串还是最热的。</p>
+<p>21 点版已经报过，不再重复。</p>
+<p><strong>Reddit：Inkling 2 Small 被调侃名字</strong></p>
+<p>r/LocalLLaMA 的热门回复是：594B 也叫 Small？</p>
+<p>权重开了，但本地跑要 190 到 200GB 内存。</p>
+<p>这是 2-bit 量化的估算数。</p>
+<p>来源：<a href="https://pulse.ecneproject.com/articles/small-is-doing-a-lot-of-heavy-lifting-thinking-machines-lab-s-594b-moe-model-lan-06bec8">https://pulse.ecneproject.com/articles/small-is-doing-a-lot-of-heavy-lifting-thinking-machines-lab-s-594b-moe-model-lan-06bec8</a></p>
+<p><strong>中文媒体：本轮没新跟进</strong></p>
+<p>机器之心、量子位都没见到 v1.0 的新稿。</p>
+<h2>值得深入学</h2>
+<p><strong>Parallel Prompting 深读已生成</strong></p>
+<p>前缀缓存的盲区就在解码重读。</p>
+<p>这篇把盲区量化了，方法能直接抄。</p>
+<p>笔记已生成，见深读目录。</p>
+<p><strong>vLLM Inkling 博客：数字能直接抄</strong></p>
+<p>DSpark 接受长度 3.5。</p>
+<p>前缀命中率 91% 到 99%。</p>
+<p>Agent 负载的实测表值得留一份。</p>
+<p><strong>Olifant：思路值得看一眼</strong></p>
+<p>草稿器不用神经网络，CPU 就能跑。</p>
+<p>家用硬件场景下，这招很便宜。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 21 点版去重。</p>
+<p>版本水位：只有快照动了。llama.cpp 从 b12342 滚到 b12345。</p>
+<p>SGLang v1.0 仍未发版。</p>
+<p>vLLM 7 条首次汇总：#67286、#66981、#67346、#63405、#67235、#67311、#67326。</p>
+<p>SGLang 9 条首次汇总：#49376、#49380、#49951、#49886、#48350、#50004、#49054、#49699、#50016。</p>
+<p>TRT-LLM 3 条首次汇总：#22180、#22076、#22215。</p>
+<p>FlashInfer 1 条首次汇总：#9434。</p>
+<p>Dynamo、LMDeploy、TGI、llama.cpp 零合入。</p>
+<p>arXiv 限流已解，新批次到了。</p>
+<p>Parallel Prompting、Olifant 首次报。</p>
+<p>vLLM Inkling 博客首次报。</p>
+<p>黄仁勋后续首次报。</p>
+<p>SGLang 联盟成立是之前报过的，不再重复。</p>
+<p>Intel 加 RadixArk 是 13 点版报过的，不再重复。</p>
+<p>Jev 文章是 21 点版报过的，不再重复。</p>
+<p>Inkling 权重开源是 21 点版报过的，不再重复。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-12-2300/">23点版</a></p></body></html>
