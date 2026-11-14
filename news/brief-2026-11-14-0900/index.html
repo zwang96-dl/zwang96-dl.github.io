@@ -1,0 +1,138 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月14日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-14T17:01:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-14（09点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-14（09点版）</h1>
+<p>09点版来了，头条是 DeepSeek-V4.1 的提速包。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>llama.cpp 正式版还是 v1.0.0。</p>
+<p>快照还是 b12383。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>TRT-LLM：DeepSeek-V4.1 提速包</strong></p>
+<p>先说 #21438。</p>
+<p>这条把 DeepSeek-V4.1 的提速优化搬到主线。</p>
+<p>KV 压缩了。</p>
+<p>KV 就是模型的草稿纸。</p>
+<p>草稿纸压薄了，显存省下来了。</p>
+<p>CSA2 稀疏注意力也来了。</p>
+<p>稀疏注意力就是只算重要的部分。</p>
+<p>专家调度改成一轮推送。</p>
+<p>MoE 里的专家就是轮流上场的子模型。</p>
+<p>GB300 的 P/D 解耦还做了专门调优。</p>
+<p>P/D 解耦就是读题和写答案分开跑。</p>
+<p>说白了，两条流水线各干各的活。</p>
+<p>这套优化原来只在 DeepSeek 自家分支里。</p>
+<p>现在主线用户也能直接用上。</p>
+<p>划重点：这跟你的 PD 解耦评估直接相关。</p>
+<p>想在 GB300 上跑 V4.1，这条是现成的参考。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21438">https://github.com/NVIDIA/TensorRT-LLM/pull/21438</a></p>
+<p><strong>vLLM：5 条新，多模态那条值得看</strong></p>
+<p>先说 #67505。</p>
+<p>LLaVA-OneVision 也支持设备端归一化了。</p>
+<p>归一化就是把像素缩放到统一范围。</p>
+<p>以前这步在主机 CPU 上算。</p>
+<p>现在直接在显卡上做。</p>
+<p>精度实测没变。</p>
+<p>llava-bench 困惑度还是 11.4485。</p>
+<p>贪心输出 16 个里 16 个都一样。</p>
+<p>说白了，洗菜改到厨房里洗。</p>
+<p>这是继 Gemma 3、Qwen2.5-Omni 后的第三家。</p>
+<p>多模态模型正在一个个搬上显卡算。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67505">https://github.com/vllm-project/vllm/pull/67505</a></p>
+<p>再说 #66821。</p>
+<p>Qwen2 改走 Transformers 后端了。</p>
+<p>原生那份 Qwen2 代码直接删了。</p>
+<p>Qwen3 的解码器栈接手了这活。</p>
+<p>Qwen2.5-VL 这些多模态模型也跟着走新路。</p>
+<p>说白了，老房子拆了，住进新楼。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66821">https://github.com/vllm-project/vllm/pull/66821</a></p>
+<p>再说 #66401。</p>
+<p>DeepSeek-v4 的一个启动报错修了。</p>
+<p>max-num-batched-tokens 以前必须 8 字节对齐。</p>
+<p>填 1500 或 2500 这类数，引擎直接起不来。</p>
+<p>这回把行距垫到 16 个元素。</p>
+<p>以后填什么数都能跑。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66401">https://github.com/vllm-project/vllm/pull/66401</a></p>
+<p>其余一句话带过。</p>
+<p>#64255 是 XPU 上 MLA 后端的注册修补。</p>
+<p>#67502 是 CI，把 Transformers 升到 5.23.0。</p>
+<p><strong>SGLang：1 条新，只是测试修补</strong></p>
+<p>先说 #50223。</p>
+<p>ComfyUI 那边的 H3 补丁不再锁源码哈希了。</p>
+<p>以前锁死哈希，模型一改就全员报错。</p>
+<p>这回把锁拆了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50223">https://github.com/sgl-project/sglang/pull/50223</a></p>
+<p><strong>其余框架</strong></p>
+<p>Mooncake 有 1 条新。</p>
+<p>#5508 是 P2PStore 的配置入口对齐。</p>
+<p>llama.cpp 这轮零合入。</p>
+<p>LMDeploy、TGI、Dynamo、FlashInfer 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>arXiv 下一批按惯例周一到。</p>
+<p>最新一批还是 11 月 12 日那批。</p>
+<p>那批的论文 13 号 01 点版已经补报过。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>X 上几位大V这轮没新帖。</p>
+<p>SGLang 联盟是 11 月 12 日报过的。</p>
+<p>llama.cpp 1.0 的媒体跟进都是 13 号的旧闻。</p>
+<p>中文媒体还是没发 llama.cpp 1.0 的稿。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>Latent Space 最新单集还是 11 月 10 日那期。</p>
+<p>那期聊 agent 时代的产品设计，跟 serving 关系不大。</p>
+<p>Reddit 和 Hacker News 也没新料。</p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的新内容。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 07 点版去重。 版本水位：全都没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照仍是 b12383。 vLLM 5 条首次汇总：#67505、#66821、#66401、#64255、#67502。TRT-LLM 1 条首次汇总：#21438。SGLang 1 条首次汇总：#50223。Mooncake 1 条首次汇总：#5508。 SGLang 联盟是 11 月 12 日报过的；SGLang-Omni 的 326.5% 数字是 03 点版报过的；Thaw 是 11 月 12 日 15 点版报过的；视觉编码拆解是 11 月 13 日 17 点版报过的；评测分数背后的 serving 账已做深读；llm-d 1.0 是 11 月 4 日报过的；TPU 六引擎横评是 11 月 9 日报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿；arXiv 下一批按惯例周一到。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-14-0900/">09点版</a></p></body></html>
