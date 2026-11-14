@@ -1,0 +1,190 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · TRT-LLM：KV 草稿纸落盘 SSD，三招把首字尾巴砍掉 91%"/>
+<meta name="doc-description" content="- 原文：NVIDIA TRT-LLM 团队，GitHub PR #21822（2026-11-14 合入）"/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-14T19:01:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TRT-LLM：KV 草稿纸落盘 SSD，三招把首字尾巴砍掉 91%</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>TRT-LLM：KV 草稿纸落盘 SSD，三招把首字尾巴砍掉 91%</h1>
+<ul><li>原文：NVIDIA TRT-LLM 团队，GitHub PR #21822（2026-11-14 合入）</li><li>原文链接：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21822">https://github.com/NVIDIA/TensorRT-LLM/pull/21822</a></li><li>作者：zhangcl</li><li>说明：这篇是工程 PR，不是论文；数字全是作者自报</li><li>说明：原 PR 未附图，关键数字见下表</li></ul>
+<h2>一句话</h2>
+<p>KV 缓存也能分层落盘。</p>
+<p>显存放不下的草稿纸，挪到 SSD 上。</p>
+<p>三招优化下来，首字延迟的尾巴直接砍掉九成。</p>
+<h2>人话解读</h2>
+<p>先讲 KV 缓存是什么。</p>
+<p>它是模型的草稿纸。</p>
+<p>每轮对话的上下文都记在上面。</p>
+<p>显存就那么大，草稿纸一多就得往外挪。</p>
+<p>以前的路子是挪到内存里。</p>
+<p>这篇再往下挪一层，挪到 SSD 上。</p>
+<p>SSD 就是电脑里的固态硬盘。</p>
+<p>它比内存慢，但比重新算快得多。</p>
+<p>问题是，SSD 这层以前不好用。</p>
+<p>恢复一次要等很久，写回也堵路。</p>
+<p>这篇给了三个开关，专门修这三个毛病。</p>
+<p>三个开关默认全关。</p>
+<p>不开它们，行为一点不变。</p>
+<p>想用就手动打开。</p>
+<p>测试是在 8 台 GB300 上跑的。</p>
+<p>模型是 GLM-5.3，KV 用 FP8 格式。</p>
+<p>FP8 是一种 8 位浮点数，省显存。</p>
+<p>读题和解码拆成两拨实例。</p>
+<p>4 个读题组，每组 4 卡并行。</p>
+<p>4 个解码组，每组 16 卡并行。</p>
+<p>800 个会话同时跑。</p>
+<p>workload 是多轮 agent 写代码的真实轨迹回放。</p>
+<h2>核心方法</h2>
+<h3>1. 并行 SSD 读写：别让一次传输堵住所有人</h3>
+<p>以前的毛病出在传输方式上。</p>
+<p>每次 SSD 传输都是一次阻塞读写。</p>
+<p>它卡在一个回调函数里。</p>
+<p>显卡可能一次只跑一个这种回调。</p>
+<p>一次大写入，就能堵住后面的恢复读取。</p>
+<p>这篇把传输交给一个线程池。</p>
+<p>回调只负责把活派出去。</p>
+<p>显卡等一个完成标志就行。</p>
+<p>传输按 4MB 切成小块。</p>
+<p>先读，后写。</p>
+<p>读优先，写分两种。</p>
+<p>淘汰写等 10 毫秒就插队。</p>
+<p>后台写等 100 毫秒才插队。</p>
+<p>这样谁都饿不着。</p>
+<p>写是带缓冲的写，不用 O_DIRECT。</p>
+<p>O_DIRECT 是一种绕过缓存直接写盘的方式。</p>
+<p>一块写失败了，整次传输就算失败。</p>
+<p>写坏的副本以后绝不复用。</p>
+<p>线程池是全进程共享的。</p>
+<p>第一个管理器起了它，后面改数值也没用。</p>
+<h3>2. 恢复后留底：别刚读回来就擦掉</h3>
+<p>以前的恢复是一次搬家。</p>
+<p>从 SSD 读回来，盘上的那份就删了。</p>
+<p>下次再淘汰，又得重写一遍。</p>
+<p>恢复本来就急着要空位。</p>
+<p>重写又把路堵上了。</p>
+<p>这篇改成恢复后留底。</p>
+<p>已经写死的整页，盘上那份留着。</p>
+<p>下次淘汰直接复用，不用再写。</p>
+<p>没写满的半页还是照旧写。</p>
+<p>盘满了要腾地方，先扔最久没用的页。</p>
+<p>留底的副本只在还差一点时才回收。</p>
+<p>被挂起的请求优先占位。</p>
+<p>留底副本算进可淘汰统计里。</p>
+<p>因为它们随时能回收，不丢数据。</p>
+<p>有个对照实验值得提。</p>
+<p>同样的主意用在内存层上，编号 #15828。</p>
+<p>那次没测出收益，最后关掉了。</p>
+<p>原因是内存写本来就很快。</p>
+<p>省掉一次内存写，感觉不到。</p>
+<p>SSD 写慢得多，省掉才有感觉。</p>
+<h3>3. 后台写透：趁空闲先把副本写好</h3>
+<p>以前的顺序是先写内存，再等淘汰时写 SSD。</p>
+<p>这篇改成一边写内存，一边后台抄一份到 SSD。</p>
+<p>以后从内存淘汰时，直接复用这份。</p>
+<p>不用再写一次。</p>
+<p>写透只占空闲的盘位。</p>
+<p>盘满了就跳过，不抢不挤。</p>
+<p>最多 1GB 的后台写同时在跑。</p>
+<p>写失败了也不影响淘汰本身。</p>
+<p>读回显存时不用等它写完。</p>
+<p>它要求内存层必须在 SSD 上面。</p>
+<p>没有内存层，这个开关会自动关掉。</p>
+<p>第二招和第三招可以单开。</p>
+<p>互不依赖。</p>
+<h2>关键数据</h2>
+<ul><li>测试模型：GLM-5.3，FP8 KV</li><li>测试硬件：8 台 GB300 节点</li><li>服务形态：读题解码分离，4 个读题组加 4 个解码组</li><li>KV 分层：显存加 160GB 内存加 1TB 本地 NVMe</li><li>会话数：800 个并发会话</li><li>基线吞吐：18.7 请求每秒</li><li>基线首字中位数：3.43 秒</li><li>基线首字 p90：42.6 秒</li><li>只开并行读写：24.8 请求每秒，涨 33%</li><li>只开并行读写：首字中位数 3.21 秒，降 6%</li><li>只开并行读写：首字 p90 15.0 秒，降 65%</li><li>再开恢复留底：27.2 请求每秒，涨 10%</li><li>再开恢复留底：首字中位数 2.18 秒，降 32%</li><li>再开恢复留底：首字 p90 7.7 秒，降 48%</li><li>再开后台写透：28.2 请求每秒，涨 3%</li><li>再开后台写透：首字中位数 1.46 秒，降 33%</li><li>再开后台写透：首字 p90 3.8 秒，降 51%</li><li>三招全开对基线：吞吐 28.2，涨 51%</li><li>三招全开对基线：首字中位数 1.46 秒，降 57%</li><li>三招全开对基线：首字 p90 3.8 秒，降 91%</li><li>解码间隔没变：中位数 14 到 15 毫秒</li><li>SSD 层在测试里一直没写满</li></ul>
+<h2>跟 Mooncake 的对比</h2>
+<p>同一份 workload，也跑了 Mooncake。</p>
+<p>Mooncake 是个开源 KV 缓存池。</p>
+<p>它有内存池，也能接 SSD。</p>
+<p>原生 SSD 层：28.2 请求每秒。</p>
+<p>首字中位数 1.46 秒，p90 3.8 秒。</p>
+<p>Mooncake 只用内存池：26.1 请求每秒。</p>
+<p>首字中位数 2.31 秒，p90 14.9 秒。</p>
+<p>Mooncake 加 SSD 层：27.8 请求每秒。</p>
+<p>首字中位数 5.85 秒，p90 19.8 秒。</p>
+<p>原生对 Mooncake 内存池：吞吐高 7.8%。</p>
+<p>首字中位数低 37%，p90 低 75%。</p>
+<p>原生对 Mooncake 加 SSD：吞吐高 1.2%。</p>
+<p>首字中位数低 75%，p90 低 81%。</p>
+<p>吞吐那栏基本是平手。</p>
+<p>同一配置重复跑，吞吐能差 3 请求每秒。</p>
+<p>首字那栏差距远超噪声。</p>
+<p>Mooncake 那边每组取了两次运行的平均。</p>
+<p>原生这边只跑了一次。</p>
+<h2>关键图表</h2>
+<p>原 PR 未附图。</p>
+<p>最值得看的是两组对比。</p>
+<p>一组是三招逐个叠加。</p>
+<p>首字 p90 从 42.6 秒一路压到 3.8 秒。</p>
+<p>另一组是原生 SSD 层对 Mooncake。</p>
+<p>吞吐打平，首字大胜。</p>
+<h2>跟研究方向的关联</h2>
+<p>这篇直接撞上你的 PD 解耦评估。</p>
+<p>五招能直接进评估清单。</p>
+<p>第一招：KV 分层账单要单列恢复时间。</p>
+<p>显存、内存、SSD 三层，层层都有恢复成本。</p>
+<p>这篇证明 SSD 层能把首字尾巴砍 91%。</p>
+<p>评估里要加一栏。</p>
+<p>跨层恢复时，首字 p90 是多少。</p>
+<p>第二招：选型别只看吞吐。</p>
+<p>原生 SSD 层和 Mooncake 加 SSD，吞吐只差 1.2%。</p>
+<p>首字中位数差了四倍。</p>
+<p>agent 场景里，首字才是体感。</p>
+<p>第三招：单次运行的数要打折。</p>
+<p>每组配置只跑了一次。</p>
+<p>写透那行作者自己说没立住。</p>
+<p>抄数字时要标清楚这是单次结果。</p>
+<p>第四招：三个开关默认全关。</p>
+<p>行为不变是好事，但也容易漏开。</p>
+<p>评估清单里要记一笔。</p>
+<p>跑 TRT-LLM 的 SSD 层，先确认三个开关开了没。</p>
+<p>第五招：硬件和模型要对齐再比。</p>
+<p>这组数是 GB300 加 GLM-5.3 跑出来的。</p>
+<p>你的评估卡是 H100 和 MI350X。</p>
+<p>收益能不能复现，要实测才知道。</p>
+<p>还有一个方向值得跟。</p>
+<p>Mooncake 那边要更多并发才能喂饱读题。</p>
+<p>并发一高，首字就跟着涨。</p>
+<p>原生这边 800 会话就打满了。</p>
+<p>这说明两家的瓶颈不在一个地方。</p>
+<h2>术语表</h2>
+<ul><li>KV 缓存：模型的草稿纸，记着每轮对话的上下文</li><li>TTFT：首字延迟，从发请求到第一个词出来</li><li>p50：中位数，一半请求比它快</li><li>p90：90 分位，九成请求比它快</li><li>P/D 解耦：读题和解码分开跑，各用各的实例</li><li>读题：prefill，把输入一次性算完</li><li>解码：decode，一个词一个词往外吐</li><li>GB300：英伟达 Blackwell 架构的服务器 GPU</li><li>FP8：8 位浮点数，省显存</li><li>NVMe：一种高速固态硬盘接口</li><li>RAID0：多块盘并成一块用，速度叠加</li><li>淘汰：缓存满了，把旧页踢出去</li><li>写透：数据写内存的同时，后台抄一份到下一层</li><li>线程池：一组提前建好的工作线程，分活干</li><li>O_DIRECT：绕过系统缓存，直接读写磁盘</li><li>Mooncake：开源 KV 缓存池，管显存内存和 SSD</li><li>agent：能自己调工具、多轮干活的智能体</li><li>DEP：解码专家并行，一种解码实例的组织方式</li><li>TPOT：每输出一个词的平均时间</li></ul>
+<h2>注意事项</h2>
+<ul><li>数字全是作者自报，没有第三方复现</li><li>每组配置只跑了一次，写透那行没立住</li><li>报告里的数字是评审改动之前的版本测的</li><li>后台写队列和 1GB 上限是新加的，不在测试里</li><li>SSD 层在测试里一直没写满，满了的表现没测</li><li>Mooncake 那边取了两次平均，原生这边一次</li><li>节点集合和运行版本在各组之间有差别</li><li>三个开关默认全关，不开等于没这篇</li><li>写透要求内存层在 SSD 上面，没有就自动关</li><li>原 PR 未附图，关键数字都在上表里</li></ul></body></html>

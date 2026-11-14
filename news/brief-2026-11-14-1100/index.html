@@ -1,0 +1,173 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月14日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-14T19:03:05"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-14（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-14（11点版）</h1>
+<p>11点版来了，头条是 TRT-LLM 的 SSD 提速。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 的快照动了</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>llama.cpp 正式版还是 v1.0.0。</p>
+<p>快照从 b12383 滚到 b12385。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>TRT-LLM：KV 落盘 SSD，首字尾巴砍掉 91%</strong></p>
+<p>先说 #21822。</p>
+<p>KV 缓存也能分层落盘。</p>
+<p>KV 就是模型的草稿纸。</p>
+<p>显存放不下，就挪到 SSD 上。</p>
+<p>SSD 就是固态硬盘。</p>
+<p>它比内存慢，但比重新算快得多。</p>
+<p>这回给了三个开关。</p>
+<p>第一招是并行读写。</p>
+<p>以前一次传输能堵住所有人。</p>
+<p>现在交给线程池，读写分开排队。</p>
+<p>第二招是恢复后留底。</p>
+<p>以前读回来就把盘上的删了。</p>
+<p>现在留着，下次淘汰不用重写。</p>
+<p>第三招是后台写透。</p>
+<p>趁空闲先把副本写好。</p>
+<p>以后淘汰直接复用，不用再写。</p>
+<p>三个开关默认全关。</p>
+<p>想用就手动打开。</p>
+<p>实测是在 8 台 GB300 上跑的。</p>
+<p>模型是 GLM-5.3，KV 用 FP8 格式。</p>
+<p>FP8 是一种 8 位浮点数。</p>
+<p>800 个会话同时跑，多轮写代码的轨迹。</p>
+<p>吞吐从 18.7 涨到 28.2 请求每秒。</p>
+<p>涨了 51%。</p>
+<p>首字中位数从 3.43 秒压到 1.46 秒。</p>
+<p>首字就是第一个词出来的时间。</p>
+<p>p90 从 42.6 秒压到 3.8 秒。</p>
+<p>p90 是 90 分位，九成请求比它快。</p>
+<p>解码间隔没变，还是 14 到 15 毫秒。</p>
+<p>划重点：这跟你的 PD 解耦评估直接相关。</p>
+<p>P/D 解耦就是读题和写答案分开跑。</p>
+<p>KV 跨层恢复的时间，评估里要单列。</p>
+<p>还有个提醒：每组配置只跑了一次。</p>
+<p>写透那行作者自己说没立住。</p>
+<p>数字全是作者自报，别当定论。</p>
+<p>同一份活也跑了 Mooncake。</p>
+<p>Mooncake 是个开源 KV 缓存池。</p>
+<p>吞吐基本打平，只差 1.2%。</p>
+<p>首字中位数低 75%，p90 低 81%。</p>
+<p>说白了，拼吞吐是平手，拼首字是大胜。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21822">https://github.com/NVIDIA/TensorRT-LLM/pull/21822</a></p>
+<p>再说 #19303。</p>
+<p>草稿模型的 KV 池也能复用了。</p>
+<p>草稿模型就是先写草稿的小模型。</p>
+<p>以前配对的草稿池不往外发布可复用的块。</p>
+<p>这回打通了，调度器也跟上了。</p>
+<p>DeepSeek V4 和 Qwen4-Exp 关掉了退避。</p>
+<p>退避就是复用失败时先等一等。</p>
+<p>改动不大，投机解码那条线记一笔。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19303">https://github.com/NVIDIA/TensorRT-LLM/pull/19303</a></p>
+<p><strong>vLLM：1 条新，是个启动崩溃修补</strong></p>
+<p>先说 #67545。</p>
+<p>启动热身时，虚拟请求可能超长。</p>
+<p>虚拟请求就是热身用的假请求。</p>
+<p>它比模型允许的最长输入还长。</p>
+<p>注意力就读到了块表外面。</p>
+<p>块表就是管显存页的那张表。</p>
+<p>结果就是启动直接崩。</p>
+<p>这回把虚拟请求封顶在上限内。</p>
+<p>举个例子就懂了。</p>
+<p>最长 2048，批量上限 8192。</p>
+<p>以前直接起不来，现在能跑了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67545">https://github.com/vllm-project/vllm/pull/67545</a></p>
+<p><strong>llama.cpp：快照滚到 b12385，3 条修补</strong></p>
+<p>先说 #32241。</p>
+<p>Qwen2.5-VL 的 NVFP4 权重出过乱码。</p>
+<p>NVFP4 是一种 4 位浮点格式。</p>
+<p>原因是三组缩放因子没传进去。</p>
+<p>缩放因子就是量化时用的倍数。</p>
+<p>修完困惑度从 1043694 掉到 9.3759。</p>
+<p>困惑度越低，模型输出越正常。</p>
+<p>说白了，以前是乱码，现在是人话。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32241">https://github.com/ggml-org/llama.cpp/pull/32241</a></p>
+<p>再说 #32243。</p>
+<p>Hexagon 芯片上的注意力尾巴修了。</p>
+<p>图片 patch 数量一变，softmax 就算错。</p>
+<p>softmax 就是注意力里算权重的办法。</p>
+<p>修完 Qwen3-VL 那几组误差下来了。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32243">https://github.com/ggml-org/llama.cpp/pull/32243</a></p>
+<p>再说 #32273。</p>
+<p>32 位目标上 ctz64 编译不过。</p>
+<p>ctz64 是数末尾有几个零的函数。</p>
+<p>这回分两段扫，先低 32 位再高 32 位。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32273">https://github.com/ggml-org/llama.cpp/pull/32273</a></p>
+<p><strong>其余框架</strong></p>
+<p>SGLang 这轮零合入。</p>
+<p>LMDeploy、TGI、Dynamo、FlashInfer 也一样。</p>
+<p>Mooncake 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>arXiv 下一批按惯例周一到。</p>
+<p>最新一批还是 11 月 12 日那批。</p>
+<p>那批的论文 13 号已经补报过。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>X 上几位大V这轮没新帖。</p>
+<p>TPU 8tx 是 11 月 9 日的旧闻。</p>
+<p>SGLang 联盟是 11 月 12 日报过的。</p>
+<p>llama.cpp 1.0 的媒体跟进都是 13 号的旧闻。</p>
+<p>中文媒体还是没发 llama.cpp 1.0 的稿。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>Latent Space 最新单集还是 11 月 10 日那期。</p>
+<p>那期聊 agent 时代的产品设计，跟 serving 关系不大。</p>
+<p>Reddit 和 Hacker News 也没新料。</p>
+<h2>值得深入学</h2>
+<p>TRT-LLM 的 SSD 卸载值得深读。</p>
+<p>这篇直接撞上你的 PD 解耦评估。</p>
+<p>KV 跨层恢复的时间，评估里要单列。</p>
+<p>选型别只看吞吐，首字 p90 才是体感。</p>
+<p>精读笔记：TRT-LLM 的 KV 落盘 SSD 三招。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 09 点版去重。 版本水位：只有 llama.cpp 快照动了，从 b12383 滚到 b12385。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0。 vLLM 1 条首次汇总：#67545。TRT-LLM 2 条首次汇总：#21822、#19303。llama.cpp 3 条首次汇总：#32241、#32243、#32273。 TRT-LLM #21822 已做深读；SGLang 联盟是 11 月 12 日报过的；TPU 8tx 是 11 月 9 日报过的；llama.cpp 1.0 是 11 月 13 日报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿；arXiv 下一批按惯例周一到。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-14-1100/">11点版</a></p></body></html>
