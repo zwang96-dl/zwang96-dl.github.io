@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月14日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-14T15:00:47"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-14（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-14（07点版）</h1>
+<p>07点版来了，头条是 SGLang 堵上了一个扩散模型漏显存的大洞。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 快照动了</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>llama.cpp 正式版还是 v1.0.0。</p>
+<p>快照从 b12377 滚到 b12383。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：2 条新，都是扩散模型</strong></p>
+<p>先说 #50321。</p>
+<p>扩散模型做视频生成时，显存会越跑越多。</p>
+<p>元凶是多卡之间传数据的句柄只建了一个。</p>
+<p>请求形状一变，旧缓存就泄漏。</p>
+<p>8 张 B300 上跑视频模型，每个请求多占约 2 GiB。</p>
+<p>跑 50 个请求左右就直接爆显存。</p>
+<p>这回改成每个对端一个句柄，漏点堵上了。</p>
+<p>说白了，水管接头原来共用一个，越用越漏。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50321">https://github.com/sgl-project/sglang/pull/50321</a></p>
+<p>再说 #49270。</p>
+<p>Hy-Nomas 是个 INT8 的扩散模型。</p>
+<p>INT8 是一种 8 位整数精度。</p>
+<p>以前每次算之前，都要先把权重转成 FP32。</p>
+<p>转完再乘缩放、再转回来，白白多出几步。</p>
+<p>这回把这几步融进一个算子，一次搞定。</p>
+<p>说白了，调料提前拌好，下锅直接炒。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49270">https://github.com/sgl-project/sglang/pull/49270</a></p>
+<p><strong>vLLM：6 条新，MoE 负载均衡那条值得看</strong></p>
+<p>先说 #67591。</p>
+<p>EPLB 是专家并行负载均衡。</p>
+<p>MoE 里的专家就是轮流上场的子模型。</p>
+<p>以前 FP8 分块量化的 MoE 不能开 EPLB。</p>
+<p>原因是代码里一道门把开关拦住了。</p>
+<p>这回把门拆了，专家可以按负载动态搬家。</p>
+<p>说白了，忙的专家分点活给闲的，整队跑得更匀。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67591">https://github.com/vllm-project/vllm/pull/67591</a></p>
+<p>再说 #67426。</p>
+<p>Qwen3-Omni 现在支持设备端归一化。</p>
+<p>图片和视频像素先以 uint8 传上显卡。</p>
+<p>再在显卡上做缩放和归一化。</p>
+<p>以前是在主机上算好再传。</p>
+<p>精度实测没变，llava-bench 困惑度还是 7.4409。</p>
+<p>说白了，洗菜改到厨房里洗，省得来回端。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67426">https://github.com/vllm-project/vllm/pull/67426</a></p>
+<p>再说 #67599。</p>
+<p>路由专家的行缓存，两边算的大小不一致。</p>
+<p>调度器和 worker 各算各的，max_bytes 只改了一边。</p>
+<p>这回统一成一个来源，不再各说各话。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67599">https://github.com/vllm-project/vllm/pull/67599</a></p>
+<p>其余一句话带过。</p>
+<p>#67637、#67601 是 CI 的修补。</p>
+<p>#67273 是 agent 技能的杂项更新。</p>
+<p><strong>llama.cpp：5 条新，视频那两条值得看</strong></p>
+<p>先说 #32267。</p>
+<p>视频的像素长宽比和旋转信息修好了。</p>
+<p>以前竖拍的视频可能被压扁或转错方向。</p>
+<p>多模态模型吃进去的是变形的画面。</p>
+<p>这回按元数据摆正再喂给模型。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32267">https://github.com/ggml-org/llama.cpp/pull/32267</a></p>
+<p>再说 #32188。</p>
+<p>视频解码器现在可以自己换了。</p>
+<p>以前只能用内置的那套。</p>
+<p>想接别的解码方案，现在有了口子。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32188">https://github.com/ggml-org/llama.cpp/pull/32188</a></p>
+<p>其余一句话带过。</p>
+<p>#32237 是 Granite4Vision 的转换注册。</p>
+<p>#32156 是转换器的匹配检查。</p>
+<p>#31775 是后端切分的小修补。</p>
+<p><strong>TRT-LLM、LMDeploy、TGI、Dynamo、FlashInfer</strong></p>
+<p>这五家这轮没新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>arXiv 下一批按惯例周一到。</p>
+<p>最新一批还是 11 月 12 日那批。</p>
+<p>那批的论文 13 号 01 点版已经补报过。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>X 上几位大V这轮没新帖。</p>
+<p>SGLang 联盟是 11 月 12 日报过的。</p>
+<p>llama.cpp 1.0 的媒体跟进都是 13 号的旧闻。</p>
+<p>中文媒体还是没发 llama.cpp 1.0 的稿。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>Latent Space 最新单集还是 11 月 10 日那期。</p>
+<p>那期聊 agent 时代的产品设计，跟 serving 关系不大。</p>
+<p>Reddit 和 Hacker News 也没新料。</p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的新内容。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 05 点版去重。 版本水位：除 llama.cpp 快照 b12377→b12383 外全都没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0。 vLLM 6 条首次汇总：#67637、#67601、#67599、#67591、#67426、#67273。SGLang 2 条首次汇总：#50321、#49270。llama.cpp 5 条首次汇总：#32267、#32237、#32188、#32156、#31775。 SGLang 联盟是 11 月 12 日报过的；SGLang-Omni 的 326.5% 数字是 03 点版报过的；Thaw 是 11 月 12 日 15 点版报过的；视觉编码拆解是 11 月 13 日 17 点版报过的；评测分数背后的 serving 账已做深读；llm-d 1.0 是 11 月 4 日报过的；TPU 六引擎横评是 11 月 9 日报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿；arXiv 下一批按惯例周一到。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-14-0700/">07点版</a></p></body></html>
