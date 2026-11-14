@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月14日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-14T22:59:46"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-14（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-14（15点版）</h1>
+<p>15点版来了，头条是假权重跑分终于不再骗人。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>llama.cpp 正式版还是 v1.0.0。</p>
+<p>快照还是 b12387，没滚新版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：假权重跑分不再虚高</strong></p>
+<p>先说 #67693。</p>
+<p>假权重就是跑分用的假模型参数。</p>
+<p>以前 FP8 的假权重只在正负 1 之间取。</p>
+<p>真权重的数值分布要宽得多。</p>
+<p>结果就是假权重跑得比真的快。</p>
+<p>好比拿空杯子称重，总比装满水轻。</p>
+<p>GB200 上跑 DeepSeek-V4.1-Flash。</p>
+<p>读题的大步子能快出 11%。</p>
+<p>这回假权重改成全范围随机码。</p>
+<p>跑分和真权重基本对上，只差噪音。</p>
+<p>划重点：你以后看 vLLM 的跑分。</p>
+<p>先问一句是不是假权重跑的。</p>
+<p>假权重跑的数，现在才可信。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67693">https://github.com/vllm-project/vllm/pull/67693</a></p>
+<p><strong>TRT-LLM：Qwen3 排序模型能原生跑了</strong></p>
+<p>先说 #19550。</p>
+<p>排序模型就是给搜索结果打分的模型。</p>
+<p>以前 TRT-LLM 没有原生支持。</p>
+<p>这回 0.6B、4B、8B 三档都能跑。</p>
+<p>还给了 /rerank 接口。</p>
+<p>说白了，RAG 那条流水线又补了一块。</p>
+<p>RAG 就是先检索再让模型答。</p>
+<p>数字方面 PR 里没给性能。</p>
+<p>别把它当提速承诺看。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19550">https://github.com/NVIDIA/TensorRT-LLM/pull/19550</a></p>
+<p><strong>SGLang：1 条新，只是内部接线</strong></p>
+<p>先说 #50544。</p>
+<p>多数据并行时，启动握手会丢一个字段。</p>
+<p>这回把它补传上去。</p>
+<p>但仓库自带的调度器根本不报这个字段。</p>
+<p>只影响自己改过调度器的外部用户。</p>
+<p>你用的官方版，行为一点没变。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50544">https://github.com/sgl-project/sglang/pull/50544</a></p>
+<p><strong>llama.cpp：14 条合入，快照还没滚</strong></p>
+<p>快照还是 b12387。</p>
+<p>这 14 条要等下个快照才进。</p>
+<p>挑两条跟性能有关的说。</p>
+<p>#31323 是 Vulkan 的提示处理提速。</p>
+<p>RDNA3 和 RDNA4 的显卡能直接跑。</p>
+<p>RDNA 就是 AMD 显卡那套架构。</p>
+<p>#28982 是 CUDA 的 softmax 改动。</p>
+<p>softmax 就是注意力里算权重的办法。</p>
+<p>其余多是聊天工具调用和编译修补。</p>
+<p>#32109 是 SYCL 的图片处理优化。</p>
+<p>跟多模态图片处理沾边。</p>
+<p>来源：GitHub PR 列表</p>
+<p><strong>其余框架</strong></p>
+<p>LMDeploy、TGI、Dynamo 这轮零合入。</p>
+<p>FlashInfer、Mooncake 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>arXiv 下一批按惯例周一到。</p>
+<p>最新一批还是 11 月 12 日那批。</p>
+<p>那批的论文 13 号已经补报过。</p>
+<h2>业内新闻</h2>
+<p><strong>IBM：给指令和数据划了条线，防提示注入</strong></p>
+<p>先说 LLMON 这事。</p>
+<p>LLMON 是 IBM 的一套标记语言。</p>
+<p>名字读起来像柠檬。</p>
+<p>它把提示词切成带编号的小块。</p>
+<p>指令是一块，数据是另一块。</p>
+<p>模型只听指令块的话。</p>
+<p>藏在数据里的坏指令就不理了。</p>
+<p>说白了，以前指令和数据混在一锅。</p>
+<p>现在分盘装，泾渭分明。</p>
+<p>11 月 12 日发了两个实验模型。</p>
+<p>Granite 4.1 的 3B 和 8B 版。</p>
+<p>开源协议是 Apache 2.0。</p>
+<p>间接注入就是把坏指令藏进数据里。</p>
+<p>原来成功率 53% 到 100%。</p>
+<p>现在掉到 0.02% 到 5.6%。</p>
+<p>数字是 IBM 自报的，别当定论。</p>
+<p>还有个提醒：这条防线是学出来的。</p>
+<p>不是硬保证，别只靠它守 agent。</p>
+<p>agent 就是能动手干活的模型助手。</p>
+<p>来源：<a href="https://huggingface.co/blog/ibm-granite/llmon-an-llm-native-markup-language-now-in-granite">https://huggingface.co/blog/ibm-granite/llmon-an-llm-native-markup-language-now-in-granite</a></p>
+<p>论文：<a href="https://arxiv.org/html/2610.38120v1">https://arxiv.org/html/2610.38120v1</a></p>
+<h2>访谈与深度</h2>
+<p><strong>三引擎选型对照表：vLLM、SGLang、TRT-LLM</strong></p>
+<p>Metarix 刚更新了一篇对照文章。</p>
+<p>三个引擎放一张表里比。</p>
+<p>结论跟你手头的评估方向一致。</p>
+<p>vLLM 是稳妥默认，模型支持最全。</p>
+<p>SGLang 适合前缀复用多的流量。</p>
+<p>TRT-LLM 适合全英伟达的机群。</p>
+<p>文章里 H100 的跑分可以参考。</p>
+<p>但它有个小错误。</p>
+<p>表格说 vLLM 的 v0.33.0 还在候选版。</p>
+<p>其实正式版 11 月 2 日就发了。</p>
+<p>版本那栏别照抄。</p>
+<p>来源：<a href="https://metarix.io/vllm-vs-sglang-vs-tensorrt-llm">https://metarix.io/vllm-vs-sglang-vs-tensorrt-llm</a></p>
+<p><strong>其余渠道这轮没新东西</strong></p>
+<p>X 上几位大V这轮没新帖。</p>
+<p>Latent Space 最新单集还是 11 月 10 日那期。</p>
+<p>中文媒体还是没发 llama.cpp 1.0 的稿。</p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的新内容。</p>
+<p>vLLM 那条是跑分修补。</p>
+<p>TRT-LLM 那条是功能补齐。</p>
+<p>IBM 那条跟提示注入有关。</p>
+<p>都跟你的 PD 解耦评估不直接沾边。</p>
+<p>宁缺毋滥，这轮先不写精读笔记。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 13 点版去重。 版本水位：全都没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照仍是 b12387。 vLLM 1 条首次汇总：#67693。TRT-LLM 1 条首次汇总：#19550。SGLang 1 条首次汇总：#50544。llama.cpp 14 条首次汇总：#32282、#32271、#32259、#32251、#32232、#32203、#32164、#32109、#32024、#31990、#31438、#31416、#31323、#28982。 IBM LLMON 是首次汇总；Metarix 三引擎对照是首次汇总；SGLang 联盟是 11 月 12 日报过的；TPU 8tx 是 11 月 9 日报过的；llama.cpp 1.0 是 11 月 13 日报过的；Reddit 模型膨胀讨论是 13 点版报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿；arXiv 下一批按惯例周一到。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-14-1500/">15点版</a></p></body></html>
