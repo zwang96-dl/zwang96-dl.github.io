@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月14日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-14T13:01:56"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-14（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-14（05点版）</h1>
+<p>05点版来了，头条是两家引擎都在修多模态的毛病。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>llama.cpp 正式版还是 v1.0.0。</p>
+<p>快照还是 b12377。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：5 条新，4 位量化那条值得看</strong></p>
+<p>先说 #64753。</p>
+<p>Qwen3.8-Flash-Next 的 4 位专家权重不用解压了。</p>
+<p>现在它能直接留在显存里跑。</p>
+<p>NVFP4 是一种 4 位浮点格式。</p>
+<p>MoE 里的专家就是轮流上场的子模型。</p>
+<p>以前加载时要先解压，显存一下多占 2.57 GiB。</p>
+<p>这回直接拿压缩形态跑，KV 缓存多出 18.7%。</p>
+<p>说白了，行李箱不用全打开，塞得下更多草稿纸。</p>
+<p>实测在 RTX PRO 6000 上，GSM8K 分数没变。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64753">https://github.com/vllm-project/vllm/pull/64753</a></p>
+<p>再说 #66375。</p>
+<p>RL 训练里同步权重时，显存会爆。</p>
+<p>sparse NCCL 是一种只传改动部分的同步方式。</p>
+<p>以前每个 worker 把所有补丁攒在显存里。</p>
+<p>Qwen3-30B-A3B 在 TP4 下，改动 1.25% 就爆了。</p>
+<p>这回修了这处溢出，速度也提了。</p>
+<p>说白了，搬家改成一件一件搬，别全堆门口。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66375">https://github.com/vllm-project/vllm/pull/66375</a></p>
+<p>再说 #67519。</p>
+<p>EAGLE-3 是推测解码的一种，草稿模型先写，主模型再改。</p>
+<p>它在 Transformers 后端的视觉语言模型上修好了。</p>
+<p>以前 Qwen2.5-VL 这类模型一启动就报错。</p>
+<p>这回能正常跑了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67519">https://github.com/vllm-project/vllm/pull/67519</a></p>
+<p>其余一句话带过。</p>
+<p>#67632 删了起不来的 OpenPangu-VL 模型。</p>
+<p>#64515 是 XPU 上 DeepSeek-V4 内核的小修补。</p>
+<p><strong>SGLang：15 条新，4 条值得看</strong></p>
+<p>先说 #47013。</p>
+<p>GLM-5.3-Flash 的 FP8 缓存一并发就出乱码。</p>
+<p>KV 缓存就是模型的草稿纸，FP8 是一种 8 位精度。</p>
+<p>元凶是写缓存时多占了一个保留位。</p>
+<p>修完 GSM8K 从 50 分涨回 98 分。</p>
+<p>说白了，格子数错一位，答案就全写歪了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47013">https://github.com/sgl-project/sglang/pull/47013</a></p>
+<p>再说 #50007。</p>
+<p>Qwen-VL 处理图片时，显存峰值能到最终结果的 10 倍。</p>
+<p>图片一多一大，显存直接爆掉。</p>
+<p>这回改成按张处理，峰值压下来了。</p>
+<p>说白了，以前一口气全倒进锅里，现在一张一张下。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50007">https://github.com/sgl-project/sglang/pull/50007</a></p>
+<p>再说 #49915。</p>
+<p>一个写得太贵的停止正则，能拖垮整个调度器。</p>
+<p>停止正则就是让模型在特定文本处停下的规则。</p>
+<p>调度器是排队派活的管家。</p>
+<p>以前它在解码时同步跑正则，别的请求全被晾着。</p>
+<p>这回直接拒绝这类昂贵的正则。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49915">https://github.com/sgl-project/sglang/pull/49915</a></p>
+<p>再说 #46781。</p>
+<p>推测解码里多模态的位置编码，现在不卡主机到显存的传输了。</p>
+<p>以前每步都要等一次同步，解码被拖慢。</p>
+<p>这回绕开了那次等待。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46781">https://github.com/sgl-project/sglang/pull/46781</a></p>
+<p>其余一句话带过。</p>
+<p>#50345 修了 NPU 上流水线并行的挂起。</p>
+<p>#49905、#49121、#50318、#49805 都是小优化。</p>
+<p>#50034 是混合缓存的文档。</p>
+<p>#50371、#50175、#47346 是测试和编译相关。</p>
+<p>#49248、#50510 是 CI 的修补。</p>
+<p><strong>TRT-LLM：1 条新，只是量化配置</strong></p>
+<p>先说 #21840。</p>
+<p>它保住了 MTP 的量化排除配置。</p>
+<p>MTP 是多 token 预测，一次多猜几个词。</p>
+<p>以前配置会被误丢掉。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21840">https://github.com/NVIDIA/TensorRT-LLM/pull/21840</a></p>
+<p><strong>llama.cpp：2 条新，都是小修补</strong></p>
+<p>先说 #32023。</p>
+<p>Jinja 模板渲染的开销降了。</p>
+<p>Jinja 是拼提示词用的模板引擎。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32023">https://github.com/ggml-org/llama.cpp/pull/32023</a></p>
+<p>再说 #30403。</p>
+<p>Whisper 音频预处理不再多切一块纯填充的音频块。</p>
+<p>Whisper 是语音转文字的模型。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30403">https://github.com/ggml-org/llama.cpp/pull/30403</a></p>
+<p><strong>LMDeploy、Dynamo、TGI、FlashInfer</strong></p>
+<p>这四家这轮没新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>arXiv 下一批按惯例周一到。</p>
+<p>最新一批还是 11 月 12 日那批。</p>
+<p>视觉编码拆解那篇 13 号 17 点版已经报过。</p>
+<p>深读笔记也已经做了。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>X 上几位大V这轮没新帖。</p>
+<p>Reddit 和 Hacker News 也没新料。</p>
+<p>中文媒体还是没发 llama.cpp 1.0 的稿。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>Latent Space 最新单集还是 11 月 10 日那期。</p>
+<p>那期聊 agent 时代的产品设计，跟 serving 关系不大。</p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的新内容。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 03 点版去重。 版本水位：全都没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照 b12377。 vLLM 5 条首次汇总：#67632、#66375、#64753、#67519、#64515。SGLang 15 条首次汇总：#49248、#49915、#50007、#50345、#50034、#49905、#47346、#46781、#49121、#50318、#50371、#50175、#47013、#49805、#50510。TRT-LLM 1 条首次汇总：#21840。llama.cpp 2 条首次汇总：#32023、#30403。 SGLang 联盟是 11 月 12 日报过的；SGLang-Omni 的 326.5% 数字是 03 点版报过的；视觉编码拆解是 11 月 13 日 17 点版报过的；评测分数背后的 serving 账已做深读；llm-d 1.0 是 11 月 4 日报过的；TPU 六引擎横评是 11 月 9 日报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿；arXiv 下一批按惯例周一到。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-14-0500/">05点版</a></p></body></html>
