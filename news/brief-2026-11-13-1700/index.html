@@ -1,0 +1,115 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月13日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-13"/>
+<meta name="doc-ts" content="2026-11-14T01:08:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-13（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-13（17点版）</h1>
+<p>17点版来了，头条是 SGLang 的 PD 新后端。</p>
+<h2>框架更新</h2>
+<p><strong>头条：SGLang 给 PD 解耦换了条新路</strong></p>
+<p>先说 #47025。 Mooncake 的新传输引擎 TENT 来了。 TENT 是传 KV 的新一代引擎。 它能按请求挑传输方式。 网卡堵了就分流，前后台流量分开走。 SGLang 把它接成 PD 连接器的可选后端。 开个环境变量就能试，不用改代码。 默认还是老引擎，现有部署不用动。 单节点上，网卡拥堵时 KV 传得更快了。 首字时间基本没变，读题算力才是大头。 来源：<a href="https://github.com/sgl-project/sglang/pull/47025">https://github.com/sgl-project/sglang/pull/47025</a></p>
+<p>再说 #50364。 量化那块合了个融合优化。 SiLU 激活加乘法，合成一个算子跑。 SiLU 是一种激活函数，管非线性变换。 来源：<a href="https://github.com/sgl-project/sglang/pull/50364">https://github.com/sgl-project/sglang/pull/50364</a></p>
+<p>再说 #50363 和 #49917。 两条都是分层缓存 hicache 的活。 hicache 是把 KV 往主机内存分层存。</p>
+<p>#50363 让 AMD 卡上的写回走批量拷贝。</p>
+<p>#49917 修了个窗口锁定问题。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50363">https://github.com/sgl-project/sglang/pull/50363</a></p>
+<p>再说 #49636。 KV 分片向外来后端敞开了。 第三方后端和池子也能加入逻辑页分片。 来源：<a href="https://github.com/sgl-project/sglang/pull/49636">https://github.com/sgl-project/sglang/pull/49636</a></p>
+<p>其余一句话带过。</p>
+<p>#50373 是测试修。</p>
+<p><strong>vLLM：7 条，草稿模型那两条值得看</strong></p>
+<p>先说 #61395。 DeepSeek V4 和 V4.1 的草稿模型能开 EPLB 了。 EPLB 是专家负载均衡，让专家在各卡上分得均匀。 DSpark 是 DeepSeek 的推测解码草稿模型。 草稿模型和目标模型的专家数不一样，也能一起均衡。 来源：<a href="https://github.com/vllm-project/vllm/pull/61395">https://github.com/vllm-project/vllm/pull/61395</a></p>
+<p>再说 #62800。 修了个 KV 缓存页面的 bug。 带草稿层的混合模型，页面分配会出错。 说白了，推测解码的草稿层和主模型抢同一本草稿纸。 这回分清楚了。 来源：<a href="https://github.com/vllm-project/vllm/pull/62800">https://github.com/vllm-project/vllm/pull/62800</a></p>
+<p>其余一句话带过。</p>
+<p>#67317、#66314、#67394、#65733 都是 ROCm 和 CI。</p>
+<p>#67321 是测试修。</p>
+<p><strong>TRT-LLM：1 条，推测解码提速</strong></p>
+<p>先说 #22008。 草稿层只在草稿行上跑，不用全量跑。 推测解码里，草稿只管自己那几行。 省下来的算力，给主模型腾地方。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22008">https://github.com/NVIDIA/TensorRT-LLM/pull/22008</a></p>
+<p><strong>Dynamo：9 条，多模态那条值得看</strong></p>
+<p>先说 #18629。 多模态里透明图的合成，跟 vLLM 对齐了。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18629">https://github.com/ai-dynamo/dynamo/pull/18629</a></p>
+<p>再说 #17911。 TRT-LLM 后端在注意力并行下，队列仪表盘修准了。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17911">https://github.com/ai-dynamo/dynamo/pull/17911</a></p>
+<p>再说 #18209。 vLLM 报 400 错时，原因能透传给客户端了。 以前只看到错，不知道错在哪。 来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18209">https://github.com/ai-dynamo/dynamo/pull/18209</a></p>
+<p>其余一句话带过。</p>
+<p>#18747、#18748 是 1.7.0 分支的 cherry-pick。</p>
+<p>#18711 是依赖升级。</p>
+<p>#18758、#16749、#17881 是文档和 CI。</p>
+<p><strong>FlashInfer：4 条</strong></p>
+<p>先说 #9469。 Hopper 卡上变长注意力的批量声明收紧了。 变长就是输入长短不一，不用补齐到一样长。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9469">https://github.com/flashinfer-ai/flashinfer/pull/9469</a></p>
+<p>再说 #9296。 解码 benchmark 里，推测掩码被正确处理了。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9296">https://github.com/flashinfer-ai/flashinfer/pull/9296</a></p>
+<p>其余两条一句话带过。</p>
+<p>#7421 修了 SM120 上 GEMM 失败不报错。</p>
+<p>#9430 是测试。</p>
+<p><strong>llama.cpp：1.0 的细节出来了，快照又滚了一格</strong></p>
+<p>先说 1.0 到底改了啥。 35 个废弃函数删了，老接口正式退场。 NextN 推测解码 API 升进主头文件。 NextN 是并行吐多个候选词的那套接口。 KV 缓存加了 FP8 格式，省显存。 FP8 是 8 位浮点数，比 16 位省一半地方。 MoE 模型多了主机内存专家缓存。 不常用的专家放内存，用时再搬上来。 新支持 Kimi-K3.1-Pro、Ripple 这些模型。 llama-server 还补了一批安全修复。 来源：<a href="https://aifrontierpost.com/articles/llama-cpp-v1-0-release/">https://aifrontierpost.com/articles/llama-cpp-v1-0-release/</a></p>
+<p>再说快照。 b12368 滚到 b12374，今天 16 点 08 分打的包。 正式版还是 v1.0.0。 来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/v1.0.0">https://github.com/ggml-org/llama.cpp/releases/tag/v1.0.0</a></p>
+<p><strong>版本水位：只动了 llama.cpp 快照</strong></p>
+<p>vLLM 正式版还是 v0.33.0。 预发布还是 v0.34.0rc3。 SGLang 还是 v0.5.23。 v1.0 的 tag 还没挂出来。 TRT-LLM 还是 v1.4.0rc3。 LMDeploy 还是 v0.18.0。 TGI 还是 v3.3.7。 Dynamo 正式版还是 v1.6.2。 FlashInfer 正式版还是 v0.7.4。 预发布还是 v0.7.5rc1。 llama.cpp 正式版还是 v1.0.0。 快照从 b12368 滚到 b12374。 来源：GitHub releases、tags</p>
+<p><strong>LMDeploy、TGI、Mooncake：零合入</strong></p>
+<p>两小时里没合入新 PR。</p>
+<h2>新技术与论文</h2>
+<p><strong>TraceKV：推理模型的草稿纸，压 5.64 倍还不掉分</strong></p>
+<p>先说问题。 会推理的视觉语言模型，草稿纸特别大。 图片加思考过程，KV 缓存一路涨。 低秩压缩能把草稿纸压小。 低秩就是只存主要的几条信息，细节扔掉。 但老办法压完，模型越想越偏。 推理到后面，答案开始跑偏、甚至死循环。 来源：<a href="https://arxiv.org/abs/2611.15569">https://arxiv.org/abs/2611.15569</a></p>
+<p>再说这篇的做法。 它先让模型自己生成推理轨迹，再拿去校准。 校准就是拿真实例子，量一量压完差多少。 这样校准用的数据，跟推理时遇到的一样。 再按敏感度分钱：关键位置多留，次要位置少留。 最后三招合起来，保住的是推理思路本身。 不是只保数字像，而是保答案的分布像。 划重点：三组模型上，压 5.64 倍还几乎不掉分。 解码还快了 1.83 倍。 这篇标了值得深读，笔记已经生成了。 来源：<a href="https://arxiv.org/abs/2611.15569">https://arxiv.org/abs/2611.15569</a></p>
+<p><strong>KVPath：各层的草稿纸，连起来存</strong></p>
+<p>先说想法。 以前每层各存各的 KV。 这篇发现，相邻层的 KV 很像。 只存层与层之间的差量就行。 差量很小，维度低，省地方。 来源：<a href="https://arxiv.org/abs/2611.16072">https://arxiv.org/abs/2611.16072</a></p>
+<p><strong>arXiv：今晚没新批次</strong></p>
+<p>新批次今晚没到。 API 里最新还是 11 月 12 日的稿。 下一批按惯例周一到。 周五那批剩下的两篇，上面补完了。</p>
+<h2>业内新闻</h2>
+<p><strong>英伟达：周五收盘又跌 2%，盘前那波涨没守住</strong></p>
+<p>先说股价。 周五收盘 162.85 美元，跌 2.01%。 开盘还涨过，一度冲到 170 美元。 盘中最低探到 158.39 美元。 盘前涨超 2%，开盘没守住。 盘后又跌近 1%，报 161.23 美元。 来源：<a href="https://ox8.us/2026/11/12/nvidia-selloff-20-percent-after-hours-november-2026/">https://ox8.us/2026/11/12/nvidia-selloff-20-percent-after-hours-november-2026/</a></p>
+<p>再说董事会。 金融时报说，董事会接触过 Arm 的 CEO。 想请 Rene Haas 来接任。 董事会随后否认，说没正式接触任何人。 正在选猎头公司，流程刚起步。 来源：<a href="https://cosanalyst.com/articles/nvidia-jensen-huang-board-investigation-what-it-means-for-nvda-stock-2026-11-08/">https://cosanalyst.com/articles/nvidia-jensen-huang-board-investigation-what-it-means-for-nvda-stock-2026-11-08/</a></p>
+<p>再说两个时间点。 Kress 的全员会定在 11 月 18 日上午 9 点。 财报还是 11 月 17 日发。 众议院那边，今晚美东 8 点是个截止时间。 黄仁勋要决定，接不接受 12 月 1 日的问询。 结果还没出来。 来源：<a href="https://cosanalyst.com/articles/nvidia-jensen-huang-board-investigation-what-it-means-for-nvda-stock-2026-11-08/">https://cosanalyst.com/articles/nvidia-jensen-huang-board-investigation-what-it-means-for-nvda-stock-2026-11-08/</a></p>
+<p><strong>SGLang Summit：第二天结束了，实录还没出</strong></p>
+<p>Liam Fedus 的炉边谈在今天上午。 聊新兴 AI 实验室那场。 现在刚结束，网上暂无实录。 官网说，部分场次会后发剪辑版。 出来后，下轮再报。 来源：<a href="https://www.sglang.io/summit#agenda">https://www.sglang.io/summit#agenda</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 大V：本轮没新帖</strong></p>
+<p>lmsysorg、vLLM 官方都没动静。 karpathy 最新还是 11 月 1 日那条。 jimfan 也没动静。</p>
+<p><strong>Latent Space：本轮没有新单集</strong></p>
+<p>最新还是 11 月 10 日那期。 聊 Resend 怎么给 agent 做文档。 来源：<a href="https://podbay.fm/p/latent-space-the-ai-engineer-podcast">https://podbay.fm/p/latent-space-the-ai-engineer-podcast</a></p>
+<p><strong>Reddit：llama.cpp 1.0 的帖子还是当日最热</strong></p>
+<p>Merve 发的那帖，仍是当天窜得最快的帖子。 底下呼声最高的还是要人。 大家想要更多维护者。 11 点版报过，这里不再展开。 来源：<a href="https://aifrontierpost.com/articles/llama-cpp-v1-0-release/">https://aifrontierpost.com/articles/llama-cpp-v1-0-release/</a></p>
+<p>再说一条新帖。 AMD 的工程师用 agent 技能造了一批内核。 51 个热门模型，跑在 Strix Halo 硬件上。 Strix Halo 是 AMD 的高端笔记本芯片。 来源：<a href="https://readmex.ai/e/llama.cpp">https://readmex.ai/e/llama.cpp</a></p>
+<p><strong>中文媒体：还没见到 llama.cpp 1.0 的稿</strong></p>
+<p>机器之心、量子位都没发。</p>
+<h2>值得深入学</h2>
+<p><strong>TraceKV：推理模型的草稿纸，压 5.64 倍还不掉分</strong></p>
+<p>这篇能帮你把推理模型的 KV 缓存压下来。 跟你研究的 PD 解耦评估直接相关。 解码池子省显存，等于同等硬件多接请求。 笔记：TraceKV-推理视觉语言模型低秩KV压缩-精读</p>
+<h2>去重脚注</h2>
+<p>本轮已与 15 点版去重。 版本水位：llama.cpp 快照 b12368 滚到 b12374，其余正式版、预发布全没动。 vLLM 7 条首次汇总：#61395、#62800、#67317、#66314、#67321、#67394、#65733。 SGLang 6 条首次汇总：#47025、#50373、#50364、#50363、#49917、#49636。 TRT-LLM 1 条首次汇总：#22008。 Dynamo 9 条首次汇总：#18758、#18747、#18748、#18711、#18629、#18209、#17911、#17881、#16749。 FlashInfer 4 条首次汇总：#9469、#9296、#9430、#7421。 LMDeploy、TGI、Mooncake 零合入。 TraceKV、KVPath 是 11 月 11–12 日批次漏报的首次补报。 Unbundling Multimodal Vision Encoding 是 07 点版深读过的，不再重复。 arXiv 今晚没新批次，下一批按惯例周一到。 英伟达：周五收盘 162.85 美元跌 2.01%、盘后 161.23 美元、Rene Haas 接触传闻与董事会否认、Kress 全员会 11 月 18 日、众议院截止时间是首次报；周四收盘 166.19 美元、财报 11 月 17 日是之前报过的。 SGLang Summit 第二天结束、实录暂无是首次报；Liam Fedus 炉边谈是之前报过的。 Latent Space 最新单集仍是 11 月 10 日那期。 Reddit 1.0 帖子仍是当日最热、维护者呼声是之前报过的；agent 造 Loom 内核是首次报。 中文媒体仍没发 llama.cpp 1.0 的稿。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-13-1700/">17点版</a></p></body></html>
