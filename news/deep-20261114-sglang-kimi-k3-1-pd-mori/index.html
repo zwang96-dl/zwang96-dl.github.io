@@ -1,0 +1,151 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang：Kimi-K3.1 的 PD 解耦走 MoRI，传输后端能二选一了"/>
+<meta name="doc-description" content="- 原文：SGLang 团队（AMD 方向），GitHub PR #48902（2026-11-14 合入）"/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-14T21:03:30"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang：Kimi-K3.1 的 PD 解耦走 MoRI，传输后端能二选一了</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang：Kimi-K3.1 的 PD 解耦走 MoRI，传输后端能二选一了</h1>
+<ul><li>原文：SGLang 团队（AMD 方向），GitHub PR #48902（2026-11-14 合入）</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/48902">https://github.com/sgl-project/sglang/pull/48902</a></li><li>作者：AMD-yanfeiwang</li><li>说明：这篇是工程 PR，不是论文；数字全是作者自报</li><li>说明：合入的是 kimi-k3.1-day-0-amd 分支，还没进主线</li><li>说明：原 PR 未附图，关键数字见下表</li></ul>
+<h2>一句话</h2>
+<p>Kimi-K3.1 做 PD 解耦，以前只能走 Mooncake。</p>
+<p>现在 MoRI 这条路也通了。</p>
+<p>两份漏传的草稿状态补上，精度基本没掉。</p>
+<h2>人话解读</h2>
+<p>先讲 PD 解耦是什么。</p>
+<p>它是读题和写答案分开跑。</p>
+<p>读题那拨算完，把草稿纸传给解码那拨。</p>
+<p>草稿纸就是 KV 缓存。</p>
+<p>传草稿纸要走传输后端。</p>
+<p>Mooncake 和 MoRI 都是传输后端。</p>
+<p>Mooncake 是开源 KV 缓存池。</p>
+<p>MoRI 是 SGLang 自带的另一套。</p>
+<p>Kimi-K3.1 在 DCP 下做 PD，以前只认 Mooncake。</p>
+<p>DCP 就是把上下文拆到多张卡上。</p>
+<p>MoRI 也能搬同 DCP 的 KV 页。</p>
+<p>但它漏了两份状态，一直传不通。</p>
+<p>一份叫 draft_ring，一份叫 request_row。</p>
+<p>这两份是 K3.1 默认注册的草稿状态。</p>
+<p>draft_ring 是草稿模型的环形草稿。</p>
+<p>request_row 是每条请求的那行记录。</p>
+<p>漏了它们，每次传输都失败。</p>
+<p>这回把两份补上，路就通了。</p>
+<p>测试是在 2 组 8 张 MI355X 上跑的。</p>
+<p>读题和解码各一拨。</p>
+<p>每拨都是 8 卡张量并行加 8 路 DCP。</p>
+<p>对照组是一台聚合式服务器。</p>
+<p>同样的模型，同样的设置。</p>
+<p>结果是精度基本没掉。</p>
+<h2>核心方法</h2>
+<h3>1. 开关放行：K3.1 允许走 MoRI</h3>
+<p>以前有个硬性检查。</p>
+<p>DCP 下的 PD 只认 Mooncake。</p>
+<p>别的后端直接报错。</p>
+<p>这回把 MoRI 也放进白名单。</p>
+<p>报错文案改成只支持 Mooncake 或 MoRI。</p>
+<p>改动只有两行。</p>
+<p>但它是整篇的前提。</p>
+<h3>2. 补传两份草稿状态</h3>
+<p>MoRI 的 send_state 有张清单。</p>
+<p>清单列着每种状态怎么搬。</p>
+<p>这回清单里加了两项。</p>
+<p>draft_ring 和 request_row 都加进去了。</p>
+<p>另一处 _send_swa_dsa_state 也一样。</p>
+<p>两处都得加，缺一处就断。</p>
+<p>说白了，搬家清单上漏了两件行李。</p>
+<p>补上清单，东西才能一次搬完。</p>
+<h3>3. 环形行只配双方都有的位置</h3>
+<p>draft_ring 的配对有个坑。</p>
+<p>读题和解码两边的 DCP 各管一部分位置。</p>
+<p>有些位置只有一边有。</p>
+<p>这回加了一道过滤。</p>
+<p>只在两边都拥有这个位置时才配对。</p>
+<p>Row 0 是个标记。</p>
+<p>它表示某一边的 DCP 不拥有这个位置。</p>
+<p>过滤掉 Row 0，剩下的才是真配对。</p>
+<p>如果某一边根本没注册草稿。</p>
+<p>那就直接返回空，不硬搬。</p>
+<h3>4. 重排守门：跨 DCP 尺寸就报错</h3>
+<p>还有一种情况要拦。</p>
+<p>DCP-1 的读题配 DCP-8 的解码。</p>
+<p>这种跨尺寸重排，MoRI 搬不动。</p>
+<p>因为池子里有 DSA 的索引 K。</p>
+<p>索引 K 是稀疏注意力用的那份表。</p>
+<p>重排那条路不搬这份表。</p>
+<p>这回在握手时就拦下。</p>
+<p>报错会告诉你两条出路。</p>
+<p>要么两边用同样的 DCP 尺寸。</p>
+<p>要么回去用 Mooncake。</p>
+<h2>关键数据</h2>
+<ul><li>测试硬件：2 组 8 张 MI355X</li><li>服务形态：1 个读题实例加 1 个解码实例</li><li>并行配置：每拨都是 TP8 加 DCP8</li><li>草稿验证：DFLASH block 6，真实验证</li><li>测试镜像：sglang-rocm 的 kimi-k31-pro 镜像</li><li>GSM8K 5-shot：MoRI 是 0.995</li><li>GSM8K 5-shot：合跑对照组是 0.9975</li><li>GSM8K 400 道：两边 399 道答案一致</li><li>长针测试：8k、32k、64k 上下文，共 24 组</li><li>长针测试：MoRI 和对照组都是 24 组全过</li><li>接受长度：MoRI 是 4.88</li><li>接受长度：合跑对照组是 4.86</li><li>针测试第二个问题：复用约 3 万解码缓存词</li><li>跨尺寸重排：DCP-1 配 DCP-8 会被握手拦下</li></ul>
+<h2>关键图表</h2>
+<p>原 PR 未附图。</p>
+<p>最值得看的是上面那张精度对照表。</p>
+<p>GSM8K 只差 0.25 个百分点。</p>
+<p>长针测试两边全过。</p>
+<p>接受长度也只差 0.02。</p>
+<p>三组数一起看，结论才站得住。</p>
+<h2>跟研究方向的关联</h2>
+<p>这篇直接撞上你的 PD 解耦评估。</p>
+<p>四招能直接进评估清单。</p>
+<p>第一招：传输后端要分开报。</p>
+<p>K3.1 的 PD 以前被 Mooncake 绑死。</p>
+<p>现在 MoRI 也能走了。</p>
+<p>评估清单里要加一栏。</p>
+<p>MoRI 和 Mooncake 各自的搬运成本。</p>
+<p>第二招：草稿状态要进搬运清单。</p>
+<p>DFLASH 的 draft_ring 和 request_row。</p>
+<p>漏传任何一份，传输直接失败。</p>
+<p>新模型上线先对一遍状态清单。</p>
+<p>别等跑起来才发现少传了。</p>
+<p>第三招：跨尺寸重排先问支不支持。</p>
+<p>DCP-1 配 DCP-8 在 MoRI 上会被拦。</p>
+<p>评估里要记一笔。</p>
+<p>读题和解码的 DCP 尺寸要不要对齐。</p>
+<p>第四招：精度对照要看三组数。</p>
+<p>GSM8K、长针、接受长度都得看。</p>
+<p>只看一组数，容易漏掉暗病。</p>
+<p>还有一个方向值得跟。</p>
+<p>这篇合入的是 AMD 的 day-0 分支。</p>
+<p>还没进 SGLang 主线。</p>
+<p>主线合入后要再核一遍。</p>
+<h2>术语表</h2>
+<ul><li>PD 解耦：读题和解码分开跑，各用各的实例</li><li>读题：prefill，把输入一次性算完</li><li>解码：decode，一个词一个词往外吐</li><li>DCP：上下文并行，把上下文拆到多张卡上</li><li>TP：张量并行，把一层拆到多张卡上</li><li>KV 缓存：模型的草稿纸，记着每轮对话的上下文</li><li>Mooncake：开源 KV 缓存池，管显存内存和 SSD</li><li>MoRI：SGLang 自带的 KV 传输后端</li><li>DFLASH：K3.1 的草稿验证机制</li><li>draft_ring：草稿模型的环形草稿状态</li><li>request_row：每条请求的那行记录</li><li>DSA：稀疏注意力，只算重要的部分</li><li>索引 K：稀疏注意力用的那份键表</li><li>GSM8K：小学数学题测试集，常用精度对照</li><li>长针测试：大海捞针，测长上下文找东西的能力</li><li>接受长度：草稿一次被接受的平均词数</li><li>MI355X：AMD 的数据中心 GPU</li><li>握手：两边实例建立连接时先对一遍条件</li></ul>
+<h2>注意事项</h2>
+<ul><li>数字全是作者自报，没有第三方复现</li><li>对照组只有一个聚合式服务器</li><li>测试只跑了 GSM8K 和长针两组</li><li>合入的是 day-0 分支，还没进主线</li><li>DCP-1 配 DCP-8 被拦下是预期行为</li><li>原 PR 未附图，关键数字都在上表里</li></ul></body></html>
