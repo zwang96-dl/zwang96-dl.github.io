@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月13日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-13"/>
+<meta name="doc-ts" content="2026-11-14T03:02:17"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-13（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-13（19点版）</h1>
+<p>19点版来了，头条是蚂蚁的 Duo。</p>
+<h2>新技术与论文</h2>
+<p><strong>头条：蚂蚁 Duo 来了，会边听边说的音视频模型</strong></p>
+<p>Duo 是个全双工音视频模型。说话的同时还能听你说话。视频和声音一起生成，对得上口型。论文 11 月 11 日挂上 arXiv。权重 11 月 12 日放上 Hugging Face。代码和流式推理管线今天也放出来了。vLLM-Omni 和 SGLang-Omni 都能直接接。想接实时多模态 agent 的人，现在有现成路子了。</p>
+<p>它分两个模块干活。Intent 模块决定什么时候开口、说什么意图。Realization 模块负责把话和画面生出来。两个模块按 0.71 秒一块同步，不用等一整轮说完。30 组真实对话里，180 项标准过了 93.3%。语言和语音清晰度拿了满分。口型同步 90%。</p>
+<p>延迟这块：8 张卡上首段输出 330 到 650 毫秒。说白了，半秒多就能接上话。权重一共 153GB，不小。提醒一句：权重许可不是 Apache 2.0。商用之前先读许可。 来源：<a href="https://www.orcarouter.ai/blog/duo-1-0-causal-base-quiet-weights-release">https://www.orcarouter.ai/blog/duo-1-0-causal-base-quiet-weights-release</a> 来源：<a href="https://aiweekly.co/alerts/inclusionai-releases-duo-v1-a-full-duplex-audiovisual-world-model-with-933-pass">https://aiweekly.co/alerts/inclusionai-releases-duo-v1-a-full-duplex-audiovisual-world-model-with-933-pass</a></p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 正式版还是 v0.33.0。预发布还是 v0.34.0rc3。SGLang 还是 v0.5.23。TRT-LLM 还是 v1.4.0rc3。LMDeploy 还是 v0.18.0。TGI 还是 v3.3.7。Dynamo 正式版还是 v1.6.2。FlashInfer 预发布还是 v0.7.5rc1。llama.cpp 正式版还是 v1.0.0。快照还是 b12374。 来源：GitHub releases、tags</p>
+<p><strong>vLLM：4 条新，PD 那条值得看</strong></p>
+<p>先说 #65336。PD 解耦的拼图又补一块。prefill 那边流水线切分后，KV 分散在各段。decode 这边现在能直接去各段拉。混合 KV 缓存的注意力层也能拉。说白了，读题和吐词分开跑时，草稿纸不用再整份搬家了。 来源：<a href="https://github.com/vllm-project/vllm/pull/65336">https://github.com/vllm-project/vllm/pull/65336</a></p>
+<p>再说 #66799。MoE 路由的补零行，以前白算。现在默认跳过。GLM-5.3 上并发跑，吞吐涨 5% 到 21%。DeepSeek-V3.2 涨 3% 到 8%。数字是作者自报的。 来源：<a href="https://github.com/vllm-project/vllm/pull/66799">https://github.com/vllm-project/vllm/pull/66799</a></p>
+<p>再说 #64827。DeepSeek-V4 开机预热漏了几个算子。线上跑着跑着会现场编译，请求能卡 300 秒超时。这回启动时全预热一遍。 来源：<a href="https://github.com/vllm-project/vllm/pull/64827">https://github.com/vllm-project/vllm/pull/64827</a></p>
+<p>其余一句话带过。#67455，解码池默认取最后一个位置。</p>
+<p><strong>SGLang：16 条新，Rust 那边继续批量落地</strong></p>
+<p>先说 #50401。Rust 服务端也能开 HTTP/2 了。以前开这个开关会被拒。现在跟 Python 版一样，清明文 h2c 和 HTTP/1.1 同端口跑。路由器转发也能用上了。 来源：<a href="https://github.com/sgl-project/sglang/pull/50401">https://github.com/sgl-project/sglang/pull/50401</a></p>
+<p>再说 #50370。分层缓存那块又开个口子。外来的存储后端也能加入 KV 分片。先注册名字，再按规矩读写自己的分片。 来源：<a href="https://github.com/sgl-project/sglang/pull/50370">https://github.com/sgl-project/sglang/pull/50370</a></p>
+<p>再说 #49658。最短读题优先的调度，加了防饿死。长提示以前可能一直排不上队。现在等久了会慢慢加分。 来源：<a href="https://github.com/sgl-project/sglang/pull/49658">https://github.com/sgl-project/sglang/pull/49658</a></p>
+<p>再说 #50407。视频请求能限帧数和 token 数了。Rust 服务端把上限传给多模态处理。视频一多，显存不会被悄悄吃光。 来源：<a href="https://github.com/sgl-project/sglang/pull/50407">https://github.com/sgl-project/sglang/pull/50407</a></p>
+<p>再说 #49992。缓存淘汰改成全注意力和滑动窗口一起算账。Rust 树核里一次走完。 来源：<a href="https://github.com/sgl-project/sglang/pull/49992">https://github.com/sgl-project/sglang/pull/49992</a></p>
+<p>其余一句话带过。#46409，多模态重构第三步。#49721，健康检查不再被请求堵住。#49666、#49644，分层缓存的修补。#49641、#49695，基数树（缓存的索引树）回收的修补。#49649、#49630、#50396、#49634，Rust 服务端和调度的修补。#44613，NIXL 存储测试隔离。</p>
+<p><strong>TRT-LLM：3 条新</strong></p>
+<p>先说 #21668。卡间 All2All 通信换了新传输。还带哨兵机制。旧的计数写方式退役了。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21668">https://github.com/NVIDIA/TensorRT-LLM/pull/21668</a></p>
+<p>再说 #21203。FlashInfer 的注意力模块，以前只在一部分流水线 rank 上编。现在所有 rank 预热前都编好。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21203">https://github.com/NVIDIA/TensorRT-LLM/pull/21203</a></p>
+<p>再说 #20918。Whisper 的跨 KV 池子改按编码器长度定。不再按最大输入长度一刀切。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20918">https://github.com/NVIDIA/TensorRT-LLM/pull/20918</a></p>
+<p><strong>FlashInfer：2 条新</strong></p>
+<p>先说 #9473。H100 的非因果分页 prefill 接进 cuDNN 了。读题那步又多一条快路。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9473">https://github.com/flashinfer-ai/flashinfer/pull/9473</a></p>
+<p>再说 #9454。MegaMoE 双向变体的自动调参来了。 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9454">https://github.com/flashinfer-ai/flashinfer/pull/9454</a></p>
+<p>其余一句话带过。Dynamo #18761，文档小合入。Mooncake #5280，TENT 修 EFA 协议。llama.cpp #32221，Metal 修溢出。</p>
+<h2>业内新闻</h2>
+<p><strong>补报：谷歌把 TorchTPU 开源了，vLLM 和 SGLang 当天就接上</strong></p>
+<p>TorchTPU 是跑在 TPU 上的原生 PyTorch。谷歌 10 月 22 日开源的，之前几期漏报了。vLLM 和 SGLang 发布当天就给了支持。70B 模型上，谷歌称吞吐比老 PyTorch/XLA 快 2.3 倍。KV 利用率涨 38%。提醒一句：数字是谷歌自报的。 来源：<a href="https://aicoder.com/news/news-1792641807085-jwu16">https://aicoder.com/news/news-1792641807085-jwu16</a></p>
+<p><strong>英伟达：接班人那出戏又添两笔</strong></p>
+<p>华尔街日报引述匿名消息说，黄仁勋今年夏天开会时，给了 Kress 一个外号。外号叫“受惊的小鹿”。还说她帮不上战略决策。Kress 当了 13 年 CFO。11 月 17 日财报电话会是她第一场。 来源：<a href="https://techcrunch.com/2026/11/13/jensen-huang-didnt-show-confidence-in-his-successor-report-says/">https://techcrunch.com/2026/11/13/jensen-huang-didnt-show-confidence-in-his-successor-report-says/</a></p>
+<p>路透又报了一起，传闻总数到了三起。董事会没证实。仍是未定论，别当定论传。 来源：<a href="https://www.financialinvestigator.se/news-detail-page/2026/11/13/swissquote-pricing-the-huang-risk">https://www.financialinvestigator.se/news-detail-page/2026/11/13/swissquote-pricing-the-huang-risk</a></p>
+<p><strong>社区趣闻：2.8T 的 Kimi K3，不用显卡也能跑</strong></p>
+<p>有玩家用纯 CPU 加 Optane 内存跑 Kimi K3。2.8T 参数的模型，1 比特量化下每秒 0.85 个词。关掉 DAX 之后，提到 1.5 个词。慢归慢，重点是能跑起来。数字是玩家自报的，没复现过。 来源：<a href="https://windowsforum.com/news/kimi-k3-runs-on-cpu-and-optane-without-a-gpu-but-generates-under-1-token-per-second.451401/">https://windowsforum.com/news/kimi-k3-runs-on-cpu-and-optane-without-a-gpu-but-generates-under-1-token-per-second.451401/</a></p>
+<p>还有一则。Xbox Series X 也能跑推理了。LFM2.5-350M 每秒约 95 个词。1.2B 的每秒约 37 个词。客厅主机顺手当推理机，够玩。 来源：<a href="https://gbatemp.net/threads/first-inference-results-on-xbox-series-x-xllama-in-dev-mode-lfm2-5-350m-and-1-2b-measured.686508/">https://gbatemp.net/threads/first-inference-results-on-xbox-series-x-xllama-in-dev-mode-lfm2-5-350m-and-1-2b-measured.686508/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>llama.cpp 1.0 的社区回响</strong></p>
+<p>1.0 本身 7 点版报过。这轮是社区的反应。r/LocalLLaMA 上，Hugging Face 工程师 Merve 发了帖。帖子成了当天最热。热评第一不是祝贺，是喊缺维护者。有人点名 Strata 等分叉跑得更快。还有一篇 HN 热帖，646 个赞。标题说本地 LLM 不需要 Ollama 了。意思是 llama.cpp 自己已经够像生产级引擎。DEV 今天出了篇解读，列了 5 个多数人不知道的技巧。KV 量化和提示缓存都在里面。 来源：<a href="https://aifrontierpost.com/articles/llama-cpp-v1-0-release/">https://aifrontierpost.com/articles/llama-cpp-v1-0-release/</a> 来源：<a href="https://pengen.diewe.workers.dev/_cbd692d476c5faf3b61bcf/the-local-llm-ecosystem-doesnt-need-ollama-5-llamacpp-tricks-90-of-developers-are-missing-2olg">https://pengen.diewe.workers.dev/_cbd692d476c5faf3b61bcf/the-local-llm-ecosystem-doesnt-need-ollama-5-llamacpp-tricks-90-of-developers-are-missing-2olg</a></p>
+<p><strong>其他渠道：这轮没新东西</strong></p>
+<p>Latent Space 最新单集还是 11 月 10 日那期。X 上几位大V没新帖。机器之心、量子位还没发 llama.cpp 1.0 的稿。arXiv 今晚没新批次。下一批按惯例周一到。</p>
+<h2>值得深入学</h2>
+<p><strong>Duo：全双工音视频世界模型，实时 agent 的 serving 长这样</strong></p>
+<p>这篇能帮你看清实时多模态 agent 的 serving 长什么样。跟你研究的 PD 解耦评估直接相关。流式解码的延迟账可以直接抄。 笔记：Duo-全双工音视频世界模型-精读</p>
+<h2>去重脚注</h2>
+<p>本轮已与 17 点版去重。 版本水位：全都没动。vLLM 正式版 v0.33.0、预发布 tag v0.34.0rc3；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 v0.7.5rc1；llama.cpp 正式版 v1.0.0、快照 b12374。 vLLM 4 条首次汇总：#65336、#66799、#64827、#67455。 SGLang 16 条首次汇总：#50407、#50401、#50370、#46409、#49992、#49721、#49666、#49658、#49695、#49649、#49644、#49641、#49630、#50396、#49634、#44613。 TRT-LLM 3 条首次汇总：#21668、#21203、#20918。 FlashInfer 2 条首次汇总：#9473、#9454。 Dynamo #18761、Mooncake #5280、llama.cpp #32221 是首次汇总的小修补。 Duo v1 是今天新放出的首次报；TorchTPU 是 10 月 22 日旧闻的首次补报；Kimi K3 纯 CPU 跑分和 Xbox 跑分是首次报；llama.cpp 1.0 社区回响是首次报；英伟达“受惊的小鹿”和路透第三起是首次报；周五收盘 162.85 美元、盘后 161.23 美元是 17 点版报过的。 SGLang Summit 第二天结束、实录暂无是 17 点版报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-13-1900/">19点版</a></p></body></html>
