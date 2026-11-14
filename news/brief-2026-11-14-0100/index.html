@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月14日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-14T08:59:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-14（01点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-14（01点版）</h1>
+<p>01点版来了，头条是 Kimi 大模型的新配方。</p>
+<h2>框架更新</h2>
+<p><strong>头条：vLLM 给 Kimi K3.1 Pro 配了全套 MI355X 配方</strong></p>
+<p>先说 #67600。Kimi K3.1 Pro 是月之暗面的旗舰模型。2.8T 参数的 MoE，只激活 104B。权重用 MXFP4，上下文 1M 词。</p>
+<p>这回 vLLM 给它做了 MI355X 的 AgentX 配方。一个配方，覆盖 6 种并发：1、4、16、24、32、48。并发 1 时走纯 TP8，低延迟解码。并发上去就开 DCP8，再加主机 KV 卸载。推测解码用 DSpark 草稿模型。草稿模型先写草稿，主模型再改。</p>
+<p>划重点：这跟你的 MI350X 评估直接相关。Kimi K3.1 Pro 是现在最强的开源权重模型之一。想在 AMD 卡上跑 agent 任务，这个配方就是现成的起跑线。 来源：<a href="https://github.com/vllm-project/vllm/pull/67600">https://github.com/vllm-project/vllm/pull/67600</a></p>
+<p><strong>版本水位：FlashInfer 悄悄打了 rc2 的 tag</strong></p>
+<p>FlashInfer 的 v0.7.5rc2 tag 出来了。时间是 13 号 21 点 58 分。23点版漏了这一条。release 页面目前还是 rc1。</p>
+<p>llama.cpp 快照滚到 b12376。时间是今天 0 点 42 分。</p>
+<p>其余都没动。vLLM 正式版还是 v0.33.0。预发布还是 v0.34.0rc3。SGLang 还是 v0.5.23。TRT-LLM 还是 v1.4.0rc3。LMDeploy 还是 v0.18.0。TGI 还是 v3.3.7。Dynamo 正式版还是 v1.6.2。llama.cpp 正式版还是 v1.0.0。 来源：GitHub releases、tags</p>
+<p><strong>vLLM：2 条新，音频那条值得看</strong></p>
+<p>先说 #67474。MOSS-Audio 的启动画像修了。以前用 1 秒假音频画像，只有 13 个音频 token。这回按 30 秒预算画像，375 个 token。说白了，启动时先按真实量级热身，别拿小样糊弄。 来源：<a href="https://github.com/vllm-project/vllm/pull/67474">https://github.com/vllm-project/vllm/pull/67474</a></p>
+<p><strong>SGLang：1 条新，只是依赖升级</strong></p>
+<p>先说 #50397。sglang-kernel 升到 0.4.11。sgl-fa3 升到 0.1.0。纯依赖升级，没改逻辑。 来源：<a href="https://github.com/sgl-project/sglang/pull/50397">https://github.com/sgl-project/sglang/pull/50397</a></p>
+<p><strong>TRT-LLM：1 条新，MoE 的 FP8 提速</strong></p>
+<p>先说 #21178。CUTLASS 的 MoE 那边，FP8 分块扩行和激活启动都加速了。说白了，专家切换那步少做无用功。 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21178">https://github.com/NVIDIA/TensorRT-LLM/pull/21178</a></p>
+<p><strong>llama.cpp：1 条新，推测解码拆干净了</strong></p>
+<p>先说 #32016。DFlash 那套推测解码方法拆开了。以前 4 种方法挤在一个文件里。这回拆成 4 个独立方法：dflash、dflash2、dspark、lilicorr。只动结构，不改行为。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32016">https://github.com/ggml-org/llama.cpp/pull/32016</a></p>
+<p>LMDeploy、Dynamo、TGI、FlashInfer 这轮没新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>arXiv 下一批按惯例周一到。Geodesic 那篇烤箱长文是 21 点版报过的。SGLang 接 IBM Spyre 是 5 点版报过的。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>谷歌 TPU 8tx 和 8i Max 是 11 月 9 日报过的。Gemini 4 Hydrogen 是 5 点版报过的。SGLang Summit 第二天没见新料流出。</p>
+<h2>访谈与深度</h2>
+<p><strong>其他渠道：这轮没新东西</strong></p>
+<p>Latent Space 最新单集还是 11 月 10 日那期。X 上几位大V没新帖。机器之心、量子位还是没发 llama.cpp 1.0 的稿。</p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的新内容。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 23 点版去重。 版本水位：FlashInfer 预发布 tag 滚到 v0.7.5rc2（release 页仍是 rc1）；llama.cpp 快照滚到 b12376；其余没动。vLLM 正式版 v0.33.0、预发布 tag v0.34.0rc3；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；llama.cpp 正式版 v1.0.0。 vLLM 2 条首次汇总：#67600、#67474。SGLang 1 条首次汇总：#50397。TRT-LLM 1 条首次汇总：#21178。llama.cpp 1 条首次汇总：#32016。 Geodesic 烤箱长文是 21 点版报过的，已有深读笔记；SGLang 接 IBM Spyre、Gemini 4 Hydrogen 是 5 点版报过的；TPU 8tx/8i Max 是 11 月 9 日报过的；黄仁勋辞任是 12 号 19 点版报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿；arXiv 下一批按惯例周一到。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-14-0100/">01点版</a></p></body></html>
