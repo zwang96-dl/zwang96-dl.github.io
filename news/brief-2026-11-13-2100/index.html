@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月13日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-13"/>
+<meta name="doc-ts" content="2026-11-14T05:04:48"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-13（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-13（21点版）</h1>
+<p>21点版来了，头条是谷歌的 TPU Sync。</p>
+<h2>新技术与论文</h2>
+<p><strong>头条：谷歌把 TPU 的 KV 搬运工开源了</strong></p>
+<p>TPU Sync 是谷歌刚开源的 C++ 库。它专管 TPU 上 KV cache（模型的草稿纸）的搬运。还能顺手搬权重。读题和吐词分开跑时，草稿纸要在节点之间传。这一步以前是瓶颈。</p>
+<p>谷歌的自报数字很亮眼。Qwen3 235B 上，KV 传输中位数从几秒压到 230 毫秒。首字时间平均降 60%。480B 的模型在低并发下降 90%。64K 长上下文的前缀缓存场景，首字时间最多降 90%。</p>
+<p>它把 TPU 显存、主机内存、共享存储和机房网络当成一层内存。跟 vLLM 和 SGLang 都接上了。走的是 TorchTPU 那条线。说白了，这是 TPU 那边的 PD 解耦加速器。</p>
+<p>提醒两句。数字全是谷歌自报的，没人独立复现过。仓库自己也说接口还在快速变，只发了开发版。想尝鲜就钉死某个提交再用。 来源：<a href="https://www.marktechpost.com/2026/11/13/google-tpu-sync-kv-cache-transfer-library/">https://www.marktechpost.com/2026/11/13/google-tpu-sync-kv-cache-transfer-library/</a> 来源：<a href="https://zot.news/article/google-open-sources-tpu-sync-accelerate-llm-serving-tpus-hsn9e">https://zot.news/article/google-open-sources-tpu-sync-accelerate-llm-serving-tpus-hsn9e</a></p>
+<p><strong>英伟达 Sigma：扩散模型一次写一整段</strong></p>
+<p>Sigma 是英伟达的连续扩散语言模型。3B 和 8B 两个尺寸。论文 11 月 12 日更新了新版。跟传统模型一个词一个词往外蹦不同。它一次并行起草一整段文字。</p>
+<p>实测数字：单张 GB200 上用 SGLang 跑。8B 模型吞吐是自家自回归模式的 3.46 倍。数学题上一次能出 8 个词。写代码一次出 4 个词。精度基本没掉。</p>
+<p>提醒一句：这只是单请求实测。3B 和 8B 都是研究尺寸。忙起来的生产集群什么样，还没人测过。 来源：<a href="https://que.com/nvidias-sigma-drafts-text-in-parallel-blocks-and-runs-about-3-5-times-faster-than-standard-decoding-making-diffusion-a-real-contender-for-cheaper-ai-inference/">https://que.com/nvidias-sigma-drafts-text-in-parallel-blocks-and-runs-about-3-5-times-faster-than-standard-decoding-making-diffusion-a-real-contender-for-cheaper-ai-inference/</a> 来源：<a href="https://arxiv.org/pdf/2610.02665v1">https://arxiv.org/pdf/2610.02665v1</a></p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 正式版还是 v0.33.0。预发布还是 v0.34.0rc3。SGLang 还是 v0.5.23。TRT-LLM 还是 v1.4.0rc3。LMDeploy 还是 v0.18.0。TGI 还是 v3.3.7。Dynamo 正式版还是 v1.6.2。FlashInfer 预发布还是 v0.7.5rc1。llama.cpp 正式版还是 v1.0.0。快照前进一位，到了 b12375。 来源：GitHub releases、tags</p>
+<p><strong>vLLM：6 条新，PD 那两条值得看</strong></p>
+<p>先说 #65098。ROCm 那边的 PD 解耦又补一块。Wide-EP 的无头节点现在也能拿到 KV 配置。说白了，读题和吐词分开跑时，更多节点能直接参与搬草稿纸。 来源：<a href="https://github.com/vllm-project/vllm/pull/65098">https://github.com/vllm-project/vllm/pull/65098</a></p>
+<p>再说 #66925。EPD 那边接上了 Kimi-K3。图片只传元数据也能跑。编码器、读题、吐词三段拆开时，图片输入少走弯路。 来源：<a href="https://github.com/vllm-project/vllm/pull/66925">https://github.com/vllm-project/vllm/pull/66925</a></p>
+<p>再说 #67487。Kimi-K3.1-Pro 的 MI355X 跑法来了。并发 48，配 3 个草稿词。照着配方就能复现。 来源：<a href="https://github.com/vllm-project/vllm/pull/67487">https://github.com/vllm-project/vllm/pull/67487</a></p>
+<p>其余一句话带过。#65453，多模态的修补。#67564、#67579，CI 的修补。</p>
+<p><strong>SGLang：1 条新</strong></p>
+<p>先说 #49970。Rust 服务端放宽了请求 ID。上限提到 256 字节。客户端传长 ID 不会被拒了。 来源：<a href="https://github.com/sgl-project/sglang/pull/49970">https://github.com/sgl-project/sglang/pull/49970</a></p>
+<p><strong>llama.cpp：2 条新</strong></p>
+<p>先说 #31954。Hexagon 后端多了 IQ2_XXS 和 NVFP4 量化。高通芯片上能跑更小的模型。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31954">https://github.com/ggml-org/llama.cpp/pull/31954</a></p>
+<p>再说 #32230。聊天那块删了个 Mistral 的临时绕过。 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32230">https://github.com/ggml-org/llama.cpp/pull/32230</a></p>
+<p>TRT-LLM、FlashInfer、Dynamo 这轮没新合入。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>SGLang 联盟那事是 12 号的，前面报过了。英伟达接班人的传闻也是 19 点版报过的。没再出新进展。</p>
+<h2>访谈与深度</h2>
+<p><strong>值得深读：评测分数，烤箱说了算</strong></p>
+<p>Geodesic 团队 11 月 13 日发了篇长文。标题叫《好披萨也得有好烤箱》。讲的是同一模型，换套 serving，分数能差一倍。</p>
+<p>模型是 Qwen3.6-27B。跑的是 Terminal-Bench 2.1。慢的那套 serving 上，通过率只有 24%。换到 8 张 H100 的专用节点，同样的模型涨到 46%。超时从 57% 掉到 12%。每位 agent 每秒拿到 78 个词。</p>
+<p>划重点：前缀缓存命中率是分水岭。快的那套命中 94%。慢的那套只有 55%。长对话一多，慢 serving 就在反复重算。</p>
+<p>这篇跟你的 PD 解耦评估直接相关。里面那套 serving 质量指标可以直接抄。每位 agent 的速度、首字时间、词间延迟、缓存命中率。 来源：<a href="https://medium.com/@willyouzhizou/great-pizzas-need-great-ovens-why-llm-evaluation-depends-on-serving-quality-ac81709c9be9">https://medium.com/@willyouzhizou/great-pizzas-need-great-ovens-why-llm-evaluation-depends-on-serving-quality-ac81709c9be9</a></p>
+<p><strong>其他渠道：这轮没新东西</strong></p>
+<p>Latent Space 最新单集还是 11 月 10 日那期。X 上几位大V没新帖。机器之心、量子位还是没发 llama.cpp 1.0 的稿。arXiv 下一批按惯例周一到。</p>
+<h2>值得深入学</h2>
+<p><strong>评测分数背后的 serving 账，PD 评估可以直接抄</strong></p>
+<p>这篇能帮你看清评测分数怎么被 serving 带偏。跟你正在做的 PD 解耦评估直接相关。里面的四个 serving 质量指标可以直接抄进你的评估清单。 笔记：评测分数背后的serving账-精读</p>
+<h2>去重脚注</h2>
+<p>本轮已与 19 点版去重。 版本水位：全都没动。vLLM 正式版 v0.33.0、预发布 tag v0.34.0rc3；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 v0.7.5rc1；llama.cpp 正式版 v1.0.0、快照 b12375。 vLLM 6 条首次汇总：#65098、#66925、#67487、#65453、#67564、#67579。 SGLang 1 条首次汇总：#49970。 llama.cpp 2 条首次汇总：#31954、#32230。 TPU Sync、Sigma、评测分数那篇长文是首次报。 llama.cpp 1.0 本体和社区回响是 17 点版、19 点版报过的；Duo 是 19 点版报过的；TorchTPU 是 19 点版补报过的；SGLang 联盟是 12 号报过的；英伟达接班人传闻是 19 点版报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-13-2100/">21点版</a></p></body></html>
