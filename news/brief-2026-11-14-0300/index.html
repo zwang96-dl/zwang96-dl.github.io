@@ -1,0 +1,150 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月14日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-14T11:02:00"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-14（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-14（03点版）</h1>
+<p>03点版来了，头条是 SGLang 进了英伟达的企业货架。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：vLLM 预发布滚到 rc4</strong></p>
+<p>vLLM 的预发布 tag 滚到了 v0.34.0rc4。</p>
+<p>对应的提交是今天 02:15 PST 的。</p>
+<p>release 页面还没挂出这版。</p>
+<p>llama.cpp 快照滚到 b12377。</p>
+<p>发布时间是今天 01:46 PST。</p>
+<p>其余都没动。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布还是 v0.7.5rc2 的 tag。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：7 条新，MXFP8 那条值得看</strong></p>
+<p>先说 #50324。</p>
+<p>统一缓存的外部链接器现在支持 MXFP8 的 KV。</p>
+<p>MXFP8 是一种 8 位浮点格式，KV 就是草稿纸。</p>
+<p>之前用这格式跑长上下文配方，启动就报错。</p>
+<p>这回把缩放信息塞进 KV 页里，跟着整页一起搬。</p>
+<p>说白了，草稿纸换了薄本子，搬运工也得认。</p>
+<p>划重点：这跟 Inkling 的长上下文配方直接相关。</p>
+<p>想在统一缓存上跑 MXFP8 的 KV，这处修补是前提。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50324">https://github.com/sgl-project/sglang/pull/50324</a></p>
+<p>再说 #46363。</p>
+<p>分层缓存那边的流水线同步改了。</p>
+<p>以前一次只往前推一轮。</p>
+<p>这回按流水线深度往前推，缓存同步少等几拍。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46363">https://github.com/sgl-project/sglang/pull/46363</a></p>
+<p>再说 #50496。</p>
+<p>约束生成那边，打印语法对象不再带内存地址。</p>
+<p>纯粹是日志可读性的小修补。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50496">https://github.com/sgl-project/sglang/pull/50496</a></p>
+<p>其余一句话带过。</p>
+<p>#50203 是 NPU 的重构。</p>
+<p>#50176、#50476、#50036 都是 CI 的修补。</p>
+<p><strong>vLLM：4 条新，ROCm 那两条值得看</strong></p>
+<p>先说 #66934 和 #66933。</p>
+<p>两条都是 ROCm 上的 Minimax M3.1 优化。</p>
+<p>Minimax M3.1 是 Minimax 的 MoE 模型。</p>
+<p>一条调注意力索引的 XCD 负载均衡。</p>
+<p>一条改 GEMM 的矩阵乘法实现。</p>
+<p>说白了，都是让新模型在 AMD 卡上跑得更顺。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66934">https://github.com/vllm-project/vllm/pull/66934</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66933">https://github.com/vllm-project/vllm/pull/66933</a></p>
+<p>再说 #67297。</p>
+<p>内部数据类全都加上 slots=True。</p>
+<p>这是 Python 内存和速度的小优化。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67297">https://github.com/vllm-project/vllm/pull/67297</a></p>
+<p>#66672 是 CI 的修补，跳过。</p>
+<p><strong>TRT-LLM：1 条新，只是测试标注</strong></p>
+<p>先说 #21700。</p>
+<p>它把几批单测标成只跑 CPU。</p>
+<p>不改引擎逻辑，跳过细节。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21700">https://github.com/NVIDIA/TensorRT-LLM/pull/21700</a></p>
+<p><strong>LMDeploy：1 条新，前缀缓存更好查了</strong></p>
+<p>先说 #5124。</p>
+<p>/v1/completions 是补全接口。</p>
+<p>用量里现在会报 cached_tokens。</p>
+<p>cached_tokens 是命中前缀缓存的 token 数。</p>
+<p>说白了，草稿纸复用了多少，现在一眼能看见。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5124">https://github.com/InternLM/lmdeploy/pull/5124</a></p>
+<p><strong>llama.cpp、Dynamo、TGI、FlashInfer</strong></p>
+<p>这四家这轮没新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>arXiv 下一批按惯例周一到。</p>
+<h2>业内新闻</h2>
+<p><strong>头条：SGLang 进了英伟达的企业货架</strong></p>
+<p>LMSYS 13 号发了篇博客。</p>
+<p>SGLang 现在是英伟达 NIM 认证微服务的底座。</p>
+<p>NIM 是英伟达打包好的企业级推理服务。</p>
+<p>说白了，开源引擎不变，外面套了层企业包装。</p>
+<p>这层包装包括验证过的容器和配置。</p>
+<p>覆盖 30 多种硬件和 37 个以上常用模型。</p>
+<p>企业支持走英伟达 AI Enterprise。</p>
+<p>划重点：这对你意味着两件事。</p>
+<p>第一，企业落地 SGLang 有了官方背书的路子。</p>
+<p>第二，企业侧的验证和调优发现会回流上游。</p>
+<p>博客原话：性能调优瞄准真实部署的配置。</p>
+<p>来源：<a href="https://www.lmsys.org/blog/2026-11-13-sglang-nvidia-nim">https://www.lmsys.org/blog/2026-11-13-sglang-nvidia-nim</a></p>
+<p><strong>补漏：SGLang-Omni 语音 serving 数字先打个问号</strong></p>
+<p>这是一篇第三方文章，昨晚更新的。</p>
+<p>主角是 SGLang-Omni，语音和多模态 serving 运行时。</p>
+<p>它 11 月 12 日登上了 GitHub 日榜。</p>
+<p>README 自称 H100 上吞吐最高涨 326.5%。</p>
+<p>先打问号：没给分模型数据，也没放评测代码。</p>
+<p>也没第三方复现过这些数字。</p>
+<p>说白了，数字很亮眼，证据还没跟上。</p>
+<p>语音 serving 是你多模态方向的近亲，先记一笔。</p>
+<p>来源：<a href="https://www.notatechguy.com/sglang-omni-serves-voice-ai-claims-326-throughput-on-h100/">https://www.notatechguy.com/sglang-omni-serves-voice-ai-claims-326-throughput-on-h100/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>Latent Space 最新单集还是 11 月 10 日那期。</p>
+<p>那期聊 agent 时代的产品设计，跟 serving 关系不大。</p>
+<p>SGLang Summit 第二天没见新料流出。</p>
+<p>X 上几位大V这轮没新帖。</p>
+<p>机器之心、量子位还是没发 llama.cpp 1.0 的稿。</p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的新内容。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 01 点版去重。 版本水位：vLLM 预发布 tag 滚到 v0.34.0rc4（release 页还没挂出）；llama.cpp 快照滚到 b12377；其余没动。vLLM 正式版 v0.33.0；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0。 vLLM 4 条首次汇总：#67297、#66934、#66933、#66672。SGLang 7 条首次汇总：#50324、#46363、#50496、#50203、#50176、#50476、#50036。TRT-LLM 1 条首次汇总：#21700。LMDeploy 1 条首次汇总：#5124。 SGLang 与 NVIDIA NIM 的合作博客是 11 月 13 日发的，首次报。SGLang-Omni 的 326.5% 数字是第三方文章的转述，未经独立验证，首次报。AMD 两篇 GLM 长上下文实测是 13 点版报过的；llm-d 1.0 是 11 月 4 日报过的；ElasticMM 是 11 月 4 日报过的；SGLang 联盟是 11 月 12 日报过的；Inkling 2 Small 是 11 月 12 日报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿；arXiv 下一批按惯例周一到。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-14-0300/">03点版</a></p></body></html>
