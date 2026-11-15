@@ -1,0 +1,121 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月15日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-15T19:00:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-15（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-15（11点版）</h1>
+<p>11点版来了，周日上午比较清静。</p>
+<p>框架那边有几条小合入，别的频道没动静。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了 llama.cpp 快照</strong></p>
+<p>llama.cpp 的快照从 b12418 涨到 b12421。</p>
+<p>快照就是每天自动打的构建号。</p>
+<p>其余全没动。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：重启能接着用处理好的 FP8 权重</strong></p>
+<p>#63976 是本轮 vLLM 唯一一条合入。</p>
+<p>它给 Fast Start 加了新支持。</p>
+<p>Fast Start 是 vLLM 的快速启动功能。</p>
+<p>说白了，引擎重启不用从头再来。</p>
+<p>这次支持的是压缩张量格式的 FP8 权重。</p>
+<p>FP8 就是 8 位浮点量化，省显存的办法。</p>
+<p>处理好的权重和缩放系数可以存下来。</p>
+<p>下次重启直接从缓存里拿，不用重算。</p>
+<p>输出结果和原来完全一致。</p>
+<p>像把切好的菜放冰箱，下次直接下锅。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63976">https://github.com/vllm-project/vllm/pull/63976</a></p>
+<p><strong>SGLang：AMD 卡上的多卡通信换了新走法</strong></p>
+<p>#49955 是给 AMD gfx1250 的优化。</p>
+<p>gfx1250 就是 MI350X 那代架构的代号。</p>
+<p>你手里正好有 MI350X，值得留意。</p>
+<p>它给自定义 all-reduce 加了环形算法。</p>
+<p>all-reduce 就是多卡互相传数据求和。</p>
+<p>还把 2shot_push 展开重写了一遍。</p>
+<p>2shot_push 是原来的传数据方式。</p>
+<p>旧办法会把整张量在互联上传两遍。</p>
+<p>每存一次还要等一等，浪费时间。</p>
+<p>新走法少跑冤枉路，通信更顺。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49955">https://github.com/sgl-project/sglang/pull/49955</a></p>
+<p><strong>SGLang：内核调试多了个秒表</strong></p>
+<p>#50374 是个调试工具。</p>
+<p>它能在 JIT 内核里打时间戳。</p>
+<p>JIT 内核就是运行时现编的加速代码。</p>
+<p>以前只知道内核变快还是变慢。</p>
+<p>现在能看到时间花在内核的哪一段。</p>
+<p>这是给内核开发者用的，普通用户用不上。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50374">https://github.com/sgl-project/sglang/pull/50374</a></p>
+<p><strong>llama.cpp：两条小修补</strong></p>
+<p>#32349 让 Qwen3-ForcedAligner 能正确读输出头。</p>
+<p>ForcedAligner 是做语音对齐的工具。</p>
+<p>#32020 给多模态模块加了 zonos3-mini。</p>
+<p>zonos3-mini 是个轻量语音合成模型。</p>
+<p>两条都是小修补，不用深究。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32349">https://github.com/ggml-org/llama.cpp/pull/32349</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32020">https://github.com/ggml-org/llama.cpp/pull/32020</a></p>
+<p><strong>其余框架</strong></p>
+<p>TRT-LLM、LMDeploy、TGI 这轮零合入。</p>
+<p>Dynamo、FlashInfer 同样没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 最新一批还是 11 月 12 日的。</p>
+<p>下一批按惯例周一到。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新业内消息</strong></p>
+<p>新闻、HN、X、中文媒体都没见到新东西。</p>
+<p>Metarix 的三引擎对照是 11 月 14 日报过的。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>也没见到别的播客新单集。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有够格的深读材料</strong></p>
+<p>值得跟的一条：</p>
+<ol><li>SGLang #49955，AMD gfx1250 的 all-reduce 优化。你手里有 MI350X，以后在上面跑 SGLang，通信这块会更顺。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 09 点版去重。 版本水位：llama.cpp 快照 b12418→b12421；其余全没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照已是 b12421。 vLLM 1 条首次汇总：#63976（Fast Start 支持 FP8 权重缓存重启）。SGLang 2 条首次汇总：#49955（AMD gfx1250 all-reduce）、#50374（JIT 内核内事件追踪）。llama.cpp 2 条首次汇总：#32349（Qwen3-ForcedAligner 输出头）、#32020（zonos3-mini TTS）。 TRT-LLM、LMDeploy、TGI、Dynamo、FlashInfer 零合入。 Thaw 是 11 月 14 日 23 点版报过的；Tensward 是 11 月 14 日 21 点版报过的；Metarix 三引擎对照是 11 月 14 日 15 点版报过的；SGLang 联盟是 11 月 12 日报过的；MiniMax H3-Image 是 11 月 10 日报过的。 arXiv 下一批按惯例周一到；本轮无深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-15-1100/">11点版</a></p></body></html>
