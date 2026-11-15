@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月15日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-15T17:03:42"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-15（09点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-15（09点版）</h1>
+<p>09点版来了，这轮就一条实打实的。</p>
+<p>llama.cpp 接上了 MiniMax-M3.1。</p>
+<p>其余框架都没动静。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了 llama.cpp 快照</strong></p>
+<p>llama.cpp 的快照从 b12413 涨到 b12418。</p>
+<p>快照就是每天自动打的构建号。</p>
+<p>其余全没动。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>llama.cpp：MiniMax-M3.1 能跑了</strong></p>
+<p>#32301 是本轮最实在的一条。</p>
+<p>MiniMax-M3.1 是 MiniMax 的多模态大模型。</p>
+<p>多模态就是能看图，也能读文字。</p>
+<p>这回 llama.cpp 把它接进来了。</p>
+<p>视觉部分跟 SGLang 对过数了。</p>
+<p>对得挺准，余弦相似度在 0.999996 以上。</p>
+<p>余弦相似度就是两边算得像不像的尺子。</p>
+<p>推理还带了 dspark 推测解码。</p>
+<p>推测解码就是先让小模型打草稿。</p>
+<p>再让大模型改，改得少就快。</p>
+<p>写代码时接受率 66%，速度快了约 1.5 倍。</p>
+<p>写文章时接受率 42%，慢一些。</p>
+<p>8 张 H200 上测困惑度，跟 SGLang 差 0.3% 以内。</p>
+<p>困惑度就是模型猜下一个词有多准。</p>
+<p>想在本地跑这个模型的人，可以试试了。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32301">https://github.com/ggml-org/llama.cpp/pull/32301</a></p>
+<p>模型背景：<a href="https://omniakey.com/blog/minimax-m3-1-flash-review">https://omniakey.com/blog/minimax-m3-1-flash-review</a></p>
+<p><strong>其余框架</strong></p>
+<p>TRT-LLM 这轮只有一条 CI。</p>
+<p>拆的是 GB300 和 DGX B200 的测试。</p>
+<p>SGLang 和 vLLM 这轮零合入。</p>
+<p>LMDeploy、TGI、Dynamo 也是零合入。</p>
+<p>FlashInfer 同样没有新合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 最新一批还是 11 月 12 日的。</p>
+<p>下一批按惯例周一到。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新业内消息</strong></p>
+<p>新闻、HN、X、中文媒体都没见到新东西。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>也没见到别的播客新单集。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有够格的深读材料</strong></p>
+<p>值得跟的一条：</p>
+<ol><li>llama.cpp #32301，MiniMax-M3.1 支持合入了。本地跑这个多模态模型，终于有了路子。dspark 推测解码的实测数据，也值得看一眼。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 07 点版去重。 版本水位：llama.cpp 快照 b12413→b12418；其余全没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照已是 b12418。 llama.cpp 1 条首次汇总：#32301（MiniMax-M3.1 支持）。 TRT-LLM 1 条为 CI。SGLang、vLLM、LMDeploy、TGI、Dynamo、FlashInfer 零合入。 Inkling 2 Small 是 11 月 12 日报过的；MiniMax M3.1 模型本身是 10 月 19 日发布的，之前报过；Tensward 是 11 月 14 日 21 点版报过的；Metarix 三引擎对照是 11 月 14 日 15 点版报过的；SGLang 联盟是 11 月 12 日报过的。 arXiv 下一批按惯例周一到；本轮无深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-15-0900/">09点版</a></p></body></html>
