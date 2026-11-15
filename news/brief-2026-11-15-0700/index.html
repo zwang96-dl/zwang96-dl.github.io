@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月15日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-15T15:00:44"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-15（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-15（07点版）</h1>
+<p>07点版来了，半夜这轮动静不大。</p>
+<p>SGLang 有三条合入，vLLM 这轮零合入。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>llama.cpp 最新快照还是 b12413。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：Qwen4-Exp 的序列并行补上了</strong></p>
+<p>#43048 是本轮最实在的一条。</p>
+<p>Qwen4-Exp 是通义的新一代实验模型。</p>
+<p>序列并行就是把一句话切成几段，分给几张卡一起算。</p>
+<p>这回补的是 GR 和 PLE 两类激活的切分。</p>
+<p>GR 是门控残差，一种混合模型的连接方式。</p>
+<p>PLE 是另一类并行结构，同样按 token 切分。</p>
+<p>以前这条路只通 LayerNorm，现在全打通了。</p>
+<p>注意力、MoE 这些部分还是整行算，再拼回去。</p>
+<p>跑 Qwen4-Exp 这类混合模型的人，并行能少绕弯。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/43048">https://github.com/sgl-project/sglang/pull/43048</a></p>
+<p><strong>SGLang：多轮对话的缓存计数修准了</strong></p>
+<p>#49328 修的是分层缓存的监控计数。</p>
+<p>HiCache 是 SGLang 的分层缓存。</p>
+<p>L3 就是最外层那级，一般是远端存储。</p>
+<p>以前有个小漏洞：两个请求同时预取同一段前缀。</p>
+<p>其中一段在半路已经被另一个请求缓存了。</p>
+<p>这段就不会被记进&quot;没取到&quot;的计数里。</p>
+<p>监控上能差出两成多，一直对不上。</p>
+<p>多轮对话多的场景，这个数最容易飘。</p>
+<p>修完之后，计数就准了。</p>
+<p>属于监控修补，不影响速度。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49328">https://github.com/sgl-project/sglang/pull/49328</a></p>
+<p><strong>SGLang：Qwen-Image 2.1 的改图尺寸对齐了</strong></p>
+<p>#50358 是个生图的小对齐。</p>
+<p>Qwen-Image 2.1 是通义的生图模型。</p>
+<p>以前改图不传尺寸，输出永远是 1024×1024。</p>
+<p>不管原图是横是竖，都被压成正方形。</p>
+<p>现在跟 Diffusers 看齐，按原图比例出图。</p>
+<p>1280×720 的图，改完是 1376×768。</p>
+<p>跑生图服务的人，注意一下这个变化。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50358">https://github.com/sgl-project/sglang/pull/50358</a></p>
+<p><strong>FlashInfer：小尺寸的 FP8 量化更快了</strong></p>
+<p>#9500 给稀疏注意力提了个速。</p>
+<p>Sage 是块稀疏注意力的一种实现。</p>
+<p>稀疏注意力就是只算重要的那部分，省算力。</p>
+<p>这回提速的是量化那一步，专攻小尺寸。</p>
+<p>序列长度 4096 以内，用一次启动的新量化器。</p>
+<p>只影响 Blackwell 这一代卡。</p>
+<p>跑 FP8 稀疏注意力的人，小请求会快一点。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9500">https://github.com/flashinfer-ai/flashinfer/pull/9500</a></p>
+<p><strong>其余框架</strong></p>
+<p>TRT-LLM 这轮两条都是 CI。</p>
+<p>一条是 Rocky Linux 8 的镜像清理。</p>
+<p>另一条是 MPI 启动的稳定性修补。</p>
+<p>MPI 是多进程之间传消息的机制。</p>
+<p>llama.cpp 只有一条 CI，改的是 HIP 的符号名。</p>
+<p>HIP 是 AMD 卡上的计算接口。</p>
+<p>vLLM、LMDeploy、TGI、Dynamo 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 最新一批还是 11 月 12 日的。</p>
+<p>下一批按惯例周一到。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新业内消息</strong></p>
+<p>新闻、HN、X、中文媒体都没见到新东西。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>也没见到新的播客单集。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有够格的深读材料</strong></p>
+<p>三条值得跟，按对你做多模态推理优化的帮助排：</p>
+<ol><li>SGLang #43048，Qwen4-Exp 的序列并行补上了。混合架构的并行切分，跟你 PD 解耦那条线沾边。</li><li>SGLang #49328，分层缓存的计数修准了。跑多轮对话 agent 流量时，监控数字终于对得上。</li><li>FlashInfer #9500，小尺寸 FP8 量化提速。Blackwell 上跑稀疏注意力的小请求会快一点。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 05 点版去重。 版本水位：全都没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照仍是 b12413。 SGLang 3 条首次汇总：#43048（Qwen4-Exp 序列并行）、#50358（Qwen-Image 2.1 尺寸对齐）、#49328（HiCache 计数修补）。FlashInfer 1 条首次汇总：#9500（小尺寸 FP8 量化提速）。 TRT-LLM 2 条、llama.cpp 1 条均为 CI。vLLM、LMDeploy、TGI、Dynamo 零合入。 Thaw 是 11 月 12 日报过的；Tensward 是 11 月 14 日 21 点版报过的；Metarix 三引擎对照是 11 月 14 日 15 点版报过的；SGLang 联盟是 11 月 12 日报过的。 arXiv 下一批按惯例周一到；本轮无深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-15-0700/">07点版</a></p></body></html>
