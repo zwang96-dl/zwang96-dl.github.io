@@ -1,0 +1,143 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月15日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-15T23:01:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-15（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-15（15点版）</h1>
+<p>15点版来了，周日下午有点动静。</p>
+<p>vLLM 这轮合了三条，SGLang 一条小修补。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了 llama.cpp 快照</strong></p>
+<p>llama.cpp 的快照从 b12425 涨到 b12426。</p>
+<p>快照就是每天自动打的构建号。</p>
+<p>其余全没动。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：下一代 Rubin 卡能跑 NVFP4 专家并行了</strong></p>
+<p>#65974 给 SM107 加了支持。</p>
+<p>SM107 就是英伟达 Rubin 的算力代号。</p>
+<p>Rubin 是 Blackwell 之后的下一代卡。</p>
+<p>这次接的是 NVFP4 的专家模型。</p>
+<p>NVFP4 是一种 4 位量化格式，省显存。</p>
+<p>走的是 FlashInfer 的 MoE 专家并行后端。</p>
+<p>MoE 就是混合专家模型。</p>
+<p>专家并行就是把专家分到不同卡上跑。</p>
+<p>需要 FlashInfer 0.7.3 以上版本。</p>
+<p>注意：这个后端不会自动选上。</p>
+<p>得手动指定才生效。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65974">https://github.com/vllm-project/vllm/pull/65974</a></p>
+<p><strong>vLLM：修了一个会让服务崩掉的越界 bug</strong></p>
+<p>#67469 是个稳定性修补。</p>
+<p>问题出在预热和 CUDA 图捕获上。</p>
+<p>CUDA 图是把一串操作打包加速的办法。</p>
+<p>以前假数据可能比真实批次还大。</p>
+<p>序列一长就越界，显存访问非法。</p>
+<p>服务直接报错崩掉。</p>
+<p>现在把预热和捕获尺寸都卡住了。</p>
+<p>上限就是单批最多序列数乘最长长度。</p>
+<p>说白了，就是别让排练比正式演出还大。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67469">https://github.com/vllm-project/vllm/pull/67469</a></p>
+<p><strong>vLLM：AMD 卡上 DeepSeek-V4.1 能拆 prefill 了</strong></p>
+<p>#66842 是给 ROCm 的。</p>
+<p>ROCm 是 AMD 卡的计算平台。</p>
+<p>它给 DeepSeek-V4.1-Flash 开了 prefill 并行。</p>
+<p>prefill 就是读提示词算注意力那一步。</p>
+<p>以前只支持英伟达的卡。</p>
+<p>现在 AMD 卡上也能用 PCP=2 跑了。</p>
+<p>PCP 就是 prefill 上下文并行。</p>
+<p>测试显示 GSM8K 成绩基本没掉。</p>
+<p>跟你手里的 MI350X 直接相关。</p>
+<p>在 AMD 卡上跑 V4.1，prefill 能分卡了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66842">https://github.com/vllm-project/vllm/pull/66842</a></p>
+<p><strong>SGLang：一个会撞崩服务的请求现在直接报 400</strong></p>
+<p>#49759 是个小修补。</p>
+<p>它校验客户端传的 token 位置。</p>
+<p>token 位置就是想取哪几个词的向量。</p>
+<p>以前传空列表或越界位置会撞崩。</p>
+<p>现在入口直接拦下，返回 400。</p>
+<p>400 就是请求有问题的意思。</p>
+<p>普通用户感知不到，服务更稳了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49759">https://github.com/sgl-project/sglang/pull/49759</a></p>
+<p><strong>SGLang：MI355X 的 P/D nightly 换了路由器</strong></p>
+<p>#50604 是纯 CI 改动。</p>
+<p>CI 就是自动跑测试的流水线。</p>
+<p>它把 ROCm 镜像里的路由器换成 Rust 版。</p>
+<p>还顺手启动了 MI355X 的 P/D nightly。</p>
+<p>P/D 就是 prefill 和 decode 分开跑。</p>
+<p>nightly 是每晚自动跑的测试。</p>
+<p>跟你评估的 P/D 解耦方向沾边。</p>
+<p>但只是测试基建，不是功能更新。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50604">https://github.com/sgl-project/sglang/pull/50604</a></p>
+<p><strong>llama.cpp：服务器启动少做一步活</strong></p>
+<p>#32359 是个小修补。</p>
+<p>它让服务器跳过子路由的 MCP 发现。</p>
+<p>MCP 是模型上下文协议，接外部工具的。</p>
+<p>改动很小，不用深究。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32359">https://github.com/ggml-org/llama.cpp/pull/32359</a></p>
+<p><strong>其余框架</strong></p>
+<p>TRT-LLM、LMDeploy 这轮零合入。</p>
+<p>Dynamo、FlashInfer、TGI 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 最新一批还是 11 月 12 日的。</p>
+<p>下一批按惯例周一到。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新业内消息</strong></p>
+<p>新闻、HN、X、中文媒体都没见到新东西。</p>
+<p>搜到的几条都是 11 月 10 日到 14 日的。</p>
+<p>SGLang 联盟、SGLang-Neuron 那些都报过了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>Spotify 上查过，没出新单集。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有够格的深读材料</strong></p>
+<p>值得跟的一条：</p>
+<ol><li>vLLM #66842，AMD 卡上 DeepSeek-V4.1 的 prefill 并行。你手里有 MI350X，在上面跑 V4.1 可以留意这条。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 13 点版去重。 版本水位：llama.cpp 快照 b12425→b12426；其余全没动。vLLM 正式版 v0.33.0（PyPI 已确认，GitHub release 页最新条目仍为 v0.33.0rc3），预发布 tag v0.34.0rc4；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照已是 b12426。 vLLM 3 条首次汇总：#65974（SM107/Rubin NVFP4 MoE 专家并行）、#67469（预热与 CUDA 图尺寸上限修补）、#66842（ROCm DeepSeek-V4.1-Flash prefill 并行）。 SGLang 2 条首次汇总：#49759（token_indices_to_pool 校验）、#50604（CI：MI355X P/D nightly）。 llama.cpp 1 条首次汇总：#32359（服务器跳过子路由 MCP 发现）。 TRT-LLM、LMDeploy、Dynamo、FlashInfer、TGI 零合入。 SGLang 联盟是 11 月 12 日报过的；SGLang-Neuron 是 11 月 12 日报过的；MiniMax H3-Image 是 11 月 10 日报过的；TorchTPU 是 10 月 20 日报过的；Thaw 是 11 月 14 日 23 点版报过的；Metarix 三引擎对照是 11 月 14 日 15 点版报过的；Inkling 2 Small 是 11 月 14 日报过的；World Labs 加入 AMD 是 11 月 14 日报过的；LongCat-2.5 是 11 月 11 日报过的；SGLang 上 IBM Spyre 是 11 月 13 日报过的。 arXiv 下一批按惯例周一到；本轮无深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-15-1500/">15点版</a></p></body></html>
