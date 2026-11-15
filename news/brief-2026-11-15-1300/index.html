@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月15日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-15T20:59:20"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-15（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-15（13点版）</h1>
+<p>13点版来了，周日中午比较清静。</p>
+<p>本轮只有一条新合入，别的频道都没动静。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了 llama.cpp 快照</strong></p>
+<p>llama.cpp 的快照从 b12421 涨到 b12425。</p>
+<p>快照就是每天自动打的构建号。</p>
+<p>其余全没动。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags、PyPI</p>
+<p><strong>llama.cpp：多模态模块能听懂两种新语音模型了</strong></p>
+<p>#32329 是本轮唯一一条合入。</p>
+<p>它给 mtmd 加了两个语音转文字模型。</p>
+<p>mtmd 是 llama.cpp 的多模态模块。</p>
+<p>一个是 Higgs Audio v3 的转录版。</p>
+<p>另一个是微软的 VibeVoice-ASR。</p>
+<p>两个模型用的是同一套底子。</p>
+<p>所以作者一次就把俩都接上了。</p>
+<p>说白了，本地跑语音转文字又多了两个选择。</p>
+<p>跟你主攻的 P/D 解耦关系不大。</p>
+<p>但玩本地多模态部署的人可以留意。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32329">https://github.com/ggml-org/llama.cpp/pull/32329</a></p>
+<p><strong>其余框架</strong></p>
+<p>vLLM、SGLang、TRT-LLM 这轮零合入。</p>
+<p>LMDeploy、Dynamo、FlashInfer、TGI 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 最新一批还是 11 月 12 日的。</p>
+<p>下一批按惯例周一到。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新业内消息</strong></p>
+<p>新闻、HN、X、中文媒体都没见到新东西。</p>
+<p>搜到的几条都是 11 月 10 日到 13 日的。</p>
+<p>SGLang 联盟、SGLang-Neuron 那些都报过了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>Spotify 上查过，没出新单集。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有够格的深读材料</strong></p>
+<p>值得跟的一条：</p>
+<ol><li>llama.cpp #32329，mtmd 接了两个语音转文字模型。本地玩语音转文字的人可以顺手看看。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 11 点版去重。 版本水位：llama.cpp 快照 b12421→b12425；其余全没动。vLLM 正式版 v0.33.0（PyPI 已确认，GitHub release 页最新条目仍为 v0.33.0rc3），预发布 tag v0.34.0rc4；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照已是 b12425。 llama.cpp 1 条首次汇总：#32329（mtmd 支持 Higgs v3 STT 与 VibeVoice-ASR）。 vLLM、SGLang、TRT-LLM、LMDeploy、Dynamo、FlashInfer、TGI 零合入。 SGLang 联盟是 11 月 12 日报过的；SGLang-Neuron 是 11 月 12 日报过的；MiniMax H3-Image 是 11 月 10 日报过的；TorchTPU 是 10 月 20 日报过的。 arXiv 下一批按惯例周一到；本轮无深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-15-1300/">13点版</a></p></body></html>
