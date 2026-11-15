@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月14日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-15T04:59:02"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-14（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-14（21点版）</h1>
+<p>21点版来了，这轮是小打小闹的一轮。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>llama.cpp 快照从 b12387 滚到 b12393。</p>
+<p>新快照今晚 20:24 发布。</p>
+<p>改动很小，只动了 LFM2 的工具调用语法。</p>
+<p>LFM2 是 Liquid AI 出的小模型。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：扩散模型五连切，第三刀落了</strong></p>
+<p>先说 #50391。</p>
+<p>它还是给 MiniMax-H3 提速。</p>
+<p>MiniMax-H3 是个视频生成模型。</p>
+<p>背景跟 19 点版那两条一样。</p>
+<p>一个视频请求在 B300 上跑约 119 秒。</p>
+<p>这条把注意力后的两步并成一步。</p>
+<p>原来先写一遍再读一遍。</p>
+<p>现在一次写完直接用。</p>
+<p>省掉一次大张量读写。</p>
+<p>算得更快，答案一个字不差。</p>
+<p>五条里已经合了三条。</p>
+<p>#50392 和 #50388 是 19 点版报过的。</p>
+<p>#50387 和 #50390 还没合入。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50391">https://github.com/sgl-project/sglang/pull/50391</a></p>
+<p><strong>SGLang：一条跟 PD 解耦沾边的修复</strong></p>
+<p>#49170 修的是 DeepSeek-V4.1。</p>
+<p>场景是解码节点空闲时重放尾巴。</p>
+<p>重放就是把没做完的活再跑一遍。</p>
+<p>修完之后，正在干活的解码节点不再被拉进重放。</p>
+<p>说白了，忙着的节点别被打扰。</p>
+<p>跟你的 PD 评估直接相关度不高。</p>
+<p>但这是解码侧调度的小补丁。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49170">https://github.com/sgl-project/sglang/pull/49170</a></p>
+<p><strong>vLLM：一条 XPU 内核，一条音频修复</strong></p>
+<p>#66494 是英特尔 XPU 上的提速。</p>
+<p>XPU 就是英特尔显卡的计算平台。</p>
+<p>改的是 MXFP8 的线性层内核。</p>
+<p>MXFP8 是一种 8 位浮点量化格式。</p>
+<p>#67611 修了音频解码的小毛病。</p>
+<p>零解码上限现在按不限处理。</p>
+<p>#67716 是 CI 的小改动。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66494">https://github.com/vllm-project/vllm/pull/66494</a></p>
+<p><strong>其余框架</strong></p>
+<p>TRT-LLM、LMDeploy 这轮零合入。</p>
+<p>Dynamo、FlashInfer 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 下一批按惯例周一到。</p>
+<p>最新一批还是 11 月 12 日那批。</p>
+<p>那批的论文 13 号已经补报过。</p>
+<p><strong>一篇长文：在 M4 笔记本上跑 gpt-oss-120b</strong></p>
+<p>Medium 上有篇 25 分钟的长文。</p>
+<p>题目是给 gpt-oss-120b 做节能推理引擎。</p>
+<p>gpt-oss-120b 是 OpenAI 的开源大模型。</p>
+<p>作者横评了 11 个推理引擎。</p>
+<p>结论是 M4 Max 128GB 才能装下 60.8GB 的模型。</p>
+<p>单流解码大概 152 tokens/s。</p>
+<p>tokens/s 就是每秒吐多少个词。</p>
+<p>瓶颈在显存带宽，不在算力。</p>
+<p>文章还给了 22 周的研究计划。</p>
+<p>四个决策点，带功耗测量方案。</p>
+<p>这跟你的主线关系不大。</p>
+<p>但本地跑大模型的思路可以参考。</p>
+<p>来源：<a href="https://medium.com/@gwrx2005/toward-an-energy-efficient-inference-engine-for-gpt-oss-120b-on-apple-m4-laptops-a-review-of-fb7539f45ad0">https://medium.com/@gwrx2005/toward-an-energy-efficient-inference-engine-for-gpt-oss-120b-on-apple-m4-laptops-a-review-of-fb7539f45ad0</a></p>
+<h2>业内新闻</h2>
+<p><strong>HN 上冒出个推理自动调优小工具</strong></p>
+<p>名字叫 Tensward。</p>
+<p>它先测你的硬件，再问你的 workload。</p>
+<p>workload 就是你要跑的任务类型。</p>
+<p>然后自动给你调推理配置。</p>
+<p>目前支持 vLLM 和 llama.cpp。</p>
+<p>SGLang 还在路上。</p>
+<p>NVIDIA 卡和苹果芯片都能用。</p>
+<p>这跟你想做的自动调参方向很像。</p>
+<p>不过它还是个早期小工具。</p>
+<p>先知道有这么个东西就行。</p>
+<p>来源：<a href="https://news.ycombinator.com/item?id=50453646">https://news.ycombinator.com/item?id=50453646</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 上几位大V这轮没新帖</strong></p>
+<p>karpathy、jimfan 都没新动静。</p>
+<p>lmsysorg 也没新帖。</p>
+<p><strong>SGLang Summit 第二天文字总结还没出</strong></p>
+<p>Liam Fedus 那场炉边谈。</p>
+<p>目前只有活动预告页。</p>
+<p>没有会后总结文章。</p>
+<p><strong>Latent Space 还是 11 月 10 日那期</strong></p>
+<p>最新单集还是 11 月 10 日那期。</p>
+<p>讲的是给 agent 设计产品。</p>
+<p>这轮没更新。</p>
+<p>来源：Spotify</p>
+<p><strong>中文媒体还是没发 llama.cpp 1.0 的稿</strong></p>
+<p>机器之心、量子位都没动静。</p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的新内容。</p>
+<p>Tensward 是个早期小工具。</p>
+<p>M4 那篇是综述加研究计划。</p>
+<p>都跟你的 PD 解耦评估不直接沾边。</p>
+<p>宁缺毋滥，这轮先不写精读笔记。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 19 点版去重。 版本水位：除 llama.cpp 快照外全都没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照从 b12387 滚到 b12393。 SGLang 2 条首次汇总：#50391、#49170。vLLM 2 条首次汇总：#66494、#67611。 Tensward、M4 长文是首次报；Inkling 2 Small 权重是 11 月 12 日报过的；Llama 桌面应用是 19 点版报过的；SGLang 联盟是 11 月 12 日报过的；SGLang-Neuron 是 11 月 12 日报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿；arXiv 下一批按惯例周一到。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-14-2100/">21点版</a></p></body></html>
