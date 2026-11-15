@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月14日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-15T01:01:04"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-14（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-14（17点版）</h1>
+<p>17点版来了，头条是 SGLang 给管理接口上了锁。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>llama.cpp 正式版还是 v1.0.0。</p>
+<p>快照还是 b12387，没滚新版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：管理接口上锁，裸奔的端口要小心了</strong></p>
+<p>先说 #49896。</p>
+<p>这是一次破坏性改动。</p>
+<p>改动就是升级后旧用法会失效。</p>
+<p>敏感的管理接口现在要管理员密钥。</p>
+<p>没配密钥就直接返回 403。</p>
+<p>403 就是服务器拒绝访问。</p>
+<p>涉及的接口有三十多个。</p>
+<p>换权重、挂卸载 LoRA 都在里面。</p>
+<p>LoRA 就是给大模型打小补丁的办法。</p>
+<p>改 PD 角色的接口也在里面。</p>
+<p>PD 角色就是读题和写答案的分工。</p>
+<p>还有性能分析和日志配置。</p>
+<p>以前这些接口谁都能调。</p>
+<p>现在必须带上管理员密钥。</p>
+<p>密钥能用启动参数传。</p>
+<p>也能用环境变量传。</p>
+<p>说白了，以前大门敞着。</p>
+<p>现在加了把锁，钥匙得自己配。</p>
+<p>划重点：这跟你的 PD 评估直接相关。</p>
+<p>你要是把 SGLang 的端口暴露出去。</p>
+<p>升级后记得先配好密钥。</p>
+<p>不然 PD 切换和权重更新会直接报错。</p>
+<p>还有个背景：前几天 SGLang 刚爆过漏洞。</p>
+<p>CVE-2026-111391 就是 dumper 接口那事。</p>
+<p>这回 dumper 接口也被锁进去了。</p>
+<p>算是官方在补同一条防线。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49896">https://github.com/sgl-project/sglang/pull/49896</a></p>
+<p><strong>llama.cpp：5 条新，快照还没滚</strong></p>
+<p>快照还是 b12387。</p>
+<p>这 5 条要等下个快照才进。</p>
+<p>#32217 是 Inkling 2 支持。</p>
+<p>Inkling 2 是 Thinking Machines 的新模型。</p>
+<p>12 号刚开源权重那款。</p>
+<p>现在 llama.cpp 也能跑它了。</p>
+<p>文本加视觉都能跑。</p>
+<p>说白了，本地又多了一个能玩的模型。</p>
+<p>#32296 是 Metal 的小修补。</p>
+<p>给 LFM3 的算子融合打了个补丁。</p>
+<p>LFM3 是 Liquid AI 的模型。</p>
+<p>#32228 是高通 Hexagon 的新算子。</p>
+<p>给扩散模型的时间步嵌入加速。</p>
+<p>其余两条是修补。</p>
+<p>#31478 是语法触发器的类型检查。</p>
+<p>#30492 是流式响应后的连接复用。</p>
+<p>来源：GitHub PR 列表</p>
+<p><strong>其余框架</strong></p>
+<p>vLLM、TRT-LLM 这轮零合入。</p>
+<p>LMDeploy、TGI、Dynamo 也一样。</p>
+<p>FlashInfer、Mooncake 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>arXiv 下一批按惯例周一到。</p>
+<p>最新一批还是 11 月 12 日那批。</p>
+<p>那批的论文 13 号已经补报过。</p>
+<h2>业内新闻</h2>
+<p><strong>本轮没有新消息</strong></p>
+<p>X 上几位大V这轮没新帖。</p>
+<p>Reddit、HN 也没新话题。</p>
+<p>中文媒体还是没发 llama.cpp 1.0 的稿。</p>
+<h2>访谈与深度</h2>
+<p><strong>多台 Mac 串起来跑万亿模型，到底划不划算</strong></p>
+<p>有个新视频深挖了苹果 Harbor。</p>
+<p>Harbor 就是苹果那个本地推理应用。</p>
+<p>11 号那期已经报过泄露本身。</p>
+<p>这回视频算了一笔细账。</p>
+<p>拿 Qwen3-235B 举例。</p>
+<p>235B 就是 2350 亿参数的模型。</p>
+<p>模型切 94 层分到多台 Mac 上。</p>
+<p>每吐一个词要同步 188 次。</p>
+<p>同步就是各台机器对一次数。</p>
+<p>雷电 5 的线再快也扛不住。</p>
+<p>说白了，人越多，开会时间越长。</p>
+<p>视频还算了 KV 缓存的账。</p>
+<p>KV 就是模型的草稿纸。</p>
+<p>10 个 32K 对话就占约 63GB 内存。</p>
+<p>结论是单台 Mac 还行。</p>
+<p>多台串起来跑大模型并不划算。</p>
+<p>想本地跑大模型，vLLM 和 SGLang 更合适。</p>
+<p>来源：<a href="https://www.youtube.com/watch?v=UMURoYoezE8">https://www.youtube.com/watch?v=UMURoYoezE8</a></p>
+<p><strong>Latent Space 还是 11 月 10 日那期</strong></p>
+<p>最新单集还是 11 月 10 日那期。</p>
+<p>讲的是给 agent 设计产品。</p>
+<p>这轮没更新。</p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的新内容。</p>
+<p>SGLang 那条是安全加固。</p>
+<p>llama.cpp 那条是新模型支持。</p>
+<p>Harbor 视频是泄露的后续分析。</p>
+<p>都跟你的 PD 解耦评估不直接沾边。</p>
+<p>宁缺毋滥，这轮先不写精读笔记。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 15 点版去重。 版本水位：全都没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照仍是 b12387。 SGLang 1 条首次汇总：#49896。llama.cpp 5 条首次汇总：#32296、#32228、#32217、#31478、#30492。 Apple Harbor 泄露是 11 月 11 日 07 点版报过的，本轮视频是后续分析；ElasticMM 是 11 月 4 日报过的；Inkling 2 Small 权重开源是 11 月 12 日报过的；SGLang 联盟是 11 月 12 日报过的；llama.cpp 1.0 是 11 月 13 日报过的；IBM LLMON 是 15 点版报过的；Metarix 三引擎对照是 15 点版报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿；arXiv 下一批按惯例周一到。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-14-1700/">17点版</a></p></body></html>
