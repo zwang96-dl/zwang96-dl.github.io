@@ -1,0 +1,106 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月15日 02:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-15T10:16:05"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-15（02点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-15（02点版）</h1>
+<p>02点版来了，半夜这轮很安静。</p>
+<p>新合入只有几条小功能，论文那边零更新。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：llama.cpp 快照又滚了两格</strong></p>
+<p>llama.cpp 快照从 b12405 滚到 b12407。</p>
+<p>b12406 和 b12407 都在这轮里。</p>
+<p>内容是 server 小修和 CUDA 内部重构。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：Mamba 状态缓存可以按成本淘汰了</strong></p>
+<p>#50122 是给混合模型准备的缓存策略。</p>
+<p>Mamba 这类混合模型，状态缓存和 KV 缓存不一样。</p>
+<p>以前淘汰只看新旧，现在可以按成本算。</p>
+<p>成本高的状态留着，成本低的先扔。</p>
+<p>需要手动打开 --radix-eviction-policy state_cost。</p>
+<p>跑混合架构模型的人，可以少一次重复算状态的开销。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50122">https://github.com/sgl-project/sglang/pull/50122</a></p>
+<p><strong>SGLang：KV 缓存的数据类型可以由插件注册了</strong></p>
+<p>#49717 是个小接口改动。</p>
+<p>以前 KV 缓存支持哪些数据类型，写死在核心里。</p>
+<p>现在平台插件自己就能注册新的类型。</p>
+<p>新硬件、新后端接进来时，不用再改核心代码。</p>
+<p>属于打地基的改动，短期看不到速度变化。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49717">https://github.com/sgl-project/sglang/pull/49717</a></p>
+<p><strong>SGLang：流水线并行里的 PD 轮询收敛了一点</strong></p>
+<p>#50481 是个性能小修。</p>
+<p>PD 轮询和语法同步的发送量，以前按一轮算。</p>
+<p>现在按流水线深度封顶。</p>
+<p>流水线越深，省得越多。</p>
+<p>属于 PD 部署的细节优化。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50481">https://github.com/sgl-project/sglang/pull/50481</a></p>
+<p><strong>TRT-LLM：补报一条，StairCase 瞄准 GLM-5.2 NVFP4</strong></p>
+<p>#21585 是昨天 20:20 合入的，21 点版漏了。</p>
+<p>StairCase 是个新的高吞吐目标配置。</p>
+<p>针对 GLM-5.2 的 NVFP4 量化，跑在 Rubin 卡上。</p>
+<p>NVFP4 是英伟达的 4 位量化格式。</p>
+<p>Rubin 是下一代卡，现在能提前看调优方向。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21585">https://github.com/NVIDIA/TensorRT-LLM/pull/21585</a></p>
+<p><strong>其余框架</strong></p>
+<p>vLLM 这轮只有 CI 和测试修补。</p>
+<p>KV Offload 的测试端口问题修了一个。</p>
+<p>Dynamo 只有一处 router 内部重构。</p>
+<p>llama.cpp 除了快照滚动，还有两处小改。</p>
+<p>server 的 /v1/messages 接口修了一个参数丢失。</p>
+<p>CUDA 的 warp 同步原语重构了一遍。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 最新一批还是 11 月 12 日的。</p>
+<p>下一批按惯例周一到。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有够格的深读材料</strong></p>
+<p>三条值得跟，按对你做多模态推理优化的帮助排：</p>
+<ol><li>SGLang #50122，Mamba 状态按成本淘汰。缓存淘汰策略是你 PD 线的核心，混合架构以后会越来越多，先知道有这个开关。</li><li>TRT-LLM #21585，StairCase 配 GLM-5.2 NVFP4。Rubin + 4 位量化的高吞吐打法，提前看一眼调优思路。</li><li>SGLang #50481，PD 轮询按流水线深度封顶。PD 部署的细节，量不大，但和你正在跟的 PD 线直接相关。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 01 点版去重。 版本水位：除 llama.cpp 快照外全都没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照从 b12405 滚到 b12407。 SGLang 3 条首次汇总：#50122、#49717、#50481。TRT-LLM 1 条补报：#21585（11 月 14 日 20:20 合入，21 点版漏报）。llama.cpp 快照 2 格：b12406、b12407。 arXiv 下一批按惯例周一到；本轮无深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-15-0200/">02点版</a></p></body></html>
