@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月14日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-15T07:04:14"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-14（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-14（23点版）</h1>
+<p>23点版来了，这轮 PD 线上有个大件。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：llama.cpp 快照又滚了一格</strong></p>
+<p>llama.cpp 快照从 b12393 滚到 b12400。</p>
+<p>新快照今晚 22:46 发布。</p>
+<p>改动很小，只动了张量中转 buffer 的分配方式。</p>
+<p>中转 buffer 就是搬运张量时的临时落脚点。</p>
+<p>现在改从 CPU buffer 类型分配。</p>
+<p>对跑模型没直接影响，算是内部清理。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>PyPI 上已确认是 0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 在峰会上官宣了，但 tag 还没挂出来。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags、PyPI</p>
+<p><strong>SGLang：GLM-5.3-Flash 的 PD 读题，现在能开上下文并行了</strong></p>
+<p>先说 #49089。</p>
+<p>它刚合入，就在 22:53。</p>
+<p>GLM-5.3-Flash 是智谱的新旗舰模型。</p>
+<p>场景是 PD 解耦里的读题节点。</p>
+<p>读题节点负责把输入一次性算完。</p>
+<p>以前读题节点想开 CP，得配 DFlash2。</p>
+<p>CP 就是上下文并行，把长输入拆到多张卡上算。</p>
+<p>DFlash2 是一种投机解码的草稿验证机制。</p>
+<p>用原生 MTP 或不用投机解码，启动直接报错。</p>
+<p>MTP 就是多词预测，一次多猜几个词。</p>
+<p>这回把那条限制拆了。</p>
+<p>原生 MTP 和不用投机解码都能开 CP 了。</p>
+<p>数据很实在。</p>
+<p>64k 长输入，H20 上 CP8 比 TP8 快 1.51 倍。</p>
+<p>B300 上快 1.23 倍。</p>
+<p>单请求首字从 1.16 秒压到 0.89 秒。</p>
+<p>精度没动，GSM8K 都在 0.91 到 0.93 之间。</p>
+<p>说白了，读题那拨终于能把长输入拆开算了。</p>
+<p>以前只有一种姿势能拆，现在三种都能拆。</p>
+<p>这跟你的 PD 评估直接对口。</p>
+<p>读题池子的并行姿势多了一种，测的时候要单列。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49089">https://github.com/sgl-project/sglang/pull/49089</a></p>
+<p><strong>SGLang：扩散模型五连切，收官了</strong></p>
+<p>MiniMax-H3 那五条优化全合入了。</p>
+<p>MiniMax-H3 是个视频生成模型。</p>
+<p>最后一刀 #50387 今晚 21:16 落地。</p>
+<p>它改的是变长注意力分段的写入方式。</p>
+<p>原来要先写一份临时拷贝，现在直接写到位。</p>
+<p>省一次读写，答案一个字不差。</p>
+<p>顺带纠一个小错。</p>
+<p>#50390 其实 13 号晚就合了。</p>
+<p>21 点版说它还没合入，是查错了。</p>
+<p>五条全齐，B300 上一个视频请求约 119 秒那条线可以结了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50387">https://github.com/sgl-project/sglang/pull/50387</a></p>
+<p><strong>vLLM：一条 KV 落盘修补，一条 Rust 前端</strong></p>
+<p>#63524 修的是 KV Offload 的计数。</p>
+<p>KV Offload 就是把草稿纸分层落盘。</p>
+<p>文件系统那层以前多报了没写完的块。</p>
+<p>现在只上报真正写完的块。</p>
+<p>数字对不上，缓存就可能读错。</p>
+<p>#66878 给 Rust 前端加了 n 大于 1。</p>
+<p>一次请求能返回多个候选答案了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63524">https://github.com/vllm-project/vllm/pull/63524</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66878">https://github.com/vllm-project/vllm/pull/66878</a></p>
+<p><strong>Dynamo：多节点排布修了一个小 bug</strong></p>
+<p>#18576 修的是 TRT-LLM 多节点 MPI rank 排布。</p>
+<p>MPI rank 就是多节点并行时每张卡的编号。</p>
+<p>以前排布可能挤在一边，现在每个节点都分到。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18576">https://github.com/ai-dynamo/dynamo/pull/18576</a></p>
+<p><strong>其余框架</strong></p>
+<p>TRT-LLM、LMDeploy 这轮零合入。</p>
+<p>FlashInfer、TGI 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 下一批按惯例周一到。</p>
+<p><strong>Reddit 在吵：模型越长越大，本地 128GB 装不下了</strong></p>
+<p>r/LocalLLaMA 有个帖子今天中午很火。</p>
+<p>开源模型正从 100B 往 300B 到 1T 长。</p>
+<p>GLM-5.X 做到 744B。</p>
+<p>Mistral-Large-4 据说做到 1T。</p>
+<p>DeepSeek-V4.1 是 552B。</p>
+<p>200B 以上的模型用 4 位量化也塞不进 128GB。</p>
+<p>统一内存的设备和 128GB 内存加 24GB 显存都悬。</p>
+<p>帖子给的逃生路线有两条。</p>
+<p>一条是蒸馏，拿小模型学大模型。</p>
+<p>一条是 1-bit 和三值这类原生低比特模型。</p>
+<p>这跟你的主线不直接沾边。</p>
+<p>但它说明一件事。</p>
+<p>以后的旗舰模型越来越难本地跑。</p>
+<p>云端推理服务的分量只会更重。</p>
+<p>来源：<a href="https://kblip.com/social/localllama-users-weigh-options-as-open-models-balloon-past-z2IGwOt">https://kblip.com/social/localllama-users-weigh-options-as-open-models-balloon-past-z2IGwOt</a></p>
+<h2>业内新闻</h2>
+<p><strong>World Labs 的世界模型 Atlas，11 月 12 日向所有人开放了</strong></p>
+<p>Atlas 是李飞飞团队的世界模型。</p>
+<p>它能把文字和图片变成可交互的 3D 场景。</p>
+<p>11 月 12 日开了两个网页应用和开发者 API。</p>
+<p>同一天，李飞飞和 AMD 的苏姿丰在 CoRL 同台。</p>
+<p>这是收购宣布后两人第一次公开同台。</p>
+<p>AMD 收购 World Labs 是 9 月 28 日的老消息。</p>
+<p>82 亿美元全股票，交易预计年底前完成。</p>
+<p>Atlas 是模型侧的新闻，跟 serving 不直接沾边。</p>
+<p>但它跑在哪、怎么推理，以后值得看一眼。</p>
+<p>来源：<a href="https://www.aigamer.gg/news/world-labs-atlas-world-model-public-launch">https://www.aigamer.gg/news/world-labs-atlas-world-model-public-launch</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 上几位大V这轮没新帖</strong></p>
+<p>karpathy 最新帖还是 11 月 8 日的回复。</p>
+<p>jimfan、lmsysorg 也没新动静。</p>
+<p><strong>SGLang Summit 第二天文字总结还没出</strong></p>
+<p>Liam Fedus 那场炉边谈还是只有议程页。</p>
+<p>没有会后总结文章。</p>
+<p><strong>Latent Space 还是 11 月 10 日那期</strong></p>
+<p>最新单集还是 11 月 10 日那期。</p>
+<p>讲的是给 agent 设计产品。</p>
+<p>这轮没更新。</p>
+<p>来源：Spotify</p>
+<p><strong>中文媒体还是没发 llama.cpp 1.0 的稿</strong></p>
+<p>机器之心、量子位都没动静。</p>
+<h2>值得深入学</h2>
+<p><strong>SGLang #49089：GLM-5.3-Flash 的 PD 读题开 CP，值得深读</strong></p>
+<p>这篇直接贴着你的 PD 解耦评估线。</p>
+<p>读题节点开上下文并行，姿势从一种变三种。</p>
+<p>H20 上 64k 读题快 1.51 倍，首字还压了 23%。</p>
+<p>精读笔记已写好，见深度阅读目录。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 21 点版去重。 版本水位：除 llama.cpp 快照外全都没动。vLLM 正式版 v0.33.0（PyPI 已确认），预发布 tag v0.34.0rc4；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照从 b12393 滚到 b12400。 SGLang 2 条首次汇总：#49089、#50387。vLLM 2 条首次汇总：#63524、#66878。Dynamo 1 条首次汇总：#18576。 扩散五连切全部合入，#50390 其实 13 号晚已合入（21 点版说反了，已纠正）；#66494 是 21 点版报过的；Tensward、M4 长文是 21 点版报过的；Thaw 是 11 月 12 日报过的；Inkling 2 Small 权重是 11 月 12 日报过的；Llama 桌面应用是 19 点版报过的；SGLang 联盟是 11 月 12 日报过的；SGLang-Neuron 是 11 月 12 日报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿；arXiv 下一批按惯例周一到。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-14-2300/">23点版</a></p></body></html>

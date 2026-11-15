@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang：GLM-5.3-Flash 的 PD 读题开 CP，H20 上 64k 读题快 1.51 倍"/>
+<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #49089（2026-11-14 合入主线）"/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-15T07:05:19"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang：GLM-5.3-Flash 的 PD 读题开 CP，H20 上 64k 读题快 1.51 倍</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang：GLM-5.3-Flash 的 PD 读题开 CP，H20 上 64k 读题快 1.51 倍</h1>
+<ul><li>原文：SGLang 团队，GitHub PR #49089（2026-11-14 合入主线）</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/49089">https://github.com/sgl-project/sglang/pull/49089</a></li><li>作者：QNan0513</li><li>说明：这篇是工程 PR，不是论文；数字全是作者自报</li><li>说明：原 PR 未附图，关键数字见下表</li></ul>
+<h2>一句话</h2>
+<p>GLM-5.3-Flash 的 PD 读题节点。</p>
+<p>以前开上下文并行只认 DFlash2。</p>
+<p>现在原生 MTP 和不用投机解码也能开了。</p>
+<p>64k 读题快了一半多，精度没掉。</p>
+<h2>人话解读</h2>
+<p>先讲 PD 解耦是什么。</p>
+<p>它是读题和写答案分开跑。</p>
+<p>读题那拨算完，把草稿纸传给解码那拨。</p>
+<p>草稿纸就是 KV 缓存。</p>
+<p>读题节点想算得快，可以开 CP。</p>
+<p>CP 就是上下文并行。</p>
+<p>它把一份长输入拆到多张卡上算。</p>
+<p>GLM-5.3-Flash 是智谱的新旗舰模型。</p>
+<p>它的 PD 读题节点以前有个硬性限制。</p>
+<p>开 CP 必须配 DFlash2。</p>
+<p>DFlash2 是一种投机解码的草稿验证机制。</p>
+<p>投机解码就是先让小模型打草稿。</p>
+<p>再让大模型一次验一堆。</p>
+<p>原生 MTP 是另一种草稿姿势。</p>
+<p>MTP 就是多词预测，一次多猜几个词。</p>
+<p>官方菜谱用的就是原生 MTP。</p>
+<p>但读题节点开 CP 时碰上它，启动直接报错。</p>
+<p>不用投机解码也一样，照样报错。</p>
+<p>这回把那条限制拆了。</p>
+<p>三种姿势都能开 CP 了。</p>
+<p>测试在两台机器上跑的。</p>
+<p>一台是 8 张 B300。</p>
+<p>一台是 8 张 H20。</p>
+<p>读题和解码各占一半卡。</p>
+<p>中间用 Mooncake 传草稿纸。</p>
+<p>Mooncake 是开源 KV 缓存池。</p>
+<p>结果是速度涨了，精度没动。</p>
+<h2>核心方法</h2>
+<h3>1. 拆掉 DFLASH-only 的限制</h3>
+<p>改动集中在一个钩子文件里。</p>
+<p>cp_tp_group_sharing_hook.py。</p>
+<p>以前它在 GLM-5.3-Flash 的 PD 分支里写死。</p>
+<p>只有 DFlash2 能走 CP。</p>
+<p>这回把这条规则删了。</p>
+<p>前面的投机检查还在。</p>
+<p>它只放行 DFlash2 和原生 MTP。</p>
+<p>原生 MTP 还要求 top-k 等于 1。</p>
+<p>top-k 就是一次猜几个候选词。</p>
+<p>解码节点、非 Mooncake 后端照样被拦。</p>
+<p>并行度大于 1 的 PP、DP、EP 也照样被拦。</p>
+<p>说白了，门从只开一扇改成开两扇。</p>
+<p>但没资格进的还是进不去。</p>
+<h3>2. 草稿种子从 CP 汇总的张量里取</h3>
+<p>放行只是第一步。</p>
+<p>种子要对得上，验证才不会翻车。</p>
+<p>种子就是 MTP 第一轮验证用的草稿起点。</p>
+<p>它由 top-k、隐藏状态和 DSA 种子拼成。</p>
+<p>DSA 就是稀疏注意力，只算重要的部分。</p>
+<p>读题节点开 CP 后，这些张量散在各路 rank 上。</p>
+<p>这回在写种子前先汇总。</p>
+<p>隐藏状态在算 logits 之前汇总。</p>
+<p>索引 top-k 在写种子前汇总。</p>
+<p>汇总完再拼种子，解码那边才能接着验。</p>
+<h3>3. 草稿层 KV 在每路 CP rank 上都存全量</h3>
+<p>目标模型的 CP 和 TP 位置要对齐。</p>
+<p>CP rank r 就当 TP rank r 来注册。</p>
+<p>目标的 MLA KV、KDA 状态和辅助 buffer。</p>
+<p>都发到解码端对应的 TP rank 上。</p>
+<p>MLA 就是多头隐注意力，KV 压得很扁。</p>
+<p>KDA 是配套的状态分片。</p>
+<p>草稿层跟目标层走同一套位置。</p>
+<p>每路 CP rank 上都存一份完整草稿 KV。</p>
+<p>各路发出去的都是完整拷贝。</p>
+<p>跟不开 CP 的 PD 一个做法。</p>
+<p>不用改传输逻辑。</p>
+<h3>4. 测试加了原生 MTP 的 PD 用例</h3>
+<p>新测试叫 TestGlm53CpBcgMtpPD。</p>
+<p>它跑了三组旧测试。</p>
+<p>填充分块加前缀重放。</p>
+<p>不均匀批量填充重放。</p>
+<p>GSM8K 数学题。</p>
+<p>还加了一个新测试。</p>
+<p>test_first_verify_uses_prefill_draft_seed。</p>
+<p>它只让解码跑一次验证。</p>
+<p>验证用的草稿必须来自读题节点发的种子。</p>
+<p>做个反向对照能看出来。</p>
+<p>种子换成全零，验证一次都过不了。</p>
+<p>测试就挂，说明种子确实在起作用。</p>
+<h2>关键数据</h2>
+<h3>精度对照：B300，8 张 B20Z</h3>
+<ul><li>读题配置：TP4，解码 TP4</li><li>传输：Mooncake over RoCE</li><li>KV 精度：fp8_e4m3</li><li>草稿：EAGLE 5/1/6</li></ul>
+<table><thead><tr><th>读题</th><th>投机解码</th><th>长针检查 12 组</th><th>首次验证平均接受草稿数</th><th>GSM8K 5-shot</th><th>GSM8K 接受长度</th></tr></thead><tbody><tr><td>TP4</td><td>MTP</td><td>12/12 过</td><td>2.13</td><td>0.918</td><td>4.12</td></tr><tr><td>TP4 / CP4</td><td>MTP</td><td>12/12 过</td><td>2.25</td><td>0.921</td><td>4.13</td></tr><tr><td>TP4</td><td>不用</td><td>12/12 过</td><td>-</td><td>0.922</td><td>-</td></tr><tr><td>TP4 / CP4</td><td>不用</td><td>12/12 过</td><td>-</td><td>0.914</td><td>-</td></tr></tbody></table>
+<h3>精度对照：H20，8 张 H20</h3>
+<ul><li>KV 精度：bfloat16</li><li>其余配置同上</li></ul>
+<table><thead><tr><th>读题</th><th>投机解码</th><th>长针检查 12 组</th><th>首次验证平均接受草稿数</th><th>GSM8K 5-shot</th><th>GSM8K 接受长度</th></tr></thead><tbody><tr><td>TP8</td><td>MTP</td><td>12/12 过</td><td>1.98</td><td>0.919</td><td>4.15</td></tr><tr><td>TP8 / CP8</td><td>MTP</td><td>12/12 过</td><td>2.04</td><td>0.913</td><td>4.15</td></tr><tr><td>TP8</td><td>不用</td><td>12/12 过</td><td>-</td><td>0.928</td><td>-</td></tr><tr><td>TP8 / CP8</td><td>不用</td><td>12/12 过</td><td>-</td><td>0.914</td><td>-</td></tr></tbody></table>
+<ul><li>GSM8K 在两台机器上跑了 10 次。</li><li>TP 平均 0.918，CP 平均 0.919。</li><li>作者的结论是 CP 不改变精度方向。</li></ul>
+<h3>速度：H20，64k 输入</h3>
+<ul><li>测试方法：64k 随机输入，只吐 1 个词</li><li>首字 P95 目标：20 秒以内</li><li>目标：找最高并发，再看吞吐</li></ul>
+<table><thead><tr><th>读题</th><th>并发 1 时均值首字</th><th>并发 1 时输入吞吐</th><th>能过 20 秒线的最高并发</th><th>该并发下输入吞吐</th><th>该并发下首字 P95</th></tr></thead><tbody><tr><td>TP8</td><td>4.39 秒</td><td>14,939 词/秒</td><td>4</td><td>15,065 词/秒</td><td>17.43 秒</td></tr><tr><td>TP8 / CP8</td><td>2.90 秒</td><td>22,576 词/秒</td><td>6</td><td>22,815 词/秒</td><td>17.29 秒</td></tr></tbody></table>
+<ul><li>CP8 是 TP8 的 1.51 倍。</li><li>各并发下都稳定在 1.51 倍。</li><li>DP attention 8 路当对照组。</li><li>单个 64k 请求要 21.2 秒。</li><li>20 秒线内没有能跑的并发点。</li></ul>
+<h3>速度：B300，64k 输入</h3>
+<ul><li>两种设置：默认分块 16384，图上限 8192</li><li>另两种设置：分块 8192 或图上限 16384</li></ul>
+<table><thead><tr><th>读题</th><th>分块 / 图上限</th><th>并发 1 时均值首字</th><th>并发 1 时输入吞吐</th><th>能过 20 秒线的最高并发</th><th>该并发下输入吞吐</th></tr></thead><tbody><tr><td>TP8</td><td>16384 / 8192（默认）</td><td>1.29 秒</td><td>50,535 词/秒</td><td>8</td><td>50,547 词/秒</td></tr><tr><td>TP8 / CP8</td><td>16384 / 8192（默认）</td><td>1.34 秒</td><td>48,929 词/秒</td><td>8</td><td>49,076 词/秒</td></tr><tr><td>TP8</td><td>8192 / 8192</td><td>1.33 秒</td><td>49,190 词/秒</td><td>8</td><td>51,408 词/秒</td></tr><tr><td>TP8 / CP8</td><td>8192 / 8192</td><td>1.12 秒</td><td>58,216 词/秒</td><td>16</td><td>56,044 词/秒</td></tr><tr><td>TP8</td><td>16384 / 16384</td><td>1.16 秒</td><td>56,471 词/秒</td><td>16</td><td>59,205 词/秒</td></tr><tr><td>TP8 / CP8</td><td>16384 / 16384</td><td>0.89 秒</td><td>73,591 词/秒</td><td>16</td><td>72,742 词/秒</td></tr></tbody></table>
+<ul><li>默认设置下分块跑 eager，CP8 反而慢 2.9%。</li><li>16384 的图上限下，CP8 是 TP8 的 1.23 倍。</li><li>单请求首字从 1.16 秒压到 0.89 秒。</li><li>DP attention 8 路当对照组。</li><li>它在并发 24 时到 101,218 词/秒。</li><li>是 CP8 的 1.39 倍，但单个 64k 请求要 5.6 秒。</li><li>并发 4 以下，CP8 的首字更低。</li></ul>
+<h2>关键图表</h2>
+<p>原 PR 未附图。</p>
+<p>最值得看的是上面四张表。</p>
+<p>精度两张表一起看。</p>
+<p>GSM8K、长针、接受长度三组数都没动。</p>
+<p>速度两张表一起看。</p>
+<p>H20 上 1.51 倍，B300 上 1.23 倍。</p>
+<p>但 B300 的默认设置下 CP 反而慢。</p>
+<p>结论要加条件，不能只报一个倍数。</p>
+<h2>跟研究方向的关联</h2>
+<p>这篇直接撞上你的 PD 解耦评估。</p>
+<p>五招能直接进评估清单。</p>
+<p>第一招：读题池子的并行姿势要单列。</p>
+<p>CP 以前只配 DFlash2。</p>
+<p>现在 MTP 和不用投机解码也能配。</p>
+<p>评估清单里要加一栏。</p>
+<p>每种投机姿势配 CP 的收益各是多少。</p>
+<p>第二招：首字要按分块和图上限分档报。</p>
+<p>B300 默认设置下 CP 反而慢 2.9%。</p>
+<p>图上限抬到 16384 才快 1.23 倍。</p>
+<p>只报一个倍数会骗人。</p>
+<p>第三招：DP attention 也要放进对照组。</p>
+<p>H20 上它连 20 秒线都过不了。</p>
+<p>B300 上它吞吐最高，但单请求首字最慢。</p>
+<p>高并发和单请求是两个赛道。</p>
+<p>第四招：种子对齐要进检查清单。</p>
+<p>CP 汇总这一步漏了，验证就翻车。</p>
+<p>新模型上线先对一遍种子来源。</p>
+<p>第五招：精度对照要看三组数。</p>
+<p>GSM8K、长针、接受长度都得看。</p>
+<p>只看一组数，容易漏掉暗病。</p>
+<p>还有一个方向值得跟。</p>
+<p>EP 大于 1 和 NIXL 后端还没放行。</p>
+<p>作者说 #44293 在跟 NIXL 和 EP。</p>
+<p>放行之后要再核一遍。</p>
+<h2>术语表</h2>
+<ul><li>PD 解耦：读题和解码分开跑，各用各的实例</li><li>读题：prefill，把输入一次性算完</li><li>解码：decode，一个词一个词往外吐</li><li>CP：上下文并行，把长输入拆到多张卡上算</li><li>TP：张量并行，把一层拆到多张卡上</li><li>DP attention：数据并行注意力，多路并行算注意力</li><li>EP：专家并行，MoE 的专家拆到多张卡上</li><li>PP：流水线并行，把模型层拆到多张卡上</li><li>MTP：多词预测，一次多猜几个词</li><li>EAGLE：一种投机解码的草稿模型</li><li>DFlash2：一种投机解码的草稿验证机制</li><li>投机解码：先让小模型打草稿，再让大模型一次验一堆</li><li>top-k：一次猜几个候选词</li><li>KV 缓存：模型的草稿纸，记着每轮对话的上下文</li><li>Mooncake：开源 KV 缓存池，管显存内存和 SSD</li><li>MLA：多头隐注意力，KV 压得很扁的注意力</li><li>DSA：稀疏注意力，只算重要的部分</li><li>RoCE：基于以太网的远程直接内存访问</li><li>GSM8K：小学数学题测试集，常用精度对照</li><li>长针测试：大海捞针，测长上下文找东西的能力</li><li>接受长度：草稿一次被接受的平均词数</li><li>首字：TTFT，第一个词吐出来要等多久</li><li>P95：95% 的请求都比这个数快</li><li>B300：英伟达 Blackwell 架构的数据中心 GPU</li><li>H20：英伟达 Hopper 架构的数据中心 GPU</li><li>种子：MTP 第一轮验证用的草稿起点</li><li>握手：两边实例建立连接时先对一遍条件</li></ul>
+<h2>注意事项</h2>
+<ul><li>数字全是作者自报，没有第三方复现</li><li>每组配置只跑了一次，没有重复次数</li><li>GSM8K 在 10 次运行里波动不小</li><li>B300 默认设置下 CP 反而慢 2.9%</li><li>EP 大于 1 和 NIXL 后端还没放行</li><li>官方菜谱还写着 PD 不能配 CP，已经过时了</li><li>原 PR 未附图，关键数字都在上表里</li></ul></body></html>
