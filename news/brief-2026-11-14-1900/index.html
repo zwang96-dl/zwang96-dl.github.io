@@ -1,0 +1,148 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月14日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-14"/>
+<meta name="doc-ts" content="2026-11-15T02:59:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-14（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-14（19点版）</h1>
+<p>19点版来了，头条是 HF 出了个本地 AI 小应用。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>llama.cpp 正式版还是 v1.0.0。</p>
+<p>快照还是 b12387，没滚新版。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：两条扩散模型的小提速</strong></p>
+<p>先说 #50392 和 #50388。</p>
+<p>这两条都是给扩散模型提速。</p>
+<p>扩散模型就是画图生视频那类模型。</p>
+<p>背景是一个 MiniMax-H3 的视频请求。</p>
+<p>1344x768、124 帧、49 步。</p>
+<p>在一张 B300 上跑约 119 秒。</p>
+<p>显卡几乎全程满载。</p>
+<p>这两条改的是 QK-norm 加 RoPE 的小算子。</p>
+<p>QK-norm 是注意力里给向量归一化的步骤。</p>
+<p>RoPE 是给位置编码的办法。</p>
+<p>改完结果逐位一致。</p>
+<p>说白了，算得更快，答案一个字不差。</p>
+<p>这是五连切里的两条。</p>
+<p>其余三条还没合入。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50392">https://github.com/sgl-project/sglang/pull/50392</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50388">https://github.com/sgl-project/sglang/pull/50388</a></p>
+<p><strong>vLLM：一条 ROCm 提速，一条 CI</strong></p>
+<p>#67377 是 ROCm 上的提速。</p>
+<p>ROCm 就是 AMD 显卡那套计算平台。</p>
+<p>对象是 DeepSeek-V4.1-Flash。</p>
+<p>改的是 MXFP8 的稠密矩阵乘法。</p>
+<p>MXFP8 是一种 8 位浮点量化格式。</p>
+<p>说白了，AMD 卡上跑这个模型更快了。</p>
+<p>#67391 是 CI 的小改动。</p>
+<p>CI 就是自动跑测试的那套流程。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67377">https://github.com/vllm-project/vllm/pull/67377</a></p>
+<p><strong>其余框架</strong></p>
+<p>llama.cpp 这轮零合入。</p>
+<p>TRT-LLM、LMDeploy 也一样。</p>
+<p>Dynamo、FlashInfer、TGI 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>arXiv 下一批按惯例周一到。</p>
+<p>最新一批还是 11 月 12 日那批。</p>
+<p>那批的论文 13 号已经补报过。</p>
+<h2>业内新闻</h2>
+<p><strong>HF 出了个本地 AI 小应用，叫 Llama</strong></p>
+<p>Llama 是 HF 和 llama.cpp 团队出的桌面应用。</p>
+<p>Mac 和 Windows 都能装。</p>
+<p>下载只有 1MB。</p>
+<p>免费、开源、能离线用。</p>
+<p>它干两件事。</p>
+<p>一是自带聊天，像 ChatGPT 那样用。</p>
+<p>二是提供 OpenAI 兼容的接口。</p>
+<p>接口地址是 localhost:9931/v1。</p>
+<p>你的代码改个地址就能接上。</p>
+<p>不用 API key，也没有账单。</p>
+<p>模型它帮你挑。</p>
+<p>按你的机器选尺寸和量化。</p>
+<p>量化就是把模型压小一点的办法。</p>
+<p>支持的模型自动开推测解码。</p>
+<p>推测解码就是先让小模型打草稿再让大模型改。</p>
+<p>模型只在硬盘上存一份。</p>
+<p>走 HF 的缓存，跟 llama.cpp 共用。</p>
+<p>闲置 5 分钟自动卸载。</p>
+<p>说白了，本地跑模型不用再翻论坛调参数了。</p>
+<p>装上、选模型、直接聊。</p>
+<p>本地想快速验证个想法，它挺顺手。</p>
+<p>这应用是 11 月 13 日官宣的。</p>
+<p>挂在 llama.cpp 1.0 那篇 HF 博客末尾。</p>
+<p>之前几期只报了 1.0 本体。</p>
+<p>这个应用本身还没报过。</p>
+<p>提醒一句：有用户反馈 Windows 版有小毛病。</p>
+<p>下载的 GGUF 文件大小不对。</p>
+<p>删文件也删不掉。</p>
+<p>尝鲜前先知道一声。</p>
+<p>来源：<a href="https://huggingface.co/blog/ggml-org/llama-cpp-v1">https://huggingface.co/blog/ggml-org/llama-cpp-v1</a></p>
+<p>来源：<a href="https://llama.app">https://llama.app</a></p>
+<p>来源：<a href="https://kblip.com/social/users-report-hugging-face-llama-windows-app-downloads-wrong-893nW2G">https://kblip.com/social/users-report-hugging-face-llama-windows-app-downloads-wrong-893nW2G</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X 上几位大V这轮没新帖</strong></p>
+<p>karpathy、jimfan 都没新动静。</p>
+<p>lmsysorg 也没新帖。</p>
+<p>Reddit、HN 也没新话题。</p>
+<p>中文媒体还是没发 llama.cpp 1.0 的稿。</p>
+<p><strong>Latent Space 还是 11 月 10 日那期</strong></p>
+<p>最新单集还是 11 月 10 日那期。</p>
+<p>讲的是给 agent 设计产品。</p>
+<p>这轮没更新。</p>
+<p>来源：Spotify</p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的新内容。</p>
+<p>Llama 应用是产品发布。</p>
+<p>两条 PR 都是小优化。</p>
+<p>都跟你的 PD 解耦评估不直接沾边。</p>
+<p>宁缺毋滥，这轮先不写精读笔记。</p>
+<h2>去重脚注</h2>
+<p>本轮已与 17 点版去重。 版本水位：全都没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照仍是 b12387。 SGLang 2 条首次汇总：#50392、#50388。vLLM 1 条首次汇总：#67377。 Llama 桌面应用是首次报；llama.cpp 1.0 本体是 11 月 13 日报过的；SGLang-Omni 的 326.5% 数字是 03 点版报过的；TorchTPU 是 11 月 13 日 19 点版补报过的；Metarix 三引擎对照是 15 点版报过的；TPU 六引擎横评是 11 月 9 日报过的；SGLang 联盟是 11 月 12 日报过的；SGLang-Neuron 是 11 月 12 日报过的；NEAR AI 那事是 11 月 12 日报过的；Latent Space 最新单集仍是 11 月 10 日那期；中文媒体仍没发 llama.cpp 1.0 的稿；arXiv 下一批按惯例周一到。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-14-1900/">19点版</a></p></body></html>
