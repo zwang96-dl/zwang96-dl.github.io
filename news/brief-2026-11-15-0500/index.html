@@ -1,0 +1,144 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月15日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-15T13:00:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-15（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-15（05点版）</h1>
+<p>05点版来了，半夜这轮有几条硬货。</p>
+<p>vLLM 和 SGLang 各有三条以上合入。</p>
+<p>多模态相关的有两条，值得看一眼。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：llama.cpp 快照连滚五格</strong></p>
+<p>llama.cpp 快照从 b12408 滚到 b12413。</p>
+<p>b12412 和 b12413 都在这轮里发布。</p>
+<p>里面是 server 小修和图片库同步。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：多模态编码器缓存能调大小了</strong></p>
+<p>#65534 给多模态加了个新开关。</p>
+<p>开关叫 --encoder-cache-size。</p>
+<p>以前编码器缓存多大，系统按算力预算推导。</p>
+<p>现在能直接指定容量。</p>
+<p>说白了，算力预算是每步能算多少。</p>
+<p>缓存容量是能留住多少张图的编码结果。</p>
+<p>两者以前绑在一起，现在分开了。</p>
+<p>同一张图反复问，第二次不用再过编码器。</p>
+<p>跑多模态服务的人，可以少一次重复编码。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65534">https://github.com/vllm-project/vllm/pull/65534</a></p>
+<p><strong>vLLM：FP8 的 MoE 终于能走 NVLink 全互联了</strong></p>
+<p>#67592 解开了一个组合限制。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>FP8 是一种 8 位浮点量化格式。</p>
+<p>以前 DeepGEMM 和 Triton 的 FP8 专家。</p>
+<p>配上 FlashInfer 的 NVLink 全互联会直接拒绝。</p>
+<p>全互联就是 GPU 之间互相传数据。</p>
+<p>现在这个组合放行了。</p>
+<p>还顺手修了一个双向传输的专家编号 bug。</p>
+<p>跑 FP8 的 MoE 模型，通信能少绕一次弯。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67592">https://github.com/vllm-project/vllm/pull/67592</a></p>
+<p><strong>vLLM：AMD 卡上 DeepSeek V4.1 的小缝合更快了</strong></p>
+<p>#65992 是个 AMD 平台的性能修补。</p>
+<p>mHC 是 DeepSeek V4.1 里的一种注意力结构。</p>
+<p>以前它的融合接缝要分两次启动内核。</p>
+<p>现在一次启动就搞定。</p>
+<p>微基准里每条接缝快 16% 到 41%。</p>
+<p>放到整步解码里，大约只省 1%。</p>
+<p>算是个小甜点，不是大餐。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65992">https://github.com/vllm-project/vllm/pull/65992</a></p>
+<p><strong>SGLang：统一内存那套预填充不卡主机了</strong></p>
+<p>#50306 到 #50311，是一组六个合入。</p>
+<p>都围着 --enable-unified-memory 这个开关。</p>
+<p>统一内存就是 CPU 和 GPU 共用一块内存。</p>
+<p>以前每次预填充准入，都要反复问主机。</p>
+<p>问七遍预算，状态还重复算。</p>
+<p>现在这些重复劳动砍掉了。</p>
+<p>GDN 是一种混合模型结构。</p>
+<p>Qwen3.5 这类混合模型就用它。</p>
+<p>它的预填充以前会在中途卡住等主机。</p>
+<p>现在卡点也去掉了。</p>
+<p>混合架构跑得多的人，预填充会顺一点。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50311">https://github.com/sgl-project/sglang/pull/50311</a></p>
+<p><strong>SGLang：多模态处理器开始走新架构了</strong></p>
+<p>#46412 是多模态重构的第六步。</p>
+<p>一共九步，现在走了六步。</p>
+<p>新开关是 --enable-token-space-processor。</p>
+<p>打开后，多模态处理器走一套新接口。</p>
+<p>按模型注册不同的处理策略。</p>
+<p>视频预处理放哪台设备，也能单独指定。</p>
+<p>属于打地基的改动，短期看不到速度变化。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46412">https://github.com/sgl-project/sglang/pull/46412</a></p>
+<p><strong>llama.cpp：投机解码多了个 DFlash2 支持</strong></p>
+<p>#31904 给 Recursive Ripple 65B 加了支持。</p>
+<p>DFlash2 是这个模型的投机解码支持。</p>
+<p>投机解码就是先让小模型打草稿，再让大模型改。</p>
+<p>作者在 M5 Max 上测通了。</p>
+<p>用的是 Q8_0 的小模型当草稿员。</p>
+<p>这条已经合入主线。</p>
+<p>但 b12413 里还没有它。</p>
+<p>要等下一个快照才进。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31904">https://github.com/ggml-org/llama.cpp/pull/31904</a></p>
+<p><strong>其余框架</strong></p>
+<p>TRT-LLM 这轮只有一条 CI 整理。</p>
+<p>Dynamo 只有一处 scheduler 内部重构。</p>
+<p>LMDeploy、FlashInfer、TGI 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 最新一批还是 11 月 12 日的。</p>
+<p>下一批按惯例周一到。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新业内消息</strong></p>
+<p>新闻、HN、中文媒体都没见到新东西。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>也没见到新的播客单集。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有够格的深读材料</strong></p>
+<p>三条值得跟，按对你做多模态推理优化的帮助排：</p>
+<ol><li>vLLM #65534，多模态编码器缓存可调。缓存容量和算力预算分开管，跟你多模态线直接相关。</li><li>SGLang #50306–#50311，统一内存预填充去主机卡点。混合架构的预填充优化，Qwen3.5 这类模型会受益。</li><li>vLLM #67592，FP8 的 MoE 能走 NVLink 全互联了。跑 FP8 专家模型时通信少绕弯。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 03 点版去重。 版本水位：除 llama.cpp 快照外全都没动。vLLM 正式版 v0.33.0，预发布 tag v0.34.0rc4；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照从 b12408 滚到 b12413。 vLLM 3 条首次汇总：#65534、#67592、#65992。SGLang 7 条首次汇总：#50306–#50311（统一内存六连）、#46412（多模态重构 6/9）。llama.cpp 1 条首次汇总：#31904（DFlash2，等下个快照）。llama.cpp 快照 5 格：b12409–b12413。 TRT-LLM 1 条、Dynamo 1 条均为 CI 或内部重构。LMDeploy、FlashInfer、TGI 零合入。 Thaw 是 11 月 12 日报过的；Tensward 是 11 月 14 日 21 点版报过的；Metarix 三引擎对照是 11 月 14 日 15 点版报过的；SGLang 联盟是 11 月 12 日报过的。 arXiv 下一批按惯例周一到；本轮无深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-15-0500/">05点版</a></p></body></html>
