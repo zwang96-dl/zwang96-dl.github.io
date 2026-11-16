@@ -1,0 +1,148 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM 在线 NVFP4 量化：草稿模型不用备压缩版权重，解码快 13%"/>
+<meta name="doc-description" content="- 原文：vLLM 团队，GitHub PR #67006（2026-11-16 合入）"/>
+<meta name="doc-date" content="2026-11-16"/>
+<meta name="doc-ts" content="2026-11-16T17:03:47"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM 在线 NVFP4 量化：草稿模型不用备压缩版权重，解码快 13%</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM 在线 NVFP4 量化：草稿模型不用备压缩版权重，解码快 13%</h1>
+<ul><li>原文：vLLM 团队，GitHub PR #67006（2026-11-16 合入）</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/67006">https://github.com/vllm-project/vllm/pull/67006</a></li><li>说明：这篇是工程 PR，不是论文；数字全是作者自报</li><li>说明：原 PR 未附图，关键数字见下表</li></ul>
+<h2>一句话</h2>
+<p>投机解码的草稿模型，一直是带宽瓶颈。</p>
+<p>以前压成 4 位，得先备好一份压缩版权重。</p>
+<p>现在加载时现算，BF16 权重直接上车。</p>
+<p>DGX Spark 上解码快 13%，质量基本没掉。</p>
+<h2>人话解读</h2>
+<p>先讲投机解码是什么。</p>
+<p>小模型先打草稿，大模型再验算。</p>
+<p>草稿写得越快，整体吐词越快。</p>
+<p>草稿模型通常很小，瓶颈不在算力。</p>
+<p>瓶颈在显存带宽，读权重那一步。</p>
+<p>权重从 16 位压到 4 位，读的量少了四分之三。</p>
+<p>解码自然就快了。</p>
+<p>NVFP4 就是 4 位浮点量化的一种。</p>
+<p>它是英伟达的格式，黑井卡原生支持。</p>
+<p>以前想用它，得先有一份压好的权重文件。</p>
+<p>没有文件，就得自己先压一遍再传。</p>
+<p>这篇加了个在线模式。</p>
+<p>在线就是加载权重时现算压缩。</p>
+<p>BF16 权重读进来，直接压成 NVFP4。</p>
+<p>不用提前备文件，不用改模型仓库。</p>
+<p>只压权重，不压激活。</p>
+<p>激活还是 16 位，算的时候再解。</p>
+<p>这种打法叫 W4A16。</p>
+<p>它走现成的 W4A16 内核选择器。</p>
+<p>不用新写内核，复用老路。</p>
+<p>主攻场景就是草稿模型。</p>
+<p>整模型也能压，收益要看卡。</p>
+<h2>核心方法</h2>
+<h3>1. 加载时现算压缩</h3>
+<p>新方法叫 <code>nvfp4_weight_only</code>。</p>
+<p>它挂在 vLLM 的在线量化体系里。</p>
+<p>权重加载时，逐层压成 NVFP4。</p>
+<p>缩放因子跟着权重一起算。</p>
+<p>MoE 层不动，只压稠密线性层。</p>
+<h3>2. 复用 W4A16 内核选择器</h3>
+<p>压好的权重走现成的内核选择。</p>
+<p>CuTe-DSL、b12x、Marlin 三个核按需挑。</p>
+<p>这次顺手修了个选择 bug。</p>
+<p>以前 FP16 可能挑到只支持 BF16 的核。</p>
+<p>现在按激活精度选，不会挑错。</p>
+<p>量化本身优先用 <code>scaled_fp4_quant</code>。</p>
+<p>没有它就用 torch 的打包器兜底。</p>
+<p>两者算出的缩放因子完全一样。</p>
+<p>只有 E2M1 平局位取舍不同，误差一样。</p>
+<h3>3. 全局缩放跨 TP 归约</h3>
+<p>全局缩放就是整组共享的缩放因子。</p>
+<p>以前在线 FP8 就跨 TP 归约过。</p>
+<p>这回 NVFP4 也照做。</p>
+<p>压好的权重不再依赖 TP 切几份。</p>
+<p>TP=2 时每张卡的缩放等于 TP=1。</p>
+<p>副作用是老用法数值会变。</p>
+<p><code>draft_lm_head_quantization: &quot;nvfp4&quot;</code> 在 TP 大于 1 时。</p>
+<p>输出跟以前不一样了，要注意。</p>
+<h3>4. 三种开启方式</h3>
+<p>整模型压：<code>--quantization nvfp4_weight_only</code>。</p>
+<p>指定层压：<code>quantization_config.targets</code> 里挑。</p>
+<p>只压草稿器：投机配置里单独设。</p>
+<p>第三种最常用，草稿模型单独瘦身。</p>
+<p>主模型不动，风险最小。</p>
+<h2>关键数据</h2>
+<p>测试组合是 Qwen3.8-27B-NVFP4 主模型。</p>
+<p>草稿器是 DFlash2，k=7。</p>
+<p>评测是 SPEED-Bench 的代码题。</p>
+<p>输出长度 8K，并发 c=1、4、8 三档。</p>
+<table><thead><tr><th>GPU</th><th>c=1</th><th>c=4</th><th>c=8</th><th>GSM8K-256</th></tr></thead><tbody><tr><td>DGX Spark (GB10)</td><td>+13.1%</td><td>+22.7%*</td><td>+4.9%</td><td>0.965 -&gt; 0.961</td></tr><tr><td>RTX PRO 6000 Max-Q</td><td>+14.1%</td><td>+16.2%</td><td>+1.4%</td><td>0.961 -&gt; 0.969</td></tr><tr><td>GB300</td><td>+0.1%</td><td>-2.4%</td><td>+2.9%</td><td>0.969 -&gt; 0.961</td></tr></tbody></table>
+<p>星号那组要打折看。</p>
+<p>c=4 的两轮输出长度不一样。</p>
+<p>作者自己说，按 15% 到 20% 理解更稳。</p>
+<p>接受长度各行都在噪声内。</p>
+<p>GB10 c=1 那组是 3.838 到 3.934。</p>
+<p>跟 FP8 逐通道草稿器比。</p>
+<p>GB10 c=1 还快 7.6%。</p>
+<p>整模型压完，Qwen3-8B 从 15.27GB 缩到 5.99GB。</p>
+<p>GSM8K-256 三张卡上都跟 BF16 在噪声内。</p>
+<p>TP=2 在 2 张 GB200 上验证过。</p>
+<p>每张卡的全局缩放等于 TP=1。</p>
+<h2>跟研究方向的关联</h2>
+<p>这篇跟投机解码评估直接对口。</p>
+<p>草稿器量化可以单列一档。</p>
+<p>收益按卡分档报，别混在一起。</p>
+<p>带宽受限的卡收益大。</p>
+<p>DGX Spark 和 RTX PRO 6000 快 13% 到 14%。</p>
+<p>算力足的卡基本没收益。</p>
+<p>GB300 那组就是 0.1%，等于没动。</p>
+<p>接受长度要对照着报。</p>
+<p>只看吞吐，会漏掉质量变化。</p>
+<p>TP 大于 1 时数值会变。</p>
+<p>对照实验要先锁死 TP。</p>
+<p>在线量化不用备权重文件。</p>
+<p>评估新量化方案的启动成本低了。</p>
+<p>换个量化方法，改个开关就能测。</p>
+<h2>注意事项</h2>
+<p>GB300 上基本没收益。</p>
+<p>别在高端卡上指望它。</p>
+<p>B200 没测过。</p>
+<p>TP 大于 1 的接受长度也没测。</p>
+<p>c=4 那组输出长度不一样。</p>
+<p>22.7% 这个数要打折看。</p>
+<p>数字全是作者自报。</p>
+<p>每组配置只跑了一次。</p>
+<h2>术语表</h2>
+<ul><li>NVFP4：英伟达的 4 位浮点量化格式</li><li>在线量化：加载权重时现算压缩</li><li>W4A16：权重 4 位、激活 16 位的计算方式</li><li>草稿模型：投机解码里先打草稿的小模型</li><li>接受长度：主模型一次接受草稿词的平均数</li><li>DFlash2：一种草稿器</li><li>TP：张量并行，把模型切到多张卡上</li><li>E2M1：4 位浮点的一种编码</li><li>全局缩放：量化时整组共享的缩放因子</li><li>CuTe-DSL：英伟达的 GPU 内核编写工具</li><li>Marlin：一种 4 位权重推理内核</li><li>SPEED-Bench：vLLM 内部的解码速度评测</li><li>GSM8K：小学数学题评测集</li></ul></body></html>
