@@ -1,0 +1,204 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月15日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-16T05:02:55"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-15（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-15（21点版）</h1>
+<p>21点版来了，先说一句纠错。</p>
+<p>19点版刚夸过的 SGLang 优化，这轮被撤回了。</p>
+<p>vLLM 这轮合了十三条，SGLang 十一条。</p>
+<p>TRT-LLM 九条，剩下几家零合入。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：vLLM 的 v0.34.0 露头了</strong></p>
+<p>vLLM 的 v0.34.0 tag 出现了。</p>
+<p>之前最新还是 v0.34.0rc4。</p>
+<p>但 release 页还没挂出来。</p>
+<p>PyPI 上最新也还是 0.33.0。</p>
+<p>说白了，tag 先打了，正式发布还没到。</p>
+<p>其余水位全没动。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>llama.cpp 快照还是 b12428。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags、PyPI</p>
+<p><strong>SGLang：19点版刚报的那条优化被撤回了</strong></p>
+<p>#50703 是个整段撤回。</p>
+<p>撤的就是 #50156。</p>
+<p>#50156 是 Blackwell 和 Rubin 的混合模型优化。</p>
+<p>19点版刚把它当亮点报过。</p>
+<p>撤回说明里没写原因。</p>
+<p>只写了是干净的 git revert。</p>
+<p>说白了，上轮刚夸完，这轮就收回了。</p>
+<p>之前那条先别当数。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50703">https://github.com/sgl-project/sglang/pull/50703</a></p>
+<p><strong>SGLang：P/D 解耦修了两个启动就崩的 bug</strong></p>
+<p>#50520 修的是注意力并行校验。</p>
+<p>注意力并行就是把注意力分卡算。</p>
+<p>以前校验用的宽度总算成 1。</p>
+<p>开了注意力并行加 P/D，启动直接报错。</p>
+<p>现在按真实宽度比，部署能起来了。</p>
+<p>#50146 修的是 prefill 延迟器。</p>
+<p>prefill 延迟器就是攒够一批再读提示词。</p>
+<p>多卡并行时，有卡先跑有卡后跑。</p>
+<p>集合通信对不上号，服务直接崩。</p>
+<p>现在所有卡都参加集合，崩的问题没了。</p>
+<p>两条都跟 P/D 解耦直接相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50520">https://github.com/sgl-project/sglang/pull/50520</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50146">https://github.com/sgl-project/sglang/pull/50146</a></p>
+<p><strong>SGLang：调度器换了个更护着缓存的排队策略</strong></p>
+<p>#48409 是个新调度策略。</p>
+<p>名字叫固定批次有界 LPM。</p>
+<p>LPM 就是优先跑前缀相同的请求。</p>
+<p>前缀相同就能复用算过的草稿纸。</p>
+<p>以前排队一多就退回先到先得。</p>
+<p>长前缀可能在轮到之前被清掉。</p>
+<p>现在一次只看固定 64 个请求。</p>
+<p>同批里的请求不许后来的插队。</p>
+<p>说白了，排队时先护住能复用的前缀。</p>
+<p>缓存紧张的智能体负载能受益。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48409">https://github.com/sgl-project/sglang/pull/48409</a></p>
+<p><strong>SGLang：其余七条都是小修补</strong></p>
+<p>#39741 修了 Qwen3.5 的量化初始化。</p>
+<p>#50678 是 GLM-5.3 的 MI355X 部署手册。</p>
+<p>#50645 修了多卡归一化的步调。</p>
+<p>#50599、#50598、#50589 是扩散模型修补。</p>
+<p>#50576 修了推理 token 的统计上报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/39741">https://github.com/sgl-project/sglang/pull/39741</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50678">https://github.com/sgl-project/sglang/pull/50678</a></p>
+<p><strong>vLLM：混合模型的推测解码少跑了不少冤枉活</strong></p>
+<p>#67733 动的是 GDN 的推测解码路径。</p>
+<p>GDN 是混合模型里的一种新层。</p>
+<p>推测解码就是先让小模型打草稿。</p>
+<p>以前每步要多做一堆复制和初始化。</p>
+<p>现在这些全砍了，输出一个数都不差。</p>
+<p>36 层模型、1.6 万 token 下，每步省 9.79 毫秒。</p>
+<p>跑 Qwen3-Next 这类混合模型能直接受益。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67733">https://github.com/vllm-project/vllm/pull/67733</a></p>
+<p><strong>vLLM：Mamba 的中途续算从三步并成一步</strong></p>
+<p>#66938 是个 prefill 优化。</p>
+<p>Mamba 是一种不用注意力的序列模型。</p>
+<p>prefill 就是读提示词算注意力那一步。</p>
+<p>以前中途命中缓存要跑三遍才算完。</p>
+<p>现在一遍就算完，检查点直接写进原块。</p>
+<p>这条接在 17 点版的 #67717 后面。</p>
+<p>那条先修了缓存别把半成品当成品。</p>
+<p>这条再把续算并成一步。</p>
+<p>跑 Kimi-K3.1 这类长对话能受益。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66938">https://github.com/vllm-project/vllm/pull/66938</a></p>
+<p><strong>vLLM：多模态 P/D 修了一个会拖垮服务的缓存 bug</strong></p>
+<p>#66846 是个多模态修补。</p>
+<p>EPD 就是编码器、prefill、decode 分开跑。</p>
+<p>以前重置编码器缓存后，搬运工还以为图在本地。</p>
+<p>结果下个请求拿不到图，服务直接崩。</p>
+<p>现在重置时连搬运工的本地缓存一起清。</p>
+<p>说白了，账本和仓库要一起清。</p>
+<p>跑多模态 P/D 的人值得注意。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66846">https://github.com/vllm-project/vllm/pull/66846</a></p>
+<p><strong>vLLM：其余九条</strong></p>
+<p>#67725 和 #67728 是 Qwen4Exp 的算子融合。</p>
+<p>MTP 草稿头的归一化合成一次启动。</p>
+<p>解码每步快 0.07 到 0.17 毫秒。</p>
+<p>#66323 给 Liquid 的 Lfm3 加了 EAGLE-3 支持。</p>
+<p>EAGLE-3 是一种推测解码方法。</p>
+<p>#67813 让 Llama 4 按请求限制图片块数。</p>
+<p>#66937 给 ERNIE-4.5-VL 做了大视频压测。</p>
+<p>#67586 是 DeepSeek-V4.1 的 MI300X 部署文档。</p>
+<p>#67316 是个安全修补，查压缩包大小再解压。</p>
+<p>#67408 拒掉没有分词器的坏词请求。</p>
+<p>#67824 和 #64252 是英特尔 XPU 的小修补。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67725">https://github.com/vllm-project/vllm/pull/67725</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67728">https://github.com/vllm-project/vllm/pull/67728</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66323">https://github.com/vllm-project/vllm/pull/66323</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67813">https://github.com/vllm-project/vllm/pull/67813</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66937">https://github.com/vllm-project/vllm/pull/66937</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67586">https://github.com/vllm-project/vllm/pull/67586</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67316">https://github.com/vllm-project/vllm/pull/67316</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67408">https://github.com/vllm-project/vllm/pull/67408</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67824">https://github.com/vllm-project/vllm/pull/67824</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64252">https://github.com/vllm-project/vllm/pull/64252</a></p>
+<p><strong>TRT-LLM：Qwen3.5 在 GB300 上第二轮提速</strong></p>
+<p>#21997 是个大功能合集。</p>
+<p>针对的是 Qwen3.5-397B 的 NVFP4 版本。</p>
+<p>NVFP4 是一种 4 位量化格式，省显存。</p>
+<p>GB300 是英伟达的新一代机柜级芯片。</p>
+<p>改动覆盖解码、prefill 和 KV 远程层。</p>
+<p>还加了 P/D 解耦的准入控制。</p>
+<p>这是第一轮优化的延续。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21997">https://github.com/NVIDIA/TensorRT-LLM/pull/21997</a></p>
+<p><strong>TRT-LLM：Rubin 卡上的 Mistral Large 4 快了</strong></p>
+<p>#22253、#22252、#22251、#22249 是四条性能优化。</p>
+<p>SM107 就是 Rubin 卡的算力代号。</p>
+<p>Rubin 是 Blackwell 之后的下一代卡。</p>
+<p>改动集中在解码和推测解码验证上。</p>
+<p>共享专家和路由专家重叠跑。</p>
+<p>#21553 让跳过 softmax 的注意力用上新版缓存管理。</p>
+<p>剩下三条是测试和 CI。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22253">https://github.com/NVIDIA/TensorRT-LLM/pull/22253</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22252">https://github.com/NVIDIA/TensorRT-LLM/pull/22252</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22251">https://github.com/NVIDIA/TensorRT-LLM/pull/22251</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22249">https://github.com/NVIDIA/TensorRT-LLM/pull/22249</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21553">https://github.com/NVIDIA/TensorRT-LLM/pull/21553</a></p>
+<p><strong>其余框架</strong></p>
+<p>llama.cpp、LMDeploy 零合入。</p>
+<p>Dynamo、FlashInfer、TGI 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 这轮被限流了，返回 429。</p>
+<p>429 就是请求太多被挡了。</p>
+<p>按惯例下一批周一到，下轮补扫。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新业内消息</strong></p>
+<p>英伟达财报周二 13:20，之前报过。</p>
+<p>大V 和中文媒体这轮也没新动静。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>Spotify 上查过，没出新单集。</p>
+<p>SGLang Summit 第二天的文字总结还没出。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有够格的深读材料</strong></p>
+<p>值得跟的三条：</p>
+<ol><li>SGLang #50703，#50156 被撤回。19点版的结论要改。</li><li>vLLM #66846，多模态 P/D 的编码器缓存 bug。跟你的评估方向沾边。</li><li>TRT-LLM #21997，Qwen3.5 在 GB300 上的第二轮提速。P/D 准入控制值得看。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 19 点版去重。 版本水位：vLLM v0.34.0 tag 新出现（2026-11-16T04:27:15Z 打 tag，release 页和 PyPI 仍为 v0.33.0rc3 / 0.33.0）；其余没动。SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；llama.cpp 快照仍是 b12428，正式版 v1.0.0；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）。 vLLM 13 条首次汇总：#67733（GDN 推测解码去冗余复制）、#67725（Qwen4Exp MTP 草稿头归一化融合）、#67728（Qwen4Exp QSA 去零填充）、#66938（Mamba 中途续算三步并一步）、#66323（Lfm3 EAGLE-3/DSpark 支持）、#66846（EPD 编码器缓存重置漏清 Mooncake 本地缓存）、#67813（Llama 4 按请求限制 max_patches）、#66937（ERNIE-4.5-VL 大视频压测）、#67586（DeepSeek-V4.1-Flash MI300X 文档）、#67316（embedding 压缩包解压前查大小）、#67408（无分词器时拒 bad_words）、#67824（XPU LoRA 测试修补）、#64252（XPU DeepSeek-V4 稀疏 MLA attn_sink）。 SGLang 11 条首次汇总：#50703（撤回 #50156 Blackwell/Rubin 混合模型优化）、#50520（P/D attn_dp_size 校验修补）、#50146（prefill 延迟器 DP 集合修补）、#48409（固定批次有界 LPM 调度）、#39741（Qwen3.5 GDN 量化初始化）、#50678（GLM-5.3 MI355X 手册）、#50645（tp-qknorm 修补）、#50599、#50598、#50589（扩散模型修补）、#50576（reasoning_tokens 上报修补）。 TRT-LLM 9 条首次汇总：#21997（Qwen3.5 GB300 第二轮提速，KVCM2 远程层、P/D 准入）、#22253、#22252、#22251、#22249（SM107 Mistral Large 4 解码优化）、#21553（skip softmax 用 KV 缓存管理 V2）、#21995、#21683、#21682（测试/CI）。 llama.cpp、LMDeploy、Dynamo、FlashInfer、TGI 零合入。 arXiv 本轮 429 限流，未取到新批次；最新一批仍是 11 月 12 日的，下轮补扫。 Latent Space 最新一期仍是 11 月 10 日（Spotify 已核验）；SGLang Summit 第二天文字总结仍未出。 本轮无深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-15-2100/">21点版</a></p></body></html>
