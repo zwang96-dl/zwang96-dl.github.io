@@ -1,0 +1,223 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月15日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-16T03:06:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-15（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-15（19点版）</h1>
+<p>19点版来了，这轮框架那边挺热闹。</p>
+<p>vLLM 合了六条，SGLang 合了十二条。</p>
+<p>其中两条跟 P/D 解耦直接相关，值得细看。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：这轮一个没动</strong></p>
+<p>llama.cpp 快照还是 b12428。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：P/D 解耦终于能带上路由专家输出了</strong></p>
+<p>#62056 是个功能补齐。</p>
+<p>路由专家就是 MoE 模型每步选中的专家。</p>
+<p>以前开 P/D 解耦时，这类输出拿不到。</p>
+<p>P/D 解耦就是 prefill 和 decode 分开跑。</p>
+<p>现在 prefill 实例只返回前半段行。</p>
+<p>decode 实例从断点往后补。</p>
+<p>代理把两段拼起来，就是完整答案。</p>
+<p>还顺手放开了三条 KV 传输后端。</p>
+<p>Nixl、MoRIIO、Mooncake 都能用了。</p>
+<p>说白了，P/D 解耦少了一个拦路虎。</p>
+<p>跟你正在评估的方向直接相关。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/62056">https://github.com/vllm-project/vllm/pull/62056</a></p>
+<p><strong>vLLM：Mooncake 的 KV 传输换了个插口</strong></p>
+<p>#64363 是个重构，不改行为。</p>
+<p>Mooncake 是搬运 KV 缓存的工具。</p>
+<p>KV 缓存就是算过的提示词草稿纸。</p>
+<p>以前连接器直接绑死 Mooncake 的引擎。</p>
+<p>现在中间加了一层后端接口。</p>
+<p>以后换别的传输引擎不用改连接器。</p>
+<p>失败也能精确到具体哪几块出问题。</p>
+<p>说白了，给以后换搬运工留了门。</p>
+<p>跟 #62056 是同一条 P/D 线上的活。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64363">https://github.com/vllm-project/vllm/pull/64363</a></p>
+<p><strong>vLLM：AMD 卡上的推测解码快了一倍</strong></p>
+<p>#65985 是给 MI355X 的提速。</p>
+<p>它动的是 DSpark 的草稿层。</p>
+<p>DSpark 是 vLLM 在 ROCm 上的推测解码。</p>
+<p>推测解码就是先让小模型打草稿。</p>
+<p>再让大模型改，改得少就快。</p>
+<p>以前每步要起 70 个小内核。</p>
+<p>还带 11 次多卡通信。</p>
+<p>现在 5 层草稿加最后归一化一次起完。</p>
+<p>单请求草稿耗时从 700 微秒降到 338 微秒。</p>
+<p>交互延迟好了 4% 到 6%。</p>
+<p>精度没变，GSM8K 这些测试都过了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65985">https://github.com/vllm-project/vllm/pull/65985</a></p>
+<p><strong>vLLM：Qwen3.5 的 FP8 量化少跑一圈</strong></p>
+<p>#67393 是个算子融合。</p>
+<p>它针对动态 FP8 的 Qwen3.5 权重。</p>
+<p>FP8 就是 8 位浮点量化，省显存的办法。</p>
+<p>以前每层归一化后还要单独跑量化。</p>
+<p>现在归一化和量化合成一个算子。</p>
+<p>解码时这步快了 1.6 到 1.9 倍。</p>
+<p>64 层模型每步少跑 128 个内核。</p>
+<p>整机延迟降了 1% 到 2% 左右。</p>
+<p>跑 Qwen3.5 FP8 的人能直接受益。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67393">https://github.com/vllm-project/vllm/pull/67393</a></p>
+<p><strong>vLLM：还有两条小修补</strong></p>
+<p>#67606 是个测试修补。</p>
+<p>它让 Canary 的词错率测试跑在 fp32 上。</p>
+<p>Canary 是个语音转文字模型。</p>
+<p>#62708 给 RDNA 卡加了 int4 输出头量化。</p>
+<p>RDNA 是 AMD 消费级显卡的架构。</p>
+<p>int4 就是 4 位整数量化。</p>
+<p>两条都不影响主流程。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67606">https://github.com/vllm-project/vllm/pull/67606</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/62708">https://github.com/vllm-project/vllm/pull/62708</a></p>
+<p><strong>SGLang：Blackwell 和 Rubin 跑混合模型更快了</strong></p>
+<p>#50156 是一组运行时的优化。</p>
+<p>针对的是混合模型加 MTP 推测解码。</p>
+<p>混合模型就是注意力加线性层混着用。</p>
+<p>MTP 就是一次猜好几个词的推测解码。</p>
+<p>优化点在验证、缓存和批处理准备上。</p>
+<p>全是可选项，默认不开。</p>
+<p>要开得先设一个总开关。</p>
+<p>跑 Blackwell 或 Rubin 上的智能体负载值得试。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50156">https://github.com/sgl-project/sglang/pull/50156</a></p>
+<p><strong>SGLang：给大内核插件补了几块拼图</strong></p>
+<p>#50157 是个接口扩展。</p>
+<p>大内核插件就是把整步前向包成一个核。</p>
+<p>以前插件看不到混合模型的状态。</p>
+<p>现在能读 KV 池、注意力元数据这些。</p>
+<p>还能自己管一套循环验证状态。</p>
+<p>没装插件时行为完全不变。</p>
+<p>这是给英伟达那套 megakernel 铺路。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50157">https://github.com/sgl-project/sglang/pull/50157</a></p>
+<p><strong>SGLang：Gemma 4 也能只跑纯文本了</strong></p>
+<p>#49511 是个小功能。</p>
+<p>--language-model-only 是只跑文本的开关。</p>
+<p>开了它，多模态检查点跳过视觉编码器。</p>
+<p>以前 Qwen3-VL 这些模型都支持。</p>
+<p>Gemma 4 一直不支持。</p>
+<p>现在补上了，Rust 服务端也能跑了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49511">https://github.com/sgl-project/sglang/pull/49511</a></p>
+<p><strong>SGLang：其余九条都是杂项</strong></p>
+<p>#50663 修了扩散模型的进度条锁。</p>
+<p>#50572 修了自定义集合通信的收尾。</p>
+<p>#49997 和 #49671 是扩散模型文档。</p>
+<p>#45655 是 NPU 的部署手册。</p>
+<p>剩下 #50659、#50641、#50492、#50027 都是 CI。</p>
+<p>CI 就是持续集成，管自动测试的。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50663">https://github.com/sgl-project/sglang/pull/50663</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50572">https://github.com/sgl-project/sglang/pull/50572</a></p>
+<p><strong>TRT-LLM：只有一条测试改动</strong></p>
+<p>#22289 收紧了 Qwen3.5-122B 的测试配置。</p>
+<p>Qwen3.5-122B 是通义的大模型。</p>
+<p>改的是 H100 上批量 512 的 KV 占比上限。</p>
+<p>KV 占比就是缓存占显存的比例。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22289">https://github.com/NVIDIA/TensorRT-LLM/pull/22289</a></p>
+<p><strong>Dynamo：Qwen3-VL 的 MoE 路由修好了</strong></p>
+<p>#16970 是个多模态路由修补。</p>
+<p>Qwen3-VL MoE 是通义的多模态专家模型。</p>
+<p>以前它的请求走文本前缀路由。</p>
+<p>图片不同但问题相同，分不到同一台机器。</p>
+<p>现在按图片标记路由了。</p>
+<p>同一张图换问题，分到同一台机器。</p>
+<p>缓存命中率能上去，错用缓存的风险没了。</p>
+<p>本地验证里 26 个路由块重合了 24 个。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/16970">https://github.com/ai-dynamo/dynamo/pull/16970</a></p>
+<p><strong>FlashInfer：稀疏 prefill 也能跑 FP8 了</strong></p>
+<p>#8747 是个新算子。</p>
+<p>它把 RoPE、稀疏 MLA 和 FP8 量化融在一起。</p>
+<p>RoPE 就是旋转位置编码，给词加位置感。</p>
+<p>MLA 是 DeepSeek 的多头潜注意力。</p>
+<p>测的是 RTX PRO 6000 上的 prefill。</p>
+<p>另外 #9377 修了两个量化算子的空输入。</p>
+<p>#9491 是通信测试补覆盖。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8747">https://github.com/flashinfer-ai/flashinfer/pull/8747</a></p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9377">https://github.com/flashinfer-ai/flashinfer/pull/9377</a></p>
+<p><strong>其余框架</strong></p>
+<p>llama.cpp、LMDeploy、TGI 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>按推理 serving 关键词查，最新一篇还是 11 月 7 日的。</p>
+<p>下一批按惯例周一到。</p>
+<h2>业内新闻</h2>
+<p><strong>LongCat-2.5：美团把部署手册也开源了</strong></p>
+<p>模型本身 11 月 11 日报过，这次是新料。</p>
+<p>美团公布了完整的自建部署方案。</p>
+<p>194 台华为昇腾卡，分工很明确。</p>
+<p>2 台处理图片，64 台读提示词，128 台做生成。</p>
+<p>读提示词就是 prefill，做生成就是 decode。</p>
+<p>这就是一套 1.6 万亿参数的 P/D 解耦实战。</p>
+<p>比例是 1 台 prefill 配 2 台 decode。</p>
+<p>量化用的是 4 位，昇腾卡原生就支持。</p>
+<p>美团自己的测试说吞吐涨了 40% 以上。</p>
+<p>精度基本没掉。</p>
+<p>英伟达的卡在手册里一次都没出现。</p>
+<p>想看大规模 P/D 怎么分，这份手册值得翻。</p>
+<p>部署指引走的是 SGLang-FluentLLM 项目。</p>
+<p>来源：<a href="https://singularity.kiwi/longcat-25-weights-huawei-chips-2026/">https://singularity.kiwi/longcat-25-weights-huawei-chips-2026/</a></p>
+<p>来源：<a href="https://techprolonged.com/2026/11/meituan-opens-up-longcat-2-5-a-coding-agent-model-with-1-6-trillion-parameters/">https://techprolonged.com/2026/11/meituan-opens-up-longcat-2-5-a-coding-agent-model-with-1-6-trillion-parameters/</a></p>
+<p><strong>花絮：有人在 PS4 上跑起了 9B 模型</strong></p>
+<p>Garlic LLM 是个开源小项目。</p>
+<p>它把 Qwen3.5-9B 塞进了 2013 年的 PS4。</p>
+<p>Qwen3.5-9B 是通义的 90 亿参数模型。</p>
+<p>量化后只占 4.5GB，上下文 16K。</p>
+<p>开了推测解码，速度从 22 涨到 39 词每秒。</p>
+<p>推测解码就是先让小模型打草稿。</p>
+<p>用的是 Qwen3.5 自带的多词预测头。</p>
+<p>纯属好玩，但说明推测解码在哪都管用。</p>
+<p>来源：<a href="https://wisevoter.com/world/2026/11/15/garlic-llm-runs-ai-model-playstation-4">https://wisevoter.com/world/2026/11/15/garlic-llm-runs-ai-model-playstation-4</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>Spotify 上查过，没出新单集。</p>
+<p>SGLang Summit 第二天的文字总结还没出。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有够格的深读材料</strong></p>
+<p>值得跟的三条：</p>
+<ol><li>vLLM #62056，P/D 解耦加路由专家输出。跟你的评估方向直接相关。</li><li>LongCat-2.5 的昇腾部署手册，194 台卡的 P/D 分工。大规模 P/D 怎么配比的现成例子。</li><li>vLLM #65985，AMD 卡上推测解码草稿层融合。MI355X 上的实测数据。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 17 点版去重。 版本水位：全部没动。llama.cpp 快照仍是 b12428；vLLM 正式版 v0.33.0（PyPI 已确认，GitHub release 页最新条目仍为 v0.33.0rc3），预发布 tag v0.34.0rc4；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0。 vLLM 6 条首次汇总：#62056（P/D 解耦路由专家输出）、#64363（Mooncake KV 传输后端接口）、#65985（ROCm DSpark 草稿层单核启动）、#67393（Qwen3.5 动态 FP8 融合）、#67606（Canary 测试 fp32）、#62708（RDNA int4 lm_head 量化）。 SGLang 12 条首次汇总：#50156（Blackwell/Rubin 混合模型服务优化）、#50157（megakernel 绑定视图）、#49511（Gemma 4 纯文本模式）、#50663（扩散 tqdm 锁）、#50572（custom-ar-v2 收尾）、#49997 与 #49671（扩散文档）、#45655（NPU 手册）、#50659、#50641、#50492、#50027（CI）。 TRT-LLM 1 条首次汇总：#22289（测试：Qwen3.5-122B KV 占比上限）。 Dynamo 1 条首次汇总：#16970（Qwen3-VL MoE 图片感知 KV 路由）。 FlashInfer 3 条首次汇总：#8747（MLA 融合 FP8 SM120 稀疏 prefill）、#9377（量化算子空输入修补）、#9491（NVLink 通信测试）。 llama.cpp、LMDeploy、TGI 零合入。 LongCat-2.5 权重是 11 月 11 日报过的；本轮新增的是 11 月 15 日 The Decoder 分析里的昇腾部署手册（194 台卡，2/64/128 分工）。 Garlic LLM（PS4 跑 Qwen3.5-9B）首次汇总。 arXiv 按关键词查无新论文；本轮无深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-15-1900/">19点版</a></p></body></html>
