@@ -1,0 +1,246 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月16日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-16"/>
+<meta name="doc-ts" content="2026-11-16T19:04:58"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-16（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-16（11点版）</h1>
+<p>11点版来了，这轮框架很热闹。</p>
+<p>vLLM 合了 11 条，Dynamo 12 条。</p>
+<p>TRT-LLM 10 条，SGLang 4 条。</p>
+<p>llama.cpp 2 条，FlashInfer 3 条。</p>
+<p>LMDeploy 和 TGI 零合入。</p>
+<p>arXiv 新一批还没到。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了 llama.cpp 快照</strong></p>
+<p>llama.cpp 快照从 b12441 涨到 b12443。</p>
+<p>快照就是每天自动打的构建号。</p>
+<p>最新一个在 18:04 UTC。</p>
+<p>其余水位全没动。</p>
+<p>vLLM 的 v0.34.0 还是只有 tag。</p>
+<p>release 页没挂，PyPI 还是 0.33.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>不过 1.7.0 的发布准备又进了一步。</p>
+<p>FlashInfer 还是 v0.7.5rc2。</p>
+<p>来源：GitHub releases、tags、PyPI</p>
+<p><strong>vLLM：DeepSeek-V4.1 登上 A100 和 H100</strong></p>
+<p>#66497 是本轮最值得看的合入。</p>
+<p>它给 V4.1-Flash 写了套专用解码内核。</p>
+<p>V4.1 是 DeepSeek 的新 MoE 模型。</p>
+<p>MoE 就是专家混合，个头大、每次只激活一部分。</p>
+<p>以前 A100 跑不了它。</p>
+<p>它的注意力、索引器要新指令。</p>
+<p>A100 是老架构，这些指令都没有。</p>
+<p>H100 能跑，但走的是通用内核。</p>
+<p>通用内核就是没针对模型优化过的路。</p>
+<p>这回作者用 CuTe DSL 手写了一套。</p>
+<p>CuTe DSL 就是英伟达的 GPU 内核编写工具。</p>
+<p>解码那段路全换了。</p>
+<p>A100 单用户 320 词每秒。</p>
+<p>跟 InferenceX 的 H100 基线基本打平。</p>
+<p>H100 单用户 P90 是 488.8 词每秒。</p>
+<p>P90 就是 90% 的用户都好于这个数。</p>
+<p>是基线 323.6 的 1.51 倍。</p>
+<p>并发 8 时涨到 1.71 倍。</p>
+<p>精度跟 GB300 上的主线基本打平。</p>
+<p>GSM8K 是 0.9757，对主线 0.9742。</p>
+<p>长针 256K 九格全是满分。</p>
+<p>换 Marlin 后端单用户能到 526。</p>
+<p>Marlin 就是一种 4 位权重推理内核。</p>
+<p>但它每卡多占 8.3GB 显存。</p>
+<p>KV 缓存只能放 6.0M token。</p>
+<p>默认后端能放 10.3M。</p>
+<p>高并发长上下文，默认后端反而更稳。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66497">https://github.com/vllm-project/vllm/pull/66497</a></p>
+<p><strong>vLLM：Ripple-65B 在 MI350X 上跑通了</strong></p>
+<p>#67055 是 AMD 方向的配方更新。</p>
+<p>Ripple-65B 就是个 65B 的新模型。</p>
+<p>BF16 版在 MI350X 上验证通过。</p>
+<p>MI355X 上一轮已经验证过了。</p>
+<p>配方里加了个 AMD 专属开关。</p>
+<p>不加它，ROCm 会选错注意力内核。</p>
+<p>GSM8K 上慢 3 倍，SPEED-Bench 上慢 8.7 倍。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67055">https://github.com/vllm-project/vllm/pull/67055</a></p>
+<p><strong>vLLM：单核模式和低延迟解码合成一个开关</strong></p>
+<p>#67315 是个配置简化。</p>
+<p>以前开单核模式要走环境变量。</p>
+<p>低延迟解码后端又是另一个开关。</p>
+<p>两个开关管的是同一件事。</p>
+<p>现在合成一个，少记一个配置。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67315">https://github.com/vllm-project/vllm/pull/67315</a></p>
+<p><strong>vLLM：没装 pynccl 也能跑分布式了</strong></p>
+<p>#67882 修了个启动失败。</p>
+<p>pynccl 就是 NCCL 的 Python 封装。</p>
+<p>没装它，分布式初始化直接报错。</p>
+<p>现在自动退回 torch.distributed。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67882">https://github.com/vllm-project/vllm/pull/67882</a></p>
+<p><strong>vLLM：批量不变模式下 MXFP8 只挑稳妥的核</strong></p>
+<p>#67806 是个量化内核修补。</p>
+<p>批量不变就是结果不随批量大小变。</p>
+<p>MXFP8 就是 8 位微缩放浮点量化。</p>
+<p>以前在这种模式下可能挑错核。</p>
+<p>Marlin 和 FlashInfer 的输出会随批量变。</p>
+<p>现在先把不支持的核筛掉再选。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67806">https://github.com/vllm-project/vllm/pull/67806</a></p>
+<p><strong>vLLM：ROCm 的两条修补</strong></p>
+<p>#59098 修了 AITER 注意力的上下文丢失。</p>
+<p>乱序批次下会丢上下文。</p>
+<p>#66320 让 Qwen3.5 跑上 MI355X。</p>
+<p>走的是 eager 可断图模式。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/59098">https://github.com/vllm-project/vllm/pull/59098</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66320">https://github.com/vllm-project/vllm/pull/66320</a></p>
+<p><strong>vLLM：其余四条</strong></p>
+<p>#67917、#67605、#66032、#64176 都是 CI 测试。</p>
+<p><strong>SGLang：DeepSeek-V4 的路由专家也能跑 MXFP8 了</strong></p>
+<p>#49591 是给 RL 训练准备的。</p>
+<p>路由专家就是 MoE 里按需激活的那部分。</p>
+<p>以前只有 MXFP4 档能这么玩。</p>
+<p>现在 MXFP8 档也行了。</p>
+<p>训练器可以在线发 MXFP8 的专家权重。</p>
+<p>rollout 那边直接接着用，不用转格式。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49591">https://github.com/sgl-project/sglang/pull/49591</a></p>
+<p><strong>SGLang：一个请求就能拖垮整台服务器的 bug 修了</strong></p>
+<p>#50555 修了个崩溃。</p>
+<p>Rust 服务器就是 SGLang 的新版服务入口。</p>
+<p>开了某种隐藏状态模式后。</p>
+<p>一个请求就能把整台服务器拖垮。</p>
+<p>现在直接拒绝这种请求。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50555">https://github.com/sgl-project/sglang/pull/50555</a></p>
+<p><strong>SGLang：其余两条</strong></p>
+<p>#50489 是 AMD 的 nightly 评测。</p>
+<p>#46877 修了 XPU 上扩散模型的编译问题。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50489">https://github.com/sgl-project/sglang/pull/50489</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46877">https://github.com/sgl-project/sglang/pull/46877</a></p>
+<p><strong>TRT-LLM：Kimi K3 的共享专家也能跑 MXFP8 了</strong></p>
+<p>#21959 是个可选的量化路径。</p>
+<p>共享专家就是所有 token 都走的那部分专家。</p>
+<p>在 SM107 卡上走 MXFP8 融合核。</p>
+<p>SM107 就是 Rubin 架构的卡。</p>
+<p>要手动开环境变量，默认不开。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21959">https://github.com/NVIDIA/TensorRT-LLM/pull/21959</a></p>
+<p><strong>TRT-LLM：NVFP4 矩阵乘的时序修了</strong></p>
+<p>#22287 修了个 SM103 上的竞态。</p>
+<p>NVFP4 就是 4 位浮点量化。</p>
+<p>缩放因子加载前要先等依赖的网格。</p>
+<p>不等就可能读到错的数。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22287">https://github.com/NVIDIA/TensorRT-LLM/pull/22287</a></p>
+<p><strong>TRT-LLM：其余八条</strong></p>
+<p>六条是测试用例的豁免。</p>
+<p>两条是测试标记调整。</p>
+<p><strong>llama.cpp：聊天界面支持 Inkling 解析了</strong></p>
+<p>#32381 是个聊天功能。</p>
+<p>Inkling 就是 Thinking Machines 的模型格式。</p>
+<p>聊天界面现在能解析它的格式。</p>
+<p>#32416 是贡献文档整理。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32381">https://github.com/ggml-org/llama.cpp/pull/32381</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32416">https://github.com/ggml-org/llama.cpp/pull/32416</a></p>
+<p><strong>FlashInfer：批量不变模式有了 FP8 的 MoE 后端</strong></p>
+<p>#9406 是第二个批量不变 MoE 后端。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>FP8 逐张量量化现在也能进统一 MoE 层。</p>
+<p>#9397 修了个多余的拷贝。</p>
+<p>读题规划时拷了一份 KV 长度。</p>
+<p>FA2 内核根本不读它。</p>
+<p>现在不拷了。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9406">https://github.com/flashinfer-ai/flashinfer/pull/9406</a></p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9397">https://github.com/flashinfer-ai/flashinfer/pull/9397</a></p>
+<p><strong>FlashInfer：其余一条</strong></p>
+<p>#9424 是测试提速。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9424">https://github.com/flashinfer-ai/flashinfer/pull/9424</a></p>
+<p><strong>Dynamo：1.7.0 发布准备又进了一步</strong></p>
+<p>四条 cherry-pick 合进了 1.7.0 分支。</p>
+<p>cherry-pick 就是把主线的改动摘过来。</p>
+<p>ModelExpress 也涨到了 0.8.0。</p>
+<p>正式版应该快挂出来了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18757">https://github.com/ai-dynamo/dynamo/pull/18757</a></p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18750">https://github.com/ai-dynamo/dynamo/pull/18750</a></p>
+<p><strong>Dynamo：前端路由扩展能接 POST 了</strong></p>
+<p>#18492 是个前端功能。</p>
+<p>Python 路由扩展以前只认 GET。</p>
+<p>现在 POST、PUT、PATCH、DELETE 都能接。</p>
+<p>还能读请求体和请求头。</p>
+<p>异步处理函数也能跑了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18492">https://github.com/ai-dynamo/dynamo/pull/18492</a></p>
+<p><strong>Dynamo：P/D 拆分下长读题不再被误杀</strong></p>
+<p>#18738 修了个 P/D 相关的误判。</p>
+<p>P/D 拆分就是读题和解码分开跑。</p>
+<p>读题节点做多分钟的分块读题时。</p>
+<p>好久没有流式输出，探针以为它死了。</p>
+<p>直接把它重启了。</p>
+<p>现在看门狗的超时放宽了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18738">https://github.com/ai-dynamo/dynamo/pull/18738</a></p>
+<p><strong>Dynamo：其余五条</strong></p>
+<p>#18390 是容器依赖升级。</p>
+<p>#18282 是可观测性文档。</p>
+<p>#18006 是镜像换到 vLLM v0.33.0。</p>
+<p>#17968 和 #17467 是测试和前端修补。</p>
+<p><strong>LMDeploy、TGI 这轮零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没到</strong></p>
+<p>最新还是 11 月 12 日提交那批。</p>
+<p>1 点版已经报过 Callo 那三篇。</p>
+<p>下一批按惯例周二 00:00 UTC 到。</p>
+<p>这轮先空着。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新业内新闻</strong></p>
+<p>搜了一圈，都是之前报过的旧闻。</p>
+<p>Glimmer 对比 1 点版报过。</p>
+<p>LongCat-2.5 是 11 月 15 日报过的。</p>
+<p>SambaNova 那条 23 点版报过。</p>
+<p>SGLang 联盟是 11 月 12 日的消息。</p>
+<p>TorchTPU 是 10 月 20 日报过的。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>SGLang Summit 第二天的文字总结还没出。</p>
+<h2>值得深入学</h2>
+<p><strong>新深读：DeepSeek-V4.1 登上 A100 和 H100</strong></p>
+<p>#66497 的精读笔记已写好。</p>
+<p>讲的是老卡跑新模型的专用内核。</p>
+<p>A100 单用户跟 H100 基线打平。</p>
+<p>H100 单用户 P90 快一半多。</p>
+<p>跟 H100 上的模型评估直接相关。</p>
+<p>值得跟的还有两条：</p>
+<ol><li>Dynamo #18738，长读题不再被探针误杀。跑 P/D 拆分的人要看。</li><li>SGLang #49591，路由专家 MXFP8。做 RL rollout 的人要看。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 9 点版去重。 版本水位：llama.cpp 快照 b12441→b12443（18:04 UTC）；vLLM v0.34.0 仍只有 tag（release 页未挂，PyPI 仍 0.33.0）；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2（1.7.0 发布准备继续）；FlashInfer v0.7.5rc2。 vLLM 11 条首次汇总：#66497（DSv4.1 上 A100/H100）、#67055（Ripple-65B 上 MI350X/MI355X）、#67315（单核模式与低延迟解码合成一开关）、#67882（pynccl 缺失时退回 torch.distributed）、#67806（批量不变模式 MXFP8 只挑稳妥核）、#59098（ROCM AITER FA 上下文丢失修复）、#66320（Qwen3.5 上 MI355X）、#67917/#67605/#66032/#64176（CI 与测试）。 SGLang 4 条首次汇总：#49591（DSv4 路由专家 MXFP8）、#50555（Rust 服务器隐藏状态崩溃修复）、#50489（AMD nightly 评测）、#46877（XPU 扩散编译修复）。 TRT-LLM 10 条首次汇总：#21959（Kimi K3 共享专家 MXFP8）、#22287（SM103 NVFP4 GEMM 时序修复）、#22380/#22378/#22376/#22375/#22311/#22310（测试豁免）、#22262/#21702（测试标记调整）。 llama.cpp 2 条首次汇总：#32381（聊天 Inkling 解析）、#32416（贡献文档）。 FlashInfer 3 条首次汇总：#9406（批量不变 FP8 MoE 后端）、#9397（FA2 读题跳过多余 KV 长度拷贝）、#9424（测试提速）。 Dynamo 12 条首次汇总：#18757/#18756/#18755/#18754（1.7.0 cherry-pick）、#18750（ModelExpress 涨到 0.8.0）、#18492（前端路由扩展接 POST）、#18738（长读题看门狗超时放宽）、#18390（容器依赖升级）、#18282（NVTX 文档）、#18006（镜像换 vLLM v0.33.0）、#17968（Qwen3.5 Mamba 缓存上限）、#17467（SGLang 工具调用解析按分隔符过滤）。 LMDeploy、TGI 零合入。 arXiv：无新批次（最新仍为 11 月 12 日提交，1点版已报；下一批约 11 月 17 日 00:00 UTC）。 业内新闻：无新内容（Glimmer 对比 1 点版已报；LongCat-2.5 11 月 15 日已报；SambaNova 11 月 15 日 23 点版已报；SGLang 联盟 11 月 12 日消息；TorchTPU 10 月 20 日已报）。 Latent Space 最新单集仍是 11 月 10 日；SGLang Summit 第二天文字总结仍未出。 本轮新深读 1 篇：vLLM #66497 DeepSeek-V4.1 上 A100/H100 精读。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-16-1100/">11点版</a></p></body></html>
