@@ -1,0 +1,289 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月16日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-16"/>
+<meta name="doc-ts" content="2026-11-16T09:06:37"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-16（1点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-16（1点版）</h1>
+<p>1点版来了，凌晨也不冷清。</p>
+<p>vLLM 合了十四条，SGLang 十三条。</p>
+<p>TRT-LLM 五条，LMDeploy 一条。</p>
+<p>arXiv 新一批到了，三篇论文。</p>
+<p>其中 Callo 值得深读，笔记在下面。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：FlashInfer 的 rc2 发布页上线了</strong></p>
+<p>FlashInfer 的 v0.7.5rc2 发布页出来了。</p>
+<p>发布时间是今天 08:52 UTC。</p>
+<p>上轮还只有 tag，发布页是 rc1。</p>
+<p>其余水位全没动。</p>
+<p>llama.cpp 快照还是 b12430。</p>
+<p>vLLM 的 v0.34.0 还是只有 tag。</p>
+<p>release 页没挂，PyPI 还是 0.33.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>来源：GitHub releases、tags、PyPI</p>
+<p><strong>vLLM：Rust 前端一次补了七个开关</strong></p>
+<p>Rust 前端就是 vLLM 新写的入口。</p>
+<p>Python 能开的开关，它这边一个个补。</p>
+<p>#67873 补了默认多模态 LoRA。</p>
+<p>LoRA 就是给模型外挂的小适配器。</p>
+<p>#67871 补了 --hf-token。</p>
+<p>还顺手把 token 藏起来了。</p>
+<p>开发模式下，服务信息页不再明文吐 token。</p>
+<p>#67870 给多模态缓存键打标签。</p>
+<p>以前别人能拿 uuid 撞进别人的缓存。</p>
+<p>现在键上带了来源，撞不进去了。</p>
+<p>#67869 和 #63749 是报错码对齐。</p>
+<p>引擎出错时，非流式返回 500。</p>
+<p>请求里的媒体有问题时，返回 400。</p>
+<p>#63912 让透明图先垫白底再处理。</p>
+<p>跟 Python 的做法保持一致。</p>
+<p>#61788 把对象存储拉下来的模型目录传过去。</p>
+<p>七条全是补齐活，没改性能。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67873">https://github.com/vllm-project/vllm/pull/67873</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67871">https://github.com/vllm-project/vllm/pull/67871</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67870">https://github.com/vllm-project/vllm/pull/67870</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67869">https://github.com/vllm-project/vllm/pull/67869</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63912">https://github.com/vllm-project/vllm/pull/63912</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63749">https://github.com/vllm-project/vllm/pull/63749</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/61788">https://github.com/vllm-project/vllm/pull/61788</a></p>
+<p><strong>vLLM：MoRIIO 写 KV 按每层自己的头数切</strong></p>
+<p>#62474 是个 P/D 搬运修补。</p>
+<p>MoRIIO 是搬运 KV 缓存的后端。</p>
+<p>以前写数据按全模型最大的头数切。</p>
+<p>Gemma4 各层的头数不一样。</p>
+<p>有的层没有那么多头，写过去就越界。</p>
+<p>现在每层按自己的头数切。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/62474">https://github.com/vllm-project/vllm/pull/62474</a></p>
+<p><strong>vLLM：多模态修了两处视频位置 bug</strong></p>
+<p>#67744 修的是 LLaVA-OneVision。</p>
+<p>LLaVA-OneVision 是个看视频的模型。</p>
+<p>一个请求里多个视频帧数不一样会断。</p>
+<p>现在每个视频各算各的 embedding 序列。</p>
+<p>#66632 修的是视频剪枝后的位置。</p>
+<p>EVS 是视频剪枝，剪掉不重要的帧。</p>
+<p>剪完要重算每 token 的位置编码。</p>
+<p>M-RoPE 就是多模态的位置编码。</p>
+<p>以前只有第一级流水线重算了。</p>
+<p>后面几级还拿着剪之前的旧位置跑。</p>
+<p>现在第一级把新位置传给后面几级。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67744">https://github.com/vllm-project/vllm/pull/67744</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66632">https://github.com/vllm-project/vllm/pull/66632</a></p>
+<p><strong>vLLM：NCCL 加载顺序修了个权重变零的 bug</strong></p>
+<p>#65487 是个分布式修补。</p>
+<p>NCCL 是多卡互相传数据的库。</p>
+<p>权重直接重载时，先清零再加载。</p>
+<p>以前加载和清零可能排错队。</p>
+<p>清零后到，就把刚加载的权重盖成零。</p>
+<p>现在加载先等调用方的流。</p>
+<p>清零不会再插队了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65487">https://github.com/vllm-project/vllm/pull/65487</a></p>
+<p><strong>vLLM：其余三条</strong></p>
+<p>#67788 让 KV 卸载指标按实际传输算。</p>
+<p>以前磁盘上已有的块也算成写出去了。</p>
+<p>数字虚高，这回改实了。</p>
+<p>#65347 是权重重载的测试。</p>
+<p>#64965 让解码注意力拒绝 TORCH_SDPA。</p>
+<p>TORCH_SDPA 只是给视觉编码器用的。</p>
+<p>解码误配上它，现在启动就拦下。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67788">https://github.com/vllm-project/vllm/pull/67788</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65347">https://github.com/vllm-project/vllm/pull/65347</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64965">https://github.com/vllm-project/vllm/pull/64965</a></p>
+<p><strong>SGLang：DeepSeek-V4.1 的 prefill CP 进了 P/D</strong></p>
+<p>#40333 是本轮最值得看的合入。</p>
+<p>prefill CP 就是读题时把上下文切开分卡算。</p>
+<p>BCG 是能断开重连的 CUDA 图。</p>
+<p>CUDA 图是把一串操作打包加速的办法。</p>
+<p>以前 V4.1 的 prefill 节点开 CP 会跟图重放打架。</p>
+<p>不同长度的请求一混，图就对不上号。</p>
+<p>现在 CP 和 BCG 能一起用了。</p>
+<p>P/D 拆开跑时，读题节点也能分卡算。</p>
+<p>这是 2/N 系列的第二块，还没完。</p>
+<p>跟你的 P/D 评估直接相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/40333">https://github.com/sgl-project/sglang/pull/40333</a></p>
+<p><strong>SGLang：旧网关整个删了，全迁到新路由</strong></p>
+<p>#50671 和 #50732 是一对重构。</p>
+<p>sgl-model-gateway 是旧的模型网关。</p>
+<p>sgl-router 是 Rust 写的新路由。</p>
+<p>#50671 先把所有人都迁到新路由。</p>
+<p>旧网关只留源码，不再有人用。</p>
+<p>#50732 再把旧网关整个删掉。</p>
+<p>一共删了约 12.6 万行代码。</p>
+<p>部署脚本里还指着旧网关的，要改。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50671">https://github.com/sgl-project/sglang/pull/50671</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50732">https://github.com/sgl-project/sglang/pull/50732</a></p>
+<p><strong>SGLang：AMD 那边配方和验证核齐上</strong></p>
+<p>#50402 给 cookbook 加了新配方。</p>
+<p>Qwen3.5 在 MI300X 上跑 FP8 智能体任务。</p>
+<p>FP8 就是 8 位量化，省显存。</p>
+<p>还开了 FP8 的 KV 缓存。</p>
+<p>#48118 给 GDN 的验证加了 aiter 后端。</p>
+<p>GDN 是 Qwen3-Next 的线性注意力层。</p>
+<p>MTP 验证就是多 token 预测的验算步。</p>
+<p>以前 ROCm 上这步只有 Triton 核。</p>
+<p>现在 aiter 的核也能用了。</p>
+<p>#44612 把 KDA 的 MTP 验证核扩到 Hopper。</p>
+<p>KDA 是一种注意力内核。</p>
+<p>以前只在 Blackwell 上编得过。</p>
+<p>现在 Hopper 卡也能跑这条融合核。</p>
+<p>#41382 重调了稀疏 paged-prefill 的启动配置。</p>
+<p>针对 gfx1250，就是 MI355X 那代卡。</p>
+<p>#42224 给 NPU 加了 INT8 索引加速。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50402">https://github.com/sgl-project/sglang/pull/50402</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48118">https://github.com/sgl-project/sglang/pull/48118</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/44612">https://github.com/sgl-project/sglang/pull/44612</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/41382">https://github.com/sgl-project/sglang/pull/41382</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/42224">https://github.com/sgl-project/sglang/pull/42224</a></p>
+<p><strong>SGLang：扩散模型三条，外加一条 NPU 测试</strong></p>
+<p>#49599 让 DGX Spark 跑 H3 Image 的 FP8 注意力。</p>
+<p>H3 Image 是 MiniMax 的文生图模型。</p>
+<p>DGX Spark 是英伟达的小主机。</p>
+<p>以前后端把这张卡排除在外了。</p>
+<p>现在原生出图能走 FP8 注意力了。</p>
+<p>#46100 把大条件缓存键分块并行哈希。</p>
+<p>以前算键之前不知道命不命中。</p>
+<p>每次请求都要先哈希一遍大图。</p>
+<p>现在分块并行算，请求路径省了时间。</p>
+<p>#50669 和 #48503 是扩散模型的文档。</p>
+<p>#44736 是 NPU 的测试覆盖。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49599">https://github.com/sgl-project/sglang/pull/49599</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46100">https://github.com/sgl-project/sglang/pull/46100</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50669">https://github.com/sgl-project/sglang/pull/50669</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48503">https://github.com/sgl-project/sglang/pull/48503</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/44736">https://github.com/sgl-project/sglang/pull/44736</a></p>
+<p><strong>TRT-LLM：Mistral Large 4 低批量解码融了一个核</strong></p>
+<p>#22250 是个性能优化。</p>
+<p>它把 FP8 量化和矩阵乘融成一个核。</p>
+<p>FP8 量化就是把激活值压成 8 位。</p>
+<p>只针对 Mistral Large 4 低批量解码。</p>
+<p>跑在 SM107 上，就是 Rubin 卡。</p>
+<p>少了一个量化核，也少了一块中间显存。</p>
+<p>其余四条都是测试和基建。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22250">https://github.com/NVIDIA/TensorRT-LLM/pull/22250</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22324">https://github.com/NVIDIA/TensorRT-LLM/pull/22324</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22115">https://github.com/NVIDIA/TensorRT-LLM/pull/22115</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21174">https://github.com/NVIDIA/TensorRT-LLM/pull/21174</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21010">https://github.com/NVIDIA/TensorRT-LLM/pull/21010</a></p>
+<p><strong>LMDeploy：数 token 跟生成端对齐了</strong></p>
+<p>#5123 是个小修补。</p>
+<p>count_tokens 接口以前不认思考配置。</p>
+<p>生成接口认，两个数会对不上。</p>
+<p>现在两边走同一套配置，数就一致了。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5123">https://github.com/InternLM/lmdeploy/pull/5123</a></p>
+<p><strong>FlashInfer：SM90 的 MLA 滑窗解码再提速</strong></p>
+<p>#9511 优化了 DOTS3 的 MLA 滑窗解码。</p>
+<p>MLA 是一种压缩注意力机制。</p>
+<p>滑窗就是只看最近一段上下文。</p>
+<p>以前按整批请求的窗口算页范围。</p>
+<p>现在按每个查询 token 自己的窗口算。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9511">https://github.com/flashinfer-ai/flashinfer/pull/9511</a></p>
+<p><strong>llama.cpp、TGI、Dynamo 这轮零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>Callo：智能体改上下文，别干等重算了</strong></p>
+<p>Callo 是杜克大学的新论文。</p>
+<p>它盯的是智能体改上下文那个疼点。</p>
+<p>智能体一改前面的上下文，缓存就失效了。</p>
+<p>后面那段 KV 全得重算，请求只能干等。</p>
+<p>这叫缓存失效，英文叫 cache miss。</p>
+<p>Callo 的主意是：失效的 KV 别扔。</p>
+<p>它跟正确的只差一点点，拿来打草稿正好。</p>
+<p>一边让 prefill 节点重算正确的 KV。</p>
+<p>一边让 decode 节点用失效 KV 先起草。</p>
+<p>等正确的 KV 流到了，再验算一遍。</p>
+<p>验算过了才提交，没过的丢掉重算。</p>
+<p>输出跟原来一模一样，不损失精度。</p>
+<p>数字很实在：失效 KV 打的 32 个词草稿。</p>
+<p>整窗通过率 65%，正确的 KV 也才 80%。</p>
+<p>三组模型上，全请求比 vLLM 快 1.05 到 1.19 倍。</p>
+<p>中度负载下主配置快 1.14 倍。</p>
+<p>这篇值得深读，笔记在下面。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.18459">https://arxiv.org/abs/2611.18459</a></p>
+<p><strong>VelServe：解码抖动也能排队形了</strong></p>
+<p>VelServe 盯的是解码时的抖动。</p>
+<p>抖动就是某一步突然变慢，拖住整批请求。</p>
+<p>长回答要跑几百步，偶尔慢一次就超时。</p>
+<p>它按自己实测的尾部延迟定每步塞多少读题活。</p>
+<p>留够余量，超时就少了。</p>
+<p>三组模型上，好过最强基线 2.4 到 2.9 倍。</p>
+<p>DeepSeek-V2-Lite 上 4.4 倍。</p>
+<p>8 卡 P/D 拆开跑，达标请求翻倍还多。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.18392">https://arxiv.org/abs/2611.18392</a></p>
+<p><strong>Fuse-All MoE：TPU 上专家不均分也有救了</strong></p>
+<p>这是个 TPU 内核设计。</p>
+<p>MoE 模型每次只激活几个专家。</p>
+<p>专家分得不均，有的核闲着有的核排队。</p>
+<p>它把收 token、算专家、写回全融进一个核。</p>
+<p>偏斜的 prefill 任务，内核时间从 2.3 倍压到 1.09 倍。</p>
+<p>解码用对称 EP8TP2，延迟最多降 21.3%。</p>
+<p>整系统吞吐比 Megablox 高 34.5%。</p>
+<p>TPU 路线，跟你的卡不直接对口。</p>
+<p>但专家负载均衡那招可以借鉴。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.17857">https://arxiv.org/abs/2611.17857</a></p>
+<h2>业内新闻</h2>
+<p><strong>有人实测了 Muse Glimmer 30B，两家打平</strong></p>
+<p>Medium 上刚出的一篇实测对比。</p>
+<p>Muse Glimmer 30B 是新出的推理模型。</p>
+<p>同一权重、同一 131k 上下文、18 组对照。</p>
+<p>吞吐基本打平，峰值 428.7 对 432.1。</p>
+<p>首字 SGLang 赢了 12 格。</p>
+<p>长提示词解码 vLLM 略胜一筹。</p>
+<p>结论很直白：要首字选 SGLang。</p>
+<p>要长提示词解码选 vLLM。</p>
+<p>数字是作者单机 TP2 自测，只供参考。</p>
+<p>来源：<a href="https://medium.com/@baylleklilou7/muse-glimmer-30b-fp8-sglang-vs-vllm-63184d19d987">https://medium.com/@baylleklilou7/muse-glimmer-30b-fp8-sglang-vs-vllm-63184d19d987</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>Spotify 上查过，没出新单集。</p>
+<p>SGLang Summit 第二天的文字总结还没出。</p>
+<h2>值得深入学</h2>
+<p><strong>Callo：失效 KV 打草稿，P/D 里的等待变生产力</strong></p>
+<p>智能体改上下文，缓存失效就得重算。</p>
+<p>Callo 让 decode 节点先用失效 KV 起草。</p>
+<p>等 prefill 节点算出正确的，再验算提交。</p>
+<p>输出无损，全请求快 1.05 到 1.19 倍。</p>
+<p>跟你的 P/D 评估和推测解码都对口。</p>
+<p>深读笔记已写好，见下。</p>
+<p>值得跟的还有两条：</p>
+<ol><li>SGLang #40333，V4.1 的 prefill CP 进 P/D。读题分卡那块要看。</li><li>Muse Glimmer 实测对比。两家打平，首字 SGLang 胜。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 23 点版去重。 版本水位：FlashInfer v0.7.5rc2 发布页上线（2026-11-16T08:52:57Z）；llama.cpp 快照仍 b12430；vLLM v0.34.0 仍只有 tag（release 页未挂、PyPI 仍 0.33.0）；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2。 vLLM 14 条首次汇总：#67873（Rust 前端默认多模态 LoRA）、#67871（Rust 前端 --hf-token，藏 token）、#67870（Rust 前端缓存键打标签）、#67869（Rust 前端非流式引擎错返 500）、#63912（Rust 前端透明图垫白底）、#63749（Rust 前端坏媒体返 400）、#61788（Rust 前端对象存储模型目录）、#62474（MoRIIO WRITE 按层头数切，Gemma4）、#67744（LLaVA-OneVision 多视频帧数修补）、#66632（MRV2 EVS 后 M-RoPE 位置传后续流水线级）、#65487（NCCL 打包加载等调用方流）、#67788（KV Offload 指标按实际传输字节）、#65347（权重重载测试）、#64965（解码注意力拒 TORCH_SDPA）。 SGLang 13 条首次汇总：#40333（DeepSeek-V4.1 prefill CP + BCG 进 P/D，2/N）、#50732（删 sgl-model-gateway，约 12.6 万行）、#50671（全迁 sgl-router）、#50402（Qwen3.5 MI300X FP8 智能体配方）、#48118（GDN 线性链验证 aiter 后端）、#44612（KDA MTP 验证核扩 SM90）、#41382（dsv4 稀疏 paged-prefill 重调 gfx1250）、#42224（NPU INT8 LightningIndexer）、#49599（H3 Image FP8 注意力上 DGX Spark）、#46100（条件缓存键分块并行哈希）、#50669、#48503（扩散文档）、#44736（NPU CI）。 TRT-LLM 5 条首次汇总：#22250（Mistral Large 4 低 M 解码 FP8 量化+GEMM 融合，SM107）、#22324、#22115（测试）、#21174、#21010（基建）。 LMDeploy 1 条首次汇总：#5123（count_tokens 思考配置对齐）。 FlashInfer 1 条首次汇总：#9511（SM90 DOTS3 MLA 滑窗解码优化）。 llama.cpp、TGI、Dynamo 零合入。 arXiv 新三篇（2026-11-13 提交，11 月 16 日 00:00 UTC 批次）：Callo（2611.18459，失效 KV 推测解码 + P/D，全请求 1.05–1.19×）、VelServe（2611.18392，解码抖动调度，SLO goodput 2.4–2.9×，V2-Lite 4.4×）、Fuse-All MoE（2611.17857，TPU 专家负载均衡，系统吞吐 +34.5%）。 Muse Glimmer 30B FP8 实测对比（Medium，2026-11-16T07:29:31Z）：18 组对照、TP2、131k 上下文，吞吐峰值 vLLM 428.72 对 SGLang 432.10 tok/s，首字均值 1135.8 对 1078.2 ms，SGLang 赢 12/18 首字格。 Latent Space 最新一期仍是 11 月 10 日（Spotify 已核验）；SGLang Summit 第二天文字总结仍未出。 深读笔记：Callo（arXiv:2611.18459，2026-11-16 1点版）。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-16-0100/">1点版</a></p></body></html>
