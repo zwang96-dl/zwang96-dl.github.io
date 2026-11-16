@@ -1,0 +1,210 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月15日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-16T06:59:46"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-15（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-15（23点版）</h1>
+<p>23点版来了，周日深夜还挺热闹。</p>
+<p>vLLM 合了十一条，SGLang 八条。</p>
+<p>TRT-LLM 五条，llama.cpp 两条。</p>
+<p>还多了一篇值得深读的技术博客。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了 llama.cpp 快照</strong></p>
+<p>llama.cpp 的快照从 b12428 涨到 b12430。</p>
+<p>快照就是每天自动打的构建号。</p>
+<p>vLLM 的 v0.34.0 还是只有 tag。</p>
+<p>release 页查还是 404，PyPI 还是 0.33.0。</p>
+<p>说白了，正式发布还没到。</p>
+<p>其余全没动。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags、PyPI</p>
+<p><strong>vLLM：MiniMax-M3.1-Flash 在 GB300 上解码快了 1.45 倍</strong></p>
+<p>#66324 是英伟达做的专用解码。</p>
+<p>MiniMax-M3.1-Flash 是 MiniMax 的新模型。</p>
+<p>只针对小批量解码，就是智能体那种一次几条请求的场景。</p>
+<p>一台 GB300 托盘、TP4 能跑。</p>
+<p>TP4 就是把模型切四份分卡算。</p>
+<p>还支持 DSpark 推测解码，最多 7 个草稿 token。</p>
+<p>推测解码就是先让小模型打草稿。</p>
+<p>需要手动开开关，默认不生效。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66324">https://github.com/vllm-project/vllm/pull/66324</a></p>
+<p><strong>vLLM：Hy4 的 prefill 在 8 张 H200 上快了六成</strong></p>
+<p>#67490 开的是 ShardQ prefill。</p>
+<p>Hy4 是一种稀疏注意力模型。</p>
+<p>ShardQ 就是把 prefill 按 token 切开分卡算。</p>
+<p>8 张 H200 上，输入 8192 时快 59.10%。</p>
+<p>输入 32768 时快 62.53%。</p>
+<p>复用现成的切分和算子，没造新轮子。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67490">https://github.com/vllm-project/vllm/pull/67490</a></p>
+<p><strong>vLLM：序列并行终于能跟流水线并行一起开了</strong></p>
+<p>#66866 和 #65947 是一对。</p>
+<p>序列并行就是把长提示词切开分卡算。</p>
+<p>流水线并行就是把模型层数切开分卡跑。</p>
+<p>以前两者一起开，下一级拿到的张量不对。</p>
+<p>现在每级出口先拼回整份再切开。</p>
+<p>覆盖 Qwen3-Next 和 Qwen3.5。</p>
+<p>还覆盖 DeepSeek-V2 和 V3。</p>
+<p>DeepSeek-V3.2 那条还修了算错结果的 bug。</p>
+<p>GSM8K 准确率跟单级流水线打平。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66866">https://github.com/vllm-project/vllm/pull/66866</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65947">https://github.com/vllm-project/vllm/pull/65947</a></p>
+<p><strong>vLLM：新副本启动不用再读一遍权重了</strong></p>
+<p>#64641 是个启动加速。</p>
+<p>以前每个副本启动都要从磁盘读权重。</p>
+<p>现在第二个副本直接从已启动的副本那拷。</p>
+<p>同一台机器走 CUDA IPC。</p>
+<p>CUDA IPC 就是卡间直接传显存。</p>
+<p>跨机器走 Mooncake 的 RDMA。</p>
+<p>RDMA 就是网卡直通内存、不走 CPU。</p>
+<p>多副本扩容时启动更快了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64641">https://github.com/vllm-project/vllm/pull/64641</a></p>
+<p><strong>vLLM：其余六条</strong></p>
+<p>#67258 让 KV 卸载的共享区路径能配置了。</p>
+<p>KV 卸载就是把草稿纸搬到内存或硬盘。</p>
+<p>#67237 要求 GLM-5.3-Flash 必须用 Rust 做预处理。</p>
+<p>以前的 Python 路径跟官方做法对不上。</p>
+<p>现在只留 Rust 这一条路。</p>
+<p>#65197 是 KV 卸载的改名小修补。</p>
+<p>#67845 和 #67761 是 CI 修补。</p>
+<p>#60801 是英特尔 XPU 的 Mamba2 内核修补。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67258">https://github.com/vllm-project/vllm/pull/67258</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67237">https://github.com/vllm-project/vllm/pull/67237</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65197">https://github.com/vllm-project/vllm/pull/65197</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67845">https://github.com/vllm-project/vllm/pull/67845</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67761">https://github.com/vllm-project/vllm/pull/67761</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/60801">https://github.com/vllm-project/vllm/pull/60801</a></p>
+<p><strong>SGLang：P/D 解耦修了一个会把内存吃光的 bug</strong></p>
+<p>#44576 是本轮最值得看的修补。</p>
+<p>P/D 解耦就是 prefill 和 decode 分开跑。</p>
+<p>问题出在多模态请求的收尾上。</p>
+<p>prefill 跑完标成已完成，清理函数却看不到。</p>
+<p>图片特征张量就一直留在 CPU 内存里。</p>
+<p>8 级流水线的 prefill 服务上，每个请求漏 280MB。</p>
+<p>跑着跑着宿主机内存就满了。</p>
+<p>现在 prefill 结束就释放，跟你的评估直接相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/44576">https://github.com/sgl-project/sglang/pull/44576</a></p>
+<p><strong>SGLang：Rubin 卡上的 MoE 权重能就近放了</strong></p>
+<p>#50608 是个性能优化。</p>
+<p>DeepGEMM 是 MoE 的矩阵乘法库。</p>
+<p>权重本地化就是把权重放进离算力近的内存。</p>
+<p>以前只在老架构上开，这回 SM 10.0 和 10.3 也能用了。</p>
+<p>SM 10.0 和 10.3 就是 Rubin 卡的算力代号。</p>
+<p>Rubin 是 Blackwell 之后的下一代卡。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50608">https://github.com/sgl-project/sglang/pull/50608</a></p>
+<p><strong>SGLang：其余五条</strong></p>
+<p>#49294 让 NPU 上的 DSpark 草稿层能多流并跑。</p>
+<p>DSpark 是一种推测解码方法。</p>
+<p>#50658 给扩散模型加了端到端画像。</p>
+<p>扩散模型就是文生图那类模型。</p>
+<p>#50668 和 #49998 是扩散模型的文档修补。</p>
+<p>#50105 是 NPU 的测试，#49697 是 CI。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49294">https://github.com/sgl-project/sglang/pull/49294</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50658">https://github.com/sgl-project/sglang/pull/50658</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50668">https://github.com/sgl-project/sglang/pull/50668</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49998">https://github.com/sgl-project/sglang/pull/49998</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50105">https://github.com/sgl-project/sglang/pull/50105</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49697">https://github.com/sgl-project/sglang/pull/49697</a></p>
+<p><strong>TRT-LLM：NVFP4 MLA 技术博客上线了</strong></p>
+<p>#21181 合入的是一篇技术博客。</p>
+<p>讲的是 MLA 的 KV 缓存怎么压到 4 位。</p>
+<p>MLA 是一种压缩注意力机制。</p>
+<p>DeepSeek-R1、Kimi K3 都在用它。</p>
+<p>这篇值得深读，笔记在下面。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21181">https://github.com/NVIDIA/TensorRT-LLM/pull/21181</a></p>
+<p><strong>TRT-LLM：其余四条都是测试</strong></p>
+<p>#22323、#22306、#22181 是测试豁免清理。</p>
+<p>#22168 给 Kimi 的线性层加了测试覆盖。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22323">https://github.com/NVIDIA/TensorRT-LLM/pull/22323</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22306">https://github.com/NVIDIA/TensorRT-LLM/pull/22306</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22181">https://github.com/NVIDIA/TensorRT-LLM/pull/22181</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22168">https://github.com/NVIDIA/TensorRT-LLM/pull/22168</a></p>
+<p><strong>llama.cpp：修了一个 AMD 卡上的 MoE 回退</strong></p>
+<p>#32344 修的是 HIP 上的 MoE 回归。</p>
+<p>HIP 是 AMD 卡的计算接口。</p>
+<p>#32332 让 server 拒绝模板不支持的推理力度。</p>
+<p>推理力度就是让模型想多深的档位。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32344">https://github.com/ggml-org/llama.cpp/pull/32344</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32332">https://github.com/ggml-org/llama.cpp/pull/32332</a></p>
+<p><strong>FlashInfer：一条测试修补</strong></p>
+<p>#9516 恢复了 FP8 注意力的测试覆盖。</p>
+<p>LMDeploy、Dynamo、TGI 这轮零合入。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9516">https://github.com/flashinfer-ai/flashinfer/pull/9516</a></p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 这轮还没刷出周一批次。</p>
+<p>最新一批还是 11 月 12 日的。</p>
+<p>下轮补扫。</p>
+<h2>业内新闻</h2>
+<p><strong>SambaNova 和英特尔联手演示了异构 P/D</strong></p>
+<p>两家在超算大会 SC26 上做了个演示。</p>
+<p>英特尔的 GPU 只负责读题。</p>
+<p>SambaNova 的 SN50 只负责逐字生成。</p>
+<p>读题就是 prefill，逐字生成就是 decode。</p>
+<p>跑的是 GLM-5.3。</p>
+<p>中间用 vLLM 和 Dynamo 做调度。</p>
+<p>KV 搬运走 NIXL。</p>
+<p>说白了，P/D 解耦还能跨厂商拼硬件。</p>
+<p>但演示没给实测延迟和吞吐数字。</p>
+<p>先当个方向看，别当性能结论。</p>
+<p>来源：<a href="https://www.unite.ai/sambanova-pairs-intel-gpus-with-sn50-for-air-cooled-ai-inference/">https://www.unite.ai/sambanova-pairs-intel-gpus-with-sn50-for-air-cooled-ai-inference/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>Spotify 上查过，没出新单集。</p>
+<p>SGLang Summit 第二天的文字总结还没出。</p>
+<h2>值得深入学</h2>
+<p><strong>TRT-LLM：NVFP4 MLA 技术博客</strong></p>
+<p>这篇讲 MLA 的 KV 缓存怎么压到 4 位。</p>
+<p>MLA 就是 DeepSeek 那种压缩注意力。</p>
+<p>4 位之后缓存小 1.6 倍，解码还更快。</p>
+<p>P/D 拆开跑时吞吐最高翻 2.3 倍。</p>
+<p>多轮智能体场景首字最快能省 3.5 倍。</p>
+<p>跟你的 KV 优化和 P/D 评估都对口。</p>
+<p>深读笔记已写好，见下。</p>
+<p>值得跟的还有两条：</p>
+<ol><li>SGLang #44576，P/D 多模态内存泄漏。跑多模态 P/D 的人要看。</li><li>vLLM #64641，权重镜像启动加速。多副本扩容时省时间。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 21 点版去重。 版本水位：llama.cpp 快照 b12428→b12430；vLLM v0.34.0 仍只有 tag（release 页 404、PyPI 仍 0.33.0）；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）。 vLLM 11 条首次汇总：#66324（MiniMax-M3.1-Flash GB300 专用解码，最高 1.45x）、#67490（Hy4 ShardQ prefill，8×H200 快 59.10%/62.53%）、#66866（Qwen3-Next/Qwen3.5/DeepSeek-V2/V3 SP+PP）、#65947（DeepSeek-V3.2 SP+PP 修错结果）、#64641（Fast Start 权重镜像 daemon2daemon）、#67258（KV Offload mmap_path 可配）、#67237（GLM-5.3-Flash 强制 Rust 预处理）、#65197（KV Offload 改名）、#67845（CI）、#67761（CI）、#60801（XPU Mamba2 内核）。 SGLang 8 条首次汇总：#44576（P/D 多模态特征泄漏，PP8 下每请求 280MB）、#50608（DeepGEMM 权重本地化 SM10.0/10.3）、#49294（NPU DSpark 多流草稿层）、#50658（扩散模型端到端画像）、#50668、#49998（扩散文档）、#50105（NPU 测试）、#49697（CI）。 TRT-LLM 5 条首次汇总：#21181（NVFP4 MLA 技术博客）、#22323、#22306、#22181（测试豁免）、#22168（KimiLinear 测试覆盖）。 llama.cpp 2 条首次汇总：#32344（MoE HIP 回归修补）、#32332（server 拒不支持的 reasoning_effort）。 FlashInfer 1 条首次汇总：#9516（FP8 注意力测试覆盖恢复）。 LMDeploy、Dynamo、TGI 零合入。 arXiv 本轮未刷出周一批次，最新仍是 11 月 12 日那批，下轮补扫。 SambaNova+Intel SC26 异构 P/D 演示（2026-11-15）：Intel GPU 读题、SN50 解码、GLM-5.3、vLLM+Dynamo+NIXL，无实测数字。 Latent Space 最新一期仍是 11 月 10 日（Spotify 已核验）；SGLang Summit 第二天文字总结仍未出。 深读笔记：TRT-LLM NVFP4 MLA 技术博客（2026-11-15 23点版）。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-15-2300/">23点版</a></p></body></html>
