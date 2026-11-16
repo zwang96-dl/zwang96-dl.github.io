@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月16日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-16"/>
+<meta name="doc-ts" content="2026-11-16T23:08:34"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-16（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-16（15点版）</h1>
+<p>15点版来了，这轮比较安静。</p>
+<p>SGLang 修了两个小毛病。</p>
+<p>一篇中文长文值得细读。</p>
+<p>arXiv 新一批还没到。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>llama.cpp 快照还是 b12445。</p>
+<p>vLLM 的 v0.34.0 还是只有 tag。</p>
+<p>release 页没挂，PyPI 还是 0.33.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc2。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：GLM-4.7-Flash 的前缀命中不再崩</strong></p>
+<p>#50849 修的是 DCP 下的一个崩溃。</p>
+<p>DCP 就是把超长上下文的 KV 切开分给多张卡。</p>
+<p>前缀命中就是提示词开头跟以前算过的一样。</p>
+<p>命中了直接复用草稿纸，不用重算。</p>
+<p>GLM-4.7-Flash 在 DCP 下一命中就崩。</p>
+<p>FlashInfer 后端直接报 AttributeError。</p>
+<p>原因是元数据没规划好。</p>
+<p>别的后端不走这条路，所以没崩。</p>
+<p>修完 GB300 上 2 卡测过。</p>
+<p>GSM8K 没掉分，5 次命中都正常。</p>
+<p>跑 GLM-4.7-Flash 加 DCP 的人，这条值得看。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50849">https://github.com/sgl-project/sglang/pull/50849</a></p>
+<p><strong>SGLang：Muse Glimmer 的视觉位置编反了</strong></p>
+<p>#50855 修的是视觉编码的位置顺序。</p>
+<p>Muse Glimmer 是个新的多模态模型。</p>
+<p>它的视觉编码器按横竖顺序取位置。</p>
+<p>但模型训练时用的是反过来的顺序。</p>
+<p>非方形图片的位置全错了。</p>
+<p>方形图不受影响。</p>
+<p>修之前误差最大 5.2。</p>
+<p>修完误差降到 7.7e-6。</p>
+<p>一张 640x480 的图前后都能描述对。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50855">https://github.com/sgl-project/sglang/pull/50855</a></p>
+<p><strong>其余小修补</strong></p>
+<p>llama.cpp #32436 修了 granite 混合模型的转换。</p>
+<p>Dynamo #18838 让 profiler 留住选定的 prefill CP。</p>
+<p>Dynamo #18856 删了一个没用的启动选项。</p>
+<p>vLLM #68025 和 #67993 都是 CI。</p>
+<p>TRT-LLM #22401 是 infra。</p>
+<p>LMDeploy、TGI、FlashInfer 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没到</strong></p>
+<p>最新还是 11 月 13 日提交那批。</p>
+<p>下一批按惯例今晚 16:00 到。</p>
+<p>这轮先空着。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新消息</strong></p>
+<p>Glimmer 对比、SambaNova 那些都报过了。</p>
+<h2>访谈与深度</h2>
+<p><strong>法医威尔：22 个推理框架的出身（值得深读）</strong></p>
+<p>这是本轮最值得看的长文。</p>
+<p>作者给 22 个推理框架打分。</p>
+<p>每个框架在 10 个维度上打 0 到 5 分。</p>
+<p>主流框架全生在 2023 年前后。</p>
+<p>Berkeley 和 ggml 两条血统拿走四分之三的注意力。</p>
+<p>新芯片别急着自建框架。</p>
+<p>先争取一个窄而有版本的接口。</p>
+<p>计费口径也在变。</p>
+<p>从按 token 算，变成按任务算。</p>
+<p>精读笔记已经写好，见下面。</p>
+<p>来源：<a href="https://vvill26.github.io/zh/2026/11/inference-framework-forensics/">https://vvill26.github.io/zh/2026/11/inference-framework-forensics/</a></p>
+<p><strong>Latent Space 还是 11 月 10 日那期</strong></p>
+<p>SGLang Summit 第二天的文字总结还没出。</p>
+<h2>值得深入学</h2>
+<p><strong>新深读：22 个推理框架的出身</strong></p>
+<p>法医威尔第二篇的精读笔记已写好。</p>
+<p>讲的是框架的血统、打分和新芯片的接法。</p>
+<p>跟你研究的 PD 解耦直接相关。</p>
+<p>异构 PD 先对数据面约定。</p>
+<p>AFD 按延迟目标分档。</p>
+<p>输出只占 2.7% 的 token。</p>
+<p>却占 51% 的钱。</p>
+<p>值得跟的还有一条：</p>
+<ol><li>SGLang #50849，GLM-4.7-Flash 的 DCP 前缀命中修好了。跑这套配置的人要看。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 13 点版去重。 版本水位：全没动（llama.cpp 快照 b12445；vLLM v0.34.0 仍只有 tag，PyPI 仍 0.33.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc2）。 SGLang 2 条首次汇总：#50849（DCP 下 GLM-4.7-Flash 前缀命中崩溃修复）、#50855（Muse Glimmer 视觉位置编码横竖修正）。 llama.cpp 1 条首次汇总：#32436（granite 混合模型转换修复）。 Dynamo 2 条首次汇总：#18838（profiler 保留选定 prefill CP）、#18856（删除无效启动选项）。 vLLM 2 条首次汇总（均为 CI）：#68025、#67993。 TRT-LLM 1 条首次汇总（infra）：#22401。 LMDeploy、TGI、FlashInfer 零合入。 arXiv：无新批次（最新仍为 11 月 13 日提交；下一批约 11 月 17 日 00:00 UTC，即 11 月 16 日 16:00 PST）。 访谈与深度：法医威尔第二篇（22 个推理框架）首次汇总；Latent Space 最新单集仍是 11 月 10 日；SGLang Summit 第二天文字总结仍未出。 本轮新深读 1 篇：法医威尔 22 个推理框架出身精读。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-16-1500/">15点版</a></p></body></html>
