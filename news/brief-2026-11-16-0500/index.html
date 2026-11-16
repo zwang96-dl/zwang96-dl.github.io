@@ -1,0 +1,181 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月16日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-16"/>
+<meta name="doc-ts" content="2026-11-16T13:02:18"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-16（5点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-16（5点版）</h1>
+<p>5点版来了，凌晨五点还挺忙。</p>
+<p>vLLM 合了五条，SGLang 两条。</p>
+<p>TRT-LLM 五条，Mooncake 三条。</p>
+<p>llama.cpp 快照连涨四格。</p>
+<p>arXiv 新一批还没到。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了 llama.cpp 快照</strong></p>
+<p>llama.cpp 的快照从 b12432 涨到 b12438。</p>
+<p>快照就是每天自动打的构建号。</p>
+<p>上午 11:16 先到 b12433。</p>
+<p>11:38 到 b12435，12:19 到 b12436。</p>
+<p>12:49 到 b12438。</p>
+<p>其余水位全没动。</p>
+<p>vLLM 的 v0.34.0 还是只有 tag。</p>
+<p>release 页没挂，PyPI 还是 0.33.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc2。</p>
+<p>来源：GitHub releases、tags、PyPI</p>
+<p><strong>vLLM：Mooncake 搬运少了一道转换</strong></p>
+<p>#67656 是本轮最值得看的合入。</p>
+<p>Mooncake 就是 P/D 之间搬 KV 的工具。</p>
+<p>以前传描述符要先转一遍列表。</p>
+<p>列表转换就是多余的中间步骤。</p>
+<p>现在直接按数组提交。</p>
+<p>描述符就是要搬哪块数据的清单。</p>
+<p>省掉转换，搬运开销就小了。</p>
+<p>跟你的 P/D 评估直接相关。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67656">https://github.com/vllm-project/vllm/pull/67656</a></p>
+<p><strong>vLLM：混合模型读题不断点了</strong></p>
+<p>#67866 修的是 GLM-5.3-Flash 和 Kimi-K3。</p>
+<p>这两款都是混合模型。</p>
+<p>混合模型就是注意力和状态空间混着用。</p>
+<p>Triton 后端读题时，提示会被切在 Mamba 块中间。</p>
+<p>切断的地方，以前没法续上。</p>
+<p>现在读题检查点按每条序列单独存。</p>
+<p>检查点就是中途存的进度。</p>
+<p>提示再长，也能从断点接着算。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67866">https://github.com/vllm-project/vllm/pull/67866</a></p>
+<p><strong>vLLM：FP8 权重重启不用重算了</strong></p>
+<p>#63673 是个启动加速。</p>
+<p>Fast Start 就是重启后快速恢复。</p>
+<p>FP8 权重就是 8 位浮点压缩过的权重。</p>
+<p>以前重启，压缩权重得重新处理一遍。</p>
+<p>现在处理好的权重和缩放值能复用。</p>
+<p>输出结果不变，重启更快。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63673">https://github.com/vllm-project/vllm/pull/63673</a></p>
+<p><strong>vLLM：其余两条</strong></p>
+<p>#67910 是 CI 的 GPU 活动采样。</p>
+<p>#65788 是 XPU 的注意力测试开关。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67910">https://github.com/vllm-project/vllm/pull/67910</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65788">https://github.com/vllm-project/vllm/pull/65788</a></p>
+<p><strong>SGLang：LFM3 全家都能跑了</strong></p>
+<p>#46858 给 LFM3 家族加了原生支持。</p>
+<p>LFM3 是 Liquid AI 的新模型家族。</p>
+<p>纯文本版只接文字。</p>
+<p>VL 版接图片和视频。</p>
+<p>Audio 版接音频。</p>
+<p>Omni 版四种输入全接。</p>
+<p>Omni 就是全模态都支持。</p>
+<p>多模态部署又多了一个选择。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46858">https://github.com/sgl-project/sglang/pull/46858</a></p>
+<p><strong>SGLang：多模态清缓存不再报 500 了</strong></p>
+<p>#45868 是个多模态修补。</p>
+<p>Pixtral、Mistral-3、LLaVA 这类服务。</p>
+<p>清缓存和更新权重时会报 500。</p>
+<p>原因是处理器包了一层，状态没传出来。</p>
+<p>现在直接返回选中的处理器。</p>
+<p>清缓存和热更新都恢复了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/45868">https://github.com/sgl-project/sglang/pull/45868</a></p>
+<p><strong>TRT-LLM：FP4 的 MLA 解码有新核</strong></p>
+<p>#21313 是个 FP4 解码优化。</p>
+<p>MLA 就是 DeepSeek 那种压缩注意力。</p>
+<p>FP4 就是 4 位浮点量化。</p>
+<p>整块前缀复用现在能用了。</p>
+<p>新解码核和调度器也一起上了。</p>
+<p>分块读题时也能复用前缀。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21313">https://github.com/NVIDIA/TensorRT-LLM/pull/21313</a></p>
+<p><strong>TRT-LLM：对话缓存不再拖垮 worker 了</strong></p>
+<p>#22245 修了个崩溃。</p>
+<p>同一个对话的请求重叠时。</p>
+<p>旧请求清掉状态，新请求还在查。</p>
+<p>查不到就抛错，整个 worker 倒下。</p>
+<p>现在查不到就直接跳过。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22245">https://github.com/NVIDIA/TensorRT-LLM/pull/22245</a></p>
+<p><strong>TRT-LLM：其余三条</strong></p>
+<p>#22256 是 llm_function 的测试隔离。</p>
+<p>#22326 是文档小修补。</p>
+<p>#22327 是 Mamba 测试的导入修补。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22256">https://github.com/NVIDIA/TensorRT-LLM/pull/22256</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22326">https://github.com/NVIDIA/TensorRT-LLM/pull/22326</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22327">https://github.com/NVIDIA/TensorRT-LLM/pull/22327</a></p>
+<p><strong>Mooncake：找副本不再越找越慢了</strong></p>
+<p>#5528 修了个性能毛刺。</p>
+<p>本地优先找副本时，旧版是逐个比对。</p>
+<p>名字越多，比对次数平方级上涨。</p>
+<p>一千个名字要比五十万次。</p>
+<p>现在直接定位，第一次就能命中。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5528">https://github.com/kvcache-ai/Mooncake/pull/5528</a></p>
+<p><strong>Mooncake：其余两条</strong></p>
+<p>#5553 是昇腾报错信息的修补。</p>
+<p>#5548 是文档里的硬件 logo 统一。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5553">https://github.com/kvcache-ai/Mooncake/pull/5553</a></p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5548">https://github.com/kvcache-ai/Mooncake/pull/5548</a></p>
+<p><strong>llama.cpp：三条小修补</strong></p>
+<p>#32366 是模板支持 JSON 排序。</p>
+<p>#32388 是 CI 的镜像标签。</p>
+<p>#32382 是 README 更新。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32366">https://github.com/ggml-org/llama.cpp/pull/32366</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32388">https://github.com/ggml-org/llama.cpp/pull/32388</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32382">https://github.com/ggml-org/llama.cpp/pull/32382</a></p>
+<p><strong>LMDeploy、Dynamo、FlashInfer、TGI 这轮零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没到</strong></p>
+<p>最新还是 11 月 13 日提交那批。</p>
+<p>1 点版已经报过 Callo 那三篇。</p>
+<p>下一批按惯例周二 00:00 UTC 到。</p>
+<p>这轮先空着。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新业内新闻</strong></p>
+<p>凌晨时段，新闻源都安静。</p>
+<p>搜了一圈，都是之前报过的旧闻。</p>
+<p>RuntimeWire 那篇 vLLM 嵌入加载修补。</p>
+<p>说的其实是 21 点版报过的 #67316。</p>
+<p>Glimmer 对比也是 1 点版报过的。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>SGLang Summit 第二天的文字总结还没出。</p>
+<p>HN 上那几个热帖也都是前几天的。</p>
+<h2>值得深入学</h2>
+<p><strong>这轮没有新深读，两个值得跟的点</strong></p>
+<ol><li>vLLM #67656，Mooncake 搬运改数组提交。P/D 之间搬 KV 的开销小了，跟你的评估直接相关。</li><li>SGLang #46858，LFM3 全家支持。多模态部署多了一个选择，Omni 版值得留意。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 3 点版去重。 版本水位：llama.cpp 快照 b12432→b12433（11:16 UTC）→b12435（11:38 UTC）→b12436（12:19 UTC）→b12438（12:49 UTC）；vLLM v0.34.0 仍只有 tag（release 页未挂，PyPI 仍 0.33.0）；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc2。 vLLM 5 条首次汇总：#67866（Triton KDA prefill 检查点，GLM-5.3-Flash/Kimi-K3）、#67656（MooncakeConnector 数组 API 提交描述符）、#63673（Fast Start 压缩张量 CUTLASS FP8 权重缓存重启）、#67910（CI GPU 活动采样）、#65788（XPU 注意力测试）。 SGLang 2 条首次汇总：#46858（LFM3 文本/视觉/音频/Omni 支持）、#45868（LlavaMultimodalProcessor 返回选中处理器）。 TRT-LLM 5 条首次汇总：#21313（FP4 MLA 密集块复用、新解码核与调度器）、#22245（对话 KV 保留守卫）、#22256（llm_function QA 隔离）、#22326（FlashInfer 文档）、#22327（Mamba 测试导入）。 Mooncake 3 条首次汇总：#5528（Store 本地优先去重去平方）、#5553（昇腾报错细节）、#5548（README 硬件 logo）。 llama.cpp 3 条首次汇总（#32275 已在 3 点版报过）：#32388（CI docker 标签）、#32382（README）、#32366（jinja sort_keys）。 LMDeploy、Dynamo、FlashInfer、TGI 零合入。 arXiv：无新批次（最新仍为 11 月 13 日提交，1点版已报；下一批约 11 月 17 日 00:00 UTC）。 业内新闻：无新内容（RuntimeWire 的 vLLM 嵌入加载修补即 21 点版已报的 #67316；Glimmer 对比为 1 点版已报）。 Latent Space 最新单集仍是 11 月 10 日；SGLang Summit 第二天文字总结仍未出。 本轮无新深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-16-0500/">5点版</a></p></body></html>
