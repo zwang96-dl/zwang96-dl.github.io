@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月15日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-15"/>
+<meta name="doc-ts" content="2026-11-16T01:01:41"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-15（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-15（17点版）</h1>
+<p>17点版来了，周日傍晚有点动静。</p>
+<p>vLLM 这轮合了四条，AMD 那边是主角。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了 llama.cpp 快照</strong></p>
+<p>llama.cpp 的快照从 b12426 涨到 b12428。</p>
+<p>快照就是每天自动打的构建号。</p>
+<p>其余全没动。</p>
+<p>vLLM 正式版还是 v0.33.0。</p>
+<p>预发布 tag 还是 v0.34.0rc4。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 预发布 tag 还是 v0.7.5rc2。</p>
+<p>release 页上还是 rc1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：Kimi-K3.1-Pro 在 MI355X 上跑得更顺了</strong></p>
+<p>#67817 是个配方对齐。</p>
+<p>Kimi-K3.1-Pro 是月之暗面的旗舰模型。</p>
+<p>它把 MI355X 的预设镜像换成新版。</p>
+<p>MI355X 是 AMD 下一代 AI 加速卡。</p>
+<p>还默认打开了序列并行 prefill。</p>
+<p>序列并行就是把长提示词切开分卡算。</p>
+<p>prefill 就是读提示词算注意力那一步。</p>
+<p>只在高并发下生效，并发 4 到 48 才跑。</p>
+<p>并发 1 时走原来的 all-reduce 路。</p>
+<p>all-reduce 就是多卡互相传数据求和。</p>
+<p>低并发下还默认开了低延迟解码加速。</p>
+<p>说白了，AMD 卡上跑 Kimi 更顺了。</p>
+<p>跟你手里的 MI350X 同属 AMD 路线。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67817">https://github.com/vllm-project/vllm/pull/67817</a></p>
+<p><strong>vLLM：AMD 卡上 DeepSeek-V4.1 的 prefill 提速了</strong></p>
+<p>#67805 是个性能修补。</p>
+<p>它修的是 MI355X 上的 Engram 查表。</p>
+<p>Engram 是 vLLM 存词向量的一张大表。</p>
+<p>以前 prefill 每层要花 36 到 110 毫秒。</p>
+<p>这时间全耗在查表上，主流程还干等着。</p>
+<p>原因是查表顺序乱，地址翻译总被打乱。</p>
+<p>现在查之前先按表里的位置排好序。</p>
+<p>只改了 4 行代码，思路很简单。</p>
+<p>说白了，查字典前先按页码排个队。</p>
+<p>跟你评估的 AMD 路线直接相关。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67805">https://github.com/vllm-project/vllm/pull/67805</a></p>
+<p><strong>vLLM：英特尔 XPU 也能跑 MoE 微调了</strong></p>
+<p>#62807 是给 XPU 的。</p>
+<p>XPU 就是英特尔的加速卡。</p>
+<p>它让没量化的 MoE LoRA 能跑了。</p>
+<p>MoE 就是混合专家模型。</p>
+<p>LoRA 是一种轻量微调方法。</p>
+<p>以前这条路只走 Triton 专家。</p>
+<p>现在改走 XPU 自己的融合算子。</p>
+<p>量化过的版本这次还不支持。</p>
+<p>只影响英特尔卡的用户。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/62807">https://github.com/vllm-project/vllm/pull/62807</a></p>
+<p><strong>vLLM：修了一个会让 Mamba 缓存给错答案的 bug</strong></p>
+<p>#67717 是个缓存修补。</p>
+<p>Mamba 是一种不用注意力的序列模型。</p>
+<p>问题出在 prefix caching 上。</p>
+<p>prefix caching 就是复用算过的提示词。</p>
+<p>以前中途断点续算的块会被错标。</p>
+<p>下一个请求命中它，就拿到截断的状态。</p>
+<p>结果直接算出垃圾答案。</p>
+<p>现在这种块不再按整块发布。</p>
+<p>说白了，别把半成品当成品存起来。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67717">https://github.com/vllm-project/vllm/pull/67717</a></p>
+<p><strong>SGLang 与 TRT-LLM：都只有杂项改动</strong></p>
+<p>SGLang 这轮只有一条文档改动。</p>
+<p>改的是扩散模型页面的品牌展示。</p>
+<p>TRT-LLM 只有一条测试改动。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50662">https://github.com/sgl-project/sglang/pull/50662</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22104">https://github.com/NVIDIA/TensorRT-LLM/pull/22104</a></p>
+<p><strong>llama.cpp：两条小修补</strong></p>
+<p>#32363 修了转换工具的元数据。</p>
+<p>#32352 给 Jinja 模板补了 4 个功能。</p>
+<p>Jinja 就是生成提示词的模板语言。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32363">https://github.com/ggml-org/llama.cpp/pull/32363</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32352">https://github.com/ggml-org/llama.cpp/pull/32352</a></p>
+<p><strong>其余框架</strong></p>
+<p>LMDeploy、TGI、Dynamo、FlashInfer 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>这轮没新论文</strong></p>
+<p>arXiv 最新一批还是 11 月 12 日的。</p>
+<p>下一批按惯例周一到。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新业内消息</strong></p>
+<p>新闻、HN、X、中文媒体都没见到新东西。</p>
+<p>搜到的几条都是 11 月 10 日到 14 日的。</p>
+<p>SGLang 联盟、SGLang-Neuron 那些都报过了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>Spotify 上查过，没出新单集。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有够格的深读材料</strong></p>
+<p>值得跟的两条：</p>
+<ol><li>vLLM #67817，Kimi-K3.1-Pro 在 MI355X 上的新配方。AMD 路线跑 Kimi 可以照着抄。</li><li>vLLM #67805，MI355X 上 DeepSeek-V4.1 的 prefill 查表提速。AMD 卡上跑 V4.1 的人可以留意。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 15 点版去重。 版本水位：llama.cpp 快照 b12426→b12428；其余全没动。vLLM 正式版 v0.33.0（PyPI 已确认，GitHub release 页最新条目仍为 v0.33.0rc3），预发布 tag v0.34.0rc4；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer 预发布 tag v0.7.5rc2（release 页仍是 rc1）；llama.cpp 正式版 v1.0.0，快照已是 b12428。 vLLM 4 条首次汇总：#67817（Kimi-K3.1-Pro MI355X 配方对齐、SP prefill）、#67805（ROCm DSv4.1 Engram 查表排序）、#62807（XPU 未量化 MoE LoRA）、#67717（Mamba prefix cache 错标修补）。 SGLang 1 条首次汇总：#50662（文档：扩散模型品牌展示）。 TRT-LLM 1 条首次汇总：#22104（测试：取消豁免 NVFP4 MoE 后端测试）。 llama.cpp 2 条首次汇总：#32363（转换工具元数据修补）、#32352（Jinja 补 4 个功能）。 LMDeploy、TGI、Dynamo、FlashInfer 零合入。 SGLang 联盟是 11 月 12 日报过的；SGLang-Neuron 是 11 月 12 日报过的；MiniMax H3-Image 是 11 月 10 日报过的；TorchTPU 是 10 月 20 日报过的；Thaw 是 11 月 14 日 23 点版报过的；Metarix 三引擎对照是 11 月 14 日 15 点版报过的；Inkling 2 Small 是 11 月 14 日报过的；World Labs 加入 AMD 是 11 月 14 日报过的；LongCat-2.5 是 11 月 11 日报过的；SGLang 上 IBM Spyre 是 11 月 13 日报过的。 arXiv 下一批按惯例周一到；本轮无深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-15-1700/">17点版</a></p></body></html>
