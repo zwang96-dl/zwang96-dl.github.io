@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月16日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-16"/>
+<meta name="doc-ts" content="2026-11-16T10:59:06"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-16（3点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-16（3点版）</h1>
+<p>3点版来了，凌晨三点还挺忙。</p>
+<p>vLLM 合了十条，SGLang 六条。</p>
+<p>llama.cpp 快照连涨两格。</p>
+<p>arXiv 新一批还没到。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了 llama.cpp 快照</strong></p>
+<p>llama.cpp 的快照从 b12430 涨到 b12432。</p>
+<p>快照就是每天自动打的构建号。</p>
+<p>上午 09:20 先到 b12431。</p>
+<p>10:42 又到 b12432。</p>
+<p>其余水位全没动。</p>
+<p>vLLM 的 v0.34.0 还是只有 tag。</p>
+<p>release 页查还是 404，PyPI 还是 0.33.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc2。</p>
+<p>来源：GitHub releases、tags、PyPI</p>
+<p><strong>vLLM：MoE 换了个更快的搬运后端</strong></p>
+<p>#54268 是本轮最值得看的合入。</p>
+<p>all2all 就是专家之间互相传 token。</p>
+<p>以前默认走 allgather 加 reducescatter。</p>
+<p>现在 Blackwell 和 Rubin 卡默认走单边直传。</p>
+<p>单边直传就是一端直接读写对端显存。</p>
+<p>Qwen3.5 397B 的 P/D 拆分部署上。</p>
+<p>端到端快了 10.5%。</p>
+<p>小测试里，单步最多快 2.6 倍。</p>
+<p>只改默认后端，不用你动手开开关。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/54268">https://github.com/vllm-project/vllm/pull/54268</a></p>
+<p><strong>vLLM：Rust 前端又补了四个开关</strong></p>
+<p>#67872 让 Rust 前端认快读题开关。</p>
+<p>KV 共享快读题就是多层共用一份草稿纸。</p>
+<p>Gemma3n 这类模型用它省显存。</p>
+<p>以前 Rust 前端启动就报错。</p>
+<p>现在能正常接了。</p>
+<p>#67399 让 Rust 的生成接口认优先级头。</p>
+<p>优先级头就是请求里带的插队标记。</p>
+<p>以前 Rust 前端直接忽略它。</p>
+<p>现在按它排队，写错的头直接报 400。</p>
+<p>#67400 让生成接口同时接两类图片。</p>
+<p>一类是上轮展开好的图片特征。</p>
+<p>一类是这轮新传的图片。</p>
+<p>多轮对话里，两类图片能混着传了。</p>
+<p>#63773 修了 logprobs 里的前导空格。</p>
+<p>SentencePiece 分词器就是按词块切文本。</p>
+<p>以前&quot;▁the&quot;和&quot;the&quot;会被当成同一个。</p>
+<p>现在区分开了，统计数字也对了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67872">https://github.com/vllm-project/vllm/pull/67872</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67399">https://github.com/vllm-project/vllm/pull/67399</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67400">https://github.com/vllm-project/vllm/pull/67400</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63773">https://github.com/vllm-project/vllm/pull/63773</a></p>
+<p><strong>vLLM：其余五条</strong></p>
+<p>#67888 是 SPLADE 的测试修补。</p>
+<p>SPLADE 是一种稀疏检索模型。</p>
+<p>#67867 关了 XPU 的 Rust 前端测试。</p>
+<p>原因是随机精度问题。</p>
+<p>#67729 修了 Rust 前端共享测试进程。</p>
+<p>#67694 是 ROCm 的 CI 修补。</p>
+<p>#65565 把平台初始化钩子暴露出来。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67888">https://github.com/vllm-project/vllm/pull/67888</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67867">https://github.com/vllm-project/vllm/pull/67867</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67729">https://github.com/vllm-project/vllm/pull/67729</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67694">https://github.com/vllm-project/vllm/pull/67694</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65565">https://github.com/vllm-project/vllm/pull/65565</a></p>
+<p><strong>SGLang：MI355X 的集合通信少传了一成多</strong></p>
+<p>#50660 是个 AMD 的通信优化。</p>
+<p>gfx1250 就是 MI355X 那代卡。</p>
+<p>一张卡切成两个分区，两个分区共用对外链路。</p>
+<p>以前环形规约要多传 1.75 倍张量。</p>
+<p>现在分层走环，只传 1.5 倍。</p>
+<p>分区之间那份走卡内直连。</p>
+<p>8 卡节点上，通信量少了一成多。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50660">https://github.com/sgl-project/sglang/pull/50660</a></p>
+<p><strong>SGLang：HiCache 的云端密钥不再明文出现了</strong></p>
+<p>#49761 是个安全修补。</p>
+<p>HiCache 就是 SGLang 的分层 KV 缓存。</p>
+<p>它的后端配置里带着 S3 的密钥。</p>
+<p>以前启动日志、服务信息页、崩溃转储里。</p>
+<p>这些密钥都是明文。</p>
+<p>现在全打码了，只留名字不留值。</p>
+<p>上周刚给管理接口上了锁。</p>
+<p>这回把密钥泄露的口子也堵上了。</p>
+<p>自搭服务的，先检查自己的日志。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49761">https://github.com/sgl-project/sglang/pull/49761</a></p>
+<p><strong>SGLang：其余三条</strong></p>
+<p>#49760 修了个调度器崩溃。</p>
+<p>UOCR 的页守卫配错了会拖垮调度。</p>
+<p>现在配错只关掉那一页的守卫。</p>
+<p>#50751 是 NPU 路由的杂项。</p>
+<p>#50755 和 #50522 是 CI 和依赖小修补。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49760">https://github.com/sgl-project/sglang/pull/49760</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50751">https://github.com/sgl-project/sglang/pull/50751</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50755">https://github.com/sgl-project/sglang/pull/50755</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50522">https://github.com/sgl-project/sglang/pull/50522</a></p>
+<p><strong>TRT-LLM：调优器少试了很多没用的组合</strong></p>
+<p>#21185 是个编译优化。</p>
+<p>CuTe DSL 就是写 GPU 矩阵乘的语言。</p>
+<p>调优器以前要挨个试所有战术组合。</p>
+<p>现在先用启发式规则剪掉一批。</p>
+<p>剪掉的都是明显不合适的。</p>
+<p>编译时间能省下来。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21185">https://github.com/NVIDIA/TensorRT-LLM/pull/21185</a></p>
+<p><strong>LMDeploy：两条小修补</strong></p>
+<p>#5136 保住了 GLM-5.3 的文本内容块。</p>
+<p>模板渲染前，内容别被吞掉。</p>
+<p>#5093 修了工具调用参数的解析。</p>
+<p>联合类型下的 JSON 值现在留得住。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5136">https://github.com/InternLM/lmdeploy/pull/5136</a></p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5093">https://github.com/InternLM/lmdeploy/pull/5093</a></p>
+<p><strong>llama.cpp：删序列不再全表扫描了</strong></p>
+<p>#32380 是个缓存清理加速。</p>
+<p>删一个序列时，以前要扫整个缓存表。</p>
+<p>缓存越大，扫得越慢。</p>
+<p>现在按位置索引直接定位。</p>
+<p>26 万格缓存上，单次回滚从 233 微秒。</p>
+<p>压到 0.6 微秒。</p>
+<p>#32385 修了 AMD 卡上的矩阵乘崩溃。</p>
+<p>#32275 和 #31931 是 Vulkan 修补。</p>
+<p>一个修 32 位编译，一个修排序稳定性。</p>
+<p>#32281 让相关改动自动触发推测解码测试。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32380">https://github.com/ggml-org/llama.cpp/pull/32380</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32385">https://github.com/ggml-org/llama.cpp/pull/32385</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32281">https://github.com/ggml-org/llama.cpp/pull/32281</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32275">https://github.com/ggml-org/llama.cpp/pull/32275</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31931">https://github.com/ggml-org/llama.cpp/pull/31931</a></p>
+<p><strong>Dynamo：管家关机时不再漏收进程</strong></p>
+<p>#18782 和 #18781 都修 GMS。</p>
+<p>GMS 就是 Dynamo 的多机调度管家。</p>
+<p>关机时，旧版的 worker 现在能收干净。</p>
+<p>对端目录不完整时，直接拒绝。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18782">https://github.com/ai-dynamo/dynamo/pull/18782</a></p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18781">https://github.com/ai-dynamo/dynamo/pull/18781</a></p>
+<p><strong>FlashInfer：NVFP4 解码又快了一点</strong></p>
+<p>#9315 优化了 FP8 解码的转换路径。</p>
+<p>NVFP4 就是 4 位浮点量化。</p>
+<p>只针对 SM107，就是 Rubin 卡。</p>
+<p>其余四条全是 cuDNN 的测试覆盖。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9315">https://github.com/flashinfer-ai/flashinfer/pull/9315</a></p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9523">https://github.com/flashinfer-ai/flashinfer/pull/9523</a></p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9522">https://github.com/flashinfer-ai/flashinfer/pull/9522</a></p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9520">https://github.com/flashinfer-ai/flashinfer/pull/9520</a></p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9519">https://github.com/flashinfer-ai/flashinfer/pull/9519</a></p>
+<p><strong>TGI、Mooncake 这轮零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新一批还没到</strong></p>
+<p>上一批还是 11 月 13 日提交那批。</p>
+<p>1 点版已经报过 Callo 那三篇。</p>
+<p>下一批按惯例周一 00:00 UTC 到。</p>
+<p>这轮先空着。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新业内新闻</strong></p>
+<p>凌晨时段，新闻源都安静。</p>
+<p>机器之心和量子位也没发新稿。</p>
+<p>搜了一圈，都是之前报过的旧闻。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没新访谈</strong></p>
+<p>Latent Space 最新一期还是 11 月 10 日的。</p>
+<p>Spotify 上查过，没出新单集。</p>
+<p>SGLang Summit 第二天的文字总结还没出。</p>
+<h2>值得深入学</h2>
+<p><strong>这轮没有新深读，两个值得跟的点</strong></p>
+<ol><li>vLLM #54268，MoE 默认换单边直传。P/D 拆分部署快 10.5%，跟你的评估直接相关。</li><li>SGLang #49761，HiCache 密钥打码。自搭服务先查日志有没有裸奔的密钥。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 1 点版去重。 版本水位：llama.cpp 快照 b12430→b12431（09:20 UTC）→b12432（10:42 UTC）；vLLM v0.34.0 仍只有 tag（release 页 404、PyPI 仍 0.33.0）；SGLang v0.5.23（v1.0 仍无 tag）；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc2（发布页 08:52 UTC 已上线，1点版已报）。 vLLM 10 条首次汇总：#54268（MoE all2all 默认 fi_one_sided，Blackwell/Rubin，Qwen3.5 397B NVFP4 P/D +10.5%）、#67872（Rust 前端 --kv-sharing-fast-prefill）、#67399（Rust 前端 X-Vllm-Priority + 拒非法头）、#67400（Rust 前端 features+content_parts）、#63773（Rust 前端 SentencePiece 前导空格）、#67888（SPLADE CI）、#67867（XPU Rust 前端 CI 关闭）、#67729（Rust 前端共享测试进程）、#67694（ROCm CI）、#65565（平台初始化钩子）。 SGLang 6 条首次汇总：#50660（AMD hier_ring_simple，gfx1250，TP8 传输 1.75x→1.5x）、#49761（HiCache 存储密钥打码）、#49760（UOCR 页守卫配错不再崩调度器）、#50751（NPU 路由杂项）、#50755（CI）、#50522（依赖升级）。 TRT-LLM 1 条首次汇总：#21185（CuTe DSL GEMM 调优器剪枝）。 LMDeploy 2 条首次汇总：#5136（GLM-5.3 文本内容块）、#5093（工具调用 JSON 参数）。 llama.cpp 5 条首次汇总：#32380（kv-cells seq_rm 按位置索引，233µs→0.6µs）、#32385（CUDA MUL_MAT_ID AMD 修复）、#32281（推测解码测试触发）、#32275（Vulkan 32 位编译）、#31931（Vulkan radix top-k 确定性）。 Dynamo 2 条首次汇总：#18782（GMS 关机回收 V1 ranks）、#18781（GMS 拒绝不完整 peer catalog）。 FlashInfer 5 条首次汇总：#9315（NVFP4 解码转换优化，SM107）、#9523、#9522、#9520、#9519（cuDNN 测试）。 TGI、Mooncake 零合入。 arXiv：无新批次（上一批 11 月 13 日提交，1点版已报；下一批约 11 月 17 日 00:00 UTC）。 Latent Space 最新单集仍是 11 月 10 日（Spotify 已核验）；SGLang Summit 第二天文字总结仍未出；Thaw 是 11 月 14 日 23 点版报过的。 本轮无新深读笔记。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-16-0300/">3点版</a></p></body></html>
