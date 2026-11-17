@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月17日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T17:01:30"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-17（09点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-17（09点版）</h1>
+<p>09点版来了，这轮有四件实在的。</p>
+<p>主角是 vLLM 的流水线传输提速。</p>
+<p>TRT-LLM 那边 GLM-5.3-Flash 也快了不少。</p>
+<p>滑窗解码修了一个老毛病。</p>
+<p>快照号只涨了两格。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 快照动了</strong></p>
+<p>llama.cpp 快照从 b12475 涨到 b12477。</p>
+<p>这轮没有新版本发布。</p>
+<p>其余水位全没动。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc3。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：流水线搬运换了条路，首字快三成</strong></p>
+<p>#66677 是本轮最值得看的一条。</p>
+<p>它改的是流水线并行之间的搬运。</p>
+<p>流水线并行就是把模型切成几段。</p>
+<p>每段放一张卡上，依次往下传。</p>
+<p>以前段与段之间走 NCCL 传数据。</p>
+<p>NCCL 就是卡之间传数据的通用库。</p>
+<p>现在改走拷贝引擎。</p>
+<p>拷贝引擎是卡上专门搬数据的硬件。</p>
+<p>它不占算力，搬运和计算能并行。</p>
+<p>以前这条路只在单卡并行时能用。</p>
+<p>现在张量并行大于 1 也能用了。</p>
+<p>张量并行就是一层切开分多卡算。</p>
+<p>跨节点也打通了。</p>
+<p>GB300 两托盘之间也能走拷贝引擎。</p>
+<p>实测用的是 MiniMax-M3.1-Flash。</p>
+<p>MiniMax-M3.1-Flash 是一台开源大模型。</p>
+<p>单节点那组，张量并行 2 卡加流水线 2 段。</p>
+<p>快满载时，首字中位数降 16% 到 34%。</p>
+<p>首字就是第一个词出来的时间。</p>
+<p>跨节点那组，首字中位数降 27% 到 29%。</p>
+<p>轻负载和解码基本没变。</p>
+<p>跨节点搬运跑到 330 到 390GB 每秒。</p>
+<p>但有一轮测出一次约 5 秒的卡顿。</p>
+<p>那轮的尾巴指标反而变差了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66677">https://github.com/vllm-project/vllm/pull/66677</a></p>
+<p><strong>TRT-LLM：GLM-5.3-Flash 在 Hopper 上首字快三成</strong></p>
+<p>#21179 修的是 GLM-5.3-Flash 的性能。</p>
+<p>GLM-5.3-Flash 是智谱的开源大模型。</p>
+<p>Hopper 就是 H200 那代架构。</p>
+<p>以前在 Hopper 上预热会直接报错。</p>
+<p>稀疏注意力走的格子没对齐。</p>
+<p>现在格子对齐到 128，报错没了。</p>
+<p>解码小批量也拆开了算。</p>
+<p>小批量能把 GPU 塞得更满。</p>
+<p>实测是 4 张 H200，张量并行 4 卡。</p>
+<p>读题 13K token 那档，首字从 876 毫秒降到 619 毫秒。</p>
+<p>单用户每秒出词从 161 个涨到 222 个。</p>
+<p>8 并发那档，每秒出词从 37.6 涨到 53.1。</p>
+<p>精度没动，GSM8K 还是 98% 出头。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21179">https://github.com/NVIDIA/TensorRT-LLM/pull/21179</a></p>
+<p><strong>vLLM：两台决策模型能跑了</strong></p>
+<p>#63114 接的是 Base Labs 的两台模型。</p>
+<p>mammoth-1 是 27B 的决策模型。</p>
+<p>elephant-1 是 9B 的决策模型。</p>
+<p>决策模型就是专门做判断的模型。</p>
+<p>它俩训练时用了块双向掩码。</p>
+<p>块双向掩码就是块内能互相看。</p>
+<p>以前 vLLM 直接忽略这个掩码。</p>
+<p>跑出来的效果和训练时对不上。</p>
+<p>现在按训练时的方式跑。</p>
+<p>前缀缓存也开着。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63114">https://github.com/vllm-project/vllm/pull/63114</a></p>
+<p><strong>vLLM：滑窗解码不再随上下文变长而变慢</strong></p>
+<p>#61646 修的是滑窗注意力的解码。</p>
+<p>滑窗就是只看最近一段上下文。</p>
+<p>以前解码要把整条序列切开算。</p>
+<p>序列越长，切出来的段越多。</p>
+<p>现在只切窗口里的部分。</p>
+<p>窗口就是滑窗看的那一段。</p>
+<p>解码成本不再随上下文变长。</p>
+<p>实测在 AMD 的 R9700 卡上。</p>
+<p>窗口 2048，单请求那档。</p>
+<p>12K 上下文快 1.46 倍。</p>
+<p>128K 上下文快 8.7 倍。</p>
+<p>4 并发那档，64K 以上快约 10 倍。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/61646">https://github.com/vllm-project/vllm/pull/61646</a></p>
+<p><strong>SGLang：这轮只有一条小修复</strong></p>
+<p>#47293 修的是 Inkling 草稿状态的恢复。</p>
+<p>Inkling 是一种草稿模型。</p>
+<p>缓存命中时，草稿头状态没接上。</p>
+<p>草稿头读到的可能是旧数据。</p>
+<p>答案不受影响，验证会拦住错的。</p>
+<p>但接受长度会掉。</p>
+<p>现在草稿状态也跟着缓存走。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47293">https://github.com/sgl-project/sglang/pull/47293</a></p>
+<p><strong>Dynamo：镜像瘦了一半</strong></p>
+<p>#18850 砍掉了镜像里一层重复拷贝。</p>
+<p>以前运行时镜像里整份根文件系统存了两遍。</p>
+<p>镜像从 67.3GB 瘦到 37.0GB。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18850">https://github.com/ai-dynamo/dynamo/pull/18850</a></p>
+<p><strong>llama.cpp：快照涨到 b12477</strong></p>
+<p>这轮合入 5 条，多是小修。</p>
+<p>qwen4exp 的图重分配修了。</p>
+<p>服务端语法加忽略结束符时返回 400。</p>
+<p>Pascal 老卡关掉了量化矩阵向量融合。</p>
+<p>CUDA 的多行矩阵乘也加了新路径。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp">https://github.com/ggml-org/llama.cpp</a></p>
+<p>LMDeploy、TGI、FlashInfer、Mooncake 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批约今天 16:00</strong></p>
+<p>本轮没有新论文。</p>
+<p>下一批约今天 16:00 发布。</p>
+<h2>业内新闻</h2>
+<p><strong>英伟达财报今天 13:20</strong></p>
+<p>今天下午 13:20，英伟达发财报。</p>
+<p>这是新 CEO 上任后的第一份。</p>
+<p>市场预期营收约 1090 亿美元。</p>
+<p>每股收益约 2.47 到 2.48 美元。</p>
+<p>毛利率约 74%。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 FLUX 3 那期</strong></p>
+<p>最新一期还是 11 月 16 日的 FLUX 3。</p>
+<p>这轮没有新单集。</p>
+<p><strong>SGLang Summit 第二天文字总结还没出</strong></p>
+<p>搜了一圈，还是只有会前通稿和零散总结。</p>
+<p>文字总结出来再报。</p>
+<h2>值得深入学</h2>
+<p><strong>vLLM #66677：流水线搬运换拷贝引擎</strong></p>
+<p>这篇跟你的 PD 评估直接相关。</p>
+<p>流水线传输就是 PD 拆开后段间搬运的同类问题。</p>
+<p>首字中位数降 16% 到 34%，数给得全。</p>
+<p>跨节点那组也测了，搬运跑到 330 到 390GB 每秒。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>vLLM #66677。流水线搬运走拷贝引擎，首字降 16% 到 34%。</li><li>TRT-LLM #21179。GLM-5.3-Flash 在 Hopper 上首字 876 降到 619 毫秒。</li><li>vLLM #61646。滑窗解码成本不再随上下文变长，最高快约 10 倍。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 07点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc3；llama.cpp 快照 b12475→b12477。 vLLM 10 条首次汇总：#66677（拷贝引擎流水线传输扩展到 TP&gt;1 和多节点 NVLink，首字中位数降 16–34%）、#63114（Base Labs mammoth-1/elephant-1 块双向掩码）、#61646（滑窗只切窗口进 Triton split-K 解码段，R9700 上最高快约 10 倍）、#64375（ROCm RDNA W4A16 融合 scale/zero-point 载体）、#68011（文档：删掉过期的 install_deepgemm.sh 引用）、#67964（CI：只对需要 trust_remote_code 的检查点用它）、#67679（杂务：删掉已过移除版本的 --log-config-file 等参数）、#64739（模型加载：找子目录里的 safetensors 分片）、#63592（杂务：FlashAttention 版本不支持时只警告一次）、#56328（ROCm：恢复 gfx1151 分页 MQA 融合路径）。 SGLang 1 条首次汇总：#47293（修复：unified_cache 恢复 Inkling MTP 草稿状态）。 TRT-LLM 8 条首次汇总：#21179（GLM-5.3-Flash FP8 在 Hopper 上的性能修复）、#21888（CuTe DSL 编译结果跨进程复用）、#21688（重构：统一性能采集与暴露）、#22469（测试：恢复集合操作矩阵测试）、#22464（测试：恢复短 token 边界冒烟覆盖）、#22341（修复：模型加载后释放检查点页缓存）、#22254（修复：模型默认 fields_set 与循环状态上下文提升）、#22169（测试：加 LagunaForCausalLM 覆盖）。 LMDeploy 零合入。 TGI 零合入。 Dynamo 2 条首次汇总：#18850（TRT-LLM 运行时镜像 67.3GB 瘦到 37.0GB）、#18567（杂务：删掉路由 split planning 的注释引用）。 FlashInfer 零合入。 Mooncake 零合入。 llama.cpp 5 条首次汇总（b12477 之后合入，下个快照见）：#32483（qwen4exp 图重分配修复）、#32377（服务端：grammar 加 ignore_eos 时返回 400）、#32239（ggml-cuda：Pascal 全系关掉量化 matvec 融合）、#32065（CUDA：少行 MMQ 用于 MUL_MAT_ID）、#32469（UI：实时 markdown 预览默认关闭）。 arXiv：下一批约 11 月 17 日 16:00 PST。 业内新闻：英伟达财报今日 13:20（已提醒过）。 访谈与深度：Latent Space 最新仍是 11 月 16 日 FLUX 3；SGLang Summit 第二天文字总结仍未出。 深读：vLLM #66677 精读笔记已写（深度阅读/vLLM-拷贝引擎流水线传输-精读.html）。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-17-0900/">09点版</a></p></body></html>

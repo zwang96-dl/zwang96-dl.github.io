@@ -1,0 +1,160 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM #66677：流水线搬运换拷贝引擎，首字快三成"/>
+<meta name="doc-description" content="- 作者：vLLM 团队"/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T17:03:00"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM #66677：流水线搬运换拷贝引擎，首字快三成</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM #66677：流水线搬运换拷贝引擎，首字快三成</h1>
+<ul><li>作者：vLLM 团队</li><li>文章：[Perf][PP] Copy-engine PP transport: TP &gt; 1, PCP &gt; 1 and multi-node NVLink</li><li>合入时间：2026-11-17 08:35 PST（2026-11-17 16:35 UTC）</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/66677">https://github.com/vllm-project/vllm/pull/66677</a></li><li>说明：原文是代码 PR，没有配图，本笔记不附图。数字全是 PR 作者自报，没有第三方复现。</li></ul>
+<h2>一句话</h2>
+<p>流水线并行里段与段之间传数据，以前走 NCCL。这回改走拷贝引擎。单节点首字中位数降 16% 到 34%。跨节点降 27% 到 29%。</p>
+<h2>人话解读</h2>
+<p>流水线并行就是把模型切成几段。</p>
+<p>每段放一张卡上，依次往下传。</p>
+<p>段与段之间要传中间结果。</p>
+<p>中间结果就是一层算完的激活值。</p>
+<p>以前这段搬运用 NCCL。</p>
+<p>NCCL 就是卡之间传数据的通用库。</p>
+<p>它要占 SM 去搬数据。</p>
+<p>SM 就是 GPU 上真正算数的单元。</p>
+<p>搬数据占了 SM，计算就得等。</p>
+<p>拷贝引擎是卡上专门搬数据的硬件。</p>
+<p>它不占 SM，搬运和计算能并行。</p>
+<p>这就像请了个专职搬运工。</p>
+<p>厨师只管炒菜，不用自己端盘子。</p>
+<p>这条路 #65896 已经铺过一次。</p>
+<p>但那次只支持单卡并行。</p>
+<p>单卡并行就是张量并行等于 1。</p>
+<p>这回 #66677 把路拓宽了两处。</p>
+<p>第一处，张量并行大于 1 也能走。</p>
+<p>张量并行就是一层切开分多卡算。</p>
+<p>每张卡的流水线链各走各的传输。</p>
+<p>每条链都连到下一段的同号卡。</p>
+<p>第二处，跨节点也打通了。</p>
+<p>GB300 两托盘之间也能走拷贝引擎。</p>
+<p>托盘就是一台机器里的 GPU 模组。</p>
+<p>跨节点用 FABRIC 句柄共享接收缓冲。</p>
+<p>FABRIC 句柄就是跨节点共享显存的凭证。</p>
+<p>同一节点内的链还走 CUDA IPC。</p>
+<p>CUDA IPC 就是同一台机器内的显存共享。</p>
+<p>还有个细节，跨节点写信号标志要绕路。</p>
+<p>直接往对面显存写 64 位值会报错。</p>
+<p>所以先写到本地暂存，再拷贝过去。</p>
+<p>这招跟 NCCL 自己的拷贝引擎集合通信一样。</p>
+<p>另外，并发流水线大于 1 也不再强制走 NCCL。</p>
+<p>并发流水线就是同时跑多条流水线。</p>
+<p>但这处还没端到端验证过。</p>
+<p>一致性也测了。</p>
+<p>温度 0 时，输出和 NCCL 路径完全一致。</p>
+<p>温度 0 就是确定性输出，不随机采样。</p>
+<p>测试补了 6 个单测，全在 GB300 上通过。</p>
+<p>跨节点还单独跑了一个脚本。</p>
+<p>两托盘之间，40 步带延迟的传输全对。</p>
+<p>0.2GB 的整步，跑到 330 到 390GB 每秒。</p>
+<p>2 万步连续传输，0 个错位。</p>
+<h2>核心方法</h2>
+<p>改动分三块，TP 大于 1、跨节点、PCP 大于 1。</p>
+<p>TP 大于 1 那块，每条链独立建传输。</p>
+<p>每段的 TP rank 把输出全发给下一段同号 rank。</p>
+<p>建链时的选择要在 TP 组内共享。</p>
+<p>所有链必须选同一条路。</p>
+<p>混用会挂住，因为 NCCL 接收端要做聚合。</p>
+<p>跨节点那块，接收缓冲用 cuMem 分配。</p>
+<p>再用 FABRIC 句柄共享给对面节点。</p>
+<p>映射只在同一个 NVLink 域内成功。</p>
+<p>域外就走回 NCCL。</p>
+<p>信号标志走本地暂存加拷贝。</p>
+<p>数据和标志走同一条流。</p>
+<p>接收端等标志时不加远程刷新。</p>
+<p>这依赖数据先到、标志后到的顺序。</p>
+<p>NCCL 的拷贝引擎路径也是同一假设。</p>
+<p>PCP 大于 1 那块，每组位置各建一条链。</p>
+<p>不再强制回退到 NCCL。</p>
+<p>但端到端还没验证，PR 里明确写了。</p>
+<h2>关键数据</h2>
+<ul><li>测试模型：MiniMax-M3.1-Flash。</li><li>测试硬件：GB300。</li><li>部署形态：张量并行 2 卡，加流水线 2 段。</li><li>前端：Rust 前端。</li><li>配置：最大批 token 32768，最大序列数 64，块大小 128。</li><li>负载：10 万 token 缓存前缀，泊松到达，90 秒一轮。</li></ul>
+<p>单节点那组，TP 等于 2，PP 等于 2。</p>
+<p>新 token 1.5 到 2.5K，每秒 44 请求。</p>
+<p>首字中位数降 28% 到 34%。</p>
+<p>首字 p99 降 18% 到 21%。</p>
+<p>单请求配对差值是负 349 到负 395 毫秒。</p>
+<p>新 token 6 到 10K，每秒 10 请求。</p>
+<p>首字中位数降 16% 到 20%。</p>
+<p>解码词间隔基本没变。</p>
+<p>9.95 毫秒变成 10.04 毫秒。</p>
+<p>跨节点那组，每托盘 TP 等于 2，PP 等于 2。</p>
+<p>新 token 1.5 到 2.5K，每秒 44 请求。</p>
+<p>首字中位数降 27% 到 29%，三轮都稳。</p>
+<p>新 token 6 到 10K，每秒 10 请求。</p>
+<p>首字中位数降 6% 到 17%。</p>
+<p>轻负载那档，基本没变化。</p>
+<p>跨节点搬运带宽：330 到 390GB 每秒。</p>
+<p>但有一轮测出一次约 5 秒的卡顿。</p>
+<p>那轮 6 到 10K 的长请求，p99 涨了 355%。</p>
+<p>卡顿原因未知，第二轮和第三轮都没复现。</p>
+<p>第三轮加了每 rank 的卡顿探测。</p>
+<p>没有任何一次调用超过 1 秒。</p>
+<h2>跟研究方向的关联</h2>
+<p>这篇跟 PD 解耦评估直接相关。</p>
+<p>第一，流水线传输就是 PD 拆开后的同类问题。</p>
+<p>PD 解耦把读题和生成分到不同机器。</p>
+<p>段间搬运的代价，直接进首字时间。</p>
+<p>这篇的 16% 到 34% 能当参照。</p>
+<p>第二，拷贝引擎不占 SM 这个点值得记。</p>
+<p>NCCL 搬运要抢计算资源。</p>
+<p>高负载时，搬运和计算抢 SM 就是首字变差的根因。</p>
+<p>评估里对比传输后端时，单列这一项。</p>
+<p>第三，跨节点那组给出了搬运带宽实测。</p>
+<p>330 到 390GB 每秒，0.2GB 的步。</p>
+<p>PD 跨节点部署时，KV 传输量可以按这个带宽估。</p>
+<p>第四，PCP 大于 1 还没验证。</p>
+<p>评估里如果开并发流水线，先确认版本。</p>
+<p>别默认这条路已经打通。</p>
+<p>第五，那次 5 秒卡顿是个提醒。</p>
+<p>原因未知，只出现一次。</p>
+<p>尾巴指标对这种偶发卡顿很敏感。</p>
+<p>自己测首字 p99 时，单轮异常要单独看。</p>
+<p>第六，数字只在 GB300 上测过。</p>
+<p>模型只有一个，MiniMax-M3.1-Flash。</p>
+<p>H100 和 MI350X 上收益多少，得自己测。</p>
+<h2>术语表</h2>
+<ul><li>PD 解耦：读题和生成分到不同机器上跑。</li><li>流水线并行：模型切成几段，每段放一张卡。</li><li>张量并行：一层切开分多卡算。</li><li>NCCL：卡之间传数据的通用库。</li><li>拷贝引擎：卡上专门搬数据的硬件，不占算力。</li><li>SM：GPU 上真正算数的单元。</li><li>TTFT：首字时间，第一个词吐出来要等多久。</li><li>p50：中位数，一半请求比它快。</li><li>p99：尾巴，99% 的请求比它快。</li><li>NVLink：英伟达卡之间的高速互联。</li><li>NVL72：72 张卡连在一个 NVLink 域里的整机。</li><li>托盘：一台机器里的 GPU 模组。</li><li>FABRIC 句柄：跨节点共享显存的凭证。</li><li>CUDA IPC：同一台机器内共享显存的机制。</li><li>PCP：并发流水线，同时跑多条流水线。</li><li>泊松到达：请求按随机间隔陆续到来。</li><li>温度 0：确定性输出，不随机采样。</li></ul>
+<h2>原文链接</h2>
+<ul><li><a href="https://github.com/vllm-project/vllm/pull/66677">https://github.com/vllm-project/vllm/pull/66677</a></li></ul></body></html>
