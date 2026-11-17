@@ -1,0 +1,154 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月17日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T13:03:51"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-17（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-17（05点版）</h1>
+<p>05点版来了，凌晨这轮有四件实在的。</p>
+<p>主角是 vLLM 的一个补丁。</p>
+<p>TRT-LLM 也有两个提速。</p>
+<p>llama.cpp 的读题也快了。</p>
+<p>还有个好玩的：PS4 跑起了 9B 模型。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc3。</p>
+<p>llama.cpp 快照还是 b12470。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：Bailing V3 的读题检查点打通了</strong></p>
+<p>#68106 是本轮最值得看的一条。</p>
+<p>KDA 是一种线性注意力，算递推不算全文。</p>
+<p>Bailing V3、Kimi-K3 都用它。</p>
+<p>GLM-5.3-Flash 也一样。</p>
+<p>以前开前缀缓存，提示词会被拦腰切一刀。</p>
+<p>切口落在最后一个线性注意力块的边界上。</p>
+<p>现在检查点能导出来，提示词不再被切断。</p>
+<p>首字时间直接降了两成多。</p>
+<p>Ling-3.0-flash 上，GB300 两卡并行测的。</p>
+<p>并发 1、4、16 下，首字各降 23%、24%、23%。</p>
+<p>MI355X 上也降了 20%。</p>
+<p>GSM8K 分数没动，答案质量没掉。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68106">https://github.com/vllm-project/vllm/pull/68106</a></p>
+<p><strong>vLLM：另一条是小修</strong></p>
+<p>#67896 修的是 DeepSeek-V4.1 的图片预处理。</p>
+<p>设备端归一化开着时，会报一个只读警告。</p>
+<p>现在修掉了，不影响功能。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67896">https://github.com/vllm-project/vllm/pull/67896</a></p>
+<p><strong>SGLang：AMD 上 Qwen3 的读题融合了</strong></p>
+<p>#47052 把 QK-norm 和 RoPE 并成一个核。</p>
+<p>QK-norm 是归一化，RoPE 是位置编码。</p>
+<p>以前在 ROCm 上，读题每层要启动五次。</p>
+<p>现在复用扩散模型那边现成的融合核。</p>
+<p>MI355X 上，Qwen3-8B 读题时测的。</p>
+<p>这俩核占 GPU 时间的 4.8% 到 6.8%。</p>
+<p>#50815 是文档小修，教 Nemotron 3 用哪个推理解析器。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47052">https://github.com/sgl-project/sglang/pull/47052</a></p>
+<p><strong>TRT-LLM：长读题的融合核快了六成</strong></p>
+<p>#22429 改的是同一个融合核。</p>
+<p>改完一个线程组能算多个头。</p>
+<p>位置编码的 cos、sin 值只算一次。</p>
+<p>GB200 上测的，Qwen3-VL-8B 读 8k token。</p>
+<p>那组核时间省约 59%。</p>
+<p>标题称最多省 64%。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22429">https://github.com/NVIDIA/TensorRT-LLM/pull/22429</a></p>
+<p><strong>TRT-LLM：宽束搜索不用重复读提示词了</strong></p>
+<p>#21738 是个可选开的新库。</p>
+<p>beam search 就是一次猜多条候选。</p>
+<p>以前每条候选每步都要重读一遍提示词的草稿纸。</p>
+<p>宽束还走不上快的解码核，只能走老核。</p>
+<p>现在共享提示词只读一次。</p>
+<p>H100 上，96 条候选、3k 提示词那组，整句速度翻 2.1 倍。</p>
+<p>30 条候选那组，长提示词快 1.69 倍。</p>
+<p>默认关闭，想用要手动开。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21738">https://github.com/NVIDIA/TensorRT-LLM/pull/21738</a></p>
+<p>其余三条都是小修。</p>
+<p>#22159 修 UCX 选网卡的小 bug。</p>
+<p>#19230 修 NemotronV3 推理标签的收尾。</p>
+<p>#22467 是测试小修。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22159">https://github.com/NVIDIA/TensorRT-LLM/pull/22159</a> 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19230">https://github.com/NVIDIA/TensorRT-LLM/pull/19230</a></p>
+<p><strong>llama.cpp：K/V 读顺序转了个向，读题快了</strong></p>
+<p>#32407 修的是流式分块读 K/V 的顺序。</p>
+<p>多块同时读同一份 K/V 会抢缓存。</p>
+<p>现在转着圈读，L2 命中更高。</p>
+<p>L2 就是片上二级缓存。</p>
+<p>RTX 5090 上测的，Qwen3.5-27B、13 万上下文。</p>
+<p>那组读题快 1.41 倍。</p>
+<p>短上下文基本没变。</p>
+<p>#32435 给多模态加了 Minimax-Music3 支持。</p>
+<p>#32397 是给语音模型加发音词典接口。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32407">https://github.com/ggml-org/llama.cpp/pull/32407</a> 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32435">https://github.com/ggml-org/llama.cpp/pull/32435</a></p>
+<p>LMDeploy、TGI、Dynamo 这轮零合入。</p>
+<p>FlashInfer、Mooncake 也是零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批约今天 16:00</strong></p>
+<p>本轮没有新论文。</p>
+<p>下一批约今天 16:00 发布。</p>
+<h2>业内新闻</h2>
+<p><strong>PS4 跑起了 9B 模型</strong></p>
+<p>Garlic LLM 让越狱 PS4 跑起了 Qwen3.5-9B。</p>
+<p>量化压到 3 到 4 位，整模型约 4.5GB。</p>
+<p>再加投机解码提速，聊天每秒 31 到 39 个词。</p>
+<p>写代码最高每秒 43 个词。</p>
+<p>16k 上下文，离线能跑，不用联网。</p>
+<p>好玩大于实用，当个乐子看就行。</p>
+<p>来源：<a href="https://xenospectrum.com/garlic-llm-ps4-gpu-inference/">https://xenospectrum.com/garlic-llm-ps4-gpu-inference/</a></p>
+<p><strong>英伟达财报今天下午 13:20</strong></p>
+<p>这条之前已经提醒过，不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 FLUX 3 那期</strong></p>
+<p>17点版已经报过，不重复。</p>
+<p><strong>SGLang Summit 第二天文字总结还没出</strong></p>
+<p>搜了一圈，还是只有会前通稿和零散总结。</p>
+<p>文字总结出来再报。</p>
+<h2>值得深入学</h2>
+<p><strong>vLLM #68106：Bailing V3 的读题检查点</strong></p>
+<p>这篇跟你的 PD 评估直接相关。</p>
+<p>前缀缓存加线性注意力模型，检查点对齐是个暗坑。</p>
+<p>首字降 23% 的数，能直接当评估基线。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>vLLM #68106。Bailing V3 的读题检查点打通了，首字降 23%。</li><li>TRT-LLM #21738。宽束搜索共享提示词，96 束那组快 2.1 倍。</li><li>TRT-LLM #22429，长读题融合核，核时间省约 59%。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 03点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc3；llama.cpp 快照 b12470。 vLLM 2 条首次汇总：#68106（Bailing V3 的 KDA 读题检查点导出，Ling-3.0-flash 首字降 23%）、#67896（DeepSeek-V4.1 图片预处理只读警告修）。 SGLang 2 条首次汇总：#47052（AMD Qwen3 读题 QK-norm 加 RoPE 融合）、#50815（文档：Nemotron 3 推理用 nemotron_3 解析器）。 TRT-LLM 5 条首次汇总：#22467（DSpark 索引器测试走目标自己的解码选择器）、#22429（融合 QK-norm 加 RoPE 核，长读题核时间最多省 64%）、#22159（UCX 按对端路由选网卡修）、#21738（宽束搜索共享前缀注意力，可选开）、#19230（NemotronV3 推理标签收尾修）。 LMDeploy 零合入。 TGI 零合入。 Dynamo 零合入。 FlashInfer 零合入。 llama.cpp 3 条首次汇总（b12470 之后合入，下个快照见）：#32435（mtmd 支持 Minimax-Music3）、#32407（K/V 读顺序轮转，L2 命中更高）、#32397（chat 加 tts_dict，给 kokoro G2P 模板用）。 Mooncake 零合入。 arXiv：下一批约 11 月 17 日 16:00 PST。 业内新闻：Garlic LLM 在越狱 PS4 上跑 Qwen3.5-9B（xenospectrum/17173，2026-11-17）；英伟达财报今日 13:20，已提醒过。 访谈与深度：Latent Space 最新仍是 11 月 16 日 FLUX 3（17点版已报）；SGLang Summit 第二天文字总结仍未出。 深读：vLLM #68106 精读笔记已写（深度阅读/vLLM-BailingV3-KDA读题检查点-精读.html）。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-17-0500/">05点版</a></p></body></html>

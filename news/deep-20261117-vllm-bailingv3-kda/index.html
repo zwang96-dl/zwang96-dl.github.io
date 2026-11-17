@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM #68106：Bailing V3 的 KDA 读题检查点，提示词不再被拦腰切"/>
+<meta name="doc-description" content="- 作者：vLLM 团队"/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T13:04:16"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM #68106：Bailing V3 的 KDA 读题检查点，提示词不再被拦腰切</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM #68106：Bailing V3 的 KDA 读题检查点，提示词不再被拦腰切</h1>
+<ul><li>作者：vLLM 团队</li><li>文章：[Perf][KDA] Export Triton prefill checkpoints for Bailing V3</li><li>合入时间：2026-11-17 03:04 PST（2026-11-17 11:04 UTC）</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/68106">https://github.com/vllm-project/vllm/pull/68106</a></li><li>说明：原文是代码 PR，没有配图，本笔记不附图。数字全是 PR 作者自报，没有第三方复现。</li></ul>
+<h2>一句话</h2>
+<p>Bailing V3 的线性注意力层也能导出读题检查点了。开着前缀缓存，提示词不再被拦腰切一刀。首字时间直接降了两成多。</p>
+<h2>人话解读</h2>
+<p>Bailing V3 是新一代混合模型，代表模型是 Ling-3.0-flash。混合模型就是两种注意力混着用。一种是普通注意力，算全文的关联。一种是 KDA，线性注意力，算递推的那部分。</p>
+<p>KDA 是 Kimi Delta Attention 的缩写。名字来自 Kimi 的 Delta 注意力。递推就是一步一步往前推状态，不用回头看全文。</p>
+<p>读题检查点是线性注意力层的存档点。读题就是把提示词算一遍。算到检查点，就把当时的递推状态存下来。下次遇到相同前缀，直接从存档点接着算。不用从头再算一遍。</p>
+<p>以前 Bailing V3 有个缺口。它的 KDA 层导不出读题检查点。开着前缀缓存，提示词会被切在最后一个 Mamba 块的边界上。切口一到，后面那段就进不了缓存。每次都要重算，白白多花时间。</p>
+<p>这篇把缺口补上了。Triton 的分块递推算完，就把检查点状态写进一块专用缓存。再由导出器把它搬进检查点块里，连同卷积窗口一起。提示词不用再切了，整条都能进缓存。</p>
+<p>还有个顺手修的 bug。共享的 chunk_kda 入口以前会悄悄丢掉检查点参数。参数传进来，转手就没了。现在补上了转发。GLM-5.3-Flash 和 Kimi-K3 走同一条路，行为没变。</p>
+<h2>核心方法</h2>
+<p>改动分三块。</p>
+<p>第一块：打通导出。Bailing V3 的 KDA 层声明检查点对齐是 64。Triton 读题算完，就把检查点导出来。只在对齐模式下才预留缓存。平时不占显存。</p>
+<p>第二块：修参数转发。共享的 flash-linear-attention 里有个入口。</p>
+<p>入口名字叫 chunk_kda。</p>
+<p>现在它把检查点状态和偏移量透传给底层核。底层核就是门控递推前向核。</p>
+<p>以前 **kwargs 会悄悄丢掉这两个参数。现在不会了。</p>
+<p>第三块：三模型共用一套工具。GLM-5.3-Flash、Kimi-K3、Bailing V3 走同一条路。</p>
+<p>工具在 kda_checkpoint.py 里，一共两个。一个负责预留缓存，一个负责取缓存。GLM 和 K3 的行为保持不变。</p>
+<p>这是 #67866 的后续。#67866 先给 GLM-5.3-Flash 和 Kimi-K3 铺了路。这篇把 Bailing V3 也接了进来。</p>
+<h2>关键数据</h2>
+<ul><li>测试模型：Ling-3.0-flash。</li><li>部署形态：张量并行 2 卡。</li><li>测试硬件：GB300、MI355X。</li><li>GB300 上，首字时间降 23%、24%、23%。</li><li>对应并发是 1、4、16。</li><li>MI355X 上，并发 1 时首字时间降 20%。</li><li>精度对照：GSM8K 上，开前缀缓存命中时分数没变。</li><li>适用范围：只影响 Bailing V3 这类 KDA 模型。</li><li>性能数据：这篇只给了首字时间，没给吞吐数。</li></ul>
+<h2>跟研究方向的关联</h2>
+<p>这篇跟 PD 解耦评估直接相关。</p>
+<p>第一，前缀缓存加线性注意力模型，检查点对齐是个暗坑。KDA 层导不出检查点，提示词就会被切断。以后评估这类模型跑 PD，先确认版本带这个修复。否则首字时间虚高。</p>
+<p>第二，首字降 23% 的数能直接当基线。GB300 两卡并行、并发 1 到 16 的三档数都给了。自己测 Ling-3.0-flash 时，可以先对一下这组数。</p>
+<p>第三，MI355X 上也有 20% 的收益。AMD 卡上跑这类模型，检查点导出同样值得开。评估清单里按卡分档报，别只报英伟达的数。</p>
+<p>第四，GLM-5.3-Flash 和 Kimi-K3 早就打通了。Bailing V3 是第三个。现在三家走同一套工具。以后再有新模型接进来，大概率也是这条路。</p>
+<h2>术语表</h2>
+<ul><li>PD 解耦：读题和生成分到不同机器上跑。</li><li>prefill：读题阶段，把提示词算一遍。</li><li>TTFT：首字时间，第一个词吐出来要等多久。</li><li>KDA：Kimi Delta Attention，一种线性注意力。</li><li>线性注意力：算递推的注意力，不用回头看全文。</li><li>门控递推：每步用门控决定留多少旧状态。</li><li>读题检查点：线性注意力层的存档点。</li><li>前缀缓存：相同开头的提示词，算过一次就不用重算。</li><li>Mamba 块：线性注意力里的一段状态边界。</li><li>卷积窗口：KDA 层里短程卷积留下的状态。</li><li>Triton：写 GPU 核的语言，不用手写 CUDA。</li><li>对齐模式：检查点按 64 对齐的导出模式。</li><li>张量并行：多卡分头算同一个张量。</li><li>GSM8K：小学数学题测试集。</li><li>GB300：英伟达 Blackwell 架构的 GPU。</li><li>MI355X：AMD 的加速卡。</li></ul>
+<h2>原文链接</h2>
+<ul><li><a href="https://github.com/vllm-project/vllm/pull/68106">https://github.com/vllm-project/vllm/pull/68106</a></li></ul></body></html>
