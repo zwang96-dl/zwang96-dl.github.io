@@ -1,0 +1,169 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月16日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-16"/>
+<meta name="doc-ts" content="2026-11-17T03:01:20"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-16（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-16（19点版）</h1>
+<p>19点版来了，这轮是常规更新。</p>
+<p>没有新版本发布。</p>
+<p>但各家合入的 PR 不少。</p>
+<p>Kimi-K3.1 的 P/D 配方是主线。</p>
+<p>arXiv 这轮还是空的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc2。</p>
+<p>llama.cpp 快照还是 b12445。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：Kimi-K3.1-Pro 的 B300 P/D 配方来了</strong></p>
+<p>#67722 是本轮最值得看的一条。</p>
+<p>它给 Kimi-K3.1-Pro 加了 B300 预设。</p>
+<p>预设走 AgentX 的拆分部署。</p>
+<p>拆分部署就是 prefill 和 decode 分开跑。</p>
+<p>像流水线分工，各干各的活。</p>
+<p>这条跟你研究的 P/D 解耦直接相关。</p>
+<p>#64574 修的是 MoRIIO 的端口冲突。</p>
+<p>MoRIIO 是搬运 KV 缓存的工具。</p>
+<p>KV 缓存就是模型的草稿纸。</p>
+<p>多卡并行时端口会撞车。</p>
+<p>撞车就连不上，现在修好了。</p>
+<p>#65186 跟 GDN 的检查点有关。</p>
+<p>prefill 的检查点能导出来了。</p>
+<p>检查点就是中途的进度存档。</p>
+<p>以后能接着跑，不用从头算。</p>
+<p>#67072 是 AMD 的小优化。</p>
+<p>MoE 的输出投影融进 topk 排序。</p>
+<p>跑 M3.1 decode 更快一点。</p>
+<p>#62590 调了 Qwen4Exp 的稀疏预热。</p>
+<p>#49700 让 EPLB 的状态覆盖更细。</p>
+<p>EPLB 是专家负载均衡的调度器。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67722">https://github.com/vllm-project/vllm/pull/67722</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/64574">https://github.com/vllm-project/vllm/pull/64574</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/65186">https://github.com/vllm-project/vllm/pull/65186</a></p>
+<p><strong>SGLang：14 条，NPU 和 Kimi-K3 占大头</strong></p>
+<p>#50097 给 NPU 加了 FP8 KV。</p>
+<p>FP8 就是把草稿纸的字写小一半。</p>
+<p>用在 DSA 的 decode 上下文并行。</p>
+<p>DSA 是把超长上下文切开分卡算。</p>
+<p>省显存，长上下文 decode 更划算。</p>
+<p>#46022 是调度器的小修。</p>
+<p>共享前缀去重，省一次重复计算。</p>
+<p>前缀就是很多请求共用的开头。</p>
+<p>#46063 也跟调度器有关。</p>
+<p>给 encoder 的重放行预留位置。</p>
+<p>多模态请求排队更稳。</p>
+<p>#40732 补了个 PD 测试。</p>
+<p>覆盖 decode 回撤后的重启路径。</p>
+<p>#50839 修 Kimi-K3 的空闲 rank。</p>
+<p>attention DP 下空闲的卡不再捣乱。</p>
+<p>KDA 检查点的类型也对齐了。</p>
+<p>#50526 和 #50524 是 inkling2 的新核。</p>
+<p>#50882 让每台服务器都记 GC 日志。</p>
+<p>GC 就是内存回收，卡顿了能查到。</p>
+<p>#50870 修 AMD 的 DSA 内核。</p>
+<p>token 偏移改成 64 位。</p>
+<p>#50725 修 NPU 的 prefill 崩溃。</p>
+<p>#50470 修多模态的张量匹配。</p>
+<p>#49481 让 prefill 图能断点续跑。</p>
+<p>#50869 和 #49409 是 RL 方向的。</p>
+<p>sglang-miles 的输出缓存更稳。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50097">https://github.com/sgl-project/sglang/pull/50097</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/46022">https://github.com/sgl-project/sglang/pull/46022</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/40732">https://github.com/sgl-project/sglang/pull/40732</a></p>
+<p><strong>TRT-LLM：Kimi K3 上 SM107，混合 KV 缓存升到 V2</strong></p>
+<p>#22175 是本轮最实在的一条。</p>
+<p>Kimi K3 的运行时上了 SM107。</p>
+<p>SM107 就是 B300 那代卡的代号。</p>
+<p>混合 KV 缓存也升到 V2。</p>
+<p>KV 缓存就是模型的草稿纸。</p>
+<p>#21711 修的是拆分部署的停止判断。</p>
+<p>生成服务器接手后，第一 token 就要查停。</p>
+<p>以前可能漏查，现在补上了。</p>
+<p>#22408 扩了 DSpark 的草稿页。</p>
+<p>DSpark 是投机解码的草稿器。</p>
+<p>投机解码就是先让实习生打草稿。</p>
+<p>再让专家一次性改完。</p>
+<p>#21887 让采样方式能选。</p>
+<p>CUDA 图捕获时挑要用的采样变体。</p>
+<p>#22286 是重构，#22320 和 #22226 是测试。</p>
+<p>#22039 修了个安全漏洞。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22175">https://github.com/NVIDIA/TensorRT-LLM/pull/22175</a> 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21711">https://github.com/NVIDIA/TensorRT-LLM/pull/21711</a> 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22408">https://github.com/NVIDIA/TensorRT-LLM/pull/22408</a></p>
+<p><strong>Dynamo、FlashInfer、Mooncake：各一两条小修</strong></p>
+<p>Dynamo 只合了 1 条。</p>
+<p>#18379 删了旧的 vLLM 启动示例。</p>
+<p>FlashInfer 合了 2 条。</p>
+<p>#9535 给采样类加了训练前向接口。</p>
+<p>#9326 删了 CAKE 训练核。</p>
+<p>Mooncake 合了 1 条。</p>
+<p>#5536 把桶索引分片，少卡顿。</p>
+<p>LMDeploy、llama.cpp、TGI：零合入。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18379">https://github.com/ai-dynamo/dynamo/pull/18379</a> 来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9535">https://github.com/flashinfer-ai/flashinfer/pull/9535</a> 来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5536">https://github.com/kvcache-ai/Mooncake/pull/5536</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮还是空的</strong></p>
+<p>最新提交仍是 11 月 14 日那批。</p>
+<p>11 月 15–16 日 cs.LG 零新提交。</p>
+<p>下一批按惯例明晚 16:00 到。</p>
+<p>这轮先空着。</p>
+<h2>业内新闻</h2>
+<p><strong>Qwen3.8-Flash-Next 自托管指南更新了</strong></p>
+<p>这篇讲自己搭服务器跑 Qwen3.8。</p>
+<p>Qwen3.8-Flash-Next 是通义的新模型。</p>
+<p>FP8 版 172.78GB，BF16 版 335.28GB。</p>
+<p>vLLM 配方要 v0.30.0 以上。</p>
+<p>SGLang 配方覆盖 H200 到 GB300。</p>
+<p>TP8 还能上 AMD 的 MI350X。</p>
+<p>单张 RTX PRO 6000 也能跑 NVFP4。</p>
+<p>DGX Spark 也行，n-gram 表放 NVMe。</p>
+<p>你手里有 H100 和 MI350X。</p>
+<p>照着配方能直接抄作业。</p>
+<p>来源：<a href="https://www.ssdnodes.com/learn/what-it-takes-to-self-host-qwen-3-8-flash-next">https://www.ssdnodes.com/learn/what-it-takes-to-self-host-qwen-3-8-flash-next</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是今天 FLUX 3 那期</strong></p>
+<p>17点版已经报过，不重复。</p>
+<p><strong>SGLang Summit 第二天文字总结还没出</strong></p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有新深读</strong></p>
+<p>这轮的 PR 都是一两句的小修。</p>
+<p>没有一篇值得单开精读笔记。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>vLLM #67722，Kimi-K3.1-Pro 的 B300 P/D 预设。跑 Kimi-K3.1 拆分部署的人直接抄。</li><li>SGLang #50097，NPU 上 FP8 KV 配 DSA decode 上下文并行。长上下文省显存的新路子。</li><li>TRT-LLM #22175，Kimi K3 上 SM107 加混合 KV 缓存 V2。B300 用户可以对照看看。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 17 点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc2；llama.cpp 快照 b12445。 vLLM 6 条首次汇总：#67722（Kimi-K3.1-Pro B300 AgentX P/D 预设）、#67072（ROCm MoE 融合 M3.1 decode）、#65186（GDN Triton prefill 检查点导出）、#64574（MoRIIO 端口冲突修复）、#62590（Qwen4Exp 稀疏 GQA prefill 调优）、#49700（EPLB 窄状态覆盖）。 SGLang 14 条首次汇总：#50882（GC 日志）、#50870（AMD DSA 64 位偏移）、#50869（sglang-miles 输出缓存）、#50839（kimi-k3 空闲 attention-DP rank）、#50725（NPU kda prefill 崩溃修复）、#50526、#50524（inkling2 新核）、#50470（多模态张量匹配）、#50097（NPU FP8 KV for DSA decode CP）、#49481（可断点 prefill 图）、#49409（sglang-miles）、#46063（encoder 重放行预留）、#46022（共享前缀去重）、#40732（hisparse PD decode 回撤重启测试）。 TRT-LLM 8 条首次汇总：#22408（Helix 草稿页扩展）、#22320、#22286（modeling_v2 重构）、#22226、#22175（Kimi K3 SM107 + 混合 KV 缓存 V2）、#22039（漏洞修复）、#21887（cuda_graph 采样变体）、#21711（拆分生成服务器停止判断修复）。 Dynamo 1 条首次汇总：#18379（删旧 vLLM 启动示例）。 FlashInfer 2 条首次汇总：#9535（batch_invariant 采样训练前向）、#9326（删 CAKE 训练核）。 Mooncake 1 条首次汇总：#5536（桶索引分片）。 LMDeploy、llama.cpp、TGI 零合入。 arXiv：无新批次（最新仍为 11 月 14 日提交；下一批约 11 月 17 日 16:00 PST）。 业内新闻：Qwen3.8-Flash-Next 自托管指南首次汇总。 访谈与深度：Latent Space 最新仍是 11 月 16 日 FLUX 3（17点版已报）；SGLang Summit 第二天文字总结仍未出。 本轮无新深读。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-16-1900/">19点版</a></p></body></html>
