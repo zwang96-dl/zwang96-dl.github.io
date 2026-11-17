@@ -1,0 +1,206 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月17日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T23:04:33"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-17（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-17（15点版）</h1>
+<p>15点版来了，这轮主角是英伟达财报。</p>
+<p>实数全线超预期，Q4 指引也给了 1300 亿。</p>
+<p>Cerebras 那边也热闹，PD 拆分正式进生产了。</p>
+<p>FlashInfer 有一条值得深读的 KV 优化。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>这轮没有新版本发布。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc3。</p>
+<p>llama.cpp 快照还是 b12483。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>FlashInfer：KV 只转一次，vLLM 吞吐涨两成</strong></p>
+<p>#9527 是本轮最值得看的一条。</p>
+<p>它解决的是稀疏注意力的 KV 转换问题。</p>
+<p>稀疏注意力就是只看挑出来的关键词。</p>
+<p>不看全文，省算力。</p>
+<p>KV 现在存成 NVFP4。</p>
+<p>NVFP4 是一种 4 比特量化格式。</p>
+<p>注意力核吃的是 FP8。</p>
+<p>FP8 是一种 8 比特浮点格式。</p>
+<p>所以用之前要先转一道。</p>
+<p>以前每个请求行都转一遍。</p>
+<p>同一批行老选中同一个 key。</p>
+<p>转了一遍又一遍，全是重复活。</p>
+<p>现在每个 key 只转一次。</p>
+<p>转完存在共享区，各行去取。</p>
+<p>新接口有两个。</p>
+<p>行数少时用 gather。</p>
+<p>批量大时用 compact。</p>
+<p>实测在 GB300 上。</p>
+<p>解码 128 个请求，每请求 6 行。</p>
+<p>转换从 1574 微秒降到 133 微秒。</p>
+<p>读题那组更夸张。</p>
+<p>2816 行的大块，从 5695 微秒降到 56 微秒。</p>
+<p>端到端也有数。</p>
+<p>vLLM 跑 NVFP4 KV 的稀疏模型。</p>
+<p>吞吐从 824.7 涨到 1008.9 词每秒每卡。</p>
+<p>涨了 22%。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9527">https://github.com/flashinfer-ai/flashinfer/pull/9527</a></p>
+<p><strong>FlashInfer：稀疏注意力又抠了一点性能</strong></p>
+<p>#9605 是 CAKE 稀疏核的小优化。</p>
+<p>CAKE 是给稀疏注意力做的融合核。</p>
+<p>改的是输出合并那步。</p>
+<p>让它跟下一块计算重叠起来。</p>
+<p>实测 15 组形状，B200 和 GB300 上。</p>
+<p>快的最高 1.07 倍。</p>
+<p>慢的 0.99 倍，基本在噪声里。</p>
+<p>小优化，不展开。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9605">https://github.com/flashinfer-ai/flashinfer/pull/9605</a></p>
+<p><strong>Mooncake：仓库搬家了，攒了五条小修补</strong></p>
+<p>Mooncake 的仓库换地方了。</p>
+<p>以前在 mooncake-dev 组织下。</p>
+<p>现在是 kvcache-ai/Mooncake。</p>
+<p>旧地址已经 404。</p>
+<p>最近攒了五条合入。</p>
+<p>#5576、#5574、#5551、#5544、#5542。</p>
+<p>全是小修补和测试稳定。</p>
+<p>没有值得展开的。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5576">https://github.com/kvcache-ai/Mooncake/pull/5576</a></p>
+<p><strong>Dynamo：一条 cherry-pick 小修补</strong></p>
+<p>#18952 是 #18937 的 cherry-pick。</p>
+<p>修的是 vllm-omni 的导入检查。</p>
+<p>导入检查不再留一个 root 建的家目录。</p>
+<p>小修补，不展开。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18952">https://github.com/ai-dynamo/dynamo/pull/18952</a></p>
+<p>vLLM、SGLang、TRT-LLM、LMDeploy、TGI 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批约今天 16:00</strong></p>
+<p>本轮没有新论文。</p>
+<p>下一批约今天 16:00 发布。</p>
+<h2>业内新闻</h2>
+<p><strong>英伟达财报实数：全线超预期</strong></p>
+<p>财报 13:20 出了，实数来了。</p>
+<p>营收 1158 亿美元，同比涨 103%。</p>
+<p>比市场预期高约 67 亿美元。</p>
+<p>数据中心 1076 亿，同比涨 110%。</p>
+<p>占总营收 93%。</p>
+<p>调整后每股收益 2.68 美元。</p>
+<p>预期是 2.47 美元。</p>
+<p>净利润 653 亿美元，毛利率 74.8%。</p>
+<p>Q4 指引 1300 亿美元，上下浮动 3%。</p>
+<p>这个指引不含中国数据中心收入。</p>
+<p>Vera Rubin NVL72 开始出货了。</p>
+<p>官方说这是史上最快的爬坡。</p>
+<p>盘后股价涨约 2%。</p>
+<p>这是新 CEO 上任后的第一份财报。</p>
+<p>财报期覆盖到 10 月 25 日。</p>
+<p>黄仁勋 11 月 12 日才辞任。</p>
+<p>所以这份数还是他任内做出来的。</p>
+<p>另外同日有个消息。</p>
+<p>WSJ 报道，SEC 已展开民事调查。</p>
+<p>查的是信息披露有没有误导投资者。</p>
+<p>来源：<a href="https://www.fool.com/investing/2026/11/17/nvidia-sales-double-under-an-interim-ceo-rapid-earnings-reaction/">https://www.fool.com/investing/2026/11/17/nvidia-sales-double-under-an-interim-ceo-rapid-earnings-reaction/</a></p>
+<p>来源：<a href="https://dealroom.co/news/173707-nvidia-beats-with-115-8b-quarter-and-guides-to-130b-in-first-report-sinc/">https://dealroom.co/news/173707-nvidia-beats-with-115-8b-quarter-and-guides-to-130b-in-first-report-sinc/</a></p>
+<p><strong>Cerebras：PD 拆分正式进生产</strong></p>
+<p>PD 拆分就是读题和解码分开跑。</p>
+<p>Cerebras 这回把它做进生产了。</p>
+<p>读题交给 AMD 的 GPU。</p>
+<p>解码留在自家的 CS-3 上。</p>
+<p>CS-3 是 Cerebras 的晶圆级系统。</p>
+<p>两边用 KV Portal 传 KV。</p>
+<p>KV Portal 是 Cerebras 的传输层。</p>
+<p>走 RDMA 搬运。</p>
+<p>实测是 11 月 14 日的共享端点。</p>
+<p>模型是 GPT-OSS-120B。</p>
+<p>每兆瓦吞吐是纯 CS-3 配置的 5 倍。</p>
+<p>生成速度没降。</p>
+<p>10 月 1 日那次只是早期测试。</p>
+<p>这次是生产实测，还打包给了合作方。</p>
+<p>早期合作方有 AWS、Fireworks AI 等。</p>
+<p>目标是 2027 年底前铺到几百兆瓦。</p>
+<p>来源：<a href="https://www.cerebras.ai/blog/cerebras-launches-disaggregated-inference">https://www.cerebras.ai/blog/cerebras-launches-disaggregated-inference</a></p>
+<p><strong>SageMaker：按 KV 缓存状态选实例</strong></p>
+<p>AWS 给 SageMaker 上了 KV 感知路由。</p>
+<p>KV 感知就是按缓存状态选实例。</p>
+<p>请求发给缓存命中最长的那台。</p>
+<p>命中不上或查得慢，就退回负载路由。</p>
+<p>它用容器上报的缓存事件做索引。</p>
+<p>不存提示词原文，只存哈希。</p>
+<p>要 vLLM 容器 0.33.0 以上。</p>
+<p>至少两台实例才有效。</p>
+<p>AWS 称长提示下首字中位数降 97%。</p>
+<p>吞吐涨 234%。</p>
+<p>这是厂商自报，等第三方复现再信。</p>
+<p>注意别跟 9 月的前缀感知路由搞混。</p>
+<p>那条只按提示词前缀指纹分流。</p>
+<p>这条看的是真实缓存状态。</p>
+<p>来源：<a href="https://www.unite.ai/sagemaker-ai-routes-requests-using-container-reported-gpu-cache-state/">https://www.unite.ai/sagemaker-ai-routes-requests-using-container-reported-gpu-cache-state/</a></p>
+<p><strong>RightNow：YC 新公司卖开源模型推理</strong></p>
+<p>YC 今天推了一家新公司 RightNow。</p>
+<p>自称 GPU 内核实验室。</p>
+<p>卖开源模型的托管推理。</p>
+<p>按模型写核，接口兼容 OpenAI。</p>
+<p>价格表公开，缓存命中率也公开。</p>
+<p>团队只有两个人。</p>
+<p>宣传里有个 Revolut 的例子。</p>
+<p>说 2000 名工程师切到 GLM 5.3。</p>
+<p>省了 90% 编码开支。</p>
+<p>这是营销说法，别当实测。</p>
+<p>来源：<a href="https://explainx.ai/blog/rightnow-yc-kernel-open-model-inference-api-pricing-2026">https://explainx.ai/blog/rightnow-yc-kernel-open-model-inference-api-pricing-2026</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 FLUX 3 那期</strong></p>
+<p>最新一期还是 11 月 16 日的 FLUX 3。</p>
+<p>这轮没有新单集。</p>
+<h2>值得深入学</h2>
+<p><strong>FlashInfer #9527：NVFP4 KV 只转一次</strong></p>
+<p>这篇跟你的 KV 优化线直接相关。</p>
+<p>长上下文加投机解码，验证行老重复选中同一个 key。</p>
+<p>以前每行都转一遍，白白烧算力。</p>
+<p>现在每个 key 只转一次，端到端吞吐涨 22%。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>FlashInfer #9527。NVFP4 KV 只转一次，vLLM 吞吐涨 22%。</li><li>Cerebras PD 生产部署。AMD 读题加 CS-3 解码，每兆瓦 5 倍。</li><li>英伟达财报实数。营收 1158 亿，Q4 指引 1300 亿。</li></ol>
+<p>深读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261117-flashinfer-nvfp4-token-sparse/">FlashInfer NVFP4 KV 只转一次</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-17-1500/">15点版</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 13点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2（最新 tag 为 v1.7.0-kimi-k3.1-pro-dev.1 开发预发布）；FlashInfer v0.7.5rc3；llama.cpp 快照 b12483；Mooncake v0.3.14（仓库已从 mooncake-dev 迁至 kvcache-ai）。 vLLM 零合入。SGLang 零合入。TRT-LLM 零合入。LMDeploy 零合入。TGI 零合入。 FlashInfer 2 条首次汇总：#9527（feat(sdsa)：NVFP4 KV 转 FP8 供 token-sparse 注意力用，gather/compact 两条 CUDA-graph 安全路径，每 key 只转一次；GB300 上解码 128 请求×6 行 1574→133 微秒，读题 2816 行块 5695→56 微秒；vLLM 端到端 NVFP4-KV 稀疏模型吞吐 824.7→1008.9 tok/s/GPU，+22%）、#9605（perf：CAKE 稀疏注意力 tile epilogue 重叠 + tail-split 优化，B200/GB300 上 15 组形状 0.993–1.069 倍，多在噪声内）。 Dynamo 1 条首次汇总：#18952（#18937 的 cherry-pick：vllm-omni 导入检查不再留下 root 所有的家目录）。 Mooncake 5 条首次汇总（此前数期因旧地址 404 漏报）：#5576（HTTP 元数据 PUT 关 Expect）、#5574（共享内存释放前停掉 dummy 重连）、#5551（p2p 测试 SIGTERM 稳定）、#5544（Store：会话准入与心跳隔离）、#5542（同名 RDMA 亲和性）。 arXiv：下一批约 11 月 17 日 16:00 PST。 业内新闻：英伟达财报实数（营收 1158 亿、+103%，数据中心 1076 亿、+110%，调整后 EPS 2.68 美元，Q4 指引 1300 亿 ±3% 不含中国，毛利率 74.8%，Vera Rubin NVL72 出货，盘后 +2%；WSJ：SEC 民事调查）；Cerebras PD 生产部署（AMD 读题 + CS-3 解码，每兆瓦 5 倍）；SageMaker KV 感知路由上线（11 月 17 日）；RightNow YC 发布（11 月 17 日）。 访谈与深度：Latent Space 最新仍是 11 月 16 日 FLUX 3。 深读：FlashInfer #9527 NVFP4 KV 只转一次（新增）。</p></body></html>

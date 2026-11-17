@@ -1,0 +1,149 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · FlashInfer #9527：NVFP4 KV 只转一次，稀疏注意力少烧两成算力"/>
+<meta name="doc-description" content="- 作者：FlashInfer 团队"/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T23:05:39"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FlashInfer #9527：NVFP4 KV 只转一次，稀疏注意力少烧两成算力</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>FlashInfer #9527：NVFP4 KV 只转一次，稀疏注意力少烧两成算力</h1>
+<ul><li>作者：FlashInfer 团队</li><li>文章：[feat(sdsa)] convert NVFP4 KV tokens to FP8 for token-sparse attention, once per key</li><li>合入时间：2026-11-17 13:44 PST（2026-11-17 21:44 UTC）</li><li>原文链接：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9527">https://github.com/flashinfer-ai/flashinfer/pull/9527</a></li><li>说明：原文是代码 PR，没有配图，本笔记不附图。数字全是 PR 作者自报，没有第三方复现。</li></ul>
+<h2>一句话</h2>
+<p>稀疏注意力只看挑出来的 key，KV 存的是 NVFP4。</p>
+<p>注意力核吃 FP8，用之前要先转一道。</p>
+<p>以前每行都转一遍，同一个 key 转了几十遍。</p>
+<p>现在每个 key 只转一次，vLLM 吞吐涨 22%。</p>
+<h2>人话解读</h2>
+<p>稀疏注意力就是挑着看。</p>
+<p>上下文 20 万 token，只看挑出来的 2048 个。</p>
+<p>KV 缓存现在存成 NVFP4。</p>
+<p>NVFP4 是一种 4 比特量化格式。</p>
+<p>它把 KV 压得很小，省显存。</p>
+<p>但注意力核不吃 NVFP4。</p>
+<p>它吃 FP8 E4M3 格式的行。</p>
+<p>所以用之前，要把选中的 token 转成 FP8。</p>
+<p>转完放进一块工作区。</p>
+<p>工作区就是一块临时放转换结果的显存。</p>
+<p>以前的转法很笨。</p>
+<p>每个请求行都自己转一遍。</p>
+<p>同一请求的几行，选中的 key 大多重合。</p>
+<p>投机解码的验证行就是这样。</p>
+<p>验证行就是大模型验草稿的那几行。</p>
+<p>一个请求的 1+k 行，基本选同一批 key。</p>
+<p>读题分块也是这样。</p>
+<p>200K 上下文里，一个 3K 的块。</p>
+<p>每个被选中的 key 平均被复用 30 次。</p>
+<p>每行都转，就是把同一份活干 30 遍。</p>
+<p>这回改成每个 key 只转一次。</p>
+<p>转完存在共享区，各行去取就行。</p>
+<p>省下来的时间直接进吞吐。</p>
+<h2>核心方法</h2>
+<p>新接口挂在 flashinfer.sdsa.token_sparse 下。</p>
+<p>一共两条转换路径。</p>
+<p>第一条叫 gather。</p>
+<p>它按行转，适合行数少的场合。</p>
+<p>比如 batch 是 1，一次只转几行。</p>
+<p>第二条叫 compact。</p>
+<p>它按请求分组转，适合批量大的场合。</p>
+<p>同一组的行共享一份转换结果。</p>
+<p>compact 里面又分两种组。</p>
+<p>一种是 union 组。</p>
+<p>它给每组维护一张 key 位图。</p>
+<p>位图就是一张表，标着哪些 key 被选中了。</p>
+<p>先标号、再去重、再转。</p>
+<p>位图一直留着，用完清零。</p>
+<p>清零不用 memset，CUDA 图里也能跑。</p>
+<p>另一种是 dense 组。</p>
+<p>块里选中的 key 太多，干脆全转。</p>
+<p>转到最后一个被选中的 key 为止。</p>
+<p>key 按位置对号入座，不用查表。</p>
+<p>两条路径都保证图安全。</p>
+<p>图安全就是能在 CUDA 图里重放。</p>
+<p>全程没有主机同步。</p>
+<p>转换结果的数值也有讲究。</p>
+<p>FP8 行里存的是解码后的值再除以 6。</p>
+<p>调用方把两个矩阵乘的 scale 乘回 6。</p>
+<p>这样 NVFP4 的整个范围都能塞进 FP8。</p>
+<p>不会溢出，也不会丢精度。</p>
+<p>输出跟老路子逐位一致。</p>
+<p>开发时跟每行单独转的结果对过。</p>
+<p>转换网格也有优化。</p>
+<p>网格太大时，改成每组自己循环。</p>
+<p>GB300 上一个例子，378 微秒降到 97 微秒。</p>
+<h2>关键数据</h2>
+<ul><li>测试硬件：GB300。</li><li>注意力配置：head_dim 256，top_k 2048。</li><li>上下文：200K。</li><li>量法：CUDA 图重放，取 30 次中位数。</li></ul>
+<p>转换耗时对比，单位微秒：</p>
+<ul><li>解码，1 请求 × 3 验证行：19.6 → 9.4。</li><li>解码，128 请求 × 3 验证行：794 → 94。</li><li>解码，128 请求 × 6 验证行：1574 → 133。</li><li>读题，2816 行的大块：5695 → 56。</li></ul>
+<p>端到端也有数。</p>
+<p>vLLM 跑 NVFP4 KV 的稀疏模型。</p>
+<p>TP4，64 个长上下文会话并发。</p>
+<p>吞吐从 824.7 涨到 1008.9 词每秒每卡。</p>
+<p>涨了 22%。</p>
+<p>验证也很扎实。</p>
+<p>新测试 263 个用例，全过。</p>
+<p>跟老方法逐位比对，一位不差。</p>
+<p>只支持 Blackwell 卡。</p>
+<p>10.x、11.x、12.x 的算力版本。</p>
+<p>在 SM103 的 GB300 上验证过。</p>
+<p>head_dim 必须是 2 的幂，64 起步。</p>
+<h2>跟研究方向的关联</h2>
+<p>这篇跟 KV 优化线直接相关。</p>
+<p>第一，长上下文的稀疏注意力，转换是瓶颈。</p>
+<p>这篇把转换从毫秒级打到微秒级。</p>
+<p>读题大块那组，快了 100 倍。</p>
+<p>评估里跑长上下文稀疏模型，先确认版本带这个。</p>
+<p>第二，投机解码的验证行也受益。</p>
+<p>验证行就是这篇优化的第一类场景。</p>
+<p>128 请求 × 6 行，快了快 12 倍。</p>
+<p>跑 Kimi-K3 这类带草稿的模型，转换不再拖后腿。</p>
+<p>第三，这个优化跟 PD 解耦是同一条账。</p>
+<p>读题端算 KV、解码端验草稿。</p>
+<p>两边都可能撞上重复转换。</p>
+<p>评估 PD 部署时，KV 格式和转换路径要一起问。</p>
+<p>第四，NVFP4 KV 是个趋势。</p>
+<p>KV 压到 4 比特，显存省一半。</p>
+<p>但用之前要转 FP8，这笔账不能漏。</p>
+<p>这篇给了一个现成的量法。</p>
+<p>按 key 去重转，省多少直接看表。</p>
+<p>第五，数字只在 GB300 上测过。</p>
+<p>模型只有一个，没给名字。</p>
+<p>H100 和 MI350X 上怎么样，得自己测。</p>
+<h2>术语表</h2>
+<ul><li>稀疏注意力：只看挑出来的关键 token，不看全文。</li><li>NVFP4：4 位浮点量化格式，省显存。</li><li>FP8 E4M3：8 位浮点格式，注意力核吃的格式。</li><li>token-sparse：按 token 挑着算的稀疏方式。</li><li>验证行：投机解码里大模型验草稿的那几行。</li><li>工作区：一块临时放转换结果的显存。</li><li>gather：按行转的路径，行数少时用。</li><li>compact：按请求分组转的路径，批量大时用。</li><li>union 组：去重后转的组，key 只转一次。</li><li>dense 组：选中的 key 太多，干脆全转的组。</li><li>位图：一张表，标着哪些 key 被选中了。</li><li>CUDA 图：把一串操作录下来、反复重放的加速方式。</li><li>图安全：能在 CUDA 图里重放，不用主机同步。</li><li>E2M1：NVFP4 里存数值的 2 位指数格式。</li><li>E4M3：FP8 里存数值的 4 位指数格式。</li><li>块 scale：每组数值共用的缩放系数。</li><li>head_dim：注意力头的维度。</li><li>top_k：每行挑出来看的 key 数量。</li><li>Blackwell：英伟达 B 系列 GPU 的架构代号。</li><li>SM103：GB300 的流处理器版本。</li><li>TP4：张量并行 4 卡。</li></ul>
+<h2>原文链接</h2>
+<ul><li><a href="https://github.com/flashinfer-ai/flashinfer/pull/9527">https://github.com/flashinfer-ai/flashinfer/pull/9527</a></li></ul></body></html>
