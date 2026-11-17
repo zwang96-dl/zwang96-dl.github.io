@@ -1,0 +1,190 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月17日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T11:02:54"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-17（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-17（03点版）</h1>
+<p>03点版来了，凌晨这轮有三件实在的。</p>
+<p>主角是两篇新论文。</p>
+<p>一篇算清了多模态拆分的省电账。</p>
+<p>另一篇把 KV 缓存压到了 1.25 位。</p>
+<p>FlashInfer 也发了个新的预发布版。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：FlashInfer 出了 rc3，快照号也涨了</strong></p>
+<p>FlashInfer 到了 v0.7.5rc3。</p>
+<p>01:35 刚发布，从 rc2 涨上来。</p>
+<p>llama.cpp 快照从 b12465 涨到 b12470。</p>
+<p>其余水位全没动。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：KV 分片的测试管理器补了两个字段</strong></p>
+<p>#50995 是 01点版那篇深读的后续。</p>
+<p>01点版深读的是 #44447，Qwen 新模型的 KV 分片。</p>
+<p>这次补的是测试用的管理器。</p>
+<p>它漏了两个字段，一个管辅助交换，一个管延迟确认。</p>
+<p>补上之后，KV 分片的测试才能覆盖 CP-TP 混搭。</p>
+<p>CP 就是把超长上下文切开分卡算。</p>
+<p>TP 就是张量并行，多卡分头算。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50995">https://github.com/sgl-project/sglang/pull/50995</a></p>
+<p><strong>SGLang：DeepSeek-V4.1 读题索引器上 Hopper</strong></p>
+<p>#50719 修的是 Hopper 上的读题索引器。</p>
+<p>读题索引器就是给注意力挑重点的模块。</p>
+<p>以前在 Hopper 上，它走 torch 兜底。</p>
+<p>每层每个请求都要算一份 bf16 分数块。</p>
+<p>还要跟主机同步好几次，又慢又卡。</p>
+<p>现在改走 DeepGEMM 的 fp8 打分。</p>
+<p>省掉了中间的分数块，也省掉了主机同步。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50719">https://github.com/sgl-project/sglang/pull/50719</a></p>
+<p><strong>SGLang：AMD 上 DSpark 的草稿步变快了</strong></p>
+<p>#48095 给 AMD 的 DSpark 提了速。</p>
+<p>DSpark 是投机解码用的草稿器。</p>
+<p>投机解码就是先让小模型打草稿。</p>
+<p>再让大模型一次性改完。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48095">https://github.com/sgl-project/sglang/pull/48095</a></p>
+<p>其余 6 条是 CI、NPU 测试和扩散模型的小修。</p>
+<p><strong>vLLM：9 条，多模态修 bug 为主</strong></p>
+<p>#68122 修的是 ERNIE-4.5-VL 的图片预算。</p>
+<p>图片预算就是一张图最多占多少位置。</p>
+<p>现在按处理器自己的像素上限来算。</p>
+<p>#68096 修的是 MiniCPM-V/O 的图片占位符。</p>
+<p>占位符就是给图片预留的位置。</p>
+<p>现在用请求自己的切片数来算。</p>
+<p>#68076 修的是 InternVL 的视频处理。</p>
+<p>图片裁剪的参数不再往视频处理器里传。</p>
+<p>#67970 修的是 LoRA 的 id 复用。</p>
+<p>同一个 id 不许换绑另一个适配器。</p>
+<p>#67966 修的是 ROCm 的 KV 收缩。</p>
+<p>KV 缓存缩水后，脏的块表项会被清掉。</p>
+<p>其余 4 条是 CI、文档和 CPU 小修。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68122">https://github.com/vllm-project/vllm/pull/68122</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/68096">https://github.com/vllm-project/vllm/pull/68096</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/67970">https://github.com/vllm-project/vllm/pull/67970</a></p>
+<p><strong>TRT-LLM：MLA 读题的中间 KV 存储瘦身了</strong></p>
+<p>#22337 砍的是 MLA 读题的中间存储。</p>
+<p>MLA 是 DeepSeek 用的压缩注意力。</p>
+<p>读题时展开上下文 KV，会先占一块中间存储。</p>
+<p>现在超过 4096 个 token 才走跨步展开。</p>
+<p>短的读题不走这条路，省下不少显存。</p>
+<p>#22330 是 Kimi-K3 的小修。</p>
+<p>解码核的预热不再跳过。</p>
+<p>#21946 修了 MiniMax M3 的校验。</p>
+<p>注意力和 GEMM 的验证逻辑都对齐了。</p>
+<p>#21886 是个可选优化。</p>
+<p>CUDA 图捕获时，去掉只预热的那一遍。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22337">https://github.com/NVIDIA/TensorRT-LLM/pull/22337</a> 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22330">https://github.com/NVIDIA/TensorRT-LLM/pull/22330</a></p>
+<p>其余 4 条全是 QA 测试的 waive。</p>
+<p><strong>llama.cpp：快照涨到 b12470</strong></p>
+<p>这轮合入 5 条。</p>
+<p>#32463 把 Llama Chat 的界面迁到 SvelteKit 3。</p>
+<p>#32393 给 qwen3next 补了输出投影的权重缩放。</p>
+<p>#32392 收紧了 CUDA 的共享内存上限。</p>
+<p>只对真正启动的核生效。</p>
+<p>#32402 把对话标签页默认关了。</p>
+<p>#31066 给 nix 暴露了 SYCL 包。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32463">https://github.com/ggml-org/llama.cpp/pull/32463</a></p>
+<p><strong>Dynamo、Mooncake：各一条小修</strong></p>
+<p>Dynamo 合入 1 条。</p>
+<p>是容器构建里去掉 TRT-LLM 的 workaround。</p>
+<p>Mooncake 合入 1 条。</p>
+<p>路由扫描遇到连不上的节点会继续扫。</p>
+<p>LMDeploy、TGI、FlashInfer：零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 补到一批 11 月 16 日的新论文</strong></p>
+<p>之前几轮没扫到这批。</p>
+<p>这批是 11 月 16 日提交的。</p>
+<p>一共有三篇跟推理 serving 相关。</p>
+<p><strong>多模态拆分：省电是真的，首字变慢也是真的</strong></p>
+<p>arXiv:2611.21165 是本轮最值得看的一篇。</p>
+<p>它把多模态推理拆成三段跑。</p>
+<p>看图、读题、生成，各占一张卡。</p>
+<p>3 卡预算下，比 3 个融合副本更省电。</p>
+<p>每次成功请求省电 13.3% 到 37.0%。</p>
+<p>吞吐基本没动，输出只差不到 0.7%。</p>
+<p>代价是首字变慢，负载越高越慢。</p>
+<p>Qwen3-VL 高负载下，首字从 0.196 秒涨到 1.159 秒。</p>
+<p>降频的脾气三段各不相同。</p>
+<p>生成段降到 80%，每词只慢 1.7%，却省电 10.9%。</p>
+<p>读题段降到 40%，首字炸到 27.42 秒，省电只剩 0.7%。</p>
+<p>编码段降到 40%，整条线只省 4.5%。</p>
+<p>三段齐降到 80%，省电 11.7% 到 18.6%。</p>
+<p>4 次探测就能在 25 个配置里找到最省电的那个。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.21165">https://arxiv.org/abs/2611.21165</a></p>
+<p><strong>MiSTiQ：KV 缓存压到约 1.25 位</strong></p>
+<p>arXiv:2611.21216 是 KV 缓存压缩的新打法。</p>
+<p>它用格子编码加微缩放格式。</p>
+<p>格子编码就是用查表加搜索来压数。</p>
+<p>微缩放就是小块数据共用一个缩放系数。</p>
+<p>Llama3 和 Qwen3 上，困惑度比基线更低。</p>
+<p>GSM8K 准确率也比基线更高。</p>
+<p>NVFP4 下，LongBench 平均分也是最高的。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.21216">https://arxiv.org/abs/2611.21216</a></p>
+<p><strong>太空里跑 PD 解耦，行不行</strong></p>
+<p>arXiv:2611.20893 是篇趣味向的可行性研究。</p>
+<p>它算的是轨道数据中心上的拆分推理。</p>
+<p>读题和生成拆开跑，靠链路带宽吃饭。</p>
+<p>链路够快，1000 公里内都扛得住。</p>
+<p>注意力和专家层拆开跑，靠传播延迟吃饭。</p>
+<p>两边实例得在 1 公里内，不然层层累积拖垮延迟。</p>
+<p>看看就行，离落地还很远。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.20893">https://arxiv.org/abs/2611.20893</a></p>
+<h2>业内新闻</h2>
+<p>这轮没刷到值得报的业内新闻。</p>
+<p>英伟达财报在今天下午 13:20。</p>
+<p>这条之前已经提醒过，不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 FLUX 3 那期</strong></p>
+<p>17点版已经报过，不重复。</p>
+<p><strong>SGLang Summit 第二天文字总结还没出</strong></p>
+<p>搜了一圈，还是只有会前通稿和零散总结。</p>
+<p>文字总结出来再报。</p>
+<h2>值得深入学</h2>
+<p><strong>A Matter of Stages：多模态 EPD 拆分的省电账</strong></p>
+<p>这篇跟你的 PD 评估直接相关。</p>
+<p>EPD 拆分的能耗账第一次有人算全。</p>
+<p>三段降频的脾气也一次量清了。</p>
+<p>生成段降频、读题段红线，都能直接抄进评估清单。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>A Matter of Stages，arXiv:2611.21165。多模态 EPD 拆分的能耗账，评估必看。</li><li>MiSTiQ，arXiv:2611.21216。KV 缓存压到 1.25 位，长上下文场景值得跟。</li><li>FlashInfer v0.7.5rc3，预发布版又涨了一级。跟进正式版时注意。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 01点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc2→v0.7.5rc3（2026-11-17 01:35 PST 发布）；llama.cpp 快照 b12465→b12470。 vLLM 9 条首次汇总：#68126（ML4 菜谱更新）、#68122（ERNIE-4.5-VL 图片预算按处理器像素上限）、#68102（文档 Ask AI 挂件）、#68096（MiniCPM-V/O 图片占位符用请求切片数）、#68076（InternVL 视频处理器不收图片裁剪参数）、#67970（LoRA 同 id 不许换绑适配器）、#67966（ROCm KV 收缩后清脏块表项）、#67918（CI 配置修）、#67726（CPU 保留用户 KMP 设置）。 SGLang 9 条首次汇总：#50995（KV 分片 CP-TP 测试管理器补字段）、#50994（CI 去掉 CUDA 13.4 镜像里的 sgl-fa3）、#50969（NPU 多节点端到端测试方法优化）、#50824（内核测试去掉纯参数校验用例）、#50719（DeepSeek-V4.1 读题索引器走 DeepGEMM fp8）、#50686（AMD BF16 小 M 矩阵乘优化）、#50640（扩散模型 Ideogram 4 请求尺寸对齐 16 像素网格）、#49732（AMD MLA 吸收 BMM 波次预算上限）、#48095（AMD DSpark 草稿步提速）。 TRT-LLM 8 条首次汇总：#22455、#22454、#22453、#22445（QA CI waive）、#22337（MLA 读题中间 KV 存储瘦身）、#22330（Kimi-K3 解码核预热不再跳过）、#21946（MiniMax M3 注意力与 GEMM 校验修）、#21886（CUDA 图捕获去掉只预热那一遍，可选开）。 LMDeploy 零合入。 TGI 零合入。 Dynamo 1 条首次汇总：#18873（容器去掉 TRT-LLM 的 NIXL Libfabric workaround）。 FlashInfer 零合入（但发布了 v0.7.5rc3 预发布版）。 llama.cpp 5 条首次汇总（快照号 b12465→b12470 区间内）：#32463（Llama Chat 界面迁 SvelteKit 3）、#32402（对话标签页默认关）、#32393（qwen3next 输出投影权重缩放）、#32392（CUDA 共享内存上限只对启动的核生效）、#31066（nix 暴露 SYCL 包）。 Mooncake 1 条首次汇总：#5069（路由扫描遇到连不上的节点继续扫）。 arXiv：补到 11 月 16 日提交的一批（之前几轮没扫到）：2611.21165（多模态 EPD 能耗与延迟权衡）、2611.21216（MiSTiQ，KV 缓存压到约 1.25 位）、2611.20893（太空 PD 解耦可行性）；下一批约 11 月 17 日 16:00 PST。 业内新闻：无新内容（英伟达财报今日 13:20，已提醒过）。 访谈与深度：Latent Space 最新仍是 11 月 16 日 FLUX 3（17点版已报）；SGLang Summit 第二天文字总结仍未出。 深读：A Matter of Stages 精读笔记已写（深度阅读/多模态EPD拆分-能耗与延迟权衡-精读.html）。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-17-0300/">03点版</a></p></body></html>
