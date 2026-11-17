@@ -1,0 +1,73 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang #44447：Qwen3.8 Flash Next 的 KV 分片，PD 读题节点的新玩法"/>
+<meta name="doc-description" content="- 作者：Shunkangz（SGLang 团队）"/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T09:02:30"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang #44447：Qwen3.8 Flash Next 的 KV 分片，PD 读题节点的新玩法</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang #44447：Qwen3.8 Flash Next 的 KV 分片，PD 读题节点的新玩法</h1>
+<ul><li>作者：Shunkangz（SGLang 团队）</li><li>文章：[Feat] KVShard: Enable KV cache sharding for Qwen3.8 Flash Next</li><li>合入时间：2026-11-17 00:52 PST（2026-11-17 08:52 UTC）</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/44447">https://github.com/sgl-project/sglang/pull/44447</a></li><li>说明：原文是代码 PR，没有配图，本笔记不附图。数字全是 PR 作者自报，没有第三方复现。测试结论是端到端跑通，没有给吞吐和延迟数。</li></ul>
+<h2>一句话</h2>
+<p>Qwen 的新一代混合模型也能用 KV 分片了。读题节点上，KV 页切开存在多张卡上。解码端每张卡都去所有读题卡上取页。PD 解耦下跑 Qwen 新模型，这条路通了。</p>
+<h2>人话解读</h2>
+<p>Qwen3.8 Flash Next 是 Qwen 的新一代混合模型。混合模型就是两种注意力混着用。一种是 QSA，稀疏注意力，算 softmax 的那部分。一种是 GDN，线性注意力，算递推的那部分。</p>
+<p>KV 分片就是把草稿纸切开，分到多张卡上存。KV 缓存就是解码时留下的草稿纸，存着前面算过的注意力状态。以前这招只支持 MLA 那类模型。现在 Qwen 的新模型也能用了。</p>
+<p>场景是 PD 解耦下的读题节点。PD 解耦就是读题和生成分到不同机器上。读题节点上用了 CP 加 TP 的混搭。CP 就是把超长上下文切开分卡算。TP 就是张量并行，多卡分头算。</p>
+<p>混搭带来一个麻烦。QSA 那部分跑在 CP 上，上下文切开了。GDN 那部分还按 TP 的头分片，头没切开。两边的切法不一样，KV 页和附加状态的归属就对不上了。</p>
+<p>这篇就是把对不上的地方一一接好。KV 页按条纹切开，存在各张读题卡上。解码端每张卡都去所有读题卡上取页。附加状态只从对口的那张卡取。取页的扇入覆盖了 CP-TP 混搭的读题节点。扇入就是解码端要连多少个读题端。</p>
+<p>压缩索引 K 是个省显存的设计。索引 K 只占 KV 字节数的 32 分之 1。每张卡都把整块 chunk 压一遍。chunk 就是切开的一段上下文。池子算大小时，这份索引要按卡数乘 N 倍收。</p>
+<h2>核心方法</h2>
+<p>改动分三块。</p>
+<p>第一块：放行。kv_shard_hook 以前不认压缩 QSA 的模型。现在 CP-TP 共享组的读题节点上，这类模型也能开 KV 分片。不管注意力后端参数怎么填，QSA 后端都接管全部的全注意力层。</p>
+<p>第二块：池子。QSA 混合池的全注意力池换成条纹交错的页式池。压缩索引 K 在 N 倍放大的逻辑槽位上复制。池子算大小时按 N 倍收费。FP4、MXFP8 这类量化方法不被支持。NPU 和页主序的池子也不支持。遇到就明确报错，不悄悄吞掉。</p>
+<p>第三块：PD 传输。KV 页按条纹分在各张读题卡上。每个解码 rank 都去所有读题 rank 上取页。GDN、QSA、PLE 三份状态只从 rank 对口的读题卡取。NIXL 走共享的完成通知路径。所有 handle 落定后才通知，包括不发状态的非对口卡。</p>
+<p>校验也补齐了。读题端会拒绝注意力 TP 尺寸不对的解码端。尺寸不对，有些解码卡拿不到 GDN 状态。读题端也会拒绝没从全部读题卡取页的解码端。缺一页，解码就可能只拿到一半 KV。</p>
+<p>还有个小坑。混合缓存检查点默认是 2 级。2 级下，读题端只在分支点或整段末尾发 GDN 状态。重问一个只差几个词的问题时，命中点会退到很早的分叉处。测试要求命中点不低于 4096，结果只有 1280。改成 3 级之后，重问能命中 8192 的 chunk 状态。测试就过了。</p>
+<h2>关键数据</h2>
+<ul><li>测试硬件：8 卡 PD 端到端。</li><li>部署形态：读题 TP4 加 CP4，解码 TP4。</li><li>读题节点：CP-TP 共享组，QSA 跑 CP，GDN 按 TP 分头。</li><li>压缩索引 K：占 KV 字节数的 32 分之 1。</li><li>测试内容：针尖测试覆盖全部 4 个属主 rank 的页。</li><li>测试内容：提示词大于单张卡的缓存。</li><li>测试内容：缓存前缀命中、单页提示词、GSM8K。</li><li>测试内容：2 卡分片 QSA 池测试、CPU 门禁与配对测试。</li><li>性能数据：这篇没有给吞吐和延迟数。</li><li>适用范围：只影响 Qwen3.8 Flash Next 这类压缩 QSA 模型。</li></ul>
+<h2>跟研究方向的关联</h2>
+<p>这篇跟 PD 解耦评估直接相关。</p>
+<p>第一，KV 分片的覆盖面扩大了。以前只支持 MLA。现在 Qwen 的混合注意力模型也能用。以后评估 Qwen 新模型跑 PD，KV 分片是默认可用的选项。不用再绕路。</p>
+<p>第二，CP-TP 混搭的读题节点有了现成参考。QSA 跑 CP，GDN 跑 TP。KV 页条纹切，状态按 rank 对口取。这个分法可以直接对照到自己的 PD 拓扑设计里。读题端切几份，解码端就连几份。</p>
+<p>第三，校验逻辑值得抄。读题端拒绝尺寸不对的解码端。也拒绝扇入不全的解码端。自己搭 PD 评估时，这类配对检查能少踩很多静默错的坑。</p>
+<p>第四，检查点级别是个暗坑。默认 2 级会让重问的命中点退得很早。跑 Qwen 混合模型做前缀缓存测试时，先把读题端 pin 到 3 级。</p>
+<h2>术语表</h2>
+<ul><li>PD 解耦：读题和生成分到不同机器上跑。</li><li>prefill：读题阶段，把提示词算一遍。</li><li>decode：生成阶段，一次吐一个词。</li><li>KV 缓存：解码时留下的草稿纸，存注意力状态。</li><li>KV 分片：把 KV 缓存切开，分到多张卡上存。</li><li>QSA：Qwen 的稀疏注意力，算 softmax 的那部分。</li><li>GDN：门控 Delta Net，线性注意力，算递推的那部分。</li><li>CP：上下文并行，把超长上下文切开分卡算。</li><li>TP：张量并行，多卡分头算。</li><li>扇入：解码端要连多少个读题端。</li><li>chunk：切开的一段上下文。</li><li>NIXL：英伟达的 KV 传输后端。</li><li>混合缓存检查点：前缀缓存里，线性注意力状态的落盘级别。</li><li>GSM8K：小学数学题测试集。</li><li>rank：一张卡在并行组里的编号。</li></ul>
+<h2>原文链接</h2>
+<ul><li><a href="https://github.com/sgl-project/sglang/pull/44447">https://github.com/sgl-project/sglang/pull/44447</a></li></ul></body></html>
