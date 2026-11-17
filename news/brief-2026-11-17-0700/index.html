@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月17日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T15:07:22"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-17（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-17（07点版）</h1>
+<p>07点版来了，这轮有三件实在的。</p>
+<p>主角是 Vera Rubin 的 MLPerf 首秀。</p>
+<p>vLLM 那边 Kimi-K3 连着两条提速。</p>
+<p>llama.cpp 快照号也涨了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 快照动了</strong></p>
+<p>llama.cpp 快照从 b12470 涨到 b12475。</p>
+<p>这轮没有新版本发布。</p>
+<p>其余水位全没动。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc3。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：Kimi-K3 的图上限拆了，词间隔降三成</strong></p>
+<p>#67903 是本轮最值得看的一条。</p>
+<p>它修的是 Kimi-K3 的一个老上限。</p>
+<p>开投机解码加 RecoverSSM 时，图只抓一部分。</p>
+<p>RecoverSSM 是一种恢复式投机解码。</p>
+<p>CUDA 图就是把一串操作预先排好。</p>
+<p>排好的图不用每次现算，直接重放。</p>
+<p>上限来自 #55774 的一道 guard。</p>
+<p>guard 就是一道保险检查。</p>
+<p>它把超过上限的混合图全扔了。</p>
+<p>扔掉的步数只能现算，跑得慢。</p>
+<p>现在上限拆了，83 张图全抓住了。</p>
+<p>以前只抓住 59 张。</p>
+<p>GB300 上实测，Kimi K3.1 Pro。</p>
+<p>ShareGPT 每秒 8 个请求那档。</p>
+<p>TPOT 从 53.3 毫秒降到 36.2 毫秒。</p>
+<p>TPOT 就是平均每个词要等多久。</p>
+<p>代价是每张卡多占 0.57GB 图池。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67903">https://github.com/vllm-project/vllm/pull/67903</a></p>
+<p><strong>vLLM：Kimi-K3 的草稿注意力搬上 CAKE</strong></p>
+<p>#67588 让 Kimi-K3 的草稿步更快了。</p>
+<p>草稿步就是投机解码里小模型先猜。</p>
+<p>CAKE 是一种融合注意力核。</p>
+<p>以前因果草稿走老核，长的请求会卡住。</p>
+<p>现在按长度排开，一次算一行。</p>
+<p>DEP 那组有 96 个草稿头。</p>
+<p>成本只有以前的 0.27 到 0.89 倍。</p>
+<p>混杂请求那组，单层从 2753 微秒降到 1065 微秒。</p>
+<p>请求数到 64 到 128 时，快 2.2 到 2.7 倍。</p>
+<p>TP8 那组 12 个头，不受影响。</p>
+<p>但 TP4 均匀长上下文那组，最慢时反而慢 14%。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67588">https://github.com/vllm-project/vllm/pull/67588</a></p>
+<p><strong>vLLM：DeepGEMM 升级，冷启动少编译</strong></p>
+<p>#68017 升了 DeepGEMM 的版本。</p>
+<p>DeepGEMM 是 DeepSeek 出的矩阵乘库。</p>
+<p>以前每种批量大小都要单独编译一次。</p>
+<p>现在一次编译，到处都能用。</p>
+<p>冷启动时，健康检查后不用再编译。</p>
+<p>还修了一个寄存器复用的小毛病。</p>
+<p>实测是 DeepSeek-V4-Flash 加 DSpark。</p>
+<p>4 张 H200 上跑的。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68017">https://github.com/vllm-project/vllm/pull/68017</a></p>
+<p><strong>vLLM：L4 卡的 MoE 配置补上了</strong></p>
+<p>#66711 给 L4 卡补了个调好的 MoE 配置。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>L4 是英伟达的低端推理卡。</p>
+<p>Qwen3-30B-A3B 的 FP8 版，并发 8 那档。</p>
+<p>吞吐涨 2.2%，词间隔降 4%。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66711">https://github.com/vllm-project/vllm/pull/66711</a></p>
+<p><strong>SGLang：这轮只有一条杂务</strong></p>
+<p>#51021 是给内存缓存加代码负责人。</p>
+<p>没有功能变化，不展开。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51021">https://github.com/sgl-project/sglang/pull/51021</a></p>
+<p><strong>TRT-LLM：草稿模型加载只读用到的分片</strong></p>
+<p>#21836 修的是草稿模型的加载。</p>
+<p>草稿模型就是投机解码里的小模型。</p>
+<p>以前加载要把整个检查点翻一遍。</p>
+<p>检查点就是模型权重的存盘文件。</p>
+<p>现在只读装着草稿权重的分片。</p>
+<p>读不到就回退到全量读，不会崩。</p>
+<p>其余三条都是测试，不展开。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21836">https://github.com/NVIDIA/TensorRT-LLM/pull/21836</a></p>
+<p><strong>llama.cpp：快照涨到 b12475</strong></p>
+<p>这轮合入 6 条，多是小修。</p>
+<p>FP8 解码不用 ldexpf 了。</p>
+<p>PLaMo-2 和 PLaMo-3 的分词表建得更快了。</p>
+<p>CUDA 的池化也改成块归约了。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp">https://github.com/ggml-org/llama.cpp</a></p>
+<p>LMDeploy、TGI、Dynamo 这轮零合入。</p>
+<p>FlashInfer 也是零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批约今天 16:00</strong></p>
+<p>本轮没有新论文。</p>
+<p>下一批约今天 16:00 发布。</p>
+<h2>业内新闻</h2>
+<p><strong>Vera Rubin 首秀 MLPerf：训练快近一倍</strong></p>
+<p>MLPerf 是业界通用的跑分榜。</p>
+<p>英伟达新一代平台 Vera Rubin 首次上榜。</p>
+<p>DeepSeek-V3 671B，1024 张卡那组。</p>
+<p>Rubin 用 4.14 分钟，GB300 用 8.03 分钟。</p>
+<p>同卡数下，训练时间几乎砍半。</p>
+<p>七项里六项最快，另一项被 10240 卡的 GB300 拿走。</p>
+<p>新加的强化学习后训练项，Qwen3.5 397B。</p>
+<p>Rubin 10.44 分钟，GB300 13.78 分钟。</p>
+<p>有意思的是，同硬件换个推理后端。</p>
+<p>TRT-LLM 后端是 10.44 分钟。</p>
+<p>vLLM 后端是 10.94 分钟。</p>
+<p>半分钟的差距，引擎选型也能看出来。</p>
+<p>推理那头，Kimi K3 每瓦吞吐号称 10 倍以上。</p>
+<p>但这数还是 provisional，等 MLCommons 核验。</p>
+<p>provisional 就是已提交、还没核验。</p>
+<p>而且首字 p90 反而更慢，4673.9 毫秒对 2305.1 毫秒。</p>
+<p>首字就是第一个词出来的时间。</p>
+<p>谷歌的 Ironwood TPU 也首次上榜，18.02 分钟。</p>
+<p>来源：<a href="https://developer.nvidia.com/blog/nvidia-vera-rubin-nvl72-achieves-up-to-2x-blackwell-ultra-performance-in-mlperf-training-v6-1">https://developer.nvidia.com/blog/nvidia-vera-rubin-nvl72-achieves-up-to-2x-blackwell-ultra-performance-in-mlperf-training-v6-1</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 FLUX 3 那期</strong></p>
+<p>最新一期还是 11 月 16 日的 FLUX 3。</p>
+<p>这轮没有新单集。</p>
+<p><strong>SGLang Summit 第二天文字总结还没出</strong></p>
+<p>搜了一圈，还是只有会前通稿和零散总结。</p>
+<p>文字总结出来再报。</p>
+<h2>值得深入学</h2>
+<p><strong>vLLM #67903：Kimi-K3 的 CUDA 图上限</strong></p>
+<p>这篇跟你的 PD 评估直接相关。</p>
+<p>Kimi-K3 是你评估里的重点模型。</p>
+<p>投机解码加 RecoverSSM 时，图抓不全。</p>
+<p>词间隔直接被拖慢三成多。</p>
+<p>修法只有一行逻辑，代价也能量化。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>vLLM #67903。Kimi-K3 的 CUDA 图上限拆了，词间隔降三成。</li><li>vLLM #67588。Kimi-K3 草稿注意力上 CAKE，混杂请求快 2.7 倍。</li><li>Vera Rubin MLPerf 首秀。训练快近一倍，推理 10 倍那数还没核验。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 05点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc3；llama.cpp 快照 b12470→b12475。 vLLM 14 条首次汇总：#67903（Kimi-K3 RecoverSSM 混合 CUDA 图上限拆了，词间隔 53.3→36.2 毫秒）、#67588（Kimi-K3 因果 DSpark 草稿块上 CAKE，混杂请求快 2.2–2.7 倍）、#68017（DeepGEMM 升级，SM90 元数据核一次编译）、#66711（L4 FP8 MoE 配置，Qwen3-30B-A3B 并发 8 吞吐 +2.2%）、#68087（Ling VL MTP 量化配置修）、#68021（Muse Glimmer 视觉嵌入顺序修）、#67989（只融合最后一维的 RMSNorm）、#67960（CPU KV offload 缓冲区不进 core dump）、#65383（/inference/v1/generate 上报 reasoning_tokens）、#61051（CoW 块拷贝瞬时占用上限，防 OOM）、#68175（文档：睡眠模式释放 Mooncake 独立存储的 host 内存）、#68174（文档：路由专家行存储与副本亲和性）、#68144（文档：add-cli-arg agent skill）、#68007（构建：humming-kernels 升到 0.1.20）。 SGLang 1 条首次汇总：#51021（杂务：内存缓存加代码负责人）。 TRT-LLM 4 条首次汇总：#21836（草稿模型加载只读装着草稿权重的分片）、#22440（测试：恢复 CPU 上的生成抢占单测）、#22438（修：恢复生成专属性能冒烟覆盖）、#21084（测试：Wan 2.2 A14B 组件测试）。 LMDeploy 零合入。 TGI 零合入。 Dynamo 零合入。 FlashInfer 零合入。 llama.cpp 6 条首次汇总（b12470 之后合入，下个快照见）：#32477（ggml FP8 E4M3 解码不用 ldexpf）、#32476（修复 FP8 qwen4exp 检查点转换）、#32468（UI：Llama UI 设计系统）、#32249（PLaMo-2/3 分词表构建提速）、#32137（序列编辑保留 k-pool 布局前缀）、#31855（CUDA 池化用块归约）。 Mooncake 1 条首次汇总：#5576（修：带缓冲的 HTTP 元数据 PUT 不用 Expect）。 arXiv：下一批约 11 月 17 日 16:00 PST。 业内新闻：Vera Rubin MLPerf Training v6.1 首秀（NVIDIA 官方博客，2026-11-16）；英伟达财报今日 13:20，已提醒过。 访谈与深度：Latent Space 最新仍是 11 月 16 日 FLUX 3；SGLang Summit 第二天文字总结仍未出。 深读：vLLM #67903 精读笔记已写（深度阅读/vLLM-KimiK3-RecoverSSM-CUDA图上限-精读.html）。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-17-0700/">07点版</a></p></body></html>

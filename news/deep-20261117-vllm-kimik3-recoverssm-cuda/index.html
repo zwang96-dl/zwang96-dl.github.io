@@ -1,0 +1,89 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM #67903：Kimi-K3 的 RecoverSSM 图上限拆了，词间隔降三成"/>
+<meta name="doc-description" content="- 作者：vLLM 团队"/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T15:08:00"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM #67903：Kimi-K3 的 RecoverSSM 图上限拆了，词间隔降三成</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM #67903：Kimi-K3 的 RecoverSSM 图上限拆了，词间隔降三成</h1>
+<ul><li>作者：vLLM 团队</li><li>文章：[Bugfix][Kimi-K3] Capture all mixed CUDA graphs with RecoverSSM</li><li>合入时间：2026-11-17 06:12 PST（2026-11-17 14:12 UTC）</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/67903">https://github.com/vllm-project/vllm/pull/67903</a></li><li>说明：原文是代码 PR，没有配图，本笔记不附图。数字全是 PR 作者自报，没有第三方复现。</li></ul>
+<h2>一句话</h2>
+<p>Kimi-K3 开投机解码加 RecoverSSM 时，一道老上限在悄悄扔图。一共扔掉了 24 张。拆掉上限，词间隔从 53.3 毫秒降到 36.2 毫秒。</p>
+<h2>人话解读</h2>
+<p>CUDA 图就是把一串操作预先排好。排好的图不用每次现算，直接重放。重放比现算快得多。</p>
+<p>混合图是解码步里的一种图。它把一次解码的多个 token 打包进一张图。token 数越大，图越大。</p>
+<p>RecoverSSM 是一种恢复式投机解码。投机解码就是小模型先猜，大模型再验。猜错了要回滚重算。RecoverSSM 管的就是这套回滚恢复。</p>
+<p>这篇的毛病藏在一道 guard 里。guard 就是一道保险检查，来自 #55774。它只在 RecoverSSM 开着时生效。</p>
+<p>这道 guard 规定，混合图的大小不能超过一个上限。上限是最大序列数乘以 1 加投机 token 数。超过上限的图，直接不抓。</p>
+<p>不抓的后果是，那些步数只能现算。现算就是 eager 模式，一步一步跑。低延迟那档最吃亏，词间隔直接被拖慢。</p>
+<p>具体到这次的配置。最大序列数 128，投机 token 数 4。上限就是 128 乘 5，等于 640。641 到 1024 个 token 的 24 张图，全被扔了。</p>
+<p>修法很简单，就是把这道 guard 拆掉。83 张图全抓住了，以前只抓住 59 张。</p>
+<p>拆掉是安全的，理由有三条。</p>
+<p>第一，RecoverSSM 的验证容量是按请求算的。每个请求只要 num_spec 加 1 个 token。不是按整步算的。</p>
+<p>第二，KDA 的元数据构造器会分流。行宽超过 num_spec 加 1 的，走非投机路径。根本到不了 RecoverSSM 的验证口。</p>
+<p>第三，KDA 的前向在重放时是 eager 断点。图里不存 RecoverSSM 的形状。</p>
+<p>代价是每张卡多占 0.57GB 图池。图池就是存排好的图的显存。</p>
+<p>还有个遗留口子。#67590、#58863、#61309 给 GDN 也加了开关。开关管的是 RecoverSSM。如果 GDN 的元数据构造器不分流宽行，GDN 那边还得留着上限。</p>
+<h2>核心方法</h2>
+<p>改动只有一处，拆掉 guard。</p>
+<p>guard 在混合 PIECEWISE 图的捕获逻辑里。它按 RecoverSSM 单独设上限。</p>
+<p>上限等于 max_num_seqs 乘以 1 加投机 token 数。</p>
+<p>拆掉之后，混合图按配置的全部尺寸捕获。不再区分 RecoverSSM 开没开。</p>
+<p>安全性的三条理由，上面已经讲了。核心是宽行走非投机路径，验证容量按请求算。</p>
+<p>测试补了一个单测。跑在 CPU 上，不用 GPU。</p>
+<p>单测名字是下面这一串。</p>
+<p><code>test_recoverssm_keeps_mixed_graphs_past_the_decode_token_cap</code></p>
+<p>修之前，这个单测是失败的。混合尺寸 [1, 2, 4] 里，4 通不过 2 乘 3 的上限。修之后，通过了。</p>
+<h2>关键数据</h2>
+<ul><li>测试模型：Kimi K3.1 Pro。</li><li>测试硬件：GB300。</li><li>部署形态：张量并行 8 卡，加 DCP 8 卡。</li><li>草稿器：DSpark，k 等于 4。</li><li>开关：--use-replayssm。</li><li>最大序列数：128。</li><li>负载：ShareGPT，每秒 8 个请求。</li><li>图捕获：59 张变 83 张。</li><li>补回来的图：641 到 1024 个 token 的 24 张。</li><li>词间隔：53.3 毫秒降到 36.2 毫秒。</li><li>降幅约 32%。</li><li>图池代价：每张卡多占 0.57GB。</li></ul>
+<p>还有一组对照数，来自变通方案。</p>
+<p>变通方案是把最大序列数抬到 208。图就全落在上限里了。</p>
+<p>那组词间隔是 31.4 毫秒。首字时间从 2989 毫秒降到 318 毫秒。吞吐从 1378 词每秒涨到 1523 词每秒。</p>
+<p>注意，这组是变通方案的数。不是本次修复的数。修复那组只报了词间隔 36.18 毫秒。</p>
+<h2>跟研究方向的关联</h2>
+<p>这篇跟 PD 解耦评估直接相关。</p>
+<p>第一，Kimi-K3 是评估里的重点模型。投机解码加 RecoverSSM 是它的标准开法。图抓不全，词间隔直接虚高三成。跑 Kimi-K3 的 PD 对照前，先确认版本带这个修复。</p>
+<p>第二，词间隔 53.3 到 36.2 毫秒的数能当基线。配置都给了。GB300、TP8 加 DCP8、DSpark k 等于 4。每秒 8 个请求。自己测同一档时，可以先对一下这组数。</p>
+<p>第三，修法本身是个提醒。guard 是 #55774 留下的，初衷是保险。保险检查也会误伤。评估里遇到不明原因的词间隔偏高，先查图捕获全不全。</p>
+<p>第四，图池代价要进账。每张卡多占 0.57GB。显存紧张的部署，先算好这笔账再开。</p>
+<p>第五，GDN 那边还有口子。GDN 的 RecoverSSM 开关如果不分流宽行，上限还得留着。评估 GDN 模型时，单独确认一次。</p>
+<h2>术语表</h2>
+<ul><li>PD 解耦：读题和生成分到不同机器上跑。</li><li>投机解码：小模型先猜，大模型再验。</li><li>RecoverSSM：恢复式投机解码，管猜错后的回滚恢复。</li><li>CUDA 图：预先排好的一串操作，重放比现算快。</li><li>混合图：一次解码多个 token 打包成的图。</li><li>PIECEWISE：分段图的一种捕获模式。</li><li>guard：一道保险检查，条件不满足就跳过。</li><li>eager：现算模式，一步一步跑，不用预排好的图。</li><li>TPOT：词间隔，平均每个词要等多久。</li><li>TTFT：首字时间，第一个词吐出来要等多久。</li><li>DSpark：投机解码用的草稿器。</li><li>DCP：解码上下文并行，多卡分上下文算解码。</li><li>KDA：Kimi Delta Attention，一种线性注意力。</li><li>GDN：Kimi-K3 里的另一类注意力层。</li><li>ShareGPT：公开对话数据集，常用来压测 serving。</li><li>QPS：每秒请求数。</li><li>图池：存排好的 CUDA 图的显存。</li><li>max_num_seqs：最大序列数，一批最多跑多少请求。</li></ul>
+<h2>原文链接</h2>
+<ul><li><a href="https://github.com/vllm-project/vllm/pull/67903">https://github.com/vllm-project/vllm/pull/67903</a></li></ul></body></html>
