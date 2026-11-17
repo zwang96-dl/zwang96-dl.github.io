@@ -1,0 +1,223 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月17日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T21:04:47"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-17（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-17（13点版）</h1>
+<p>13点版来了，这轮有三件实在的。</p>
+<p>主角是 vLLM 的 KV 搬运断线修复。</p>
+<p>SGLang 那边 AMD 卡的 MoE 快了两成多。</p>
+<p>英伟达财报 13:20 出，15点版报实数。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 快照动了</strong></p>
+<p>llama.cpp 快照从 b12479 涨到 b12483。</p>
+<p>这轮没有新版本发布。</p>
+<p>其余水位全没动。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc3。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：KV 搬运断线，现在能自己接上</strong></p>
+<p>#68047 是本轮最值得看的一条。</p>
+<p>它修的是 PD 拆开后 KV 搬运断线的问题。</p>
+<p>PD 就是读题和解码分开跑。</p>
+<p>KV 就是读题算好的草稿纸。</p>
+<p>解码端要从读题端把草稿纸搬过来。</p>
+<p>搬运用的是 NIXL。</p>
+<p>NIXL 是英伟达的 KV 传输库。</p>
+<p>以前链路断了，死掉的对端还留着。</p>
+<p>因为它的元数据还在，系统以为它活着。</p>
+<p>之后每次去读都失败，直到重启。</p>
+<p>现在一报断线错误，马上把对端作废。</p>
+<p>等手头读完，就重新握手连上。</p>
+<p>实测在 B300 上跑了 30 分钟。</p>
+<p>模型是 MiniMax-M3.1-Flash。</p>
+<p>8 台读题加 1 台解码，并发 480。</p>
+<p>修之前，失败请求 1858 个。</p>
+<p>修之后，只剩 10 个，还都不是 KV 的问题。</p>
+<p>KV 加载失败从 905 个降到 0。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68047">https://github.com/vllm-project/vllm/pull/68047</a></p>
+<p><strong>vLLM：Kimi-K3.1-Pro 的跑分手册又对齐了一步</strong></p>
+<p>#68220 是 #68213 的续集。</p>
+<p>11点版那条只改了预设配置。</p>
+<p>这条补的是跑手册里的文字。</p>
+<p>DEP16 和 DEP32 两条线，会话粘性写明 1 秒。</p>
+<p>会话粘性就是同一用户的请求粘在同一前端。</p>
+<p>权重加载格式也写明了。</p>
+<p>全都走 fastsafetensors。</p>
+<p>DEP16 的草稿模型也写明了。</p>
+<p>用的是预览版 DSpark。</p>
+<p>改完跟 SemiAnalysis 的投稿完全一致。</p>
+<p>这是文档对齐，没有新跑分。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68220">https://github.com/vllm-project/vllm/pull/68220</a></p>
+<p><strong>vLLM：扩散模型也能跑了</strong></p>
+<p>#58387 给 vLLM 接了扩散模型。</p>
+<p>NemotronLabsDiffusion 3B 和 8B。</p>
+<p>扩散模型就是一步步去噪出结果的模型。</p>
+<p>这里是文字版，靠掩码块去噪出词。</p>
+<p>同时也支持普通自回归模式。</p>
+<p>自回归就是一个词一个词往下写。</p>
+<p>两种模式共用一个底座。</p>
+<p>#64027 是个小功能。</p>
+<p>Responses API 里，gpt-oss 也能返回输出 logprobs 了。</p>
+<p>logprobs 就是每个词的概率分数。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/58387">https://github.com/vllm-project/vllm/pull/58387</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64027">https://github.com/vllm-project/vllm/pull/64027</a></p>
+<p><strong>SGLang：AMD 卡上的 MoE 快了两成多</strong></p>
+<p>#48097 是 AMD 卡上的一条提速。</p>
+<p>它给 MI350 那代卡开了 MegaMoE。</p>
+<p>MegaMoE 是 AMD 的 MoE 加速核。</p>
+<p>搬运走 MoRI 分发。</p>
+<p>MoRI 是 AMD 的 KV 传输后端。</p>
+<p>实测是 DeepSeek-V4-Pro，EP4。</p>
+<p>EP 就是专家并行。</p>
+<p>解码验证那步从 45.52 毫秒降到 34.39 毫秒。</p>
+<p>降了 24.5%。</p>
+<p>草稿那步降了 19.7%。</p>
+<p>读题那步降了 3.7%。</p>
+<p>精度没动，GSM8K 还是 0.975。</p>
+<p>有一点要注意，AMD 的 CI 那项没过。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48097">https://github.com/sgl-project/sglang/pull/48097</a></p>
+<p>#50126 是个小优化。</p>
+<p>分词器返回的采样掩码改成扁平数组。</p>
+<p>少一层转换。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50126">https://github.com/sgl-project/sglang/pull/50126</a></p>
+<p><strong>TRT-LLM：DeepSeek-V3 进了 MX</strong></p>
+<p>#22136 让 DeepSeek-V3 进了 MX。</p>
+<p>MX 是权重一次转换、多处分发的机制。</p>
+<p>以前 DeepSeek 家的检查点只能走通用加载。</p>
+<p>现在 DeepSeek-V3-Lite 能走 MX 的路。</p>
+<p>这是第一家，后面跟 GLM-5 和 Kimi K3。</p>
+<p>Kimi K3 和 GLM-5 复用同一套 MLA 模块。</p>
+<p>MLA 就是压缩版的注意力。</p>
+<p>实测在一张 H200 上，传输上限 54.3GB。</p>
+<p>能塞进 80GB 的卡。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22136">https://github.com/NVIDIA/TensorRT-LLM/pull/22136</a></p>
+<p><strong>Dynamo：调度的信息终于传到了引擎</strong></p>
+<p>#18772 让调度信息传到了 TRT-LLM。</p>
+<p>以前请求到了引擎，都是默认优先级。</p>
+<p>现在请求的优先级提示也传过去了。</p>
+<p>前端收到请求多久了，也一起传过去。</p>
+<p>解码端排队时，按前端到达时间排。</p>
+<p>不再按到解码端的时间排。</p>
+<p>这对 PD 拆开跑有用。</p>
+<p>排队更公平，急的请求少等。</p>
+<p>#18904 修了 KV 路由的计数。</p>
+<p>SGLang 一块缓存会存两次，但只删一次。</p>
+<p>旧逻辑按次数记账，删完还剩 1。</p>
+<p>路由就以为那块还在。</p>
+<p>请求过去只能命中一半。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18772">https://github.com/ai-dynamo/dynamo/pull/18772</a></p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18904">https://github.com/ai-dynamo/dynamo/pull/18904</a></p>
+<p><strong>FlashInfer：读题排布改了，快 1.2 到 1.4 倍</strong></p>
+<p>#9301 改的是批量不变注意力的读题排布。</p>
+<p>批量不变注意力就是固定批量的注意力实现。</p>
+<p>改了三处，排布、顺序和内核细节。</p>
+<p>实测是 36 组读题形状的几何平均。</p>
+<p>GB200 上读题快 1.22 到 1.32 倍。</p>
+<p>GB300 上快 1.24 到 1.39 倍。</p>
+<p>单请求短读题那档，最高快 2.2 倍。</p>
+<p>解码基本没变。</p>
+<p>#9426 是 MoE 的源文件刷新。</p>
+<p>小更新，不展开。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9301">https://github.com/flashinfer-ai/flashinfer/pull/9301</a></p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9426">https://github.com/flashinfer-ai/flashinfer/pull/9426</a></p>
+<p><strong>llama.cpp：快照涨到 b12483</strong></p>
+<p>这轮快照连跳四格。</p>
+<p>b12480 到 b12483 先后发布。</p>
+<p>里头多是之前报过的内容。</p>
+<p>新合入只有两条。</p>
+<p>#32482 是 CUDA 的卷积换了隐式矩阵乘路径。</p>
+<p>#31002 是 11点版已报的 OpenCL 核。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp">https://github.com/ggml-org/llama.cpp</a></p>
+<p>LMDeploy、TGI、Mooncake 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批约今天 16:00</strong></p>
+<p>本轮没有新论文。</p>
+<p>下一批约今天 16:00 发布。</p>
+<h2>业内新闻</h2>
+<p><strong>英伟达财报 13:20 出</strong></p>
+<p>今天 13:20，英伟达发财报。</p>
+<p>这是新 CEO 上任后的第一份。</p>
+<p>市场预期营收约 1088.4 亿美元。</p>
+<p>每股收益约 2.47 美元。</p>
+<p>公司自己指引是 1080 亿美元上下浮动 2%。</p>
+<p>毛利率约 74%。</p>
+<p>周一股价跌了 4.12%，收在 156.14 美元。</p>
+<p>纳斯达克也进了回调区间。</p>
+<p>实数出来，15点版第一时间报。</p>
+<p>来源：<a href="https://futureaiwire.com/nvidia-q3-earnings-preview/">https://futureaiwire.com/nvidia-q3-earnings-preview/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>SGLang Summit 第二天总结终于出了</strong></p>
+<p>等了四天的峰会总结，终于有了一篇。</p>
+<p>AIB 今天发了全场回顾。</p>
+<p>2000 多人去了旧金山 Fort Mason。</p>
+<p>联盟成立了，创始成员有英伟达、AMD、谷歌、Meta 等。</p>
+<p>v1.0 和 Miles v0.2 都宣布了。</p>
+<p>英伟达报了一个数。</p>
+<p>Kimi K3.1 Pro 在 Vera Rubin 上。</p>
+<p>每卡总吞吐是 GB300 那组的 6 倍。</p>
+<p>对标的是同等交互延迟。</p>
+<p>但这数还是英伟达自己报的。</p>
+<p>等第三方复现再信。</p>
+<p>Meta 说换 SGLang 后省了一半多 GPU。</p>
+<p>单用户优化部署跑到每秒 1800 词。</p>
+<p>比默认配方快 1.8 倍。</p>
+<p>来源：<a href="https://www.aib.vote/en/news/sglang-summit-2026-consortium-v1-miles">https://www.aib.vote/en/news/sglang-summit-2026-consortium-v1-miles</a></p>
+<p><strong>Latent Space 还是 FLUX 3 那期</strong></p>
+<p>最新一期还是 11 月 16 日的 FLUX 3。</p>
+<p>这轮没有新单集。</p>
+<h2>值得深入学</h2>
+<p><strong>vLLM #68047：NIXL 断线重连</strong></p>
+<p>这篇跟你的 PD 评估直接相关。</p>
+<p>PD 拆开跑，KV 搬运一断就是成百上千个请求失败。</p>
+<p>这回修的是断线后重新握手。</p>
+<p>30 分钟实测，失败从 1858 个降到 10 个。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>vLLM #68047。NIXL 断线重连，失败请求 1858 降到 10。</li><li>SGLang #48097。AMD MegaMoE 走 MoRI，解码验证快 24.5%。</li><li>FlashInfer #9301。读题排布优化，GB300 上最高快 1.39 倍。</li></ol>
+<p>深读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261117-vllm-nixl-rehandshake/">vLLM NIXL 断线重连</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-17-1300/">13点版</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 11点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc3；llama.cpp 快照 b12479→b12483。 vLLM 4 条首次汇总：#68047（NIXL 拉模式断线重连：断线对端立即作废、排空后重新握手，B300 上 MiniMax-M3.1-Flash PD 部署 30 分钟回放失败请求 1858→10，KV 加载失败 905→0）、#68220（Recipe：Kimi-K3.1-Pro GB300 DEP 通道跑手册对齐 InferenceX#5069：前端会话粘性 1 秒、fastsafetensors 加载、DEP16 预览版 DSpark）、#58387（新增 NemotronLabsDiffusion 3B/8B：掩码块扩散 + 普通自回归双模式）、#64027（Responses API：gpt-oss 支持输出 logprobs）。另有 #68148（CI：清理 CODEOWNERS）、#65215（文档：量化方法表），未计。 SGLang 2 条首次汇总：#48097（AMD：AITER MegaMoEGfx1250 走 MoRI 分发，DeepSeek-V4-Pro EP4 解码验证 -24.5%、草稿 -19.7%、读题 -3.7%，GSM8K 0.975；AMD ROCm 10 CI 未过）、#50126（性能：分词器采样掩码改扁平数组返回）。另有 #51044（CI 测试），未计。 TRT-LLM 1 条首次汇总：#22136（MX：DeepSeek-V3-Lite 成为首个通过鉴定的 DeepSeek 系模型，GLM-5/Kimi K3 的垫脚石）。另有 #22166（文档：Muse Spark Open 部署指南）、#22475（infra：豁免 1 条 GB300 失败用例），未计。 LMDeploy 零合入。 TGI 零合入。 Dynamo 2 条首次汇总：#18772（TRT-LLM worker 接到请求优先级和前端到达时间，解码按原始到达排序）、#18904（KV 路由：SGLang 幂等存储改 SetLike 去重，删块不再被吞）。另有 #18941、#18937 两条测试小修，未计。 FlashInfer 2 条首次汇总：#9301（批量不变注意力读题排布优化，GB200/GB300 读题几何平均快 1.22–1.39 倍，单请求短读题最高 2.2 倍，解码无变化）、#9426（MoE EP：刷新 SM107 MegaMoE 源文件与适配器）。#9545 文档小修未计。 Mooncake 零合入。 llama.cpp：快照 b12480（#32468 UI 设计系统等）、b12481（#32476 FP8 qwen4exp 转换修复）、b12482（#32249 PLaMo 词表提速）、b12483（#32137 K 池布局）；快照内容多为此前各期已报；b12483 之后合入 1 条，本轮首次汇总：#32482（CUDA：F32 卷积走隐式 GEMM 路径）；#31002 为 11点版已报。 arXiv：下一批约 11 月 17 日 16:00 PST。 业内新闻：英伟达财报 13:20 出，共识营收约 1088.4 亿美元、每股收益约 2.47 美元；实数见 15点版。 访谈与深度：SGLang Summit 全场回顾（AIB，11 月 17 日）已出；Latent Space 最新仍是 11 月 16 日 FLUX 3。 深读：vLLM #68047 NIXL 断线重连（新增）。</p></body></html>

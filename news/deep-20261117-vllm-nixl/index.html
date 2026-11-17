@@ -1,0 +1,132 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM #68047：NIXL 断线重连，PD 搬运断了能自己接上"/>
+<meta name="doc-description" content="- 作者：vLLM 团队"/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T21:05:26"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM #68047：NIXL 断线重连，PD 搬运断了能自己接上</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM #68047：NIXL 断线重连，PD 搬运断了能自己接上</h1>
+<ul><li>作者：vLLM 团队</li><li>文章：[Bugfix][NIXL] Re-handshake a pull peer whose connection NIXL reports lost</li><li>合入时间：2026-11-17 11:58 PST（2026-11-17 19:58 UTC）</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/68047">https://github.com/vllm-project/vllm/pull/68047</a></li><li>说明：原文是代码 PR，没有配图，本笔记不附图。数字全是 PR 作者自报，没有第三方复现。</li></ul>
+<h2>一句话</h2>
+<p>PD 拆开跑，KV 搬运的链路断了。对端死掉了，系统还以为它活着。每次去读都失败，直到重启。这回一报断线就作废重连。30 分钟实测，失败请求从 1858 个降到 10 个。</p>
+<h2>人话解读</h2>
+<p>PD 拆开跑，读题和解码是两拨机器。</p>
+<p>读题算完 KV，要搬到解码端。</p>
+<p>KV 就是读题算好的草稿纸。</p>
+<p>搬运走 NIXL。</p>
+<p>NIXL 是英伟达的 KV 传输库。</p>
+<p>链路会断，比如对端重启、网络抖动。</p>
+<p>断了之后有个怪现象。</p>
+<p>对端的元数据还留在系统里。</p>
+<p>元数据就是对端还活着的登记信息。</p>
+<p>系统查元数据，以为对端还活着。</p>
+<p>下一次去读，还是走那条断链。</p>
+<p>每次都失败，直到有人重启服务。</p>
+<p>修之前，生产上已经出过事。</p>
+<p>#59971 就是生产事故报告。</p>
+<p>修法很直接。</p>
+<p>读失败时，看一眼错误码。</p>
+<p>如果是 NIXL 报的远端断开，就把对端作废。</p>
+<p>作废不等正在读的请求。</p>
+<p>等它们排空，再把对端从列表里拿掉。</p>
+<p>下一次读，重新握手建连。</p>
+<p>握手就是两端重新打招呼、建好传输通道。</p>
+<p>别的传输错误不受影响。</p>
+<p>还是走老路，等元数据探测说没了才作废。</p>
+<p>推模式也不动，只改拉模式。</p>
+<p>拉模式就是解码端主动去读。</p>
+<p>推模式是读题端主动往解码端送。</p>
+<p>这条修法是从 #66795 里拆出来的。</p>
+<p>#66795 还改了推模式，这回只先合拉模式。</p>
+<p>#61500 是另一个备选方案。</p>
+<p>它按失败次数作废对端，不管错误码。</p>
+<p>这回按错误码作废，第一次失败就能恢复。</p>
+<h2>核心方法</h2>
+<p>改动集中在拉模式的两处。</p>
+<p>第一处，失败处理函数现在接错误对象。</p>
+<p>以前只知道失败了，不知道为什么失败。</p>
+<p>现在认得出 nixlRemoteDisconnectError。</p>
+<p>认出后，把对端记进断开名单。</p>
+<p>第二处，清理函数改了判断。</p>
+<p>断开名单里的对端，不用等元数据探测。</p>
+<p>直接标成无效。</p>
+<p>清理时先排空在途的读。</p>
+<p>在途就是已经发出、还没完成的读。</p>
+<p>读完再把它的 agent 摘掉。</p>
+<p>下一次读，重新握手。</p>
+<p>错误码来自 NIXL 的绑定层。</p>
+<p>用类型判断，不是比名字。</p>
+<p>这样假报错混不进来。</p>
+<h2>关键数据</h2>
+<ul><li>测试模型：MiniMax-M3.1-Flash，NVFP4。</li><li>测试硬件：B300。</li><li>部署形态：8 台读题 worker，每台 DP2/EP2。</li><li>解码形态：1 台 DEP8 解码 worker。</li><li>传输：NIXL 走 UCX/RoCE。</li><li>负载：智能体编程 trace 回放，并发 480，跑 30 分钟。</li></ul>
+<p>修之前，断线报错 987 次。</p>
+<p>KV 加载失败 905 个请求。</p>
+<p>失败请求总共 1858 个。</p>
+<p>修之后，断线报错 0 次。</p>
+<p>KV 加载失败 0 个。</p>
+<p>失败请求 10 个，共 21512 个。</p>
+<p>这 10 个都是空回复，不是 KV 的问题。</p>
+<p>空回复就是请求没报错，但没返回内容。</p>
+<p>单元测试也补了一个。</p>
+<p>TestPeerReplacement 那个用例，没修之前失败。</p>
+<p>修之后通过。</p>
+<h2>跟研究方向的关联</h2>
+<p>这篇跟 PD 解耦评估直接相关。</p>
+<p>第一，PD 评估里，搬运可靠性要单列。</p>
+<p>吞吐和延迟之外，断线恢复能力也是一项。</p>
+<p>这篇给了一个现成的量法。</p>
+<p>30 分钟回放，并发 480，数失败请求。</p>
+<p>第二，断线不是小概率事件。</p>
+<p>生产上已经出过事故报告。</p>
+<p>评估里要问，引擎断线后能不能自愈。</p>
+<p>还是必须重启服务。</p>
+<p>第三，这个修法只覆盖拉模式。</p>
+<p>推模式的同类问题在 #66795 里。</p>
+<p>评估时两种模式分开问。</p>
+<p>第四，修之后的 10 个失败也值得看。</p>
+<p>它们是空回复，不是 KV 加载失败。</p>
+<p>说明 KV 那条路修干净了。</p>
+<p>但空回复的根因还没说。</p>
+<p>第五，数字只在 B300 上测过。</p>
+<p>模型只有一个，MiniMax-M3.1-Flash。</p>
+<p>H100 和 MI350X 上断线恢复怎么样，得自己测。</p>
+<h2>术语表</h2>
+<ul><li>PD 解耦：读题和生成分到不同机器上跑。</li><li>KV：读题算好的草稿纸，解码时接着用。</li><li>NIXL：英伟达的 KV 传输库。</li><li>拉模式：解码端主动去读题端取 KV。</li><li>推模式：读题端主动把 KV 送到解码端。</li><li>元数据：对端还活着的登记信息。</li><li>握手：两端重新打招呼、建好传输通道。</li><li>UCX：跨机器传数据的通信库。</li><li>RoCE：用以太网跑 RDMA 的技术。</li><li>DEP：解码端的专家并行方式。</li><li>DP：数据并行，多份请求分开跑。</li><li>EP：专家并行，专家分到不同卡上。</li><li>NVFP4：4 位浮点量化格式。</li><li>空回复：请求没报错，但没返回内容。</li><li>在途：已经发出、还没完成的读。</li></ul>
+<h2>原文链接</h2>
+<ul><li><a href="https://github.com/vllm-project/vllm/pull/68047">https://github.com/vllm-project/vllm/pull/68047</a></li></ul></body></html>
