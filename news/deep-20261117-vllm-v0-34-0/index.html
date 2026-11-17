@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM v0.34.0：草稿纸变大、老执行器退役"/>
+<meta name="doc-description" content="原文链接：https://github.com/vllm-project/vllm/releases/tag/v0.34.0"/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T01:10:41"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM v0.34.0：草稿纸变大、老执行器退役</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM v0.34.0：草稿纸变大、老执行器退役</h1>
+<p>原文链接：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.34.0">https://github.com/vllm-project/vllm/releases/tag/v0.34.0</a> 发布时间：2026-11-16 15:22 PST（本轮窗口内发布） 版本规模：1061 个提交，412 位贡献者（120 位新人）</p>
+<h2>人话解读</h2>
+<ul><li>vLLM 发了新大版本。</li><li>这版不是只加新模型。</li><li>serving 的三处都动了。</li><li>草稿纸、执行器、运维。</li><li>草稿纸就是 KV 缓存。</li><li>它记着算过的中间结果。</li><li>对你最值钱的是草稿纸。</li><li>还有 V1 退役和断点续跑。</li><li>下面按你的硬件拆开讲。</li><li>不是你的卡的，我会标明。</li></ul>
+<h2>核心更新</h2>
+<h3>草稿纸默认变大：按真实空闲显存来划</h3>
+<ul><li>以前按估算先划一块地。</li><li>现在热身完了再看。</li><li>看真实空闲显存有多少。</li><li>再决定草稿纸划多大。</li><li>名字叫可扩展 KV 缓存。</li><li>现在默认就开着。</li><li>MiniMax-M3 在 H200 上。</li><li>缓存从 433k 个 token 涨到 672k。</li><li>高并发下吞吐更高，首字更快。</li><li>代价也有，要先知道。</li><li>部分模型单 token 延迟涨 6–18%。</li><li>并发 128 的 H200 上测到的。</li><li>不想用就加参数关掉。</li><li>两个开关都行。</li><li>--gpu-memory-utilization 0.9。</li><li>或者 --no-enable-extensible-kv-cache。</li></ul>
+<h3>老执行器退役：只剩 Model Runner V2</h3>
+<ul><li>Model Runner V1 删了。</li><li>V2 是现在唯一的 GPU 执行器。</li><li>执行器就是真正跑模型的工人。</li><li>VLLM_USE_V2_MODEL_RUNNER=0 现在报错。</li><li>启动就失败，别再设了。</li><li>双批重叠也搬到了 V2 上。</li><li>双批重叠就是两批活重叠跑。</li><li>prefill 和 decode 各干各的。</li><li>连投机解码和 DCP 也能叠。</li><li>DCP 是把超长上下文切开分卡算。</li></ul>
+<h3>投机解码：后缀解码上了 V2</h3>
+<ul><li>投机解码就是先让实习生打草稿。</li><li>再让专家一次性改完。</li><li>后缀解码现在跑在 V2 上。</li><li>草稿器直接放 GPU 上。</li><li>不用再装 Arctic Inference 了。</li><li>还加了自定义投机方法。</li><li>声明式配置加插件接口。</li><li>想自己写草稿器能插进来。</li><li>V2 的草稿模型也有 CUDA 图了。</li><li>自适应验证能跟 XPress 配合。</li><li>草稿的 KV 跟目标模型同精度。</li><li>FP8 目标就配 FP8 草稿缓存。</li></ul>
+<h3>提速：谁快了多少</h3>
+<ul><li>Step5 在 4 张 GB200 上。</li><li>decode 快了 1.95 倍。</li><li>GLM-5.3-Flash 吞吐涨 1.6 倍。</li><li>对照组是 DEP4。</li><li>GLM-5.3 长 prompt 首字更快。</li><li>32K 到 128K 快 1.24–1.40 倍。</li><li>靠的是分片稀疏 MLA prefill。</li><li>Kimi-K3 的 decode 注意力也快了。</li><li>GB300 上快 1.34–1.59 倍。</li><li>要手动开，不默认。</li><li>Qwen3.5 的 decode 也快了一点。</li><li>延迟降 3.0–8.8%。</li><li>MI355X 上 DSpark 解码更顺。</li><li>低并发互动性涨 35–57%。</li></ul>
+<h3>P/D 拆开跑：这版的新东西</h3>
+<ul><li>P/D 就是 prefill 和 decode 分开跑。</li><li>像流水线分工，各干各的。</li><li>MiniMax-M3.1-Flash 支持混搭并行度。</li><li>prefill 和 decode 的 TP 可以不一样。</li><li>prefill 收压缩 KV 的次数少了。</li><li>每步从 38 次收到 4 次。</li><li>解码的 replay 图共用模型图池。</li><li>prefill 图显存每卡省了不少。</li><li>GB200 上从 15.52 降到 9.88 GiB。</li><li>DCP 接上了 FlashMLA 稀疏路径。</li><li>BF16 的 KV 也能走 DCP 了。</li><li>分片稀疏 MLA prefill 默认开。</li><li>就是上面 GLM-5.3 变快的那条。</li></ul>
+<h3>运维：断点续跑，不用重启</h3>
+<ul><li>检查点恢复来了。</li><li>服务能像游戏存档一样断点续跑。</li><li>接口是 /checkpoint/prepare。</li><li>还有 status 和 restore。</li><li>两个前端都能用。</li><li>DP+EP 容错缩容也来了。</li><li>有卡挂了不用重启。</li><li>专家自动重分到活着的卡上。</li><li>NUMA 绑定默认开了。</li><li>尽量让进程贴着自己的内存跑。</li><li>缓存感知的准入排序可以选开。</li><li>Rust 前端加了无状态 Responses 接口。</li><li>还支持一次返回多个结果。</li></ul>
+<h3>AMD：只剩 ROCm 10.0</h3>
+<ul><li>ROCm 7.2 的镜像没了。</li><li>发布镜像和 wheel 只有 10.0。</li><li>MoRI 的 EPv2 能用了。</li><li>参数是 --all2all-backend mori。</li><li>Kimi-K3 在 MI355X 上有专用 decode。</li><li>要手动开。</li><li>RDNA3 和 RDNA4 默认走 TRITON_ATTN。</li></ul>
+<h3>新模型：一次加了 10 个</h3>
+<ul><li>Mistral Large 4 是大头。</li><li>总参数 1T，激活 52B。</li><li>FP8 和 NVFP4 都能跑。</li><li>Blackwell、Hopper、MI350 都行。</li><li>MiniMax-M3.1-Flash 也来了。</li><li>还有能听会说的 Nemotron-3.5-Transcribe。</li><li>30B 参数，4B 激活的语音模型。</li><li>能跑音频聊天和转录接口。</li><li>其余还有 Ripple-65B、ZAYA1。</li><li>和 Baidu 的 Unlimited-OCR-2。</li><li>Liquid 的 LFM3 三件套也在内。</li></ul>
+<h3>升级前先看：三条会弄坏现有配置</h3>
+<ul><li>默认 block size 从 16 改成 64。</li><li>block 就是草稿纸的一页大小。</li><li>想留旧行为就传 --block-size 16。</li><li>ROCm 的分页注意力还是 16。</li><li>ROCm 7.2 的包不再发布。</li><li>要用 ROCm 10.0 的 wheel 和镜像。</li><li>huggingface_hub 要求 2.0.0 以上。</li><li>tokenizers 和 timm 也要升。</li><li>QuTLASS 和 fp_quant 删了。</li><li>fp_quant 的 checkpoint 打不开了。</li><li>Marlin W4A8 也删了。</li><li>改走 humming 量化。</li></ul>
+<h2>关键数据</h2>
+<ul><li>提交数：1061，贡献者 412 位。</li><li>MiniMax-M3 的 KV 缓存：433k → 672k token。</li><li>单 token 延迟代价：部分模型 +6–18%。</li><li>Step5 decode：4×GB200 上最高 1.95 倍。</li><li>GLM-5.3-Flash 吞吐：1.6 倍。</li><li>GLM-5.3 首字：32K–128K 快 1.24–1.40 倍。</li><li>Kimi-K3 decode 注意力：1.34–1.59 倍。</li><li>Qwen3.5 decode 延迟：降 3.0–8.8%。</li><li>MI355X 互动性：低并发 +35–57%。</li><li>prefill 图显存：15.52 → 9.88 GiB 每卡。</li><li>prefill 收 KV 次数：每步 38 → 4 次。</li></ul>
+<h2>跟你研究方向的关联</h2>
+<ul><li>草稿纸默认变大，先在你的配置上量。</li><li>你的请求输入大约 250 个词元。</li><li>缓存变大对短请求也有用。</li><li>并发一高，命中率直接变吞吐。</li><li>但单 token 延迟的代价要对照测。</li><li>高并发和低并发各跑一档。</li><li>P/D 混搭并行度值得单列一档。</li><li>prefill 和 decode 的卡数不用一样了。</li><li>你的评估里可以加一组对照。</li><li>收 KV 次数 38 降到 4 次。</li><li>传输开销那档要重测。</li><li>DCP 接上 FlashMLA 稀疏路径。</li><li>长上下文那组可以换新后端。</li><li>分片稀疏 MLA prefill 默认开。</li><li>长 prompt 首字的对照组要更新。</li><li>断点续跑对长评测很友好。</li><li>跑一半挂了不用从头来。</li><li>升级前先把 block size 定下来。</li><li>16 和 64 各跑一档再定。</li><li>数字全是作者自报。</li><li>每组配置只跑了一次。</li><li>没有独立复测，别当定论。</li></ul>
+<h2>图表说明</h2>
+<ul><li>release 页没有配图。</li><li>关键数字都已抄录在上面。</li><li>没有图需要转录。</li></ul>
+<h2>术语表</h2>
+<ul><li>KV 缓存：模型的草稿纸，记着算过的中间结果。</li><li>可扩展 KV 缓存：按真实空闲显存来划草稿纸。</li><li>Model Runner：真正跑模型的执行器。</li><li>双批重叠：prefill 和 decode 两批活重叠跑。</li><li>投机解码：实习生先打草稿，专家再改。</li><li>后缀解码：一种投机解码，草稿从后缀往前猜。</li><li>DCP：把超长上下文切开分给多张卡。</li><li>block size：草稿纸一页能装多少个 token。</li><li>检查点恢复：服务存档，挂了能断点续跑。</li><li>NUMA 绑定：进程贴着自己的内存跑，少跨节点。</li><li>ROCm：AMD 显卡的计算平台，对标 CUDA。</li><li>NVFP4：4 位浮点量化，省显存的压缩格式。</li><li>TP：张量并行，一层模型切开分卡算。</li><li>EP：专家并行，MoE 的专家分卡放。</li><li>DP：数据并行，请求分流到多组卡上。</li></ul>
+<h2>原文链接</h2>
+<ul><li>发布说明：<a href="https://github.com/vllm-project/vllm/releases/tag/v0.34.0">https://github.com/vllm-project/vllm/releases/tag/v0.34.0</a></li><li>完整更新日志：见发布说明页 Full changelog 一节</li><li>安装：pip install vllm（CUDA 13.0），镜像 vllm/vllm-openai:v0.34.0</li></ul></body></html>
