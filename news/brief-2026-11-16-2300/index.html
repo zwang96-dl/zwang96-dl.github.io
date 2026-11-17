@@ -1,0 +1,165 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月16日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-16"/>
+<meta name="doc-ts" content="2026-11-17T07:02:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-16（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-16（23点版）</h1>
+<p>23点版来了，这轮就三条实在的。</p>
+<p>主角是 SGLang 的 PD 小修。</p>
+<p>PD 解耦就是读题和生成分开跑。</p>
+<p>这回修的是解码端第一个词的发送时机。</p>
+<p>vLLM 那边来了个 OCR 新菜谱。</p>
+<p>还能在一张 4090 上跑。</p>
+<p>llama.cpp 快照号涨了，里面两条 OpenCL 的活之前漏报了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 快照号动了</strong></p>
+<p>llama.cpp 快照从 b12455 涨到 b12464。</p>
+<p>这轮没有新版本发布。</p>
+<p>其余水位全没动。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc2。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：PD 解码的第一个词不再抢跑</strong></p>
+<p>#50895 是本轮最值得看的一条。</p>
+<p>它修的是 PD 解耦里一个计时小毛病。</p>
+<p>PD 解耦就是读题和生成分到不同机器上。</p>
+<p>读题那台机器会先算出第一个词。</p>
+<p>以前这个词一算出来就立刻发给用户。</p>
+<p>听起来很贴心，其实是个坑。</p>
+<p>解码那台机器还在忙上一轮计算。</p>
+<p>第一个词发出去之后，第二个词要等两轮才来。</p>
+<p>第二个词以前要等约 104 毫秒。</p>
+<p>稳态一轮只要约 92 毫秒。</p>
+<p>用户算平均出词间隔时，这段空等全算进去了。</p>
+<p>TPOT 就是平均每个词要等多久。</p>
+<p>现在改了，第一个词不再抢跑。</p>
+<p>它跟第一次解码算出的词一起发。</p>
+<p>输出的词一个没变，只是发送时机变了。</p>
+<p>非 PD 的部署完全不受影响。</p>
+<p>实测在 GB300 上跑 DeepSeek-V4.1。</p>
+<p>10 台读题机器配 1 台解码机器。</p>
+<p>并发 4000 个多轮对话请求。</p>
+<p>单卡吞吐从 620.4k 降到 618.5k 词每秒。</p>
+<p>只降了 0.3%，基本没动。</p>
+<p>p50 TPOT 是 2.82 毫秒，p90 是 2.95 毫秒。</p>
+<p>p50 就是一半请求的水平，p90 是九成请求的水平。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50895">https://github.com/sgl-project/sglang/pull/50895</a></p>
+<p><strong>vLLM：MiniCPM-OCR 新菜谱，一张 4090 就能跑</strong></p>
+<p>#68078 给 MiniCPM-OCR 1.0 加了个部署菜谱。</p>
+<p>MiniCPM-OCR 是 OpenBMB 的 1.3B 识字模型。</p>
+<p>识字模型就是专门读文档、表格、公式的模型。</p>
+<p>菜谱就是官方验证过的启动参数组合。</p>
+<p>默认开 DSpark 推测解码。</p>
+<p>DSpark 是 vLLM 的一种推测解码方法。</p>
+<p>推测解码就是先让小模型打草稿，再让大模型改。</p>
+<p>草稿接受率约 61%，570 个里接受了 348 个。</p>
+<p>多词请求比直接生成快 20% 到 45%。</p>
+<p>还给了 AWQ 和 GPTQ 两个 4 位版本。</p>
+<p>4 位版本就是权重压得更小的版本。</p>
+<p>全程在一张 RTX 4090（24GB）上验证过。</p>
+<p>能读英文、中文、表格、公式、图表和印章。</p>
+<p>一次还能同时喂两张图。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68078">https://github.com/vllm-project/vllm/pull/68078</a> 来源：<a href="https://huggingface.co/openbmb/MiniCPM-OCR-1.0">https://huggingface.co/openbmb/MiniCPM-OCR-1.0</a></p>
+<p><strong>vLLM：FP8 稀疏解码的越界 bug 修了</strong></p>
+<p>#68014 修的是一个会崩的 bug。</p>
+<p>FlashMLA 的 FP8 稀疏解码会非法访问显存。</p>
+<p>非法访问就是读到了不该读的内存地址。</p>
+<p>原因是热缓存的行号算错了。</p>
+<p>热缓存就是经常被访问的那部分 KV。</p>
+<p>KV 就是解码时留下的草稿纸。</p>
+<p>行号一错，读到的就是别人的行。</p>
+<p>读过头了还会直接越界崩溃。</p>
+<p>修法很简单：按行读，不按页读。</p>
+<p>BF16 那条路早就这么读了。</p>
+<p>现在 FP8 也对齐了。</p>
+<p>影响的是 DeepSeek-V4.1 这类 FP8 稀疏解码用户。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68014">https://github.com/vllm-project/vllm/pull/68014</a></p>
+<p><strong>llama.cpp：快照涨到 b12464，补两条 OpenCL 的活</strong></p>
+<p>快照号从 b12455 涨到 b12464。</p>
+<p>中间合入的多数条之前都报过。</p>
+<p>有两条 OpenCL 的活是漏网的，这轮补上。</p>
+<p>#32110 修的是 Adreno 上的闪存注意力预填充路径。</p>
+<p>Adreno 是高通手机芯片里的 GPU。</p>
+<p>闪存注意力就是 flash attention。</p>
+<p>里面有个掩码图片每次调用都新建，从不释放。</p>
+<p>推测解码的验证步每层注意力都会走这条路。</p>
+<p>对象越攒越多，服务越跑越慢。</p>
+<p>现在用完就释放，还顺手修了另外两个小毛病。</p>
+<p>#30948 给 Adreno X1 加了个 Q4_K 矩阵乘法核。</p>
+<p>Q4_K 是一种 4 位量化格式。</p>
+<p>跑本地模型的人能直接受益。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32110">https://github.com/ggml-org/llama.cpp/pull/32110</a> 来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30948">https://github.com/ggml-org/llama.cpp/pull/30948</a></p>
+<p><strong>TRT-LLM、FlashInfer、Mooncake：只剩测试小修</strong></p>
+<p>TRT-LLM 这轮合入两条，都是测试用例调整。</p>
+<p>#22432 和 #22424。</p>
+<p>FlashInfer 合入一条测试，#9540。</p>
+<p>Mooncake 合入一条测试，#5551。</p>
+<p>vLLM 还合入一条 ROCm 的 CI 小修，#67986。</p>
+<p>SGLang 还合入两条 CI 和测试小修。</p>
+<p>#50940 和 #50937。</p>
+<p>LMDeploy、TGI、Dynamo：零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮还是空的</strong></p>
+<p>最新提交仍是 11 月 15 日那批。</p>
+<p>下一批按惯例明天下午 16:00 到。</p>
+<p>这轮先空着。</p>
+<h2>业内新闻</h2>
+<p>这轮没刷到值得报的业内新闻。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 FLUX 3 那期</strong></p>
+<p>17点版已经报过，不重复。</p>
+<p><strong>SGLang Summit 第二天文字总结还没出</strong></p>
+<p>搜了一圈，只有会前通稿和 LinkedIn 的收尾帖。</p>
+<p>文字总结出来再报。</p>
+<h2>值得深入学</h2>
+<p><strong>SGLang #50895：PD 解码第一个词不再抢跑</strong></p>
+<p>这篇能帮你把 PD 评估里的 TPOT 算准。</p>
+<p>第一个词的发送时机变了，计时口径也跟着变。</p>
+<p>不搞清这点，PD 和非 PD 的延迟对比会失真。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>SGLang #50895，PD 解码首词跟首批输出一起发。TPOT 计时更准，PD 评估必看。</li><li>vLLM #68078，MiniCPM-OCR 1.0 菜谱。单张 4090 就能跑文档解析，DSpark 提速 20–45%。</li><li>vLLM #68014，FlashMLA FP8 稀疏解码越界修复。跑 DeepSeek-V4.1 FP8 的人值得看一眼。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 21 点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc2；llama.cpp 快照 b12455→b12464。 vLLM 3 条首次汇总：#68078（MiniCPM-OCR 1.0 部署菜谱）、#68014（HiSparse FlashMLA FP8 稀疏解码越界修复）、#67986（ROCm CI 小修）。 SGLang 3 条首次汇总：#50895（PD 解码首词随首批输出一起发）、#50940（CI 依赖上限）、#50937（hisparse 测试修复）。 TRT-LLM 2 条首次汇总：#22432、#22424（测试用例调整）。 FlashInfer 1 条首次汇总：#9540（测试）。 Mooncake 1 条首次汇总：#5551（测试）。 llama.cpp 2 条首次汇总（快照号 b12455→b12464 区间内之前漏报的）：#32110（Adreno 闪存注意力预填充路径三处修复，掩码图片泄漏）、#30948（Adreno X1 的 Q4_K 矩阵乘法核）；其余区间内合入（#32369、#32430、#32428、#32431、#32436、#32433、#31003）已在 13–21 点版报过。 LMDeploy、TGI、Dynamo 零合入。 arXiv：无新批次（最新仍为 11 月 15 日提交；下一批约 11 月 17 日 16:00 PST）。 业内新闻：无新内容。 访谈与深度：Latent Space 最新仍是 11 月 16 日 FLUX 3（17点版已报）；SGLang Summit 第二天文字总结仍未出。 深读：SGLang #50895 精读笔记已写（深度阅读/SGLang-PD解码首词发送时机-TPOT-精读.html）。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-16-2300/">23点版</a></p></body></html>

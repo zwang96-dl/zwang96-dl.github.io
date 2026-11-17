@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang #50895：PD 解码第一个词不再抢跑，TPOT 计时更准了"/>
+<meta name="doc-description" content="- 作者：SGLang 团队"/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T07:03:59"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang #50895：PD 解码第一个词不再抢跑，TPOT 计时更准了</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang #50895：PD 解码第一个词不再抢跑，TPOT 计时更准了</h1>
+<ul><li>作者：SGLang 团队</li><li>文章：[Perf] disaggregation: Stream a PD decode request&#x27;s first token with its first decode output</li><li>合入时间：2026-11-16 21:23 PST（2026-11-17 05:23 UTC）</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/50895">https://github.com/sgl-project/sglang/pull/50895</a></li><li>说明：数字全是 PR 作者自报，单次 3600 秒实测，没有第三方复现</li></ul>
+<h2>一句话</h2>
+<p>PD 解耦下，读题机器算出的第一个词以前一算出来就发。发完要空等两轮，第二个词才来。这段空等全算进了 TPOT。现在第一个词改成跟第一次解码输出一起发，计时口径干净了。</p>
+<h2>人话解读</h2>
+<p>PD 解耦就是把读题和生成分到不同机器上。读题机器先把提示词算一遍，顺手采样出第一个词。生成机器接过 KV 缓存，接着往下生成。KV 缓存就是解码时留下的草稿纸，存着前面算过的注意力状态。</p>
+<p>以前的做法是，读题机器一算出第一个词就立刻发给用户。听起来很贴心，其实是个坑。生成机器那边有个重叠调度器。重叠调度器就是让多个前向计算排队重叠着跑的调度器。请求刚接进来时，上一轮前向还在跑。第一个词发出去之后，第二个词要等正在跑的那轮算完，再等自己那轮算完。差不多要晚两个解码步。</p>
+<p>用户算 TPOT 时，这段空等全算进去了。TPOT 就是平均每个词要等多久，算式是总时长减首词时间，再除以词数减一。首词时间就是 TTFT，从发请求到第一个词出来。空等的那两步被平均摊到每个词头上，每个请求的 TPOT 都虚高一截。</p>
+<p>改完之后，第一个词不再抢跑。它跟第一次解码算出的词一起发。输出的词一个没变，只是发送时机变了。非 PD 的部署完全不受影响。</p>
+<h2>核心方法</h2>
+<p>改动只动 PD 解码这一条路，分两点。</p>
+<p>第一点：接进来的时候，只立刻发已经算完的请求。比如只生成一个词的请求，算完就发，不用等。</p>
+<p>第二点：还在跑的请求，读题机器算出的第一个词先攒着。等第一次解码输出出来，两个词一起发。输出流那边看到偏移量是 0，就知道这是头一批词，立刻发出去。偏移量就是已经发出去多少词的计数。</p>
+<p>这个改法不碰任何生成逻辑。采样、调度、KV 搬运全都不变。只改发送时机，所以输出 token 完全一致。</p>
+<h2>关键数据</h2>
+<ul><li>测试硬件：GB300。</li><li>测试模型：DeepSeek-V4.1，带 MTP。MTP 就是一次多预测几个词的投机结构。</li><li>部署形态：PD 解耦，10 台读题机器配 1 台解码机器。解码机器是 DEP32，也就是 32 路并行解码。</li><li>负载：多轮对话，4000 并发，每组跑 3600 秒。</li><li>改之前的单卡吞吐：每秒 620.4k 词。</li><li>改之后的单卡吞吐：每秒 618.5k 词，降了 0.3%。</li><li>改之前的 p90 TPOT：3.05 毫秒。p90 就是九成请求的水平。</li><li>改之后的 p50 TPOT：2.82 毫秒。p50 就是一半请求的水平。</li><li>改之后的 p90 TPOT：2.95 毫秒。</li><li>第二个词的等待时间：改之前约 104 毫秒，稳态一轮约 92 毫秒。</li><li>输出 token：改前改后完全一致。</li><li>适用范围：只影响 PD 解码，非 PD 部署无变化。</li></ul>
+<h2>跟研究方向的关联</h2>
+<p>这篇跟 PD 解耦评估直接相关。</p>
+<p>第一，TPOT 口径要对齐。PD 和非 PD 的延迟对比里，首词发送时机不同，TPOT 会失真。做评估之前，先确认两边的 SGLang 版本都带这个修复。否则 PD 那边的 TPOT 会虚高，结论会偏。</p>
+<p>第二，这组数是现成的大规模 PD 参考。10 台读题配 1 台解码，4000 并发，单卡 618.5k 词每秒。以后自己搭 PD 评估，可以拿这组配比和吞吐当基线对照。</p>
+<p>第三，MTP 和 DEP32 的组合值得记一笔。DeepSeek-V4.1 带 MTP 跑 PD 解码，解码端 32 路并行。这个组合的 TPOT 能压到 3 毫秒以内，是个可用的参考点。</p>
+<h2>术语表</h2>
+<ul><li>PD 解耦：读题和生成分到不同机器上跑。</li><li>prefill：读题阶段，把提示词算一遍。</li><li>decode：生成阶段，一次吐一个词。</li><li>KV 缓存：解码时留下的草稿纸，存注意力状态。</li><li>TPOT：平均每个词要等多久。</li><li>TTFT：从发请求到第一个词出来的时间。</li><li>重叠调度器：让多个前向计算排队重叠着跑的调度器。</li><li>MTP：一次多预测几个词的投机结构。</li><li>DEP32：32 路并行的解码配置。</li><li>p50、p90：一半请求、九成请求的水平。</li></ul>
+<h2>原文链接</h2>
+<ul><li><a href="https://github.com/sgl-project/sglang/pull/50895">https://github.com/sgl-project/sglang/pull/50895</a></li></ul></body></html>
