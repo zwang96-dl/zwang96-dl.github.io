@@ -1,0 +1,156 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月17日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-17T19:05:59"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-17（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-17（11点版）</h1>
+<p>11点版来了，这轮是小步快跑。</p>
+<p>主角是 FlashInfer 的解码核。</p>
+<p>它给草稿验证提速最多三倍。</p>
+<p>vLLM 那边对齐了一份跑分配置。</p>
+<p>llama.cpp 快照连跳两格。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 快照动了</strong></p>
+<p>llama.cpp 快照从 b12477 涨到 b12479。</p>
+<p>这轮没有新版本发布。</p>
+<p>其余水位全没动。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc3。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>FlashInfer：草稿验证那步快了最多三倍</strong></p>
+<p>#9613 是本轮最值得看的一条。</p>
+<p>它改的是 CAKE 解码核的预编译。</p>
+<p>CAKE 是给线性注意力做的融合核。</p>
+<p>以前解码时，token 数是现算的。</p>
+<p>现算就是每次现拼程序再跑。</p>
+<p>现在 2、3、5、6、7、16 都有专用程序。</p>
+<p>token 数就是一次验证几个草稿词。</p>
+<p>预编译的程序跑起来更快。</p>
+<p>实测是 n=3 那条解码路线。</p>
+<p>n=3 就是每步做三轮更新。</p>
+<p>16 个词、单批那档，快 3.13 倍。</p>
+<p>7 个词那档，最高快 2.56 倍。</p>
+<p>批量大了以后，普遍快约 1.6 倍。</p>
+<p>这步是投机解码里验证草稿的活。</p>
+<p>投机解码就是小模型先猜、大模型再验。</p>
+<p>Kimi-K3 的草稿注意力正走 CAKE。</p>
+<p>07点版那条 #67588 刚把它搬上去。</p>
+<p>这波等于草稿那条路又快了一截。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9613">https://github.com/flashinfer-ai/flashinfer/pull/9613</a></p>
+<p><strong>vLLM：Kimi-K3.1-Pro 的跑分配置对齐了</strong></p>
+<p>#68213 改的是 GB300 的预设配置。</p>
+<p>预设就是一套调好的启动参数。</p>
+<p>它把草稿模型换回预览版 DSpark。</p>
+<p>DSpark 是 Kimi-K3.1-Pro 的草稿模型。</p>
+<p>前缀匹配单位也从 1408 改到 128。</p>
+<p>前缀匹配单位就是草稿复用的粒度。</p>
+<p>改完跟 SemiAnalysis 的投稿完全一致。</p>
+<p>SemiAnalysis 是一家芯片分析机构。</p>
+<p>投稿就是他们报给 InferenceX 的跑分。</p>
+<p>接受长度回到 3.19、3.57、3.69。</p>
+<p>接受长度就是一次验证通过几个词。</p>
+<p>分别是 4、6、7 个草稿词那三档。</p>
+<p>这是配置对齐，没有新跑分数字。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68213">https://github.com/vllm-project/vllm/pull/68213</a></p>
+<p><strong>Dynamo：离线回放也能跑自定义路由了</strong></p>
+<p>#18883 修的是离线回放的路由。</p>
+<p>离线回放就是拿历史记录模拟调度。</p>
+<p>以前回放只能用默认的调度策略。</p>
+<p>现在配置里的策略也能跑起来。</p>
+<p>比如按成本选 worker 的两层策略。</p>
+<p>worker 就是真正跑请求的机器。</p>
+<p>这对 PD 评估有用。</p>
+<p>PD 评估就是测读题和解码分开跑。</p>
+<p>离线先排一遍，能少烧点真机时间。</p>
+<p>#18868 是个小修。</p>
+<p>TRT-LLM 那边，提示词超长会报 500。</p>
+<p>现在报 400，还告诉你超了多少。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18883">https://github.com/ai-dynamo/dynamo/pull/18883</a></p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18868">https://github.com/ai-dynamo/dynamo/pull/18868</a></p>
+<p><strong>SGLang：这轮只有一条小修复</strong></p>
+<p>#50983 修的是垃圾回收的误报。</p>
+<p>冻住的垃圾不再报成泄漏。</p>
+<p>只会给个警告。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50983">https://github.com/sgl-project/sglang/pull/50983</a></p>
+<p><strong>TRT-LLM：这轮只有测试小修</strong></p>
+<p>#22471 恢复了 GB200 前缀缓存的精度覆盖。</p>
+<p>#22478 是 CI 里豁免一条失败用例。</p>
+<p>都不影响功能。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22471">https://github.com/NVIDIA/TensorRT-LLM/pull/22471</a></p>
+<p><strong>llama.cpp：快照涨到 b12479</strong></p>
+<p>这轮快照连跳两格。</p>
+<p>b12478 和 b12479 先后发布。</p>
+<p>里头是语音和音乐那两块。</p>
+<p>05点版报过的 kokoro 发音词典和 Minimax-Music3。</p>
+<p>#32438 是快照之后合入的。</p>
+<p>它给 Qwen3-TTS 加了参考模式。</p>
+<p>Qwen3-TTS 是通义的语音合成模型。</p>
+<p>参考模式就是照着一段参考音频接着念。</p>
+<p>以前只能用一句语音的特征向量。</p>
+<p>现在直接拿参考音频续写。</p>
+<p>作者说，参考模式比特征向量准得多。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp">https://github.com/ggml-org/llama.cpp</a></p>
+<p>LMDeploy、TGI、Mooncake 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批约今天 16:00</strong></p>
+<p>本轮没有新论文。</p>
+<p>下一批约今天 16:00 发布。</p>
+<h2>业内新闻</h2>
+<p><strong>本轮没有新消息</strong></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 FLUX 3 那期</strong></p>
+<p>最新一期还是 11 月 16 日的 FLUX 3。</p>
+<p>这轮没有新单集。</p>
+<p><strong>SGLang Summit 第二天文字总结还没出</strong></p>
+<p>搜了一圈，还是只有会前通稿和零散总结。</p>
+<p>文字总结出来再报。</p>
+<h2>值得深入学</h2>
+<p><strong>本轮没有新深读</strong></p>
+<p>这轮的几条都是小修和配置对齐。</p>
+<p>没有值得单开一篇笔记的。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>FlashInfer #9613。CAKE 解码核预编译，草稿验证快 1.6 到 3.1 倍。</li><li>vLLM #68213。Kimi-K3.1-Pro 预设对齐投稿，接受长度 3.19、3.57、3.69。</li><li>Dynamo #18883。离线回放能跑自定义路由，PD 评估先模拟再上真机。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 09点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc3；llama.cpp 快照 b12477→b12479。 vLLM 1 条首次汇总：#68213（Kimi-K3.1-Pro GB300 AgentX 预设换回预览版 DSpark 草稿，前缀匹配单位统一 128，对齐 InferenceX#5069 投稿）。 SGLang 1 条首次汇总：#50983（修复：冻住的垃圾只警告，不再报成泄漏）。 TRT-LLM 2 条首次汇总：#22471（修复：恢复 GB200 前缀缓存精度覆盖）、#22478（infra：豁免 1 条失败用例）。 LMDeploy 零合入。 TGI 零合入。 Dynamo 2 条首次汇总：#18883（离线回放跑配置里的 worker 选择策略）、#18868（TRT-LLM sidecar 发布 token budget，超长提示词报 400 而非 500）。 FlashInfer 1 条首次汇总：#9613（CAKE GDP n=3 静态解码程序，T=2/3/5/6/7/16，相对运行时程序快 1.6–3.1 倍）。 Mooncake 零合入。 llama.cpp：快照 b12478（#32397 kokoro tts_dict，05点版已报）、b12479（#32435 Minimax-Music3，05点版已报）；b12479 之后合入 13 条，下个快照见，其中本轮首次汇总：#32438（mtmd：Qwen3-TTS ICL/reference 模式）、#31002（OpenCL：A7 Q5_K 非 MoE 二进制核）；其余 11 条此前各期已报（#32483、#32377、#32239、#32065、#32469、#32476、#32477、#32249、#32137、#31855、#32468）。 arXiv：下一批约 11 月 17 日 16:00 PST。 业内新闻：本轮无新消息。 访谈与深度：Latent Space 最新仍是 11 月 16 日 FLUX 3；SGLang Summit 第二天文字总结仍未出。 深读：本轮无新深读笔记（宁缺毋滥）。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-17-1100/">11点版</a></p></body></html>
