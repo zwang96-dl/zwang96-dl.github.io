@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月16日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-16"/>
+<meta name="doc-ts" content="2026-11-17T05:06:06"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-16（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-16（21点版）</h1>
+<p>21点版来了，这轮没有新版本发布。</p>
+<p>llama.cpp 快照涨了一截。</p>
+<p>主线有两条。</p>
+<p>Nemotron 看图那步搬上 GPU，首字快近一半。</p>
+<p>Google 出了 Zero-TIM 博客，值得深读。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 快照动了</strong></p>
+<p>llama.cpp 快照从 b12445 涨到 b12455。</p>
+<p>其余水位全没动。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc2。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：Nemotron 看图那步搬上 GPU</strong></p>
+<p>#65941 是本轮最值得看的一条。</p>
+<p>它把 Nemotron VL 的缩放搬上 GPU。</p>
+<p>以前图片和视频帧在 CPU 上缩放。</p>
+<p>uint8 双三次缩放是预处理里最贵的 CPU 活。</p>
+<p>Perception Test 一个视频，单核要花约 350 毫秒。</p>
+<p>这回改走 CV-CUDA 在 GPU 上缩放。</p>
+<p>CV-CUDA 是英伟达的图像处理库。</p>
+<p>图像和视频任务的首字时间降 40% 到 50%。</p>
+<p>首字时间就是从发请求到第一个词出来。</p>
+<p>覆盖 NemotronH_Nano_VL_V2。</p>
+<p>服务 Nemotron 3 Nano Omni。</p>
+<p>还有 Nemotron 3.5 Super VL。</p>
+<p>还有 Nemotron Nano VL v2 的视频。</p>
+<p>默认不开，需要手动打开。</p>
+<p>#67136 修的是在线 NVFP4 量化。</p>
+<p>NVFP4 是一种 4 位量化格式。</p>
+<p>在线量化就是加载时现算压缩权重。</p>
+<p>配上 CPU offload 以前会直接崩溃。</p>
+<p>原因是量化权重还在 meta 设备上。</p>
+<p>meta 设备就是只占位、不存数的状态。</p>
+<p>现在 offload 会跳过这些参数。</p>
+<p>MoE 的专家层也能先在 CPU 上物化。</p>
+<p>再逐个搬上 GPU 量化。</p>
+<p>这是 #64552 的前置拆分。</p>
+<p>#67058 是个小修补。</p>
+<p>聊天模板格式扩展到 cross-encoder。</p>
+<p>cross-encoder 是给两个文本打分的模型。</p>
+<p>剩下四条是 XPU 的测试清理。</p>
+<p>#68052、#67877、#67243、#67188。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65941">https://github.com/vllm-project/vllm/pull/65941</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/67136">https://github.com/vllm-project/vllm/pull/67136</a> 来源：<a href="https://github.com/vllm-project/vllm/pull/67058">https://github.com/vllm-project/vllm/pull/67058</a></p>
+<p><strong>SGLang：GLM-5.3-Flash 登上华为昇腾</strong></p>
+<p>#43305 是本轮 SGLang 最实在的一条。</p>
+<p>它让 GLM-5.3-Flash 跑在昇腾 A3 和 A5 上。</p>
+<p>DSA、KDA 和草稿注意力都路由到 Ascend 后端。</p>
+<p>DSA 是把超长上下文切开分卡算。</p>
+<p>MLA 预处理去掉 RoPE。</p>
+<p>KDA 的门布局也做了适配。</p>
+<p>还补了 DSA 元数据和图捕获重放。</p>
+<p>压缩索引页、BF16 尾巴、host 缓存都支持了。</p>
+<p>精度数给了两组。</p>
+<p>AIME26 是 0.96，GSM8K 是 0.917。</p>
+<p>速度数这次没给。</p>
+<p>#50486 修的是 MUSA 的构建。</p>
+<p>sgl-kernel 的 AOT 轮子构建恢复了。</p>
+<p>AOT 就是提前编译好再装。</p>
+<p>#42806 是 CI 的小修。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/43305">https://github.com/sgl-project/sglang/pull/43305</a> 来源：<a href="https://github.com/sgl-project/sglang/pull/50486">https://github.com/sgl-project/sglang/pull/50486</a></p>
+<p><strong>TRT-LLM：文档和测试为主</strong></p>
+<p>#20711 是个破坏性重构。</p>
+<p>ModelLoader.load() 简化了。</p>
+<p>helper 挪到 models/checkpoints。</p>
+<p>升级的人注意接口变了。</p>
+<p>#22338 对齐了 NVFP4 MLA 的技术博客。</p>
+<p>博客内容跟最终论文对上。</p>
+<p>#21897 修正了分块注意力的文档。</p>
+<p>#22420 和 #21233 是测试相关。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/20711">https://github.com/NVIDIA/TensorRT-LLM/pull/20711</a> 来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22338">https://github.com/NVIDIA/TensorRT-LLM/pull/22338</a></p>
+<p><strong>llama.cpp：快照涨到 b12455</strong></p>
+<p>#31003 给 OpenCL 加了个新核。</p>
+<p>算的是 q8_0 的矩阵乘法。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31003">https://github.com/ggml-org/llama.cpp/pull/31003</a></p>
+<p><strong>Dynamo：多模态坏图不再报 500</strong></p>
+<p>#18762 修的是错误码。</p>
+<p>损坏的图片以前返回 500。</p>
+<p>超长提示词被拒也返回 500。</p>
+<p>500 是服务器错，400 才是客户端错。</p>
+<p>现在这两类都返回 400。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18762">https://github.com/ai-dynamo/dynamo/pull/18762</a></p>
+<p><strong>FlashInfer：稀疏注意力小提速</strong></p>
+<p>#9536 动的是稀疏注意力核。</p>
+<p>一行里选中的 KV 块多了。</p>
+<p>就走双缓冲加尾部分拆的路线。</p>
+<p>SM100 和 SM103 上延迟小幅改善。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9536">https://github.com/flashinfer-ai/flashinfer/pull/9536</a></p>
+<p><strong>Mooncake：5 条，搬运层在收紧</strong></p>
+<p>#5513 是本轮 Mooncake 最值得看的一条。</p>
+<p>它给 MNNVL 原生路径加了严格路由。</p>
+<p>MNNVL 是英伟达的机内高速传输。</p>
+<p>以前 fabric 配坏了会悄悄 fallback。</p>
+<p>悄悄走网络，吞吐掉一个量级。</p>
+<p>人还以为一切正常。</p>
+<p>现在配错直接报错。</p>
+<p>不再静默降级。</p>
+<p>#5462 修的是热 key 的回收。</p>
+<p>热 key 就是一直有人读的 key。</p>
+<p>以前回收要等读租约过期。</p>
+<p>读的人不断，回收就一直卡住。</p>
+<p>现在内存里的副本可以直接拷走。</p>
+<p>#5214 加了统一的可观测性看板。</p>
+<p>#5215 修了 HugeTLB 的子视图注册。</p>
+<p>HugeTLB 是大页内存。</p>
+<p>#5172 让 CUDA 12 构建运行时加载拷贝函数。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5513">https://github.com/kvcache-ai/Mooncake/pull/5513</a> 来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5462">https://github.com/kvcache-ai/Mooncake/pull/5462</a></p>
+<p>LMDeploy、TGI：零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮还是空的</strong></p>
+<p>最新提交仍是 11 月 15 日那批。</p>
+<p>11 月 16 日 cs.LG 零新提交。</p>
+<p>下一批按惯例明天下午 16:00 到。</p>
+<p>这轮先空着。</p>
+<h2>业内新闻</h2>
+<p><strong>Google Zero-TIM：训练和推理的数对不上（值得深读）</strong></p>
+<p>RL 训练里，采样和训练走两条路。</p>
+<p>采样是 decode，一次吐一个词。</p>
+<p>训练是整批前向加反向。</p>
+<p>同一权重、同一 token，两边算出的数可能不一样。</p>
+<p>差一点点不要紧，攒多了训练就飘了。</p>
+<p>Zero-TIM 是 Google 在 Tunix 里的一套配方。</p>
+<p>它让三条路的数按位对齐。</p>
+<p>64 张 TPU v5p 上验证过。</p>
+<p>200 步里，采样和训练的数差全程是 0。</p>
+<p>解题率也涨了。</p>
+<p>这事跟 sglang-miles 那条 RL 线直接相关。</p>
+<p>RL 采样就是推理，数不对齐就是白跑。</p>
+<p>深读笔记已经写好，见本轮「值得深入学」。</p>
+<p>来源：<a href="https://developers.googleblog.com/unlocking-stable-on-policy-rl-on-tpu-with-bitwise-zero-traininference-mismatch/">https://developers.googleblog.com/unlocking-stable-on-policy-rl-on-tpu-with-bitwise-zero-traininference-mismatch/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是今天 FLUX 3 那期</strong></p>
+<p>17点版已经报过，不重复。</p>
+<p><strong>SGLang Summit 第二天文字总结还没出</strong></p>
+<h2>值得深入学</h2>
+<p><strong>Google Zero-TIM：训练和推理的数对不上，RL 悄悄变离线</strong></p>
+<p>这篇能帮你把 RL 采样那笔账算清楚。</p>
+<p>四招配方全拆开讲了。</p>
+<p>三路对账的思路可以直接抄进 PD 评估。</p>
+<p>TPU 和 JAX 的配方，H100 上要换内核。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>vLLM #65941，Nemotron VL 缩放上 GPU。跑多模态视频任务的人，首字能快近一半。</li><li>SGLang #43305，GLM-5.3-Flash 登上昇腾。AIME26 0.96，GSM8K 0.917。</li><li>Mooncake #5513，MNNVL 配错直接报错。静默降级这颗雷拆了。</li></ol>
+<h2>去重脚注</h2>
+<p>本轮已与 19 点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2；FlashInfer v0.7.5rc2；llama.cpp 快照 b12445→b12455。 vLLM 7 条首次汇总：#68052、#67877、#67243、#67188（XPU 测试清理）、#67136（在线 NVFP4 MoE 量化配 CPU offload）、#67058（聊天模板 content 格式扩展到 cross-encoder）、#65941（Nemotron VL 图片缩放搬上 GPU，CV-CUDA）。 SGLang 3 条首次汇总：#50486（MUSA AOT 轮子构建恢复）、#43305（GLM-5.3-Flash 上昇腾 A3/A5）、#42806（CI 小修）。 TRT-LLM 5 条首次汇总：#22420、#22338（NVFP4 MLA 博客对齐论文）、#21897（分块注意力文档修正）、#21233（测试）、#20711（ModelLoader 破坏性重构）。 llama.cpp 1 条首次汇总：#31003（OpenCL 新核）；快照 b12445→b12455。 Dynamo 1 条首次汇总：#18762（多模态坏图和超长提示词返回 400）。 FlashInfer 1 条首次汇总：#9536（稀疏注意力双缓冲加尾部分拆）。 Mooncake 5 条首次汇总：#5513（MNNVL 严格 FABRIC 路由）、#5462（热 key 内存副本回收）、#5215（HugeTLB 子视图注册）、#5214（统一可观测性看板）、#5172（CUDA 12 运行时加载拷贝函数）。 LMDeploy、TGI 零合入。 arXiv：无新批次（最新仍为 11 月 15 日提交；下一批约 11 月 17 日 16:00 PST）。 业内新闻：Google Zero-TIM 博客首次汇总（2026-11-16 发布）。 访谈与深度：Latent Space 最新仍是 11 月 16 日 FLUX 3（17点版已报）；SGLang Summit 第二天文字总结仍未出。 深读：Google Zero-TIM 精读笔记已写（深度阅读/Google-Zero-TIM-训练推理对数-TPU-RL-精读.html）。 全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-16-2100/">21点版</a></p></body></html>
