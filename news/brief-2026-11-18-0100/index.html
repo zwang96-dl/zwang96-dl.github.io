@@ -1,0 +1,160 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月18日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-18"/>
+<meta name="doc-ts" content="2026-11-18T09:04:07"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-18（01点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-18（01点版）</h1>
+<p>01点版来了，这轮是凌晨小更新。</p>
+<p>深夜合入不少，但大多是修补。</p>
+<p>最值得看的是 TRT-LLM 那三条性能项。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：llama.cpp 快照涨到 b12503</strong></p>
+<p>这轮没有正式版发布。</p>
+<p>llama.cpp 连发三个快照。</p>
+<p>b12500、b12502、b12503。</p>
+<p>23点版还是 b12499。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 还是 v0.7.5rc4。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>TRT-LLM：13 条合入，DSv4.1 性能占了 3 条</strong></p>
+<p>#22366 是 DSv4.1 的注意力项。</p>
+<p>CSA2（DeepSeek 的稀疏注意力）走张量并行全层选择链。</p>
+<p>核内页掩码也一起上了。</p>
+<p>#22360 是 DSv4.1 的解码项。</p>
+<p>解码批的拆分边界和系数核来了。</p>
+<p>#22357 也是 DSv4.1 的。</p>
+<p>DeepGEMM 的新核把 X1 留在张量内存。</p>
+<p>SM107 的移位核也来了。</p>
+<p>#22082 是 GLM-5.3-Flash 的功能项。</p>
+<p>分块 8 位量化的目标上了 Blackwell。</p>
+<p>#20229 是 KV 缓存管理器的功能项。</p>
+<p>C++ 版 v2 学会了按位置管 KV。</p>
+<p>双流注意力也一起上了。</p>
+<p>这条跟 PD 拆分部署沾边。</p>
+<p>剩下 8 条是测试和基建。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22366">https://github.com/NVIDIA/TensorRT-LLM/pull/22366</a></p>
+<p><strong>vLLM：4 条合入，KV 落盘占了两条</strong></p>
+<p>#66841 是 beam search 的前端性能项。</p>
+<p>beam search 是一次留多条候选的解码。</p>
+<p>给已完成的假设历史加了上限。</p>
+<p>在线搜索时内存不会越攒越多。</p>
+<p>#66278 是 KV 落盘的修补。</p>
+<p>磁盘写不满时报“磁盘满了”。</p>
+<p>以前只报笼统的 I/O 错误。</p>
+<p>#59547 也是 KV 落盘的。</p>
+<p>每 rank 独占一块 CPU 内存区。</p>
+<p>不再共用同一份复制布局。</p>
+<p>剩下 1 条是 ROCm 的 CI 小项。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66841">https://github.com/vllm-project/vllm/pull/66841</a></p>
+<p><strong>SGLang：6 条合入，多模态重构继续走</strong></p>
+<p>#46413 是多模态重构第 7 步。</p>
+<p>Qwen VL 模型加了新的 token 处理策略。</p>
+<p>#47644 是 DFlash 的修补。</p>
+<p>草稿采样器只给放得下的 batch 准备。</p>
+<p>#47703 修了 trtllm_mha。</p>
+<p>图构建的页表改成直接读。</p>
+<p>#49514 是 DSV4.1 的修补。</p>
+<p>工具消息按预设格式渲染。</p>
+<p>剩下 2 条是测试和 CI。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46413">https://github.com/sgl-project/sglang/pull/46413</a></p>
+<p><strong>FlashInfer：4 条，NVFP4 的 MoE 后端来了</strong></p>
+<p>#9603 是新功能。</p>
+<p>NVFP4 是英伟达的 4 位浮点量化。</p>
+<p>它的 MegaMoE EP 后端来了。</p>
+<p>跑在 SM107 上。</p>
+<p>SM107 就是 Blackwell 新卡。</p>
+<p>#9389 也是 MoE 的。</p>
+<p>NVLink 屏障改成可选项。</p>
+<p>#8853 修了 DSMEM 的读取。</p>
+<p>#6458 修了解码的配置拒绝。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9603">https://github.com/flashinfer-ai/flashinfer/pull/9603</a></p>
+<p><strong>Mooncake：6 条合入，修补为主</strong></p>
+<p>这轮 6 条，4 条是修补。</p>
+<p>#5523 让 RDMA 支持 CUDA DMA-BUF。</p>
+<p>没装 nvidia-peermem 也能走。</p>
+<p>#2357 把 SSD 和 DFS 的并发读合并了。</p>
+<p>#5597 修了优雅卸载卡心跳的问题。</p>
+<p>剩下 3 条是传输层和存储修补。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5523">https://github.com/kvcache-ai/Mooncake/pull/5523</a></p>
+<p><strong>Dynamo、llama.cpp：各几条小修补</strong></p>
+<p>Dynamo 2 条都是小修复。</p>
+<p>#18729 给 vLLM worker 的 SIGTERM 留了清理窗口。</p>
+<p>#18167 让快照尊重 HF 的离线策略。</p>
+<p>llama.cpp 5 条。</p>
+<p>两条是 Llama 界面的开发工具升级。</p>
+<p>两条是 CUDA 老卡的修补。</p>
+<p>一条是 OpenVINO 的模型支持扩展。</p>
+<p>LMDeploy、TGI 这轮零合入。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18729">https://github.com/ai-dynamo/dynamo/pull/18729</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>上一批还是 21点版报过的 6 篇。</p>
+<p>下一批约今天 16:00 UTC 发布。</p>
+<p>也就是早上 8 点 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic：IPO 今晚定价，明天上市</strong></p>
+<p>Anthropic 今天定价，明天纳斯达克挂牌。</p>
+<p>代码 ANT，区间 70 到 78 美元。</p>
+<p>825M 股，公开募资最高约 644 亿美元。</p>
+<p>修正文件还披露了两个新数。</p>
+<p>亚马逊上市后持股 14.7%。</p>
+<p>谷歌持股 13.7%，两家合计 28.4%。</p>
+<p>Altimeter 的 Gerstner 说投了 50 亿美元标。</p>
+<p>彭博说需求约 7 倍。</p>
+<p>加密期货隐含的估值约 1.7 万亿美元。</p>
+<p>这些都是市场价，不是官方定价。</p>
+<p>最终定价今晚美东时间才出。</p>
+<p>来源：<a href="https://www.neoteo.com/en/gerstner-says-altimeter-bid-5-billion-for-anthropic-ipo-shares">https://www.neoteo.com/en/gerstner-says-altimeter-bid-5-billion-for-anthropic-ipo-shares</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无新增。</p>
+<h2>值得深入学</h2>
+<p>本轮没有新增深读笔记。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>TRT-LLM 的 DSv4.1 性能三连。PD 线上值得留意。</li><li>vLLM 的 KV 落盘两条修补。落盘那路更稳了。</li><li>Anthropic 今晚定价。首家上市的前沿模型公司。</li></ol>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-18-0100/">01点版</a></p>
+<hr/>
+<p>本轮已与 23点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2（实验 tag 仍为 v1.5.1-kimi-k3-post.1）；FlashInfer v0.7.5rc4；llama.cpp 快照 b12503（23点版 b12499）；Mooncake v0.3.14。 vLLM 4 条首次汇总：#68342（ROCm CI：Qwen3-VL 泄漏测试计进程内显存）、#66841（前端：在线 beam search 已完成假设历史加上限）、#66278（KV Offload：FS 层短写报磁盘满而非 EIO）、#59547（KV Offload：每 rank 独占 CPU 区，脱离复制布局）。 SGLang 6 条首次汇总：#51207（测试：Qwen token-space 测试用 image_processor_backend）、#49514（OpenAI：DSV4.1 工具消息按 recipe 渲染）、#49488（CI：Intel Xeon 测试套件迁至两 SPR runner）、#47703（修复：trtllm_mha 图构建页表供 eager 读取）、#47644（修复：dflash 草稿采样器只为放得下的 batch 分段）、#46413（多模态重构 7/9：Qwen VL token-space 策略）。 TRT-LLM 13 条首次汇总：#22546（基建：bump_version.py 记录 schema 版本同步）、#22541（测试：Apertus 1.5 精度测试设 max_seq_len）、#22522（基建：TOT 豁免清单走合后分支）、#22519（测试：解封 Qwen3.8-Flash-Next FP8 PLE offload 精度测试）、#22510（修复：恢复 Modeling V2 测试清单覆盖检查）、#22459（重构：trtllm_modeling_v2 删 tune 阶段）、#22423（测试：合并注意力覆盖用例）、#22366（性能：DSv4.1 CSA2 注意力-TP 全层选择链，核内页掩码+集群 GVR）、#22360（性能：DSv4.1 mHC 拆分边界与系数核，解码批）、#22357（性能：DSv4.1 DeepGEMM mega_mhc X1 留张量内存，SM107 移位核）、#22082（功能：ModelingV2 GLM-5.3-Flash block-FP8 目标 sm_10x tp4）、#20289（测试：VisualGen 客户端计时指标说明）、#20229（功能：C++ KV 缓存管理器 v2 locality domain 支持+双流注意力）。 Dynamo 2 条首次汇总：#18729（vLLM worker 收 SIGTERM 时给 EngineCore 清理窗口）、#18167（快照尊重目标 HF 离线策略）。 FlashInfer 4 条首次汇总：#9603（Cake MegaMoE：SM107 NVFP4 MegaMoE EP 后端）、#9389（MoE-EP：NVLS NVLink 屏障可选）、#8853（修复：块缩放 split-K GEMM 与 norm/attention 在读对端 DSMEM 前取集群级锁）、#6458（修复：解码拒绝不支持的 CUDA 核拆分关闭）。 llama.cpp 5 条首次汇总：#32523（UI：Storybook 后续，DESIGN.md token 生成等）、#32504（CUDA：V100 上 MoE 用 MMQ）、#32485（UI：Llama UI 与 Llama Chat 的 Storybook）、#32172（ggml-openvino：扩展模型支持，优化 NPU/GPU 与内存）、#31352（CUDA：Pascal DP4A MMQ I tile 扩大，J=64）。 Mooncake 6 条首次汇总：#5597（Store：优雅卸载不再阻塞心跳）、#5559（修补：Sunrise 上发现 GPU-NIC PCIe 亲和性）、#5523（TENT：无 nvidia-peermem 时支持 CUDA DMA-BUF RDMA）、#5492（修补：显式协议路由失败后 batch 仍可复用）、#5410（修补：TENT NVLink IPC 映射设备与缓存生命周期）、#2357（Store：合并并发 SSD 与 DFS 读）。 业内新闻：Anthropic IPO 今晚定价、明天纳斯达克上市（ANT，$70–78，825M 股）；修正文件披露亚马逊 14.7% / 谷歌 13.7%（合计 28.4%）；Gerstner 称 Altimeter 认购 50 亿美元；彭博称需求约 7 倍；加密期货隐含估值约 1.7 万亿美元。 访谈与深度：无新增。 深读：无新增。</p></body></html>
