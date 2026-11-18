@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月17日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-18T01:07:16"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-17（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-17（17点版）</h1>
+<p>17点版来了，这轮主角是 AWS。</p>
+<p>Dynamo 托管服务上了 SageMaker。</p>
+<p>草稿 KV 压 4 位那篇也值得细看。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>这轮没有新版本发布。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc3。</p>
+<p>llama.cpp 快照涨到 b12489。</p>
+<p>15点版还是 b12483。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>Dynamo 多了个开发 tag。</p>
+<p>v1.7.0-mistral-large-4-dev.1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>TRT-LLM：Kimi K3 的 NVFP4 版上了 Rubin</strong></p>
+<p>#21996 给 Kimi K3 加了 NVFP4 支持。</p>
+<p>跑在 Rubin 上，SM107。</p>
+<p>一共四个 modeling_v2 目标。</p>
+<p>NVFP4 是一种 4 比特量化格式。</p>
+<p>Rubin 是英伟达下一代平台。</p>
+<p>小步快跑，不展开。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21996">https://github.com/NVIDIA/TensorRT-LLM/pull/21996</a></p>
+<p><strong>TRT-LLM：另外三条都是小修补</strong></p>
+<p>#22022 让 dspark 能排 draft 长度。</p>
+<p>dspark 是一种投机解码方案。</p>
+<p>#22007 给单模型投机 worker 加了词表并行 argmax。</p>
+<p>#21291 把上下文取消和 KV 回收拆开。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22022">https://github.com/NVIDIA/TensorRT-LLM/pull/22022</a></p>
+<p><strong>SGLang：AMD 卡上开了新内核</strong></p>
+<p>#50196 是 AMD 方向的性能项。</p>
+<p>mhc 开了 AITER 的 mHC 内核。</p>
+<p>跑在 gfx942 上，也就是 MI300 系列。</p>
+<p>另外三条是修补。</p>
+<p>#51077 是 Mooncake 方向的修补。</p>
+<p>传输写失败时，拉黑那个会话。</p>
+<p>#49290 是安全修补。</p>
+<p>扩散服务收到的请求改走安全反序列化。</p>
+<p>#50008 是 NVFP4 的小修补。</p>
+<p>trtllm 的隐藏层尺寸补齐到 256 倍数。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50196">https://github.com/sgl-project/sglang/pull/50196</a></p>
+<p><strong>Dynamo：13 条合入，多是 1.7.0 的准备工作</strong></p>
+<p>#18328 是这轮最值得看的一条。</p>
+<p>Dynamo 接上了 TokenSpeed。</p>
+<p>接的是它的无头引擎和 msgpack 线路。</p>
+<p>无头就是没有 HTTP 层，直接走线路。</p>
+<p>#18864 改了一个状态码。</p>
+<p>worker 满了回 529，不回 500。</p>
+<p>529 的意思是暂时过载。</p>
+<p>#17765 让 SGLang 聊天处理器认 tokenizer 参数。</p>
+<p>剩下 10 条多是 1.7.0 的准备工作。</p>
+<p>多是 cherry-pick 和依赖升级。</p>
+<p>1.7.0 发布在即，合入节奏很快。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18328">https://github.com/ai-dynamo/dynamo/pull/18328</a></p>
+<p><strong>vLLM：8 条合入，多是 CI 和修补</strong></p>
+<p>#68099 是多模态的小修补。</p>
+<p>音视频里没音频也没视频时。</p>
+<p>跳过那次读盘，省一次白跑。</p>
+<p>#67563 是直接重载的修补。</p>
+<p>给填充参数打上标记。</p>
+<p>剩下 6 条是 CI 和 ROCm 修补。</p>
+<p>不展开。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68099">https://github.com/vllm-project/vllm/pull/68099</a></p>
+<p><strong>llama.cpp：两条小修补</strong></p>
+<p>#32434 修了 server 的 slot 调度。</p>
+<p>LoRA 和循环模型那路。</p>
+<p>#32427 让多模态支持 tiny-voca。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32434">https://github.com/ggml-org/llama.cpp/pull/32434</a></p>
+<p><strong>FlashInfer：11 条合入，多是 MoE 和 GEMM 修补</strong></p>
+<p>#6483 是通信层的小功能。</p>
+<p>改成按目标排布，DCP 输入加 token 掩码。</p>
+<p>剩下 10 条全是修补。</p>
+<p>MoE 核、分组矩阵乘、自动调优。</p>
+<p>没有值得展开的。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6483">https://github.com/flashinfer-ai/flashinfer/pull/6483</a></p>
+<p>LMDeploy、TGI、Mooncake 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>草稿 KV 压到 4 位，接受率只掉 0.8 个点</strong></p>
+<p>这篇是本轮最值得看的。</p>
+<p>投机解码要存两份草稿纸。</p>
+<p>小模型那份压到 4 位。</p>
+<p>接受率 57.93% 只掉到 57.14%。</p>
+<p>两份加起来省 23.95%。</p>
+<p>32K 上下文，一条序列省 635.8 MiB。</p>
+<p>最值钱的是一个反常识发现。</p>
+<p>key 比 value 更怕压，是姿势带出来的。</p>
+<p>换个分组方式，结论就反过来了。</p>
+<p>但原型机反而慢了 18% 到 33%。</p>
+<p>现在只省显存，不省时间。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.20565">https://arxiv.org/abs/2611.20565</a></p>
+<p><strong>GaugeRoPE：潜 KV 压缩 5.85 倍，解码快 2.48 倍</strong></p>
+<p>这篇压的是潜 KV 缓存。</p>
+<p>潜 KV 就是把 key 和 value 折起来存。</p>
+<p>折完直接当执行状态用。</p>
+<p>不用每次展开回原始维度。</p>
+<p>Mistral-7B 上压 5.85 倍。</p>
+<p>质量跟没压的基线差不多。</p>
+<p>解码最快到 2.48 倍。</p>
+<p>而且不用训练，即插即用。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.20524">https://arxiv.org/abs/2611.20524</a></p>
+<p><strong>SURMA：通信卸载做到芯片上，推理快 1.26 倍</strong></p>
+<p>SuperPOD 里卡越多，通信越吃算力。</p>
+<p>SURMA 是片上的远程内存访问引擎。</p>
+<p>它把细粒度传输从 SM 手里接过来。</p>
+<p>512 字节的粒度下，一个 SM 就跑满带宽。</p>
+<p>NVLink 要 14% 的 SM 才够。</p>
+<p>四个模型上推理快 1.05 到 1.26 倍。</p>
+<p>只占 GPU 面积不到 0.5%。</p>
+<p>目前还是 FPGA 原型验证。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.21274">https://arxiv.org/abs/2611.21274</a></p>
+<p><strong>POND：大模型只读题，小模型全程解码</strong></p>
+<p>两个模型合作，不用大模型一个字一个字吐。</p>
+<p>大模型只做读题。</p>
+<p>小模型拿着大模型的表示接着写。</p>
+<p>中间有一座桥，把表示映射成 KV。</p>
+<p>GLM-5.3 配 Qwen 接收器。</p>
+<p>效果跟 Qwen3.8-Max 配 Qwen 差不多。</p>
+<p>跨模型家族也能搭。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.21301">https://arxiv.org/abs/2611.21301</a></p>
+<p><strong>两台 DGX Spark 直连，TP=2 中位数快 1.59 倍</strong></p>
+<p>两台 GB10 桌面机直连 200GbE。</p>
+<p>17 个模型，8B 到 235B，全用 vLLM 测。</p>
+<p>张量并行 2 卡，中位数快 1.59 倍。</p>
+<p>96 组对比里 93 组都赢。</p>
+<p>流水线并行 2 卡是 1.39 倍。</p>
+<p>NVFP4 降延迟，比加一台机器还管用。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.20289">https://arxiv.org/abs/2611.20289</a></p>
+<p><strong>K2-Horizon：六个开源模型，从 0.9B 到 375B</strong></p>
+<p>IFM 发布了一支开源模型舰队。</p>
+<p>最小 0.9B，最大的 MoE 有 375B。</p>
+<p>22T token 共享预训练。</p>
+<p>训练数据、检查点、代码全公开。</p>
+<p>vLLM、SGLang、Ollama 都能跑。</p>
+<p>11 月 15 到 17 日发布，之前几轮漏了。</p>
+<p>来源：<a href="https://explainx.ai/blog/k2-horizon-open-model-fleet-ifm-november-2026">https://explainx.ai/blog/k2-horizon-open-model-fleet-ifm-november-2026</a></p>
+<p><strong>arXiv：新一批还没到</strong></p>
+<p>API 里最新还是 11 月 16 日 18:59 UTC 那批。</p>
+<p>今天 16:00 那批还没露头。</p>
+<p>下一批再看。</p>
+<h2>业内新闻</h2>
+<p><strong>AWS：Dynamo 托管服务上了 SageMaker HyperPod</strong></p>
+<p>AWS 把 Dynamo 做进了 SageMaker。</p>
+<p>HyperPod 管机器、网络和健康检查。</p>
+<p>Dynamo 管多节点和 PD 拆分。</p>
+<p>PD 拆分就是读题和解码分开跑。</p>
+<p>Qwen3-235B-A22B-FP8，16 张 H200。</p>
+<p>拆分后每卡每秒 207 词，并发 80。</p>
+<p>合跑最高才 101 词，并发 32。</p>
+<p>拆分是合跑的 2.05 倍。</p>
+<p>Qwen3.5-397B 那组也测了。</p>
+<p>两节点 126.4 词每卡每秒。</p>
+<p>是单节点的 99.1%，基本没损耗。</p>
+<p>GLM-5.3 的 FP8 权重就超 640GB。</p>
+<p>一台 p5.48xlarge 根本装不下。</p>
+<p>这就是得多节点的原因。</p>
+<p>数字是 AWS 自报，等第三方复现再信。</p>
+<p>来源：<a href="https://www.unite.ai/aws-adds-managed-nvidia-dynamo-to-sagemaker-hyperpod-inference/">https://www.unite.ai/aws-adds-managed-nvidia-dynamo-to-sagemaker-hyperpod-inference/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>一个环境变量，llama.cpp 快 21%</strong></p>
+<p>Tensward 发现了一个零成本提速。</p>
+<p>设一个环境变量就行，不用改代码。</p>
+<p>GLIBC_TUNABLES=glibc.malloc.hugetlb=1。</p>
+<p>它是让内存分配走大页。</p>
+<p>大页就是一次多给点内存，少跑几次腿。</p>
+<p>H100 上工具调用提示词快 21%。</p>
+<p>首词快 22% 左右。</p>
+<p>L4 上快 6.5%。</p>
+<p>Ollama 快 2% 到 7%。</p>
+<p>vLLM 和 SGLang 基本没收益。</p>
+<p>它俩本来就不怎么缺页。</p>
+<p>来源：<a href="https://tensward.com/blog/huge-pages-llama-cpp">https://tensward.com/blog/huge-pages-llama-cpp</a></p>
+<p><strong>V-CAST：长视频推理耗时减半，免训练</strong></p>
+<p>看长视频，模型要逐帧编码成视觉 token。</p>
+<p>token 越多，推理越慢。</p>
+<p>V-CAST 在送进语言模型前剪枝。</p>
+<p>只留有用的视觉 token。</p>
+<p>全程免训练，即插即用。</p>
+<p>中山大学、港理工等团队做的。</p>
+<p>Qwen3-VL、LLaVA 上都验证过。</p>
+<p>来源：<a href="https://www.aitntnews.com/newDetail.html?newId=31326">https://www.aitntnews.com/newDetail.html?newId=31326</a></p>
+<p><strong>Latent Space 还是 FLUX 3 那期</strong></p>
+<p>最新一期还是 11 月 16 日的 FLUX 3。</p>
+<p>这轮没有新单集。</p>
+<h2>值得深入学</h2>
+<p><strong>投机解码的草稿 KV 压到 4 位</strong></p>
+<p>这篇跟你的投机解码线直接相关。</p>
+<p>草稿 KV 单列一笔账，K4V4 档能直接抄。</p>
+<p>量化结论先问分组方式，别只看数值。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>AWS Dynamo 上 HyperPod。PD 拆分托管化，16 张 H200 上 2.05 倍。</li><li>草稿 KV 压 4 位。arXiv:2611.20565，接受率只掉 0.8 个点。</li><li>K2-Horizon 开源模型舰队。0.9B 到 375B，vLLM 和 SGLang 都能跑。</li></ol>
+<p>深读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261118-kv-4-0-8/">投机解码的草稿 KV 压到 4 位</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-17-1700/">17点版</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 15点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2（最新 tag 为 v1.7.0-mistral-large-4-dev.1 开发预发布）；FlashInfer v0.7.5rc3；llama.cpp 快照 b12489（15点版 b12483）；Mooncake v0.3.14（仓库已从 mooncake-dev 迁至 kvcache-ai）。 vLLM 8 条首次汇总：#68256（ROCm CI 多卡 DPX 锁节点）、#68099（多模态：音视频无音频视频时跳过 host 读盘）、#68090（ROCm 睡眠模式 cuMem 预留后留 guard）、#68026（Ray 下 EngineCore SIGTERM 处理保留）、#68010（删多处死代码）、#67563（直接重载：构造时给填充参数打 fill_on_reload）、#66682（AMD CI 全量跑）、#66670（ROCm GPU 空闲时跳过内存稳定等待）。 SGLang 7 条首次汇总：#51101（rust-server 测试夹具解耦）、#51077（mooncake：worker 内快照传输信息、aux 写失败拉黑会话）、#50196（AMD mhc：gfx942 开 AITER mHC 内核）、#50076（sgl-router 从 router-v* tag 发版）、#50008（moe：NVFP4 trtllm 隐藏层尺寸补齐到 256 倍数）、#49930（AMD 扩散层间卸载测试修补）、#49290（扩散安全：DiffusionServer 入站请求改 safe_pickle_loads）。 TRT-LLM 4 条首次汇总：#22022（dspark 开 draft_len_schedule）、#22007（单模型投机 worker 词表并行贪心 argmax）、#21996（Kimi K3 NVFP4 上 Rubin SM107，四个 modeling_v2 目标）、#21291（上下文取消与 KV 回收解耦）。 Dynamo 13 条首次汇总：#18963（删 legacy vLLM KVBM 示例）、#18955（1.7.0 cherry-pick：planner 记录 aisim 版本）、#18935（1.7.0 cherry-pick：DeepSeek-R1 Hopper vLLM PD 配方设 decode 批 token 预算）、#18874（1.7.0 cherry-pick：SGLang 上 SDXL 文本编码器按尺寸配）、#18867（1.7.0 cherry-pick：helm 升级预检默认值跨复用保留）、#18864（worker 满载回 HTTP 529）、#18825（release/1.7.0 采 AISim 0.14.0 RC4）、#18767（1.7.0 cherry-pick：sidecar 示例升 TRT-LLM/Dynamo 1.7.0 镜像）、#18751（1.7.0 cherry-pick：verl 指南限 Dynamo 1.4.x 并注 1.7.0 阻塞）、#18745（AISim 升 0.15 nightly）、#18328（TokenSpeed 无头引擎与 msgpack 线路支持）、#17853（vLLM 0.33 上自基准前缀保留）、#17765（SGLang 聊天处理器认 --tokenizer）。 FlashInfer 11 条首次汇总：#9521、#9514、#9513、#9512、#9507、#9472、#9252、#8188、#8081、#7746（MoE/GEMM/自动调优修补）、#6483（通信：目标优先 DCP 输入与 token 掩码）。 llama.cpp 2 条首次汇总：#32434（server slot 调度修 LoRA 与循环模型）、#32427（mtmd 支持 tiny-voca）。 LMDeploy、TGI、Mooncake 零合入。 arXiv：11 月 16 日 18:59 UTC 之后的新批尚未进入 API（2611.20565 草稿 KV 量化、2611.20524 GaugeRoPE、2611.21274 SURMA、2611.21301 POND、2611.20289 DGX Spark 基准为该批补收，03点版已报 2611.21165/2611.21216/2611.20893）；下一批再看。 业内新闻：AWS SageMaker HyperPod 支持托管 Dynamo（11 月 17 日发布，15:40 PST）；K2-Horizon 开源模型舰队（11 月 15–17 日发布，之前几轮漏报补收）。 访谈与深度：Tensward 大页内存提速 llama.cpp（11 月 17 日）；V-CAST 长视频免训练剪枝（量子位，11 月 17 日）；Latent Space 最新仍是 11 月 16 日 FLUX 3。 深读：投机解码草稿 KV 压 4 位 arXiv:2611.20565（新增）。</p></body></html>
