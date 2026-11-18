@@ -1,0 +1,253 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月17日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-18T05:05:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-17（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-17（21点版）</h1>
+<p>21点版来了，这轮主角是 Gemma 4 的 KV 省法。</p>
+<p>一行只存 640 个数，解码 KV 省三成多。</p>
+<p>还有一提醒：投机解码的配置不能只看低并发。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>这轮没有新版本发布。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>实验 tag 还是 v1.5.1-kimi-k3-post.1。</p>
+<p>FlashInfer 还是 v0.7.5rc3。</p>
+<p>llama.cpp 快照涨到 b12498。</p>
+<p>19点版还是 b12494。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：14 条合入，HY4 新配方来了</strong></p>
+<p>#68295 是 HY4-Flash 的部署配方。</p>
+<p>配方给了 BF16 和 FP8 两个版本。</p>
+<p>还有官方镜像和 Rust 前端。</p>
+<p>投机解码配了 5 个草稿 token。</p>
+<p>#67302 是 ROCm 方向的量化项。</p>
+<p>ModelOpt 的 INT8 权重能上 ROCm 了。</p>
+<p>以前 ROCm 直接拒掉这类检查点。</p>
+<p>#66099 是 MiniMax-M3 的核清理。</p>
+<p>Hopper 稀疏读题里少了一处老写法。</p>
+<p>#65595 是 ROCm 上 DeepSeek-V4.1 的项。</p>
+<p>DP 各 rank 共用一份 Engram 主机表。</p>
+<p>剩下 10 条是 CI、修补和前端小修。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68295">https://github.com/vllm-project/vllm/pull/68295</a></p>
+<p><strong>SGLang：18 条合入，AMD 上 Kimi-K3.1 继续铺</strong></p>
+<p>#50997 是 AMD 方向的内核项。</p>
+<p>给 Kimi-K3.1 铺 gfx950 上的稀疏 MLA。</p>
+<p>gfx950 就是 MI355 系列。</p>
+<p>还有 DCP 的 top-k 和 FP4 索引键。</p>
+<p>DCP 是跨节点搬 KV 的协议。</p>
+<p>#48313 是 H20 上的性能项。</p>
+<p>GLM-5.3-Flash 的 MoE 下投影加了 TMA 配置。</p>
+<p>TMA 是 GPU 的张量内存加速器。</p>
+<p>TP8 和 TP4 两档都有。</p>
+<p>#50783 是 NPU 方向的修补。</p>
+<p>dspark 加 DP 注意力，读题时也能开 PP 或 CP。</p>
+<p>#49348 让 RunAI 接 PP 的 Nemotron 草稿。</p>
+<p>剩下 14 条是修补、文档和 CI。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50997">https://github.com/sgl-project/sglang/pull/50997</a></p>
+<p><strong>TRT-LLM：11 条合入，拆分方向收了个尾</strong></p>
+<p>#22419 是拆分方向的功能项。</p>
+<p>超时的拆分 KV 接收，空闲时回收掉。</p>
+<p>#22356 是 DeepSeek-V4.1 的性能项。</p>
+<p>采样换成融合采样，并行逆 CDF 游走。</p>
+<p>#21250 是 Hopper 上的 MoE 项。</p>
+<p>Triton 的 FP8 激活 MoE 覆盖解码批大小。</p>
+<p>#22088 收紧了 GLM-5.3-Flash 的路由。</p>
+<p>建模 V2 的融合 MTP 步也收紧了。</p>
+<p>剩下 7 条是测试、修补和杂务。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22419">https://github.com/NVIDIA/TensorRT-LLM/pull/22419</a></p>
+<p><strong>FlashInfer：4 条合入</strong></p>
+<p>#9550 是 CAKE SSD 组合核的功能项。</p>
+<p>状态类型显式化，调用方自己管终态。</p>
+<p>#9538 给 trtllm-gen 的 NVFP4 MoE 加了局部域。</p>
+<p>#8431 让 Windows arm64 也能构建。</p>
+<p>#9358 是文档修补。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9550">https://github.com/flashinfer-ai/flashinfer/pull/9550</a></p>
+<p><strong>llama.cpp：1 条小修补</strong></p>
+<p>#30824 是 Vulkan 方向。</p>
+<p>rms_norm 改成运行时定循环次数。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30824">https://github.com/ggml-org/llama.cpp/pull/30824</a></p>
+<p><strong>Mooncake：1 条合入</strong></p>
+<p>#5550 给 Metax GPU 开了 peermem 支持。</p>
+<p>走 ibv_reg_mr 注册内存。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5550">https://github.com/kvcache-ai/Mooncake/pull/5550</a></p>
+<p>LMDeploy、TGI、Dynamo 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>Gemma 4 的 K=V 缓存：只存一份，省三成多</strong></p>
+<p>这篇是本轮最值得看的。</p>
+<p>Gemma 4 全局层里，K 和 V 是同一份数。</p>
+<p>官方说这设计能省 37.5% 的 KV。</p>
+<p>开源引擎却还在存两份。</p>
+<p>这篇一行只存 640 个数。</p>
+<p>K 和 V 各开一扇窗读。</p>
+<p>注意力核不用改。</p>
+<p>单请求解码 KV 省 1.34 到 1.40 倍。</p>
+<p>32K 时池子多装一个请求。</p>
+<p>解码 56.0 涨到 69.7 词每秒。</p>
+<p>PD 拆分实测也跑了。</p>
+<p>两张 A100，NIXL 传 KV。</p>
+<p>16K 提示词每步解码 token 是 1.38 倍。</p>
+<p>但同批每步慢 4% 到 9%。</p>
+<p>64K 批没变，吞吐还掉 4%。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.23035">https://arxiv.org/abs/2611.23035</a></p>
+<p><strong>VSpark：机器人动作的投机解码，快 1.28 到 2.1 倍</strong></p>
+<p>视觉语言动作模型，一次吐一个动作。</p>
+<p>投机解码能加速，但有个麻烦。</p>
+<p>很多 token 编的是同一个动作。</p>
+<p>草稿猜得接近，照样被拒。</p>
+<p>VSpark 走了三招。</p>
+<p>带噪声的 rollout、特征对齐、续写复用。</p>
+<p>4 个模型、4 个操作基准上测的。</p>
+<p>加速 1.28 到 2.10 倍，输出无损。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.22666">https://arxiv.org/abs/2611.22666</a></p>
+<p><strong>SpecSearch：投机解码的配置，换卡换负载都得重选</strong></p>
+<p>这篇是个提醒，不是新加速法。</p>
+<p>DFlash 在 RTX 5090 上，低并发 3.50 倍。</p>
+<p>高并发短输出，只有 0.76 倍。</p>
+<p>比自回归还慢。</p>
+<p>配置跟着负载、卡、显存一起变。</p>
+<p>SpecSearch 是个硬件感知的搜索引擎。</p>
+<p>联合搜解码策略、草稿长度和精度。</p>
+<p>vLLM 上平均是自回归的 2.01 倍。</p>
+<p>是投机解码的 1.36 倍。</p>
+<p>预测器不用在目标卡上校准。</p>
+<p>能保住 97.36% 的搜索收益。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.22296">https://arxiv.org/abs/2611.22296</a></p>
+<p><strong>XM-Sparse：稀疏注意力搬去内存池，解码快 5 倍</strong></p>
+<p>稀疏注意力省了算力，KV 还得全留着。</p>
+<p>显存还是瓶颈。</p>
+<p>以前 offload 到主机内存。</p>
+<p>PCIe 带宽不够，主机内存也不够大。</p>
+<p>这篇搬去横向扩展内存池。</p>
+<p>热 KV 和索引缓存分开管。</p>
+<p>各配一套 I/O。</p>
+<p>基于 SGLang 实现的。</p>
+<p>DeepSeek-V3.2 和 GLM-5.3 上测的。</p>
+<p>16K 到 1M 上下文。</p>
+<p>比 PCIe 的 ECHO 快 4.98 倍。</p>
+<p>比 HiSparse 快 4.52 倍。</p>
+<p>比同平台的朴素接法快 1.34 倍。</p>
+<p>内存池是仿真出来的，不是真硬件。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.22280">https://arxiv.org/abs/2611.22280</a></p>
+<p><strong>Spool：混合视觉模型的流式推理，首字快 6.6 倍</strong></p>
+<p>视频问答要盯着最近两分钟。</p>
+<p>混合视觉模型里有循环层。</p>
+<p>窗口一滑，旧帧全得重算一遍。</p>
+<p>Spool 发现循环更新是仿射的。</p>
+<p>每帧的效果能写成一个变换。</p>
+<p>变换可以复合，旧帧直接去掉。</p>
+<p>不用重跑整个窗口。</p>
+<p>训练都不用，插上就能用。</p>
+<p>5 个开源混合模型、4 个视频推理基准。</p>
+<p>20 组里首字 p95 全是最低。</p>
+<p>几何平均比 vLLM 基线快 6.6 倍。</p>
+<p>准确率平均还涨 2.3 个点。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.23228">https://arxiv.org/abs/2611.23228</a></p>
+<p><strong>SR-VLA：提前猜下一帧，卡顿少了</strong></p>
+<p>机器人动作模型，推理会卡住下一个动作块。</p>
+<p>异步提前算能藏延迟。</p>
+<p>但猜错了就得全重算。</p>
+<p>SR-VLA 用轻量预测器先猜下一帧。</p>
+<p>冻住的 VLA 先算一份投机 KV。</p>
+<p>真输入到了，再决定接受还是修。</p>
+<p>只修 KV 里对不上的部分。</p>
+<p>LIBERO 上测出 2.67 倍和 1.27 倍。</p>
+<p>两个基线各比各的。</p>
+<p>任务成功率基本没掉。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.22356">https://arxiv.org/abs/2611.22356</a></p>
+<h2>业内新闻</h2>
+<p><strong>英伟达盘后：收在 162.95 美元，涨 4.8%</strong></p>
+<p>19点版报的是 161.34 美元，涨 3.8%。</p>
+<p>盘后又往上走了一截。</p>
+<p>收在约 162.95 美元，涨 4.8%。</p>
+<p>亚洲股市周三也跟着涨。</p>
+<p>AI 硬件供应链都沾光。</p>
+<p>明天开盘能不能守住，还得看。</p>
+<p>来源：<a href="https://marketunclouded.com/article-nvidia-earnings-q3-fy2027">https://marketunclouded.com/article-nvidia-earnings-q3-fy2027</a></p>
+<h2>访谈与深度</h2>
+<p><strong>DeepSeek-V4.1 在 Hopper 上变快了，两处改动</strong></p>
+<p>mindpattern 今天的一篇梳理。</p>
+<p>vLLM #65656 加了个 CuTe DSL 打分器。</p>
+<p>直接读分页 FP8 KV 里的候选 key。</p>
+<p>8 张 H20 上，词间隔中位数降 18.5% 到 28.4%。</p>
+<p>SGLang #50719 让 H100 和 H200 跑批量读题索引。</p>
+<p>GSM8K 稳在 98.00%。</p>
+<p>文章还翻了个旧账。</p>
+<p>SGLang #47802，11 月 15 日合入。</p>
+<p>修了个静默错答案的 bug。</p>
+<p>GLM-4-32B 的 GSM8K 只有 50.87%。</p>
+<p>换 FlashAttention 3 是 93.48%。</p>
+<p>没报错，没日志，就这么错着。</p>
+<p>来源：<a href="https://www.mindpattern.ai/s/2026-11-17-deepseek-v4-1-got-faster-on-hopper-gpus-on-november-17-through-one-change-in-vllm-and">https://www.mindpattern.ai/s/2026-11-17-deepseek-v4-1-got-faster-on-hopper-gpus-on-november-17-through-one-change-in-vllm-and</a></p>
+<p><strong>Muse Glimmer 30B FP8：SGLang 和 vLLM 打平手</strong></p>
+<p>一篇 11 月 16 日的对打实测。</p>
+<p>同一权重、同一 131072 上下文。</p>
+<p>18 组配对，吞吐基本打平。</p>
+<p>峰值解码 428.7 对 432.1 词每秒。</p>
+<p>首字 SGLang 赢得多。</p>
+<p>中位数 531.8 对 712.2 毫秒。</p>
+<p>18 组里 12 组是 SGLang 快。</p>
+<p>来源：<a href="https://medium.com/@baylleklilou7/muse-glimmer-30b-fp8-sglang-vs-vllm-63184d19d987">https://medium.com/@baylleklilou7/muse-glimmer-30b-fp8-sglang-vs-vllm-63184d19d987</a></p>
+<p><strong>Latent Space 还是 FLUX 3 那期</strong></p>
+<p>最新一期还是 11 月 16 日的 FLUX 3。</p>
+<p>这轮没有新单集。</p>
+<p>Spotify 亲核确认。</p>
+<h2>值得深入学</h2>
+<p><strong>Gemma 4 的 K=V 缓存：只存一份，解码 KV 省三成</strong></p>
+<p>这篇跟你的 KV 优化线直接相关。</p>
+<p>结构性省法，不是压精度。</p>
+<p>640 个数一行这个数可以直接抄。</p>
+<p>PD 拆分里搬运量少三成。</p>
+<p>但省显存不等于省时间。</p>
+<p>批上不去时，吞吐可能还掉。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>Gemma 4 K=V 缓存。arXiv:2611.23035，解码 KV 省 1.34–1.40 倍。</li><li>SpecSearch 的提醒。投机解码配置换卡换负载都得重选。</li><li>英伟达盘后涨 4.8%。收在 162.95 美元，亚洲股市跟着涨。</li></ol>
+<p>深读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261118-gemma4-kv-kv/">Gemma 4 的 K=V 缓存：只存一份，解码 KV 省三成</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-17-2100/">21点版</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 19点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2（实验 tag 仍为 v1.5.1-kimi-k3-post.1）；FlashInfer v0.7.5rc3；llama.cpp 快照 b12498（19点版 b12494）；Mooncake v0.3.14。 vLLM 14 条首次汇总：#68295（配方：HY4-Flash BF16/FP8 + 官方镜像 + Rust 前端 + DFly 5 草稿 token）、#68266（CI：XPU 非活跃默认多模态 LoRA 跑 top-k logprobs 对比）、#68091（Ray：DP 前端 SIGTERM 处理跨 ray.init 保留）、#68089（ROCm：分叉进程刷新 AITER 环境变量）、#68027（ROCm：建好 op 时才探 AITER mHC 支持）、#67904（多模态：Pixtral HF 尊重处理器尺寸覆盖）、#67302（ROCm：ModelOpt INT8_PB_WO 上 Triton WNA16 8 位核）、#67135（CI：ROCm float64 参考 + 解码格式原语）、#67087（CI：CPU 镜像工具链 PPA 不走 Launchpad API）、#66409（CI：去掉两个 flaky 测试的失败机制）、#66376（Ascend：异步 EPLB worker 设 device_index）、#66099（MiniMax-M3：Hopper 稀疏读题去掉 tl.make_block_ptr）、#65771（前端：gpt-oss 旧工具调用头特殊 token 当纯文本编码）、#65595（ROCm：DSv4.1 DP 各 rank 共用 Engram 主机表，HIP VMM）。 SGLang 18 条首次汇总：#51160（文档：Hy4-flash cookbook）、#51149（CODEOWNERS：Shunkangz 加 weight_cache owner）、#51124（Intel CPU：Outlines pin 兼容版）、#51093（CI：slash-command 后刷新 CI-states 块）、#51086（CPU：Outlines pin 到 grammar 后端导入的版本）、#51085（测试：周度 CPU 单测跟进模型与线性改动）、#51083（LoRA：LoRA 层暴露 bias 与 deferred-finalize 标志）、#51081（hicache：页统一 L3 对象名预期 KV dtype 后缀）、#51074（重构：server_args 删废弃标志、选项与环境变量）、#51041（AMD：dsv4 TileLang FlashMLA 双缓存 phase-1 guard 用 T.And）、#50997（AMD：dsa gfx950 稀疏 MLA、DCP top-k、FP4 index-K，Kimi-K3.1）、#50822（AMD：w8a8_fp8 GLM 每 token 预量化元组走 aiter ptpc GEMM）、#50821（AMD：mla concat_and_cast_mha_k 补非 2 的幂 nope/rope 宽）、#50820（AMD：dsv4 修 TileLang FlashMLA gfx942 流水线 crash + fnuz KV 解码）、#50783（NPU：dspark 支持读题开 dspark+dp 注意力同时开 pp 或 cp）、#49749（CI：AMD muse-spark 加 MI35x nightly MMMU 精度门）、#49348（模型加载：RunAI 支持 PP Nemotron MTP 草稿）、#48313（NVIDIA：fused_moe H20 下投影 TMA 配置，GLM-5.3-Flash TP8/TP4）。 TRT-LLM 11 条首次汇总：#22501（测试：Helix NCCL 编译测试重编译上限 pin，#21736 back-port）、#22496（修复：恢复 Modeling V2 源码布局 CPU 检查）、#22495（修复：恢复 FP8 前缀缓存精度覆盖）、#22491（基建：合后 3078 豁免 1 个失败用例）、#22419（功能：空闲时回收超时的拆分 KV 接收）、#22388（修复：NVLink 单边 all-to-all fence 加 memory clobber）、#22356（性能：DeepSeek-V4.1 融合采样，并行逆 CDF 游走 + 流水线首扫）、#22271（测试：解绑 TestKvCacheManagerV2AutoResolution 拆分测试）、#22089（修复：trtllm-gen FMHA 等 PDL 前驱再读序列长度）、#22088（修复：收紧 GLM-5.3-Flash modeling_v2 路由与融合 MTP 步）、#21250（性能：Hopper 上解码批大小的 Triton FP8 激活 MoE）。 LMDeploy 零合入；TGI 零合入；Dynamo 零合入。 FlashInfer 4 条首次汇总：#9550（cake_ssd_combined：显式 state_dtype、调用方拥有终态）、#9538（moe：trtllm-gen NVFP4 MoE 局部域）、#9358（文档：修 API 契约、Returns 渲染与示例）、#8431（构建：Windows arm64 MSVC host 编译支持）。 llama.cpp 1 条首次汇总：#30824（Vulkan：rms_norm 运行时定循环次数）；快照 b12494→b12498。 Mooncake 1 条首次汇总：#5550（TransferEngine：Metax GPU 经 ibv_reg_mr 开 peermem 支持）。 arXiv：本轮 6 篇均为 11 月 17 日提交批、19点版未覆盖（2611.23035 Gemma 4 K=V、2611.22666 VSpark、2611.22296 SpecSearch、2611.22280 XM-Sparse、2611.23228 Spool、2611.22356 SR-VLA）；下一批约 11 月 18 日 16:00 发布。 业内新闻：英伟达盘后收约 162.95 美元（+4.8%，19点版报 161.34 美元/+3.8%）；亚洲股市周三跟涨。 访谈与深度：mindpattern 梳理 DeepSeek-V4.1 Hopper 提速（vLLM #65656、SGLang #50719、SGLang #47802 静默错答案修复）；Muse Glimmer 30B FP8 对打（11 月 16 日，吞吐打平、SGLang 首字赢 12/18 组）；Latent Space 最新仍是 11 月 16 日 FLUX 3（Spotify 亲核）。 深读：Gemma 4 K=V 缓存 arXiv:2611.23035（新增）。</p></body></html>
