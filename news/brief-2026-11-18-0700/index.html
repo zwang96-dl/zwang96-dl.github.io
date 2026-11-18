@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月18日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-18"/>
+<meta name="doc-ts" content="2026-11-18T15:00:18"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-18（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-18（07点版）</h1>
+<p>07点版来了，今早有两条大新闻。</p>
+<p>OpenAI 发了新模型，亚马逊把 Dynamo 接进了云服务。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：没有新正式版</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 还是 v0.7.5rc4。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 还是 b12503。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：PD 拆分在 ROCm 上修了个关键 bug</strong></p>
+<p>#66514 跟 PD 直接相关。</p>
+<p>NIXL 的传输单元被 UCX 1.23 的新默认搞坏了。</p>
+<p>现在修好了，ROCm 上的 PD 搬运又通了。</p>
+<p>#68310 也是 ROCm 的性能项。</p>
+<p>Triton 和 AITER 的 prefill 检查点能导出了。</p>
+<p>说白了，读题那一步的加速成果能存下来复用。</p>
+<p>#52602 是个安全修补。</p>
+<p>多模态输入没配上限时，默认最多 999 项。</p>
+<p>Rust 前端这轮修了一串小毛病。</p>
+<p>流式指标、400 报错、finish_reason 缺失都在里头。</p>
+<p>#68391、#68344、#68307、#68349、#66998、#66988、#68162 都是测试和入口小修补。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66514">https://github.com/vllm-project/vllm/pull/66514</a></p>
+<p><strong>TRT-LLM：DeepSeek-V4.1 的小矩阵算得更快了</strong></p>
+<p>#22359 是性能项。</p>
+<p>小尺寸 FP8 和 MXFP8 矩阵乘做了优化。</p>
+<p>还换了操作数顺序，SwGLU 输出也打包了。</p>
+<p>#22027 也跟性能有关。</p>
+<p>CUDA 图捕获期间，NCCL-EP 调度改用池化分发。</p>
+<p>#22342、#22336 是测试和底层修补。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22359">https://github.com/NVIDIA/TensorRT-LLM/pull/22359</a></p>
+<p><strong>SGLang：这轮零合入</strong></p>
+<p>过去两小时没有新 PR 合进来。</p>
+<p>v1.0 仍在等 tag。</p>
+<p><strong>Dynamo：清理旧代码为主</strong></p>
+<p>#18929 保住了 SGLang 老 DP 排号的兼容。</p>
+<p>剩下 4 条全是删死代码。</p>
+<p>路由、KV 索引器、调度器的旧接口都清掉了。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18929">https://github.com/ai-dynamo/dynamo/pull/18929</a></p>
+<p><strong>llama.cpp：新添一个模型</strong></p>
+<p>#32071 加了 Zyphra 的 Zaya1 8B。</p>
+<p>Zyphra 就是那家报 10M 上下文提速的公司。</p>
+<p>剩下 3 条是界面和工具小修补。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32071">https://github.com/ggml-org/llama.cpp/pull/32071</a></p>
+<p>FlashInfer、LMDeploy、TGI、Mooncake 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>下一批约今天 16:00 UTC 发布。</p>
+<p>也就是早上 8 点 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>OpenAI 发了 GPT-6.2，分大小两档</strong></p>
+<p>Astra 是旗舰，管最难的活。</p>
+<p>Sol 是日常款，管写代码和写文章。</p>
+<p>价格上 Astra 降了两成。</p>
+<p>输入每百万 token 8 美元，输出 40 美元。</p>
+<p>Sol 还是老价，输入 2 美元，输出 10 美元。</p>
+<p>独立评测给了 Astra 62 分。</p>
+<p>比上一代高 5 分，单任务成本还降了 36%。</p>
+<p>Sol 57 分，比上一代高 2 分。</p>
+<p>划重点：旗舰降价了，日常款没变。</p>
+<p>API 里的名字是 gpt-6.2-astra 和 gpt-6.2-sol。</p>
+<p>来源：<a href="https://community.openai.com/t/gpt-6-2-astra-and-sol-are-now-available/1417531/1">https://community.openai.com/t/gpt-6-2-astra-and-sol-are-now-available/1417531/1</a></p>
+<p><strong>亚马逊云把 Dynamo 接进来了</strong></p>
+<p>SageMaker HyperPod 推理服务现在支持 Dynamo。</p>
+<p>vLLM、SGLang、TRT-LLM 都能走这条路。</p>
+<p>PD 拆分和 KV 感知路由都支持。</p>
+<p>官方给了个实测数字。</p>
+<p>Qwen3-235B 在 16 张 H200 上跑。</p>
+<p>拆分部署每卡每秒 207 个输出 token。</p>
+<p>不拆分只有 101 个，直接翻倍。</p>
+<p>注意：这只是这一个配置的数字。</p>
+<p>换模型换并发，结果会不一样。</p>
+<p>来源：<a href="https://www.mechnext.eu/en/article/74-sagemaker-hyperpod-inference-supports-distributed-serving-with-nvidia-dynamo">https://www.mechnext.eu/en/article/74-sagemaker-hyperpod-inference-supports-distributed-serving-with-nvidia-dynamo</a></p>
+<p><strong>Anthropic：定价今晚出</strong></p>
+<p>最终价还没公布，等今晚美东收盘后。</p>
+<p>区间还是 70 到 78 美元。</p>
+<p>但 WSJ 说可能定到 80 美元以上。</p>
+<p>新细节：260 亿美元私募同步进行。</p>
+<p>买家是谷歌、英伟达等 7 家战略投资者。</p>
+<p>散户最多能分到 20% 的份额。</p>
+<p>明天 11 月 19 日在纳斯达克挂牌，代码 ANT。</p>
+<p>来源：<a href="https://invezz.com/news/2026/11/18/anthropic-ipo-set-to-price-tonight-reports-point-above-80/">https://invezz.com/news/2026/11/18/anthropic-ipo-set-to-price-tonight-reports-point-above-80/</a></p>
+<p><strong>YC 新公司 RightNow：卖开源模型推理</strong></p>
+<p>11 月 17 日刚开张的 GPU 内核小团队。</p>
+<p>按模型手写内核，再把推理当 API 卖。</p>
+<p>GLM 5.3 标价输入 1.30 美元，输出 4.20 美元。</p>
+<p>还公开了缓存命中率，算少见的透明。</p>
+<p>团队只有 2 个人，先观望。</p>
+<p>来源：<a href="https://explainx.ai/blog/rightnow-yc-kernel-open-model-inference-api-pricing-2026">https://explainx.ai/blog/rightnow-yc-kernel-open-model-inference-api-pricing-2026</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：新一期聊 GPT-6.2</strong></p>
+<p>11 月 18 日那期就是 GPT-6.2。</p>
+<p>顺带捎了几条推理经济学。</p>
+<p>vLLM 给 Kimi K3.1 Pro 的滑动窗口草稿模型。</p>
+<p>接受长度最多涨 30%。</p>
+<p>还有英伟达给 Qwen3.8-27B 的 4B 草稿模型。</p>
+<p>来源：<a href="https://dev.to/felipe0liveira/megakernels-get-deleted-kv-caches-get-halved-and-preemption-finally-pays-off-5fp7">https://dev.to/felipe0liveira/megakernels-get-deleted-kv-caches-get-halved-and-preemption-finally-pays-off-5fp7</a></p>
+<h2>值得深入学</h2>
+<p>本轮没有新增深读笔记。</p>
+<p>值得跟的两条，记在这里：</p>
+<ol><li>亚马逊云的 Dynamo 集成。PD 拆分翻倍那个数字，可以对照你自己的评估。</li><li>GPT-6.2 的定价。旗舰降价两成，推理成本账要重算。</li></ol>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-18-0700/">07点版</a></p>
+<hr/>
+<p>本轮已与 05点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4（tag）；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2（实验快照 v1.5.1-kimi-k3-post.1）；FlashInfer v0.7.5rc4；llama.cpp 快照 b12503；Mooncake v0.3.14。 vLLM 13 条首次汇总：#66514（ROCm/PD：修 UCX 1.23 ROCm DMABUF 默认搞坏的 NIXL 单元）、#68391（ROCm/CI：DSv4.1 mono merge AB 测试拉起 worker）、#68344（入口：pooling 入口 add_special_tokens 用三态）、#68307（建议：去掉 CUDA graph wrapper bypass flag）、#61856（修补/Rust 前端：流式与取消请求的 HTTP 指标）、#63843（修补/Rust 前端：auto tool parser 不可用时返回 400）、#63739（修补/Rust 前端：流式 chat choices 补 null finish_reason）、#52602（安全：多模态 item 上限默认 999）、#68349（XPU：Transformers 后端 attention sinks 测试跑在 XPU）、#68310（ROCm/性能：导出 Triton 与 AITER FlyDSL prefill 检查点）、#66998（修补/Rust 前端：vllm serve 省略 parser 参数时照常服务 gpt-oss）、#66988（修补/Rust 前端：parallel_tool_calls 为 false 时只允许一次工具调用）、#68162（测试：GPU 单元测试复用单 rank 并行组）。 SGLang 零合入。 TRT-LLM 4 条首次汇总：#22027（性能：CUDA 图捕获期间启用池化 NCCL-EP 分发）、#22336（测试：按 tactic 选择 MoE 实现）、#22342（修补：FC1 prologue probe stream 范围）、#22359（性能：DeepSeek-V4.1 小尺寸 FP8/MXFP8 GEMM，BF16 权重转换、交换操作数、打包索引查询与 SwiGLU 输出）。 Dynamo 5 条首次汇总：#18798（清理/kv-indexer：删死掉的 CKF 指标与 trait 钩子）、#18805（清理/scheduler：删 RouterRequest/RouterResponse 线路）、#18803（清理/router：删 protocol、kv-hints、worker 选择与准入的死接口）、#18800（清理/kv-router：删死配置路径与 profile 功能）、#18929（修补/sglang：保留老 DP 排号兼容）。 llama.cpp 4 条首次汇总：#32071（模型：新增 Zyphra Zaya1 8B）、#32544（UI：从 npm 安装 @ggml-org/llama-brand）、#32543（UI：llama-chat 发布去掉 registry 检查）、#32495（gguf-py：修 GGUFReader 张量偏移溢出）。 FlashInfer、LMDeploy、TGI、Mooncake 零合入。 arXiv：最新批次仍为 2026-11-17，下一批约今天 16:00 UTC。 业内新闻：OpenAI GPT-6.2 Astra/Sol 发布（11 月 17 日，Astra $8/$40、Sol $2/$10，AA 指数 62/57）；SageMaker HyperPod Inference 支持 Dynamo（11 月 18 日，Qwen3-235B 拆分 207 vs 聚合 101 output tok/s/GPU）；Anthropic IPO 定价今晚出（区间 70–78 美元，WSJ 称或高于 80 美元；$26B 私募给 7 家战略投资者；散户最多 20%；11 月 19 日挂牌 ANT）；RightNow YC 开源模型推理 API 开张（11 月 17 日）。 访谈与深度：Latent Space 11 月 18 日新一期聊 GPT-6.2 及推理经济学。 深读：无新增。</p></body></html>
