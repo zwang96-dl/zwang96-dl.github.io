@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月18日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-18"/>
+<meta name="doc-ts" content="2026-11-18T10:58:55"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-18（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-18（03点版）</h1>
+<p>03点版来了，凌晨这轮很清淡。</p>
+<p>就一个像样的新功能。</p>
+<p>剩下全是小修补。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：没有新正式版</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 还是 v0.7.5rc4。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 还是 b12503。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：路由器会按 KV 余量挑人了</strong></p>
+<p>#51147 是 sgl-router 的新功能。</p>
+<p>加了 --dp-rank-policy least_tokens。</p>
+<p>路由器按各引擎上报的 KV 余量分流。</p>
+<p>哪个 DP rank 手头 KV 最少，请求就往哪去。</p>
+<p>说白了，就是别让某个 worker 先撑爆。</p>
+<p>跟 PD 拆分部署沾边。</p>
+<p>多副本之间负载更匀了。</p>
+<p>#51215 是小修补。</p>
+<p>对齐工具函数改回可导入。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51147">https://github.com/sgl-project/sglang/pull/51147</a></p>
+<p><strong>TRT-LLM：Qwen4 实验模型又快了一点</strong></p>
+<p>#22518 是性能项。</p>
+<p>qwen4_exp 的 FP8 模型。</p>
+<p>PDL 的依赖提前释放了。</p>
+<p>在 MNNVL 的张量并行求和里。</p>
+<p>说白了，就是用完的资源早点还回去。</p>
+<p>别占着等下一轮。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22518">https://github.com/NVIDIA/TensorRT-LLM/pull/22518</a></p>
+<p><strong>vLLM、FlashInfer 等：都是小修补</strong></p>
+<p>vLLM 2 条。</p>
+<p>#68350 是 CI 的默认设备恢复。</p>
+<p>#68300 是 ROCm 的测试项。</p>
+<p>FlashInfer 3 条。</p>
+<p>#9640 修了 MoE 的操作数检查。</p>
+<p>#9650 是 CI，#9638 是测试。</p>
+<p>Mooncake 1 条。</p>
+<p>#5575 让 UDS 监听 backlog 可配。</p>
+<p>llama.cpp 1 条。</p>
+<p>#32454 把归一化、乘法和加法融成一个核。</p>
+<p>LMDeploy 1 条。</p>
+<p>#5150 修了 GLM 对话里的多 token 停止词。</p>
+<p>Dynamo、TGI 这轮零合入。</p>
+<p>来源：各仓库 PR 列表</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>下一批约今天 16:00 UTC 发布。</p>
+<p>也就是早上 8 点 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic：定价还没出，先来了个代币版</strong></p>
+<p>最终定价还没公布。</p>
+<p>还是等今晚美东时间。</p>
+<p>币安钱包今天开了个代币化申购。</p>
+<p>06:00 到 14:00 UTC，限额 5 亿美元。</p>
+<p>每个代币 70 到 78 美元。</p>
+<p>注意，这不是真股票。</p>
+<p>只是跟着价格走的凭证。</p>
+<p>没有投票权，也没有分红权。</p>
+<p>另有报道说，承销商在考虑定到区间上方。</p>
+<p>需求太旺了，估值可能冲到 1.5 万亿美元以上。</p>
+<p>这些还是传闻，不是定价。</p>
+<p>来源：<a href="https://news.bitcoin.com/exchanges/binance-wallet-500m-anthropic-ipo-xstocks-token-sale/">https://news.bitcoin.com/exchanges/binance-wallet-500m-anthropic-ipo-xstocks-token-sale/</a></p>
+<h2>访谈与深度</h2>
+<p>本轮无新增。</p>
+<h2>值得深入学</h2>
+<p>本轮没有新增深读笔记。</p>
+<p>值得跟的一条，记在这里：</p>
+<ol><li>SGLang 路由器的 least_tokens 策略。PD 线上值得留意。</li></ol>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-18-0300/">03点版</a></p>
+<hr/>
+<p>本轮已与 01点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2（实验 tag 仍为 v1.5.1-kimi-k3-post.1）；FlashInfer v0.7.5rc4；llama.cpp 快照 b12503；Mooncake v0.3.14。 vLLM 2 条首次汇总：#68350（CI：测试后恢复默认设备）、#68300（ROCm 测试：AITER 延迟 mHC 预计算对残差校验）。 SGLang 2 条首次汇总：#51147（功能：sgl-router 加 --dp-rank-policy least_tokens，按引擎上报 KV 余量分流）、#51215（修复：对齐工具函数保持可从 utils.common 导入）。 TRT-LLM 1 条首次汇总：#22518（性能：modeling_v2 qwen4_exp FP8 在 MNNVL TP 求和里提前释放 PDL 依赖）。 FlashInfer 3 条首次汇总：#9640（修复：MoE 拒绝非连续 CUTLASS 操作数）、#9650（CI：机器人账号发的命令也跑）、#9638（测试：Llama4 warp 路由上报本地专家下标）。 Mooncake 1 条首次汇总：#5575（修补：UDS 监听 backlog 可配）。 llama.cpp 1 条首次汇总：#32454（CUDA：融合 NORM + MUL + ADD）。 LMDeploy 1 条首次汇总：#5150（修复：GLM 对话里多 token 停止词生效）。 业内新闻：Anthropic IPO 定价仍未公布（等今晚美东时间）；币安钱包今日 06:00–14:00 UTC 开代币化申购（上限 5 亿美元 USDC，70–78 USDC/代币，非真实股票、无投票分红权）；有报道称承销商考虑定价高于 70–78 美元区间。 访谈与深度：无新增。 深读：无新增。</p></body></html>
