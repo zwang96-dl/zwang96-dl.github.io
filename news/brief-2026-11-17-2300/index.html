@@ -1,0 +1,158 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月17日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-18T07:01:23"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-17（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-17（23点版）</h1>
+<p>23点版来了，这轮是小更新。</p>
+<p>两个框架都挂了新的 rc4 tag。</p>
+<p>另外 xAI 说要弃用 SGLang，自己写 C++ 栈。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：两个 rc4 tag 是新的</strong></p>
+<p>这轮没有正式版发布。</p>
+<p>TRT-LLM 挂了 v1.4.0rc4 的 tag。</p>
+<p>上轮还是 rc3。</p>
+<p>FlashInfer 也挂了 v0.7.5rc4。</p>
+<p>正式版还是 rc3。</p>
+<p>Dynamo 多了个开发 tag。</p>
+<p>v1.7.0-kimi-k3.1-pro-dev.1。</p>
+<p>跑的是 Kimi-K3.1 Pro。</p>
+<p>llama.cpp 快照涨到 b12499。</p>
+<p>21点版还是 b12498。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：7 条合入，ROCm 占了大头</strong></p>
+<p>#67906 是 DeepSeek-V4.1 的性能项。</p>
+<p>MXFP8 的输入量化直接融进生产者核。</p>
+<p>共享专家那路也一起融了。</p>
+<p>#63254 是 ROCm 上的 MoE 项。</p>
+<p>token 分片的 MoE 归约一次做完。</p>
+<p>以前要分两步走。</p>
+<p>#65353 是 gpt-oss 的修补。</p>
+<p>MXFP4 专家按整块分到各卡。</p>
+<p>调用方传的 w2_bias 也保住了。</p>
+<p>#66783 修了 Dots3Note 视觉塔。</p>
+<p>不再做主机同步。</p>
+<p>#65799 是 RL 方向的加载项。</p>
+<p>热更新后逐个参数对账。</p>
+<p>少一个就报错。</p>
+<p>#63369 给多模态加了个图片解码后端。</p>
+<p>用 TorchCodec 解图。</p>
+<p>剩下 1 条是 ROCm 的构建修补。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67906">https://github.com/vllm-project/vllm/pull/67906</a></p>
+<p><strong>SGLang：11 条合入，AMD 的投机解码继续铺</strong></p>
+<p>#50999 是 AMD 的投机解码项。</p>
+<p>MLA 草稿验证核来了。</p>
+<p>DFLASH 的 MLA 上下文核也来了。</p>
+<p>目标模型自己采样那路也补上了。</p>
+<p>#50998 是 Kimi-K3.1 的 AMD 项。</p>
+<p>gfx950 上 KDA 验证核来了。</p>
+<p>gfx950 就是 MI355 系列。</p>
+<p>A8W4 的 MoE 核也来了。</p>
+<p>还有 latent-tail 和集合通信核。</p>
+<p>#51134 是拆分方向的修补。</p>
+<p>KV 管理器拆掉时，PP 共识存储也关掉。</p>
+<p>之前可能漏关。</p>
+<p>#50763 是 NPU 的性能项。</p>
+<p>DSv4 的投机解码走了无镜像的序列长度路。</p>
+<p>剩下 7 条是 CI、文档和测试。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50999">https://github.com/sgl-project/sglang/pull/50999</a></p>
+<p><strong>TRT-LLM：4 条合入，DSv4.1 的 MXFP4 表来了</strong></p>
+<p>#22414 是 DeepSeek-V4.1 的功能项。</p>
+<p>MXFP4 的 Engram 表来了。</p>
+<p>量化部署又往前走了一步。</p>
+<p>#22504 是文档项。</p>
+<p>NVFP4 MLA 技术博客标了日期。</p>
+<p>博客是 11 月 17 日的。</p>
+<p>#22421 是测试项。</p>
+<p>FP4 MLA 的拆分测试解封了。</p>
+<p>剩下 1 条是基建项。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22414">https://github.com/NVIDIA/TensorRT-LLM/pull/22414</a></p>
+<p><strong>Mooncake：7 条合入，存储层占了 5 条</strong></p>
+<p>Mooncake 是搬 KV 的传输层。</p>
+<p>这轮 7 条里 5 条都在 Store 上。</p>
+<p>#5620 给驱逐线程数加了开关。</p>
+<p>#5505 让 RDMA 客户端缓冲可选大页内存。</p>
+<p>大页能少一次地址翻译。</p>
+<p>#5502 让 RDMA 队列深度可配。</p>
+<p>#5617 修了成员关系的可疑清理。</p>
+<p>剩下 2 条是测试和文档。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5620">https://github.com/kvcache-ai/Mooncake/pull/5620</a></p>
+<p><strong>LMDeploy、llama.cpp、FlashInfer：各 1 条小修补</strong></p>
+<p>LMDeploy #5147 修了决策问答的反馈。</p>
+<p>llama.cpp #32492 是 CUDA 小修补。</p>
+<p>conv2d 的补丁索引换了快速除法。</p>
+<p>FlashInfer #9639 是 CI 修补。</p>
+<p>文档检查器的导入修好了。</p>
+<p>TGI、Dynamo 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>上一批还是 21点版报过的 6 篇。</p>
+<p>下一批约明天 16:00 发布。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>xAI：Grok 4.8 的推理栈改写成 C++，不用 SGLang 了</strong></p>
+<p>马斯克在 X 上说，xAI 重写了 RL 和推理栈。</p>
+<p>以前用 JAX 和 SGLang。</p>
+<p>现在全改成 C++ 从头写。</p>
+<p>Grok 4.8 还在 RL 阶段，没发布。</p>
+<p>2.5 万亿参数这个数也是他自己说的。</p>
+<p>没经过独立核实。</p>
+<p>对 SGLang 来说，这是一次公开的弃用。</p>
+<p>但 xAI 一向喜欢自研栈，别过度解读。</p>
+<p>来源：<a href="https://pbxscience.com/musk-xai-rewrote-the-grok-4-8-rl-and-inference-stack-in-c-c-dropping-jax-and-sglang/">https://pbxscience.com/musk-xai-rewrote-the-grok-4-8-rl-and-inference-stack-in-c-c-dropping-jax-and-sglang/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>SGLang Summit 官方回顾来了</strong></p>
+<p>LMSYS 官网 11 月 17 日发了峰会回顾。</p>
+<p>2000 多人去了旧金山 Fort Mason。</p>
+<p>联盟成立、v1.0 官宣这些都在里面。</p>
+<p>想回看峰会全貌的可以点进去。</p>
+<p>来源：<a href="https://www.lmsys.org/blog">https://www.lmsys.org/blog</a></p>
+<h2>值得深入学</h2>
+<p>本轮没有新增深读笔记。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>TRT-LLM 和 FlashInfer 都挂了 rc4 tag。正式版临近了。</li><li>xAI 弃用 SGLang 改 C++ 自研栈。马斯克自己的说法。</li><li>SGLang 在 AMD 上继续铺 Kimi-K3.1 和投机解码核。</li></ol>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-17-2300/">23点版</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 21点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM 正式版仍为 v1.4.0rc3（新 tag v1.4.0rc4）；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2（新开发 tag v1.7.0-kimi-k3.1-pro-dev.1）；FlashInfer 正式版仍为 v0.7.5rc3（新 tag v0.7.5rc4）；llama.cpp 快照 b12499（21点版 b12498）；Mooncake v0.3.14。 vLLM 7 条首次汇总：#67936（ROCm：DSv4.1 gfx942 top-512 扩展改从构建目录副本编译）、#67906（ROCm：DSv4.1 MXFP8 输入量化融进生产者核与共享专家）、#66783（多模态：Dots3Note 视觉塔去掉主机同步）、#65799（RL：热更新逐参数对账）、#65353（gpt-oss：MXFP4 专家整块分 TP，保留调用方 w2_bias）、#63369（多模态：TorchCodec 图片解码后端）、#63254（ROCm：Muse Spark token 分片 MoE 归约一次 reduce-scatter 做完）。 SGLang 11 条首次汇总：#51177（CI：NPU DSV4-Flash 用例选 Mooncake PD 传输后端）、#51176（CI：加 CI 权限）、#51171（测试：NPU deepseek-v4 恢复 CP+DSPARK 联合用例）、#51152（文档：AMD cookbook Qwen3.5 MI355X FP8）、#51134（拆分：KV 管理器拆除时关 PP 共识存储）、#51087（CI：megakernel 只跑 PR 点名的模型）、#50999（AMD：投机解码 MLA 草稿验证、DFLASH MLA 上下文、目标端采样核）、#50998（AMD：kimi-k3 gfx950 KDA 验证、A8W4 MoE、latent-tail、LL 集合核）、#50763（NPU：dsv4 DFlash 系投机解码无镜像 seq_lens 路）、#50707（AMD：muse-spark 加 gfx1250 支持）、#48894（测试：NPU kimi_k3 128k 解码前缀用例重调到 C6）。 TRT-LLM 4 条首次汇总：#22504（文档：NVFP4 MLA 技术博客标 11/17 日期）、#22503（基建：TOT 豁免清单走 post-merge 分支）、#22421（测试：FP4 MLA helix-scatter 单测解封）、#22414（功能：DeepSeek-V4.1 MXFP4 Engram 表）。 LMDeploy 1 条首次汇总：#5147（decision：处理 Intern-Decision QA 反馈）。 FlashInfer 1 条首次汇总：#9639（CI：恢复文档检查器导入）。 llama.cpp 1 条首次汇总：#32492（CUDA：conv2d 补丁索引用 fastdiv 解码）；快照 b12498→b12499。 Mooncake 7 条首次汇总：#5620（Store：驱逐工作线程数开关）、#5617（Store-RS：可变成员可疑清理）、#5610（Store：exists_evict_bench 测读租约下查找延迟与驱逐吞吐）、#5591（修补：拒绝未知 tebench 段类型并检查经典配置错误）、#5505（Store：RDMA 客户端缓冲可选 THP 大页）、#5502（TransferEngine：RDMA RC QP 接收队列与 RD 原子深度可配）、#5425（文档：Conductor Rust API）。 TGI 零合入；Dynamo 零合入。 arXiv：本轮无新批次（最新仍为 21点版覆盖的 2611.23228 一批）；下一批约 11 月 18 日 16:00 发布。 业内新闻：xAI 重写 Grok 4.8 RL 与推理栈为 C++，弃用 JAX 与 SGLang（马斯克 X 帖，11 月 10 日；pbxscience 11 月 16 日报道；2.5 万亿参数未核实）；英伟达盘后仍为 162.95 美元（+4.8%），21点版已报，无变化。 访谈与深度：LMSYS 官网 11 月 17 日发 SGLang Summit 2026 官方回顾。</p></body></html>
