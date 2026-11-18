@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月18日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-18"/>
+<meta name="doc-ts" content="2026-11-18T23:02:04"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-18（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-18（15点版）</h1>
+<p>15点版来了，这轮是 IPO 定价唱主角。</p>
+<p>Anthropic 定价 83 美元，高出区间上限。</p>
+<p>FlashInfer 正式版 tag 落地，页面还没挂。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：FlashInfer 正式版 tag 来了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 打了 v0.7.5 的 tag。</p>
+<p>tag 就是正式版的版本号标记。</p>
+<p>但 release 页面还是 v0.7.5rc3。</p>
+<p>页面估计很快会跟上。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照升到 b12527。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：5 条，工具调用解析器换引擎了</strong></p>
+<p>#62728 是工具调用的活。</p>
+<p>Muse Spark 的解析器搬到流式解析引擎。</p>
+<p>流式解析就是边吐字边认工具调用。</p>
+<p>以前要等整段到齐才认。</p>
+<p>#61690 是个小功能。</p>
+<p>迭代指标里可选加 GPU 计时。</p>
+<p>GPU 计时就是每步花了多少毫秒。</p>
+<p>#68484 是结构化输出的简化。</p>
+<p>token 位掩码的分配逻辑收敛了。</p>
+<p>位掩码就是标记哪些 token 能出的表。</p>
+<p>#68376 是修补。</p>
+<p>修了 NemotronLabsDiffusion 的同步检查。</p>
+<p>问题出在 GPU 同步上。</p>
+<p>#68480 是 CI 的小调整。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/62728">https://github.com/vllm-project/vllm/pull/62728</a></p>
+<p><strong>SGLang：21 条，Rust 服务端一口气补齐接口</strong></p>
+<p>这轮合入的 21 条里，18 条是 Rust 服务端。</p>
+<p>Rust 服务端就是 SGLang 用 Rust 重写的服务层。</p>
+<p>补的是各家 API 的路由和模型定义。</p>
+<p>OpenAI 的对话和补全接口有了。</p>
+<p>Anthropic 的 Messages 接口有了。</p>
+<p>Ollama 的路由也有了。</p>
+<p>还有打分、向量、重排、tokenize 这些接口。</p>
+<p>说白了，Rust 版快能平替 Python 版了。</p>
+<p>#50853 跟 P/D 解耦沾边。</p>
+<p>/v1/loads 现在上报完整 decode 主机池。</p>
+<p>还上报已落地的跨主机传输。</p>
+<p>P/D 解耦就是读题和生成分开跑。</p>
+<p>这接口方便调度器看清 decode 侧的负载。</p>
+<p>#51038 是调度器修补。</p>
+<p>DP 注意力下，空闲批次也上报负载了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50853">https://github.com/sgl-project/sglang/pull/50853</a></p>
+<p><strong>TRT-LLM：4 条，都是测试和修补</strong></p>
+<p>#22585 是测试修补。</p>
+<p>#22199 是修补。</p>
+<p>检查点监听器收不到完成文件时，现在会发信号。</p>
+<p>#22487 是内核修补。</p>
+<p>#22482 是测试跳过。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22199">https://github.com/NVIDIA/TensorRT-LLM/pull/22199</a></p>
+<p><strong>llama.cpp：3 条，都是小修补</strong></p>
+<p>#32567 修了 server 的睡眠状态。</p>
+<p>#32562 是模型加载的安全修补。</p>
+<p>#31966 是界面的小调整。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32567">https://github.com/ggml-org/llama.cpp/pull/32567</a></p>
+<p><strong>Dynamo：9 条，sidecar 和前端修补为主</strong></p>
+<p>#17612 是个新功能。</p>
+<p>SGLang sidecar 现在每节点起一个。</p>
+<p>sidecar 就是跟主服务一起跑的小助手进程。</p>
+<p>#17431 也是 sidecar 的活。</p>
+<p>启动脚本和部署改走 Rust 服务端。</p>
+<p>#18923 是多模态修补。</p>
+<p>图片像素超限的报错，现在能原样传回来了。</p>
+<p>#17918 是前端修补。</p>
+<p>路由前先校验 SGLang 的 token 预算。</p>
+<p>#17933 也是前端修补。</p>
+<p>vLLM 聊天处理器现在保留缓存盐值。</p>
+<p>其余是文档、测试和 CI 调整。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/17612">https://github.com/ai-dynamo/dynamo/pull/17612</a></p>
+<p><strong>FlashInfer：2 条，都是性能活</strong></p>
+<p>#9464 是 GEMM 的优化。</p>
+<p>SM120 上 FP8 分组 GEMM 换了小 M 分块。</p>
+<p>GEMM 就是矩阵乘法，推理里最吃算力的活。</p>
+<p>#9669 是线性注意力的功能。</p>
+<p>Cake GDN 的序列切分，现在能手动打开。</p>
+<p>覆盖 SM100 和 SM107 两代卡。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9464">https://github.com/flashinfer-ai/flashinfer/pull/9464</a></p>
+<p><strong>LMDeploy、TGI、Mooncake：这轮零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>最新还是 11 月 17 日那批。</p>
+<p>下一批约 00:00 UTC 发布。</p>
+<p>来源：arXiv API</p>
+<p><strong>SenseNova-Loop-9B：AWQ 和 GGUF 权重补上了</strong></p>
+<p>11点版报过这个模型，今天补了权重。</p>
+<p>AWQ 和 GGUF 两种量化权重都能下载了。</p>
+<p>GGUF 就是 llama.cpp 能直接跑的格式。</p>
+<p>本地小机器也能试试这个 9B 模型了。</p>
+<p>来源：<a href="https://huggingface.co/sensenova/SenseNova-Loop-9B-GGUF">https://huggingface.co/sensenova/SenseNova-Loop-9B-GGUF</a></p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic：IPO 定价 83 美元，高出区间上限</strong></p>
+<p>路透和彭博都确认了这个价。</p>
+<p>定价 83 美元，高出 70 到 78 的区间。</p>
+<p>按 825M 股算，募资约 685 亿美元。</p>
+<p>发行规模还可能上调，最终股数没公布。</p>
+<p>另有 260 亿美元的私募配售。</p>
+<p>买家包括英伟达、谷歌、微软这些大厂。</p>
+<p>完全稀释后估值约 1.5 万亿美元。</p>
+<p>年化收入跑到 810 亿美元了。</p>
+<p>10 月 31 日的数据，比 9 月底多了 100 亿。</p>
+<p>明天 11 月 19 日纳斯达克挂牌，代码 ANT。</p>
+<p>划重点：定价超预期，AI 模型的烧钱故事还在被买单。</p>
+<p>来源：<a href="https://www.reuters.com/legal/transactional/anthropic-prices-blockbuster-ipo-83-share-source-says-2026-11-18/">https://www.reuters.com/legal/transactional/anthropic-prices-blockbuster-ipo-83-share-source-says-2026-11-18/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong></p>
+<p>HN、X、Reddit 这轮也没新东西。</p>
+<p>SGLang 联盟那波还是 11 月 12 日的旧闻。</p>
+<h2>值得深入学</h2>
+<p>本轮没有新增深读笔记。</p>
+<p>值得跟的两条，记在这里：</p>
+<ol><li>SGLang 的 Rust 服务端批量补接口。接口越来越全了，跟你评估的部署形态有关。</li><li>SGLang #50853。/v1/loads 上报 decode 主机池。</li></ol>
+<p>P/D 调度能看得更清。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-18-1500/">15点版</a></p>
+<hr/>
+<p>本轮已与 13点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4；FlashInfer v0.7.5 tag 于 2026-11-18T22:27:02Z 落地，release 页面仍为 v0.7.5rc3；Dynamo 正式版 v1.6.2（实验快照 v1.5.1-kimi-k3-post.1；v1.7.0-*-dev.1 两个 tag 指向 11 月 2 日、11 月 6 日的旧提交，非新）；llama.cpp 快照 b12527（2026-11-18T22:56:20Z）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 5 条首次汇总：#68480（CI：rocm 缓存提示时机）、#62728（前端/工具调用：Muse Spark 解析器迁至流式解析引擎）、#68376（修补：NemotronLabsDiffusion GPU 同步检查）、#61690（功能：迭代指标可选 GPU 计时）、#68484（结构化输出：简化 allocate_token_bitmask）。 SGLang 21 条首次汇总：Rust 服务端批量 18 条——#49748（/v1/responses 无状态接口）、#49744（Anthropic Messages API）、#49747（Vertex/SageMaker 生成封装、PUT /generate）、#49746（/v1/score、embeddings、classify、rerank、tokenize）、#49745（OpenAI completions/chat completions schema 与 gRPC）、#49743（Ollama 路由）、#49742（configure_logging、dumper 路由、HiCache L3 布局、弹性 EP 状态）、#49741（/open_session、/close_session、session_params）、#49740（NGRAM 投机解码外部语料路由）、#49739（/parse_function_call、/separate_reasoning）、#49737（pd_role_switch、update_weight_version）、#49738（权重读取、更新组、权重更新、LoRA 拒绝）、#49736（set_internal_state、profiling、专家分布、slow_down、显存占用控制）、#50851（meta_info.dp_rank 无 DP 时报 null）、#50831（spec_verify_calls_total 指标）、#50854（延迟指标从 HTTP 层请求起点计时）、#50832（generate 请求移交调度器时打点）、#50952（每请求投机解码统计的已知缺口说明）；#50853（解耦：/v1/loads 上报完整 decode 主机池与已落地的跨主机传输）；#51038（调度器：DP 注意力下空闲批次也上报负载）；#51357（文档：OSS CI Hub 使用说明）。 TRT-LLM 4 条首次汇总：#22585（测试：循环收集器避开原始图捕获）、#22199（修补：检查点监听器 done 文件建不出时发信号）、#22487（修补：KDA 分解链内核 double-buffer update_ready）、#22482（测试：Rubin 上跳过不支持的 INT8 Sage Ulysses 用例）。 llama.cpp 3 条首次汇总：#32567（server：修 v1/realtime 睡眠状态）、#32562（模型：限制 n_layer*n_mudd_taps 防加载越界读）、#31966（server/ui：缩放时流式推理框留在视口内）。 Dynamo 9 条首次汇总：#17918（前端：路由前校验 SGLang token 预算）、#18902（文档：KVCR 0.1.1 不支持 SGLang 引擎集成）、#18923（多模态：保留图片像素超限报错）、#17612（SGLang sidecar：每节点起一个 sidecar）、#17933（前端：vLLM 聊天处理器保留缓存盐值）、#17431（SGLang sidecar：启动脚本与部署改走 Rust 服务端）、#18506（前端：上报配置的迁移上限、只计真实迁移）、#18992（测试：vLLM 编译不了的结构化输出语法固定 pin 400）、#17798（CI：ECR 登录换共享 docker-login action）。 FlashInfer 2 条首次汇总：#9464（性能：SM120 FP8 分组 GEMM 小 M 分块换 AB）、#9669（功能：Cake GDN 序列切分在 SM100/SM107 上可 opt-in）。 LMDeploy、TGI、Mooncake 零合入。 arXiv：无新批次（最新 published 仍为 2026-11-17，FastFrames 2611.23226），下一批约 00:00 UTC。 业内新闻：Anthropic IPO 定价 $83/股（路透 2026-11-18T21:26:11Z、彭博 21:21Z；高于 $70–78 区间；825M 股约募 $68.5B，规模或上调；另有 $26B 私募配售；完全稀释估值约 $1.5T；年化收入 $81B，截至 10 月 31 日；11 月 19 日纳斯达克挂牌 ANT）——13点版只报到&quot;等今晚收盘后定价&quot;，定价本身是本轮新消息。 SenseNova-Loop-9B：AWQ 与 GGUF 权重 2026-11-18 补上（模型本身 11点版已报）。 去重：HyperPod/Dynamo（07点版已报）、Cerebras PD 进生产（11-17 1500版已报）、Gemma 4 K=V 论文与 SpecSearch（11-17 2100版已报）、Together Compiler 与 DeepSeek-V4.1-Flash Vera Rubin 58x（11-17 各期已报）、SGLang 联盟（11 月 12 日旧闻）、Latent Space 11 月 18 日新一期（07点版已报）均未重复。HN/X/Reddit 本轮无新内容。 深读：无新增。</p></body></html>
