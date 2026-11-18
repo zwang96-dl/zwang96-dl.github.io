@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月18日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-18"/>
+<meta name="doc-ts" content="2026-11-18T19:01:37"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-18（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-18（11点版）</h1>
+<p>11点版来了，这轮是框架更新的天下。</p>
+<p>vLLM 一口气合了 11 条。</p>
+<p>FlashInfer 的 Cake 也连着上了 6 条。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：没有新正式版</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 还是 v0.7.5rc4。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 出了新快照 b12521。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：PD 搬运加了个安全阀</strong></p>
+<p>#66011 是修补，跟 PD 直接相关。</p>
+<p>PD 就是读题和解码分开跑。</p>
+<p>NIXL 是 PD 里搬 KV 的传输层。</p>
+<p>KV 是读题后留下的中间状态。</p>
+<p>以前生产者的 KV 租约过期了。</p>
+<p>远程读题还可能照读不误。</p>
+<p>现在直接拒绝，读不到过期数据。</p>
+<p>说白了，草稿纸过期了就别再抄。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66011">https://github.com/vllm-project/vllm/pull/66011</a></p>
+<p><strong>vLLM：GLM-5.3 的在线量化伸进注意力了</strong></p>
+<p>#64373 是量化功能。</p>
+<p>在线量化就是边跑边把权重压小。</p>
+<p>以前压不到 BF16 的注意力投影。</p>
+<p>BF16 是一种半精度浮点格式。</p>
+<p>现在这块也能压了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64373">https://github.com/vllm-project/vllm/pull/64373</a></p>
+<p><strong>vLLM：ROCm 这轮两条修补加一条验证</strong></p>
+<p>#68454 修了 MiniMax-M3.1 的解码崩溃。</p>
+<p>预洗牌的 MXFP8 权重会触发它。</p>
+<p>MXFP8 是一种 8 位浮点量化格式。</p>
+<p>#66911 是个验证配方。</p>
+<p>Qwen3.8-Flash-Next 在 MI325X 上跑 BF16。</p>
+<p>MI325X 是 AMD 的加速卡。</p>
+<p>#65317 是指标修补。</p>
+<p>抢占次数改在调度器里计数。</p>
+<p>以前在恢复时才数，容易数错。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68454">https://github.com/vllm-project/vllm/pull/68454</a></p>
+<p><strong>vLLM：多模态接口和 KV 卸载各一处小修补</strong></p>
+<p>#68135 是多模态前端小功能。</p>
+<p>生成接口现在回传 mm_hashes。</p>
+<p>mm_hashes 是多媒体内容的哈希值。</p>
+<p>#68359 是 KV 卸载的修补。</p>
+<p>SWA 是一种滑动窗口注意力。</p>
+<p>现在把最后一段尾巴也报对了。</p>
+<p>剩下几条是日志、CI 和前端小修补。</p>
+<p>#67526 在模型加载后记下每层选的后端。</p>
+<p>#68211 给 DeepSeek-V4.1 的工具搜索换了渲染。</p>
+<p>#67916 和 #68188 都是 CI。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68135">https://github.com/vllm-project/vllm/pull/68135</a></p>
+<p><strong>SGLang：这轮只有两条轻量合入</strong></p>
+<p>#50727 是 AMD 的 CI 修补。</p>
+<p>日志流的 SIGPIPE 不再误杀健康任务。</p>
+<p>#51290 是文档。</p>
+<p>给 DaisyRose-27B 加了本 cookbook。</p>
+<p>cookbook 就是上手食谱式教程。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51290">https://github.com/sgl-project/sglang/pull/51290</a></p>
+<p><strong>TRT-LLM：MegaMoE 多了去重战术</strong></p>
+<p>#22035 是新功能。</p>
+<p>MegaMoE 是 TRT-LLM 的 MoE 推理方案。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>去重现在可以当战术选项打开。</p>
+<p>#21209 是性能融合。</p>
+<p>Qwen3-Next 的残差加法、归一化和静态 FP8 量化。</p>
+<p>三步并成一个算子跑。</p>
+<p>#22364 也是性能活。</p>
+<p>DeepSeek-V4.1 的 Engram 解码。</p>
+<p>哈希和历史散射一次启动干完。</p>
+<p>剩下两条是遥测和 MiniMax-H3 默认步数。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22035">https://github.com/NVIDIA/TensorRT-LLM/pull/22035</a></p>
+<p><strong>llama.cpp：新快照 b12521，老卡和 Vulkan 都有提速</strong></p>
+<p>b12521 是今天 17:10 UTC 发布的新快照。</p>
+<p>CUDA 给 Pascal 老卡提了速。</p>
+<p>DP4A 是老卡上的整数点积指令。</p>
+<p>Vulkan 加了 bf16 支持。</p>
+<p>bf16 是一种半精度浮点格式。</p>
+<p>CUDA 还把归一化和乘法融成一步。</p>
+<p>新支持了 Zaya1 8B 这个模型。</p>
+<p>另合入 #30672。</p>
+<p>按显卡型号选 FP16 还是 BF16 做累加。</p>
+<p>说白了，不同卡用不同的精度账本。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b12521">https://github.com/ggml-org/llama.cpp/releases/tag/b12521</a></p>
+<p><strong>Dynamo：11 条大多是 1.7.0 的 cherry-pick</strong></p>
+<p>cherry-pick 就是把别的分支的改动摘过来。</p>
+<p>#18979 刷新了 Mooncake 传输引擎。</p>
+<p>Mooncake 是 PD 里搬 KV 的开源层。</p>
+<p>这条跟你的 PD 评估沾边。</p>
+<p>#18204 是个小修补。</p>
+<p>空的 stop 数组现在当没有停止词。</p>
+<p>stop 是让模型停下的词。</p>
+<p>其余是依赖升级、构建和文档。</p>
+<p>#17368 把 SGLang 的 mocker 移进新位置。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18979">https://github.com/ai-dynamo/dynamo/pull/18979</a></p>
+<p><strong>FlashInfer：Cake 连上 6 条性能活</strong></p>
+<p>#9622 管 Rubin 上的 batch-invariant 注意力。</p>
+<p>batch-invariant 就是批次变了结果也不变。</p>
+<p>Rubin 是英伟达的新一代架构。</p>
+<p>#9648 给 Cake 的稀疏注意力加了重叠收尾。</p>
+<p>SM103 是 Blackwell 的一个变体。</p>
+<p>#9663 让 Cake 的 GDN 一次跑多条序列。</p>
+<p>GDN 是一种门控解码注意力。</p>
+<p>#9644 给 Cake 的 SSD 组合加了状态池。</p>
+<p>#9294 给 recurrent_kda 加了 batch-invariant。</p>
+<p>#9660 给双 die 的 SM107a 做了 FP8 GEMM。</p>
+<p>GEMM 就是通用矩阵乘法。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9622">https://github.com/flashinfer-ai/flashinfer/pull/9622</a></p>
+<p><strong>LMDeploy、TGI、Mooncake：这轮零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>最新还是 11 月 17 日那批。</p>
+<p>下一批约 00:00 UTC 发布。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>SenseNova-Loop-9B：商汤开源了个 9B 多模态小模型</strong></p>
+<p>商汤 11 月 17 日发布了 SenseNova-Loop-9B。</p>
+<p>9B 就是 90 亿参数，个头不大。</p>
+<p>Apache 2.0 协议，商用也没问题。</p>
+<p>11 月 18 日又补了 AWQ 和 GGUF 权重。</p>
+<p>SGLang 和 vLLM 都能跑。</p>
+<p>两边各走一个 PR 接入。</p>
+<p>还支持 MTP 投机解码。</p>
+<p>MTP 就是一次多猜几个 token。</p>
+<p>自托管视觉问答、读图、文档理解都能用。</p>
+<p>划重点：小模型、多模态、双引擎都支持。</p>
+<p>来源：<a href="https://huggingface.co/sensenova/SenseNova-Loop-9B-GGUF">https://huggingface.co/sensenova/SenseNova-Loop-9B-GGUF</a></p>
+<p><strong>Anthropic：认购倍数又涨了，定价还是今晚</strong></p>
+<p>最终价还没公布，等今晚美东收盘后。</p>
+<p>彭博说认购接近 7 倍。</p>
+<p>路演中期还是约 6 倍。</p>
+<p>WSJ 说可能定在 80 美元以上。</p>
+<p>官方区间还是 70 到 78 美元。</p>
+<p>明天 11 月 19 日纳斯达克挂牌，代码 ANT。</p>
+<p>来源：<a href="https://invezz.com/news/2026/11/18/anthropic-ipo-set-to-price-tonight-reports-point-above-80/">https://invezz.com/news/2026/11/18/anthropic-ipo-set-to-price-tonight-reports-point-above-80/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong></p>
+<p>Latent Space 11 月 18 日那期，07点版已经报过。</p>
+<p>HN 和 X 上这轮也没新东西。</p>
+<h2>值得深入学</h2>
+<p>本轮没有新增深读笔记。</p>
+<p>值得跟的两条，记在这里：</p>
+<ol><li>SenseNova-Loop-9B。多模态小模型，SGLang 和 vLLM 都支持。</li><li>vLLM #66011。PD 里 KV 租约过期直接拒读，跟你的 PD 评估沾边。</li></ol>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-18-1100/">11点版</a></p>
+<hr/>
+<p>本轮已与 09点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4（tag）；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2（实验快照 v1.5.1-kimi-k3-post.1）；FlashInfer v0.7.5rc4（tag）；llama.cpp 快照 b12521；Mooncake v0.3.14。 vLLM 11 条首次汇总：#66011（修补/NIXL/PD：生产者 KV 租约过期后拒绝远程 prefill 读）、#68211（前端/DeepSeek-V4.1：工具搜索按 deepseek-recipe 渲染）、#67526（核心：模型加载后记录每层选定的后端）、#68359（修补/KV offload：first_live_chunk_idx 报最终 SWA 尾巴）、#67916（CI：Nemotron GSM8K offload 条目练 CPU reload）、#66911（ROCm/recipe：Qwen3.8-Flash-Next 在 MI325X 上验 BF16，AITER）、#68454（修补/ROCm/MiniMax-M3.1：预洗牌 MXFP8 权重的 decode glue 崩溃）、#64373（量化/GLM-5.3：在线量化覆盖 BF16 注意力投影）、#65317（修补/metrics：抢占在调度器计数，不在 resume 时）、#68135（前端/多模态：/inference/v1/generate 回传 mm_hashes）、#68188（ROCm/CI：test_online_mxfp4_hadamard 强制 ASM 路径）。 SGLang 2 条首次汇总：#50727（CI/AMD：spur 日志流 SIGPIPE 不再取消健康任务）、#51290（文档/cookbook：DaisyRose-27B cookbook）。 TRT-LLM 5 条首次汇总：#22485（chore/遥测：上报 Muse Spark Open 架构）、#21209（性能：Qwen3-Next norms 的残差加法+RMSNorm+静态 FP8 量化融合）、#22035（功能/MegaMoE：dedup 作为战术选项）、#22486（chore：MiniMax-H3 默认 50 步）、#22364（性能/DeepSeek-V4.1：Engram decode 哈希与历史散射单次启动、成对 gather、prologue fork）。 llama.cpp 新快照 b12521（2026-11-18T17:10:32Z，距 b12503 共 18 提交）：#31352（CUDA：Pascal DP4A MMQ J=64 tile 加大）、#32202（Vulkan：多算子加 bf16）、#32454（CUDA：融合 NORM+MUL+ADD）、#32071（模型：新增 Zaya1 8B）、#32495（gguf-py：张量偏移溢出修补）、#32507（server：v1/realtime 转录 prompt 修补）；另合入 #30672（CUDA：按 SKU 选 FP16/BF16 累加精度门控）。b12503 时已汇总的 #32514、#32535 未重复计入。 Dynamo 11 条首次汇总：#18979（build/trtllm：1.7.0 cherry-pick，刷新 Mooncake transfer engine）、#18204（fix/openai：空 stop 数组当无停止序列）、#17368（feat/mocker：SGLang mocker 与 sidecar testkit 移到 sglang.api.v1）、#18971（fix/vllm：1.7.0 cherry-pick，vLLM 0.33 上保留 self-benchmark 前缀）、#18983（build/container：etcd 用 golang.org/x/net v0.62.0）、#18985（build/deps：tokio 升 1.54.1）、#18938（docs/router：router crates 的 AGENTS.md 加性能说明）、#19019（test/bench：删已移除 indexer/mocker 的测试）、#18981（build/vllm：dnspython 升 2.9.2）、#18987（fix/operator：升级不再滚动 frontend sidecar probes 与 vllm-rs workers）、#18887（fix/runtime：关机时 bound HTTP/WebSocket draining）。 FlashInfer 6 条首次汇总：#9622（性能/batch_invariant：Rubin 上 batch-invariant attention 的排布、decode launch grid、PDL）、#9648（性能/cake_sage_block_sparse_attention：多 block 行重叠 tile epilogue、SM103 tail split）、#9663（功能/cake_gdn：opt-in Cake GDN sequence split，一次多序列）、#9644（功能/cake_ssd_combined：caller state pool 按 slot 读写状态）、#9294（功能/batch_invariant：recurrent_kda batch_invariant=True，KDA 类 kda.bf16.c16）、#9660（性能/cake_batch_deepgemm_fp8：双 die SM107a 的 locality-domain serving GEMM）。 LMDeploy、TGI、Mooncake 零合入。 arXiv：无新批次（最新 published 仍为 2026-11-17），下一批约 00:00 UTC。 业内新闻：SenseNova-Loop-9B 发布（11 月 17 日，Apache 2.0；SGLang PR #47281、vLLM PR #64832；11 月 18 日补 AWQ/GGUF；支持 MTP 投机解码）；Anthropic IPO 更新（彭博：认购近 7 倍，路演中期约 6 倍；WSJ：或定于 80 美元以上；最终价今晚美东收盘后，11 月 19 日挂牌 ANT）。 去重：HyperPod/Dynamo（07点版已报）、Cerebras PD 进生产（11-17 1500版已报）、Gemma 4 K=V 论文与 SpecSearch（11-17 2100版已报）均未重复。HN/X 无新内容；Latent Space 11 月 18 日新一期 07点版已报。 深读：无新增。</p></body></html>
