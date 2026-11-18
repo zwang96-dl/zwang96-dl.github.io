@@ -1,0 +1,264 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月17日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-17"/>
+<meta name="doc-ts" content="2026-11-18T03:02:21"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-17（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-17（19点版）</h1>
+<p>19点版来了，这轮主角是英伟达财报。</p>
+<p>营收 1158 亿，大超预期。</p>
+<p>还有一篇多模态投机解码的新论文。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>这轮没有新版本发布。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc3。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>FlashInfer 还是 v0.7.5rc3。</p>
+<p>llama.cpp 快照涨到 b12494。</p>
+<p>17点版还是 b12489。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>Dynamo 多了个实验 tag。</p>
+<p>v1.5.1-kimi-k3-post.1。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>Dynamo：Kimi-K3 实验版来了</strong></p>
+<p>新 tag 是实验快照，不是正式版。</p>
+<p>跑的是 Kimi-K3，基于 SGLang 后端。</p>
+<p>读题解码拆分用 DCP 传输。</p>
+<p>DCP 就是跨节点搬 KV 的协议。</p>
+<p>草稿 KV 也走这条线搬。</p>
+<p>拆分配置是 1P1D，16 张 GB300。</p>
+<p>KV 在节点间走 Mooncake 传输。</p>
+<p>走的是 NVLink，不是网线。</p>
+<p>配方里还有 64K 输入的 agent 回放。</p>
+<p>想在 GB300 上跑 Kimi-K3 的可以先看。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/releases/tag/v1.5.1-kimi-k3-post.1">https://github.com/ai-dynamo/dynamo/releases/tag/v1.5.1-kimi-k3-post.1</a></p>
+<p><strong>TRT-LLM：8 条合入，投机解码占两条</strong></p>
+<p>#21363 是这轮最值得看的一条。</p>
+<p>MiniMax-M3 的草稿 KV 不再单放。</p>
+<p>直接住进目标模型的 KV 管理器。</p>
+<p>拆分部署下也一样能用。</p>
+<p>#21816 是 Helix 的聚合改进。</p>
+<p>Helix 是 TRT-LLM 的拆分部署方案。</p>
+<p>KV 大小按实测算，预热也补上了。</p>
+<p>#22362 是 DeepSeek-V4.1 的性能项。</p>
+<p>CSA2 的重排索引用一次集群启动搞定。</p>
+<p>#22216 让 XQA 多块模式支持 INT8 KV。</p>
+<p>剩下 4 条是测试、修补和杂务。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21363">https://github.com/NVIDIA/TensorRT-LLM/pull/21363</a></p>
+<p><strong>SGLang：8 条合入，拆分方向修了个计数 bug</strong></p>
+<p>#51111 是拆分方向的修补。</p>
+<p>prefill 节点在启动服务器里只算一次。</p>
+<p>注册多少次都只算一次。</p>
+<p>之前重复注册会算重。</p>
+<p>#50023 是 NPU 方向的新功能。</p>
+<p>Hicache 支持两种 FP8 KV 格式。</p>
+<p>#41329 给 CPU 加了 FP8 和 INT8 量化算子。</p>
+<p>#44769 给 Intel XPU 加了 LoRA 后端。</p>
+<p>剩下 4 条是编码器修补和文档。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51111">https://github.com/sgl-project/sglang/pull/51111</a></p>
+<p><strong>vLLM：9 条合入，多是多模态和修补</strong></p>
+<p>#50118 是拆分方向的修补。</p>
+<p>全量 KV 上报时用有效块大小。</p>
+<p>之前上报的数字会算错。</p>
+<p>#67053 修了 Mamba 的边界状态。</p>
+<p>解码跨过稀疏保留边界时保留下来。</p>
+<p>#66679 和 #66067 都是多模态编码器方向。</p>
+<p>Kimi-VL 的编码器用 CUDA 图加速。</p>
+<p>编码器 CUDA 图代码抽成公共部分。</p>
+<p>#68154 是 Qwen4Exp 的性能项。</p>
+<p>剩下 4 条是 CI、LoRA 和 RL 修补。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/50118">https://github.com/vllm-project/vllm/pull/50118</a></p>
+<p><strong>FlashInfer：10 条合入，MLA 解码加了 FP8</strong></p>
+<p>#9274 是这轮最值得看的一条。</p>
+<p>MLA 解码加了 FP8 分片 KV。</p>
+<p>还加了按波次感知的超大分发。</p>
+<p>#9628 让 Cake GDN 预填充跑在 SM103 上。</p>
+<p>#7827 让 GDN 预填充跑在 Jetson Thor 上。</p>
+<p>剩下 7 条是修补和整理。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9274">https://github.com/flashinfer-ai/flashinfer/pull/9274</a></p>
+<p><strong>LMDeploy：2 条合入</strong></p>
+<p>#5133 优化了视觉模型的图片处理。</p>
+<p>#5119 对齐了 DeepEP 的 FP8 矩阵乘容量。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5133">https://github.com/InternLM/lmdeploy/pull/5133</a></p>
+<p><strong>Dynamo：9 条合入，多是构建和依赖</strong></p>
+<p>#18988 是这轮唯一的功能项。</p>
+<p>Kimi-K3 的 SGLang 配方挪到新镜像。</p>
+<p>剩下 8 条全是构建和依赖升级。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18988">https://github.com/ai-dynamo/dynamo/pull/18988</a></p>
+<p><strong>Mooncake：1 条合入</strong></p>
+<p>#5543 保住生产者事件的传输顺序。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5543">https://github.com/kvcache-ai/Mooncake/pull/5543</a></p>
+<p>llama.cpp、TGI 这轮零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>VisHead-Spec：多模态投机解码，高并发下提速 16%</strong></p>
+<p>这篇是本轮最值得看的。</p>
+<p>投机解码给视觉语言模型加速。</p>
+<p>小模型先打草稿，大模型再验。</p>
+<p>高并发下这招会变钝。</p>
+<p>批一大，算力先吃紧，草稿收益缩水。</p>
+<p>图像 token 太长，草稿算起来更贵。</p>
+<p>作者先去看了注意力是怎么流动的。</p>
+<p>发现只有少数 KV 头真要看图。</p>
+<p>40 个 KV 头里，8 个看图就够了。</p>
+<p>剩下的头只看文字。</p>
+<p>而且只看目标模型顶层的图像特征。</p>
+<p>办法就叫 VisHead-Spec。</p>
+<p>Qwen3-VL-8B 上测的。</p>
+<p>批大小 64 时，吞吐比自回归快 16%。</p>
+<p>同条件下 DSpark 只有 9.5%。</p>
+<p>接受长度跟 DSpark 只差 0.3%。</p>
+<p>批大小 1 时，跟 DSpark 差不多。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.21839">https://arxiv.org/abs/2611.21839</a></p>
+<p><strong>TAILROLL：RL 训练的 rollout 快了三成</strong></p>
+<p>RL 训练的瓶颈在 rollout。</p>
+<p>rollout 就是让模型先自己生成一轮答案。</p>
+<p>答案有长有短，长的拖住整步。</p>
+<p>大家都在等最长那条。</p>
+<p>TAILROLL 是个在线调度器。</p>
+<p>两招：中途迁移和提前终止。</p>
+<p>迁移是把解码中的请求换到空闲引擎。</p>
+<p>换过去只重算一次读题。</p>
+<p>终止是 GRPO 分组够样本就停。</p>
+<p>不用等最后一条长答案。</p>
+<p>rollout 时间省 24% 到 34%。</p>
+<p>整步时间省 21% 到 22%。</p>
+<p>生成吞吐最多涨 33%。</p>
+<p>最终奖励没掉，有的还涨了。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.22206">https://arxiv.org/abs/2611.22206</a></p>
+<p><strong>HyCoInfer：解码分给边缘 FPGA，吞吐 4 倍</strong></p>
+<p>云端 GPU 跑读题，解码分给边缘 FPGA。</p>
+<p>解码是访存 bound 的活。</p>
+<p>FPGA 跑解码更省电。</p>
+<p>难处有三件：容量配比、KV 过网、异构延迟。</p>
+<p>KV 压缩用残差向量量化。</p>
+<p>按带宽自适应压。</p>
+<p>500Mbps 链路上，请求吞吐是纯云端 vLLM 的 4.11 倍。</p>
+<p>平均端到端延迟降 61.1%。</p>
+<p>实验只用了两张 V100 和一块 FPGA 卡。</p>
+<p>规模还小，思路值得记一笔。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.22086">https://arxiv.org/abs/2611.22086</a></p>
+<p><strong>KVUse：推荐系统里用户画像的 KV 复用，吞吐 4 倍多</strong></p>
+<p>推荐系统每次打分都要把用户画像拼进提示词。</p>
+<p>画像是长文本，读题很重。</p>
+<p>前缀缓存救不了，因为画像前面每次都不一样。</p>
+<p>KVUse 把画像直接存成 KV。</p>
+<p>更新画像时顺手写出可复用的 KV。</p>
+<p>打分时直接读，不用重算读题。</p>
+<p>饱和负载下，打分吞吐涨 4.0 到 4.5 倍。</p>
+<p>画像更新那路涨 1.4 到 1.9 倍。</p>
+<p>排名质量跟全量重算没统计差异。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.21920">https://arxiv.org/abs/2611.21920</a></p>
+<p><strong>KV-LTM：把 KV 缓存当长期记忆存起来</strong></p>
+<p>个人助手攒几个月的对话。</p>
+<p>现在的做法是先提炼再检索。</p>
+<p>提炼那一步会丢东西。</p>
+<p>KV-LTM 反其道而行之。</p>
+<p>每次会话的原文和 KV 都存下来。</p>
+<p>问问题时直接恢复 KV，不用重算读题。</p>
+<p>原文是底本，KV 只是加速器。</p>
+<p>账算得很实在：每天 3 万 token。</p>
+<p>一年每人要存 0.34 到 3.6 TB。</p>
+<p>原文才 49MB，KV 是原文的几万倍。</p>
+<p>这篇只有设计和测评协议，没做实现。</p>
+<p>思路可以借鉴，落地先别急。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.21998">https://arxiv.org/abs/2611.21998</a></p>
+<p><strong>RISA：扩散语言模型的稀疏注意力，注意力快 5.5 倍</strong></p>
+<p>块扩散模型一次能改多个 token。</p>
+<p>长上下文里注意力还是瓶颈。</p>
+<p>每步去噪都要重读一遍 KV。</p>
+<p>RISA 是可恢复的稀疏注意力。</p>
+<p>历史 KV 在块内不变，查询每步在变。</p>
+<p>读计划在块内共享，不用每步重建。</p>
+<p>32K 上注意力快 2.67 倍。</p>
+<p>128K 上最快到 5.53 倍。</p>
+<p>任务效果跟稠密差不多。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.22191">https://arxiv.org/abs/2611.22191</a></p>
+<h2>业内新闻</h2>
+<p><strong>英伟达财报：营收 1158 亿，大超预期</strong></p>
+<p>这是黄仁勋辞任后的第一份财报。</p>
+<p>临时 CEO Kress 交的第一份答卷。</p>
+<p>营收 1158 亿美元，同比翻倍还多。</p>
+<p>预期是 1091 亿，超了 67 亿。</p>
+<p>数据中心 1076 亿，同比涨 110%。</p>
+<p>每股收益 2.68 美元，预期 2.48。</p>
+<p>下季度指引 1300 亿，也超预期。</p>
+<p>不过下季度是 14 周，多了一周。</p>
+<p>毛利率指引降到 71% 到 72%。</p>
+<p>Rubin 首季出货近 200 亿美元。</p>
+<p>英伟达说这是史上最快的产品爬坡。</p>
+<p>2028 财年收入增速预期提到约 75%。</p>
+<p>董事会主席说，不会请黄仁勋回来。</p>
+<p>黄仁勋当天早些时候说过愿回来。</p>
+<p>盘后股价涨约 3.8%，到 161.34 美元。</p>
+<p>另外两件要留意的：SEC 对英伟达开了民事调查。</p>
+<p>还有 H200 不再卖去中国。</p>
+<p>电话会上还给了个 token 数字。</p>
+<p>OpenRouter 每周 token 量一年涨 35 倍。</p>
+<p>智能体 workload 占了约 80%。</p>
+<p>来源：<a href="https://www.coindesk.com/markets/2026/11/17/nvidia-tops-estimates-issues-strong-guidance-adds-usd150-billion-to-buyback-authorization">https://www.coindesk.com/markets/2026/11/17/nvidia-tops-estimates-issues-strong-guidance-adds-usd150-billion-to-buyback-authorization</a></p>
+<p><strong>AMD：World Labs 收购正式交割</strong></p>
+<p>9 月宣布的收购，11 月 13 日交割了。</p>
+<p>82 亿美元，全股票。</p>
+<p>李飞飞任执行副总裁兼首席科学家。</p>
+<p>直接向苏姿丰汇报。</p>
+<p>交易本身是 9 月的老消息。</p>
+<p>新的是交割完成，团队正式进 AMD。</p>
+<p>来源：<a href="https://casrai.org/news/amd-world-labs-acquisition-completion-research-2026">https://casrai.org/news/amd-world-labs-acquisition-completion-research-2026</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 FLUX 3 那期</strong></p>
+<p>最新一期还是 11 月 16 日的 FLUX 3。</p>
+<p>这轮没有新单集。</p>
+<p>Spotify 亲核确认。</p>
+<h2>值得深入学</h2>
+<p><strong>VisHead-Spec：多模态投机解码只让 8 个头看图</strong></p>
+<p>这篇跟你的多模态投机解码线直接相关。</p>
+<p>8 个头看图这个数可以直接抄。</p>
+<p>高并发下 16% 的提速是在批 64 测的。</p>
+<p>笔记在深度阅读目录里。</p>
+<p>值得跟的三条，记在这里：</p>
+<ol><li>英伟达财报大超预期。营收 1158 亿，下季度指引 1300 亿。</li><li>VisHead-Spec 多模态投机解码。arXiv:2611.21839，批 64 提速 16%。</li><li>Dynamo Kimi-K3 实验版。1P1D 拆分，16 张 GB300。</li></ol>
+<p>深读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261118-vishead-spec/">VisHead-Spec：多模态投机解码只让 8 个头看图</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-17-1900/">19点版</a></p>
+<h2>去重脚注</h2>
+<p>本轮已与 17点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc3；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2（新实验 tag v1.5.1-kimi-k3-post.1，Kimi-K3 SGLang 后端快照，非生产）；FlashInfer v0.7.5rc3；llama.cpp 快照 b12494（17点版 b12489）；Mooncake v0.3.14。 vLLM 9 条首次汇总：#68154（Qwen4Exp 融合 HC up+gate）、#67864（XPU 删 VLLM_XPU_FORCE_N_CONTIG_WEIGHT）、#67818（CI：NIXL PD 测试间等 vLLM 进程与显存释放）、#67787（LoRA 专用 CUDA 图 key 里计 base 请求）、#67053（Mamba 解码跨稀疏保留边界保留状态）、#66679（Kimi-VL 编码器 CUDA 图按 max_seqlen 定尺寸）、#66487（RL 直接重载不再重绑词嵌入）、#66067（多模态编码器 CUDA 图抽公共 mixin）、#50118（KVEvents：DCP 全量 KV 上报用有效块大小）。 SGLang 8 条首次汇总：#51123（编码器超时 tick 保留结果、gRPC URL IPv6 安全）、#51118（文档：sgl-router PyPI 与容器安装合一）、#51116（muse-spark 删不可达内核与分发模式）、#51114（编码器拒标量哈希、接受空特征列表）、#51111（拆分：bootstrap server 里 prefill rank 只计一次）、#50023（NPU hicache 支持 modelslim MLA fp8 kv 与 GQA mxfp8 kv）、#44769（Intel XPU LoRA 后端）、#41329（CPU FP8/INT8 量化算子与 compressed-tensors 支持）。 TRT-LLM 8 条首次汇总：#22362（DeepSeek-V4.1 CSA2 重排消费者一次集群启动）、#22216（XQA 多块模式支持 INT8 KV）、#21966（混合窗口 KV 复用与 EXAONE 前缀 logits 测试）、#21816（Helix 聚合：实测 KV 尺寸与 prefill 预热）、#21736（Helix NCCL 重排只对 CUDA 图批次编译）、#21705（cutedsl/fused_fc12 拆包）、#21528（聊天与 VisualGen 统一本地媒体输入策略）、#21363（MiniMax-M3：DSpark 草稿 KV 住进目标 KV 缓存管理器，含拆分部署）。 LMDeploy 2 条首次汇总：#5133（视觉：优化图片处理）、#5119（DeepEP 掩码 FP8 GEMM 容量对齐）。 TGI 零合入。 Dynamo 9 条首次汇总：#18988（配方：Kimi-K3 SGLang 配方挪到 post.1 镜像）、#18920（trtllm 构建刷新 soupsieve 等）、#18919（依赖 tokio 升 1.54.1）、#18918（vllm 构建 dnspython 升 2.9.2）、#18916（容器 etcd 用 golang.org/x/net v0.62.0）、#18766（trtllm 构建刷新 Mooncake 传输引擎）、#18764（容器刷新 runtime 包与 nats-server）、#17928（trtllm 构建 transformers 升 5.10.4）、#15484（依赖技能用现有 dep labels）。 FlashInfer 10 条首次汇总：#9628（cake_gdn：SM103 上 Cake GDN 预填充可选精确序列切分）、#9481（jit：Windows 上找 nvcc.exe 编 cake_gdn cubin）、#9480（测试：接受 Windows 设备断言文本）、#9458（cudnn：SM120 预填充内核不上显式长度 token 偏移图）、#9274（mla：FP8 分片 KV 解码与波次感知 mega 分发）、#8993（infra 脚本与测试挪目录）、#8549（prims_ts：E4M3 V 行最大值精确化）、#8496（prims-ts：按专家选权重缓存策略）、#7827（gdn：Jetson Thor SM110 上跑 GDN 预填充）、#5489（prims-ts：可合并 softmax 统计与 MLA KV 边界）。 llama.cpp 零合入；快照 b12489→b12494。 Mooncake 1 条首次汇总：#5543（TENT：保住生产者事件传输顺序）。 arXiv：新批为 11 月 17 日提交（2611.21839 VisHead-Spec、2611.22206 TAILROLL、2611.22086 HyCoInfer、2611.21998 KV-LTM、2611.21920 KVUse、2611.22191 RISA）；2611.21165/2611.21216/2611.20893 等 11 月 16 日批已报过。 业内新闻：英伟达 Q3 FY2027 财报（11 月 17 日盘后，营收 1158 亿、指引 1300 亿、Rubin 首季约 200 亿、SEC 民事调查、H200 停售中国）；AMD 完成 World Labs 收购（11 月 13 日交割、11 月 16 日公告，9 月协议已报过）。 访谈与深度：Latent Space 最新仍是 11 月 16 日 FLUX 3（Spotify 亲核）；Thaw 是 11 月 1 日报过的旧闻，不报。 深读：VisHead-Spec 多模态投机解码 arXiv:2611.21839（新增）。</p></body></html>
