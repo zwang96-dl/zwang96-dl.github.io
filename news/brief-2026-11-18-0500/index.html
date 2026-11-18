@@ -1,0 +1,153 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月18日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-18"/>
+<meta name="doc-ts" content="2026-11-18T13:03:23"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-18（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-18（05点版）</h1>
+<p>05点版来了，凌晨这轮有干货。</p>
+<p>Kimi 家的消息占了大头。</p>
+<p>PD 拆分那条线也有新进展。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：没有新正式版</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 还是 v0.7.5rc4。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>实验快照还是 v1.5.1-kimi-k3-post.1。</p>
+<p>llama.cpp 还是 b12503。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>Dynamo Kimi-K3 快照：补两个官方数字</strong></p>
+<p>昨天 19 点版报过这个实验快照。</p>
+<p>今天补两个官方公布的数字。</p>
+<p>聚合部署：每卡每秒 91.3 个输出 token。</p>
+<p>1P1D：每卡每秒 62.0 个输出 token。</p>
+<p>但 1P1D 的用户速度更快。</p>
+<p>每用户每秒 77.6 个 token，聚合是 55.6。</p>
+<p>代价是首字延迟变高了。</p>
+<p>1P1D 首字 P50 要 4.8 秒，聚合只要 0.5 秒。</p>
+<p>注意一个坑：这些数字用了合成接受长度。</p>
+<p>不是真实 DSpark 跑出来的验证结果。</p>
+<p>生产别直接照搬，先自己复测。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/releases/tag/v1.5.1-kimi-k3-post.1">https://github.com/ai-dynamo/dynamo/releases/tag/v1.5.1-kimi-k3-post.1</a></p>
+<p><strong>SGLang：Kimi-K3.1 登上 MI350X 了</strong></p>
+<p>#51000 是新功能。</p>
+<p>Kimi-K3.1 能在 MI350X 和 MI355X 上跑了。</p>
+<p>走 gfx950 的 ROCm 路线。</p>
+<p>你手里正好有 MI350X。</p>
+<p>想试 K3.1 的话，这条就是入口。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51000">https://github.com/sgl-project/sglang/pull/51000</a></p>
+<p><strong>SGLang：DeepSeek-V4.1-Flash 的 prefill 提速了</strong></p>
+<p>#49066 是性能项。</p>
+<p>给 dsv41-flash 加了 FP8 的 prefill 打分。</p>
+<p>用的是 DeepGEMM，在 Hopper 卡上。</p>
+<p>说白了，读题那一步算得更快了。</p>
+<p>#50124 也是小优化。</p>
+<p>decode 的 top logprobs 每步只往 host 拷一次。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49066">https://github.com/sgl-project/sglang/pull/49066</a></p>
+<p><strong>vLLM：PD 拆分里少拉一次 KV</strong></p>
+<p>#67497 是个修补，跟 PD 直接相关。</p>
+<p>decoder 被抢占之后，以前会重复拉 KV。</p>
+<p>现在不会了，省一次跨节点搬运。</p>
+<p>#68153 也跟多模态沾边。</p>
+<p>投机解码时，多模态 embedding 也传过去了。</p>
+<p>交给 NemotronH 的 MTP 用。</p>
+<p>#68373 是 Kimi-K3 的修补。</p>
+<p>没有序列并行时，共享专家可以小一点。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67497">https://github.com/vllm-project/vllm/pull/67497</a></p>
+<p><strong>TRT-LLM：Kimi K3 的 FP4 路线又进了一步</strong></p>
+<p>#22545 是修补。</p>
+<p>Kimi K3 的建模跟上 FP4 MLA 后端的新接口。</p>
+<p>#22473 也是加载侧的修补。</p>
+<p>BF16 的 PLE 表能正常读了。</p>
+<p>NVFP4 的 MTP 权重也一样。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22545">https://github.com/NVIDIA/TensorRT-LLM/pull/22545</a></p>
+<p><strong>llama.cpp、FlashInfer、Mooncake：都是小修补</strong></p>
+<p>llama.cpp 6 条，大多是界面。</p>
+<p>Llama Chat 默认藏起 Models 和 MCP。</p>
+<p>#29539 加了个开关，只给 benchmark 用。</p>
+<p>能让 MoE 随机选专家。</p>
+<p>FlashInfer 2 条，都是测试和 benchmark。</p>
+<p>Mooncake 1 条。</p>
+<p>#5628 把 Store 的软 pin 控制暴露到 master RPC。</p>
+<p>LMDeploy、TGI、Dynamo 这轮零合入。</p>
+<p>来源：各仓库 PR 列表</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这轮没有新批次</strong></p>
+<p>下一批约今天 16:00 UTC 发布。</p>
+<p>也就是早上 8 点 PST。</p>
+<p>来源：arXiv API</p>
+<p><strong>新草稿模型：Kimi K3.1 Pro 的 DSpark 升级了</strong></p>
+<p>Inferact 和 Red Hat 换了个新草稿模型。</p>
+<p>专门给 Kimi K3.1 Pro 做投机解码。</p>
+<p>接受率综合高了 23%，HumanEval 上高了 30%。</p>
+<p>草稿模型只有 25 亿参数。</p>
+<p>每层都用 2K 滑动窗口。</p>
+<p>草稿的 KV 显存就此封顶了。</p>
+<p>上下文拉到 1M 也不会再涨。</p>
+<p>vLLM 那边已经接上了，PD 布局也能用。</p>
+<p>来源：<a href="https://alphasignal.ai/news/inferact-s-kimi-k3-1-pro-dspark-accepts-23-more-tokens-cuts-draft-memory">https://alphasignal.ai/news/inferact-s-kimi-k3-1-pro-dspark-accepts-23-more-tokens-cuts-draft-memory</a></p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic：定价今晚出，可能高于区间上限</strong></p>
+<p>最终定价还没公布。</p>
+<p>等今晚美东时间收盘后。</p>
+<p>区间还是 70 到 78 美元。</p>
+<p>但 WSJ 说可能定到 80 美元以上。</p>
+<p>订单大约是可供股份的 7 倍。</p>
+<p>需求太旺了，估值可能冲过 1.5 万亿美元。</p>
+<p>另外，S-1 修订版披露了持股。</p>
+<p>亚马逊占 14.7%，谷歌占 13.7%。</p>
+<p>明天 11 月 19 日在纳斯达克挂牌，代码 ANT。</p>
+<p>来源：<a href="https://techxplore.com/news/2026-11-anthropic-price-ipo-key-ai.html">https://techxplore.com/news/2026-11-anthropic-price-ipo-key-ai.html</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space：最新还是 FLUX 3 那期</strong></p>
+<p>11 月 16 日的 Black Forest Labs 专访。</p>
+<p>这轮没有新单集。</p>
+<p>来源：Spotify</p>
+<h2>值得深入学</h2>
+<p>本轮没有新增深读笔记。</p>
+<p>值得跟的两条，记在这里：</p>
+<ol><li>Dynamo 的 Kimi-K3 1P1D 配方。聚合和拆分数字都在，PD 评估可以直接对照。</li><li>SGLang 上 MI350X 跑 Kimi-K3.1。跟你手里的卡直接相关。</li></ol>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-18-0500/">05点版</a></p>
+<hr/>
+<p>本轮已与 03点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4；LMDeploy v0.18.0；TGI v3.3.7；Dynamo 正式版 v1.6.2（实验快照 v1.5.1-kimi-k3-post.1，19点版已报，本轮补官方数字：聚合 91.3 output tok/s/GPU、1P1D 62.0 output tok/s/GPU，用户速度 77.6 vs 55.6 tok/s，TTFT P50 4.8s vs 0.5s，数字基于合成接受长度 4.05）；FlashInfer v0.7.5rc4；llama.cpp 快照 b12503；Mooncake v0.3.14。 vLLM 10 条首次汇总：#65915（Rust 前端：支持 --override-generation-config）、#67902（Rust 前端：shm 对象存储实现 1/4）、#68153（投机解码：多模态 embedding 传给 NemotronH MTP）、#68253（Rust 前端：gRPC 请求缺温度时用模型默认值）、#65779（前端：diarized_json 转录按 segment 事件流式输出）、#68236（性能/前端：chat prompt_embeds 从 base64 字符串加载）、#68373（修补/Kimi-K3：无序列并行时减小 MegaMoE 共享专家）、#67497（修补/KV Offload/P2P：decoder 抢占后不再重复拉 PD KV）、#65288（修补/量化：MXFP8 线性选择尊重激活 scheme）、#58131（修补/XPU：num_splits 透传给 XPU flash attention 核）。 SGLang 9 条首次汇总：#51219（CI/NPU：SGLang kernel NPU tag 升到 2026.11.0.post8）、#49066（性能：dsv41-flash 在 Hopper 上加 FP8 DeepGEMM prefill 打分）、#48254（修复/routed-experts：路由已消失的请求 abort 回显不返回 token）、#49457（重构/graph：eager_on_graph 与 CUDA capture 解耦 2/3）、#51000（功能/AMD：kimi-k3 在 MI350X/MI355X gfx950 上跑 Kimi-K3.1）、#50124（性能/scheduler：decode top logprobs 每步只拷一次到 host）、#51048（功能/inkling2：加 FlashInfer CuTe DSL 与 DeepGEMM MegaMoE 核算子）、#51030（功能/jit：benchmark marker 记录结构化逐例结果）、#46414（重构/多模态：MM 重构 8/9，Qwen 输出 token-space 对照 legacy 处理器）。 TRT-LLM 3 条首次汇总：#22545（修复：Kimi K3 Modeling V2 跟随 FP4 MLA 后端 API）、#22195（基建：wheel 与剩余 CI 产物迁到 artifactory.nvidia.com）、#22473（修复：加载 BF16 PLE 表与原生 NVFP4 MTP 权重）。 llama.cpp 6 条首次汇总：#32527（UI：Models 与 MCP 默认隐藏进设置）、#32538（UI：工具权限卡边框柔化、深色模式分段按钮分隔线）、#32524（UI：Llama Chat 用 npx @ggml-org/llama-chat 运行）、#29539（MoE 随机路由 benchmark 开关 LLAMA_MOE_RANDOM_ROUTING=1）、#32507（server：修 v1/realtime 转录 prompt）、#32525（UI：Storybook 部署走 HF Jobs）。 FlashInfer 2 条首次汇总：#9655（测试：MegaMoE CPU 测试与可见 GPU 架构隔离）、#9604（统一 MoE benchmark 补缺失后端）。 Mooncake 1 条首次汇总：#5628（Store：现有对象软 pin 控制暴露到 master RPC）。 LMDeploy、TGI、Dynamo 零合入。 arXiv：最新批次仍为 2026-11-17T18:59Z，下一批约今天 16:00 UTC。 新技术：Inferact + Red Hat 新 Kimi K3.1 Pro DSpark 草稿模型（2026-11-17 发布，11-18 更新）：接受率综合 +23%、HumanEval +30%，2.5B BF16、每层 2K 滑动窗口，草稿 KV 显存封顶，vLLM 已支持、PD 布局可用。 业内新闻：Anthropic IPO 定价今晚美东时间出（区间 70–78 美元，WSJ 称或高于 80 美元，订单约 7 倍超额，估值或超 1.5 万亿美元）；S-1 修订披露亚马逊持股 14.7%、谷歌 13.7%；11 月 19 日纳斯达克挂牌 ANT。 访谈与深度：Latent Space 最新仍为 11 月 16 日 FLUX 3 专访，无新单集。 深读：无新增。</p></body></html>
