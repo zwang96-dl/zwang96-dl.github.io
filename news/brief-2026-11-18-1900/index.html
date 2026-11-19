@@ -1,0 +1,181 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月18日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-18"/>
+<meta name="doc-ts" content="2026-11-19T03:03:49"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-18（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-18（19点版）</h1>
+<p>19点版来了，论文这轮很热闹。</p>
+<p>多轮对话里图被删光的问题，有人给出了解法。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照升到 b12531。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：11 条，Hy4 多模态支持来了</strong></p>
+<p>#68296 是新模型支持。</p>
+<p>Hy4 Flash 的多模态跑通了。</p>
+<p>Hy4 就是腾讯新开的 220B 模型。</p>
+<p>这回连多模态输入一起接上了。</p>
+<p>#63294 跟编码器缓存有关。</p>
+<p>编码器缓存就是视觉编码的草稿纸。</p>
+<p>现在能分层存到文件系统了。</p>
+<p>#68533 是 KV cache 的修补。</p>
+<p>草稿模型独占的滑窗桶，不再参与定尺寸。</p>
+<p>#67174 是 KV 连接器的修补。</p>
+<p>多连接器握手时，元数据不再走错路。</p>
+<p>#66951 是投机解码的修补。</p>
+<p>多模块 MTP 的重读题，被限在有效历史内。</p>
+<p>其余是修补和 CI。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68296">https://github.com/vllm-project/vllm/pull/68296</a></p>
+<p><strong>SGLang：8 条，EPD 多模态编码器上英特尔卡了</strong></p>
+<p>#47961 是 P/D 相关的活。</p>
+<p>EPD 就是编码、读题、生成分开跑。</p>
+<p>多模态编码器这段，现在支持英特尔 XPU。</p>
+<p>#46499 是 UnifiedL3 的活。</p>
+<p>Mooncake 存后端接进来了。</p>
+<p>Mooncake 就是 KV 搬运的共享内存池。</p>
+<p>#46953 是权重缓存的活。</p>
+<p>vmm_fd 传输方式加上了。</p>
+<p>#49275 是量化的性能活。</p>
+<p>RTX PRO 5000 上，FP8 分块配置调好了。</p>
+<p>其余是修补和文档。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47961">https://github.com/sgl-project/sglang/pull/47961</a></p>
+<p><strong>TRT-LLM：9 条，基本是测试</strong></p>
+<p>#22603 是个小功能。</p>
+<p>flashinfer 的原语从老 PR 里提出来了。</p>
+<p>#22321 是个修补。</p>
+<p>NCCL 窗口里，激活值的所有权还回去了。</p>
+<p>#22193 也是修补。</p>
+<p>加载图片时，file:// 链接和特殊字符能认了。</p>
+<p>其余六条是测试豁免和标记。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22603">https://github.com/NVIDIA/TensorRT-LLM/pull/22603</a></p>
+<p><strong>Dynamo：14 条，3 条新的、11 条是摘樱桃</strong></p>
+<p>#18940 是路由的新功能。</p>
+<p>它会在线预估回复长度。</p>
+<p>短回复先放行，长回复后排队。</p>
+<p>排队更公平，短请求不用等长请求。</p>
+<p>#19082 是前端的修补。</p>
+<p>SGLang 的工具调用解析，现在要看分隔符 token。</p>
+<p>#18722 也是修补。</p>
+<p>没填的 token 上限，现在按后端默认值走。</p>
+<p>其余 11 条是 1.7.0 分支的摘樱桃。</p>
+<p>摘樱桃就是把主线已报的修补搬过来。</p>
+<p>#18597 和 #18222 的那两条，17点版报过。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18940">https://github.com/ai-dynamo/dynamo/pull/18940</a></p>
+<p><strong>FlashInfer：8 条，MoE 解码修了两处</strong></p>
+<p>#9682 是 MoE 的修补。</p>
+<p>Cake 的 warp 解码核，现在会在核内扔掉越界专家编号。</p>
+<p>#9679 是 Cake SSD 的性能活。</p>
+<p>状态槽的认领和回卷，改了实现。</p>
+<p>#9620 是性能活。</p>
+<p>批不变 GEMM 的启动开销砍了一截，结果逐位相同。</p>
+<p>#8811 是个小功能。</p>
+<p>bmm_fp8 的 cuBLAS 后端能加偏置了。</p>
+<p>其余是修补和测试。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9682">https://github.com/flashinfer-ai/flashinfer/pull/9682</a></p>
+<p><strong>llama.cpp：1 条，多模态支持新模型</strong></p>
+<p>#32443 给 mtmd 加了 voxcpm2。</p>
+<p>mtmd 就是多模态那块。</p>
+<p>voxcpm2 是个语音模型。</p>
+<p>快照升到 b12531。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32443">https://github.com/ggml-org/llama.cpp/pull/32443</a></p>
+<p><strong>LMDeploy、TGI：这轮零合入</strong></p>
+<p>Mooncake 有 2 条，都是小修补。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：11 月 18 日新一批来了，三篇都跟你有关</strong></p>
+<p>第一篇是 ShelfKV。</p>
+<p>推理视觉模型边想边删图。</p>
+<p>多轮对话里，图基本被删光了。</p>
+<p>这篇把图全放 CPU，用时再搬回显存。</p>
+<p>追问分数比最强策略高最多 20.3 个点。</p>
+<p>值得深读，笔记已写好。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.23769">https://arxiv.org/abs/2611.23769</a></p>
+<p>第二篇是 NarrowSpec。</p>
+<p>投机解码的草稿模型，可以瘦身了。</p>
+<p>草稿的隐藏宽度，不用跟目标模型一样宽。</p>
+<p>砍到一半甚至四分之一，接受率基本不掉。</p>
+<p>B200 上解码快 1.06 到 1.12 倍。</p>
+<p>DGX Spark 上快 1.13 到 1.44 倍。</p>
+<p>批 32 以上，最高 1.21 倍。</p>
+<p>实验在 SGLang 上跑的。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.23835">https://arxiv.org/abs/2611.23835</a></p>
+<p>第三篇是 Sightline。</p>
+<p>它是给 SVG 生成做的投机解码。</p>
+<p>SVG 就是用代码画的矢量图。</p>
+<p>画一张图，要一个 token 一个 token 地写。</p>
+<p>这篇发现，SVG 的猜错很少，还扎堆出现。</p>
+<p>窗口拉长到草稿的极限，照样稳。</p>
+<p>六个基准上，它都是最快的无损解码。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.23807">https://arxiv.org/abs/2611.23807</a></p>
+<p>补一篇 11 月 17 日漏掉的。</p>
+<p>FACT 是投机解码的训练法。</p>
+<p>它给每个验证轮次定预算，再跨步训练。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.23463">https://arxiv.org/abs/2611.23463</a></p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic：明天挂牌，认购超了 7 倍</strong></p>
+<p>定价 83 美元、980M 股，17点版报过了。</p>
+<p>这轮的新消息是认购情况。</p>
+<p>机构加散户，认购量是供给的近 7 倍。</p>
+<p>谷歌、英伟达这些战略股东，还要另买 260 亿美元。</p>
+<p>加上这笔，总募资超过 1050 亿美元。</p>
+<p>完全稀释后估值约 1.5 万亿美元。</p>
+<p>第三季度单季收入 170 亿美元。</p>
+<p>年化收入跑到约 810 亿美元。</p>
+<p>明天 11 月 19 日纳斯达克挂牌，代码 ANT。</p>
+<p>来源：<a href="https://www.kucoin.com/news/flash/anthropic-ipo-prices-at-83-raising-105b-in-7x-oversubscribed-offering">https://www.kucoin.com/news/flash/anthropic-ipo-prices-at-83-raising-105b-in-7x-oversubscribed-offering</a></p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新访谈</strong></p>
+<p>HN、X、Reddit 这轮也没新东西。</p>
+<h2>值得深入学</h2>
+<p>本轮新增一篇深读笔记：</p>
+<ol><li>ShelfKV：多轮推理里，图片 KV 别扔、要时再读。arXiv:2611.23769。</li></ol>
+<p>它跟你的多模态 P/D 评估直接对口。</p>
+<p>视觉 KV 的账要单列，保护比加容量值钱。</p>
+<p>按需读的词间隔代价，也要进评估。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-18-1900/">19点版</a></p>
+<hr/>
+<p>本轮已与 17点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2（实验快照 v1.5.1-kimi-k3-post.1）；llama.cpp 快照 b12531（2026-11-19T02:20:33Z），b12530（01:10:01Z）亦新；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 11 条首次汇总：#68296（模型：Hy4 Flash 多模态支持）、#63294（EC Connector：编码器缓存文件系统分层）、#68533（修补/KV Cache：草稿独占滑窗桶不参与 KV 组定尺寸）、#67174（修补/KV Connector：多连接器握手元数据路由）、#66951（修补/投机解码：多模块 MTP 重 prefill 限在有效历史内）、#67189（修补/Responses：保留空推理块）、#64314（Misc：torch 2.14 自定义类 API）、#68494/#68208/#67534/#64128（CI）。 SGLang 8 条首次汇总：#47961（功能/Intel：EPD 多模态编码器路径支持 XPU）、#46499（功能/UnifiedL3：Mooncake 存后端）、#46953（功能/weight_cache：vmm_fd 传输）、#49275（性能/NVIDIA 量化：RTX PRO 5000 通道级 FP8 GEMM 分块配置）、#49790（修补/NPU：qwen3_5_mtp 量化适配）、#51235（文档）、#50490/#50220（CI/测试）。 TRT-LLM 9 条首次汇总：#22603（chore：flashinfer-prims-ts 提升）、#22333（fix：trtllm_modeling_v2 减少检查）、#22321（fix：NCCL 窗口 mHC 激活所有权）、#22193（fix：file:// URI 与特殊字符）、#21151（fix：PrimTS FMHA/MLA 兼容）、#22598/#22593/#22580/#22567（测试豁免）。 Dynamo 14 条：新功能 3 条——#18940（功能/路由：在线预估回复长度、短回复优先准入）、#19082（修补/前端：SGLang 工具调用解析按分隔符 token 设门）、#18722（修补/vllm：按后端默认值处理省略的 token 上限）；其余 11 条为 1.7.0 分支摘樱桃（#19111←#18222、#19109←#18597、#19108←#19101、#19057←#18188、#19053、#19052、#19051、#19041、#19024、#18698、#18510），其中 #18597、#18222、#19101 已在 17点版报过主线版。 FlashInfer 8 条首次汇总：#9682（修补/MoE：Cake warp 解码核内丢弃越界专家编号）、#9679（性能/cake_ssd_combined：状态槽认领与回卷）、#9673（修补/cake_locality）、#9671（测试/moe_ep）、#9620（性能/batch_invariant：批不变 GEMM 启动开销）、#8811（功能/gemm：bmm_fp8 cuBLAS 后端加偏置）、#7819（功能/gemm：SM120 FP4 GEMM 自调优可选关 stream-K）。 llama.cpp 1 条首次汇总：#32443（mtmd：支持 voxcpm2）。 Mooncake 2 条：#5632（清理死代码）、#5566（修补/PG 集体路径缓冲）。 LMDeploy、TGI 零合入。 arXiv：11 月 18 日新批 3 篇首次汇总——2611.23769 ShelfKV（多轮推理视觉 KV 按需读，DBTrimKV +20.3 点）、2611.23835 NarrowSpec（草稿隐藏宽度减半/四分之一，B200 快 1.06–1.12 倍、GB10 快 1.13–1.44 倍，SGLang 实测）、2611.23807 Sightline（SVG 长窗口投机解码）；补报 11 月 17 日批漏掉的 2611.23463 FACT（投机解码固定预算分配与跨步训练）。 业内新闻：Anthropic IPO 新细节（KuCoin/TechFlow 2026-11-19 02:03Z；认购近 7 倍超额、$26B 战略私募、总募资超 $105B、完全稀释估值约 $1.5T、Q3 收入 $17B、年化收入约 $81B；定价 $83、980M 股已在 17点版报过；11 月 19 日纳斯达克挂牌 ANT）。 去重：SGLang 联盟（11 月 12 日旧闻）、Hy4 开源权重与部署配方（11-17 2100版、11-18 1300版已报）、HyperPod/Dynamo（07点版已报）、GLM-5.3 vLLM 博客（11-13 2300版、11-15 0100版已报）、Gemma 4 K=V（11-17 2100版已报）、vLLM 0.34 发布（11-16 1900版深读）均未重复。HN/X/Reddit 本轮无新内容；机器之心/量子位无新相关报道。 深读：ShelfKV arXiv:2611.23769（新增，含原文 Figure 1/2/3/4/5）。</p></body></html>
