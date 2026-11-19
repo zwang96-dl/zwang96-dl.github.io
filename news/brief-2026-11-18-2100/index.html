@@ -1,0 +1,200 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月18日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-18"/>
+<meta name="doc-ts" content="2026-11-19T05:10:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-18（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-18（21点版）</h1>
+<p>21点版来了，这轮是框架更新唱主角。</p>
+<p>SGLang 的 P/D 解耦又进一步。</p>
+<p>NIXL 也能走统一内存了。</p>
+<p>还有一篇 LMSYS 新博客。</p>
+<p>MoE 低位量化核值得细看。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照升到 b12532。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：15 条，GB300 配方更新了</strong></p>
+<p>#68556 是 DeepSeek-V4.1-Flash 的配方更新。</p>
+<p>Dynamo AgentX 的跑法合进来了。</p>
+<p>新增一个 TP4 延迟特化预设。</p>
+<p>PD 预设也同步了旧设置。</p>
+<p>#66795 是 NIXL 的修补。</p>
+<p>推模式下，写提交不再卡住。</p>
+<p>块提前释放的问题也修了。</p>
+<p>NIXL 代理还加了锁。</p>
+<p>#68129 是投机解码的性能活。</p>
+<p>PrimTS 的滑窗验证批，留在解码计划上。</p>
+<p>#68127 是多模态的修补。</p>
+<p>图片占位按请求级参数定尺寸。</p>
+<p>DeepSeek-OCR、VL2 这些模型受益。</p>
+<p>#67880 是新模型支持。</p>
+<p>Inkling 2 上 Hopper 卡了。</p>
+<p>#67191 是 ROCm 的活。</p>
+<p>MXFP4 目标给 BF16 首尾层专家。</p>
+<p>#66233 是修补。</p>
+<p>显式传 null 的 max_tokens，现在也受上限管。</p>
+<p>#67153 是前端性能活。</p>
+<p>快分词器改用提示词尾巴做种子。</p>
+<p>#68049 是 LoRA 的活。</p>
+<p>GTE 嵌入和重排模型能开 LoRA 了。</p>
+<p>其余是模型加载、快速启动、XPU 和 ROCm 内核。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68556">https://github.com/vllm-project/vllm/pull/68556</a></p>
+<p><strong>SGLang：18 条，统一内存 P/D 接上 NIXL 了</strong></p>
+<p>#50767 是 P/D 的新功能。</p>
+<p>统一内存的 P/D 解耦，现在支持 NIXL 了。</p>
+<p>跟 Mooncake 用同一套共享内存池契约。</p>
+<p>不用改 NIXL 库。</p>
+<p>#50620 是投机解码的性能活。</p>
+<p>EAGLE 拒绝采样的草稿 softmax 和采样，融成一个核。</p>
+<p>#44217 是量化的功能。</p>
+<p>DSA 支持原生 FP8 KV 缓存，读题走 Q8。</p>
+<p>#49069、#49068 是性能活。</p>
+<p>跑的是 DeepSeek-V4.1-Flash。</p>
+<p>Hopper 读题候选选择和写回融合了。</p>
+<p>验证时分页索引键块复用。</p>
+<p>#50228 是 Gemma 4 的性能活。</p>
+<p>解码批的融合 all-reduce，进了 CUDA 图。</p>
+<p>#51295 是缓存性能活。</p>
+<p>解码槽分配和 token 映射一次搞定。</p>
+<p>#50775 是修补。</p>
+<p>KDA 读题溢出修了，token 偏移超 2 的 31 次方会炸。</p>
+<p>#51162 是量化修补。</p>
+<p>SM100 上，AWQ、GPTQ 的 Marlin 转换保住了。</p>
+<p>其余是 DSA、调度器、扩散模型和食谱。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50767">https://github.com/sgl-project/sglang/pull/50767</a></p>
+<p><strong>TRT-LLM：5 条，两功能一评测</strong></p>
+<p>#22517 是功能。</p>
+<p>Qwen4 实验模型的 PLE 主机表，每主机只存一份。</p>
+<p>#22080 是功能。</p>
+<p>GLM-5.3 的 PrimTS 开了新组合。</p>
+<p>NVFP4 配 FP8RoPE，还带缩放。</p>
+<p>#21564 是功能。</p>
+<p>trtllm-eval 加视频生成评测子命令，支持 LPIPS。</p>
+<p>其余两条是测试。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22517">https://github.com/NVIDIA/TensorRT-LLM/pull/22517</a></p>
+<p><strong>LMDeploy、llama.cpp：各 1 条小修补</strong></p>
+<p>#5004 是修补。</p>
+<p>DP 休眠时，注意力 TP 集体顺序保住了。</p>
+<p>#32522 是 OpenCL 的小修。</p>
+<p>KV 临时填充现在能调了。</p>
+<p>快照升到 b12532。</p>
+<p>TGI 这轮零合入。</p>
+<p><strong>Dynamo：3 条，P/D 解码少扫几千万个元素</strong></p>
+<p>#18895 是 P/D 解耦的修补。</p>
+<p>解码端派发后，提示词 token 列表就扔掉。</p>
+<p>长提示词下，垃圾回收不用反复扫几千万个元素。</p>
+<p>#15312 是功能。</p>
+<p>引擎指标前缀能用环境变量加了。</p>
+<p>#18656 是前端修补。</p>
+<p>被挂起的工具调用，不再算进推理 token。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18895">https://github.com/ai-dynamo/dynamo/pull/18895</a></p>
+<p><strong>FlashInfer：1 条，批不变采样齐了</strong></p>
+<p>#9619 是个小功能。</p>
+<p>批不变采样，top-k、top-p、min-p 都齐了。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9619">https://github.com/flashinfer-ai/flashinfer/pull/9619</a></p>
+<p><strong>Mooncake：4 条，存储高可用加了一道闸</strong></p>
+<p>#5489 是存储高可用的活。</p>
+<p>Redis 集群拓扑路由加上了。</p>
+<p>副本确认失败就关闸。</p>
+<p>其余三条是修补和收敛。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5489">https://github.com/kvcache-ai/Mooncake/pull/5489</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：新一批还没刷出来</strong></p>
+<p>最新还是 11 月 18 日那批。</p>
+<p>下一批约 00:00 UTC 发布。</p>
+<p>来源：arXiv API</p>
+<p><strong>GitHub 热榜：本地推理调速出了个 Agent skill</strong></p>
+<p>它叫 inference-optimisation-skill。</p>
+<p>做法是爬山式调参。</p>
+<p>先算理论上限，再一次改一个变量。</p>
+<p>交错对照实验，取中位数。</p>
+<p>失败案例也记下来。</p>
+<p>支持 vLLM、SGLang 这些引擎。</p>
+<p>11 月 16 日建库，两天 1145 星。</p>
+<p>4 卡 H200 上，DeepSeek-V4.1-Flash 能跑了。</p>
+<p>之前一跑就崩。</p>
+<p>解码 229.1 词每秒，6 道验收全过。</p>
+<p>跟你想做的自动调参很像，但这是本地小机器的路子。</p>
+<p>来源：<a href="https://github.com/sybil-solutions/inference-optimisation-skill">https://github.com/sybil-solutions/inference-optimisation-skill</a></p>
+<h2>业内新闻</h2>
+<p><strong>ROCm 10.2.0 发布了，开始拼每瓦多少 token</strong></p>
+<p>AMD 的六周例行更新。</p>
+<p>重点是功耗预算工具。</p>
+<p>推理部署开始看每瓦多少 token 了。</p>
+<p>服务镜像带 vLLM 0.32.0 和 SGLang 0.5.21。</p>
+<p>注意，这两个版本都比最新版旧一截。</p>
+<p>PyTorch 2.15 的轮子也来了。</p>
+<p>来源：<a href="https://aidailypost.com/news/rocm-1020-expands-hyperloom-power-budget">https://aidailypost.com/news/rocm-1020-expands-hyperloom-power-budget</a></p>
+<p><strong>Anthropic IPO：明天挂牌，没有新消息</strong></p>
+<p>19点版已报全。</p>
+<h2>访谈与深度</h2>
+<p><strong>LMSYS 新博客：Humming 接进 SGLang</strong></p>
+<p>低位量化 MoE 核的完整介绍。</p>
+<p>0.1.18 版，格式和算路拆开。</p>
+<p>Hopper 上 4 位存、8 位算。</p>
+<p>测的是 DeepSeek-V4.1-Flash-1017。</p>
+<p>硬件是 8 卡 H20。</p>
+<p>读题比 Marlin 快 1.07 到 1.23 倍。</p>
+<p>专家激活换 FP8，解码吞吐再涨 16.79% 到 34.41%。</p>
+<p>GSM8K 只掉 0.3 个点。</p>
+<p>值得深读，笔记已写好。</p>
+<p>来源：<a href="https://www.lmsys.org/blog/2026-11-18-humming-sglang">https://www.lmsys.org/blog/2026-11-18-humming-sglang</a></p>
+<p><strong>这轮没有其他新访谈</strong></p>
+<p>HN、X、Reddit 这轮也没新东西。</p>
+<h2>值得深入学</h2>
+<p>本轮新增一篇深读笔记：</p>
+<ol><li>Humming 接进 SGLang：MoE 低位量化核。LMSYS 博客，2026-11-18。</li></ol>
+<p>它跟你的 SGLang 评估直接对口。</p>
+<p>MoE 后端三选一，读题占比定胜负。</p>
+<p>FP8 激活的账要单列。</p>
+<p>值得跟的两条，记在这里：</p>
+<ol><li>SGLang #50767。统一内存 P/D 走 NIXL。</li></ol>
+<ol><li>vLLM #68556。V4.1-Flash 的 GB300 配方。</li></ol>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-18-2100/">21点版</a></p>
+<hr/>
+<p>本轮已与 19点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2（实验快照 v1.5.1-kimi-k3-post.1）；llama.cpp 快照 b12532（2026-11-19T04:45:06Z），b12531（02:20:33Z）亦新；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 15 条首次汇总：#68556（Recipe：DeepSeek-V4.1-Flash GB300 Dynamo AgentX 预设，InferenceX #5015）、#66795（修补/NIXL：推模式写提交不卡、块不提前释放、代理加锁）、#68129（性能/PrimTS：滑窗验证批留解码计划）、#68127（修补/多模态：请求级参数定图片占位尺寸，DeepSeek-OCR/VL2、LightOnOCR、Molmo2）、#67880（模型：Inkling 2 Hopper 支持）、#67191（ROCm/Muse Spark：BF16 首尾层专家在线 MXFP4 目标）、#66233（修补：显式 null max_tokens 也受上限）、#67153（性能/前端：快分词器用提示词尾巴做种子）、#68049（模型/LoRA：GTE 嵌入与重排模型开 LoRA）、#67836（模型加载：计划拷贝时 casts 与 setitem 直写）、#68388/#68328（Fast Start：去掉 IPC 加载拷贝模式、WNA16 预处理权重）、#66975/#64231（XPU：Ray 测试、采样掩码 SYCL 核）、#66444（ROCm：wvSplitK bf16 N=5 防 VGPR 溢出）。 SGLang 18 条首次汇总：#50767（功能/解耦：统一内存 PD 走 NIXL）、#50620（性能/投机解码：EAGLE 拒绝采样融合草稿 softmax+采样核）、#44217（功能/DSA：原生 FP8 KV 缓存 + Q8 读题）、#49069/#49068（性能/dsv41-flash：Hopper 读题候选选择与写回融合、验证复用分页索引键块）、#50228（性能/NVIDIA：Gemma4 解码融合 all-reduce 进解码 CUDA 图）、#51295（性能/mem_cache：解码槽分配与 req_to_token 一次启动）、#50775（修补/注意力：KDA 读题超 2^31 token 偏移溢出）、#50752/#45274（修补/性能/DSA：BF16 TileLang 共享内存溢出、稀疏解码任意分块因子）、#51162（修补/量化：SM100 保留 AWQ/GPTQ 的 Marlin 转换）、#50518（修补/tokenizer：分词 worker 排空后再停调度器）、#51078/#51358/#51361/#51362/#51318（功能/文档/扩散：LTX-2 音频流、图片编辑输入说明、Pi0.5 前置条件、空结果非零退出、pybase64+orjson 序列化）、#51410（文档/食谱：RTX PRO 6000 跑 DeepSeek-V4.1）。 TRT-LLM 5 条首次汇总：#22517（功能/qwen4_exp：PLE 主机表每主机存一份）、#22080（功能：GLM5.3 PrimTS NVFP4-FP8RoPE 带缩放）、#21564（功能：trtllm-eval 视频生成评测子命令 + LPIPS）、#22508/#22549（测试：FP4 MLA 解耦测试自动调优裁剪、取消测试豁免）。 LMDeploy 1 条首次汇总：#5004（修补：DP 休眠保留注意力 TP 集体顺序）。 llama.cpp 1 条首次汇总：#32522（OpenCL：分解 FA 的 KV 临时填充可调）；快照 b12532。 TGI 零合入。 Dynamo 3 条首次汇总：#18895（修补/SGLang：解耦解码派发后丢提示词 token 列表，省 GC 扫描）、#15312（功能：环境变量加引擎指标前缀）、#18656（修补/前端：挂起工具调用不计推理 token）。 FlashInfer 1 条首次汇总：#9619（功能/batch_invariant：批不变 top-k/top-p/min-p 采样）。 Mooncake 4 条首次汇总：#5489（Store/HA：Redis 集群拓扑路由 + 失败关闭副本确认）、#5526（修补/Store：不序列化死分配器副本、限流端点 ERROR）、#5455（Store：KV 事件发布收敛到 ObjectRoute）、#5284（修补/store：wait_for 轮询超时路径锁 result_ 写）。 arXiv：无新批次（API 最新 published 仍为 2026-11-18 18:55 UTC；下一批约 00:00 UTC 11-20）。 业内新闻：ROCm 10.2.0（aidailypost 2026-11-19；Hyperloom 功耗预算工具；服务镜像 vLLM 0.32.0 / SGLang 0.5.21；PyTorch 2.15 轮子）；inference-optimisation-skill（GitHub 2026-11-16 建库，1145 星；爬山式调参 Agent skill；B390/B70/3090/4×H200 实测，H200 上 DeepSeek-V4.1-Flash 解码 229.1 词每秒）；Anthropic IPO 无新消息（19点版已报全，11 月 19 日挂牌 ANT）。 去重：AWS Lambda GPU（13点版已报）、Cerebras PD 进生产（11-17 1500版已报）、Hy4 开源权重与许可证（13点版已报）、HyperPod/Dynamo（07点版已报）、XM-Sparse（11-17 2100版已报）、SGLang 联盟（11 月 12 日旧闻）、Gemini 4 Neon（17点版已报）、GPT-6.2（07/09点版已报）均未重复。HN/X/Reddit/机器之心/量子位本轮无新相关内容；Spotify 本轮未新查。 深读：Humming 接进 SGLang，LMSYS 官方博客 2026-11-18（新增，含原文 Figure 1/2）。</p></body></html>
