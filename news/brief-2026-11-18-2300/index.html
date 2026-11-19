@@ -1,0 +1,190 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月18日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-18"/>
+<meta name="doc-ts" content="2026-11-19T07:04:31"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-18（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-18（23点版）</h1>
+<p>23点版来了，这轮是论文补报唱主角。</p>
+<p>19点版漏掉的 arXiv 新批，一次补齐。</p>
+<p>小模型先读一遍，长图文读题能快十倍。</p>
+<p>还有一篇 KV 缓存安全警示，值得留意。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照还是 b12532。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：15 条，投机解码和权重传输是重点</strong></p>
+<p>#68164 是投机解码的修补。</p>
+<p>牛顿步算出非有限值，现在直接拒掉。</p>
+<p>#68043 是权重传输的新姿势。</p>
+<p>NCCL 和 IPC 共用一块缓冲区的布局。</p>
+<p>#67364、#67363 是 ROCm 的性能活。</p>
+<p>DeepSeek-V4.1 的压缩 KV 缓存塞进压缩核。</p>
+<p>MXFP4 索引的解码元数据一次启动搞定。</p>
+<p>#65263 是前缀缓存的修补。</p>
+<p>Gemma-4 的 MTP 命中丢失修好了。</p>
+<p>#68457 是构建变化。</p>
+<p>Python 3.14 成了镜像和 CI 的默认。</p>
+<p>#68552 是重构。</p>
+<p>CUDA 图尺寸策略收进平台层。</p>
+<p>其余是 CI、测试、XPU 和 ROCm 内核。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68164">https://github.com/vllm-project/vllm/pull/68164</a></p>
+<p><strong>SGLang：6 条，DFLASH 草稿环默认关了</strong></p>
+<p>#51386 是投机解码的修补。</p>
+<p>DFLASH 的草稿 KV 环默认关掉。</p>
+<p>#46401 是新内核。</p>
+<p>SM103 的单 token BF16 MoE 核来了。</p>
+<p>#48249 是性能活。</p>
+<p>Qwen4 的 PLE 表按实际大小钉住。</p>
+<p>其余三条是杂项和测试。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51386">https://github.com/sgl-project/sglang/pull/51386</a></p>
+<p><strong>TRT-LLM：3 条，一篇文档两个豁免</strong></p>
+<p>#22498 是文档。</p>
+<p>AgentX 在 GB300 上的 serving 配方。</p>
+<p>其余两条是测试豁免。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22498">https://github.com/NVIDIA/TensorRT-LLM/pull/22498</a></p>
+<p><strong>llama.cpp：5 条，Vulkan 是主角</strong></p>
+<p>#28528 是 Vulkan 的活。</p>
+<p>stream-k 的矩阵乘落地了。</p>
+<p>#31045 是 Vulkan 的修补。</p>
+<p>混合符号整数点积的 MMQ 开了。</p>
+<p>其余是 CUDA、Vulkan 小修和 I/O 回退。</p>
+<p>快照还是 b12532，没动。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/28528">https://github.com/ggml-org/llama.cpp/pull/28528</a></p>
+<p><strong>Dynamo：2 条，Kimi-K3.1 的解码并行放行了</strong></p>
+<p>#19001 是 SGLang 的修补。</p>
+<p>Kimi-K3.1 上，PrimTS 的 DSA 核能走解码 CP 了。</p>
+<p>#18660 是新功能。</p>
+<p>回放把实时智能体热身和状态缓存转给 AISimulate。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19001">https://github.com/ai-dynamo/dynamo/pull/19001</a></p>
+<p><strong>Mooncake：4 条，存储回退和指标优化</strong></p>
+<p>#5608 是存储的修补。</p>
+<p>S3 快照对象缺失时回退。</p>
+<p>#5602 是 MNNVL 的同步活。</p>
+<p>gpu_wait 按调用方流同步。</p>
+<p>其余是 Store-RS 指标收集优化和文档。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5608">https://github.com/kvcache-ai/Mooncake/pull/5608</a></p>
+<p><strong>LMDeploy、FlashInfer、TGI：零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：11 月 18 日那批，补报 5 篇</strong></p>
+<p>19点版只报了其中 3 篇。</p>
+<p>剩下这 5 篇也是同一批，之前没报过。</p>
+<p><strong>SkimPrefill：小模型先读，读题快十倍</strong></p>
+<p>多模态模型答长图文题，读题占了首字大头。</p>
+<p>这篇让 0.8B 小模型先读一遍全文。</p>
+<p>只读到第 7 层的一个注意力头，图还降一半分辨率。</p>
+<p>挑出最相关的整图或整段，再交给目标模型。</p>
+<p>只留 10% 的 token，读题快 3.7 到 11.6 倍。</p>
+<p>准确率没掉，反而平均涨了 2 到 10 个点。</p>
+<p>值得深读，笔记已写好。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.24431">https://arxiv.org/abs/2611.24431</a></p>
+<p><strong>CanopyKV：视觉推理的草稿纸，只留四分之一</strong></p>
+<p>智能体边看图边想，截图越攒越多。</p>
+<p>草稿纸越写越厚，显存和推理都变贵。</p>
+<p>这篇按截图的父子关系留证据。</p>
+<p>该留的留，该扔的扔，不用再算注意力分。</p>
+<p>MME-Lite 上，KV 只留约四分之一。</p>
+<p>准确率反涨 10.5 个点，整轮推理快 1.64 倍。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.24373">https://arxiv.org/abs/2611.24373</a></p>
+<p><strong>Vanguard：投机解码的裁判，开始看截图了</strong></p>
+<p>视觉智能体每步都要大模型拍板。</p>
+<p>小模型先猜，大模型只验不过的。</p>
+<p>裁判以前只看文字，分不清这步合不合屏幕。</p>
+<p>这篇让裁判带着截图打分。</p>
+<p>2B 草稿判完，准确率不输 8B 目标。</p>
+<p>Mind2Web 和 EB-ALFRED 上还明显更准。</p>
+<p>大模型只写少数几步，剩下的全交给草稿。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.23917">https://arxiv.org/abs/2611.23917</a></p>
+<p><strong>LoopCache：循环 Transformer 的自投机解码</strong></p>
+<p>循环模型把同一块权重反复用 R 轮。</p>
+<p>波浪式自投机解码一次管多轮。</p>
+<p>旧办法只在固定轮次起草稿，草稿容易过时。</p>
+<p>批在一起的 token 还要搬 R 倍的 KV。</p>
+<p>这篇按置信度动态改草稿。</p>
+<p>KV 按轮次轮着用，每步只搬一轮的量。</p>
+<p>比 WaveFront 快 10.25 倍。</p>
+<p>比 LoopSpec 快 14.56 倍。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.24301">https://arxiv.org/abs/2611.24301</a></p>
+<p><strong>When Shuffling Fails：打乱藏不住 token 了</strong></p>
+<p>KV 缓存外存共享时，token 会被偷看到。</p>
+<p>打乱混淆号称有 b! 种可能，数不过来。</p>
+<p>这篇发现重复 token 会让打乱失效。</p>
+<p>有效状态从 b! 缩到 b，攻击能校准出等效去噪器。</p>
+<p>KV-Cloak 上实测，3000 条真实提示词。</p>
+<p>token 多重集恢复率 100%，就在 GPU 上。</p>
+<p>按轮次换密钥能打断跨请求迁移。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.24276">https://arxiv.org/abs/2611.24276</a></p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic IPO：今天挂牌，开盘价还没出</strong></p>
+<p>定价 83 美元，代码 ANT，纳斯达克。</p>
+<p>美东 9:30 开盘，现在还没到点。</p>
+<p>19点版已报全定价细节，这里只补一句。</p>
+<p>来源：<a href="https://trustloud.com/anthropic-ipo-date/">https://trustloud.com/anthropic-ipo-date/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>中文 SGLang 长文：从基数树讲到生产部署</strong></p>
+<p>稻草小站的一篇系统拆解。</p>
+<p>从 RadixAttention 起家，讲到进程组成。</p>
+<p>调度、重叠、HiCache、P/D 分离都拆了一遍。</p>
+<p>还给了部署监控清单和常见坑。</p>
+<p>按 SGLang 0.5.22 版对照源码写的。</p>
+<p>适合当 SGLang 评估的案头参考。</p>
+<p>来源：<a href="https://www.niuwancheng.cn/blog/docs/ai/inference-engines/02-sglang.html">https://www.niuwancheng.cn/blog/docs/ai/inference-engines/02-sglang.html</a></p>
+<p><strong>X、Reddit、HN 这轮没有新东西</strong></p>
+<p>法医威尔第二篇，16点版已深读过。</p>
+<p>SGLang 联盟和 v1.0 官宣，都是 11 月 12 日的旧闻。</p>
+<h2>值得深入学</h2>
+<p>本轮新增一篇深读笔记：</p>
+<ol><li>SkimPrefill：小模型先读，读题快十倍。arXiv:2611.24431，2026-11-18。</li></ol>
+<p>它跟你的多模态读题评估直接对口。</p>
+<p>读题节点先过一遍小模型，省下的时间能换并发。</p>
+<p>10% 预算这个数可以抄进对照组。</p>
+<p>值得跟的两条，记在这里：</p>
+<ol><li>CanopyKV。视觉 KV 按截图父子关系留。</li></ol>
+<ol><li>Dynamo #19001。Kimi-K3.1 的 DSA 核走解码 CP。</li></ol>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-18-2300/">23点版</a></p>
+<hr/>
+<p>本轮已与 21点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2；llama.cpp 快照 b12532（2026-11-19T04:45:06Z）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 15 条首次汇总：#68592（CI/测试：水位 key 检查忽略 key 文件路径）、#68568（ROCm/CI：mi300_dpx 任务临时切到 mi300_1 队列）、#68552（重构：CUDA 图尺寸策略收进平台层）、#68457（CI/构建：Python 3.14 成镜像与 CI 默认）、#68329（模型加载：去掉 torchao 重载装饰器）、#68164（修补/投机解码：非有限牛顿步拒掉）、#68048（修补/模型加载：逐层重载保留 CPU 卸载的 Engram 存储）、#68043（RL/权重传输：NCCL 与 IPC 共用单缓冲区分块布局）、#68008（修补：MXFP4 线性选择排除 Marlin）、#67833（XPU/CI：扩展 Intel GPU 注意力与 worker 测试）、#67364（ROCm/性能/DSv4.1：压缩 KV 缓存塞进压缩启动）、#67363（ROCm/性能/DSv4.1：MXFP4 索引解码元数据一次启动）、#67001（修补/前端：beam search 与语音转文本保留 DP rank）、#65263（修补/核心：Gemma-4 MTP 前缀缓存命中丢失）、#64687（模型/XPU：Qwen3.5 模型移植与 MoE 解码融合）。 SGLang 6 条首次汇总：#51386（修补/投机解码：DFLASH 草稿 KV 环默认关）、#51231（杂项：inkling tml-renderers 升到 0.4.2）、#50972（测试/NPU：图测试改跑 tp2）、#50721（杂项：dynamo-renderer 升到 10.4.3）、#48249（性能/Qwen4：PLE 卸载表按实际大小钉住）、#46401（功能/NVIDIA：SM103 单 token BF16 MoE 核）。 TRT-LLM 3 条首次汇总：#22607/#22601（infra：CPU 空停采样豁免、6 个失败用例豁免）、#22498（文档：AgentX GB300 serving 配方）。 llama.cpp 5 条首次汇总：#32545（回退到缓冲 I/O）、#32379（Vulkan：存储用 FP16 浮点零）、#32374（CUDA：mul_mat_q 用 64 位目标偏移）、#31045（Vulkan：混合符号整数点积 MMQ）、#28528（Vulkan：stream-k MUL_MAT）。 Dynamo 2 条首次汇总：#19001（修补/SGLang：Kimi-K3.1 上 PrimTS DSA 核可走解码 CP）、#18660（功能/replay：实时智能体热身与状态缓存转给 AISimulate）。 Mooncake 4 条首次汇总：#5608（修补/存储：S3 快照对象缺失回退）、#5602（TENT：MNNVL gpu_wait 调用方流同步）、#5596（存储：Store-RS 指标收集优化）、#5568（文档：HPE Slingshot CXI 支持）。 LMDeploy、FlashInfer、TGI 零合入。 arXiv：11 月 18 日批补报 5 篇首次汇总——2611.24431 SkimPrefill（小模型先读，长图文读题 3.7–11.6 倍，10% token，准确率反涨）、2611.24373 CanopyKV（主动视觉推理 KV 压缩，MME-Lite 约 1/4 KV、+10.5 点、1.64 倍）、2611.23917 Vanguard（截图裁判的步骤级投机解码，2B 草稿 ≥ 8B 目标）、2611.24301 LoopCache（循环 Transformer 自投机解码，比 WFD 快 10.25 倍、比 LoopSpec 快 14.56 倍）、2611.24276 When Shuffling Fails（KV 打乱混淆失效，KV-Cloak 3000 提示词 100% 恢复）。 业内新闻：Anthropic IPO 今天挂牌（ANT、$83，美东 9:30 开盘，开盘价未出）；SGLang 联盟/v1.0 官宣（11 月 12 日旧闻，未重复）；NEAR AI 事件（11 月 10 日已报，未重复）；法医威尔第二篇（16点版已深读，未重复）。 访谈与深度：中文 SGLang 长文拆解（稻草小站，按 0.5.22 版）；HN/X/Reddit 本轮无新相关内容。 深读：SkimPrefill arXiv:2611.24431（新增，含原文 Figure 1/5/6/7）。</p></body></html>
