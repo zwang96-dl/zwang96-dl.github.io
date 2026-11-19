@@ -1,0 +1,149 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月19日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-19"/>
+<meta name="doc-ts" content="2026-11-19T11:00:03"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-19（3点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-19（3点版）</h1>
+<p>深夜档，还是 GitHub 合入唱主角。</p>
+<p>32 条 PR 进了主分支。</p>
+<p>没有新版本，没有新论文。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 还是 v1.0.0，主分支到了 5812201。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：9 条，KV 传输的可靠性是重点</strong></p>
+<p>#67939 是 KV 传输的修补。</p>
+<p>Mooncake 传完要校验结果。</p>
+<p>传失败的，现在能走完收尾流程。</p>
+<p>KV 传输就是 P/D 解耦里搬草稿纸的活。</p>
+<p>搬丢了得能发现，还得能收尾。</p>
+<p>#68563 是多模态修补。</p>
+<p>Unlimited-OCR-2 的 DASH 路由，现在批量不变。</p>
+<p>#68055 也是多模态。</p>
+<p>LFM2-VL 开始认 do_image_splitting 参数了。</p>
+<p>图片要不要切分，由调用方说了算。</p>
+<p>#64040 是内核修补。</p>
+<p>FlashInfer 的 FP8 块缩放 GEMM，行打包传对了。</p>
+<p>#68574 是 ROCm 的性能活。</p>
+<p>Qwen4Exp 的短卷积 prefill 检查点，能导出了。</p>
+<p>#68070 是解析器的性能活。</p>
+<p>DeepSeek 的 DSML 非 JSON 参数，跳过每轮转换。</p>
+<p>其余是构建上限、CI 跳过和 CPU 采样核。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67939">https://github.com/vllm-project/vllm/pull/67939</a></p>
+<p><strong>SGLang：7 条，多模态模型能只跑文字了</strong></p>
+<p>#47977 是新功能。</p>
+<p>多模态模型加个开关，只跑文字。</p>
+<p>视觉部分不加载，省显存也省启动时间。</p>
+<p>想先拿文字链路做实验，这个开关正合适。</p>
+<p>#51450 是 Kimi-K3.1 的新内核。</p>
+<p>FP4 索引器支持进了 DCP。</p>
+<p>#49127 是缓存的可观测性。</p>
+<p>外部缓存链接器的加载、卸载、等待都有指标了。</p>
+<p>草稿纸搬进搬出花了多久，现在看得见。</p>
+<p>#51270 是 Rust 服务端的修补。</p>
+<p>gRPC 端口下，分词 worker 数可以大于 1 了。</p>
+<p>#51458 是投机解码的修补。</p>
+<p>空闲 DP rank 上的自定义掩码，DFLASH 会保留。</p>
+<p>其余是文档和命令行注册同步。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47977">https://github.com/sgl-project/sglang/pull/47977</a></p>
+<p><strong>TRT-LLM：8 条，权重加载变快了</strong></p>
+<p>#21835 是性能活。</p>
+<p>权重加载用到更多 CPU 线程。</p>
+<p>大模型启动时，读权重那段更快了。</p>
+<p>#21689 是评测。</p>
+<p>Qwen3.5-4B 的 P/D 解耦跑了 GSM8K。</p>
+<p>#22329 是建模层交接。</p>
+<p>trtllm_modeling_v2 交给正式后继者接管。</p>
+<p>其余是测试豁免、文档和准确率覆盖恢复。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21835">https://github.com/NVIDIA/TensorRT-LLM/pull/21835</a></p>
+<p><strong>llama.cpp：3 条，Metal 是主角</strong></p>
+<p>#32542 是 Metal 的活。</p>
+<p>M5 的 CONV_2D 张量接口来了。</p>
+<p>split-K 覆盖了全部芯片。</p>
+<p>#32589 是 Qwen3VL 的修补。</p>
+<p>EAGLE-3 的层输入张量设对了。</p>
+<p>#32594 是 CI 修补。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32542">https://github.com/ggml-org/llama.cpp/pull/32542</a></p>
+<p><strong>Dynamo：1 条，算子多了重跑意图</strong></p>
+<p>#15930 是算子功能。</p>
+<p>DGDR 重跑意图现在能显式声明了。</p>
+<p>v1.7.0 又多了个开发 tag。</p>
+<p>v1.7.0-kimi-k3.1-pro-dev.1，正式版还在路上。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/15930">https://github.com/ai-dynamo/dynamo/pull/15930</a></p>
+<p><strong>Mooncake：1 条，删失败能回收旧分配</strong></p>
+<p>#5650 是存储修补。</p>
+<p>删除失败时，旧分配能回收了。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5650">https://github.com/kvcache-ai/Mooncake/pull/5650</a></p>
+<p><strong>FlashInfer：3 条，解码 GDN 有性能活</strong></p>
+<p>#9706 是性能活。</p>
+<p>sm_107a 的 GDN 解码加了局域性优化。</p>
+<p>批量 48 以上才生效。</p>
+<p>其余是 Windows 的内存函数加载和测试。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9706">https://github.com/flashinfer-ai/flashinfer/pull/9706</a></p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：没有新批</strong></p>
+<p>最新还是 11 月 18 日那批。</p>
+<p>下一批约在 11 月 20 日 00:00 UTC。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic 今天挂牌，开盘还没到</strong></p>
+<p>定价 83 美元，代码 ANT，纳斯达克。</p>
+<p>美东时间 9:30 开盘，相当于这边 6:30。</p>
+<p>开盘价等 7 点版再报。</p>
+<p>来源：<a href="https://www.fastcompany.com/91644956/ant-stock-live-anthropic-trading-time-date-ipo-share-price">https://www.fastcompany.com/91644956/ant-stock-live-anthropic-trading-time-date-ipo-share-price</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X、Reddit、HN 这轮没有新东西</strong></p>
+<p>搜到的都是 11 月 12 日联盟的旧闻。</p>
+<p>Spyre、Tensward 那些，之前几期都报过。</p>
+<h2>值得深入学</h2>
+<p>本轮没有新增深读笔记。</p>
+<p>合入都是小修补，没到深读的份量。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-19-0300/">3点版</a></p>
+<hr/>
+<p>本轮已与 1点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2，新增开发 tag v1.7.0-kimi-k3.1-pro-dev.1；llama.cpp v1.0.0，主分支提交 5812201（2026-11-19T10:24:10Z）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 9 条首次汇总：#64040（修补/内核：FlashInfer FP8 块缩放 GEMM 传 packed rows）、#68055（修补/多模态：LFM2-VL 认 do_image_splitting 与 thumbnail）、#68070（性能/解析器：跳过非 JSON DeepSeek DSML 参数的每轮转换）、#67939（KV Connector：校验 Mooncake 结果、完成失败传输）、#68566（构建：nvidia-cudnn-frontend 上限 1.33 以下）、#68604（CI：Hopper 以下跳过 HYV4 与 Inkling 的 PP 等价测试）、#68574（ROCm/性能：Qwen4Exp 导出 PLE 短卷积 prefill 检查点）、#62440（CPU：AArch64 top-k/top-p 采样核）、#68563（修补：Unlimited-OCR-2 DASH 路由批量不变）。 SGLang 7 条首次汇总：#47977（功能/多模态：--disable-multimodal 只跑文字）、#51270（修补/grpc：Rust 服务端 --tokenizer-worker-num 可大于 1）、#49127（功能/linker：外部缓存链接器查、加载、卸载、等待指标）、#51172（文档/AMD：GLM-5.3-Flash MI300X/MI325X AgentX cookbook 命令）、#51517（修补/cli：Cookbook 命令注册表与主分支同步）、#51450（功能/NVIDIA/dsa：Kimi-K3.1 FP4 索引器支持，DCP 下）、#51458（修补/dflash：空闲 DP rank 保留 captured custom_mask）。 TRT-LLM 8 条首次汇总：#22634（infra：pre-merge 豁免 1 个失败用例）、#22329（修补/trtllm_modeling_v2：交接给正式后继者）、#21835（性能：权重加载用更多 torch CPU 线程）、#21689（测试：Qwen3.5-4B disagg GSM8K 评测）、#22617（杂项：删两个无用日志解析器）、#22521（修补：恢复 FLUX.2/FastWan LPIPS 覆盖）、#22488（修补：恢复 B300 DeepSeek 准确率覆盖）、#22075（测试：全跳过的单测记为 SKIPPED 而非 PASSED）。 llama.cpp 3 条首次汇总：#32594（CI：修 opencl 构建）、#32542（Metal：M5 CONV_2D 张量 API，全芯片 split-K）、#32589（修补：Qwen3VL EAGLE-3 设 t_layer_inp）。 Dynamo 1 条首次汇总：#15930（功能/算子：显式 DGDR 重跑意图）。 Mooncake 1 条首次汇总：#5650（修补/存储：删除失败时回收旧分配）。 FlashInfer 3 条首次汇总：#9479（测试：cake_profiler 接受 mangled sentinel 内核名）、#9478（修补/comm：Windows 从 ucrtbase 加载 malloc/free）、#9706（性能/cake_gdn：sm_107a 局域性 GDN 解码，B&gt;=48）。 LMDeploy、TGI 零合入。 arXiv：无新批次（API 最新 published 仍为 2026-11-18T17:31:56Z；下一批约 00:00 UTC 11-20）。 业内新闻：Anthropic IPO 仍未开盘（美东 9:30 开盘，1点版已报定价 83 美元）；SGLang 联盟、IBM Spyre、Tensward 均为已报旧闻，未重复。 访谈与深度：HN/X/Reddit 本轮无新相关内容。 深读：本轮无新增。</p></body></html>
