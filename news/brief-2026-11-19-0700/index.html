@@ -1,0 +1,176 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月19日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-19"/>
+<meta name="doc-ts" content="2026-11-19T15:03:12"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-19（7点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-19（7点版）</h1>
+<p>早晨档，合入还是主角。</p>
+<p>28 条 PR 进了主分支。</p>
+<p>没有新版本，没有新论文。</p>
+<p>Anthropic 的开盘价还没出来。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 正式版还是 v1.0.0。</p>
+<p>每日快照到了 b12541，5点版时是 b12535。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：9 条，AMD 解码提速是亮点</strong></p>
+<p>#66133 是个性能修补。</p>
+<p>AMD 的 gfx1151 芯片上，解码吞吐最高涨 44%。</p>
+<p>修的是分块大小没对齐，解码一跑就掉速。</p>
+<p>#68072 是 KV 传输的修补。</p>
+<p>KV 就是模型的草稿纸。</p>
+<p>MoRIIO 是搬 KV 的后端。</p>
+<p>NVFP4 是一种 4 位浮点量化。</p>
+<p>它传这种格式的 KV 页面时，不同卡混跑会写错。</p>
+<p>现在修好了。</p>
+<p>#68529 是 Mooncake 的修补。</p>
+<p>每个请求现在能单独限流。</p>
+<p>不会一个请求把通道占满。</p>
+<p>#59209 是稀疏计算的活。</p>
+<p>HiSparse 的支持范围扩大了。</p>
+<p>稀疏计算就是只算有用的部分，省算力。</p>
+<p>#68386 是内核修补。</p>
+<p>一个融合算子的整数偏移会溢出。</p>
+<p>还会把部分旋转位置算错。</p>
+<p>现在修好了。</p>
+<p>#68565 是 Rust 前端的活。</p>
+<p>引擎握手时多报一项能力。</p>
+<p>只收元数据、不收正文的输入也能接。</p>
+<p>#67860 是 XPU 的开关。</p>
+<p>XPU 是英特尔的加速卡。</p>
+<p>加了个环境变量，管查向量用不用 FP8。</p>
+<p>FP8 是一种 8 位浮点数。</p>
+<p>#68694 是 ROCm 的修补。</p>
+<p>ROCm 是 AMD 的计算平台。</p>
+<p>它绕开了 torch 2.13 的一个编译器 bug。</p>
+<p>出问题的是扩散模型的采样器。</p>
+<p>#67947 是水印的修补。</p>
+<p>投机解码就是先让小模型打草稿。</p>
+<p>投机解码的行里，跨提示词边界的重复上下文现在能检出。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66133">https://github.com/vllm-project/vllm/pull/66133</a></p>
+<p><strong>SGLang：5 条，全是 NPU 和杂活</strong></p>
+<p>#40580 是 NPU 的新后端。</p>
+<p>NPU 是昇腾这类专用 AI 芯片。</p>
+<p>MindIE-SD 稀疏注意力后端来了。</p>
+<p>稀疏注意力就是只算关键部分。</p>
+<p>#45792 是多模态的活。</p>
+<p>共享图片加载器现在能解 JPEG 了。</p>
+<p>多模态模型读图又少了一道坎。</p>
+<p>#51551 是 CI 的拆分。</p>
+<p>测试分区拆成两半，防超时。</p>
+<p>其余两条是版本 bump 和警告清理。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/40580">https://github.com/sgl-project/sglang/pull/40580</a></p>
+<p><strong>TRT-LLM：3 条，GLM 新模型上新卡</strong></p>
+<p>#22621 是新模型支持。</p>
+<p>GLM-5.3-Flash 的 FP8 建模目标，能在 sm_103 上跑了。</p>
+<p>sm_103 是英伟达新卡的架构代号。</p>
+<p>#22194 是个小修补。</p>
+<p>top_logprobs 设成 0 时，不用再传 logprobs 了。</p>
+<p>#22409 也是修补。</p>
+<p>B300 的注意力超时恢复了，过期的豁免删了。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22621">https://github.com/NVIDIA/TensorRT-LLM/pull/22621</a></p>
+<p><strong>Dynamo：5 条，路由多了分发门</strong></p>
+<p>#18443 是路由的新功能。</p>
+<p>路由多了分发门和会话通道。</p>
+<p>ThunderAgent 坐上了门岗。</p>
+<p>#18801 是 KV 索引的重构。</p>
+<p>构造时的索引代理删掉了。</p>
+<p>#18799 是调度器的清理。</p>
+<p>旧的调度链和死代码删掉了。</p>
+<p>另外两条是文档恢复。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18443">https://github.com/ai-dynamo/dynamo/pull/18443</a></p>
+<p><strong>FlashInfer：1 条，解码状态池升级</strong></p>
+<p>#9720 是解码核的新功能。</p>
+<p>FP16 状态池来了，配随机舍入。</p>
+<p>FP16 是一种 16 位浮点数。</p>
+<p>随机舍入就是按概率进位。</p>
+<p>只针对 SM100 和 SM103 的解码路线。</p>
+<p>SM100 和 SM103 是新卡的架构代号。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9720">https://github.com/flashinfer-ai/flashinfer/pull/9720</a></p>
+<p><strong>llama.cpp：3 条，快照到了 b12541</strong></p>
+<p>#32489 是 CUDA 的新核。</p>
+<p>给 set_n 加了散射核。</p>
+<p>#27258 是调度器的测试。</p>
+<p>调度器和异步后端的行为，现在用测试钉死了。</p>
+<p>#32429 是个修补。</p>
+<p>Inkling 2 的注意力掩码设对了。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32489">https://github.com/ggml-org/llama.cpp/pull/32489</a></p>
+<p><strong>Mooncake：2 条，搬运层加了新通道</strong></p>
+<p>#4540 是传输引擎的新功能。</p>
+<p>目标端本地 GPU 写通道来了，还是可选项。</p>
+<p>搬草稿纸又多了一条近路。</p>
+<p>#5311 是 MLU 的活。</p>
+<p>MLU 是寒武纪的 AI 芯片。</p>
+<p>同一台机器上的 MLU 之间，现在能直接传数据了。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/4540">https://github.com/kvcache-ai/Mooncake/pull/4540</a></p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：没有新批</strong></p>
+<p>最新还是 11 月 18 日那批。</p>
+<p>下一批约在 11 月 20 日 00:00 UTC。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic 挂牌：第一笔交易还没出来</strong></p>
+<p>定价 83 美元，代码 ANT，纳斯达克。</p>
+<p>美东 9:30 开盘，相当于这边 6:30。</p>
+<p>新股开盘要先撮合，大盘股常拖一两小时。</p>
+<p>第一笔交易还没打印出来。</p>
+<p>开盘价等 9 点版再报。</p>
+<p>New Street 给了 105 美元目标价。</p>
+<p>那是 12 个月视角，不是首日承诺。</p>
+<p>来源：<a href="https://www.fastcompany.com/91644956/ant-stock-live-anthropic-trading-time-date-ipo-share-price">https://www.fastcompany.com/91644956/ant-stock-live-anthropic-trading-time-date-ipo-share-price</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X、Reddit、HN 这轮没有新东西</strong></p>
+<p>搜到的都是 11 月 12 日联盟、Spyre 那些旧闻。</p>
+<p>Qwen3.8 自托管指南也是 11 月 16 日的旧文。</p>
+<h2>值得深入学</h2>
+<p>本轮没有新增深读笔记。</p>
+<p>合入都是小修补和性能点，没到深读的份量。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-19-0700/">7点版</a></p>
+<hr/>
+<p>本轮已与 5点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2；llama.cpp 正式版 v1.0.0，每日快照 b12541（5点版时 b12535，主分支提交 c7468107，2026-11-19T14:44:47Z）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 9 条首次汇总：#66133（性能/ROCm：gfx1151 bf16 分块悬崖修补，解码吞吐最高 +44%）、#68072（修补/ROCm/MoRIIO：异构 TP 写 NVFP4 KV 页面与复制索引缓存）、#68529（修补/KV Connector：按请求执行 Mooncake 卸载限额）、#59209（功能/HiSparse：支持 QSA）、#68386（修补/内核：fused_qk_norm_rope int32 偏移溢出与 NeoX 部分旋转损坏）、#68565（功能/Rust前端/EPD：引擎握手上报 metadata-only 输入能力）、#67860（功能/XPU：VLLM_XPU_SUPPORT_FP8_QUERY 控制 flash attention FP8 查询）、#68694（修补/ROCm：绕开 torch 2.13 Inductor gather bug，Nemotron 扩散采样器）、#67947（修补/水印：投机行跨提示词边界重复上下文检测）。 SGLang 5 条首次汇总：#40580（功能/NPU：MindIE-SD 稀疏注意力后端）、#45792（功能/NPU/多模态：共享图片加载器加 JPEG 解码）、#51551（CI/NPU：extra-b-test 拆两分区防超时）、#50028（杂项/rust：sglang-api-types bump 到 0.1.1）、#44329（修补/NPU/扩散：清理警告）。 TRT-LLM 3 条首次汇总：#22621（功能：GLM-5.3-Flash FP8 Modeling V2 目标跑在 sm_103）、#22194（修补：top_logprobs=0 时无需 logprobs）、#22409（修补：恢复 B300 注意力超时，删过期豁免）。 Dynamo 5 条首次汇总：#18443（功能/路由：分发门与会话 lane，ThunderAgent 上门）、#18801（重构/kv-indexer：删构造时索引代理）、#18799（杂项/调度器：删 policy.rs、旧调度链与死代码）、#19152/#19150（文档/fern：恢复 v1.5.0–v1.6.1 的 Model Express/Shadow Engine Failover 与快照页面）。 FlashInfer 1 条首次汇总：#9720（功能/cake_gdp：FP16 状态池加随机舍入，SM100/SM103 解码路线）。 llama.cpp 3 条首次汇总：#32489（功能/CUDA：set_n 散射核）、#27258（测试：调度器与异步后端行为形式化）、#32429（修补：Inkling 2 注意力掩码）。 Mooncake 2 条首次汇总：#4540（功能/传输引擎：opt-in 目标端本地 GPU 写通道）、#5311（功能：同机 MLU IPC 与设备直拷）。 LMDeploy、TGI 零合入。 arXiv：无新批次（KV cache 查询最新 published 仍为 2026-11-18T15:37:04Z；下一批约 00:00 UTC 11-20）。 业内新闻：Anthropic IPO 第一笔交易截至约 15:10 UTC 仍未打印（美东 9:30 开盘=这边 6:30，开盘撮合进行中；New Street 目标价 $105，12 个月视角）；开盘价留待 9 点版。 访谈与深度：HN/X/Reddit 本轮无新相关内容（SGLang 联盟、Spyre、Tensward、Qwen3.8 指南均为已报或旧闻）。 深读：本轮无新增。</p></body></html>
