@@ -1,0 +1,145 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月19日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-19"/>
+<meta name="doc-ts" content="2026-11-19T18:58:49"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-19（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-19（11点版）</h1>
+<p>vLLM 给 Inkling 2 换了个更快的专家核。</p>
+<p>H200 上并发一高，吞吐直接翻倍还多。</p>
+<p>其余合入都是小修补。</p>
+<p>没有新版本，没有新论文。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.4.0rc4。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 正式版还是 v1.0.0。</p>
+<p>每日快照到了 b12549，9点版时是 b12546。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：7 条，Inkling 2 在 Hopper 上提速</strong></p>
+<p>#68761 是个性能大活。</p>
+<p>Inkling 2 的专家矩阵乘换了新核。</p>
+<p>专家就是 MoE 里分工的小模型。</p>
+<p>新核叫 Humming，专吃 NVFP4 和 MXFP8 权重。</p>
+<p>H200 上 4 卡并行跑 NVFP4 版。</p>
+<p>并发 1 时吞吐涨 1.48 倍。</p>
+<p>并发 64 时涨 2.71 倍。</p>
+<p>MXFP8 版 8 卡并行也有 2.06 倍。</p>
+<p>精度没掉，GSM8K 还是 0.976。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68761">https://github.com/vllm-project/vllm/pull/68761</a></p>
+<p>#67941 是 KV 缓存的松绑。</p>
+<p>KV 就是模型的草稿纸。</p>
+<p>Nemotron Shortcut 需要混用页大小。</p>
+<p>以前校验直接拒绝这种布局。</p>
+<p>现在放行了，别的模型不受影响。</p>
+<p>#63397 是 AMD 卡的解码提速。</p>
+<p>Kimi-K2 系列的 MLA 解码换了新算路。</p>
+<p>MLA 是一种省显存的注意力。</p>
+<p>MI355X 上 8 卡并行跑得更快。</p>
+<p>#62912 是 MoE 的小优化。</p>
+<p>MoE 挑专家现在整 warp 一起算。</p>
+<p>warp 就是 GPU 里一组并行线程。</p>
+<p>结果直接留在寄存器里，少搬运。</p>
+<p>#67348 是前端的安全修补。</p>
+<p>分词输入现在有了上限。</p>
+<p>以前超大输入能把服务拖垮。</p>
+<p>#67981 和 #65241 都是内核修补。</p>
+<p>一个预热 SplitKV 的合并核。</p>
+<p>一个补了同步指令防写错。</p>
+<p><strong>SGLang：2 条，一修一杂</strong></p>
+<p>#51518 是 AMD 的修补。</p>
+<p>Qwen3.5 的 FP8 状态层缓存有 bug。</p>
+<p>单核镜像先钉在一个已修复的版本。</p>
+<p>#51387 是扩散模型的性能活。</p>
+<p>Flux3 的 SwiGLU 现在走共享层。</p>
+<p>SwiGLU 是一种激活函数。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51518">https://github.com/sgl-project/sglang/pull/51518</a></p>
+<p><strong>TRT-LLM：1 条，只是测试</strong></p>
+<p>#22533 是测试的放宽。</p>
+<p>流水线并行 PD 测试冷启动给 900 秒。</p>
+<p>PD 就是读题和生成分机器跑。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22533">https://github.com/NVIDIA/TensorRT-LLM/pull/22533</a></p>
+<p><strong>Dynamo：4 条，都是修补</strong></p>
+<p>#18998 是规划器的容错。</p>
+<p>启动中的容量先容忍，别急着报错。</p>
+<p>#10780 是路由的观测补全。</p>
+<p>独立路由的指标现在能单独追踪。</p>
+<p>#19110 是链路追踪的修补。</p>
+<p>#18680 是个新功能。</p>
+<p>性能模型消费方共用一个输入口。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18998">https://github.com/ai-dynamo/dynamo/pull/18998</a></p>
+<p><strong>llama.cpp：2 条，小修</strong></p>
+<p>#32606 修了 YuE2 的投影加载。</p>
+<p>YuE2 是个音乐生成模型。</p>
+<p>#32387 给 ROPE 和 SET_ROWS 加了 BF16 支持。</p>
+<p>BF16 是一种 16 位浮点数。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32606">https://github.com/ggml-org/llama.cpp/pull/32606</a></p>
+<p><strong>FlashInfer、Mooncake、LMDeploy、TGI：零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：没有新批</strong></p>
+<p>最新还是 11 月 18 日那批。</p>
+<p>下一批约在 11 月 20 日 00:00 UTC。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic：开盘冲高后回落</strong></p>
+<p>开盘 111.50 美元，9点版已报。</p>
+<p>中午一度冲到 114.99 美元。</p>
+<p>到美东 12:42 回到 98.62 美元。</p>
+<p>比发行价 83 美元还是高约 19%。</p>
+<p>首日收盘价等下期再报。</p>
+<p>来源：<a href="https://www.fool.com/investing/2026/11/19/should-you-buy-anthropic-stock-now-that-it-s-public/">https://www.fool.com/investing/2026/11/19/should-you-buy-anthropic-stock-now-that-it-s-public/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>X、Reddit、HN 这轮没有新东西</strong></p>
+<p>搜到的还是 Inkling 2 的旧指南。</p>
+<p>都是 11 月 13 日到 16 日的内容。</p>
+<p>没有值得单拎出来的新讨论。</p>
+<h2>值得深入学</h2>
+<p>本轮没有新增深读笔记。</p>
+<p>合入里最有份量的是 #68761。</p>
+<p>但它只是换核提速，没有新方法。</p>
+<p>等下轮有新东西再写。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-19-1100/">11点版</a></p>
+<hr/>
+<p>本轮已与 9点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.4.0rc4；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2；llama.cpp 正式版 v1.0.0，每日快照 b12549（9点版时 b12546，主分支提交 7fce543，2026-11-19T18:13:55Z）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 7 条首次汇总：#68761（性能：Inkling 2 Hopper 专家 GEMM 换 Humming，NVFP4 TP4 H200 并发 64 吞吐 2.71 倍，MXFP8 TP8 2.06 倍，GSM8K 不变）、#67941（功能/KV：层紧凑布局允许混用页大小，为 Nemotron Shortcut）、#63397（性能/ROCm：MLA 解码 W_UV 走 AITER Triton bf16 BMM，Kimi-K2 系列 MI355X 提速）、#62912（性能/MoE：全 warp top-k 行选择，结果留寄存器）、#67348（前端：max_tokenize_tokens 上限防 DoS）、#67981（修补/FA4：预热 SplitKV combine 核）、#65241（修补/内核：fused KDA 解码块规约前加 __syncwarp）。 SGLang 2 条首次汇总：#51518（修补/AMD：mono-kernel 钉在 32a1220，修 Qwen3.5 FP8 state_layer_cache）、#51387（性能/扩散：flux3 原生 SwiGLU 走共享 SiluAndMul 层）。 TRT-LLM 1 条首次汇总：#22533（测试：流水线并行 PD 测试冷启动放宽到 900 秒）。 Dynamo 4 条首次汇总：#18998（修补/规划器：容忍待启动容量）、#10780（修补/路由：独立路由指标追踪器）、#19110（修补/运行时：继续 traceparent 未知 trace-flags 的 trace）、#18680（功能：统一 --ais-perf-model 输入）。 llama.cpp 2 条首次汇总：#32606（修补/mtmd：YuE2 投影加载）、#32387（功能/ggml：ROPE 与 SET_ROWS 加 BF16 支持）。 FlashInfer、Mooncake、LMDeploy、TGI 零合入。 arXiv：无新批次（KV cache 查询最新 published 仍为 2026-11-18T15:37:04Z；下一批约 00:00 UTC 11-20）。 业内新闻：Anthropic 开盘 $111.50 后冲高 $114.99，美东 12:42 回落至 $98.62，仍较发行价 $83 高约 19%（Motley Fool）。 访谈与深度：HN/X/Reddit 本轮无新相关内容。 深读：本轮无新增（宁缺毋滥）。</p></body></html>
