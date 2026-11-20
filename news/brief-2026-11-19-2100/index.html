@@ -1,0 +1,228 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月19日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-19"/>
+<meta name="doc-ts" content="2026-11-20T05:03:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-19（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-19（21点版）</h1>
+<p>11 月 20 日那批论文进来了。</p>
+<p>混合模型前缀缓存有了新解法。</p>
+<p>GitHub 这轮 36 条合入。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.3.0，今晚 18:45 刚出。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 还是 b12556，没有新快照。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：13 条，跨引擎共享是头条</strong></p>
+<p>#67539 是 DeepSeek V4.1 的新功能。</p>
+<p>Engram 表可以跨引擎共享了。</p>
+<p>Engram 是 V4.1 记长期记忆的表。</p>
+<p>以前每个引擎各存一份。</p>
+<p>现在拆成行，分散存在各卡上。</p>
+<p>走 NVLink 或 RDMA 去取。</p>
+<p>RDMA 就是跨机器的高速直连。</p>
+<p>不用专门的宿主进程，也不用额外依赖。</p>
+<p>#61620 是量化的新功能。</p>
+<p>NVFP4 的权重能在线转成 MXFP4。</p>
+<p>MXFP4 是更新的 4 位浮点格式。</p>
+<p>不用重新导模型，直接加载就能用。</p>
+<p>#64289 是 MoE 的提速。</p>
+<p>SM90 的 MXFP4 MegaMoE 走了 FlashInfer。</p>
+<p>MegaMoE 是个很快的专家并行核。</p>
+<p>#68844 加了 HY4 的配方。</p>
+<p>HY4 是腾讯 770B 的大模型。</p>
+<p>配方就是官方给的部署做法。</p>
+<p>#68041 是 RL 训练的改动。</p>
+<p>权重更新后默认直接重载。</p>
+<p>不用再重启服务。</p>
+<p>其余是修补和 CI。</p>
+<p>#68270 修了 Qwen3-VL 的视频位置。</p>
+<p>#62589、#60153 是 AMD 卡的提速。</p>
+<p>#68176 是快速启动支持 INT8 权重。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67539">https://github.com/vllm-project/vllm/pull/67539</a></p>
+<p><strong>SGLang：9 条，CPU 量化是头条</strong></p>
+<p>#51459 是 CPU 上的量化。</p>
+<p>每 token 的 FP8 量化上了 AVX10.2。</p>
+<p>AVX10.2 是新一代 CPU 的向量指令。</p>
+<p>纯 CPU 跑推理也能用 8 位了。</p>
+<p>#51363 是采样的提速。</p>
+<p>注意力并行时，top-p 归一化不用走慢路。</p>
+<p>top-p 就是只留概率够高的词。</p>
+<p>#51691 是文档。</p>
+<p>Hy4 的 cookbook 加进来了。</p>
+<p>#50140 是 profiler 的小功能。</p>
+<p>前向步骤能打上 NVTX 标记。</p>
+<p>NVTX 是英伟达的性能分析标记。</p>
+<p>#48227 是模型加载的保护。</p>
+<p>多线程加载时，在途字节数有了上限。</p>
+<p>其余是测试、修补和 NPU 重构。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51459">https://github.com/sgl-project/sglang/pull/51459</a></p>
+<p><strong>TRT-LLM：5 条，V4.1 解码提速是头条</strong></p>
+<p>#22465 是 DeepSeek V4.1 的提速。</p>
+<p>CSA2 注意力在解码时预取候选块。</p>
+<p>CSA2 是稀疏注意力的一种。</p>
+<p>候选块提前放进 L2 缓存。</p>
+<p>L2 就是 GPU 上 fast 的二级缓存。</p>
+<p>解码时不用现去内存里翻。</p>
+<p>这是 19 点版那套 V4.1 提速包的延续。</p>
+<p>其余是修补和重构。</p>
+<p>#19949 修了 BF16 的 MoE 权重。</p>
+<p>#22340 修了 MXFP4 的描述符对齐。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22465">https://github.com/NVIDIA/TensorRT-LLM/pull/22465</a></p>
+<p><strong>FlashInfer：7 条，GDN 读题核是头条</strong></p>
+<p>#9704 是 GDN 的新核。</p>
+<p>Cake CP 读题后端可以选了。</p>
+<p>GDN 是一种带门控的递推层。</p>
+<p>CP 就是把长上下文切开分卡算。</p>
+<p>小批量加长序列，最快 4.25 倍。</p>
+<p>批量一大就反而不如老核。</p>
+<p>所以还加了 auto 模式自动挑。</p>
+<p>#8497 是 MoE 的提速。</p>
+<p>MXFP4 乘 MXFP8 的矩阵乘更快了。</p>
+<p>#9463 是注意力的扩展。</p>
+<p>Blackwell 的分页自动模式支持 FP16。</p>
+<p>Blackwell 是英伟达 B200 那代架构。</p>
+<p>其余是构建和修补。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9704">https://github.com/flashinfer-ai/flashinfer/pull/9704</a></p>
+<p><strong>Dynamo、Mooncake：各 1 条小修补</strong></p>
+<p>Dynamo #17558 是观测修补。</p>
+<p>P/D 拆分仪表盘上，主机名显示对了。</p>
+<p>Mooncake #5538 是构建修补。</p>
+<p>NPU 的轮子包关掉了随机堆基址。</p>
+<p>来源：GitHub pulls</p>
+<p><strong>llama.cpp、LMDeploy、TGI：零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：11 月 20 日那批进来了，6 篇相关</strong></p>
+<p><strong>FrontierReplay：混合模型的前缀缓存不用切读题了</strong></p>
+<p>混合模型的前缀缓存一直很难做。</p>
+<p>递推层的状态不能随便截断。</p>
+<p>想在中间存检查点，就得切断读题。</p>
+<p>这篇不切了，读题一口气跑完。</p>
+<p>事后只重放递推层，补出检查点。</p>
+<p>每 token 比重算便宜 6–37 倍。</p>
+<p>好吞吐比 vLLM 高 1.11–4.26 倍。</p>
+<p>首字中位数降 16–89%。</p>
+<p>近似方法长上下文掉 13–17% 准确率。</p>
+<p>它一分不掉。</p>
+<p>细节见文末深读。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.26020">https://arxiv.org/abs/2611.26020</a></p>
+<p><strong>Aggron：智能体等排队时，顺手把 KV 压了</strong></p>
+<p>智能体会话越跑越长，KV 越攒越多。</p>
+<p>以前等 KV 攒到阈值，才一次性摘要。</p>
+<p>摘要还跟正常请求抢算力。</p>
+<p>Aggron 每回合都摘要，只压一部分。</p>
+<p>它挑请求排队卡住的空档干活。</p>
+<p>用的是排队堵出来的闲置算力。</p>
+<p>高负载下，P99 延迟降 27–31%。</p>
+<p>P99 就是最慢那 1% 的请求。</p>
+<p>吞吐涨 1.34–1.40 倍。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.26435">https://arxiv.org/abs/2611.26435</a></p>
+<p><strong>AscMLA：FP4 解码，长上下文 MLA 更省了</strong></p>
+<p>MLA 是 DeepSeek 那种省显存的注意力。</p>
+<p>长上下文解码，老要反复读 KV。</p>
+<p>FP4 能把 KV 压得更小。</p>
+<p>但 K 和 V 的缩放要求不一样。</p>
+<p>以前得先反量化，或者各存一份。</p>
+<p>这篇用不对称缩放，一份 FP4 直接算。</p>
+<p>缓存比 FP8 少 38.2%。</p>
+<p>比 TRT-LLM 的 FP8 核快 1.35 倍。</p>
+<p>比 CAKE 的 NVFP4 核快 1.26 倍。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.26106">https://arxiv.org/abs/2611.26106</a></p>
+<p><strong>BlockJack：KV 缓存的页表也能被劫持</strong></p>
+<p>这是第一篇 KV 地址翻译攻击。</p>
+<p>页表就是逻辑块到物理块的对照表。</p>
+<p>攻击者改一个页表项。</p>
+<p>读 KV 就读到别人租户的块上。</p>
+<p>受害者的上下文会漏进攻击者的回答。</p>
+<p>医疗场景里，41.1% 的回答被带偏。</p>
+<p>变得不那么紧急，但看起来还合理。</p>
+<p>好消息是 vLLM 已经确认了漏洞。</p>
+<p>补丁也提了，作者验证过。</p>
+<p>多租户部署的，要去看一眼补丁。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.25945">https://arxiv.org/abs/2611.25945</a></p>
+<p><strong>G-MTP：草稿头一次猜多个词，服务端快 3.1 倍</strong></p>
+<p>投机解码的草稿头，一次只猜一个词。</p>
+<p>这篇换成多 token 预测。</p>
+<p>一个共享草稿头，一次猜好几个。</p>
+<p>还加了三处优化。</p>
+<p>目标模型的激活直接注进去。</p>
+<p>KV 交叉注意力零拷贝，省了读题。</p>
+<p>词表投影按簇算，省了全词表开销。</p>
+<p>Gemma 4 上，服务端最快 3.1 倍。</p>
+<p>手机 GPU 上也有 2.2 倍。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.25813">https://arxiv.org/abs/2611.25813</a></p>
+<p><strong>Validation-driven：智能体负载评测法</strong></p>
+<p>企业把智能体从闭源 API 搬到自家部署。</p>
+<p>上线前的验证流程，工具却很随意。</p>
+<p>这篇给了一套端到端的评测管线。</p>
+<p>录好的 trace 重放，95 分位只差 1.18 倍。</p>
+<p>现场重跑能差到 4.98 倍。</p>
+<p>少量录好的会话，就能稳定复现负载。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.25905">https://arxiv.org/abs/2611.25905</a></p>
+<h2>业内新闻</h2>
+<p>这轮没新消息。</p>
+<p>Anthropic 盘后还是 92.60 美元。</p>
+<p>19点版已经报过。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 最新一期还是 Linear 的访谈。</p>
+<p>跟推理 serving 没关系，这轮不收。</p>
+<h2>值得深入学</h2>
+<p><strong>FrontierReplay：混合模型的前缀缓存，读题不用切了</strong></p>
+<p>这篇值得精读，三个原因。</p>
+<p>第一，它盯的是混合模型。</p>
+<p>Qwen3.5、Kimi-K3 都是这个结构。</p>
+<p>你的评估里迟早要过这一关。</p>
+<p>第二，办法很干净。</p>
+<p>读题不切，事后只重放递推层。</p>
+<p>1–3 毫秒就能补一个检查点。</p>
+<p>第三，数字够硬。</p>
+<p>好吞吐最高 4.26 倍，准确率一分不掉。</p>
+<p>但要注意：只在 1 张 A800 上测过。</p>
+<p>用的 vLLM 0.30.0，版本有点老。</p>
+<p>精读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261120-frontierreplay/">FrontierReplay-混合模型前缀缓存不切读题-精读</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-19-2100/">21点版</a></p>
+<hr/>
+<p>本轮已与 19点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（2026-11-20T02:45:00Z，即 11-19 18:45 PST；1.4.0 仍为 rc4）；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2；llama.cpp b12556（无新快照）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 13 条首次汇总：#67539（功能/DSv4.1：Engram pool 跨引擎共享，NVLink/RDMA）、#61620（功能/量化：在线 NVFP4→MXFP4）、#64289（性能/MoE：SM90 MXFP4 MegaMoE 走 FlashInfer MoE-EP）、#68844（配方：HY4）、#68041（功能/RL：权重更新默认直接重载）、#68270（修补/多模态：Qwen3-VL M-RoPE）、#68840（CI：B200 DeepEP v2 MoE DP 改 nightly）、#68176（功能/Fast Start：ModelOpt INT8 预处理权重）、#60153（性能/ROCm：DSv4.1 gfx942 mHC 融合）、#62589（性能/ROCm：Qwen4Exp QSA 索引）、#68460（修补/Fast Start）、#60969（修补/推理）、#68653（CI/XPU）。 SGLang 9 条首次汇总：#51459（功能/CPU：每 token FP8 量化 AVX10.2）、#51363（性能/采样：注意力 DP 下 top-p/top-k 快速归一化）、#51552（测试：inkling2 GB300 DSPARK 端到端）、#50140（功能/profiler：前向步骤 NVTX 标记）、#48227（功能/模型加载：多线程加载在途字节上限）、#51671（修补/路由器：媒体 tie-break 只计一次）、#51691（文档：Hy4 cookbook）、#51594（CI/扩散）、#49995（重构/NPU）。 TRT-LLM 5 条首次汇总：#22465（性能/DSv4.1：CSA2 注意力 TP 解码 L2 预取）、#19949（修补：TRTLLM-Gen BF16 MoE 权重）、#22340（修补：MXFP4 FP8 MoE TMA 描述符）、#22500（重构：递推状态契约）、#22243（测试：删 NemotronV3 用例）。 FlashInfer 7 条首次汇总：#9704（功能/Cake GDN：CP 读题后端，小批量长序列最快 4.25 倍）、#8497（性能/MoE：MXFP4×MXFP8 GEMM）、#9687（性能/Cake：FP8 批量 DeepGEMM）、#9463（功能/注意力：Blackwell 分页自动扩 FP16）、#8498（性能/MoE EP）、#9672（构建：cuDNN Frontend ≥1.33.0）、#9610（修补/GEMM）。 Dynamo 1 条：#17558（修补/观测：DCGM host 进 P/D 仪表盘图例）。Mooncake 1 条：#5538（修补：NPU 轮子包关随机堆基址）。llama.cpp、LMDeploy、TGI 零合入。 arXiv：11 月 20 日批已进 API；6 篇首次汇总——2611.26020 FrontierReplay（混合模型前缀缓存不切读题，好吞吐最高 4.26 倍）、2611.26435 Aggron（智能体 KV 压缩，P99 -27–31%、吞吐 +1.34–1.40 倍）、2611.26106 AscMLA（FP4 MLA 解码，缓存比 FP8 少 38.2%、比 TRT-LLM FP8 快 1.35 倍）、2611.25945 BlockJack（KV 地址翻译故障攻击，vLLM 已确认并打补丁）、2611.25813 G-MTP（多 token 预测草稿，服务端最快 3.1 倍）、2611.25905 Validation-driven Deployment（智能体负载评测管线，重放 p95 只差 1.18 倍）。 业内新闻：ANT 盘后仍为 $92.60（19点版已报，无新价）；AWS 五引擎实测（17点版已报）；HN/X/Reddit/机器之心/量子位本轮无新相关内容；Latent Space 最新仍为 Linear GTM 访谈（与 serving 无关）。 深读：新增 1 篇——FrontierReplay（arXiv:2611.26020，2026-11-19 提交；含原文 Figure 1/5/6/8）。 去重：TRT-LLM v1.3.0（19点版已报并深读）、Dynamo Planner Retune（19点版已报）、SingProbe 权重（19点版已报）、Megakernel（17点版已报）、Gemma 4 五引擎实测（17点版已报）、Tensward（11-15 已报）均未重复。</p></body></html>
