@@ -1,0 +1,160 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月19日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-19"/>
+<meta name="doc-ts" content="2026-11-20T07:01:36"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-19（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-19（23点版）</h1>
+<p>这轮 GitHub 合入 31 条。</p>
+<p>TRT-LLM 的稀疏注意力是头条。</p>
+<p>arXiv 同一批里补捡两篇。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23，v1.0 仍无 tag。</p>
+<p>TRT-LLM 还是 v1.3.0，1.4.0 仍为 rc4。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 出了两个新快照，b12558 和 b12559。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：11 条，重排器上 LoRA 是头条</strong></p>
+<p>#68622 是重排器上 LoRA 的新功能。</p>
+<p>GTE 是常用的重排模型。</p>
+<p>重排器就是给候选答案打分的模型。</p>
+<p>现在原生 Transformers 的 GTE 能直接跑。</p>
+<p>它的 LoRA 适配器也能一起用。</p>
+<p>LoRA 是轻量微调的适配器。</p>
+<p>#68842 是 Qwen4Exp 的提速。</p>
+<p>QSA 在小批量下换了切分配置。</p>
+<p>QSA 是 Qwen4 的稀疏注意力。</p>
+<p>#67994 是混合模型的核心改动。</p>
+<p>Mamba 的块大小按 KV 规格来定。</p>
+<p>Mamba 是递推层的一种。</p>
+<p>其余是修补和 CI。</p>
+<p>#66396 修了多模态的权重缓存。</p>
+<p>#68245 拦掉了 ICNS 图片输入。</p>
+<p>ICNS 是苹果的图标格式。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68622">https://github.com/vllm-project/vllm/pull/68622</a></p>
+<p><strong>SGLang：9 条，V4.1 登上 A5 是头条</strong></p>
+<p>#47660 是 NPU 的新功能。</p>
+<p>DeepSeek-V4.1 能在昇腾 A5 上跑了。</p>
+<p>A5 是华为昇腾的新卡。</p>
+<p>#51595 是 inkling2 的提速。</p>
+<p>MegaMoE 只算本卡分到的 token。</p>
+<p>MegaMoE 是很快的专家并行核。</p>
+<p>#48678 是镜像的改动。</p>
+<p>AWS 的 EFA 装进主镜像了。</p>
+<p>EFA 是亚马逊的高速网卡。</p>
+<p>不用再单独维护一个镜像版本。</p>
+<p>#48353 是 XPU 的修补。</p>
+<p>W8A8 的 int8 支持补上了。</p>
+<p>Whisper 的 MLP 线性层也能量化了。</p>
+<p>其余是重构、文档和测试。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47660">https://github.com/sgl-project/sglang/pull/47660</a></p>
+<p><strong>TRT-LLM：6 条，稀疏注意力是头条</strong></p>
+<p>#21555 是稀疏注意力的新功能。</p>
+<p>RocketKV 接进了 KV 缓存管理器 V2。</p>
+<p>KV 缓存就是解码时留的草稿纸。</p>
+<p>稀疏注意力只算重要的 token。</p>
+<p>算得少了，显存和时间都省了。</p>
+<p>#22058 是投机解码的提速。</p>
+<p>LM head 和草稿头融合成一个核。</p>
+<p>LM head 是最后算词概率的层。</p>
+<p>单模型投机解码直接受益。</p>
+<p>#22610 也是提速。</p>
+<p>编译好的 GVR Top-K 核能跨进程复用。</p>
+<p>不用每次启动都重新编译。</p>
+<p>其余是修补和重构。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21555">https://github.com/NVIDIA/TensorRT-LLM/pull/21555</a></p>
+<p><strong>FlashInfer、Dynamo、Mooncake：各有小动作</strong></p>
+<p>FlashInfer #9541 是 MoE 的新功能。</p>
+<p>MXFP8 的中间切分上了 Rubin。</p>
+<p>Rubin 是英伟达下一代架构。</p>
+<p>#9641 是 MLA 的重构。</p>
+<p>Mooncake #5417 是存储的改动。</p>
+<p>昇腾单段路由加进来了。</p>
+<p>Dynamo #16959 只是重构。</p>
+<p>llama.cpp #32631 是 OpenCL 的小修补。</p>
+<p>来源：GitHub pulls</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：同一批里补捡两篇</strong></p>
+<p>21点版那批论文还有两篇漏网。</p>
+<p>这两篇当时没捞到，补一下。</p>
+<p><strong>MemFolder：智能体的记忆越攒越薄，照样够用</strong></p>
+<p>智能体跑久了，外部记忆越攒越多。</p>
+<p>记录一多，检索变慢。</p>
+<p>取回来的上下文一长，读题和解码都变贵。</p>
+<p>MemFolder 把记录按结构折叠起来。</p>
+<p>先筛有代表性的锚点，再压成紧凑表示。</p>
+<p>记录数和上下文长度一起往下走。</p>
+<p>检索、读题、解码的开销都跟着降。</p>
+<p>跟 21点版的 Aggron 是同一条线。</p>
+<p>Aggron 压的是 KV，MemFolder 折的是记忆。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.26427">https://arxiv.org/abs/2611.26427</a></p>
+<p><strong>ScaleWire：网卡怎么选，MoE 分发能差 4.5 倍</strong></p>
+<p>大模型训练和推理都靠 scale-up 网络。</p>
+<p>scale-up 就是卡跟卡之间的高速互联。</p>
+<p>以太网正在变成开放的互联方案。</p>
+<p>网卡跨层机制互相影响，性能很难算清。</p>
+<p>ScaleWire 是个端到端的仿真框架。</p>
+<p>它模拟网卡各层的机制，再推算片上资源。</p>
+<p>拿 DeepSeek-R1 的分发任务来测。</p>
+<p>网卡设计不同，每卡性能能差 4.5 倍。</p>
+<p>这是仿真工具，不是推理引擎。</p>
+<p>但它能帮你挑网卡和配拓扑。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.26086">https://arxiv.org/abs/2611.26086</a></p>
+<h2>业内新闻</h2>
+<p>这轮没新消息。</p>
+<p>Anthropic 股价没新价，收盘还是 97.17 美元。</p>
+<p>盘后还是 92.60 美元。</p>
+<p>19点版已经报过。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 最新一期还是 Linear 的访谈。</p>
+<p>跟推理 serving 没关系，这轮不收。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>MemFolder 和 ScaleWire 都是短讯体量。</p>
+<p>TRT-LLM 的 RocketKV 是个 PR。</p>
+<p>等它有论文或博客再精读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-19-2300/">23点版</a></p>
+<hr/>
+<p>本轮已与 21点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2；llama.cpp 新快照 b12558、b12559；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 11 条首次汇总：#67994（核心/Mamba：按 KV 规格定块大小）、#68120（修补/量化：Qwen3-Next MoE 门控 INC/AutoRound 检查点）、#68622（功能/LoRA：原生 Transformers GTE 重排器及 LoRA）、#68815（CI：KV 握手测试真哈希初始化）、#67249（修补/流式：--enable-force-include-usage）、#65256（量化：E8M0 缩放字节保留）、#66396（修补/多模态：权重缓存键指纹）、#67791（修补/Pooling：/pooling 分块后处理）、#68245（安全：拒 ICNS 图片输入）、#68624（XPU 修补）、#68842（性能/Qwen4Exp：QSA sm_100 小批量 split-K）。 SGLang 9 条首次汇总：#51719（重构/采样：算法中立 watermark 接口）、#50043（文档）、#49535（修补/qwen3.5：纯文本检查点 MoE 族覆盖）、#47660（功能/NPU：DeepSeek-V4.1 上昇腾 A5）、#51715（CI：sgl-router 预编译 Rust 扩展）、#51711（测试：sgl-router 图片对话）、#48678（功能/docker：AWS EFA 进主镜像）、#51595（性能/inkling2：MegaMoE 只算本卡 token）、#48353（修补/XPU：W8A8 int8 与 Whisper MLP 量化）。 TRT-LLM 6 条首次汇总：#22632（修补/qwen4_exp：释放 PLE host 表）、#21555（功能/稀疏注意力：RocketKV 接 KV 缓存管理器 V2）、#22058（性能/投机解码：融合 BF16 LM head + argmax 草稿头）、#22560（修补/Slurm 重试）、#21368（重构/Cosmos3 参数解析）、#22610（性能：GVR Top-K CuTe DSL 核跨进程持久化）。 FlashInfer 2 条：#9641（重构/MLA CP 边界）、#9541（功能/MoE：MXFP8 局部域中间切分上 Rubin）。Dynamo 1 条：#16959（重构/超时解析共享）。Mooncake 1 条：#5417（存储/TE：昇腾单段路由）。llama.cpp 1 条 PR：#32631（OpenCL：f16 分解 FA 折叠 GQA 头）+ 新快照 b12558、b12559。LMDeploy、TGI 零合入。 arXiv：11 月 20 日批补捡 2 篇——2611.26427 MemFolder（智能体记忆折叠）、2611.26086 ScaleWire（scale-up 以太网仿真，DeepSeek-R1 分发差 4.5 倍）；2611.26334（视频扩散 2-bit KV 量化，领域不符未收）、2611.26540 AURA（音频头像，未收）、2611.26358 Beam 模型报告（未收）。11 月 21 日批尚未发布（00:00 UTC）。 业内新闻：ANT 收盘 97.17、盘后 92.60，均无变化（19点版已报）；HN/X/Reddit/机器之心/量子位本轮无新相关内容；Latent Space 最新仍为 Linear GTM 访谈（与 serving 无关）。 深读：本轮无新增（宁缺毋滥）。 去重：FrontierReplay 等 21点版 6 篇论文、TRT-LLM v1.3.0、Dynamo Planner Retune、Megakernel、Anthropic IPO、AWS 五引擎实测均未重复；英伟达 Brightspeed 电信楼改造（11-19 07:13 PST）与戴尔 SC26 分布式推理计划（11-18 23:44 PST）均在窗口之外，未收。</p></body></html>
