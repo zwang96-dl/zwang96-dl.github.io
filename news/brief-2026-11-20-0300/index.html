@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月20日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-20"/>
+<meta name="doc-ts" content="2026-11-20T10:59:29"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-20（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-20（03点版）</h1>
+<p>这轮 GitHub 合入 48 条。</p>
+<p>llama.cpp 连出两个新快照。</p>
+<p>Anthropic 盘前跌了 6% 多。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>不过 v1.0 分支又收了 4 个 cherry-pick。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 出了 b12560 和 b12561。</p>
+<p>01点版时还是 b12559。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：15 条，水印和 KV 提示是头条</strong></p>
+<p>#45894 是采样的新功能。</p>
+<p>SynthID 文本水印能按请求开了。</p>
+<p>SynthID 是谷歌的隐形水印技术。</p>
+<p>生成文本里藏一串看不见的记号。</p>
+<p>事后能验出这段话是不是模型写的。</p>
+<p>以前水印是全局开关。</p>
+<p>现在每个请求能单独决定开不开。</p>
+<p>#51088 是 HiCache 的打通。</p>
+<p>请求里带的 KV 提示能传到存储后端了。</p>
+<p>KV 提示就是调度器给的缓存建议。</p>
+<p>HiCache 是 SGLang 的分层 KV 缓存。</p>
+<p>存储后端拿到提示，找页更快。</p>
+<p>#51656 是 Kimi-K3 的提速。</p>
+<p>LayerNorm 序列并行读题用上组播了。</p>
+<p>组播就是一份数据同时发给多张卡。</p>
+<p>#51343 是 PD 搬运的小优化。</p>
+<p>收到的附加数据一次拷贝完。</p>
+<p>以前是按字节一片片切。</p>
+<p>PD 就是读题和生成分机器跑。</p>
+<p>#51351 是调度的开关。</p>
+<p>能关掉透明大页。</p>
+<p>透明大页是操作系统的内存优化。</p>
+<p>有些场景下它反而拖慢调度。</p>
+<p>其余是 v1.0 分支的 cherry-pick。</p>
+<p>#51817、#51771、#51767、#51766 都是。</p>
+<p>v1.0 分支还在持续收补丁。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/45894">https://github.com/sgl-project/sglang/pull/45894</a></p>
+<p><strong>vLLM：17 条，Rust 前端批量合入是头条</strong></p>
+<p>13 条都是 Rust 前端的修补。</p>
+<p>Rust 前端就是 vLLM 的新服务层。</p>
+<p>这批主要是报错更清楚。</p>
+<p>比如模型找不到时列出合法别名。</p>
+<p>工具调用参数能流式回传了。</p>
+<p>还有 Mistral 推理格式的解析器。</p>
+<p>#68447 是多模态的新模型。</p>
+<p>ShieldGemma 2 能原生跑了。</p>
+<p>ShieldGemma 是谷歌的内容安全模型。</p>
+<p>专门判断图片有没有违规。</p>
+<p>现在走 /classify 接口直接出分。</p>
+<p>#63830 是 Mamba 的清理。</p>
+<p>mamba_cache_mode 这个旧开关删了。</p>
+<p>#66928 是 EPD 的保护。</p>
+<p>EPD 就是把编码、读题、解码分开跑。</p>
+<p>没人接手转运的元数据项直接报错。</p>
+<p>其余是基准测试的小修补。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68447">https://github.com/vllm-project/vllm/pull/68447</a></p>
+<p><strong>FlashInfer：2 条，MLA 解码是头条</strong></p>
+<p>#9718 是 MLA 的提速。</p>
+<p>Cake 的 Blackwell 解码行计划改到设备上建了。</p>
+<p>MLA 是 DeepSeek 那种省显存的注意力。</p>
+<p>Blackwell 是英伟达 B200 那代架构。</p>
+<p>#9727 是编译的提速。</p>
+<p>批量不变的 GEMM 编译更少也更便宜了。</p>
+<p>GEMM 就是矩阵乘法。</p>
+<p>来源：GitHub pulls</p>
+<p><strong>TRT-LLM：5 条，全是测试和基建</strong></p>
+<p>没有功能性改动。</p>
+<p>#19412 是个小提速。</p>
+<p>embedding 偏置行不在 host 上物化了。</p>
+<p>host 就是 CPU 那边。</p>
+<p>来源：GitHub pulls</p>
+<p><strong>Dynamo、Mooncake：各 2 条</strong></p>
+<p>Dynamo #19249 是文档。</p>
+<p>1.7.0 的配方页面加了生命周期徽标。</p>
+<p>1.7.0 分支已经在收 cherry-pick。</p>
+<p>正式版还没挂出来。</p>
+<p>Mooncake #5432 是存储的改动。</p>
+<p>批量 OpLog 的清理有了节奏控制。</p>
+<p>OpLog 就是操作的流水账。</p>
+<p>#5689 修了 TENT 的时钟。</p>
+<p>改成读单调时钟。</p>
+<p>来源：GitHub pulls</p>
+<p><strong>llama.cpp：5 条，界面和重构</strong></p>
+<p>#32615 是界面的瘦身。</p>
+<p>设计 token 精简了。</p>
+<p>#32617 是图标的小改动。</p>
+<p>视觉模型显示眼镜图标。</p>
+<p>音频模型显示耳机图标。</p>
+<p>其余是模型类的重构。</p>
+<p>来源：GitHub pulls</p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：11 月 21 日那批还没出</strong></p>
+<p>新一批每天 00:00 UTC 才发。</p>
+<p>也就是今天 16:00 PST。</p>
+<p>11 月 20 日那批已经报完了。</p>
+<p>下期再看。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic 盘前跌了 6% 多</strong></p>
+<p>收盘价还是 97.17 美元。</p>
+<p>盘前最新价约 91.02 美元。</p>
+<p>比收盘跌了 6.33%。</p>
+<p>昨晚盘后价是 92.60 美元。</p>
+<p>盘前还在往下走。</p>
+<p>今天开盘再看稳不稳得住。</p>
+<p>来源：Finnhub、TradingView</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 最新还是 Linear 那期。</p>
+<p>11 月 19 日出的，讲 GTM。</p>
+<p>跟推理 serving 没关系，这轮不收。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>全是 PR 和小修补。</p>
+<p>等它有论文或博客再精读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-20-0300/">03点版</a></p>
+<hr/>
+<p>本轮已与 01点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag（release/v1.0.0 分支又收 4 个 cherry-pick：#51817、#51771、#51767、#51766）；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2（1.7.0 分支在收 cherry-pick）；llama.cpp 新出 b12560（01:27 PST）与 b12561（02:46 PST）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 SGLang 15 条首次汇总：#45894（功能/采样：每请求 SynthID 文本水印）、#51312（修补/模型加载：检查点预取按节点分 rank）、#51479（修补/dsv41：MegaGate 行掩码进解码回放尾图）、#51765（CI/NPU：降 GPQA 并发修 pinned host OOM）、#51088（功能/hicache：请求级 KV 提示透传存储后端）、#51817（发布：cherry-pick #51666 到 release 分支）、#51666（修补/AMD：kimi-k3 删捆绑 TreeCore）、#49774（CI/AMD：ROCm 7.2.0/7.2.4 通道仅周末跑）、#51771（发布：cherry-pick nixl AITER HIP runtime 绑定）、#51767（发布：cherry-pick FP8 MoE is_shuffled 标记）、#51766（发布：cherry-pick 非量化 CPU 输入不上 AITER GEMM）、#51656（性能/kimi-k3：LayerNorm 序列并行读题组播）、#51351（性能/调度：SGLANG_DISABLE_THP 关透明大页）、#51343（性能/PD：收到的 aux 数据一次 memcpy）、#51661（修补/权重更新：分块权重更新保留 fused-pair 两半）。 vLLM 17 条首次汇总：#68447（模型：ShieldGemma 2 原生 /classify）、#68766/#55399/#68911/#68409/#68407/#68913/#68910/#68143/#68406/#48013/#63967/#68073（Rust 前端批量：工具调用参数流式、logprobs 报错、tokenizer 偏好、no-op 启动参数、模板、模型别名、LoRA 卸载、response_format、缺失 prompt、Mistral 推理解析器、min_tokens 校验、严格工具）、#68859（修补/基准：--seed 透传 spec_bench）、#63830（核心/Mamba：删 mamba_cache_mode）、#66928（核心/EPD：无覆盖的元数据项直接失败）、#65911（ROCm/性能：W4A16 皮肤 GEMM 6-8 解码行）。 TRT-LLM 5 条：#22684（基建：豁免 1 个失败用例）、#22631（测试：DeepSeek 取消覆盖 L40S）、#22532（功能：gen-only 基准支持并发调度）、#19412（性能：embedding 偏置行不在 host 物化）、#22637（修补：致命错误测试清理等 encoder 完成线程）。 FlashInfer 2 条：#9718（性能/MLA：Cake Blackwell 解码行计划设备上建）、#9727（性能/batch_invariant：GEMM 编译更少更便宜）。 Dynamo 2 条：#19249（文档：1.7.0 配方页生命周期徽标 cherry-pick）、#18961（修补/operator：KAI 调度器身份与队列注入）。 Mooncake 2 条：#5432（存储：批量 OpLog 清理加节奏控制）、#5689（修补/TENT：读单调时钟）。 llama.cpp 5 条：#32653（重构：indexer 键轮换进模型类）、#32658（CI：删 ui-lib 发布验证）、#32615（界面：设计 token 瘦身）、#32617（界面：视觉眼镜/音频耳机图标）、#32648（重构：图节点预算进模型类）。LMDeploy、TGI 零合入。 arXiv：11 月 21 日批尚未发布（00:00 UTC = 16:00 PST）；11 月 20 日批已报完。 业内新闻：ANT 盘前约 91.02 美元（-6.33% vs 收盘 97.17），昨晚盘后 92.60 美元（19点版已报）；HN/中文媒体本轮无新相关内容；Latent Space 最新仍为 11 月 19 日 Linear GTM 访谈（与 serving 无关）。 深读：本轮无新增（宁缺毋滥；全是 PR/小修补）。 去重：01点版 51 条 PR、arXiv 11 月 20 日批、ANT 收盘价等均未重复。</p></body></html>
