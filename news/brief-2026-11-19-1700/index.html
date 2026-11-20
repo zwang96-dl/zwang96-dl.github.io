@@ -2,7 +2,7 @@
 <meta name="doc-title" content="多模态推理简报 · 11月19日 17:00"/>
 <meta name="doc-description" content=""/>
 <meta name="doc-date" content="2026-11-19"/>
-<meta name="doc-ts" content="2026-11-20T01:12:15"/>
+<meta name="doc-ts" content="2026-11-20T01:13:00"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>多模态大模型推理服务简报 · 2026-11-19（17点版）</title><style>
@@ -132,8 +132,8 @@ img{border-color:#30363d}
 <p>来源：<a href="https://finnhub.io/?q=%22ANT%22">https://finnhub.io/?q=%22ANT%22</a></p>
 <p><strong>五台引擎同场跑 Gemma 4，小模型上云有了实测数</strong></p>
 <p>一篇新实测把 Gemma 4 E2B 搬上 Lambda。</p>
-<p>五台引擎各跑一个函数。</p>
-<p>vLLM、SGLang、llama.cpp、PyTorch、JAX 都在列。</p>
+<p>五台引擎是 vLLM、SGLang。</p>
+<p>还有 llama.cpp、PyTorch、JAX。</p>
 <p>同一块 L4 卡，同一组权重。</p>
 <p>单请求最快的是 vLLM 加 Google 的草稿模型。</p>
 <p>Lambda 上 218.6 词每秒，EC2 上 275.3。</p>
@@ -177,7 +177,7 @@ img{border-color:#30363d}
 <p>验证框架也值得学：隐藏测试集加独立审计。</p>
 <p>两道锁防住 agent 钻 evaluator 的空子。</p>
 <p>但别照搬结论，高并发仍是通用引擎的地盘。</p>
-<p>精读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261119-megakernel/">每个模型一个Megakernel-Agent手写专属解码核-精读</a></p>
+<p>精读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261120-megakernel-agent/">每个模型一个Megakernel-Agent手写专属解码核-精读</a></p>
 <p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-19-1700/">17点版</a></p>
 <hr/>
 <p>本轮已与 15点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag（release/v1.0.0 分支在收 cherry-pick，#51642）；TRT-LLM v1.4.0rc4；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2；llama.cpp 新快照 b12556（2026-11-19T23:12:54Z，上一版 b12555）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 11 条首次汇总：#61428（性能/ROCm：Qwen3.8-27B GDN 解码三合一进 AITER gluon 核，882→730 kernels/step，MI355X TP1）、#66184（性能/ROCm：MiniMax-M3 整层 mono 解码走 --monokernel，删 mono/envs.py）、#67648（修补/Transformers：流水线后段保留收到的 hidden states）、#66631（修补/HiSparse：解绑页面时 batch owner 记账）、#67166（修补/ROCm：replace() 不重复追加默认 custom ops）、#68724（Transformers 后端：fx tracer 跟踪装饰 forward 并 pin cache）、#67959（ROCm：AITER v0.1.29.post1）、#68318（测试/XPU：Triton-only ReplaySSM/SSU 测试跑 XPU）、#68617（CI/XPU：Hybrid SSM NixlConnector PD 前缀缓存测试进 Intel CI）、#68780（杂项：修 get_decode_stream_seed docstring）、#68790（CI：测试间释放 torch.compile 状态）。 SGLang 11 条首次汇总：#51455（性能/PD：DCP-1→DCP-N 传输打包等宽折叠草稿，Mooncake 一页一描述符）、#51382（性能/MiniMax-M3：共享专家与 MegaMoE 在 CUDA 图下另流重叠，约 1.3ms/步）、#43279（功能：Wan2.2-S2V-14B 语音转视频，XPU 支持）、#51642（发布分支：DFLASH 草稿 KV 环默认关闭，cherry-pick 进 release/v1.0.0）、#51643（发布分支：AMD sana-video2 测试跳过）、#49532（性能/cosmos3：批量清理刷新 + Bimanual 模型 VAE 快路径）、#46603（性能/扩散：GPU BLAKE3 加速条件哈希）、#51411（性能/扩散：Flux3 prompt 走条件缓存编码）、#51391（CI：权限更名）、#50823（功能/XPU：整合简单 XPU 使能）、#51536（CI/NPU：SGLang kernel NPU tag 升 2026.11.0.post10）。 TRT-LLM、LMDeploy、TGI、Mooncake 零合入。 Dynamo 7 条首次汇总：#18176（修补/KV 路由：只给 SGLang 加载的 HiCache 页面记账）、#18060（修补/KV 路由：HostPinned 占位存储不标缓存命名空间模糊）、#17547（重构/vLLM：去掉老版本 vLLM 后端 fallback）、#14610（修补/发现：MDC 校验和排除 source_path）、#15596（测试/路由：跨消费者远程索引路由覆盖）、#18133（修补/前端：上下文长度拒绝带 limit 和 token 数渲染）、#19223（构建/容器：内置 FFmpeg 升 9.0.2）。 FlashInfer 8 条首次汇总：#9659（性能/NVFP4 prefill：QToken 稀疏组 16/32 + 延迟模型组策略）、#9549（修补/VC 注意力：预处理 V 聚合、k-means 初始化、受限 token 分组）、#9677（功能/batch-invariant：GDN 类无状态调用）、#9726（性能/batch-invariant：更多 Rubin 布局）、#9738（修补：CuTe-DSL 缓存依赖收窄）、#9744（修补：让 PyTorch 选 DeepGEMM 的 C++ 标准）、#9739（测试：SM107 显存核算测试跳过穷举搜索）、#9698（CI：NVSkills CI 请求工作流）。 arXiv：无新批次（KV cache 查询最新 published 仍为 2026-11-18T15:37:04Z；11-20 批截至 01:06 UTC 未进 API）。 业内新闻：ANT 盘后 $92.10（-5.22% vs 收盘 $97.17，Finnhub 美东 19:49 快照）；Gemma 4 E2B 五引擎 Lambda 实测（Medium，11-18/19 实测）：vLLM+Google drafter 单请求最快（Lambda 218.6 tok/s，EC2 275.3），SGLang 无 drafter 4 并发基本打平 vLLM，SGLang 冷启动 346–372s。 访谈与深度：Anthropic《A Megakernel per Model》工程博客（2026-11-19，全文镜像 dangxingyu.github.io/megakernel，代码 megakernel-zoo）；tokenstrom 事实核查：SGLang v1.0“95% AI 撰写”不成立，8/16–11/14 主分支 Claude 署名提交占 18.3%，且 v1.0 正式版尚未发布。 深读：新增 1 篇——每个模型一个 Megakernel（Anthropic 工程博客 2026-11-19；含原文 Figure 1/2，图为内联 SVG 渲染）。 去重：UniBoost（15点版已报）、Anthropic 首日收盘 $97.17（15点版已报）、SingProbe（11-19 05点版已报）、LMSYS Muse Spark Ultrafast 博客（11 月 5 日旧闻，11 月 8–10 日期已报）、SGLang 联盟（11 月 12 日旧闻）均未重复。</p></body></html>
