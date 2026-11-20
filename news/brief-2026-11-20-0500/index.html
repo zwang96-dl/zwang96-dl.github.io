@@ -1,0 +1,193 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月20日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-20"/>
+<meta name="doc-ts" content="2026-11-20T13:05:22"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-20（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-20（05点版）</h1>
+<p>这轮 GitHub 合入 25 条。</p>
+<p>腾讯 Hy4 权重正式开源了。</p>
+<p>llama.cpp 一口气出了 5 个新快照。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 新出 b12562 到 b12566。</p>
+<p>03点版时还是 b12561。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：7 条，PD 心跳修补是头条</strong></p>
+<p>#51790 是 PD 的修补。</p>
+<p>PD 就是读题和生成分机器跑。</p>
+<p>解码机每 3 秒给读题机发一次心跳。</p>
+<p>心跳就是报个平安，确认还活着。</p>
+<p>Rust 服务模式下，心跳走了健康检查接口。</p>
+<p>这个接口默认会跑一次生成探测。</p>
+<p>读题机只读题，不生成。</p>
+<p>探测一跑，心跳就超时。</p>
+<p>两次超时，解码机就把读题机踢掉。</p>
+<p>现在心跳直接回 200，不跑探测了。</p>
+<p>你的 PD 评估里记一笔。</p>
+<p>读题机被误踢，请求会全失败。</p>
+<p>#48208 是投机解码的提速。</p>
+<p>投机解码就是小模型先打草稿。</p>
+<p>以前每行 top-k 概率各拷一次。</p>
+<p>现在同一 k 的请求批量拷。</p>
+<p>批量越大，省的主机开销越多。</p>
+<p>#51718 和 #51615 都是 Gemma4 的修补。</p>
+<p>视觉池化跳过时，有效图块别丢了。</p>
+<p>填充部分要排除在外。</p>
+<p>其余是缓存初始化和启动修补。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51790">https://github.com/sgl-project/sglang/pull/51790</a></p>
+<p><strong>vLLM：12 条，HY4 检查点注册是头条</strong></p>
+<p>#68875 是 HY4 的新模型。</p>
+<p>HY4 是腾讯 770B 的大模型。</p>
+<p>公开检查点 tencent/Hy4 进了注册表。</p>
+<p>FP8 版也一起登记了。</p>
+<p>等于官方宣布：这模型能跑了。</p>
+<p>#68210 是快速启动的新后端。</p>
+<p>权重预热后用 VMM 共享。</p>
+<p>VMM 就是 CUDA 的虚拟内存管理。</p>
+<p>多进程之间零拷贝传权重。</p>
+<p>启动更快，占的内存也更少。</p>
+<p>#68479 是多模态的卸载。</p>
+<p>视觉塔能挪到 CPU 上跑。</p>
+<p>CPU 卸载就是显存不够时借内存。</p>
+<p>大图模型在小卡上也能跑了。</p>
+<p>#68672 是 Rust 前端的修补。</p>
+<p>多模态缓存不再走引擎的 LRU。</p>
+<p>LRU 就是最近最少用的淘汰策略。</p>
+<p>其余是两条安全修补。</p>
+<p>#52605 管视频解码池的显存峰值。</p>
+<p>#56842 给音频重采样核加了上限。</p>
+<p>Qwen3-VL 的视频修补有两条。</p>
+<p>#68832 接受整数帧率列表。</p>
+<p>#68857 把负步长视频输入归一化。</p>
+<p>#59442 是 AMD 卡的提速。</p>
+<p>Qwen4Exp 的组合核换了新实现。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68875">https://github.com/vllm-project/vllm/pull/68875</a></p>
+<p><strong>TRT-LLM：1 条，V4.1 每步更便宜是头条</strong></p>
+<p>#22355 是 DeepSeek-V4.1 的提速。</p>
+<p>执行器、调度器和采样器每步少干活。</p>
+<p>host 就是 CPU 那边。</p>
+<p>每步省一点，高并发下省很多。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22355">https://github.com/NVIDIA/TensorRT-LLM/pull/22355</a></p>
+<p><strong>FlashInfer：1 条，小修补</strong></p>
+<p>#9757 修了 Cake 的 FP8 核。</p>
+<p>显存时钟没跑满时，别走双子核。</p>
+<p>双子核就是两路并行算的路子。</p>
+<p>来源：GitHub pulls</p>
+<p><strong>Dynamo：1 条，删了 15 万行代码</strong></p>
+<p>#18651 删了 KV 块管理器。</p>
+<p>KV 块管理器就是管显存块的老模块。</p>
+<p>1.5.0 起就废弃了。</p>
+<p>这次连同 528 个文件一起清掉。</p>
+<p>代码少了 154383 行。</p>
+<p>减了 7 个依赖，没加新包。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18651">https://github.com/ai-dynamo/dynamo/pull/18651</a></p>
+<p><strong>Mooncake：1 条，以太网新传输</strong></p>
+<p>#5644 支持 UBoE 传输。</p>
+<p>UBoE 就是跑在以太网上的统一总线。</p>
+<p>以前只支持 RC 模式。</p>
+<p>现在能用 RM 可靠消息模式。</p>
+<p>华为那边的卡能接上了。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5644">https://github.com/kvcache-ai/Mooncake/pull/5644</a></p>
+<p><strong>llama.cpp：2 条，模型小改动</strong></p>
+<p>#32657 给门控前馈加了缩放系数。</p>
+<p>#32660 更新了 CUDA 的算子支持检查。</p>
+<p>来源：GitHub pulls</p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：11 月 21 日那批还没出</strong></p>
+<p>新一批每天 00:00 UTC 才发。</p>
+<p>也就是今天 16:00 PST。</p>
+<p>11 月 20 日那批已经报完了。</p>
+<p>下期再看。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>腾讯 Hy4 权重开源了：770B 旗舰能下载了</strong></p>
+<p>Hy4 是腾讯的多模态旗舰模型。</p>
+<p>770B 总参数，每 token 只激活 49B。</p>
+<p>上下文 1M token，图文视频都能读。</p>
+<p>三份权重都放出来了。</p>
+<p>Hy4 是指令版，Hy4-FP8 是 8 位版。</p>
+<p>Hy4 base 是没微调的预训练版。</p>
+<p>FP8 版约 770GB，BF16 版约 1.55TB。</p>
+<p>许可证换了，不是 Apache 2.0。</p>
+<p>现在是腾讯自己的 Hy License。</p>
+<p>大模型即服务年入超 5000 万美元。</p>
+<p>或者月活超 1 亿，要另外拿许可。</p>
+<p>小团队自己部署不受影响。</p>
+<p>vLLM 和 SGLang 都有官方镜像。</p>
+<p>配方是 8 卡张量并行加 DFly2。</p>
+<p>DFly2 是 Hy4 自带的投机解码草稿器。</p>
+<p>草稿和主模型共用 KV 缓存。</p>
+<p>长上下文生成不额外占显存。</p>
+<p>今天上午 8 点到 10 点有 AMA。</p>
+<p>腾讯 Hy 团队在 Reddit 上答问。</p>
+<p>来源：<a href="https://news.sulat.com/2026/11/20/tencent-hy4-open-weights/">https://news.sulat.com/2026/11/20/tencent-hy4-open-weights/</a></p>
+<p><strong>Anthropic 盘前继续跌</strong></p>
+<p>收盘价还是 97.17 美元。</p>
+<p>盘前最新约 88 美元。</p>
+<p>比收盘跌了约 9.4%。</p>
+<p>路透早些时候报的还是 91 美元。</p>
+<p>越走越低，开盘再看。</p>
+<p>来源：Finnhub、Reuters</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 最新还是 Linear 那期。</p>
+<p>11 月 19 日出的，讲 GTM。</p>
+<p>跟推理 serving 没关系，这轮不收。</p>
+<h2>值得深入学</h2>
+<p><strong>腾讯 Hy4 模型卡精读：770B 怎么跑、DFly2 怎么省 KV</strong></p>
+<p>这篇能帮你把 Hy4 跑起来。</p>
+<p>官方配方、DFly2 原理、显存账一次讲清。</p>
+<p>跟你的 PD 评估直接对口。</p>
+<p>DFly2 只传最后一层 hidden state。</p>
+<p>读题到解码的搬运量很小。</p>
+<p>精读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261120-hy4-770b/">Hy4 模型卡精读</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-20-0500/">05点版</a></p>
+<hr/>
+<p>本轮已与 03点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2；llama.cpp 新出 b12562（11:19 UTC）、b12563（11:35 UTC）、b12564（12:00 UTC）、b12565（12:18 UTC）、b12566（12:43 UTC）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 SGLang 7 条首次汇总：#51718（修补/Gemma4：池化跳过时保留有效视觉块）、#51615（修补/Gemma4：视觉池化排除填充并保留范围）、#50116（修补/mem_cache：显式 HND 初始化）、#43095（测试/调度：接纳重匹配记录前缀命中 token 数）、#51790（修补/rust-server：PD 解码心跳走 /health 不跑生成探测）、#48208（性能/投机：同 k 请求批量 top logprobs）、#48247（修补/http_server：生成 worker 跳过 launcher 重导入）。 vLLM 12 条首次汇总：#68672（修补/Rust 前端：vllm-rs 下跳过引擎 LRU 多模态缓存）、#68900（多模态：废弃 VLLM_OBJECT_STORAGE_SHM_BUFFER_NAME）、#68875（模型：注册公开 HY4 检查点 tencent/Hy4 与 Hy4-FP8）、#68210（Fast Start：预加载守护进程加 VMM IPC 后端）、#52605（安全：PyNvVideoCodec 池租赁计入显存峰值）、#56842（安全：torchaudio 重采样核尺寸上限）、#68479（修补/卸载：--cpu-offload-gb 可卸载视觉塔）、#68832（修补/多模态：Qwen3-VL 接受整数逐视频 fps 列表）、#68857（修补/多模态：负步长视频输入归一化）、#59442（ROCm/性能/Qwen4Exp：HC combine_and_mix 走 AITER FlyDSL 两段核）、#68793（模型：Falcon 与 RADIO 用上游 Transformers 5.16 配置）、#68754（修补：多模态塔/连接器 LoRA 只映射已编码项）。 TRT-LLM 1 条：#22355（性能/DeepSeek-V4.1：执行器、调度器、采样器每步 host 开销更便宜）。FlashInfer 1 条：#9757（修补：显存时钟未满时 Cake FP8 不走 twin 核）。Dynamo 1 条：#18651（重构：删 KVBM，528 文件、154383 行删除，减 7 依赖）。Mooncake 1 条：#5644（传输：UBoE 走 URMA RM 模式）。llama.cpp 2 条：#32660（CUDA：GDN supports_op 检查更新）、#32657（模型：ffn_gate_up_exps 加缩放）。LMDeploy、TGI 零合入。 arXiv：11 月 21 日批尚未发布（00:00 UTC = 16:00 PST）；11 月 20 日批已报完。 业内新闻：Hy4 权重 11 月 20 日开源（X 03:52 UTC 宣布；三份权重上 HF/ModelScope/GitCode；Tencent Hy License；vLLM/SGLang 官方镜像与配方；AMA 今天 8–10 点 PST 在 r/LocalLLaMA）；ANT 盘前约 88 美元（Finnhub 07:33 EST，-9.44% vs 收盘 97.17；路透早些时候报 91.24 美元，-6%）。 深读：新增 1 篇——Hy4 模型卡精读（5 张原图均已下载并压图内嵌；无 fenced 代码块；正文 0 句超 40 字）。 去重：03点版 48 条 PR、ANT 盘前 91.02 美元、HyperPod/Dynamo（11-18 07点版已报）、Gemma 4 五引擎实测（11-19 17点版已报）、Latent Space Linear 访谈（11 月 19 日）均未重复。</p></body></html>
