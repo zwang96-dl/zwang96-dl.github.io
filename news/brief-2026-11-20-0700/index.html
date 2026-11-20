@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月20日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-20"/>
+<meta name="doc-ts" content="2026-11-20T15:10:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-20（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-20（07点版）</h1>
+<p>这轮 GitHub 合入 23 条。</p>
+<p>腾讯又开源了一个视频模型家族。</p>
+<p>Anthropic 开盘后回升到 91 美元多。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 新出 5 个快照。</p>
+<p>b12568 到 b12577，中间有跳号。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：4 条，Hy4 和 V3.2 都修好了</strong></p>
+<p>#68689 是 Hy4 的修补。</p>
+<p>Hy4 是腾讯 770B 的大模型。</p>
+<p>上轮刚开源，这轮就能跑了。</p>
+<p>修的是 8 卡数据并行加多模态编码器。</p>
+<p>数据并行就是多卡分摊请求。</p>
+<p>编码器就是把图转成 token 的模块。</p>
+<p>之前这个组合一开就报错。</p>
+<p>现在能跑了，想试 Hy4 的可以直接上。</p>
+<p>#68948 是 V3.2 的加载修补。</p>
+<p>V3.2 是 DeepSeek 的新旗舰。</p>
+<p>NVFP4 版之前加载会失败。</p>
+<p>NVFP4 就是 4 位量化的一种。</p>
+<p>现在改走上游的新配置，加载正常了。</p>
+<p>#68904 是安全上限。</p>
+<p>批量聊天默认最多 1024 个会话。</p>
+<p>超了直接返回 400，不进引擎。</p>
+<p>#68881 是 XPU 的 CI 修补。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68689">https://github.com/vllm-project/vllm/pull/68689</a></p>
+<p><strong>SGLang：3 条，Gemma 4 工具调用修了两处</strong></p>
+<p>#51616 修了流式工具调用丢文本。</p>
+<p>Gemma 4 调工具时，工具前后的正文会丢。</p>
+<p>现在正文和工具调用都保留了。</p>
+<p>#51592 修了重复的工具序号。</p>
+<p>同一个工具调两次，序号会重复。</p>
+<p>客户端按序号分组，会把参数拼错。</p>
+<p>现在按调用顺序重新编号。</p>
+<p>#51366 是 AMD 的代码整理。</p>
+<p>Kimi-K3.1 的 gfx950 模块挪出共享路径。</p>
+<p>其他架构不再受影响。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51616">https://github.com/sgl-project/sglang/pull/51616</a></p>
+<p><strong>TRT-LLM：3 条，都是小修补</strong></p>
+<p>#22689 修了 K3 的测试探针。</p>
+<p>K3 就是 Kimi K3.1。</p>
+<p>#22686 放行了 B300 的多卡注意力测试。</p>
+<p>#22671 加了个 CI 工作流。</p>
+<p>来源：GitHub pulls</p>
+<p><strong>FlashInfer：3 条，解码核支持新卡</strong></p>
+<p>#9774 是 Cake 的解码核扩展。</p>
+<p>Cake 就是门控 Delta 乘积核家族。</p>
+<p>解码程序现在支持 SM107。</p>
+<p>SM107 是新一代卡的架构编号。</p>
+<p>#9765 接受 cuDNN 的第四路线性注意力输出。</p>
+<p>#9753 是 CI 的 lint 修补。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9774">https://github.com/flashinfer-ai/flashinfer/pull/9774</a></p>
+<p><strong>Dynamo：1 条，Kimi K2.5 能加载了</strong></p>
+<p>#19200 把 transformers 升到 5.13.1。</p>
+<p>之前 Kimi K2.5 的配置加载会崩。</p>
+<p>原因是旧版跟 Hub 缓存路径较劲。</p>
+<p>现在修好了，部署不再超时。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19200">https://github.com/ai-dynamo/dynamo/pull/19200</a></p>
+<p><strong>LMDeploy：1 条，监控有了独立端口</strong></p>
+<p>#5152 加了 --monitoring-port。</p>
+<p>健康检查和指标不再走推理接口。</p>
+<p>长提示预处理再忙，监控也不卡了。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5152">https://github.com/InternLM/lmdeploy/pull/5152</a></p>
+<p><strong>llama.cpp：7 条，UI 和 server 小改动</strong></p>
+<p>llama-ui 上 npm 了。</p>
+<p>server 加了 MCP 代理允许内网地址。</p>
+<p>其余是 UI 细节和音频测试。</p>
+<p><strong>Mooncake：1 条，NPU 发布流程拆分</strong></p>
+<p>#5705 让昇腾轮子能单独发热修复版。</p>
+<p>不再跟主版本发布绑在一起。</p>
+<p><strong>TGI：零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：11 月 21 日那批还没出</strong></p>
+<p>新一批每天 00:00 UTC 才发。</p>
+<p>也就是今天 16:00 PST。</p>
+<p>下期再看。</p>
+<p>来源：arXiv API</p>
+<p><strong>腾讯 WeMM-Video 开源了：能看视频、能听声音</strong></p>
+<p>WeMM-Video 是腾讯微信团队的模型家族。</p>
+<p>2B、4B、9B 三个小尺寸，加一个 35B。</p>
+<p>35B 是 MoE，每 token 只激活 3B。</p>
+<p>MoE 就是专家混合，平时只用一部分。</p>
+<p>它能同时处理视频、音频、图片和文字。</p>
+<p>说白了，看画面也听声音，再回答问题。</p>
+<p>120 多个评测跑下来，35B 是开源视频理解新高。</p>
+<p>9B 的小个子超过了 Qwen3-Omni-30B。</p>
+<p>训练用了约 1.2 万亿 token。</p>
+<p>许可证是 Apache 2.0，随便商用。</p>
+<p>部署要打补丁的 vLLM 或 SGLang。</p>
+<p>35B 官方例子用 2 卡张量并行。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.26409">https://arxiv.org/abs/2611.26409</a></p>
+<h2>业内新闻</h2>
+<p><strong>Anthropic 开盘了：先跌后回升</strong></p>
+<p>开盘 89.86 美元。</p>
+<p>盘前一度跌到 87.26 美元。</p>
+<p>最新约 91.85 美元，跌 5.5%。</p>
+<p>发行价是 83 美元，还没破。</p>
+<p>纳斯达克也在跌，AI 板块一起承压。</p>
+<p>来源：Finnhub、Reuters</p>
+<p><strong>Hy4 AMA 一个小时后开始</strong></p>
+<p>上午 8 点到 10 点，r/LocalLLaMA。</p>
+<p>腾讯 Hy 团队加 @ShunyuYao12 在线答问。</p>
+<p>想问 Hy4 部署细节的可以去蹲。</p>
+<p>来源：<a href="https://news.sulat.com/2026/11/20/tencent-hy4-open-weights/">https://news.sulat.com/2026/11/20/tencent-hy4-open-weights/</a></p>
+<h2>访谈与深度</h2>
+<p>Latent Space 最新还是 Linear 那期。</p>
+<p>11 月 19 日出的，讲 GTM。</p>
+<p>跟推理 serving 没关系，这轮不收。</p>
+<h2>值得深入学</h2>
+<p><strong>WeMM-Video 技术报告精读：视频加音频怎么做、部署要打什么补丁</strong></p>
+<p>这篇能帮你判断 WeMM 值不值得接。</p>
+<p>全模态架构、训练配方、部署方式一次讲清。</p>
+<p>跟你的多模态推理评估直接对口。</p>
+<p>精读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261120-wemm-video/">WeMM-Video 技术报告精读</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-20-0700/">07点版</a></p>
+<hr/>
+<p>本轮已与 05点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2；llama.cpp 新出 b12568（13:28 UTC）、b12569（13:49 UTC）、b12572（14:07 UTC）、b12576（14:24 UTC）、b12577（14:46 UTC）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 SGLang 3 条首次汇总：#51616（修补/function_call：Gemma4 工具调用间文本保留）、#51592（修补/function_call：Gemma4 流式工具序号按调用顺序）、#51366（重构/AMD：Kimi-K3.1 gfx950 模块移出共享路径）。 vLLM 4 条首次汇总：#68948（模型：DeepSeek-V3.2 走上游 DeepseekV32Config，修 NVFP4 加载）、#68904（安全：批量聊天默认上限 1024 会话）、#68881（CI/XPU：修 Engram peer group 测试）、#68689（修补：Hy4 mxfp4dfly、DP8 与 cudagraph_mm_encoder 报错）。 TRT-LLM 3 条首次汇总：#22689（修补/K3：Helix probe 跟随共享 KV gate 重构）、#22686（修补：放行 B300 多卡注意力测试）、#22671（infra：新增 NVSkills CI 请求工作流）。 FlashInfer 3 条首次汇总：#9774（feat：Cake GDP 解码程序支持 SM107）、#9765（修补/cuDNN：接受第四路线性注意力输出）、#9753（修补/CI：provider spec lint 准备）。 Dynamo 1 条：#19200（修补/trtllm：transformers 升至 5.13.1，修 Kimi K2.5 远程代码配置加载崩溃）。Mooncake 1 条：#5705（CI/Build：Ascend NPU 轮子独立热修复发布）。llama.cpp 7 条：#32667（ui：llama-ui 上 npm）、#32664（tts：-t 透传到 mtmd 上下文）、#32661（ui：highlight.js 语言按需加载）、#32633（server：--ui-mcp-proxy-allow-private-urls）、#32579（server：更多音频测试）、#32570（ui：打字时聚焦聊天框）、#32518（修补：直方图 bin 数转 int）。LMDeploy 1 条：#5152（feat/serve：独立监控端口 --monitoring-port）。TGI 零合入。 arXiv：11 月 21 日批尚未发布（00:00 UTC = 16:00 PST）。 业内新闻：WeMM-Video 开源（腾讯微信团队；2B/4B/9B/35B-A3B；arXiv 2611.26409，11 月 19 日提交；Apache 2.0；120+ 评测；部署需 WeMM 补丁版 vLLM/SGLang；35B 官方例子 2 卡 TP）；ANT 开盘 89.86 美元，盘前低点 87.26 美元，最新约 91.85 美元（Finnhub 美东 09:56 快照，-5.47% vs 收盘 97.17）；Hy4 AMA 今天 8–10 点 PST（r/LocalLLaMA，已于 05点版预告）。 深读：新增 1 篇——WeMM-Video 技术报告精读（3 张原图均已从 arXiv PDF 提取并压图内嵌；无 fenced 代码块；正文 0 句超 40 字）。 去重：Hy4 权重开源与深读（05点版）、ANT 盘前约 88 美元（05点版）、Gemma 4 E2B 五引擎 Lambda 实测（11-19 17点版）、Latent Space Linear 访谈（11 月 19 日）均未重复。</p></body></html>
