@@ -1,0 +1,165 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月20日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-20"/>
+<meta name="doc-ts" content="2026-11-20T09:00:39"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-20（01点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-20（01点版）</h1>
+<p>这轮 GitHub 合入 51 条。</p>
+<p>SGLang 给 PD 传输加了校验。</p>
+<p>vLLM 的混合模型读题又快了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>不过 release 分支已经开始合 cherry-pick。</p>
+<p>正式版应该不远了。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 还是 b12559，没有新快照。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>SGLang：17 条，PD 搬 KV 多了道验货是头条</strong></p>
+<p>#41056 是 NPU 上 PD 校验的新功能。</p>
+<p>PD 就是读题和生成分机器跑。</p>
+<p>读题机算完 KV，搬给生成机。</p>
+<p>KV 就是解码时留的草稿纸。</p>
+<p>搬的过程中万一传坏了，以前发现不了。</p>
+<p>现在两边各算一次校验和。</p>
+<p>校验和就是一串数字指纹。</p>
+<p>对不上，生成机直接拒收。</p>
+<p>这招本来只在 CUDA 上有。</p>
+<p>现在昇腾 A3 和 A5 也能用了。</p>
+<p>代价很小：吞吐最多慢 2.3%。</p>
+<p>1 万 token 时只慢 0.5%。</p>
+<p>校验一次 5 到 14 毫秒。</p>
+<p>你的 PD 评估里可以记一笔。</p>
+<p>跨机搬 KV，完整性校验是标配。</p>
+<p>#51779 和 #41269 都是投机解码的修补。</p>
+<p>投机解码就是小模型先打草稿。</p>
+<p>EAGLE 草稿在 DP 注意力下会卡死。</p>
+<p>DP 就是把请求分到多组设备上算。</p>
+<p>这两条把死锁修了。</p>
+<p>#48314 是 GLM-5.3-Flash 的提速。</p>
+<p>H20-3e 上 TP8 和 TP4 的配置加进来了。</p>
+<p>TP 就是张量并行。</p>
+<p>#51725 是打分的新功能。</p>
+<p>每个输入位置的 token 概率能单独输出了。</p>
+<p>#49554 是 AMD 的提速。</p>
+<p>MI355X 上小矩阵启动更快了。</p>
+<p>#51763 是 v1.0 分支的 cherry-pick。</p>
+<p>release/v1.0.0 分支开始收补丁了。</p>
+<p>其余是文档、扩散模型修补和 CI。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/41056">https://github.com/sgl-project/sglang/pull/41056</a></p>
+<p><strong>vLLM：7 条，混合模型读题提速是头条</strong></p>
+<p>#68673 是 Mamba 的读题提速。</p>
+<p>LFM2 和 LFM3 的 ShortConv 层能导出检查点了。</p>
+<p>检查点就是中途存下来的状态。</p>
+<p>以前开着前缀缓存，长提示还得多跑一步读题。</p>
+<p>前缀缓存就是算过的开头不用重算。</p>
+<p>现在一步跑完，首字快了很多。</p>
+<p>LFM2-1.2B、8K 提示、并发 4。</p>
+<p>B300 上首字时间降 76%。</p>
+<p>MI355X 上降 32%。</p>
+<p>代价是 KV 容量少 0.8%。</p>
+<p>准确率基本没变。</p>
+<p>这条跟 21点版的 FrontierReplay 是同一条线。</p>
+<p>混合模型的前缀缓存正在被一块块补齐。</p>
+<p>#68864 加了 Inkling 2 Small 的配方。</p>
+<p>H200 上能直接按配方跑了。</p>
+<p>配方就是官方给的部署做法。</p>
+<p>#58672 是 MoE 的重构。</p>
+<p>Quark 的静态 INT8 量化换了新调度。</p>
+<p>#57311 是启动提速。</p>
+<p>模型信息缓存的保存变轻了。</p>
+<p>其余是 CI。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68673">https://github.com/vllm-project/vllm/pull/68673</a></p>
+<p><strong>llama.cpp：13 条，Vulkan 上 GDN 是头条</strong></p>
+<p>#30207 是 Vulkan 的新功能。</p>
+<p>GDN 的分块实现上了 Vulkan。</p>
+<p>GDN 是一种带门控的递推层。</p>
+<p>混合模型在 Vulkan 上也能跑了。</p>
+<p>#32636 是 MoE 的改动。</p>
+<p>图节点给 MoE 缓存预留了位置。</p>
+<p>其余是界面、WebGPU 和 CUDA 修补。</p>
+<p>来源：GitHub pulls</p>
+<p><strong>Mooncake：6 条，全是存储层</strong></p>
+<p>#5558 是 OpLog 的提速。</p>
+<p>批量操作日志只拼一次。</p>
+<p>#5673 是迁移的改动。</p>
+<p>硬钉住的对象也能被 DrainJob 搬走。</p>
+<p>#5473 是读路径的提速。</p>
+<p>偏移分配器一次 I/O 读完。</p>
+<p>其余是并发保护和 NVLink 排空。</p>
+<p>来源：GitHub pulls</p>
+<p><strong>FlashInfer、TRT-LLM、Dynamo：小修补</strong></p>
+<p>FlashInfer 3 条。</p>
+<p>#9763 是 Cake GDN 的提速。</p>
+<p>TRT-LLM 4 条，大多是测试和基建。</p>
+<p>Dynamo 只有 1 条测试。</p>
+<p>来源：GitHub pulls</p>
+<p><strong>LMDeploy、TGI：零合入</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：11 月 21 日那批还没出</strong></p>
+<p>新一批每天 00:00 UTC 才发。</p>
+<p>11 月 20 日那批已经报完了。</p>
+<p>21点版报了 6 篇，23点版补捡 2 篇。</p>
+<p>下期再看。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p>这轮没新消息。</p>
+<p>美股已经收盘。</p>
+<p>Anthropic 盘后价还是 92.60 美元。</p>
+<p>19点版已经报过。</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 最新还是 Linear 那期。</p>
+<p>11 月 19 日出的，讲 GTM。</p>
+<p>跟推理 serving 没关系，这轮不收。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>#41056 和 #68673 都是 PR。</p>
+<p>等它有论文或博客再精读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-20-0100/">01点版</a></p>
+<hr/>
+<p>本轮已与 23点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag（release/v1.0.0 分支已开始合 cherry-pick）；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2；llama.cpp 仍为 b12559；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 7 条首次汇总：#68887（CI：Python 3.12 smoke 测试用 uv 管理 Python）、#68852（修补/Pooling：分块 embedding 超 max_model_len 截断）、#57311（性能/启动：模型信息缓存保存变轻）、#58672（重构/MoE：Quark 静态 INT8 迁入 MoE oracle）、#68883（CI：Hopper 以下跳过 HYV4Flash PP 等价测试）、#68864（配方：Inkling 2 Small nightly + Hopper H200）、#68673（性能/Mamba：ShortConv 导出 prefill 检查点，LFM2-1.2B 8K 提示并发 4 时 TTFT B300 -76%、MI355X -32%）。 SGLang 17 条首次汇总：#49554（性能/AMD：gfx950 分段 bf16 matmul 小 M 启动更快）、#51779（修补/投机解码：EAGLE 草稿读当前 DP 注意力字段）、#49216（修补：解密配置进架构探测）、#41056（功能/NPU：PD KV 校验上昇腾，Adler-32，A3/A5 验证，吞吐最多 -2.3%）、#51525（修补/AMD：nixl 绑定 AITER HIP runtime）、#51763（发布：cherry-pick #50886 到 release/v1.0.0）、#51611（修补/扩散：图重放 eager 断点保留 FA4）、#51598（修补/扩散：HTTP profiler 失败也停 worker profiler）、#51079（修补/AMD：非量化 CPU 输入不上 AITER GEMM）、#51725（功能/logprob：token_ids_logprob_rows）、#51463（修补/AMD：FP8 MoE 权重标记 is_shuffled）、#47824（修补/Intel：gemma4 GPTQ INT4 上 CPU）、#51700（文档：Hy4 安装对齐 Docker 指南）、#48314（性能/NVIDIA：fused_moe 加 H20-3e GLM-5.3-Flash TP8/TP4 配置）、#41269（修补/投机解码：DSA seed 缺失时防草稿死锁）、#50886（CI/AMD：QSA MQA prefill 核塞进 gfx942 共享内存）、#51624（CI：Marlin MoE GEMV/GEMM 界放宽到 1e-2）。 TRT-LLM 4 条：#22029（测试：MoE 通信与 Eagle3 测试配置）、#22123（功能：modeling-v2 上手 skill）、#22673（测试：取消豁免已修的用例）、#22667（基建：豁免 1 个失败用例）。 FlashInfer 3 条：#9693（修补/prims-ts：空 KV 请求保留持久解码屏障）、#9446（重构/prims-ts：分页上下文导入上提）、#9763（性能/cake_gdp：SM100/SM103 随机 FP16 快照共享内存噪声程序）。 Dynamo 1 条：#17583（测试：aisimulate 覆盖运行时选定的 DGD 块大小）。 Mooncake 6 条：#5558（存储：批量 OpLog JSON/Base64 只拼一次）、#5555（修补/存储：变更加段 OpLog 前先校验预留）、#5673（存储：DrainJob 可迁移硬钉对象）、#5473（存储：偏移分配器一次 I/O 读完，io_uring 批量）、#5361（TENT：释放子批次前排空 NVLink 流）、#5337（修补/存储：并发 offload 时保护待注册桶）。 llama.cpp 13 条：#32632（界面：模型选择器设 reasoning effort）、#32591（界面：全屏图表预览）、#30207（Vulkan：分块 GATED_DELTA_NET 实现）、#32636（llama：给 MoE 缓存预留图节点）、#32559（模型：加 Domyn Edge 4B）、#32600（llamafile/s390x：QK 数据类型支持）、#32265（kleidiai：OHOS AArch64 目标）、#32576（WebGPU：2D 索引拷贝核修补）、#31268（CUDA：Orin 单列 MMVQ 优化）、#31345（CUDA：每专家 fallback 保持 MUL_MAT_ID 精度）、#31149（Vulkan：RMS_NORM_MUL_ROPE 循环优化）、#31708（WebGPU：COL2IM_1D 支持）。LMDeploy、TGI 零合入。 arXiv：11 月 21 日批尚未发布（00:00 UTC）；11 月 20 日批已在 21点版（6 篇）与 23点版（补捡 2 篇）报完；cs.CL 最新提交仍为 11 月 19 日 18:57 UTC，无新增。 业内新闻：ANT 盘后 92.60 美元无变化（19点版已报，美股已收盘）；HN/X/Reddit/机器之心/量子位本轮无新相关内容；Latent Space 最新仍为 11 月 19 日 Linear GTM 访谈（与 serving 无关）。 深读：本轮无新增（宁缺毋滥；#41056、#68673 均为 PR，待论文或博客再精读）。 去重：23点版 31 条 PR、MemFolder、ScaleWire、TRT-LLM RocketKV、FrontierReplay 等均未重复。</p></body></html>
