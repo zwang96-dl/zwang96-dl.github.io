@@ -2,7 +2,7 @@
 <meta name="doc-title" content="多模态推理简报 · 11月19日 19:00"/>
 <meta name="doc-description" content=""/>
 <meta name="doc-date" content="2026-11-19"/>
-<meta name="doc-ts" content="2026-11-20T03:00:27"/>
+<meta name="doc-ts" content="2026-11-20T03:02:41"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>多模态大模型推理服务简报 · 2026-11-19（19点版）</title><style>
@@ -196,7 +196,7 @@ img{border-color:#30363d}
 <p>接受率会掉，聚合部署不受影响。</p>
 <p>还有 TensorRT 老后端整个删了。</p>
 <p>升级前先看迁移指南。</p>
-<p>精读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261120-trtllm-v1-3-0/">TensorRT-LLM v1.3.0 正式版-精读</a></p>
+<p>精读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261120-tensorrt-llm-v1-3-0/">TensorRT-LLM v1.3.0 正式版-精读</a></p>
 <p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-19-1900/">19点版</a></p>
 <hr/>
 <p>本轮已与 17点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM 新正式版 v1.3.0（2026-11-20T02:45:00Z，即 11-19 18:45 PST；1.4.0 仍为 rc4）；FlashInfer v0.7.5；Dynamo 正式版 v1.6.2；llama.cpp b12556（无新快照）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 7 条首次汇总：#62480（内核/ROCm：W4A8 MoE decode 核上 RDNA3/RDNA3.5 gfx11）、#68799（修补/调度：调度时释放已消费的 encoder 输入）、#68782（修补/注意力：FlashInfer XQA ragged draft mask 去 GPU-CPU 同步）、#68749（修补/ROCm：batched kpool decode 跨 wave 竞态）、#68227（修补/NIXL：不断开 agent 已走的引擎）、#67680（修补/NIXL KV Connector：indexer 后端排除出兼容哈希）、#59058（修补/MoRIIO：consumer abort 后保留 WRITE 接收映射）。 SGLang 11 条首次汇总：#51520（功能/kimi-k3：--enable-layernorm-sp 序列并行 prefill）、#48937（功能/sgl-router：DeepSeek 图文对话按前缀缓存路由）、#51338（功能/classify：多标签独立概率）、#48389（功能/NPU：GLM DSA 缓存层切分）、#51662（测试/sgl-router：4 卡 H100 PD dp-aware 2P+2D 端到端）、#51652/#51649（文档/扩散：FLUX.3 条件缓存与 Ulysses 传输说明）、#51637（修补/sgl-router：Responses 汇总事件对齐）、#51305（修补/mem_cache：FP4 默认）、#50962（修补/hicache：原生哈希扩展编不过则存储挂载失败）、#51424（CI/NPU：重开 PR 触发）。 TRT-LLM 6 条首次汇总：#22647（基建/GB300：waive 1 个失败用例）、#22612（测试：修 skip 标记）、#22569（修补：FlashInfer 工作区隔离、JIT 构建共享）、#22540（修补：Check-Test-List 收集挂起上界）、#22346（重构：响应准备与输出快照集中化）、#21763（测试：nemotron_3 与 qwen3.8 用例上 spark）。 FlashInfer 1 条：#9534（回滚：autotuner 大桶查找修补 #7626）。 Dynamo 5 条首次汇总：#18484（文档/博客：Planner Retune 新增）、#19225（功能/mocker：profiler 结果走 AIS、去 scikit-learn）、#18552（功能/runtime：NVTX payload 经 nvtx-sys 2.1、按请求 key）、#18417（功能/llm：Rust 前端跑 Mistral v11+ tekken checkpoint）、#17986（CI：共享组织 GPU runner）。 Mooncake 2 条首次汇总：#5684（修补/TE：EFA split device buffer 守拓扑本地网卡）、#5371（功能/TENT：内置 TPU 适配器、可插拔 buffer provider）。 llama.cpp、LMDeploy、TGI 零合入。 arXiv：11 月 20 日批截至 03:00 UTC 未进 API；最新仍为 11 月 19 日批（LoopCache 2026-11-19T03:17:52Z），23点版已报。 业内新闻：ANT 盘后 $92.60（美东 20:00 Finnhub 快照，-4.70% vs 收盘 $97.17；17点版报过 $92.10）；SingProbe 两款权重 11-19 上线（inclusionAI/Ling-3.1-flash-1019-singprobe、DeepSeek-V4.1-Flash-1017-singprobe，技术本身 05点版已报）。 访谈与深度：Dynamo Planner Retune 博客（#18484，H200 实测每卡 goodput +13.1%、SLA 51%→58%、TTFT 中位数 -17%，调参 5–7 分钟）；Latent Space 11-19 新一期为 Linear GTM 访谈（Spotify），与推理 serving 无关，未收录。 深读：新增 1 篇——TensorRT-LLM v1.3.0 正式版（GitHub release notes 2026-11-20T02:45:00Z；原 release notes 无图，关键数字已抄录）。 去重：Megakernel（17点版已报并深读）、Gemma 4 五引擎实测（17点版已报）、SGLang 联盟（11 月 12 日旧闻）、HyperPod/Dynamo（11-18 07点版已报）、Hy4（11-17 2100版已报）、TripleKV/LoopCache（11-18 23点版已报）均未重复；HN/X/Reddit/机器之心/量子位本轮无新相关内容。</p></body></html>
