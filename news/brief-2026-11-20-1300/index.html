@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月20日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-20"/>
+<meta name="doc-ts" content="2026-11-20T21:01:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-20（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-20（13点版）</h1>
+<p>这轮 GitHub 合入 35 条。</p>
+<p>头条是两件新模型的事。</p>
+<p>Thinking Machines 今天发了新模型。</p>
+<p>名字是 Inkling 2 Mini。</p>
+<p>FlashInfer 出了 v0.7.6rc1。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：两处动了</strong></p>
+<p>FlashInfer 新出 v0.7.6rc1。</p>
+<p>今天 12:33 发布的预发布版。</p>
+<p>llama.cpp 新出快照 b12590。</p>
+<p>今天 11:02 发布。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases、tags</p>
+<p><strong>vLLM：9 条，Omni 支持是头条</strong></p>
+<p>#60648 让 Transformers 后端能跑 Omni 模型。</p>
+<p>Omni 模型就是一次请求里同时吃音频、图片、视频的那种全能模型。</p>
+<p>以前得走专门分支，现在主线后端直接支持。</p>
+<p>要 Transformers 5.23.0 才行。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/60648">https://github.com/vllm-project/vllm/pull/60648</a></p>
+<p>#69027 加了 Inkling 2 Mini 的部署配方。</p>
+<p>Thinking Machines 今天刚发的新模型，框架当天就跟上了。</p>
+<p>#68798 是投机解码的重构。</p>
+<p>投机解码就是先让小模型打草稿，再让大模型改。</p>
+<p>现在草稿模型的行为改从配置里推导，不再到处查方法名。</p>
+<p>#68785 让 HiSparse 的卸载索引器只存一份。</p>
+<p>多个 TP rank 之间共享，不再每张卡各存一份，省显存。</p>
+<p>#69019 是 Responses 接口的另一条修补。</p>
+<p>Rust 前端支持 additional_tools 输入。</p>
+<p>其余 4 条是 ROCm 修补、依赖 pin、前端修补和重构。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69027">https://github.com/vllm-project/vllm/pull/69027</a></p>
+<p><strong>SGLang：8 条，Hy4-Flash 内核是头条</strong></p>
+<p>#51646 给 Hy4-Flash 送来了专用内核。</p>
+<p>Hy4-Flash 是腾讯刚开源的便宜大模型。</p>
+<p>IndexPool、Engram、iHC 融合核一次合入。</p>
+<p>这是 Hy4-Flash 上主线的第一块拼图。</p>
+<p>后面还有文本模型、视觉语言、DFly 投机解码几块。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51646">https://github.com/sgl-project/sglang/pull/51646</a></p>
+<p>#51927 和 #51930 是 Inkling-2-Mini 的 cookbook 文档。</p>
+<p>#47889 优化了 cosmos3 的 KV 缓存管理。</p>
+<p>KV 缓存就是推理时留下的草稿纸，管得好能省显存。</p>
+<p>#51464 是扩散模型 zimage 的小修补。</p>
+<p>其余 3 条是 CI、测试和重构。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51927">https://github.com/sgl-project/sglang/pull/51927</a></p>
+<p><strong>FlashInfer：8 条，静默算错修补是头条</strong></p>
+<p>#6160 修了一个静默算错的 bug。</p>
+<p>Hopper 卡上 FP16/BF16 读题时，屏障计数可能多算一次。</p>
+<p>读到旧数据，结果错了还不报错，是最危险的那种。</p>
+<p>现在把多余的那次到达去掉了，数学和接口都不变。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/6160">https://github.com/flashinfer-ai/flashinfer/pull/6160</a></p>
+<p>#7496 给 TRT-LLM 路径加了 Nemotron 的激活函数。</p>
+<p>#9695 和 #9598 是采样和 batch-invariant 的性能优化。</p>
+<p>#9745 是 FP4 MoE 路由的元数据查询。</p>
+<p>其余 3 条是测试和自动调参修补。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.6rc1">https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.6rc1</a></p>
+<p><strong>Dynamo：9 条，1.7.0 发布准备是头条</strong></p>
+<p>多条 cherry-pick 合入了 release/1.7.0 分支。</p>
+<p>发布用的企业版 vLLM 运行时、容器 FFmpeg 升到 9.0.2。</p>
+<p>正式版 1.7.0 的 RC 正在准备中。</p>
+<p>#19236 是路由器的性能修补。</p>
+<p>准入排队时，已准备好的负载还能继续用。</p>
+<p>其余 6 条是容器、合规和文档。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19236">https://github.com/ai-dynamo/dynamo/pull/19236</a></p>
+<p><strong>llama.cpp：1 条，新快照 b12590</strong></p>
+<p>#32571 是 qwen3-asr 转换的小修补。</p>
+<p>快照 b12590 今天 11:02 发布。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b12590">https://github.com/ggml-org/llama.cpp/releases/tag/b12590</a></p>
+<p><strong>其余四家：零合入</strong></p>
+<p>TRT-LLM、LMDeploy、TGI、Mooncake 都没动静。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批 16:00 PST 才发</strong></p>
+<p>每天 00:00 UTC 才发新一批。</p>
+<p>也就是今天 16:00 PST。</p>
+<p>下期再看。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>Inkling 2 Mini 今天发布</strong></p>
+<p>Thinking Machines 的新模型，通用多模态。</p>
+<p>文字加图片输入，文字输出。</p>
+<p>vLLM 和 SGLang 当天就跟上了配方和 cookbook。</p>
+<p>想试的直接看模型卡。</p>
+<p>来源：<a href="https://huggingface.co/thinkingmachines/Inkling-2-Mini">https://huggingface.co/thinkingmachines/Inkling-2-Mini</a></p>
+<p><strong>Anthropic 续跌：盘中碰过发行价</strong></p>
+<p>开盘 89.86 美元。</p>
+<p>盘中最低跌到 83.05 美元，发行价就是 83 美元。</p>
+<p>最新约 88.23 美元，跌约 9%。</p>
+<p>AI 板块今天整体都在跌。</p>
+<p>来源：Finnhub</p>
+<h2>访谈与深度</h2>
+<p>Latent Space 最新还是 Linear 那期。</p>
+<p>11 月 19 日出的，讲 GTM。</p>
+<p>跟推理 serving 没关系，这轮不收。</p>
+<p>HN 上没有新的 serving 讨论。</p>
+<p>Thaw 是 11 月 1 日报过的旧闻，不报。</p>
+<h2>值得深入学</h2>
+<p>这轮没有值得深读的新内容。</p>
+<p>Hy4-Flash 的 SGLang 内核只是 PR。</p>
+<p>Inkling 2 Mini 只有模型卡，没有技术报告。</p>
+<p>等有成体系的技术文章再精读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-20-1300/">13点版</a></p>
+<hr/>
+<p>本轮已与 11点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 新出 v0.7.6rc1（2026-11-20 12:33 PST 发布，预发布）；Dynamo 正式版 v1.6.2（1.7.0 RC 准备中）；llama.cpp 新出 b12590（2026-11-20 11:02 PST 发布）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 9 条首次汇总：#69025（修补/ROCm：batch-invariant 模式避开 MIOpen 的 split-K 卷积 solver）、#69019（功能/Rust 前端：Responses API 支持 additional_tools 输入项，与 11点版 #68781 不同 PR）、#68917（修补/前端：/v1/decisions 按 /v1/systemone 方式读谓词）、#69027（配方：新增 Inkling 2 Mini）、#68991（构建：PyNvVideoCodec pin 放宽到 &gt;=2.2.4 以修 CVE）、#60648（功能/Transformers 后端：Omni 模型支持，音频+图片+视频单请求，需 Transformers 5.23.0）、#68006（重构：MR V2 全图捕获用 FULL 代替 NONE）、#68798（投机解码/重构：speculator 行为改从 SpeculatorConfig 推导）、#68785（HiSparse：跨 TP rank 只存一份 offloaded indexer）。 SGLang 8 条首次汇总：#51646（功能/内核：Hy4-Flash IndexPool、Engram 与融合 iHC post-pre 内核，#51159 栈的第一块）、#51927（文档/cookbook：新增 Inkling-2-Mini）、#51930（文档/cookbook：Inkling-2-Mini 安装指向其 PR）、#51464（修补/扩散：zimage 的 n&gt;1 输出逐个跑）、#47889（性能/cosmos3：Sim-Bimanual KV 缓存管理优化）、#51913（CI/扩散：Hunyuan3D 形状去噪校准）、#50819（测试/rust-server：验证断连会中止已准入的 unary prefill）、#50897（重构/rust-server：仅保留需 crate 内部的测试辅助）。 TRT-LLM、LMDeploy、TGI、Mooncake 零合入。 FlashInfer 8 条首次汇总：#7496（功能：Nemotron tanh clamped sqrelu 进 TRTLLM 路径）、#6160（修补/fa3：修 Hopper FP16/BF16 prefill 静默数值错误，屏障多算一次到达）、#9785（测试/attention：cuDNN paged auto plan 遇 soft cap 时拒绝而非 FP16）、#9695（性能/batch-invariant：采样 host 开销、预编译池与核变体）、#9289（自动调参：tactic 池纳入缓存覆盖统计）、#9676（功能/batch-invariant：KDA 类 kda.bf16.c16 无状态调用）、#9598（性能/采样：SM103 serving 形态单 launch cluster top-p renorm）、#9745（功能/MoE：路由 FP4 MoE 元数据的 routing tile query）。v0.7.6rc1 于 2026-11-20T20:33:55Z 发布。 Dynamo 9 条首次汇总：#19217（修补/容器：装 ca-certificates 的 RUN 里检查版本下限）、#19210（合规：NOTICES-Native 标注静态链接 libzmq 4.3.4）、#19107（文档/sidecar：sidecar 代码与测试的 agent 指南）、#19242（构建/依赖：[release/1.7.0] pin 已发布的 AISim beta.1 产物）、#19254（CI/发布：[cherry-pick 1.7.0] 每个 RC 都发布企业版 vLLM 运行时）、#19238（构建/容器：[cherry-pick 1.7.0] 内置 FFmpeg 升到 9.0.2）、#19262（功能/容器：[cherry-pick 1.7.0] 把 THIRD-PARTY.txt 写进 /legal）、#17936（文档/runtime：DYN_SYSTEM_USE_ENDPOINT_HEALTH_STATUS 标注为已生效）、#19236（性能/router：准入排队时已准备好的负载继续可用）。 llama.cpp 1 条首次汇总：#32571（转换：qwen3-asr 的 &quot;language ...&quot; 输出放进 thinking block）。新快照 b12590 于 2026-11-20T19:02:52Z 发布。 arXiv：下一批 00:00 UTC（16:00 PST）发布。 业内新闻：Inkling 2 Mini 2026-11-20 发布（HF 模型卡日期），vLLM #69027 与 SGLang #51927/#51930 当天跟进；ANT 开盘 89.86 美元，盘中低点 83.05 美元（发行价 83 美元），最新约 88.23 美元（Finnhub 美东 15:56 快照，-9.2% vs 收盘 97.17），11点版已报开盘价与盘中低点，本轮续报最新价。 深读：本轮无新增。 去重：Hy4 权重开源与深读（05点版）、Hy4 AMA（11点版）、Thaw（11 月 1 日）、Latent Space Linear 访谈（11 月 19 日）、Inkling 2 Small（11-19 19点版）均未重复。</p></body></html>
