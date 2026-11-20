@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · TensorRT-LLM v1.3.0 正式版：Rubin 预览、KV 缓存 V2、PD 新调度"/>
+<meta name="doc-description" content="- 作者：NVIDIA TensorRT-LLM 团队"/>
+<meta name="doc-date" content="2026-11-20"/>
+<meta name="doc-ts" content="2026-11-20T03:00:42"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TensorRT-LLM v1.3.0 正式版：Rubin 预览、KV 缓存 V2、PD 新调度</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>TensorRT-LLM v1.3.0 正式版：Rubin 预览、KV 缓存 V2、PD 新调度</h1>
+<ul><li>作者：NVIDIA TensorRT-LLM 团队</li><li>原文：GitHub Release v1.3.0，2026-11-20T02:45:00Z 发布（美西 11 月 19 日 18:45）</li><li>原文链接：<a href="https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.3.0">https://github.com/NVIDIA/TensorRT-LLM/releases/tag/v1.3.0</a></li><li>深读：2026-11-19 19点版（1.3 这条线的正式版，不是 rc）</li></ul>
+<h2>人话解读</h2>
+<p>1.3.0 是 1.3 这条线的正式版。</p>
+<p>1.4.0 还在 rc 阶段，最新是 rc4。</p>
+<p>这版一次塞了三件大事。</p>
+<p>第一，Rubin 预览支持来了。</p>
+<p>Rubin 是英伟达的新一代 GPU。</p>
+<p>DeepSeek-V4 和 Kimi K3 能在上面跑了。</p>
+<p>第二，KV 缓存换了 V2 管理器。</p>
+<p>KV 缓存就是解码时的草稿纸。</p>
+<p>还加了压缩和磁盘缓存。</p>
+<p>第三，PD 拆分加了新调度。</p>
+<p>读题和生成分机器跑，排队更聪明了。</p>
+<p>另外还多了一个新方向：VisualGen。</p>
+<p>图片和视频生成模型也能用同一套服务跑了。</p>
+<p>但这版删东西也很狠。</p>
+<p>TensorRT 老后端整个没了。</p>
+<p>只剩 PyTorch 这一条后端。</p>
+<p>升级前先看迁移指南，别直接升。</p>
+<h2>核心方法</h2>
+<p><strong>Rubin 预览支持</strong></p>
+<ul><li>Rubin 是 SM107 架构的新卡。</li><li>DeepSeek-V4 和 Kimi K3 已验证能跑。</li><li>Qwen3.5、MiniMax-M3 也在预览名单里。</li><li>NVFP4 MoE 加了局域化。</li><li>显存流量不出本芯片。</li><li>关掉它可以设 DISABLE_LOCALITY_DOMAINS=1。</li></ul>
+<p><strong>KV 缓存 V2</strong></p>
+<ul><li>管理器按模型选型，大部分模型默认开。</li><li>压缩有两招：TriAttention 和 NVFP4 冷页压缩。</li><li>冷页就是很久没翻的那页草稿纸。</li><li>NVFP4 KV 缓存和磁盘缓存都来了。</li><li>同一对话的块可以复用。</li><li>多模态 KV 块按精确内容哈希。</li><li>FlexKV 和 LMCache 两个连接器都能接。</li></ul>
+<p><strong>PD 拆分（Disaggregated Serving）</strong></p>
+<ul><li>新调度叫 gen-first，先排生成再排读题。</li><li>对话亲和路由让同一对话落到同一组机器。</li><li>混合模型和 beam search 也能拆开跑。</li><li>Qwen3.8-Flash-Next 新支持拆分部署。</li><li>1.2 版的几个拆分挂起 bug 都修了。</li></ul>
+<p><strong>投机解码（Speculative Decoding）</strong></p>
+<ul><li>新草稿器：DSpark、DFlash、后缀自动机、PARD。</li><li>EAGLE3 动态树和 Eagle 3.1 草稿模型。</li><li>投机解码能跟 LoRA 一起用。</li><li>接受率低了会自动关掉动态投机。</li><li>拒收采样补上了，单模型路径也能用。</li></ul>
+<p><strong>并行与 MoE</strong></p>
+<ul><li>DWDP：权重分片、数据并行混着用。</li><li>Helix 上下文并行扩展了。</li><li>KV 感知的注意力 DP 路由器。</li><li>NCCL-EP 后端，专家数上限提到 2048。</li><li>MoE 后端多了 DENSEGEMM、MEGAMOE_DEEPGEMM。</li><li>还有 CUTEDSL_FC12，只给 Rubin 用。</li></ul>
+<p><strong>量化与稀疏注意力</strong></p>
+<ul><li>MXFP8 的 W8A8 线性和 MoE 都支持了。</li><li>NVFP4 纯权重能量化跑在 Hopper 和 Ada 卡上。</li><li>DSA 的 FP4 和 FP8 解码核来了。</li><li>GVR Top-K 和 Skip Softmax 注意力。</li><li>Skip Softmax 就是跳过不重要的注意力分数。</li></ul>
+<p><strong>多模态与新方向</strong></p>
+<ul><li>多模态编码器缓存和 CUDA 图都加了。</li><li>前缀感知调度默认开，共享前缀只算一次。</li><li>VisualGen 新垂直方向：FLUX、Wan 2.2 等。</li><li>图生图、视频生成都能走 trtllm-serve。</li></ul>
+<h2>关键数据</h2>
+<p>这版发布说明里几乎没有跑分数字。</p>
+<p>只有功能清单和修复清单。</p>
+<p>这点先说清楚，别当它有实测。</p>
+<p>能抄的数字都在下面：</p>
+<ul><li>专家数上限：2048 个。</li><li>KV 搬运默认超时：60 秒，以前没有超时。</li><li>TorchCompile 默认流数：从 1 改成 3。</li><li>Logprobs 上限：100 个，超了直接报错。</li><li>随版发了 12 篇技术博客。</li><li>部署指南新增：GLM-5、Kimi K3、MiniMax-M3。</li><li>还有 Nemotron 3、Qwen3.8-Flash-Next。</li></ul>
+<h2>原文图表</h2>
+<p>原 release notes 未附图。</p>
+<p>关键数字已抄录在上文。</p>
+<h2>升级注意：先看这三条</h2>
+<ul><li>TensorRT 老后端删了，只剩 PyTorch 后端。</li><li>trtllm-build 等命令都没了。</li><li>C++ Executor 和老 runtime API 也删了。</li><li>两模型投机解码删了，改用单模型实现。</li><li>遥测默认开了，不想上报要设开关。</li><li>开关是 TRTLLM_NO_USAGE_STATS=1。</li><li>PD 拆分下 DSpark 的草稿 KV 不搬运。</li><li>接受率会掉，聚合部署不受影响。</li><li>GLM-5.2 的 NVFP4 在 GB200 上可能段错误。</li><li>max_num_tokens 别超过 4096。</li><li>Kimi-K3 的 NVFP4 可能加载 tokenizer 失败。</li><li>跟自带 transformers 版本有关。</li></ul>
+<h2>跟研究方向的关联</h2>
+<ul><li>PD 评估可以直接拿这版当 TRT-LLM 基线。</li><li>gen-first 调度和对话亲和路由是新变量。</li><li>评估里要单列：拆分下 DSpark 接受率掉多少。</li><li>KV 缓存 V2 是默认项，对照组要写清楚。</li><li>NVFP4 冷页压缩的账要单列一档。</li><li>多模态 KV 块精确哈希，跟 ShelfKV 那篇对得上。</li><li>读题节点可以试前缀感知调度。</li><li>共享前缀只算一次，RAG 流量收益最大。</li><li>12 篇技术博客里有两篇值得单读。</li><li>一篇讲 Skip Softmax 注意力长上下文。</li><li>一篇讲 Helix 并行撑起百万 token 解码。</li><li>Rubin 预览只是预览，别当生产结论。</li></ul>
+<h2>术语表</h2>
+<ul><li>Rubin：英伟达新一代 GPU，SM107 架构。</li><li>KV 缓存 V2：新一代草稿纸管理器，默认开。</li><li>TriAttention：一种 KV 压缩方法。</li><li>NVFP4 冷页压缩：不常用的 KV 页压成 4 位。</li><li>DSpark / DFlash：两种新的投机解码草稿器。</li><li>EAGLE3：一种草稿模型，猜下一个词。</li><li>DWDP：权重分片加数据并行的混搭。</li><li>Helix：上下文并行，把长上下文切开分卡算。</li><li>VisualGen：TRT-LLM 里新加的图片视频生成方向。</li><li>gen-first 调度：先排生成请求，再排读题。</li><li>对话亲和路由：同一对话固定落到同一组机器。</li><li>FlexKV / LMCache：外接 KV 缓存的连接器。</li></ul></body></html>
