@@ -1,0 +1,221 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月20日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-20"/>
+<meta name="doc-ts" content="2026-11-21T01:05:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-20（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-20（17点版）</h1>
+<p>这轮 GitHub 合入 51 条。</p>
+<p>头条是 Hy4-Flash 的视觉版。</p>
+<p>SGLang 把图和视频也接进来了。</p>
+<p>加上 vLLM 那边的稀疏支持。</p>
+<p>Hy4 这套拼图基本拼完了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有一处动了</strong></p>
+<p>llama.cpp 新出两个快照。</p>
+<p>b12599 和 b12600，15:13 和 15:30 先后发布。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：25 条，Hy4-Flash 视觉版是头条</strong></p>
+<p>#51937 给 Hy4-Flash 接上了视觉语言支持。</p>
+<p>图片和视频输入都能走了。</p>
+<p>这是 Hy4 上主线的第三块拼图。</p>
+<p>第一块是 13点版报过的专用内核。</p>
+<p>第二块是 15点版报过的文本模型。</p>
+<p>视觉塔和投影层按注意力并行切分。</p>
+<p>视频帧采样和图文混排的位置编码都处理了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51937">https://github.com/sgl-project/sglang/pull/51937</a></p>
+<p>#51882 和 #51892 修了 PD 拆分里的一对死锁。</p>
+<p>读题和解码分开跑时，两边会互相等。</p>
+<p>一边攥着 KV 缓存不放。</p>
+<p>另一边攥着解码显存不放。</p>
+<p>谁都不让步，最后超时才失败。</p>
+<p>现在让步的那方先把 KV 还回去。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51882">https://github.com/sgl-project/sglang/pull/51882</a></p>
+<p>#50684 给 FlashInfer 的两种 MoE 核开了读题 CUDA 图。</p>
+<p>CuTe DSL 的 MoE 和 MegaMoE。</p>
+<p>以前这两条路测的时候都关着这项。</p>
+<p>现在按默认后端跑通了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50684">https://github.com/sgl-project/sglang/pull/50684</a></p>
+<p>#50242 给 sgl-router 加了运行时 worker 管理接口。</p>
+<p>#51788 修了投机解码里的惩罚器。</p>
+<p>被接受的 token 以前没喂给惩罚器。</p>
+<p>#51945 修了 Rust 服务端的分词性能。</p>
+<p>字节级 BPE 分词以前每步都重解全文。</p>
+<p>输出越长越慢，最坏是平方级。</p>
+<p>现在每块只解自己的字节。</p>
+<p>其余 18 条是扩散、日志和修补。</p>
+<p>#51969 修了 Hy4-Flash 的并行尺寸读取。</p>
+<p>#51935 和 #51933 是扩散模型修补。</p>
+<p>#51932 拆掉了注意力并行里的中转。</p>
+<p>#51904 砍了请求日志和崩溃转储的拷贝。</p>
+<p>#51909 和 #51899 是 logprob 候选功能。</p>
+<p>#51897 让处理器自己发布多模态特征。</p>
+<p>#51895、#51891、#51889、#51881 是接口修补。</p>
+<p>#51880 让 zigzag 上下文并行容忍短请求。</p>
+<p>#51688 是 beam 搜索的小优化。</p>
+<p>#51165 上报了忽略结束符请求的停止位置。</p>
+<p>#51759 是文档要求。</p>
+<p>#47020 给 DFlash 补上了请求惩罚。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51937">https://github.com/sgl-project/sglang/pull/51937</a></p>
+<p><strong>vLLM：7 条，Hy4 稀疏支持是头条</strong></p>
+<p>#69026 给 Hy4 Flash 接上了 HiSparse。</p>
+<p>HiSparse 是 vLLM 的稀疏注意力加速。</p>
+<p>滑窗层以前也会拿到缓存句柄。</p>
+<p>第一次写 KV 就失败。</p>
+<p>现在滑窗层只注册普通索引组。</p>
+<p>只有真正的稀疏层才拿句柄。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69026">https://github.com/vllm-project/vllm/pull/69026</a></p>
+<p>#69023 修了 DSv4.1 的启动崩溃。</p>
+<p>延迟特化解码后端配 DSpark 草稿器。</p>
+<p>启动时直接报属性缺失。</p>
+<p>现在从草稿器的 MoE 层读标志。</p>
+<p>#68760 给压测工具加了决策后端。</p>
+<p>#67798 加了纯编码器注意力钩子。</p>
+<p>#61214 给 gfx942 加了 MXFP8 MoE 后端。</p>
+<p>其余 2 条是 ROCm 修补。</p>
+<p>#66586 修了压缩张量的 KV 缩放因子。</p>
+<p>#65935 修了压测里的显卡可见性。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69026">https://github.com/vllm-project/vllm/pull/69026</a></p>
+<p><strong>TRT-LLM：6 条，Inkling 2 是头条</strong></p>
+<p>#22627 接入了 Inkling 2 Modeling V2 全家。</p>
+<p>算子、内核和 Inkling-2-Small 目标都有了。</p>
+<p>一台 GB300 托盘，TP4 配 EP4。</p>
+<p>路由还没接，下个 PR 才注册。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22627">https://github.com/NVIDIA/TensorRT-LLM/pull/22627</a></p>
+<p>#19395 给 PrimTS 加了 MLA 读题。</p>
+<p>还接了 MTP 和 Helix，支持 Rubin。</p>
+<p>Kimi K3 的全注意力层能选它。</p>
+<p>#22418 修了拆分流的报错时机。</p>
+<p>上游流在首块之前失败。</p>
+<p>以前返回 200 加一段坏正文。</p>
+<p>现在直接返回 HTTP 错误。</p>
+<p>#22658 给 Rubin 加了 H3 的原生静态 FP8 场景。</p>
+<p>其余 2 条是修补。</p>
+<p>#22695 修了 SM107 的 FlashMLA 构建。</p>
+<p>#22571 给小矩阵乘法分了桶。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22627">https://github.com/NVIDIA/TensorRT-LLM/pull/22627</a></p>
+<p><strong>Dynamo：5 条，预填充路由修补是头条</strong></p>
+<p>#19270 修了 prefill 跳转不跟踪输出块的问题。</p>
+<p>开了输出块跟踪的前端会直接失败。</p>
+<p>因为 prefill 跳转从不激活。</p>
+<p>现在 prefill 跳转不再跟踪块。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19270">https://github.com/ai-dynamo/dynamo/pull/19270</a></p>
+<p>#19266 把 TRT-LLM 构建底座移到 CUDA 13.4。</p>
+<p>#19253 让每个 RC 都发布企业版 vLLM 镜像。</p>
+<p>#18473 让 KV 路由接受非 UTF-8 的二进制键。</p>
+<p>#17885 容忍响应平面不匹配。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19270">https://github.com/ai-dynamo/dynamo/pull/19270</a></p>
+<p><strong>FlashInfer：8 条，MoE 通信是头条</strong></p>
+<p>#9623 把 NCCL EP 升到 0.3。</p>
+<p>SplitMoE 的通信层跟着升级。</p>
+<p>多了几组控制参数和兼容修补。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9623">https://github.com/flashinfer-ai/flashinfer/pull/9623</a></p>
+<p>#9780 给 SM12x 加了 BF16 乘 NVFP4 的 GEMV 核。</p>
+<p>#9787 让 mm_bf16 支持调用方战术和 FP32 输出。</p>
+<p>#9773 优化了大批量 FP8 的 DeepGEMM。</p>
+<p>#9702 给 SM103 的 FMHA 换了静态调度器。</p>
+<p>#9649 修了 NVLink 单边全交换的内存问题。</p>
+<p>#9795 清掉了过时的 cuDNN 版本检查。</p>
+<p>#9285 给批不变注意力加了非因果模式。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9623">https://github.com/flashinfer-ai/flashinfer/pull/9623</a></p>
+<p><strong>llama.cpp：0 条合入，两个新快照</strong></p>
+<p>窗口里没有合入的 PR。</p>
+<p>但 b12599 和 b12600 先后发布。</p>
+<p>分别是 15:13 和 15:30。</p>
+<p><strong>其余三家：零合入</strong></p>
+<p>LMDeploy、TGI、Mooncake 都没动静。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这批没来，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日 18:59 的提交。</p>
+<p>15点版预计今天 16:00 发新一批，实际没来。</p>
+<p>arXiv 周末不发榜，下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p>美股已收盘，这轮没有新消息。</p>
+<p>Hy4 权重开源是 05点版报过的。</p>
+<p>ANT 收盘价 15点版也报过了。</p>
+<h2>访谈与深度</h2>
+<p><strong>CPU 才是瓶颈？一篇新文章算了笔账</strong></p>
+<p>Medium 今天有篇文章讲 Blink。</p>
+<p>Blink 是 4 月的一篇论文。</p>
+<p>思路是把 CPU 踢出推理链路。</p>
+<p>请求走智能网卡，调度交给常驻 GPU 的核。</p>
+<p>文章给了一组实测数字。</p>
+<p>H100 跑 Llama-3 8B，vLLM 能到 7475 token 每秒。</p>
+<p>在空闲核上跑个压缩任务。</p>
+<p>吞吐直接掉到 1961 token 每秒。</p>
+<p>首 token 的 P99 延迟从 150 毫秒涨到 21 秒。</p>
+<p>同一块卡，同一个模型。</p>
+<p>只差一个抢 CPU 的邻居。</p>
+<p>来源：<a href="https://medium.com/@roanmonteiro/your-30k-gpu-is-waiting-on-a-shared-xeon-1b151389b8e0">https://medium.com/@roanmonteiro/your-30k-gpu-is-waiting-on-a-shared-xeon-1b151389b8e0</a></p>
+<p>论文：<a href="https://arxiv.org/abs/2604.07609">https://arxiv.org/abs/2604.07609</a></p>
+<p><strong>温度设 0 还会飘？新文章给了代价表</strong></p>
+<p>AppScale 今天发了篇总结。</p>
+<p>讲温度 0 下输出仍会变。</p>
+<p>真凶是批大小改了核的算术。</p>
+<p>SGLang 的确定性模式要慢 25% 到 45%。</p>
+<p>Thinking Machines 的原型从 26 秒涨到 42 秒。</p>
+<p>vLLM 只要开 VLLM_BATCH_INVARIANT=1。</p>
+<p>代价官方没给数字。</p>
+<p>这篇跟你之前读过的 Thinking Machines 深读是同一条线。</p>
+<p>来源：<a href="https://appscale.blog/en/blog/llm-nondeterminism-temperature-zero-batch-invariance-2026">https://appscale.blog/en/blog/llm-nondeterminism-temperature-zero-batch-invariance-2026</a></p>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<p>HN 上也没有新的 serving 讨论。</p>
+<p>Tensward 是 11 月 13 日的旧帖。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>PR 居多，适合直接看链接。</p>
+<p>Blink 那篇值得一读，但它是 4 月旧论文的新解读。</p>
+<p>先放访谈里，暂时不做整篇精读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-20-1700/">17点版</a></p>
+<hr/>
+<p>本轮已与 15点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 新出 b12599（2026-11-20T23:13:20Z）与 b12600（2026-11-20T23:30:28Z）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 7 条首次汇总：#69026（功能/HiSparse：HY4 Flash 支持，滑窗稀疏层注册普通索引组、不拿 HiSparse 句柄）、#69023（修补/DSv4.1：DSpark 草稿器的 native mega MoE 标志从其 MoE 层读，修 latency_specialized+dspark 启动崩溃）、#68760（压测：vllm bench serve 加 decisions 后端）、#67798（功能：纯编码器注意力钩子，模型自有布局）、#66586（修补/ROCm：压缩张量 e4m3fnuz KV 缩放因子）、#65935（修补/ROCm：benchmark_moe 保留 HIP_VISIBLE_DEVICES 给 Ray）、#61214（ROCm/MoE：AITER Triton MXFP8 MoE 后端，gfx942）。 SGLang 25 条首次汇总：#51937（功能/模型：Hunyuan-4-Flash 视觉语言支持，#51159 栈第三块；ViT+spatial-merge 投影、视频帧采样、交错 MRoPE）、#51973（修补/sgl-router：API worker 持有 URL 时推迟 discovery 恢复）、#51969（修补/hunyuan_v4_flash：TP 尺寸与 rank 走 get_parallel()，列出 fusion gate）、#51945（性能/rust-server：字节级 BPE 分词按 chunk 解码，修 O(n²)）、#51935（修补/扩散：Pika-H3-Flex 参考管线对齐关键帧拟合、音频长度与参考尺寸）、#51933（性能/AMD/扩散：MiniMax-H3 packed attention 走 aiter batch 与 MHA v4 核）、#51932（重构/rust-server：去掉 attention-DP 生成中转）、#51909（功能/logprob：prompt logprobs 返回输入候选选择器的权重）、#51904（性能/rust-server：砍请求日志与崩溃转储拷贝、recorder 锁持有）、#51899（功能/logprob：请求自选 prompt logprob 候选、替代 top-k）、#51897（功能/rust-server：处理器以自有 transport 发布多模态特征）、#51895（修补/rust-server：/generate  honoring return_prompt_token_ids，/v1/completions honoring return_token_ids）、#51892（修补/disaggregation：无解码预留的 prefill 请求把存储预取让给已 bootstrap 的请求）、#51891（修补/http_server：单条 /generate 流的结束事件与 [DONE] 一起写）、#51889（功能/cuda-graph：模型声明 prefill input_embeds 缓冲的 dtype）、#51882（修补/disaggregation：停放的乐观 prefill 在 bootstrap 请求被 KV 卡住时交还 KV）、#51881（功能/rust-server：导出前端队列深度、队列满拒绝与媒体拉取槽等待）、#51880（功能/cp：zigzag CP 容忍短于 2x cp_size 的请求）、#51788（修补/speculative：每个被接受 token 都喂给惩罚器）、#51759（文档/agents：改 python/sglang/kernels 前须先做 kernel-organization）、#51688（性能/beam：NVFP4 检查点用小 FP32 router GEMM）、#51165（功能/scheduler：上报 ignore_eos 请求首个停止 token 本会结束的位置）、#50684（功能/NVIDIA/cuda-graph：FlashInfer CuTe DSL MoE 与 MegaMoE 的 prefill CUDA 图）、#50242（功能/sgl-router：运行时 worker 管理 API）、#47020（修补/dflash：DFLASH 下应用请求惩罚）。 TRT-LLM 6 条首次汇总：#22695（修补：SM107 专属目标构建 FlashMLA）、#22658（性能：Rubin 原生静态 FP8 H3 场景）、#22627（功能/modeling_v2：Inkling 2 Modeling V2 全家，算子+内核+Inkling-2-Small 目标，GB300 单托盘 TP4/EP4，路由未接）、#22571（修补：eager 低 M MMA GEMM 按行数分桶）、#22418（功能：拆分流首块前失败即报 HTTP 错误）、#19395（功能：PrimTS MLA prefill、MTP/Helix 集成、Rubin 支持，Kimi K3 全注意力层可选）。 Dynamo 5 条首次汇总：#19270（修补/router：prefill 跳转不跟踪输出块，修 KV 模式前端配拆分部署全失败）、#19266（构建/trtllm：TRT-LLM 构建底座移至 CUDA 13.4）、#19253（CI/release：每个 RC 都发布企业版 vLLM runtime）、#18473（修补/kv-router：KV 事件接受非 UTF-8 二进制 extra key）、#17885（功能/runtime：容忍响应平面不匹配，TLS 留在 tcp，Velo 0.22.1）。 FlashInfer 8 条首次汇总：#9795（重构：去掉过时 cuDNN 前端版本检查）、#9787（功能/gemm：mm_bf16(backend=&quot;tgv&quot;) 接受调用方 tactic 与 FP32 输出）、#9780（功能/gemm：BF16 x NVFP4 gathered-row GEMV 带 scatter epilogue，SM12x）、#9773（性能/cake_batch_deepgemm_fp8：大 expected_m 的 masked pair program，212-SM sm_107a）、#9702（修补/trtllm-gen：SM103 paged context FMHA 用静态 tile 调度器）、#9649（修补/comm：NVLink 单边 all-to-all fence 的内存破坏）、#9623（功能/moe_ep：NCCL EP 0.3 控制与兼容修补）、#9285（功能/batch_invariant：批不变注意力的非因果模式）。 llama.cpp 0 条合入；新快照 b12599（23:13 UTC）、b12600（23:30 UTC）。 LMDeploy、TGI、Mooncake 零合入。 arXiv：API 最新提交仍为 2026-11-19T18:59:53Z；15点版预计的 16:00 PST 新一批未到，arXiv 周末不发榜，下批为周一 00:00 UTC（周日 16:00 PST）。 访谈与深度：Blink（Medium 2026-11-20，arXiv 2604.07609，2026 年 4 月论文；H100+Llama-3 8B vLLM 7475 tok/s，CPU 邻居抢核后 1961 tok/s，P99 TTFT 150ms→21s）；AppScale 批不变总结（2026-11-20；SGLang 确定性模式慢 25–45%，TM 原型 26→42 秒，vLLM VLLM_BATCH_INVARIANT=1）；Latent Space 最新仍为 11 月 19 日 Linear GTM 访谈；HN 无新 serving 讨论。 深读：本轮无新增（宁缺毋滥；Blink 为 4 月旧论文的新解读，暂不做整篇精读）。 去重：Hy4 旗舰权重开源与深读（05点版）、Hy4 AMA 已结束（11点版）、Hy4 Flash 权重开源（05点版）、Gemma 4 E2B 五引擎 Lambda 实测（11-19 17点版）、HyperPod+Dynamo（11-17 已报）、Latent Space Linear 访谈（11 月 19 日）、Tensward（11 月 13 日）、SGLang 联盟与 v1.0 官宣（11 月 12–17 日已报）均未重复。</p></body></html>
