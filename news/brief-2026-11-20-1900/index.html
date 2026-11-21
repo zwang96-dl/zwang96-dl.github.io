@@ -1,0 +1,181 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月20日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-20"/>
+<meta name="doc-ts" content="2026-11-21T03:04:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-20（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-20（19点版）</h1>
+<p>这轮 GitHub 一共合入 17 条。</p>
+<p>头条是 SGLang 的 K3.1 验证核修补。</p>
+<p>批量一上去，验证直接慢了 40 多倍。</p>
+<p>修完之后，5 到 8 个请求不用再走慢路了。</p>
+<p>另外还有一个 PD 拆分的挂死修补。</p>
+<p>健康检查还亮绿灯，请求却一个都不出。</p>
+<p>TRT-LLM 那边把多模态编码器换了执行器。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 没有新快照。</p>
+<p>最新还是 b12600。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：10 条，K3.1 验证核是头条</strong></p>
+<p>#51983 修了 K3.1 验证核的批量限制。</p>
+<p>GB300 上跑 K3.1，TP16 解码。</p>
+<p>批量 8 时，一轮验证要 316.6 毫秒。</p>
+<p>批量 1 时只要 7.65 毫秒。</p>
+<p>差了 40 多倍。</p>
+<p>原因是一个提前排好的任务单没建起来。</p>
+<p>CUDA 图（提前排好的 GPU 任务单）只认 1、2、4 这三个批量。</p>
+<p>5 到 8 个请求一来，它就拒绝接单。</p>
+<p>只能退回一条一条慢慢算的老路。</p>
+<p>现在插件自己决定接哪些批量。</p>
+<p>不再被 1、2、4 这三个数卡住。</p>
+<p>修完的实测数字还在跑，作者说随后补上。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51983">https://github.com/sgl-project/sglang/pull/51983</a></p>
+<p>#47840 修了 PD 拆分里的一处挂死。</p>
+<p>HiSparse 是稀疏注意力加速。</p>
+<p>它配上投机解码，再配上 PD 拆分。</p>
+<p>流水线一分段，第一个请求就卡住。</p>
+<p>后面的请求一个都不出。</p>
+<p>更坑的是健康检查还显示正常。</p>
+<p>原因是只有最后一段流水线有草稿运行器。</p>
+<p>其他段没注册草稿数，传缓存时直接报错。</p>
+<p>现在传缓存不再要求草稿数。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47840">https://github.com/sgl-project/sglang/pull/47840</a></p>
+<p>#51961 给投机解码的块验证提了速。</p>
+<p>投机解码就是先让实习生打草稿，再让专家改。</p>
+<p>以前一个请求独占一个程序，串行扫全词表。</p>
+<p>批量一小，GPU 大半都在空转。</p>
+<p>现在三组分块核并行跑，验证更快了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51961">https://github.com/sgl-project/sglang/pull/51961</a></p>
+<p>#51641 修了流水线并行下的控制请求挂死。</p>
+<p>权重更新一到，两边互相等，直接卡住。</p>
+<p>现在控制请求走自己的屏障，不再撞车。</p>
+<p>同一套配置连跑 8 次更新，457 次生成都没出错。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51641">https://github.com/sgl-project/sglang/pull/51641</a></p>
+<p>#51254 修了 HiCache 换存储后端时的旧账。</p>
+<p>换了新后端，旧的“这页存过”记忆还在。</p>
+<p>结果新后端永远收不到备份。</p>
+<p>现在一挂新后端就先清空旧记忆。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51254">https://github.com/sgl-project/sglang/pull/51254</a></p>
+<p>#51252 是 HiSparse 的内存泄漏修补。</p>
+<p>释放路径有好几份拷贝，有一份忘了还显存槽位。</p>
+<p>现在所有释放都走同一条路，漏不掉了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51252">https://github.com/sgl-project/sglang/pull/51252</a></p>
+<p>#49537 给 KV 缓存加了写延迟分布指标。</p>
+<p>L2 和 L3 是分层缓存的两档。</p>
+<p>从上一档写到下一档要多久，现在能看见了。</p>
+<p>调分层缓存的时候，这组数字用得上。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49537">https://github.com/sgl-project/sglang/pull/49537</a></p>
+<p>#50859 补了被打断请求的采样掩码。</p>
+<p>请求在排队时被撤回，之前只给 token 不给掩码。</p>
+<p>做强化学习回放的人拿不到完整数据。</p>
+<p>现在打断的回应里也带上掩码。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50859">https://github.com/sgl-project/sglang/pull/50859</a></p>
+<p>#51939 让视频生成的前置检查并行跑了。</p>
+<p>一个请求带多个远程素材，以前一个一个下。</p>
+<p>现在最多 8 个线程一起下，排队更快了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51939">https://github.com/sgl-project/sglang/pull/51939</a></p>
+<p>其余 1 条是 CI 测试修补。</p>
+<p><strong>TRT-LLM：5 条，多模态编码器是头条</strong></p>
+<p>#22547 把多模态编码器换到了新执行器上。</p>
+<p>以前编码器挂在主执行器下面，调度不自由。</p>
+<p>现在它有了自己的排程执行器。</p>
+<p>编码和解码分开排队，更容易各跑各的。</p>
+<p>这一步跟你研究的多模态 P/D 分离是同一条线。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22547">https://github.com/NVIDIA/TensorRT-LLM/pull/22547</a></p>
+<p>#22723 把 PrimTS 的源码来源换成了新分支。</p>
+<p>PrimTS 是 Kimi K3 全注意力层用的读题加速。</p>
+<p>17点版报过它，这次是后续落地。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22723">https://github.com/NVIDIA/TensorRT-LLM/pull/22723</a></p>
+<p>#22707 恢复了 B200 和 GB200 的 TEP4 精度覆盖。</p>
+<p>之前两处豁免把测试盖住了。</p>
+<p>现在拿掉豁免，测试重新跑起来。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22707">https://github.com/NVIDIA/TensorRT-LLM/pull/22707</a></p>
+<p>#22698 修了首 token 执行器的早响应读取。</p>
+<p>结果存在新通道里，测试却还在老地方找。</p>
+<p>现在改到新通道读。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22698">https://github.com/NVIDIA/TensorRT-LLM/pull/22698</a></p>
+<p>#22677 是关机时的资源释放修补。</p>
+<p>后缀自动机的显存和暂存以前关服务会漏掉。</p>
+<p>现在关机时一起释放。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22677">https://github.com/NVIDIA/TensorRT-LLM/pull/22677</a></p>
+<p><strong>Dynamo：1 条，是篇文档</strong></p>
+<p>#19235 把一篇 Rust 工具调用解析器的文章收进了 Dynamo 文摘。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19235">https://github.com/ai-dynamo/dynamo/pull/19235</a></p>
+<p><strong>FlashInfer：1 条，Windows 编译修补</strong></p>
+<p>#9711 修了 Windows 下的编译问题。</p>
+<p>Cake 生成的核和全交换模块，现在能在 MSVC 下编了。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9711">https://github.com/flashinfer-ai/flashinfer/pull/9711</a></p>
+<p><strong>其余五家：零合入</strong></p>
+<p>vLLM、llama.cpp、LMDeploy 都没动静。</p>
+<p>TGI、Mooncake 也没动静。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：这批没来，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日的提交。</p>
+<p>BlockJack 那些 11 月 19 日的论文，21点版已经报过。</p>
+<p>arXiv 周末不发榜，下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p>美股已收盘，这轮没有新消息。</p>
+<p>要报的都在前面几期报完了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<p>HN 上也没有新的 serving 讨论。</p>
+<p>Tensward 是 11 月 13 日的旧帖。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>PR 居多，适合直接看链接。</p>
+<p>#51983 的实测数字还在补。</p>
+<p>等作者贴出来再看要不要精读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-20-1900/">19点版</a></p>
+<hr/>
+<p>本轮已与 17点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 最新仍为 b12600；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 SGLang 10 条首次汇总：#51983（修补/megakernel：K3.1 verify megakernel 不再被 request_batches=(1,2,4) 卡住，TP16 DFlash 批量 5–8 不再退回 eager；GB300 TP16 解码 8K/1K 并发 8：批量 1 一轮 7.65ms、批量 8 一轮 316.6ms 且 0 次命中 CUDA 图，修后实测待补）、#51978（测试/CI：修两个 base-a-test-cpu stub）、#51961（性能/speculative：块验证改词表分块 Triton 核，fp32 p/q）、#51939（性能/diffusion：MiniMax-H3 远程条件输入并行本地化与探测，最多 8 线程）、#51641（修补/scheduler：控制请求走 DP 分片屏障，修 PP+本地控制广播下 /end_weight_update 挂死；RPC 等所有 PP 段回执）、#51254（修补/hicache：挂新存储后端时清 storage_existence_cache）、#51252（重构/hisparse：释放统一走一路，修 DeepSeek-V4 HiSparse C4 槽位泄漏）、#50859（修补/tokenizer：等待队列中被打断的请求也返回已生成 token 的采样掩码）、#49537（功能/kv-cache：L2→L3 写延迟分布指标）、#47840（修补/disaggregation：HiSparse+投机解码+PD 在 PP&gt;1 prefill 下传缓存不再要求草稿 KV 缓冲，修首请求挂死且 /health 仍 200）。 TRT-LLM 5 条首次汇总：#22723（chore：flashinfer-prims-ts 源码分支提到 trtllm-prims-ts-dev-20261107，#19395 后续）、#22707（修补：拿掉 B200/GB200 两处豁免，恢复 TEP4 FP8-KV 精度覆盖）、#22698（修补：首 token 执行器改读 response channel 的早响应）、#22677（修补：关机释放后缀自动机 mask 与 staging 缓冲）、#22547（重构：独立多模态编码器移到 ScheduledEncoderExecutor，31 文件）。 Dynamo 1 条首次汇总：#19235（文档：Rust 工具调用解析器文章进 Dynamo 文摘）。 FlashInfer 1 条首次汇总：#9711（修补/Windows：Cake 生成核与 DCP 全交换模块可在 MSVC 下构建）。 vLLM、llama.cpp、LMDeploy、TGI、Mooncake 零合入。 arXiv：API 最新提交仍为 2026-11-19；BlockJack、FrontierReplay、Aggron、AscMLA、G-MTP 均已在 11 月 19 日 21点版报过；下批为周一 00:00 UTC（周日 16:00 PST）。 访谈与深度：Latent Space 最新仍为 11 月 19 日 Linear GTM 访谈；HN 无新 serving 讨论。 深读：本轮无新增（宁缺毋滥；#51983 修后实测待作者补齐）。 去重：Hy4 旗舰权重开源与深读（05点版）、Hy4 AMA 已结束（11点版）、Hy4 Flash 权重开源（05点版）、Gemma 4 E2B 五引擎 Lambda 实测（11-19 17点版）、HyperPod+Dynamo（11-17 已报）、Latent Space Linear 访谈（11 月 19 日）、Tensward（11 月 13 日）、SGLang 联盟与 v1.0 官宣（11 月 12–17 日已报）、Muse Glimmer 对打（11-17 21点版）、Ling-3.1-flash（11-19 19点版）均未重复。</p></body></html>
