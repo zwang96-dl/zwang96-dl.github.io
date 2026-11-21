@@ -1,0 +1,154 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月21日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-21"/>
+<meta name="doc-ts" content="2026-11-21T22:58:32"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-21（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-21（15点版）</h1>
+<p>这轮 GitHub 一共合入 9 条。</p>
+<p>SGLang 5 条，TRT-LLM 1 条。</p>
+<p>FlashInfer 1 条，llama.cpp 1 条。</p>
+<p>vLLM 零合入。</p>
+<p>llama.cpp 快照升到 b12615。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照从 b12613 升到 b12615。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：投机解码的采样惩罚算准了</strong></p>
+<p>#52054 修的是 verify 里的采样惩罚。</p>
+<p>投机解码是先让小模型打草稿，再让大模型验。</p>
+<p>验的时候每行草稿都要扣重复词的罚分。</p>
+<p>以前一整块草稿共用同一份罚分。</p>
+<p>后面的行漏算了前面草稿词的罚分。</p>
+<p>min_new_tokens 也跟着差了几位。</p>
+<p>现在每行按自己的祖先路径单独算。</p>
+<p>EAGLE 树、NGRAM、DFlash、DSpark 全覆盖。</p>
+<p>结果跟不投机时逐位一致。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52054">https://github.com/sgl-project/sglang/pull/52054</a></p>
+<p><strong>SGLang：DeepSeek-V4.1 解码挑 top-k 更快了</strong></p>
+<p>#51348 是给 Rubin 上 DeepSeek-V4.1 解码做的。</p>
+<p>解码时每层要在一堆候选里挑前 512 个。</p>
+<p>一批 240 行里最长行是平均的 2.6 到 6.3 倍。</p>
+<p>以前按最长那行定时间，短行都在空等。</p>
+<p>现在加个开关 SGLANG_DEEP_SELECT_MULTIWAVE=1。</p>
+<p>行数多就分几波跑，按总量不按最长行计时。</p>
+<p>默认关着，行长均匀时旧核反而更快。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51348">https://github.com/sgl-project/sglang/pull/51348</a></p>
+<p><strong>SGLang：MI355X 上 DeepSeek-V4.1 读题更快了</strong></p>
+<p>#44265 是 AMD 上的 prefill 优化。</p>
+<p>Mega-mHC 是 DeepSeek-V4.1 的一种读题加速核。</p>
+<p>以前只在英伟达 SM100 上能开。</p>
+<p>MI355X 上开关开了也没用。</p>
+<p>现在 gfx950 也能走 aiter 的 Mega-mHC 核。</p>
+<p>默认关着，得手动开对应开关。</p>
+<p>你手里是 MI350X，同属 gfx950 家族。</p>
+<p>这条思路值得留意，代码不一定直接能用。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/44265">https://github.com/sgl-project/sglang/pull/44265</a></p>
+<p><strong>SGLang：Kimi K3.1 的显存 OOM 修了</strong></p>
+<p>#51995 修的是 MXFP4 MoE 的临时显存。</p>
+<p>MXFP4 是一种 4 位量化格式。</p>
+<p>每次前向都现申请 2.83 GB 临时空间。</p>
+<p>KV 缓存先把显存放出去了。</p>
+<p>只差 12 到 33 MB 就爆了。</p>
+<p>现在权重加载时就先留好一块共享空间。</p>
+<p>KV 再按剩下的量去分配。</p>
+<p>不过只覆盖了 SM100 的 MXFP4 路径。</p>
+<p>PD 解码节点还跳过这步。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51995">https://github.com/sgl-project/sglang/pull/51995</a></p>
+<p><strong>SGLang：其余 1 条一句话带过</strong></p>
+<p>#52113：一行测试修补，跳过。</p>
+<p><strong>TRT-LLM：Rubin 上解码打分快了一半多</strong></p>
+<p>#21825 重写了 QSA 索引器的打分核。</p>
+<p>QSA 是给长上下文挑关键 KV 的打分器。</p>
+<p>解码快了 1.5 到 1.65 倍。</p>
+<p>读题也快了 1.1 到 1.34 倍。</p>
+<p>诀窍是把矩阵乘转了个方向。</p>
+<p>还给小批量换了更小的分块。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21825">https://github.com/NVIDIA/TensorRT-LLM/pull/21825</a></p>
+<p><strong>FlashInfer：MLA 长 KV 解码又快了一点</strong></p>
+<p>#9834 是 Cake 后端的分块 KV 解码优化。</p>
+<p>MLA 是 DeepSeek 的注意力结构。</p>
+<p>batch 1、KV 16K 时快了 4%。</p>
+<p>自动选后端现在也会选 Cake 了。</p>
+<p>B200 上平均快 7.7%，GB300 上快 9%。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9834">https://github.com/flashinfer-ai/flashinfer/pull/9834</a></p>
+<p><strong>llama.cpp：快照升到 b12615</strong></p>
+<p>多了 2 个提交。</p>
+<p>一个修 CUDA 快速除法的未定义行为。</p>
+<p>一个给 SYCL 加了融合算子。</p>
+<p>另外 #32763 是聊天小修。</p>
+<p>Inkling 2 不支持 enable_thinking。</p>
+<p>改成只在支持时传 reasoning_effort=none。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b12615">https://github.com/ggml-org/llama.cpp/releases/tag/b12615</a></p>
+<p><strong>其余：零合入</strong></p>
+<p>vLLM、LMDeploy、TGI、Dynamo、Mooncake 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日的提交。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新动态</strong></p>
+<p>HN、Reddit、X、中文媒体都没有 2 小时内的新消息。</p>
+<p>搜到的 HyperPod+Dynamo 是 11 月 18 日的旧闻。</p>
+<p>11 月 17 日那期已经报过，不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>#52054 是投机解码的正确性修补。</p>
+<p>#51348 和 #44265 都是小范围的性能开关。</p>
+<p>#9834 只有 4% 的提升。</p>
+<p>体量都不够一篇精读笔记。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-21-1500/">15点版</a></p>
+<hr/>
+<p>本轮已与 13点版去重。简报文件：~/workspace/goals/goal-4/briefs/2026-11-21-1500.md；日志：~/memory/2026-11-21.md；PR 原始清单：~/workspace/goals/goal-4/hidden_files/2026-11-21-1500-scan.txt。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 快照 b12613→b12615（11/21 发布，多 2 提交）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 SGLang 5 条首次汇总：#52054（功能/投机解码：verify 里每行按祖先路径算精确采样惩罚，覆盖 EAGLE 树/NGRAM/DFlash/DSpark；1786 行）、#51348（性能/NVIDIA：deep_select 多波次 cluster top-k 开关，DeepSeek-V4.1 解码索引器，长尾行场景；默认关）、#44265（功能/AMD：DeepSeek-V4.1 Mega-mHC prefill 派发到 aiter gfx950；MI355X，默认关）、#51995（修复：SM100 trtllm-gen MXFP4 MoE 在权重加载时预留共享 workspace，修 Kimi K3.1 B300 上 12–33MB 之差的间歇 OOM；PD 解码节点跳过）、#52113（测试：1 行修补）。 TRT-LLM 1 条首次汇总：#21825（性能：QSA PrimTS 索引器打分核重写，Rubin 解码 1.5–1.65x、prefill 1.1–1.34x）。 FlashInfer 1 条首次汇总：#9834（性能：Cake BF16 split-KV MLA 解码，batch 1/KV 16K 快 4.1%，backend=&quot;auto&quot; 开始选 Cake；B200 几何均值 1.077x、GB300 1.09x）。 llama.cpp 1 条首次汇总：#32763（聊天：仅在支持时传 reasoning_effort=none，适配 Inkling 2）。 vLLM、LMDeploy、TGI、Dynamo、Mooncake 零合入。 arXiv：API 最新提交仍为 2026-11-19；下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻/访谈：HN、Reddit、X、中文媒体本轮均无 2 小时内新动态；HyperPod+Dynamo 为 11-18 旧闻（11-17 已报）；Latent Space 仍为 11/19 那期。 深读：本轮无新增（宁缺毋滥；#52054 为正确性修补，#51348/#44265 为小范围性能开关，#9834 仅 4% 提升）。</p></body></html>
