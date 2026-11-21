@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月21日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-21"/>
+<meta name="doc-ts" content="2026-11-21T08:59:09"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-21（1点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-21（1点版）</h1>
+<p>这轮 GitHub 一共合入 3 条值得说的。</p>
+<p>vLLM 一条，解码核提速是头条。</p>
+<p>SGLang 一条，采样惩罚换了个家。</p>
+<p>FlashInfer 一条，小幅调优。</p>
+<p>其余都是测试和文档。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 还是 b12602。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：1 条，GDN 解码核是头条</strong></p>
+<p>#69065 给 16 位循环状态换了个专用解码核。</p>
+<p>GDN 是门控差分网络（一种循环结构）。</p>
+<p>Qwen3.8-Flash-Next 这类混合模型里就用它。</p>
+<p>MTP 是多词元预测（一次猜好几个词）。</p>
+<p>以前 16 位状态跑得慢，瓶颈在核内归约。</p>
+<p>不是搬数据慢，是算的时候互相等。</p>
+<p>新核直接快了 1.3 到 1.6 倍。</p>
+<p>端到端解码步子最快能省 5.3% 的时间。</p>
+<p>实测跑在 1 张 GB300 上。</p>
+<p>模型是 Qwen3.8-Flash-Next-FP8。</p>
+<p>32 个请求时，单步从 69.2 微秒降到 46.5 微秒。</p>
+<p>128 个请求时，从 241.1 微秒降到 163.4 微秒。</p>
+<p>输出逐比特相同，GSM8K 分数也没变。</p>
+<p>设计借鉴了 FlashInfer 的 cake_gdn 核。</p>
+<p>说白了：混合模型的解码又快了一截。</p>
+<p>Qwen3.8-Flash-Next 的 decode 节点能直接受益。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69065">https://github.com/vllm-project/vllm/pull/69065</a></p>
+<p><strong>SGLang：1 条，采样惩罚换了个家</strong></p>
+<p>#52035 把采样惩罚的历史记到每个请求自己的池子里。</p>
+<p>采样惩罚是防重复的扣分机制。</p>
+<p>比如重复惩罚，就是不让模型老说同一句话。</p>
+<p>以前历史存在每批的表里。</p>
+<p>调度器填表还慢一拍，验证时可能不准。</p>
+<p>现在采样完立刻在采样流上记数。</p>
+<p>调度器只管发号和回收，不再碰惩罚状态。</p>
+<p>表面看是重构，真正目的是下一条 PR。</p>
+<p>下一步要让投机解码的惩罚算得准。</p>
+<p>投机解码是先让小模型打草稿再让大模型改。</p>
+<p>惩罚算不准，草稿的取舍就跟着错。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52035">https://github.com/sgl-project/sglang/pull/52035</a></p>
+<p><strong>FlashInfer：1 条，小幅调优</strong></p>
+<p>#9823 调了 Cake GDP 核的快照噪声路由。</p>
+<p>GDP 是门控差分乘积（另一种循环核）。</p>
+<p>只换了哪段程序跑，不换结果。</p>
+<p>输出逐比特相同，速度快了一点。</p>
+<p>受影响的形状上，几何平均快约 1.05 倍。</p>
+<p>幅度不大，一句话带过。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9823">https://github.com/flashinfer-ai/flashinfer/pull/9823</a></p>
+<p><strong>其余：测试和文档</strong></p>
+<p>SGLang 两条测试、一条文档。</p>
+<p>TRT-LLM 一条测试，llama.cpp 一条 CI。</p>
+<p>Dynamo、LMDeploy、TGI、Mooncake 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日的提交。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新动态</strong></p>
+<p>Reddit、中文媒体、X 上都没有 2 小时内的新消息。</p>
+<p>比较文章都是几天前的旧货。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<p>HN 上也没有新的 serving 讨论。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>三条都是核与内部重构，适合直接看链接。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-21-0100/">1点版</a></p>
+<hr/>
+<p>本轮已与 23点版去重。简报文件：~/workspace/goals/goal-4/briefs/2026-11-21-0100.md；日志：~/memory/2026-11-21.md；PR 原始清单：~/workspace/goals/goal-4/hidden_files/2026-11-21-0100-prs.txt。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 仍为 b12602；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 1 条首次汇总：#69065（内核/GDN：16 位循环状态专用 fused CUDA MTP 解码核，借鉴 FlashInfer cake_gdn；GB300 上 Qwen3.8-Flash-Next-FP8：核 1.3–1.6×，端到端解码步子最快快 5.3%；32 请求 69.2→46.5us、128 请求 241.1→163.4us；逐比特相同，GSM8K 不变）。 SGLang 1 条首次汇总：#52035（采样：惩罚历史改由每请求池在采样流上采样后即时计数；调度器只发号/回收；为下一条精确投机惩罚 PR 铺路）。 FlashInfer 1 条首次汇总：#9823（性能/Cake GDP：快照噪声程序按架构与每 SM 的 CTA 数分流，另加 draw-share 兄弟程序；受影响形状几何平均约 1.05×，逐比特相同）。 其余：SGLang #52042（文档）、#51979/#51974（测试）；TRT-LLM #22724（测试）；llama.cpp #32708（CI）；Dynamo、LMDeploy、TGI、Mooncake 零合入。 arXiv：API 最新提交仍为 2026-11-19；下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻/访谈：Reddit、中文媒体、X、HN、Latent Space 本轮均无 2 小时内新动态。 深读：本轮无新增（宁缺毋滥；三条均为核与内部重构）。</p></body></html>
