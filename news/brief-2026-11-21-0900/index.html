@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月21日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-21"/>
+<meta name="doc-ts" content="2026-11-21T17:01:08"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-21（9点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-21（9点版）</h1>
+<p>这轮 GitHub 一共合入 11 条。</p>
+<p>vLLM 占了 6 条，Inkling 2 Mini 是头条。</p>
+<p>SGLang 给 MoE 专家换了量化核。</p>
+<p>llama.cpp 出了新快照 b12608。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照从 b12606 升到 b12608。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：6 条，Inkling 2 Mini 进主线是头条</strong></p>
+<p>#69028 把 Inkling 2 Mini 接进来了。</p>
+<p>Inkling 2 Mini 是 Thinking Machines 的新模型。</p>
+<p>总参数 26B，每次只激活 3.5B。</p>
+<p>中间 12 层每 token 跑 3 遍。</p>
+<p>像同一道工序循环做三遍。</p>
+<p>每遍共享同一套权重。</p>
+<p>每遍各留一份自己的 KV 缓存。</p>
+<p>DSpark 是它自带的推测解码草稿器。</p>
+<p>推测解码就是先让实习生打草稿再让专家改。</p>
+<p>DSpark 直接读循环层的隐藏状态来猜。</p>
+<p>支持 Blackwell、Hopper 和 DGX Spark。</p>
+<p>GB200 上跑通了全套测试。</p>
+<p>昨天那篇精读笔记讲的就是它。</p>
+<p>今天是实现代码正式合入主线。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69028">https://github.com/vllm-project/vllm/pull/69028</a></p>
+<p><strong>vLLM：有些 token 再也不让模型采样</strong></p>
+<p>#68976 加了引擎级的 --masked-token-ids。</p>
+<p>有些 token 永远不该被采样出来。</p>
+<p>比如词表外的填充位。</p>
+<p>还有多模态模型里的图片占位符。</p>
+<p>以前只能靠每次请求传白名单。</p>
+<p>白名单一大就慢得没法用。</p>
+<p>或者改代码绕过去，RL 框架就是这么干的。</p>
+<p>RL 训练还会把这些没训过的行扰动。</p>
+<p>一旦采样出来，就会污染训练。</p>
+<p>现在引擎直接把这些位置的分数压到负无穷。</p>
+<p>一次设置，全局生效。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68976">https://github.com/vllm-project/vllm/pull/68976</a></p>
+<p><strong>vLLM：Hy4-flash 清理了 435 行代码</strong></p>
+<p>#69013 是 Hy4-flash 的清理。</p>
+<p>Hy4 是腾讯开源的 770B 旗舰模型。</p>
+<p>Flash 版是它的轻量变体。</p>
+<p>清理后 AIME 2025 还是 97.5%。</p>
+<p>OCRBench 从 82.4% 变成 82.8%。</p>
+<p>分数基本没动，只是代码更干净了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69013">https://github.com/vllm-project/vllm/pull/69013</a></p>
+<p><strong>vLLM：其余 3 条一句话带过</strong></p>
+<p>#69145：GTE 模型的位置编码配置做了归一化。</p>
+<p>#69134：M-RoPE 提示词测试改用平台设备。</p>
+<p>#53207：Whisper 提示词条件改用真的起始 token。</p>
+<p><strong>SGLang：3 条，MXFP8 专家有核跑了是头条</strong></p>
+<p>#51936 让 Marlin 核跑 MXFP8 的 MoE 专家。</p>
+<p>MXFP8 是一种 8 位量化格式。</p>
+<p>权重是 E4M3，每 32 个共用一个 E8M0 缩放。</p>
+<p>以前这类检查点在没原生核的卡上跑不起来。</p>
+<p>Marlin 核早就支持 MXFP4 专家。</p>
+<p>这次把 E4M3 权重也接了进来。</p>
+<p>缩放类型不同就走不同的核。</p>
+<p>不用改调用方式，也不用加开关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51936">https://github.com/sgl-project/sglang/pull/51936</a></p>
+<p><strong>SGLang：其余 2 条一句话带过</strong></p>
+<p>#39754：embedding 截断保留末尾 [SEP]。</p>
+<p>MEAN 池化改成 fp32 累加。</p>
+<p>#52085：权重更新测试里补了个控制请求桩。</p>
+<p><strong>llama.cpp：1 条，量化缩放张量自动接上了</strong></p>
+<p>#32669 让 .scale 张量自动接进 MoE 前馈。</p>
+<p>.scale 张量是量化权重的缩放系数。</p>
+<p>以前每个模型都要手动接线。</p>
+<p>漏接就悄悄算错，或者直接跑不起来。</p>
+<p>今年 3 月到 11 月修了十几个同类问题。</p>
+<p>这次改成自动接，顺手修了正确性。</p>
+<p>新快照 b12608 就是带上这条的版本。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32669">https://github.com/ggml-org/llama.cpp/pull/32669</a></p>
+<p><strong>Mooncake：1 条，测试里的小修补</strong></p>
+<p>#5725 修了高可用测试里的 stale 记录 helper。</p>
+<p>一句话带过。</p>
+<p><strong>其余：零合入</strong></p>
+<p>TRT-LLM、LMDeploy、TGI、Dynamo、FlashInfer 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日的提交。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新动态</strong></p>
+<p>HN、Reddit、X、中文媒体都没有 2 小时内的新消息。</p>
+<p>搜到的都是 11 月 16 日到 20 日的内容。</p>
+<p>不在本轮 2 小时窗口内，不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>Inkling 2 Mini 的精读笔记昨天已经写了。</p>
+<p>#69028 是那篇笔记讲的支持正式合入主线。</p>
+<p>#51936 是核适配，没有实测数字。</p>
+<p>#68976 是小功能，98 行。</p>
+<p>都不够一篇精读笔记的体量。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-21-0900/">9点版</a></p>
+<hr/>
+<p>本轮已与 7点版去重。简报文件：~/workspace/goals/goal-4/briefs/2026-11-21-0900.md；日志：~/memory/2026-11-21.md；PR 原始清单：~/workspace/goals/goal-4/hidden_files/2026-11-21-0900-prs.txt。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 快照从 b12606 升到 b12608；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 6 条首次汇总：#69028（模型：Inkling 2 Mini 接入主线；26B 总参数/3.5B 激活，中间 12 层每 token 循环 3 遍、共享权重、各留 KV 与 conv-state 缓存；DSpark 推测解码读循环层隐藏状态；支持 Blackwell/Hopper/DGX Spark；GB200 验证通过；对应 11/20 已有精读笔记）、#68976（功能：引擎级 --masked-token-ids，禁采 token 的 logits 压到 -inf；解决词表外填充位与多模态占位符被采样、RL 训练污染问题；98 行）、#69013（模型：Hy4-flash 清理，-435 行；AIME 2025 97.5% 不变，OCRBench 82.4%→82.8%）、#69145（修 bug：GTE 位置编码配置归一化）、#69134（CI：M-RoPE 测试改用平台设备）、#53207（修 bug：Whisper 提示词条件改用真的 &lt;|startofprev|&gt; token）。 SGLang 3 条首次汇总：#51936（性能/量化：Marlin 核跑 MXFP8 MoE 专家；E4M3 权重 + E8M0 组 32 缩放；无原生 MXFP8 核的卡也能跑这类检查点；缩放类型进 dispatch key，调用方零改动）、#39754（embedding：截断保留末尾 [SEP]，MEAN 池化改 fp32 累加）、#52085（测试：权重更新张量 rank 测试补控制请求 barrier 桩）。 llama.cpp 1 条首次汇总：#32669（模型：.scale 张量在 build_moe_ffn 自动接上并修正确性；此前 3–11 月十几个模型各修一次同类漏接；新快照 b12608）。 Mooncake 1 条首次汇总：#5725（测试：HA 测试里 stale client 记录 helper 修补）。 TRT-LLM、LMDeploy、TGI、Dynamo、FlashInfer 零合入。 arXiv：API 最新提交仍为 2026-11-19；下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻/访谈：HN、Reddit、X、中文媒体本轮均无 2 小时内新动态；搜到的 Muse Glimmer 对比（11/16）、SGLang 联盟（11/12）、dev.to 三引擎综述均为窗口外内容；Latent Space 仍为 11 月 19 日那期，无新单集。 深读：本轮无新增（宁缺毋滥；Inkling 2 Mini 精读笔记已于 11/20 写好，#69028 为其合入主线；#51936 为核适配无实测数字；#68976 为 98 行小功能）。</p></body></html>
