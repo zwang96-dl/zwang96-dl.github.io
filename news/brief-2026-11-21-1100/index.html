@@ -1,0 +1,136 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月21日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-21"/>
+<meta name="doc-ts" content="2026-11-21T18:58:27"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-21（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-21（11点版）</h1>
+<p>这轮 GitHub 一共合入 4 条。</p>
+<p>SGLang 占了 2 条，都是给生图模型提速。</p>
+<p>TRT-LLM 和 llama.cpp 各 1 条。</p>
+<p>版本水位一个没动。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照还是 b12608。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：2 条，都在给 MiniMax-H3 生图提速</strong></p>
+<p>#51825 把出图最后一步搬上 GPU。</p>
+<p>MiniMax-H3 是 MiniMax 的生图模型。</p>
+<p>以前出图后要回 CPU 做两件事。</p>
+<p>先把浮点画布转成 8 位图。</p>
+<p>再用 Pillow 缩放到用户要的尺寸。</p>
+<p>这一步要 110 毫秒。</p>
+<p>整个解码阶段才 148 毫秒。</p>
+<p>等于四分之三的时间都耗在这。</p>
+<p>新办法全程留在 GPU 上做。</p>
+<p>量化在 GPU 上算，结果和 CPU 一模一样。</p>
+<p>缩放也照搬了 Pillow 的算法。</p>
+<p>连滤波系数都是按原样重算的。</p>
+<p>输出字节和以前完全一致。</p>
+<p>省下的 110 毫秒直接还给用户。</p>
+<p>对跑生图服务的延迟很实在。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51825">https://github.com/sgl-project/sglang/pull/51825</a></p>
+<p><strong>SGLang：再给 AdaLN 投影加个备忘录</strong></p>
+<p>#51965 给 AdaLN 投影加了个备忘录。</p>
+<p>AdaLN 是扩散模型里调每层风格的模块。</p>
+<p>MiniMax-H3 每个块都要算一次大投影。</p>
+<p>2688 乘 96768 的矩阵，半精度。</p>
+<p>每步要跑 50 次，一次读 520MB。</p>
+<p>像每步都把同一份大表重抄一遍。</p>
+<p>但投影只跟时间步有关。</p>
+<p>同一批请求的步数基本一样。</p>
+<p>算过一次就能复用。</p>
+<p>新办法按时间步做个小缓存。</p>
+<p>最多留 32 条，满了按最久不用淘汰。</p>
+<p>权重一更新就清空重算。</p>
+<p>LoRA 合并也不会用错旧值。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51965">https://github.com/sgl-project/sglang/pull/51965</a></p>
+<p><strong>TRT-LLM：1 条，纯测试配方刷新</strong></p>
+<p>#21439 刷新了 B200 上的生图性能测试配方。</p>
+<p>FLUX.2、Wan2.2、LTX2 四组用例。</p>
+<p>数字来自 10 月那次实测扫表。</p>
+<p>每组只跑了一次，不算正式基线。</p>
+<p>一句话带过。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21439">https://github.com/NVIDIA/TensorRT-LLM/pull/21439</a></p>
+<p><strong>llama.cpp：1 条，5 行修了个越界</strong></p>
+<p>#32722 修了 Parakeet 语音模型的越界问题。</p>
+<p>Parakeet 是语音识别模型。</p>
+<p>相对位置偏移那块视图建得太大了。</p>
+<p>超出了原张量的边界。</p>
+<p>Nemotron-3-Nano-Omni 初始化直接报错。</p>
+<p>改完把两步视图合成一步。</p>
+<p>在 DGX Spark 上实测通过。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32722">https://github.com/ggml-org/llama.cpp/pull/32722</a></p>
+<p><strong>其余：零合入</strong></p>
+<p>vLLM、LMDeploy、TGI 零合入。</p>
+<p>Dynamo、FlashInfer、Mooncake 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日的提交。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新动态</strong></p>
+<p>HN、Reddit、X、中文媒体都没有 2 小时内的新消息。</p>
+<p>搜到的都是 11 月 19 日到 21 日凌晨的内容。</p>
+<p>不在本轮 2 小时窗口内，不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>两条 SGLang 生图提速都是点状优化。</p>
+<p>跟你研究的 P/D 解耦不直接相关。</p>
+<p>#51825 的 GPU 缩放思路值得知道。</p>
+<p>但体量不够一篇精读笔记。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-21-1100/">11点版</a></p>
+<hr/>
+<p>本轮已与 9点版去重。简报文件：~/workspace/goals/goal-4/briefs/2026-11-21-1100.md；日志：~/memory/2026-11-21.md；PR 原始清单：~/workspace/goals/goal-4/hidden_files/2026-11-21-1100-scan.txt。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 快照仍为 b12608；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 SGLang 2 条首次汇总：#51825（性能/扩散：MiniMax-H3 出图尾巴搬上 GPU；Pillow LANCZOS 缩放+量化原来在 CPU 上跑 110ms，占 148ms 解码阶段的约 3/4、约 16% 的 C1 请求；GPU 版逐字节一致）、#51965（性能/扩散：MiniMax-H3 AdaLN 投影按时间步 memoize；每 DiT 步 50 次 2688x96768 BF16 GEMV、每次读 520MB；最多 32 条 LRU，权重更新/LoRA 合并时失效）。 TRT-LLM 1 条首次汇总：#21439（测试：B200 VisualGen 性能 sanity 配方按 10 月扫表刷新；FLUX.2/Wan2.2/LTX2 四组，单次观测、非 CI 基线）。 llama.cpp 1 条首次汇总：#32722（修 bug：Parakeet 相对位置视图越界，Nemotron-3-Nano-Omni 初始化失败；5 行，DGX Spark 实测通过）。 vLLM、LMDeploy、TGI、Dynamo、FlashInfer、Mooncake 零合入。 arXiv：API 最新提交仍为 2026-11-19；下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻/访谈：HN、Reddit、X、中文媒体本轮均无 2 小时内新动态；Latent Space 仍为 11 月 19 日那期。 深读：本轮无新增（宁缺毋滥；两条 SGLang 生图提速均为点状优化，与 P/D 解耦不直接相关）。</p></body></html>
