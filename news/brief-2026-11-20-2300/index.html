@@ -1,0 +1,190 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月20日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-20"/>
+<meta name="doc-ts" content="2026-11-21T07:04:41"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-20（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-20（23点版）</h1>
+<p>这轮 GitHub 一共合入 15 条。</p>
+<p>vLLM 3 条，全是多模态。</p>
+<p>头条是音频编码器上了 CUDA 图。</p>
+<p>ASR 的长尾直接砍下来了。</p>
+<p>SGLang 9 条，调度器修了个读题卡住的坑。</p>
+<p>另外还有一篇安全盘点，值得看一眼。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 还是 b12602。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：3 条，音频编码器是头条</strong></p>
+<p>#68831 给 Qwen3-Omni 的音频塔加上了 CUDA 图。</p>
+<p>CUDA 图是把一串小核提前排好，一次发出去。</p>
+<p>以前只有视觉塔能用，音频塔一直现算现发。</p>
+<p>ASR 音频都很短，32 层小核来回发，启动开销占了大头。</p>
+<p>压测一上去，编码器的长尾就拖垮了整体延迟。</p>
+<p>现在音频塔的 transformer 部分也进了图里。</p>
+<p>只在 FLASH_ATTN 和 TRITON_ATTN 下开。</p>
+<p>实测在 1 张 B200 上跑 Qwen3-Omni 30B。</p>
+<p>编码器单次调用 p99 从 9.87 毫秒降到 2.65 毫秒。</p>
+<p>端到端 80 请求每秒时，p99 从 430 毫秒降到 335 毫秒。</p>
+<p>说白了：短音频再也不用为反复启动小核买单了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68831">https://github.com/vllm-project/vllm/pull/68831</a></p>
+<p>#68739 修了 Kimi 视频在数据并行下的 embedding 数量。</p>
+<p>Kimi 的视觉编码器会把一个视频块的帧先平均再输出。</p>
+<p>数据并行那条路却按每帧各出一份来算。</p>
+<p>一个 4 帧的块，本该 252 份，错给了 1008 份。</p>
+<p>多出来的还会挤占同批里后面图片的位置。</p>
+<p>现在按高乘宽来定每项的输出数量。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68739">https://github.com/vllm-project/vllm/pull/68739</a></p>
+<p>#69089 修了视频帧的颜色格式。</p>
+<p>图片传进来会自动转 RGB，视频帧却保持原样。</p>
+<p>灰度、RGBA、调色板帧一到 HF 处理器就报错。</p>
+<p>现在视频帧也统一转 RGB。</p>
+<p>Qwen3-VL、Qwen2.5-VL、InternVL3 等都受益。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69089">https://github.com/vllm-project/vllm/pull/69089</a></p>
+<p><strong>SGLang：9 条，调度器两条最值得看</strong></p>
+<p>#50955 修了读题预算里一个会卡住请求的坑。</p>
+<p>读题是先把提示词算一遍，生成第一个词。</p>
+<p>分块读题时，调度器会先截一段，让短请求插队。</p>
+<p>以前预算只算了当前这段，没给剩下的部分留位置。</p>
+<p>后面的请求一拥而上，把剩下的显存占满了。</p>
+<p>轮到续读时没位置，只能原地等好几轮。</p>
+<p>现在剩下的部分也提前占位，续读不会再被饿死。</p>
+<p>跟你研究的 P/D 解耦直接相关。</p>
+<p>读题节点上这种卡顿最要命。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50955">https://github.com/sgl-project/sglang/pull/50955</a></p>
+<p>#51398 修了内存释放和恢复的幂等性。</p>
+<p>释放和恢复是调度器腾显存、再拿回来的操作。</p>
+<p>以前重复点一次就报 KeyError，调度器直接停摆。</p>
+<p>现在只处理还没变状态的标签，重试多少次都安全。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51398">https://github.com/sgl-project/sglang/pull/51398</a></p>
+<p>#51929 让 JIT 模块可以按显卡家族编译。</p>
+<p>以前每张卡各编一份，同一家族也得分开编。</p>
+<p>现在可以编一份 sm_100f，全家族共用。</p>
+<p>默认没变，想用要自己开开关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51929">https://github.com/sgl-project/sglang/pull/51929</a></p>
+<p>#51934 给 AMD 上的 BigVGAN 声码器换了卷积核。</p>
+<p>MIOpen 原来的求解器慢，每调用一次 4 到 5 毫秒。</p>
+<p>一段 5 秒的音频解码，光这里就吃掉 0.28 秒。</p>
+<p>新核用 Triton 写，求和顺序跟原来一模一样。</p>
+<p>结果逐字节相同，速度上去了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51934">https://github.com/sgl-project/sglang/pull/51934</a></p>
+<p>#51946 把 /internal/peer 锁成了只认自家监听器。</p>
+<p>这个接口管着清缓存、换权重这类控制操作。</p>
+<p>以前没配管理员密钥时，谁能连上就能发控制消息。</p>
+<p>现在每个启动实例发自己的随机令牌。</p>
+<p>外人就算连上，也发不进来。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51946">https://github.com/sgl-project/sglang/pull/51946</a></p>
+<p>#51620 修了 LTX-2.5 扩散模型的一个报错。</p>
+<p>quality=exact 的请求在 K/V 收集时张量尺寸对不上。</p>
+<p>现在遇到这种情况自动退回老路。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51620">https://github.com/sgl-project/sglang/pull/51620</a></p>
+<p>#51962 和 #51971 是两条隐私修补。</p>
+<p>请求的网址不再进下载报错信息。</p>
+<p>请求内容也不再进自动生成的文件名。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51962">https://github.com/sgl-project/sglang/pull/51962</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51971">https://github.com/sgl-project/sglang/pull/51971</a></p>
+<p>#51494 修了 fp16 LoRA 的精度。</p>
+<p>LoRA 是给模型打小补丁的微调办法。</p>
+<p>以前增量按 fp16 算，现在按激活值的精度算。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51494">https://github.com/sgl-project/sglang/pull/51494</a></p>
+<p><strong>llama.cpp：2 条，QSA 提速是头条</strong></p>
+<p>#32519 让 QSA 索引器只算当前这批序列。</p>
+<p>QSA 是 llama.cpp 里给长上下文准备的索引器。</p>
+<p>以前它会把所有序列的池子都打分排序。</p>
+<p>空闲序列也跟着算，白白浪费时间。</p>
+<p>现在只排当前这批的，空闲的不算。</p>
+<p>实测 10 万 token 空闲上下文在旁。</p>
+<p>解码从 9.64 毫秒降到 8.20 毫秒。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32519">https://github.com/ggml-org/llama.cpp/pull/32519</a></p>
+<p>#32551 修了语法模块的整数溢出。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32551">https://github.com/ggml-org/llama.cpp/pull/32551</a></p>
+<p><strong>Dynamo：1 条，只有文档</strong></p>
+<p>#19258 给路由器的 AGENTS.md 补了规则和测试命令。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19258">https://github.com/ai-dynamo/dynamo/pull/19258</a></p>
+<p><strong>其余五家：零合入</strong></p>
+<p>TRT-LLM、LMDeploy、TGI 都没动静。</p>
+<p>FlashInfer、Mooncake 也没动静。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日的提交。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>vLLM 十周发了 58 份安全公告</strong></p>
+<p>一篇 11 月 20 日左右的盘点数了 vLLM 的安全公告页。</p>
+<p>9 月 19 份，10 月 33 份，11 月前 9 天 6 份。</p>
+<p>13 份高危，41 份中危，4 份低危。</p>
+<p>好消息是全在 v0.33.0 或更早修好了。</p>
+<p>11 月 9 日补发的两份是旧 bug。</p>
+<p>一份是流水线并行加异步调度时，用户数据串到别人答案里。</p>
+<p>另一份是思考预算的标签被带进同批别人的回答。</p>
+<p>两份新举报还没定性，也都还开着。</p>
+<p>vLLM 的 #66629 说后缀解码的共享词库会串 token。</p>
+<p>SGLang 的 #49361 说缓存用后释放会串租户的 KV。</p>
+<p>SGLang 这条正戳在你的评估点上。</p>
+<p>多租户共享 KV 缓存，隔离就是命门。</p>
+<p>本轮 SGLang 的 #51946 正好收紧了一处入口。</p>
+<p>提醒一句：多租户服务先升到 v0.33.0 以上。</p>
+<p>别拿旧版顶着。</p>
+<p>来源：<a href="https://maccus.fr/en/vllm-security-flaws/">https://maccus.fr/en/vllm-security-flaws/</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/issues/66629">https://github.com/vllm-project/vllm/issues/66629</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/issues/49361">https://github.com/sgl-project/sglang/issues/49361</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<p>HN 上也没有新的 serving 讨论。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>PR 居多，适合直接看链接。</p>
+<p>安全盘点那篇是新闻汇总，原文信息量够用。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-20-2300/">23点版</a></p>
+<hr/>
+<p>本轮已与 21点版去重。简报文件：~/workspace/goals/goal-4/briefs/2026-11-20-2300.md；日志：~/memory/2026-11-20.md；PR 原始清单：~/workspace/goals/goal-4/hidden_files/2026-11-20-2300-prs.txt。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 仍为 b12602（2026-11-21T04:28:53Z）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 3 条首次汇总：#68831（性能/多模态：Qwen3-Omni/Qwen3-ASR 音频塔 encoder CUDA graphs；B200 上 Qwen3-Omni 30B-A3B fp8 ASR：encoder 单次调用 p99 9.87→2.65ms，E2E 80 req/s p99 430.2→334.5ms；仅 FLASH_ATTN/TRITON_ATTN，conv 前端仍 eager）、#68739（修补/多模态：rope_2d DP 视觉输出按高×宽定尺寸；Kimi-K2.5/K2.6 视频块 4 帧 336×588 应为 252 份、错给 1008 份；同批后续图片也被挤占，最大差 1.73）、#69089（修补/多模态：PIL 视频帧转 RGB，与图片一致；灰度/RGBA/调色板帧不再在 HF 处理器报错）。 SGLang 9 条首次汇总：#50955（修补/调度器：PrefillBudget/SWAPrefillBudget 也计入被截 chunk 的未完成部分，防续读被饿死；关联 #44823）、#51398（修补/调度器：内存释放与恢复幂等，重复/重试不再 KeyError 停调度器）、#51929（功能/NVIDIA/JIT：模块可选按 arch 家族 sm_100f 编译，共享缓存；默认不变，需 SGLANG_JIT_CUDA_ARCH_POLICY）、#51934（性能/AMD/扩散：BigVGAN 声码器卷积改 Triton 核，沿用 MIOpen 求和顺序、逐字节相同；naive 求解器 FP64 累加 4–5ms/调用，约占 5s 请求音频解码的 0.28s）、#51620（修补/扩散：LTX-2.5 quality=exact 下 K/V-gather 张量尺寸失配时回退）、#51962（修补/扩散：请求 URL 不再进下载报错）、#51971（修补/扩散：请求内容不再进自动媒体文件名）、#51494（修补/扩散：fp16 LoRA 增量按激活值精度算）、#51946（修补/rust-server：/internal/peer 只认本启动实例的监听器，per-launch peer token；接 #49896 管理员密钥收紧）。 llama.cpp 2 条首次汇总：#32519（QSA 索引器只打分 ubatch 内序列的 k-pool，省掉对所有池子 reps 的 sort；RTX PRO 6000 上 100k 空闲上下文旁解码 9.64→8.20ms/token f16、12.56→11.56 q8_0）、#32551（修补/语法：整数溢出）。 Dynamo 1 条首次汇总：#19258（文档/路由：其余 crate AGENTS.md 补规则与测试命令）。 TRT-LLM、LMDeploy、TGI、FlashInfer、Mooncake 零合入。 arXiv：API 最新提交仍为 2026-11-19；下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻：vLLM 安全盘点（maccus.fr，数据截至 11 月 16 日）首次收录；58 份公告（9 月 19、10 月 33、11 月前 9 天 6；13 高危/41 中危/4 低危）全在 v0.33.0 或更早修好；11 月 9 日两份新举报（vLLM #66629 后缀解码共享词库串 token、SGLang #49361 UnifiedRadixCache 用后释放串租户 KV）均仍 open，vLLM 修补 PR #66658 仍 open 未合；均已现场核验。 访谈与深度：Latent Space 最新仍为 11 月 19 日 Linear GTM 访谈；HN 无新 serving 讨论；Lambda GPU Gemma 4 E2B 实测（11-19 17点版）与 Hy4/Inkling 2 Mini（11-20 各期已报）均未重复。 深读：本轮无新增（宁缺毋滥；PR 居多，安全盘点为新闻汇总、原文信息量够用）。</p></body></html>
