@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月21日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-21"/>
+<meta name="doc-ts" content="2026-11-21T12:59:32"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-21（5点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-21（5点版）</h1>
+<p>这轮 GitHub 一共合入 15 条。</p>
+<p>vLLM 2 条，安全加固是头条。</p>
+<p>SGLang 1 条，调度器多了个防饿死开关。</p>
+<p>TRT-LLM 2 条，都是修修补补。</p>
+<p>llama.cpp 9 条，小修补为主。</p>
+<p>Mooncake 1 条，KV 搬运少了层开销。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照还是 b12606。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：2 条，安全加固是头条</strong></p>
+<p>#54721 把上轮没补完的输入上限补齐了。</p>
+<p>上轮 #51447 给 5 个请求参数加了上限。</p>
+<p>但每个都留了小口子，一共 4 处。</p>
+<p>这轮一次全堵上，分 4 个提交。</p>
+<p>比如 stop_token_ids，以前只去重不限个数。</p>
+<p>现在默认最多 128 个，超了直接拦。</p>
+<p>三层一起拦：请求模型层、采样参数层、前端校验层。</p>
+<p>说白了：恶意请求想靠超大输入拖垮服务，更难了。</p>
+<p>对外暴露 vLLM 服务的同学值得看一眼。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/54721">https://github.com/vllm-project/vllm/pull/54721</a></p>
+<p>#68971 只是跳过 XPU 上不适用的测试。</p>
+<p>一句话带过。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68971">https://github.com/vllm-project/vllm/pull/68971</a></p>
+<p><strong>SGLang：1 条，调度器多了个防饿死开关</strong></p>
+<p>#51957 给最短读题优先加了个随负载缩放的模式。</p>
+<p>最短读题优先是先算短提示词的调度策略。</p>
+<p>平时它能拉低平均首字时间。</p>
+<p>但短请求一直来，长请求会被无限插队。</p>
+<p>等多久都没人理，这就是饿死。</p>
+<p>新模式看读题积压有多少，自动调两个旋钮。</p>
+<p>积压越大，短请求优先的圈子越小。</p>
+<p>压到头就退回先来先到，长请求不再饿死。</p>
+<p>另一个旋钮管每批读题的量。</p>
+<p>队列空时每批只读一点，短请求不用等整块。</p>
+<p>队列满了再放开到整块，吞吐不掉。</p>
+<p>4 个新开关，都是可选项，默认全关。</p>
+<p>关着时调度和批大小跟以前一模一样。</p>
+<p>作者没放公开实测数据，先当设计稿看。</p>
+<p>跟你研究的 P/D 调度直接相关，值得点开细读。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51957">https://github.com/sgl-project/sglang/pull/51957</a></p>
+<p><strong>TRT-LLM：2 条，都是修修补补</strong></p>
+<p>#22668 修了 MoE 核的自动调优键。</p>
+<p>7 个 MoE 运行器现在共用一把钥匙。</p>
+<p>旧的调优记录第一次会 miss，重调一次就好。</p>
+<p>#22588 把 DeepSeek-V4.1 解码的 Top-K 排到 Q 投影之后。</p>
+<p>修的是事件顺序，GB300 上的性能测试豁免也撤了。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22668">https://github.com/NVIDIA/TensorRT-LLM/pull/22668</a></p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22588">https://github.com/NVIDIA/TensorRT-LLM/pull/22588</a></p>
+<p><strong>llama.cpp：9 条，小修补为主</strong></p>
+<p>#32704 修了 inkling2_loop 的权重缩放。</p>
+<p>第 2、3 遍循环用的专家没有挂缩放。</p>
+<p>NVFP4 的 inkling-2-mini 困惑度飙到 130。</p>
+<p>正常该是 7.65，修完就回来了。</p>
+<p>只影响 NVFP4，不管 GGML 量化。</p>
+<p>#32720 给 hrm_text 多加了越界检查。</p>
+<p>#32698 让 CUDA 在 fastdiv 未定义行为时直接 abort。</p>
+<p>#32685 把上下文仪表盘改成点击弹出。</p>
+<p>#31804 提升 RDNA4 的 Vulkan 性能。</p>
+<p>针对 Q3_K、Q5_K、IQ4_XS 三种量化。</p>
+<p>#32456、#31753 是 SYCL 核的小优化。</p>
+<p>#32279 修了 zdnn 的张量加载竞态。</p>
+<p>#32466 绕开 AMD Windows 驱动的一个 Vulkan bug。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32704">https://github.com/ggml-org/llama.cpp/pull/32704</a></p>
+<p><strong>Mooncake：1 条，KV 搬运少了层开销</strong></p>
+<p>#5525 给同步传输加了个数组入口。</p>
+<p>以前每个 KV 段都要先包成一个 Python 对象。</p>
+<p>vLLM 的 Mooncake 连接器里，一次 16K 读题能产 9.6 万个段。</p>
+<p>每个对象约 0.7 微秒，光打包就不少时间。</p>
+<p>新接口一次传三个数组，GIL 只放一次。</p>
+<p>等所有段都到终态，再按段回一个状态字节。</p>
+<p>老接口不动，只是多了条快路。</p>
+<p>说白了：P/D 解耦搬 KV 时，Python 那层不拖后腿了。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5525">https://github.com/kvcache-ai/Mooncake/pull/5525</a></p>
+<p><strong>其余：零合入</strong></p>
+<p>FlashInfer、LMDeploy、TGI、Dynamo 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日的提交。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新动态</strong></p>
+<p>Reddit、X、HN、中文媒体都没有 2 小时内的新消息。</p>
+<p>11 月 18 日那两条云厂商消息之前已经报过。</p>
+<p>SageMaker HyperPod 接 Dynamo，ElastiCache 加分布式 KV 缓存。</p>
+<p>都是 11 月 20 日各期报过的内容，不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>SGLang 调度器那篇没放实测数据，先当设计稿看。</p>
+<p>Mooncake 那条是聚焦的接口优化，直接看链接就够。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-21-0500/">5点版</a></p>
+<hr/>
+<p>本轮已与 3点版去重。简报文件：~/workspace/goals/goal-4/briefs/2026-11-21-0500.md；日志：~/memory/2026-11-21.md；PR 原始清单：~/workspace/goals/goal-4/hidden_files/2026-11-21-0500-prs.txt。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 快照仍为 b12606；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 2 条首次汇总：#54721（安全：补齐 #51447 未完成的输入上限加固，4 处口子、4 个提交；stop_token_ids 默认上限 128；Pydantic/采样参数/前端三层拦）、#68971（测试：跳过 XPU 上不适用的 LoRA 测试）。 SGLang 1 条首次汇总：#51957（调度：最短读题优先随负载缩放；积压越大短请求优先圈越小、终至先来先到防饿死；空队列时批读题量下限为 chunk 的 1/8；4 个新开关默认全关；无公开实测数据）。 TRT-LLM 2 条首次汇总：#22668（MoE 自动调优键：7 个运行器共用路由键；旧调优记录首次 miss 后重调）、#22588（DeepSeek-V4.1 解码 Top-K 排到 Q 投影之后；撤 GB300 性能测试豁免）。 llama.cpp 9 条首次汇总：#32704（inkling2_loop 循环槽重挂缩放；NVFP4 inkling-2-mini 困惑度 130.43 → 7.65）、#32720（hrm_text 越界检查）、#32704 之外：#32698（CUDA fastdiv 未定义行为 abort）、#32685（上下文仪表盘点击弹出）、#32466（Vulkan 绕开 AMD Windows 驱动 bug）、#32456（SYCL 列块 gated_delta_net 核）、#32279（zdnn 张量加载竞态）、#31804（Vulkan RDNA4 上 Q3_K/Q5_K/IQ4_XS 性能）、#31753（SYCL 融合 ADD/RMS_NORM/MUL）。 Mooncake 1 条首次汇总：#5525（TENT：同步传输数组入口；一次 16K 读题在 vLLM 连接器里可产 96256 个段，每段建 Python 对象约 0.7us；新接口一次传三个 uint64 数组、GIL 只放一次）。 FlashInfer、LMDeploy、TGI、Dynamo 零合入。 arXiv：API 最新提交仍为 2026-11-19；下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻/访谈：Reddit、X、HN、中文媒体、Latent Space 本轮均无 2 小时内新动态；11 月 18 日 SageMaker HyperPod 接 Dynamo 与 ElastiCache 分布式 KV 缓存已于 11 月 20 日各期报过，不重复。 深读：本轮无新增（宁缺毋滥；SGLang 调度器 PR 无实测数据，Mooncake 为聚焦接口优化）。</p></body></html>
