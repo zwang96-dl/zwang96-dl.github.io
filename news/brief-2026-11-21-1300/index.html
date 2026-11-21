@@ -1,0 +1,163 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月21日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-21"/>
+<meta name="doc-ts" content="2026-11-21T21:02:58"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-21（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-21（13点版）</h1>
+<p>这轮 GitHub 一共合入 16 条。</p>
+<p>vLLM 2 条，SGLang 13 条，Dynamo 1 条。</p>
+<p>llama.cpp 出了新快照 b12613。</p>
+<p>版本水位只有它动了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照从 b12608 升到 b12613。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：Inkling 2 在 GB10 上更快了</strong></p>
+<p>#69021 是 #69028 的后续。</p>
+<p>Inkling 2 是 Thinking Machines 的新模型。</p>
+<p>之前为修 SM12x 崩溃绕开了 TMA。</p>
+<p>TMA 是 GPU 搬数据的高速通道。</p>
+<p>这次确认 64 宽分块加两级流水能跑。</p>
+<p>还比绕路的核快两成多。</p>
+<p>N 等于 256，2048 个 token 时 120 微秒变 90。</p>
+<p>4096 个 token 时 216 微秒变 174。</p>
+<p>8192 个 token 时 475 微秒变 380。</p>
+<p>只改了 4 行，Hopper 和 SM100 没动。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69021">https://github.com/vllm-project/vllm/pull/69021</a></p>
+<p><strong>vLLM：Rubin 构建换上新版 PyTorch</strong></p>
+<p>#68036 是纯构建改动。</p>
+<p>Rubin 是英伟达下一代 GPU。</p>
+<p>构建镜像换成 PyTorch 的 cu135 夜版。</p>
+<p>还记下了 ptxas 13.5.37 的坑。</p>
+<p>它在 SM107 上会悄悄算错数。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68036">https://github.com/vllm-project/vllm/pull/68036</a></p>
+<p><strong>SGLang：昇腾上搬 KV 更省了</strong></p>
+<p>#44320 是 NPU 上的扩展优化。</p>
+<p>扩展就是读新 token 那一步。</p>
+<p>以前总按 query 那头搬数据。</p>
+<p>这次先算哪头搬得少，再选方向。</p>
+<p>新 token 超过 4096 个也走这条路。</p>
+<p>说白了就是搬东西挑轻的那头搬。</p>
+<p>这是给 DeepSeek 模型在昇腾上做的优化。</p>
+<p>不过这是昇腾专属实现。</p>
+<p>你手里是 H100 和 MI350X。</p>
+<p>思路能借鉴，代码不能直接搬。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/44320">https://github.com/sgl-project/sglang/pull/44320</a></p>
+<p><strong>SGLang：多卡等不到人就别硬撑</strong></p>
+<p>#52030 修了扩散多卡并行的超时处理。</p>
+<p>以前等超时的那单照样返回残缺结果。</p>
+<p>下一单反而先报错，冤得很。</p>
+<p>现在超时那单直接失败，不再硬撑。</p>
+<p>流水线等待也加了上限。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52030">https://github.com/sgl-project/sglang/pull/52030</a></p>
+<p><strong>SGLang：撞不上层的 LoRA 现在直接报错</strong></p>
+<p>#51783 堵住了悄悄失效的 LoRA。</p>
+<p>LoRA 是给模型打的小补丁。</p>
+<p>以前对不上层的照样显示加载成功。</p>
+<p>请求照跑，跑的却是底模型。</p>
+<p>抽查 826 个热门 LoRA，116 个 0 层加载。</p>
+<p>现在加载时就直接拦下来。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51783">https://github.com/sgl-project/sglang/pull/51783</a></p>
+<p><strong>SGLang：外挂平台能自己提供分段图后端</strong></p>
+<p>#50150 是给非 CUDA 平台开的口子。</p>
+<p>分段图后端是把一次前向拆成多段图。</p>
+<p>以前只能用内置的 CUDA 版。</p>
+<p>NPU 这类平台想自己实现就得改源码。</p>
+<p>现在能直接接自己的实现进来。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50150">https://github.com/sgl-project/sglang/pull/50150</a></p>
+<p><strong>SGLang：其余 9 条一句话带过</strong></p>
+<p>#52050：MP4 编码器换画布不重新注册。</p>
+<p>8 张 B300 上每次新尺寸省 21 毫秒多。</p>
+<p>#51972：校准文件改用随机 ID，不再外泄提示词。</p>
+<p>#51954：本地编解码只继承受限环境变量。</p>
+<p>#51260：预热时后端死了，不再谎报就绪。</p>
+<p>#51563：Cosmos3 解码只留主卡干活，实测没变快。</p>
+<p>#52126、#52117：两个一两行的测试基准修补。</p>
+<p>#51928：CI 权限加了两个人，跳过。</p>
+<p>#44651：FLUX.3 夜间测试上新，跳过。</p>
+<p><strong>Dynamo：1 条，纯测试</strong></p>
+<p>#19327 是分段 GLM 工具调用的回放测试。</p>
+<p>一句话带过。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19327">https://github.com/ai-dynamo/dynamo/pull/19327</a></p>
+<p><strong>llama.cpp：快照升到 b12613</strong></p>
+<p>多了 5 个提交。</p>
+<p>Inkling 2 的循环层开始共用循环槽位。</p>
+<p>RDNA4 上几种量化格式的矩阵乘更快了。</p>
+<p>Vulkan 为绕开 AMD Windows 驱动 bug 改了写法。</p>
+<p>另外两处是小修补。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b12613">https://github.com/ggml-org/llama.cpp/releases/tag/b12613</a></p>
+<p><strong>其余：零合入</strong></p>
+<p>TRT-LLM、LMDeploy、TGI 零合入。</p>
+<p>FlashInfer、Mooncake 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日的提交。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新动态</strong></p>
+<p>HN、Reddit、X、中文媒体都没有 2 小时内的新消息。</p>
+<p>搜到的都是 11 月 19 日到 21 日凌晨的内容。</p>
+<p>不在本轮 2 小时窗口内，不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>#44320 的搬运思路跟 KV 优化沾边。</p>
+<p>但它是昇腾专属实现。</p>
+<p>跟你研究的 P/D 解耦不直接相关。</p>
+<p>#69021 是 4 行的后续小修。</p>
+<p>体量都不够一篇精读笔记。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-21-1300/">13点版</a></p>
+<hr/>
+<p>本轮已与 11点版去重。简报文件：~/workspace/goals/goal-4/briefs/2026-11-21-1300.md；日志：~/memory/2026-11-21.md；PR 原始清单：~/workspace/goals/goal-4/hidden_files/2026-11-21-1300-scan.txt。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 快照 b12608→b12613（11:40 PST 发布，多 5 提交）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 2 条首次汇总：#69021（性能：Inkling 2 在 GB10/SM12x 上保留 TMA k_group_partials 路径；120→90、216→174、475→380µs，约快 20–25%，4 行）、#68036（构建：Rubin 镜像改用 PyTorch cu135 夜版；记录 ptxas 13.5.37 在 SM107 上静默算错的 workaround）。 SGLang 13 条首次汇总：#44320（性能/NPU：DSA extend 按搬运量小的方向 gather 前缀 KV 或 query；超 4096 新 token 也走 KV gather；DeepSeek MLA NPU 路径，1071 行）、#52030（修复：扩散 Ulysses 对端超时那单直接失败，不再返回残缺数据；head-group 流水线等待加 bound，623 行）、#51783（修复：撞不上任何层的 LoRA 加载时直接拒绝；抽查 826 个热门 Hub LoRA，116 个此前 0 层加载）、#50150（功能：OOT 平台可提供自己的 breakable 图后端）、#52050（性能/扩散：MP4 编码器 staging buffer 按更小帧复用；8x B300 新画布尺寸省 14ms+7.5ms）、#51972（修复：STA 校准产物改用随机 sample ID，防提示词外泄）、#51954（修复：本地编解码只继承受限环境）、#51260（修复：预热时 worker 死掉不再谎报就绪）、#51563（重构：Cosmos3 解码只留主 CFG rank，实测无提速）、#52126/#52117（修复：JIT benchmark 两处一两行修补）、#51928（CI 权限）、#44651（CI：FLUX.3 夜间测试）。 Dynamo 1 条首次汇总：#19327（测试：分段 GLM 工具调用回放）。 TRT-LLM、LMDeploy、TGI、FlashInfer、Mooncake 零合入。 arXiv：API 最新提交仍为 2026-11-19；下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻/访谈：HN、Reddit、X、中文媒体本轮均无 2 小时内新动态；Latent Space 仍为 11/19 那期。 深读：本轮无新增（宁缺毋滥；#44320 为昇腾专属实现，与 P/D 解耦不直接相关；#69021 为 4 行后续小修）。</p></body></html>
