@@ -1,0 +1,193 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月21日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-21"/>
+<meta name="doc-ts" content="2026-11-21T15:00:34"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-21（7点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-21（7点版）</h1>
+<p>这轮 GitHub 一共合入 23 条。</p>
+<p>SGLang 占了 15 条，MoE 提速是头条。</p>
+<p>TRT-LLM 上了一个显存监控大功能。</p>
+<p>llama.cpp 接了实时语音模型。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照还是 b12606。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：15 条，MoE 搬专家提速是头条</strong></p>
+<p>#51279 让下一层专家提前搬上卡。</p>
+<p>MoE 模型每层只用少数专家。</p>
+<p>Paged Experts 是按需把专家搬进显存的机制。</p>
+<p>以前要等本层算完路由，才知道下层要谁。</p>
+<p>搬专家的时间全卡在关键路径上。</p>
+<p>实测 Qwen3-Next-80B，单步 10.2 毫秒。</p>
+<p>其中 2.4 毫秒都在等专家搬进来。</p>
+<p>新办法是用本层输入提前猜下层要谁。</p>
+<p>猜中的专家边算边搬，不占关键路径。</p>
+<p>猜错了也没损失，只是白搬一次。</p>
+<p>跟你研究的解码延迟直接相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51279">https://github.com/sgl-project/sglang/pull/51279</a></p>
+<p><strong>SGLang：调度器漏算了一笔负载</strong></p>
+<p>#50088 修了 DP 控制器的负载统计。</p>
+<p>DP 控制器是把请求分给各节点的组件。</p>
+<p>它按各节点的总 token 数挑最闲的发。</p>
+<p>但正在分块读题的请求没被算进去。</p>
+<p>它既不在运行批里，也不在等待队列里。</p>
+<p>一个刚开始读 64K 提示词的节点。</p>
+<p>上报的负载只有一个分块的量。</p>
+<p>新请求就一直往它身上堆。</p>
+<p>改完后未读完的部分也算进负载。</p>
+<p>作者在 2 张 H20 上复现过这个问题。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50088">https://github.com/sgl-project/sglang/pull/50088</a></p>
+<p><strong>SGLang：语法缓存再也不无限长了</strong></p>
+<p>#45087 给编译后的语法加了淘汰上限。</p>
+<p>结构化输出要先把 JSON schema 编译成语法。</p>
+<p>以前编译结果存在字典里，永远不淘汰。</p>
+<p>每个新 schema 要吃 250 到 380MB 内存。</p>
+<p>智能体框架常在 schema 里塞每次都变的值。</p>
+<p>于是每个请求都是缓存 miss。</p>
+<p>生产实测：11 天调度器从 3.5GB 涨到 35GB。</p>
+<p>现在按宿主机内存设上限，满了按 LRU 淘汰。</p>
+<p>跑结构化输出的服务值得看一眼。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/45087">https://github.com/sgl-project/sglang/pull/45087</a></p>
+<p><strong>SGLang：推测解码补上了提示词尾巴</strong></p>
+<p>#48592 是 N-gram 推测解码的一块拼图。</p>
+<p>N-gram 推测解码是拿历史词串猜下一个词的加速法。</p>
+<p>以前新请求读题完，进第一个解码步时。</p>
+<p>提示词还没进 N-gram 词典，词典里是空的。</p>
+<p>长上下文问答和摘要最吃亏。</p>
+<p>因为答案里很多词其实提示词里就有。</p>
+<p>现在把有界的提示词尾巴也插进词典。</p>
+<p>第一步解码就能猜了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48592">https://github.com/sgl-project/sglang/pull/48592</a></p>
+<p><strong>SGLang：H20 上的 FP8 小矩阵换了核</strong></p>
+<p>#51220 给 H20 的小 M FP8 矩阵乘换了核。</p>
+<p>解码时矩阵的 M 维就是 batch 大小。</p>
+<p>每步要跑 60 多个 M 在 1 到 32 的小矩阵乘。</p>
+<p>默认的 DeepGEMM 大核是为大 M 设计的。</p>
+<p>小 M 时 tile 大半空着，算力白白浪费。</p>
+<p>H20 只有 78 个 SM，算力本就比 H100 少三分之一。</p>
+<p>带宽却只少了约 15%，小核更划算。</p>
+<p>新办法是给小 M 换上 swapAB 核。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51220">https://github.com/sgl-project/sglang/pull/51220</a></p>
+<p><strong>SGLang：视频生成模型换了通信后端</strong></p>
+<p>#50243 给 Wan 和 MiniMax H3 接了 FlashInfer 的 Ulysses。</p>
+<p>Ulysses 是视频扩散模型切分注意力头的并行通信。</p>
+<p>以前走 SGLang 自带的集合通信。</p>
+<p>现在可以选 FlashInfer 公开的通信器。</p>
+<p>注意力计算后端保持不变。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50243">https://github.com/sgl-project/sglang/pull/50243</a></p>
+<p><strong>SGLang：其余 9 条一句话带过</strong></p>
+<p>#51237：权重更新少做重复活，目标和草稿各建一次。</p>
+<p>#51210：融合 layernorm 核里把填充的头流遮掉。</p>
+<p>#51148：块缩放 FP8/INT8 矩阵乘的行偏移改用 int64。</p>
+<p>#50929：DSA 元数据核的 batch 大小改成运行时参数，省掉反复编译。</p>
+<p>#50639：Krea-2 扩散请求尺寸对齐到 16 像素网格。</p>
+<p>#50602：Nomas VAE 里融合了有序均方约简。</p>
+<p>#51943：命令行能认出 RTX PRO 6000 的硬件 id。</p>
+<p>#52084：CI 里给 qknorm 测试补了注册。</p>
+<p>#39071：AMD 上 QK norm 改用融合原地核。</p>
+<p><strong>vLLM：1 条，多模态传坏数据不再报 500</strong></p>
+<p>#69073：读不懂的 embedding 载荷改返回 400。</p>
+<p>embedding 载荷是客户端直接传的向量数据。</p>
+<p>以前反序列化失败会漏成 500 服务器错误。</p>
+<p>现在明确告诉客户端：你传的东西有问题。</p>
+<p>宿主机和设备 OOM 还是按服务器错误报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69073">https://github.com/vllm-project/vllm/pull/69073</a></p>
+<p><strong>TRT-LLM：2 条，显存监控是头条</strong></p>
+<p>#21113 加了个全局内存监控器，1.7 万行。</p>
+<p>以前显存满了只报 OOM，不说哪块满了。</p>
+<p>也不说从启动到现在变了什么。</p>
+<p>各分配器的账还对不上，直接加会算重。</p>
+<p>新监控把账对齐，告诉你该调什么。</p>
+<p>138 个文件的大改，值得点开看看设计。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21113">https://github.com/NVIDIA/TensorRT-LLM/pull/21113</a></p>
+<p>#22427 只是整理测试文档，一句话带过。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22427">https://github.com/NVIDIA/TensorRT-LLM/pull/22427</a></p>
+<p><strong>llama.cpp：4 条，实时语音是头条</strong></p>
+<p>#32491 给 mtmd 接了 Kyutai 的 Hibiki。</p>
+<p>Hibiki 是全双工实时语音模型。</p>
+<p>全双工就是听和说同时进行，像打电话一样。</p>
+<p>服务器端先支持上了。</p>
+<p>本地跑实时语音助手又多一个选择。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32491">https://github.com/ggml-org/llama.cpp/pull/32491</a></p>
+<p>其余 3 条都是 SYCL 和内存访问的小优化，一句话带过。</p>
+<p>#31998、#31109 是 SYCL 核的修补，#30846 改了矩阵乘的内存访问模式。</p>
+<p><strong>Mooncake：1 条，KV 搬运多了 Go 和 C 入口</strong></p>
+<p>#5426 给 Conductor 加了 Go RPC 客户端和 C ABI 绑定。</p>
+<p>Conductor 是 Mooncake 里管前缀缓存查询的组件。</p>
+<p>以前主要从 Python 和 Rust 用。</p>
+<p>现在 Go 服务和 C 程序也能直接调了。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5426">https://github.com/kvcache-ai/Mooncake/pull/5426</a></p>
+<p><strong>其余：零合入</strong></p>
+<p>LMDeploy、TGI、Dynamo、FlashInfer 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日的提交。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新动态</strong></p>
+<p>HN、Reddit、X、中文媒体都没有 2 小时内的新消息。</p>
+<p>搜到的都是 11 月 18 日到 19 日的内容。</p>
+<p>Lambda 上 GPU、SageMaker 接 Dynamo 之前都报过。</p>
+<p>不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>#51279 的想法和数字都在简报里讲清了。</p>
+<p>直接点 PR 链接看就行。</p>
+<p>#45087 是明确的修漏 fix，#21113 是可观测性功能。</p>
+<p>都不够一篇精读笔记的体量。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-21-0700/">7点版</a></p>
+<hr/>
+<p>本轮已与 5点版去重。简报文件：~/workspace/goals/goal-4/briefs/2026-11-21-0700.md；日志：~/memory/2026-11-21.md；PR 原始清单：~/workspace/goals/goal-4/hidden_files/2026-11-21-0700-prs.txt。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 快照仍为 b12606；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 1 条首次汇总：#69073（多模态：读不懂的 embedding 载荷改返 400 而非 500；客户端传坏张量不再当服务器故障；OOM 仍报服务器错误）。 SGLang 15 条首次汇总：#51279（性能：Paged Experts 下一层专家预测预搬；Qwen3-Next-80B-A3B NVFP4 在 RTX 5070 Ti 上单步 10.2ms 中 2.4ms 在搬专家；用本层输入预测下层专家、边算边搬）、#50088（调度：chunked prefill 进行中请求的未读部分计入 total_tokens 负载；2×H20、Qwen3.8-27B-FP8 复现）、#45087（结构化输出：编译语法缓存按宿主机内存 LRU 淘汰；每新 schema +250–380MB，生产 11 天调度器 3.5GB→35GB）、#48592（推测解码：NGRAMWorker 在 extend 时插入有界提示词尾巴，首个解码步词典不再为空）、#51220（性能：H20 上小 M 块 FP8 GEMM 走 swapAB 核；解码 M 1–32，DeepGEMM 默认大核 tile 空置；H20 78 SM vs H100/H200 132 SM）、#50243（扩散：Wan 与 MiniMax H3 的 Ulysses 通信可走 FlashInfer 通信器）、#51237（权重更新：CUDA-IPC 张量为目标/草稿各重建一次）、#51210（layernorm：遮掉填充的 hc 流）、#51148（GEMM：块缩放 FP8/INT8 行偏移改 int64）、#50929（DSA：元数据核 batch 大小改运行时参数，免每 batch 重编译）、#50639（扩散：Krea-2 请求尺寸对齐 16 像素网格）、#50602（扩散：Nomas VAE 融合有序均方约简）、#51943（CLI：识别 RTX PRO 6000 硬件 id）、#52084（CI：qknorm 测试注册）、#39071（AMD：QK norm 融合原地核）。 TRT-LLM 2 条首次汇总：#21113（功能：全局内存监控器，17287 行、138 文件；MemoryCounters 与 torch_reserved 重叠、PagePool 报容量非占用，统一对账）、#22427（文档：测试指引按范围整理）。 llama.cpp 4 条首次汇总：#32491（多模态：mtmd 支持 Kyutai Hibiki 全双工实时语音，服务器端先上）、#31998（SYCL：IQ4_NL/IQ4_XS 权重重排）、#31109（SYCL：CONV_TRANSPOSE_1D 输入迭代加界）、#30846（内存访问：mul_mat_one_chunk 模式优化）。 Mooncake 1 条首次汇总：#5426（Conductor：Go RPC 客户端与 C ABI 绑定）。 LMDeploy、TGI、Dynamo、FlashInfer 零合入。 arXiv：API 最新提交仍为 2026-11-19；下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻/访谈：HN、Reddit、X、中文媒体本轮均无 2 小时内新动态；搜到的 Lambda GPU、SageMaker HyperPod 接 Dynamo、TorchTPU 均为 11 月 18–19 日已报内容；helloaihub 的“vLLM/SGLang 树形推测解码 3.3x”系 4 天前 AI 聚合文、无官方信源，未收录。Latent Space 仍为 11 月 19 日那期，无新单集。 深读：本轮无新增（宁缺毋滥；#51279 想法与数字已在简报内讲清，#45087 为修漏 fix，#21113 为可观测性功能）。</p></body></html>
