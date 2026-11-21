@@ -1,0 +1,165 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月20日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-20"/>
+<meta name="doc-ts" content="2026-11-21T05:00:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-20（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-20（21点版）</h1>
+<p>这轮 GitHub 一共合入 10 条。</p>
+<p>头条是 SGLang 给 K3.1 省显存。</p>
+<p>一台卡能省出 5.8GB，吞吐一点没掉。</p>
+<p>FlashInfer 那边也很快。</p>
+<p>MLA 解码延迟直接砍了快一半。</p>
+<p>vLLM 则把扩散模型接上了快后端。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>llama.cpp 出了新快照 b12602。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：3 条，K3.1 省显存是头条</strong></p>
+<p>#51900 修了 K3.1 共享专家的显存占用。</p>
+<p>共享专家是 MoE 里每 token 都要过的部分。</p>
+<p>以前它在另一条流上跑，释放总慢半拍。</p>
+<p>读题跑得越久，占着不用的显存越多。</p>
+<p>GB300 上跑 K3.1 读题，8 张卡每张多占 6GB。</p>
+<p>现在释放改到主流程上排队。</p>
+<p>每张卡省出 5.8GB。</p>
+<p>空闲显存从 6.4GB 涨到 12.2GB。</p>
+<p>读题速度一点没变。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51900">https://github.com/sgl-project/sglang/pull/51900</a></p>
+<p>#52002 把采样惩罚的代码并成了一个模块。</p>
+<p>以前惩罚逻辑散在各处。</p>
+<p>现在收进一个 penalties 模块。</p>
+<p>纯重构，行为没变。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52002">https://github.com/sgl-project/sglang/pull/52002</a></p>
+<p>#51987 是篇文档。</p>
+<p>扩散模型存图到 S3，推荐用工作负载凭证。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51987">https://github.com/sgl-project/sglang/pull/51987</a></p>
+<p><strong>vLLM：2 条，扩散模型是头条</strong></p>
+<p>#62516 让 DiffusionGemma 用上了快后端。</p>
+<p>DiffusionGemma 是扩散式文本模型。</p>
+<p>它一批请求里混着两种注意力。</p>
+<p>一种只看前面，一种前后都看。</p>
+<p>B200 上以前没有后端能同时接这两种。</p>
+<p>只能退回慢速的 Triton 后端。</p>
+<p>现在跑在 FlashInfer 的 TRTLLM-Gen 上。</p>
+<p>还成了 B200 纯文本服务的默认选择。</p>
+<p>实测比 Triton 快 1.1 到 1.54 倍。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/62516">https://github.com/vllm-project/vllm/pull/62516</a></p>
+<p>#68600 修了批量不变性的一个缺口。</p>
+<p>批量不变性是同一请求结果不随批量变。</p>
+<p>以前手动融合的归约加归一化没遵守它。</p>
+<p>批量一变，算术路径跟着变。</p>
+<p>现在融合前先看开关，开了就不用融合。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68600">https://github.com/vllm-project/vllm/pull/68600</a></p>
+<p><strong>TRT-LLM：1 条，DeepSeek-V4.1 解码提速</strong></p>
+<p>#22363 给 DeepSeek-V4.1 的 MoE 解码换了打法。</p>
+<p>MoE 是专家混合模型，每 token 只激活几个专家。</p>
+<p>新打法只跑第一层全连接，省掉重复活。</p>
+<p>第二层改用 CuTe 写的新核。</p>
+<p>路由也改成单簇加动态专家并行。</p>
+<p>GB300 上一步解码从 2.8 毫秒降到 2.67 毫秒。</p>
+<p>条件比较窄，只在批量 1 等特定配置下生效。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22363">https://github.com/NVIDIA/TensorRT-LLM/pull/22363</a></p>
+<p><strong>FlashInfer：1 条，MLA 解码快了 1.86 倍</strong></p>
+<p>#9807 把 Cake 的 MLA 解码改成单拆分。</p>
+<p>MLA 是 DeepSeek 用的压缩注意力。</p>
+<p>以前解码要先分块算再汇总。</p>
+<p>现在 GPU 一次吃满，直接一个核出结果。</p>
+<p>批量 128 时，延迟从 55.87 微秒降到 30.06 微秒。</p>
+<p>B200 和 GB300 上都是 1.86 倍左右。</p>
+<p>自动选后端也会优先挑它。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9807">https://github.com/flashinfer-ai/flashinfer/pull/9807</a></p>
+<p><strong>Mooncake：1 条，点对点存储能独立打包了</strong></p>
+<p>#5714 把 C++ 的点对点存储拆成了独立库。</p>
+<p>以前装哪个轮子，决定了能用哪种存储后端。</p>
+<p>现在两个后端能一起装进一个轮子。</p>
+<p>用哪个由环境变量说了算。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5714">https://github.com/kvcache-ai/Mooncake/pull/5714</a></p>
+<p><strong>llama.cpp：新快照 b12602，另有 1 条英特尔核优化</strong></p>
+<p>#31428 优化了英特尔显卡上的分组矩阵乘法。</p>
+<p>以前权重先在共享内存里中转一次。</p>
+<p>现在直接在寄存器里拼好，喂给 XMX 核心。</p>
+<p>少了一道中转，速度跟着上去。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31428">https://github.com/ggml-org/llama.cpp/pull/31428</a></p>
+<p>其余 1 条是 OpenVINO 文档修补。</p>
+<p><strong>其余三家：零合入</strong></p>
+<p>LMDeploy、TGI、Dynamo 都没动静。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日的提交。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p>AWS 托管 Dynamo 那篇是 11 月 17 日已报消息的转载。</p>
+<p>没有新内容，这轮不重复报。</p>
+<p>来源：<a href="https://news.hamidun.com/en/news/16441/aws-launches-managed-nvidia-dynamo-for-models-that-don-t-fit">https://news.hamidun.com/en/news/16441/aws-launches-managed-nvidia-dynamo-for-models-that-don-t-fit</a></p>
+<h2>访谈与深度</h2>
+<p><strong>温度 0 也不确定？一篇讲透批量不变性</strong></p>
+<p>AppScale 11 月 20 日发了篇博客。</p>
+<p>讲的是温度设成 0，输出为什么还会变。</p>
+<p>原因是批量大小会改变浮点求和顺序。</p>
+<p>两个 token 分数接近时，结果就翻了。</p>
+<p>vLLM 有个开关能定住它。</p>
+<p>开 VLLM_BATCH_INVARIANT=1 就行。</p>
+<p>SGLang 的确定模式要慢 25% 到 45%。</p>
+<p>作者建议只把关键流量放到确定通道。</p>
+<p>其余流量继续走快核，别全 fleet 一起慢。</p>
+<p>这篇正好接上本轮 vLLM 的 #68600。</p>
+<p>来源：<a href="https://appscale.blog/en/blog/llm-nondeterminism-temperature-zero-batch-invariance-2026">https://appscale.blog/en/blog/llm-nondeterminism-temperature-zero-batch-invariance-2026</a></p>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<p>HN 上也没有新的 serving 讨论。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>PR 居多，适合直接看链接。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-20-2100/">21点版</a></p>
+<hr/>
+<p>本轮已与 19点版去重。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 新快照 b12602（2026-11-21T04:28:53Z，前一版 b12600）；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 2 条首次汇总：#62516（注意力/FlashInfer：DiffusionGemma 混合因果/双向注意力跑 TRTLLM-Gen，SM100/SM103 纯文本默认；B200 上比 TRITON_ATTN 快 1.10–1.45× BF16 KV、1.15–1.54× FP8 KV；GPQA-Diamond 68.69/69.67 vs 69.95）、#68600（修补/批量不变性：手动 FlashInfer all-reduce+RMSNorm 融合遵守 VLLM_BATCH_INVARIANT=1，修 #68587）。 SGLang 3 条首次汇总：#51900（性能/kimi-k3：共享专家 side-stream 释放改到当前流排序；Kimi-K3.1 prefill GB300 x8：每卡 reserved-but-unallocated 14.0→8.2GB，最小空闲 6.4→12.2GB，prefill 吞吐 17550→17598 tok/s）、#52002（重构/采样：penaltylib 并入一个 penalties 模块）、#51987（文档：扩散模型 S3 上传优先用 workload credentials）。 TRT-LLM 1 条首次汇总：#22363（性能/DeepSeek-V4.1：MoE decode 在 attention TP 下 FC1-only TRTLLM-Gen + CuTe DSL FC2 + one-cluster routing + dynamic EP；GB300 解码步 2.803/2.777ms→2.670ms；条件窄：batch 1、EP2、MoE TP≥4、NVFP4、SM100/SM103；数字为作者自报）。 FlashInfer 1 条首次汇总：#9807（性能/MLA：Cake MLA FP8 page-64 解码改 one-split；batch 128 q_len 1 KV 1024：B200 55.87→30.06us、GB300 52.58→28.32us，约 1.86×；backend=&quot;auto&quot; 新增 Cake 优先区间）。 Mooncake 1 条首次汇总：#5714（P2PStore：C++ P2P Store 独立库/扩展/命令，与集中式后端同装一轮，MOONCAKE_STORE_BACKEND 选择）。 llama.cpp 2 条首次汇总：#31428（SYCL：Grouped XMX GEMM 寄存器内解包直 feed DPAS，省 SLM 中转）、#30967（文档：OpenVINO 后端细节）。 LMDeploy、TGI、Dynamo 零合入。 arXiv：API 最新提交仍为 2026-11-19；下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻：AWS HyperPod 托管 Dynamo 的 11 月 20 日 hamidun 转载与 11 月 17 日已报的同一消息重复，不再报；Hy4/Hy4 Flash 权重开源（05点版）、Hy4 AMA 已结束（11点版）、Inkling 2 Mini（11 月 20 日 19点版已报）均未重复。 访谈与深度：AppScale 批量不变性博客（2026-11-20，Satyam Kumar）首次收录；Latent Space 最新仍为 11 月 19 日 Linear GTM 访谈；HN 无新 serving 讨论；Tensward（11 月 13 日）未重复。 深读：本轮无新增（宁缺毋滥；PR 居多，博客正文仅问答提炼、信息量不足）。 去重：SGLang #51983/#47840 等 19点版 17 条、TRT-LLM #22547 等 5 条、Dynamo #19235、FlashInfer #9711 均未重复。</p></body></html>
