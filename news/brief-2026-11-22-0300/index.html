@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月22日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-22"/>
+<meta name="doc-ts" content="2026-11-22T10:59:42"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-22（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-22（03点版）</h1>
+<p>这轮 GitHub 一共合入 10 条。</p>
+<p>SGLang 6 条，vLLM 2 条。</p>
+<p>TRT-LLM 1 条，Mooncake 1 条。</p>
+<p>LMDeploy、TGI、Dynamo、FlashInfer 全都没动。</p>
+<p>llama.cpp 也没合入新 PR。</p>
+<p>没有新版本发布。</p>
+<p>llama.cpp 快照升到 b12631。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照从 b12629 升到 b12631。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：P/D 解耦的传输层，抽成通用接口了</strong></p>
+<p>#46460 是这轮最值得看的一条。</p>
+<p>P/D 解耦就是把活拆成两道工序。</p>
+<p>一道专门算提示词，一道专门吐词。</p>
+<p>两道工序分给不同的机器干。</p>
+<p>中间要搬运 KV 缓存，靠 Mooncake 干这活。</p>
+<p>KV 缓存就是算过的中间结果，留着复用。</p>
+<p>以前搬运的写法是 Mooncake 专属的。</p>
+<p>现在抽成一个通用接口，叫 Transport。</p>
+<p>以后换别的搬运工具，不用重写一遍。</p>
+<p>协议和线上传输格式都没变。</p>
+<p>这是 P/D 解耦大重构的第二步。</p>
+<p>跟你正在评估的 P/D 解耦直接相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46460">https://github.com/sgl-project/sglang/pull/46460</a></p>
+<p><strong>vLLM：KV 卸载修了个并发下丢前缀的 bug</strong></p>
+<p>#69110 是 #67098 的后续修补。</p>
+<p>KV 卸载就是把不常用的缓存挪走。</p>
+<p>挪到 CPU 或者磁盘上，给显存腾地方。</p>
+<p>ARC 是一种缓存淘汰策略。</p>
+<p>它会挑最不常用的块先挪走。</p>
+<p>并发存缓存的时候有个漏洞。</p>
+<p>新存的后缀，可能被留在已淘汰的前缀后面。</p>
+<p>前缀没了，后缀就成了孤儿。</p>
+<p>现在把复用的前缀也算进淘汰判断。</p>
+<p>后缀不会再被单独留下。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69110">https://github.com/vllm-project/vllm/pull/69110</a></p>
+<p><strong>vLLM：工具选择不再打乱提示词缓存</strong></p>
+<p>#68408 修的是 Rust 前端。</p>
+<p>tool_choice 有一种值叫 allowed_tools。</p>
+<p>它的意思是工具单子不动。</p>
+<p>每轮只换&quot;这轮能用哪几个工具&quot;。</p>
+<p>工具单子不动，提示词就不用重写。</p>
+<p>提示词缓存也就能一直复用。</p>
+<p>以前 Rust 前端碰到它直接报 400。</p>
+<p>现在聊天接口和 Responses 接口都支持了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68408">https://github.com/vllm-project/vllm/pull/68408</a></p>
+<p><strong>SGLang 其余：5 条小修小补</strong></p>
+<p>#52283：P/D 解耦的测试修补。</p>
+<p>Mooncake 传输换了接口，测试跟上了。</p>
+<p>#52185 和 #52170：采样重构两件套。</p>
+<p>采样就是每步挑下一个词。</p>
+<p>以前调整 logits 的逻辑散在三处。</p>
+<p>现在走一条有序流水线。</p>
+<p>采样参数也改成按步现算。</p>
+<p>行为不变，纯粹为了以后好维护。</p>
+<p>#51425：Wan2.1 图生视频的 LoRA 修好了。</p>
+<p>LoRA 是给模型打的小补丁。</p>
+<p>图片分支的键名没对上，80 个模块白白用回底模。</p>
+<p>现在键名对上了，补丁能正常生效。</p>
+<p>#51170：AMD 上 MXFP8 的 MoE 少了一次白干的活。</p>
+<p>输出本来就要被内核整个重写。</p>
+<p>以前还先清零一次，纯属多余。</p>
+<p>现在删掉了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52283">https://github.com/sgl-project/sglang/pull/52283</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52185">https://github.com/sgl-project/sglang/pull/52185</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52170">https://github.com/sgl-project/sglang/pull/52170</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51425">https://github.com/sgl-project/sglang/pull/51425</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51170">https://github.com/sgl-project/sglang/pull/51170</a></p>
+<p><strong>TRT-LLM：MiniMax-H3 的 FP8 场景认整块 BF16 检查点了</strong></p>
+<p>#22749 修的是检查点准入。</p>
+<p>MiniMax-H3 有个静态 FP8 的专用场景。</p>
+<p>FP8 是一种 8 位量化，省显存。</p>
+<p>以前整块没量化的检查点不让进。</p>
+<p>只能走通用慢路，50 个模块都吃不上融合算子。</p>
+<p>现在放行了，融合算子全都能用上。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22749">https://github.com/NVIDIA/TensorRT-LLM/pull/22749</a></p>
+<p><strong>Mooncake：只改了文档</strong></p>
+<p>#5686 给 README 加了生态集成 logo 墙。</p>
+<p>每个项目名都链到了上游仓库。</p>
+<p>还新列了 PyTorch、Tair KVCache 这些集成。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5686">https://github.com/kvcache-ai/Mooncake/pull/5686</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>这轮 API 能返回。</p>
+<p>最新仍是 11 月 19 日那批。</p>
+<p>Aggron、AscMLA 那些 19 日 21 点版报过。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新动态</strong></p>
+<p>HN、Reddit、X、中文媒体都没有 2 小时内的新消息。</p>
+<p>搜到的几篇都是窗口外的旧文。</p>
+<p>SGLang 联盟是 11 月 12 日的。</p>
+<p>树形推测解码 3.3 倍是 21 日 07 点版报过的。</p>
+<p>TorchTPU 那篇也早报过了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>Spotify 核验，最新单集仍是 11 月 19 日。</p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>#46460 是 P/D 传输层的接口抽取。</p>
+<p>跟你的 P/D 解耦方向直接相关。</p>
+<p>但它只是第二步重构。</p>
+<p>协议和线上传输格式都没变。</p>
+<p>体量不够一篇精读。</p>
+<p>其余也都是修补和小优化。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-22-0300/">03点版</a></p></body></html>
