@@ -1,0 +1,158 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月21日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-21"/>
+<meta name="doc-ts" content="2026-11-22T02:59:58"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-21（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-21（19点版）</h1>
+<p>这轮 GitHub 一共合入 5 条。</p>
+<p>SGLang 3 条，TRT-LLM 1 条。</p>
+<p>llama.cpp 1 条，vLLM 零合入。</p>
+<p>llama.cpp 快照升到 b12626。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照从 b12622 升到 b12626。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：大模型启动 9 次挂 5 次，修了</strong></p>
+<p>#52120 修的是 hicache 的启动问题。</p>
+<p>hicache 是 SGLang 的主机端 KV 缓存。</p>
+<p>KV 缓存就是模型的草稿纸。</p>
+<p>它把算过的注意力结果存在主机内存里。</p>
+<p>这次出问题的是 Kimi-K3.1 的 PD 读题。</p>
+<p>PD 解耦就是读题和生成分两拨机器干。</p>
+<p>一台 GB300 节点上 4 张卡同时启动。</p>
+<p>每张卡各自量一遍主机还剩多少内存。</p>
+<p>量着量着，别卡的池子被算成已占用。</p>
+<p>9 次启动挂了 5 次。</p>
+<p>报错说只剩 40 到 79 GB，实际够得很。</p>
+<p>现在只量一次，大家按同一份账本分。</p>
+<p>显式指定大小和自动分配都走这条路。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52120">https://github.com/sgl-project/sglang/pull/52120</a></p>
+<p><strong>SGLang：结构化输出的收尾 token 被误杀了</strong></p>
+<p>#52180 修的是 llguidance 的小毛病。</p>
+<p>llguidance 是管结构化输出的后端。</p>
+<p>结构化输出就是逼模型按固定格式说话。</p>
+<p>比如必须吐合法 JSON。</p>
+<p>有些语法本身就以 EOS 收尾。</p>
+<p>EOS 是模型说的到此为止的记号。</p>
+<p>校验那步只认 EOS 是结束信号。</p>
+<p>语法要的那个收尾 token 反而被拒了。</p>
+<p>请求直接报错退出。</p>
+<p>现在改按语法的掩码来放行。</p>
+<p>掩码就是语法允许的 token 清单。</p>
+<p>投机校验多跑的 token 也不再报错了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52180">https://github.com/sgl-project/sglang/pull/52180</a></p>
+<p><strong>SGLang：日志写满了，不再拖垮整个服务</strong></p>
+<p>#52171 修的是 Rust 服务端的日志。</p>
+<p>开了 --log-requests 才会踩到。</p>
+<p>日志走一个 1024 行的缓冲区。</p>
+<p>收集日志的下游一慢，缓冲就满了。</p>
+<p>满了以后写日志的 worker 会卡住。</p>
+<p>它还握着一把全局锁。</p>
+<p>别的 worker 想记日志也排队等。</p>
+<p>连健康检查都跟着停摆。</p>
+<p>现在多了个开关，可以选丢行模式。</p>
+<p>开关是个环境变量。</p>
+<p><code>SGLANG_RUST_REQUEST_LOG_FULL_BUFFER</code></p>
+<p>设成 drop，满了就整行丢掉。</p>
+<p>丢了多少行会记到指标里。</p>
+<p>默认还是等，不改行为。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52171">https://github.com/sgl-project/sglang/pull/52171</a></p>
+<p><strong>TRT-LLM：给 KV 搬运先立一份说明书</strong></p>
+<p>#21769 是 RI-10 系列的第一块砖。</p>
+<p>RI-10 是 TRT-LLM 的 KV 搬运改造计划。</p>
+<p>目标是让搬运方一次说清页布局。</p>
+<p>页布局就是 KV 在显存里怎么排布的。</p>
+<p>以前每种缓存结构各写一套钩子。</p>
+<p>以后新结构只要改一个方法。</p>
+<p>这期先加了声明本身。</p>
+<p>管理器报出 PageTableSpec。</p>
+<p>里面写着各角色的排布和量化方式。</p>
+<p>哪些角色不用搬，哪些搬完要重建。</p>
+<p>原生搬运和 MiniMax M3 先用上了。</p>
+<p>真正搬运逻辑的改动还在后面。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21769">https://github.com/NVIDIA/TensorRT-LLM/pull/21769</a></p>
+<p><strong>llama.cpp：快照升到 b12626</strong></p>
+<p>#32725 修的是 Vulkan 的内存清零。</p>
+<p>Vulkan 是个跨平台图形接口。</p>
+<p>离散显卡上清零要 4 字节对齐。</p>
+<p>以前没对齐的头尾也直接塞进去。</p>
+<p>现在头尾改走逐字节写。</p>
+<p>中间对齐的部分才走快速填充。</p>
+<p>影响很小，只在失败恢复后才触发。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32725">https://github.com/ggml-org/llama.cpp/pull/32725</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b12626">https://github.com/ggml-org/llama.cpp/releases/tag/b12626</a></p>
+<p><strong>其余：零合入</strong></p>
+<p>vLLM、LMDeploy、TGI 零合入。</p>
+<p>Dynamo、FlashInfer、Mooncake 也零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>API 里最新还是 11 月 19 日的提交。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新动态</strong></p>
+<p>HN、Reddit、X、中文媒体都没有 2 小时内的新消息。</p>
+<p>搜到的都是 11 月 17 到 19 日的旧闻。</p>
+<p>联盟和 v1.0 的消息 11 月 17 日已报。</p>
+<p>Baseten 和 LMSYS 的 PD 实测 11 月 19 日已报。</p>
+<p>不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>#21769 是系列开篇的地基，单看还不够一篇笔记。</p>
+<p>其余 4 条都是小修小补。</p>
+<p>体量都不够一篇精读笔记。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-21-1900/">19点版</a></p>
+<hr/>
+<p>本轮已与 17点版去重。简报文件：~/workspace/goals/goal-4/briefs/2026-11-21-1900.md；日志：~/memory/2026-11-21.md；PR 原始清单：~/workspace/goals/goal-4/hidden_files/2026-11-21-1900-scan.txt。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 快照 b12622→b12626；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 SGLang 3 条首次汇总：#52120（修复/hicache：显式大小路径只采样一次主机预算再分池，GB300 4 卡 Kimi-K3.1 PD prefill 启动 9 次挂 5 次）、#52180（修复/constrained：llguidance 接受语法本身以 EOS 收尾的 token，改按掩码放行）、#52171（性能/rust-server：请求日志缓冲区满时可丢行，SGLANG_RUST_REQUEST_LOG_FULL_BUFFER=drop，默认 wait 不变）。 TRT-LLM 1 条首次汇总：#21769（功能/RI-10 首期：KVCacheManagerV2.page_table_spec() 声明 PageTableSpec，统一 KV 搬运的页布局描述；MiniMax M3 先用上）。 llama.cpp 1 条首次汇总：#32725（修复/Vulkan：非 UMA 设备上未对齐 memset 拆头尾逐字节写，影响仅失败恢复清理路径）。 vLLM、LMDeploy、TGI、Dynamo、FlashInfer、Mooncake 零合入。 arXiv：API 最新提交仍为 2026-11-19；下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻/访谈：HN、Reddit、X、中文媒体本轮均无 2 小时内新动态；SGLang 联盟/v1.0 为 11-17 旧闻（已报）；Baseten/LMSYS PD 实测为 11-19 已报；Latent Space 仍为 11/19 那期（Spotify 核验，最新单集 2026-11-19）。 深读：本轮无新增（宁缺毋滥；#21769 为 RI-10 系列开篇地基、单看不够一篇笔记；其余为小修小补）。</p></body></html>
