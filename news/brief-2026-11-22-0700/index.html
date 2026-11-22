@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月22日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-22"/>
+<meta name="doc-ts" content="2026-11-22T15:06:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-22（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-22（07点版）</h1>
+<p>这轮 GitHub 一共合入 9 条。</p>
+<p>SGLang 6 条，vLLM 2 条。</p>
+<p>Mooncake 1 条，只加了个 logo。</p>
+<p>TRT-LLM、LMDeploy、TGI 没动。</p>
+<p>Dynamo、FlashInfer 也没动。</p>
+<p>llama.cpp 也没合入新 PR。</p>
+<p>不过快照从 b12632 升到 b12633。</p>
+<p>变化只有一条提交，05 点版报过。</p>
+<p>所以这轮其实没新内容。</p>
+<p>没有新版本发布。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照升到 b12633。</p>
+<p>但新增提交就是 05 点版的 #32727。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：草稿模型填 KV，少跑注意力</strong></p>
+<p>#46784 是推测解码的性能优化。</p>
+<p>推测解码就是小模型先打草稿。</p>
+<p>大模型再核对，错了就改。</p>
+<p>草稿模型也要先填 prefill 的 KV。</p>
+<p>KV 就是算过的中间结果，留着复用。</p>
+<p>以前填的时候每个 token 都跑注意力。</p>
+<p>现在除了最后一个 token，都跳过。</p>
+<p>注意力是 prefill 里最贵的一步。</p>
+<p>跳过之后，草稿填得更快。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46784">https://github.com/sgl-project/sglang/pull/46784</a></p>
+<p><strong>SGLang：GLM-5-next 支持序列并行</strong></p>
+<p>#50906 是个新功能。</p>
+<p>LayerNorm 也能按序列切开了。</p>
+<p>序列并行就是把长输入切成段。</p>
+<p>每张卡只算自己那段。</p>
+<p>GLM-5-next 的长上下文更好跑了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50906">https://github.com/sgl-project/sglang/pull/50906</a></p>
+<p><strong>SGLang：扩散模型三条优化</strong></p>
+<p>#51999：LTX-2.3 复用条件分支的缓存块。</p>
+<p>条件分支算过的前缀块，直接给另一分支用。</p>
+<p>不用再算一遍，省时间。</p>
+<p>#52220：六个热点的 Triton 启动改成重放。</p>
+<p>Triton 是写 GPU 内核的工具。</p>
+<p>重放就是启动方式换成更快的路子。</p>
+<p>#52226：扩散 LoRA 的权重快照修好了。</p>
+<p>LoRA 是给模型打的小补丁，微调用的。</p>
+<p>合入成底座权重时，快照要先留一份。</p>
+<p>以前那份可能被覆盖，现在修好了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51999">https://github.com/sgl-project/sglang/pull/51999</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52220">https://github.com/sgl-project/sglang/pull/52220</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52226">https://github.com/sgl-project/sglang/pull/52226</a></p>
+<p><strong>SGLang：还有个内核小修补</strong></p>
+<p>#52074：零 token 时不启动内核。</p>
+<p>以前空请求也会启动一次归一化。</p>
+<p>现在直接跳过。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52074">https://github.com/sgl-project/sglang/pull/52074</a></p>
+<p><strong>vLLM：视频加载终于按帧数上限截断</strong></p>
+<p>#68802 是个多模态修补。</p>
+<p>加载视频时，帧数上限以前没生效。</p>
+<p>长视频会多吃很多显存。</p>
+<p>现在按上限截断，多余的帧不读了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68802">https://github.com/vllm-project/vllm/pull/68802</a></p>
+<p><strong>vLLM 其余：只整理了文档</strong></p>
+<p>#69248 把训练文档重新分了类。</p>
+<p>跟跑模型没关系。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>这轮 API 能返回。</p>
+<p>最新仍是 11 月 19 日那批。</p>
+<p>Aggron、AscMLA 那些 19 日 21 点版报过。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>独立实测：换 SGLang，单卡 32 人排队了</strong></p>
+<p>这是昨天下午出的实测，之前几期漏了。</p>
+<p>作者拿 Qwen3.8-27B 做对照。</p>
+<p>两张 A100 80GB，没有 NVLink。</p>
+<p>单卡 32 个用户，vLLM 跑 1568 词每秒。</p>
+<p>SGLang 只有 881 词每秒。</p>
+<p>慢不是引擎不行，是默认上限太低。</p>
+<p>SGLang 启动时自己定了上限。</p>
+<p>INT4 配方只能同时跑 27 个请求。</p>
+<p>多出来的 5 个排队等，首字等了 14.4 秒。</p>
+<p>vLLM 默认上限是 256，全都一起跑。</p>
+<p>单用户时两者基本打平。</p>
+<p>双卡时结论跟上一期一致。</p>
+<p>一个人用，分开跑最快。</p>
+<p>人多了，复制一份各跑各的最快。</p>
+<p>划重点：上 SGLang 先看启动日志那行上限。</p>
+<p>来源：<a href="https://sotaaz.com/post/serve-ladder-sglang-en">https://sotaaz.com/post/serve-ladder-sglang-en</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是 11 月 19 日。</p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<h2>值得深入学</h2>
+<p><strong>这轮有一篇：上面那篇换引擎实测</strong></p>
+<p>单卡排队的坑，正好是你评 SGLang 要避的。</p>
+<p>笔记已写好，见深度阅读。</p>
+<p>其余 PR 都是小优化和修补。</p>
+<p>体量不够，不做笔记。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-22-0700/">07点版</a></p></body></html>
