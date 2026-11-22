@@ -1,0 +1,117 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月22日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-22"/>
+<meta name="doc-ts" content="2026-11-22T23:01:51"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-22（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-22（15点版）</h1>
+<p>这轮 GitHub 一共合入 3 条。</p>
+<p>vLLM 占了 2 条，llama.cpp 1 条。</p>
+<p>SGLang、TRT-LLM 它们都没动。</p>
+<p>没有新版本发布。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照还是 b12633。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：英伟达新模型 Nemotron Shortcut 上车了</strong></p>
+<p>#68198 是这轮最实在的一条。</p>
+<p>Nemotron 是英伟达的模型家族。</p>
+<p>Shortcut 能看文字、图片和视频。</p>
+<p>架构是混搭：稀疏注意力加线性状态层。</p>
+<p>稀疏注意力就是只看最相关的几把钥匙。</p>
+<p>线性状态层像给序列记流水账。</p>
+<p>专家并行也不用等前一步算完。</p>
+<p>MTP 是多 token 预测。</p>
+<p>就是一次猜好几个 token 的推测解码。</p>
+<p>草稿头也接上了。</p>
+<p>在 4 张 GB300 上跑通过了。</p>
+<p>注意：这只是模型代码。</p>
+<p>要真正跑起来，还得等另外两条合入。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68198">https://github.com/vllm-project/vllm/pull/68198</a></p>
+<p><strong>vLLM：Kimi-K3.1-Pro 的 MI355X 配方更新了</strong></p>
+<p>#69163 更新了 AMD 卡上的跑法。</p>
+<p>MI355X 是 AMD 的新卡。</p>
+<p>配方换成了正式版 DSpark 草稿。</p>
+<p>DSpark 是推测解码用的草稿模型。</p>
+<p>并发 16 到 48 时，一次猜 4 个 token。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69163">https://github.com/vllm-project/vllm/pull/69163</a></p>
+<p><strong>llama.cpp：音频 FFT 提速了</strong></p>
+<p>#32815 是个多模态音频小优化。</p>
+<p>mtmd 是 llama.cpp 里管多模态的那块。</p>
+<p>FFT 是音频处理里的快速傅里叶变换。</p>
+<p>以前是递归拆分，现在改成迭代分段算。</p>
+<p>奇数长度的部分也批量一起算。</p>
+<p>浮点运算顺序没变，结果不变。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32815">https://github.com/ggml-org/llama.cpp/pull/32815</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批今天 16 点</strong></p>
+<p>最新仍是 11 月 19 日那批。</p>
+<p>Aggron、AscMLA 那些 19 日 21 点版报过。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是今天 16:00 PST。</p>
+<p>下轮 17 点版应该能赶上。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新消息</strong></p>
+<p>搜到的几条都是旧闻重列。</p>
+<p>sotaaz 那篇 07 点版报过。</p>
+<p>PrimaLabs 那篇 11 点版报过。</p>
+<p>AWS 的 KV 缓存技能 11 月 21 日报过。</p>
+<p>SGLang 联盟还是 11 月 12 日的消息。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是 11 月 19 日。</p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<h2>值得深入学</h2>
+<p><strong>这轮没有</strong></p>
+<p>三条都是模型接入和配方更新。</p>
+<p>体量不够，不做笔记。</p>
+<p>有新东西再写。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-22-1500/">15点版</a></p></body></html>
