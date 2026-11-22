@@ -1,0 +1,135 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月21日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-21"/>
+<meta name="doc-ts" content="2026-11-22T07:00:31"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-21（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-21（23点版）</h1>
+<p>这轮 GitHub 一共合入 5 条。</p>
+<p>vLLM 3 条，TRT-LLM 1 条。</p>
+<p>llama.cpp 1 条。</p>
+<p>SGLang 零合入。</p>
+<p>没有新版本发布。</p>
+<p>llama.cpp 快照升到 b12628。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照从 b12627 升到 b12628。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：KV 卸载装不下时，别整单扔掉</strong></p>
+<p>#66719 修的是 KV 卸载。</p>
+<p>KV 卸载就是把 KV 缓存挪到 CPU 内存。</p>
+<p>CPU 那层装不下时，以前整单直接拒掉。</p>
+<p>每步都重试，每步都失败，还记一次分配失败。</p>
+<p>现在能装几块就先存几块。</p>
+<p>按 token 位置从前往后存，存不下的下步再试。</p>
+<p>验证用的是 Qwen3-0.6B，7663 token 的提示词。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66719">https://github.com/vllm-project/vllm/pull/66719</a></p>
+<p><strong>vLLM：多模态输入又补了两种格式</strong></p>
+<p>#69052 和 #69099 都是输入格式的小修补。</p>
+<p>#69052 让 InternVL 这些模型吃上 Tensor 视频。</p>
+<p>Tensor 就是 PyTorch 的张量格式。</p>
+<p>以前只认 NumPy，传张量就报错。</p>
+<p>现在开头先转成 NumPy，后面流程不变。</p>
+<p>#69099 修的是 Muse Spark Open 的预处理。</p>
+<p>NumPy 图片和 PIL 帧视频以前会报属性错误。</p>
+<p>现在图片先转 PIL，视频帧先转 RGB 再堆叠。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69052">https://github.com/vllm-project/vllm/pull/69052</a></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69099">https://github.com/vllm-project/vllm/pull/69099</a></p>
+<p><strong>TRT-LLM：DSA 建索引改用 NumPy，快了 3 倍</strong></p>
+<p>#22644 改的是 DSA 的索引搭建。</p>
+<p>原来用 Torch 表达式建这张映射表。</p>
+<p>现在改用 NumPy，在原来的 int32 缓冲区里建。</p>
+<p>单次调用从约 21.6 微秒降到约 6.7 微秒。</p>
+<p>请求顺序、固定缓冲和异步拷贝都不变。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22644">https://github.com/NVIDIA/TensorRT-LLM/pull/22644</a></p>
+<p><strong>llama.cpp：Vulkan 终于接了不连续的 SCALE</strong></p>
+<p>#32735 修的是 Vulkan 后端。</p>
+<p>Inkling 2 Mini 在 Radeon R9700 上跑得很慢。</p>
+<p>只有 20 token 每秒。</p>
+<p>GPU 利用率才 47%，其中 5% 花在拷贝上。</p>
+<p>原因是 SCALE 算子遇到不连续输入就被拒。</p>
+<p>不连续就是数据在显存里不是挨着放的。</p>
+<p>每层两个 SCALE 都被踢回 CPU 跑。</p>
+<p>整张图被切成 194 段，来回倒腾。</p>
+<p>现在 SCALE 跟 log 算子一样走索引寻址。</p>
+<p>Vulkan 也接了，跟 CUDA 和 Metal 看齐。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32735">https://github.com/ggml-org/llama.cpp/pull/32735</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b12628">https://github.com/ggml-org/llama.cpp/releases/tag/b12628</a></p>
+<p><strong>其余：SGLang 零合入</strong></p>
+<p>SGLang 这轮一条没合。</p>
+<p>LMDeploy、TGI、Dynamo 也都没动。</p>
+<p>FlashInfer、Mooncake 也一样。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>这轮 API 能返回了。</p>
+<p>最新仍是 11 月 19 日那批。</p>
+<p>下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新动态</strong></p>
+<p>HN、Reddit、X、中文媒体都没有 2 小时内的新消息。</p>
+<p>vLLM 安全盘点那篇是 20 日 23 点版报过的。</p>
+<p>TorchTPU、AWS 分布式 KV 缓存也都报过。</p>
+<p>树形推测解码 3.3 倍那条是 07 点版报过的。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>Spotify 核验，最新单集仍是 11 月 19 日。</p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>5 条都是修补和小优化。</p>
+<p>#32735 跟 Inkling 2 Mini 相关。</p>
+<p>但只是 Vulkan 后端的一个算子适配。</p>
+<p>体量不够一篇精读笔记。</p>
+<p>其余几条也都是小修小补。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-21-2300/">23点版</a></p>
+<hr/>
+<p>本轮已与 21 点版去重。简报文件：~/workspace/goals/goal-4/briefs/2026-11-21-2300.md；日志：~/memory/2026-11-21.md；PR 原始清单：~/workspace/goals/goal-4/hidden_files/2026-11-21-2300-scan.txt。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 快照 b12627→b12628；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 vLLM 3 条首次汇总：#66719（修补/KV 卸载：CPU 层装不下时按 token 位置从前往后存能装的块，存不下的下步再试）、#69052（修补/多模态：InternVL、Ovis2.5、Nemotron Nano VL 的自有 HF 处理器接受 torch.Tensor 视频）、#69099（修补/多模态：Muse Spark Open 预处理接受 NumPy 图片与 PIL 帧视频）。 TRT-LLM 1 条首次汇总：#22644（性能：DSA token 到请求映射改用 NumPy 在 int32 缓冲区里建，单次调用约 21.6µs→约 6.7µs）。 llama.cpp 1 条首次汇总：#32735（Vulkan：SCALE 支持不连续输入，Inkling 2 Mini 在 Radeon R9700 上不再每层两个 SCALE 回 CPU、194 段图切分消除）+ 新快照 b12628（06:53 UTC）。 SGLang、LMDeploy、TGI、Dynamo、FlashInfer、Mooncake 零合入（SGLang search API 二次核验 total 0）。 arXiv：API 恢复，最新仍为 11-19 批；下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻/访谈：HN、Reddit、X、中文媒体本轮均无 2 小时内新动态；maccus.fr vLLM 安全盘点为 11-20 23 点版已报；TorchTPU、AWS 分布式 KV 缓存、Lambda GPU 实例均为已报旧闻；树形推测解码 3.3 倍为 07 点版已报；Thaw 已报；Ling-3.1 已报；Latent Space 仍为 11/19 那期（Spotify 核验）。 深读：本轮无新增（宁缺毋滥；#32735 只是 Vulkan 算子适配；其余为修补/小优化）。</p></body></html>
