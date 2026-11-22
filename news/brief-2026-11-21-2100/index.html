@@ -1,0 +1,146 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月21日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-21"/>
+<meta name="doc-ts" content="2026-11-22T05:02:46"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-21（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-21（21点版）</h1>
+<p>这轮 GitHub 一共合入 9 条。</p>
+<p>SGLang 5 条，TRT-LLM 1 条。</p>
+<p>llama.cpp 1 条，Mooncake 1 条。</p>
+<p>vLLM 只有 1 条 CI 测试。</p>
+<p>没有新版本发布。</p>
+<p>llama.cpp 快照升到 b12627。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只有 llama.cpp 动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>v1.0 还是没有 tag。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 正式版还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 正式版还是 v1.6.2。</p>
+<p>llama.cpp 快照从 b12626 升到 b12627。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：扩散模型启动提速，先并行问 4 个分片</strong></p>
+<p>#52183 改的是扩散模型的加载。</p>
+<p>扩散模型就是画图和做视频那类模型。</p>
+<p>DiT 是这类模型用的 Transformer 结构。</p>
+<p>启动前要先量每个权重分片有多大。</p>
+<p>以前是一个个去问 Hugging Face。</p>
+<p>每个分片都要等一轮网络来回。</p>
+<p>现在最多 4 个分片一起问。</p>
+<p>问完再汇总，启动就快了一截。</p>
+<p>只改了探测这步，不动权重读取和生成。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52183">https://github.com/sgl-project/sglang/pull/52183</a></p>
+<p><strong>SGLang：多卡通信注册时，别重复映射同一块显存</strong></p>
+<p>#52173 改的是 custom-all-reduce 的注册。</p>
+<p>all-reduce 是多卡之间汇总数据的操作。</p>
+<p>注册时每张卡要映射别卡的显存。</p>
+<p>以前同一块显存会被反复映射很多次。</p>
+<p>每次映射都要过驱动锁，排队很慢。</p>
+<p>现在每块显存只映射一次。</p>
+<p>注册快了，别的驱动调用也不用等了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52173">https://github.com/sgl-project/sglang/pull/52173</a></p>
+<p><strong>SGLang：LoRA 线性层大扫除，代码合一了</strong></p>
+<p>#37460 是 LoRA 的重构。</p>
+<p>LoRA 是给大模型打小补丁微调的办法。</p>
+<p>以前 LoRA 的线性层和基础线性层各写一套。</p>
+<p>逻辑重复，改一处容易漏另一处。</p>
+<p>现在抽成公共部分，两边共用。</p>
+<p>行为不变，纯粹为了以后好维护。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/37460">https://github.com/sgl-project/sglang/pull/37460</a></p>
+<p><strong>TRT-LLM：内存账本又修了一笔，跟 19 点版那单同病</strong></p>
+<p>#22139 修的是内存够不够的判断。</p>
+<p>这次是分片条带化的内存检查。</p>
+<p>检查前先看主机还剩多少内存。</p>
+<p>以前只看已用多少，不算能回收的文件缓存。</p>
+<p>文件缓存就是系统暂存文件的内存。</p>
+<p>能回收的部分其实也算可用。</p>
+<p>现在把它算进去，误判内存不够的情况少了。</p>
+<p>跟 19 点版 SGLang 那单 hicache 修的是同类毛病。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22139">https://github.com/NVIDIA/TensorRT-LLM/pull/22139</a></p>
+<p><strong>llama.cpp：决策模型并行跑，不再崩了</strong></p>
+<p>#32713 修的是 server 的批处理。</p>
+<p>非因果注意力是决策模型常用的注意力。</p>
+<p>vllm-d3 这类决策模型就用它。</p>
+<p>这类请求不能拆批，必须整批进一个 ubatch。</p>
+<p>ubatch 就是一次前向的最小单位。</p>
+<p>以前只检查了总批次，没检查 ubatch 上限。</p>
+<p>并行一开多，几个请求挤在一起就触发断言崩了。</p>
+<p>现在非因果请求按 ubatch 上限收，多余的等下一批。</p>
+<p>还补了一个 vllm-d3 的并行测试。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32713">https://github.com/ggml-org/llama.cpp/pull/32713</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/b12627">https://github.com/ggml-org/llama.cpp/releases/tag/b12627</a></p>
+<p><strong>其余：小修小补</strong></p>
+<p>vLLM 的 #68867 只是 CI 测试解耦。</p>
+<p>SGLang 的 #52214 和 #52118 都是测试修修补补。</p>
+<p>Mooncake 的 #5698 给压测工具加了预热开关。</p>
+<p>LMDeploy、TGI、Dynamo、FlashInfer 零合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周末没新批，下批周一</strong></p>
+<p>这轮 API 撞上限没返回。</p>
+<p>按 19 点版已核验的日程，下批是周一 00:00 UTC。</p>
+<p>也就是周日 16:00 PST。</p>
+<p>来源：arXiv API</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新动态</strong></p>
+<p>HN、Reddit、X、中文媒体都没有 2 小时内的新消息。</p>
+<p>AWS 分布式 KV 缓存是 11 月 20 日的，05 点版已报。</p>
+<p>Inkling 2 Mini 也是 11 月 20 日的，已报过。</p>
+<p>AMD 那篇 QuickReduce 博客看着像新文。</p>
+<p>其实测试是 2025 年 7 月的旧文。</p>
+<p>不算新消息，不收录。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>Spotify 核验，最新单集仍是 11 月 19 日。</p>
+<p>讲 Linear 的 GTM，没新单集。</p>
+<h2>值得深入学</h2>
+<p>这轮没有新增深读。</p>
+<p>#32713 跟 SystemOne 决策模型相关。</p>
+<p>但只是批处理边界的小修复。</p>
+<p>体量不够一篇精读笔记。</p>
+<p>其余几条也都是小修小补。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-21-2100/">21点版</a></p>
+<hr/>
+<p>本轮已与 19 点版去重。简报文件：~/workspace/goals/goal-4/briefs/2026-11-21-2100.md；日志：~/memory/2026-11-21.md；PR 原始清单：~/workspace/goals/goal-4/hidden_files/2026-11-21-2100-scan.txt。 版本水位：vLLM v0.34.0；SGLang v0.5.23，v1.0 仍无 tag；TRT-LLM v1.3.0（1.4.0 仍为 rc4）；FlashInfer 正式版 v0.7.5.post1，预发布 v0.7.6rc1；Dynamo 正式版 v1.6.2；llama.cpp 快照 b12626→b12627；LMDeploy v0.18.0；TGI v3.3.7；Mooncake v0.3.14。 SGLang 5 条首次汇总：#52183（性能/diffusion：远程 DiT 分片头并行读，最多 4 路，扩散冷启动探测提速）、#52173（性能/custom-all-reduce：注册时每块对端 graph-input 显存只映射一次，省驱动锁排队）、#37460（重构/LoRA：线性层与 LoRA 线性层抽公共逻辑）、#52214（修复/cuda-graph：prefill 测试固件初始化 Breakable 后端标志）、#52118（测试：修 transformers 主分支上挂的 3 个单测）。 TRT-LLM 1 条首次汇总：#22139（修复：分片条带化内存检查把可回收文件缓存算进可用内存）。 llama.cpp 1 条首次汇总：#32713（修复/server：非因果批按 min(n_batch, n_ubatch) 限流，vllm-d3 并行不再触发断言；补 test_systemone_noncausal_parallel）。 Mooncake 1 条首次汇总：#5698（工具/tebench：预热可配 --warmup_ms，默认 1000ms，可设 0 跳过）。 vLLM 1 条 CI：#68867（CI：LoRA 层测试与 GLM 模型导入解耦）。 LMDeploy、TGI、Dynamo、FlashInfer 零合入。 arXiv：本轮 API 撞上限未返回；按 19 点版已核验日程，最新仍为 11-19 提交，下批周一 00:00 UTC（周日 16:00 PST）。 业内新闻/访谈：HN、Reddit、X、中文媒体本轮均无 2 小时内新动态；AWS 分布式 KV 缓存（11-20）05 点版已报；Inkling 2 Mini（11-20）已报；AMD QuickReduce 博客实为 2025 年 7 月测试的旧文，不收录；Latent Space 仍为 11/19 那期（Spotify 核验，最新单集 2026-11-19）。 深读：本轮无新增（宁缺毋滥；#32713 虽与 SystemOne/vllm-d3 相关但只是批处理边界修复；其余为小修小补/重构）。</p></body></html>
