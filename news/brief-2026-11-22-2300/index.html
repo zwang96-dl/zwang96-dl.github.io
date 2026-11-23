@@ -1,0 +1,135 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月22日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-22"/>
+<meta name="doc-ts" content="2026-11-23T06:59:57"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-22（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-22（23点版）</h1>
+<p>这轮 GitHub 一共合入 16 条。</p>
+<p>vLLM 4 条，SGLang 1 条。</p>
+<p>TRT-LLM 4 条，FlashInfer 2 条。</p>
+<p>Mooncake 3 条，Dynamo 和 LMDeploy 各 1 条。</p>
+<p>没有新版本发布。</p>
+<p>llama.cpp 快照到了 b12649。</p>
+<p>arXiv 下一批要到周一才挂出来。</p>
+<p>X、Reddit、HN、中文媒体这轮都没新东西。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12649。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：流水线切分省显存了</strong></p>
+<p>流水线并行就是把模型切成几段。</p>
+<p>每段放一张卡上，接力跑。</p>
+<p>以前每段都把词表那套权重全背上。</p>
+<p>词表权重就是进出模型的翻译表。</p>
+<p>很多段背了却一次都不用。</p>
+<p>现在只在用得上的段上建。</p>
+<p>PP=2 时每段少背 0.58 到 1.08 GiB。</p>
+<p>KV 缓存只多占 0.25% 到 0.43%。</p>
+<p>换句话说，腾出来的地方能多放点草稿纸。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67349">https://github.com/vllm-project/vllm/pull/67349</a></p>
+<p><strong>vLLM：剩下 3 条都是边角料</strong></p>
+<p>两条是英特尔显卡的 CI 入口调整。</p>
+<p>一条只改了训练文档的措辞。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68354、https://github.com/vllm-project/vllm/pull/68618">https://github.com/vllm-project/vllm/pull/68354、https://github.com/vllm-project/vllm/pull/68618</a> 和 <a href="https://github.com/vllm-project/vllm/pull/69333">https://github.com/vllm-project/vllm/pull/69333</a></p>
+<p><strong>SGLang：扩散模型训练能分开调噪声了</strong></p>
+<p>这条是给扩散模型多流 rollouts 用的。</p>
+<p>rollout 就是让模型自己跑几步看看效果。</p>
+<p>以前视频和音频流共用一套噪声参数。</p>
+<p>现在音频流可以单独设成 ODE 那档。</p>
+<p>ODE 就是确定性更强、噪声更小的走法。</p>
+<p>跟你做的 LLM serving 关系不大。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51737">https://github.com/sgl-project/sglang/pull/51737</a></p>
+<p><strong>TRT-LLM：恢复检查点不再砍前缀复用</strong></p>
+<p>前缀复用就是以前算过的开头不用重算。</p>
+<p>像草稿纸上写过的部分直接接着用。</p>
+<p>以前恢复 DeepSeek-V4.1 的检查点时。</p>
+<p>复用会被截短，白白重算一段。</p>
+<p>现在恢复时复用长度保住了。</p>
+<p>这是 KV 缓存管理器的一处改动。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22352">https://github.com/NVIDIA/TensorRT-LLM/pull/22352</a></p>
+<p><strong>TRT-LLM：剩下 3 条也偏内部</strong></p>
+<p>一条是 Kimi K3 在四节点上的启动预算。</p>
+<p>一条把每步的设备拷贝收进统一计划。</p>
+<p>一条只是给失败用例放行。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22726、https://github.com/NVIDIA/TensorRT-LLM/pull/20972">https://github.com/NVIDIA/TensorRT-LLM/pull/22726、https://github.com/NVIDIA/TensorRT-LLM/pull/20972</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22776">https://github.com/NVIDIA/TensorRT-LLM/pull/22776</a></p>
+<p><strong>FlashInfer：两条都是小修补</strong></p>
+<p>一条让 Cake 的测试在各家显卡上都过。</p>
+<p>一条是 softmax 掩码的小优化。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9836">https://github.com/flashinfer-ai/flashinfer/pull/9836</a> 和 <a href="https://github.com/flashinfer-ai/flashinfer/pull/9846">https://github.com/flashinfer-ai/flashinfer/pull/9846</a></p>
+<p><strong>Mooncake：3 条都是存储层修补</strong></p>
+<p>一条加了路由版本的校验。</p>
+<p>一条防无效写入把好数据挤掉。</p>
+<p>一条支持整批非阻塞状态查询。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5616、https://github.com/kvcache-ai/Mooncake/pull/5729">https://github.com/kvcache-ai/Mooncake/pull/5616、https://github.com/kvcache-ai/Mooncake/pull/5729</a> 和 <a href="https://github.com/kvcache-ai/Mooncake/pull/5674">https://github.com/kvcache-ai/Mooncake/pull/5674</a></p>
+<p><strong>Dynamo 和 LMDeploy：各 1 条小活</strong></p>
+<p>Dynamo 给模拟器补了个缓存命中上报。</p>
+<p>LMDeploy 让报错里显示服务的模型名。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18106">https://github.com/ai-dynamo/dynamo/pull/18106</a> 和 <a href="https://github.com/InternLM/lmdeploy/pull/5181">https://github.com/InternLM/lmdeploy/pull/5181</a></p>
+<p><strong>llama.cpp：快照到了 b12649</strong></p>
+<p>这轮只合入一条 OpenCL 的小核。</p>
+<p>来源：GitHub releases</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批周一才挂出来</strong></p>
+<p>周一那批 21 点版已经报过。</p>
+<p>下一批按节奏要到周一 16 点后。</p>
+<p>来源：arXiv</p>
+<h2>业内新闻</h2>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<p>大 V 们这 2 小时里没发 serving 相关的内容。</p>
+<p>Reddit 和 HN 也没翻出新的讨论。</p>
+<p>机器之心和量子位同样安静。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的。</p>
+<p>vLLM 那条省显存的改动想法和数字都在上面讲清了。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-22-2300/">23点版</a></p></body></html>
