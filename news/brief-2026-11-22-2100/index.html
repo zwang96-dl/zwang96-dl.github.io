@@ -1,0 +1,165 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月22日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-22"/>
+<meta name="doc-ts" content="2026-11-23T05:05:41"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-22（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-22（21点版）</h1>
+<p>这轮 GitHub 一共合入 13 条。</p>
+<p>vLLM 6 条，SGLang 2 条。</p>
+<p>TRT-LLM 3 条，Mooncake 2 条。</p>
+<p>FlashInfer 和 llama.cpp 都没动。</p>
+<p>没有新版本发布。</p>
+<p>arXiv 周一批终于挂出来了。</p>
+<p>171 篇里有 3 篇跟 serving 沾边。</p>
+<p>其中 1 篇值得深读。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照还是 b12645。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：KV 连接器能看到全流水线了</strong></p>
+<p>流水线并行就是把模型切成几段。</p>
+<p>每段放一张卡上，接力跑。</p>
+<p>以前 KV 连接器只看得到自己那段。</p>
+<p>KV 连接器就是搬运 KV 缓存的插槽。</p>
+<p>现在引擎把每一阶段的缓存都交出来。</p>
+<p>每块缓存多大，也一起给了。</p>
+<p>PD 拆分传数据，靠的就是这个插槽。</p>
+<p>这条是给后续改动铺路的。</p>
+<p>本身还没接上新功能。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67998">https://github.com/vllm-project/vllm/pull/67998</a></p>
+<p><strong>vLLM：Muse Spark 支持 NVFP4 量化了</strong></p>
+<p>Muse Spark 的路由专家能在线转格式了。</p>
+<p>路由专家就是 MoE 里按需点名的专家。</p>
+<p>NVFP4 是一种 4 位量化格式。</p>
+<p>转完省显存，部署更便宜。</p>
+<p>这是模型支持层面的小活。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64552">https://github.com/vllm-project/vllm/pull/64552</a></p>
+<p><strong>vLLM：XPU 多了一种 8 位量化格式</strong></p>
+<p>XPU 就是英特尔显卡的后端。</p>
+<p>新加的是 modelopt_mxfp8 格式。</p>
+<p>跟你关系不大。</p>
+<p>除非你在英特尔卡上跑。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68858">https://github.com/vllm-project/vllm/pull/68858</a></p>
+<p><strong>SGLang：两条都是小修补</strong></p>
+<p>一条是草稿核规格不达标时优雅拒绝。</p>
+<p>megakernel 就是给模型手写的专属解码核。</p>
+<p>以前规格不合就整个服务拒绝。</p>
+<p>现在只拒绝这个核，服务照常跑。</p>
+<p>另一条只改了 cookbook 的链接选项。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52438">https://github.com/sgl-project/sglang/pull/52438</a> 和 <a href="https://github.com/sgl-project/sglang/pull/52373">https://github.com/sgl-project/sglang/pull/52373</a></p>
+<p><strong>TRT-LLM：三条里两条是同一处修补</strong></p>
+<p>门控 RMSNorm 核以前现用现编。</p>
+<p>RMSNorm 是一种归一化层。</p>
+<p>头一次调用会卡一下。</p>
+<p>现在按 batch 大小提前编好。</p>
+<p>两条是一处修补加一次回迁。</p>
+<p>另一条只动了测试。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22576">https://github.com/NVIDIA/TensorRT-LLM/pull/22576</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22772">https://github.com/NVIDIA/TensorRT-LLM/pull/22772</a></p>
+<p><strong>Mooncake：两条都是存储层修补</strong></p>
+<p>一条修内存索引的继承问题。</p>
+<p>另一条修弹性分配的回收等待。</p>
+<p>Mooncake 就是 KV 缓存的共享内存池。</p>
+<p>跟你的 PD 评估不直接相关。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5643">https://github.com/kvcache-ai/Mooncake/pull/5643</a> 和 <a href="https://github.com/kvcache-ai/Mooncake/pull/5593">https://github.com/kvcache-ai/Mooncake/pull/5593</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周一批挂出来了</strong></p>
+<p>cs.LG 一共 171 篇。</p>
+<p>按以往节奏本该 16 点就挂出来。</p>
+<p>这回晚了 5 个小时。</p>
+<p>3 篇跟 serving 沾边。</p>
+<p>重点是推测解码那篇。</p>
+<p>来源：arXiv</p>
+<p><strong>推测解码：打草稿也能并行了</strong></p>
+<p>推测解码就是先让小模型打草稿。</p>
+<p>再让大模型一次性改完。</p>
+<p>草稿一直是一层一层串着写的。</p>
+<p>这篇让草稿模型一次并行算好几层。</p>
+<p>秘诀是层和层之间长得很像。</p>
+<p>复用同一个隐藏状态就行。</p>
+<p>走偏了就重算那一层。</p>
+<p>打草稿最快能提速 1.65 倍。</p>
+<p>猜中的比例基本没掉。</p>
+<p>MMLU 上 Qwen 组合端到端快了 2.77 倍。</p>
+<p>这篇值得深读，笔记在下面。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.27477">https://arxiv.org/abs/2611.27477</a></p>
+<p><strong>Turnout：推理时注意力可以半路换挡</strong></p>
+<p>全注意力要存整个 KV 缓存。</p>
+<p>像草稿纸越攒越厚。</p>
+<p>线性注意力只留固定大小的状态。</p>
+<p>省内存，但容易掉精度。</p>
+<p>这篇让模型自己学什么时候换挡。</p>
+<p>简单的地方用省内存那档。</p>
+<p>难的地方切回全注意力。</p>
+<p>推理任务上精度和效率更平衡了。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.27500">https://arxiv.org/abs/2611.27500</a></p>
+<p><strong>DPMA：MoE 模型也能压一压</strong></p>
+<p>用学习的方法压缩 MoE 模型。</p>
+<p>MoE 就是一堆专家、每次只叫几个出来。</p>
+<p>压缩后部署更便宜。</p>
+<p>这篇细节不多，先记一笔。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.27759">https://arxiv.org/abs/2611.27759</a></p>
+<h2>业内新闻</h2>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<p>大 V 们这 2 小时里没发 serving 相关的内容。</p>
+<p>Reddit 和 HN 也没翻出新的讨论。</p>
+<p>机器之心和量子位同样安静。</p>
+<p>单卡换 SGLang 那篇实测不重复报。</p>
+<p>早上 7 点版已经深读过。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<h2>值得深入学</h2>
+<p><strong>推测解码并行打草稿</strong></p>
+<p>草稿这步提速 1.65 倍。</p>
+<p>猜中比例基本不掉。</p>
+<p>跟你评估里的推测解码直接相关。</p>
+<p>笔记：<a href="https://zwang96-dl.github.io/news/deep-20261123-ald/">并行打草稿：推测解码的草稿也能并行写了</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-22-2100/">21点版</a></p></body></html>
