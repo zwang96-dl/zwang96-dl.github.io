@@ -1,0 +1,121 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月22日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-22"/>
+<meta name="doc-ts" content="2026-11-23T01:04:10"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-22（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-22（17点版）</h1>
+<p>这轮 GitHub 一共合入 5 条。</p>
+<p>SGLang 和 llama.cpp 各 2 条，vLLM 1 条。</p>
+<p>没有新版本发布。</p>
+<p>arXiv 周一那批还没挂出来，下轮再看。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12638。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：昇腾卡上的 P/D 解耦补齐了</strong></p>
+<p>这条跟你研究的方向最贴。</p>
+<p>P/D 解耦就是把读提示词和写回答分开跑。</p>
+<p>它给昇腾 NPU 的 P/D 解耦补上了两块拼图。</p>
+<p>第一块是 PD 传输，管 KV 缓存搬家。</p>
+<p>KV 缓存就是模型的草稿纸，存着算过的注意力。</p>
+<p>第二块是 decode 回缩，解码工人能先退后进。</p>
+<p>回缩时压缩索引和尾巴缓冲都能备份恢复。</p>
+<p>精度也测了，用的是 GLM-5.3-Flash 的 8 位版。</p>
+<p>AIME26 拿了 0.967，gsm8K 拿了 0.913。</p>
+<p>不过这是昇腾 NPU 的活。</p>
+<p>跟你的 H100 和 MI350X 不直接沾边。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50968">https://github.com/sgl-project/sglang/pull/50968</a></p>
+<p><strong>SGLang：确定性模式的解码不空转了</strong></p>
+<p>MI350X 用户能直接受益。</p>
+<p>确定性模式就是每次跑结果都一模一样。</p>
+<p>确定性模式以前有个毛病，批量越大越慢。</p>
+<p>在 MI350X 上跑 gpt-oss-20b。</p>
+<p>64 并发时只有正常模式的 0.33 倍。</p>
+<p>256 并发时更惨，只剩 0.21 倍。</p>
+<p>病根是拆分预算按最长上下文预留，短请求白占了 99% 的算力格子。</p>
+<p>修法是固定 block 数，让每个 block 循环干几个拆分。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47410">https://github.com/sgl-project/sglang/pull/47410</a></p>
+<p><strong>vLLM：Inkling 2 Mini 换 nightly 镜像了</strong></p>
+<p>你上周刚问过的 Inkling 2 Mini 又往前走了一步。</p>
+<p>模型支持已经合入了，配方现在直接用 nightly 镜像。</p>
+<p>nightly 就是每天自动打的最新构建。</p>
+<p>不用再等专用镜像，也不用等正式版发出来。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69296">https://github.com/vllm-project/vllm/pull/69296</a></p>
+<p><strong>llama.cpp：两条小修补，快照到了 b12638</strong></p>
+<p>一条修了 LFM2.5-VL 的聊天模板识别。</p>
+<p>LFM2.5-VL 是个能看图的多模态模型。</p>
+<p>另一条给 ggml 后端的内存清零加了通用回退。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32843">https://github.com/ggml-org/llama.cpp/pull/32843</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/32574">https://github.com/ggml-org/llama.cpp/pull/32574</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周一新批还没挂出来</strong></p>
+<p>API 这轮限流了，列表页也还停在 11 月 20 日那批。</p>
+<p>周一 00:00 UTC 的新批应该快了，下轮 19 点版再看。</p>
+<p>来源：arXiv</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新消息</strong></p>
+<p>sotaaz 那篇 SGLang 实测 07 点版报过。</p>
+<p>Lambda 五引擎实测是 11 月 19 日报过的。</p>
+<p>HN、Reddit、X 这轮也没翻出 2 小时内的新东西。</p>
+<h2>访谈与深度</h2>
+<p><strong>Medium：一篇讲透 SGLang 是怎么跑起来的</strong></p>
+<p>作者 Kaan Boke 从一次缓存命中讲起，一路讲到回复发出去。</p>
+<p>RadixAttention 就是按前缀搭的树，复用算过的前缀。</p>
+<p>chunked prefill 就是把长提示词切成小块，分批算。</p>
+<p>P/D 解耦那段也讲得很清楚，适合对照着你的评估看。</p>
+<p>来源：<a href="https://medium.com/@kaanboke/inside-sglang-from-cache-hit-to-reply-28cea652095b">https://medium.com/@kaanboke/inside-sglang-from-cache-hit-to-reply-28cea652095b</a></p>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是 11 月 19 日讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<h2>值得深入学</h2>
+<p><strong>这轮没有</strong></p>
+<p>最贴你方向的 #50968 是昇腾专属，体量不够做笔记。</p>
+<p>Medium 那篇是入门讲解，没有新数据。</p>
+<p>有新东西再写。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-22-1700/">17点版</a></p></body></html>
