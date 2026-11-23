@@ -1,0 +1,159 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月23日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-23"/>
+<meta name="doc-ts" content="2026-11-23T10:59:37"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-23（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-23（03点版）</h1>
+<p>这轮 GitHub 一共合入 20 条。</p>
+<p>vLLM 5 条，SGLang 2 条。</p>
+<p>TRT-LLM 5 条，LMDeploy 1 条。</p>
+<p>Dynamo 2 条，llama.cpp 2 条。</p>
+<p>Mooncake 3 条，TGI 和 FlashInfer 挂零。</p>
+<p>没有新版本发布。</p>
+<p>llama.cpp 快照还是 b12651。</p>
+<p>arXiv 下一批要到周一 16 点后。</p>
+<p>X、Reddit、HN、中文媒体这轮都没新东西。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照还是 b12651。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：Kimi K3.1 的稀疏 MLA 收尾了</strong></p>
+<p>MLA 是一种省显存的注意力算法。</p>
+<p>DCP 是把上下文切开分给多卡算。</p>
+<p>这次是 Kimi K3.1 稀疏 MLA 的最后一块拼图。</p>
+<p>6 块拼图全合入了。</p>
+<p>新东西是两组算子。</p>
+<p>一组负责跨卡归约中间结果。</p>
+<p>另一组负责把 KV 分片推给各卡。</p>
+<p>KV 就是模型记下来的上下文草稿。</p>
+<p>只在 Blackwell 那代卡上用。</p>
+<p>没开 DCP 的话，行为一点不变。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66027">https://github.com/vllm-project/vllm/pull/66027</a></p>
+<p><strong>vLLM：EPD 的多模态缓存修了个小 bug</strong></p>
+<p>EPD 就是编码、预处理、解码三段分工。</p>
+<p>这次修的是接收端缓存。</p>
+<p>纯元数据的条目不该占着缓存。</p>
+<p>占着会把同一张图的真像素顶掉。</p>
+<p>走 HTTP 时会撞上这个问题。</p>
+<p>gRPC 那条路不受影响。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66930">https://github.com/vllm-project/vllm/pull/66930</a></p>
+<p><strong>vLLM：AWQ 量化修了个算错的 bug</strong></p>
+<p>AWQ 是一种 4 位量化方法。</p>
+<p>torchao 的 AWQ 权重每层各有一把缩放尺。</p>
+<p>vLLM 融合权重时只留了最后一把。</p>
+<p>结果就是每层都用错了尺子。</p>
+<p>Qwen3-8B 的数学题分数从 0 涨回 0.858。</p>
+<p>双卡加载之前还会直接报错。</p>
+<p>现在修好了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69002">https://github.com/vllm-project/vllm/pull/69002</a></p>
+<p><strong>vLLM：剩下 2 条是修 bug</strong></p>
+<p>一条补了提示词对数概率的缺口。</p>
+<p>请求中途被打断时，概率没垫齐。</p>
+<p>另一条是加个治理用的代码负责人。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68605、https://github.com/vllm-project/vllm/pull/69376">https://github.com/vllm-project/vllm/pull/68605、https://github.com/vllm-project/vllm/pull/69376</a></p>
+<p><strong>SGLang：2 条都是 CI</strong></p>
+<p>一条多跑了 73 个 AMD 测试。</p>
+<p>一条砍了个不稳定的 nightly 任务。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51523、https://github.com/sgl-project/sglang/pull/51514">https://github.com/sgl-project/sglang/pull/51523、https://github.com/sgl-project/sglang/pull/51514</a></p>
+<p><strong>TRT-LLM：多模态调度修了假死锁</strong></p>
+<p>多模态调度就是图文请求一起排队。</p>
+<p>之前有个环节没拿到传输管理器。</p>
+<p>KV 发完了还占着页，检查器会误判死锁。</p>
+<p>现在补上了。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19898">https://github.com/NVIDIA/TensorRT-LLM/pull/19898</a></p>
+<p><strong>TRT-LLM：部署配置指南进了英伟达技能库</strong></p>
+<p>技能库就是给 AI 助手用的操作手册合集。</p>
+<p>这次搬进去的是部署配置指南。</p>
+<p>内容没变，只是换了个地方放。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22672">https://github.com/NVIDIA/TensorRT-LLM/pull/22672</a></p>
+<p><strong>TRT-LLM：剩下 3 条偏内部</strong></p>
+<p>一条提速了 Mamba2 的解码状态更新。</p>
+<p>Mamba2 是一种不用注意力的序列模型。</p>
+<p>一条修了测试里的计数口径。</p>
+<p>一条把测试挪到 GitHub 自带机器上跑。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22596、https://github.com/NVIDIA/TensorRT-LLM/pull/22768">https://github.com/NVIDIA/TensorRT-LLM/pull/22596、https://github.com/NVIDIA/TensorRT-LLM/pull/22768</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21087">https://github.com/NVIDIA/TensorRT-LLM/pull/21087</a></p>
+<p><strong>LMDeploy：观测能力加了追踪</strong></p>
+<p>OTLP 是一种通用的链路追踪协议。</p>
+<p>现在请求链路能接进这套协议了。</p>
+<p>日志还能顺手存一份 JSONL。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5141">https://github.com/InternLM/lmdeploy/pull/5141</a></p>
+<p><strong>Dynamo：2 条都是小修补</strong></p>
+<p>一条修了检查点恢复的开关注册。</p>
+<p>一条是代码负责人名单的杂活。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18431、https://github.com/ai-dynamo/dynamo/pull/18062">https://github.com/ai-dynamo/dynamo/pull/18431、https://github.com/ai-dynamo/dynamo/pull/18062</a></p>
+<p><strong>llama.cpp：Qwen3.6-27B 的测试快照更新了</strong></p>
+<p>快照就是测试用的预期输出存档。</p>
+<p>这次是给 Qwen3.6-27B 换了新存档。</p>
+<p>Qwen3.6-27B 的测试已经跑起来了。</p>
+<p>另一条是构建脚本的小修补。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32845、https://github.com/ggml-org/llama.cpp/pull/32864">https://github.com/ggml-org/llama.cpp/pull/32845、https://github.com/ggml-org/llama.cpp/pull/32864</a></p>
+<p><strong>Mooncake：3 条都是修补</strong></p>
+<p>一条修了传输层的水位线计数。</p>
+<p>一条给 Ascend 直连加了断开接口。</p>
+<p>一条是文档更新。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5748、https://github.com/kvcache-ai/Mooncake/pull/5362">https://github.com/kvcache-ai/Mooncake/pull/5748、https://github.com/kvcache-ai/Mooncake/pull/5362</a> 和 <a href="https://github.com/kvcache-ai/Mooncake/pull/5582">https://github.com/kvcache-ai/Mooncake/pull/5582</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批周一 16 点后才挂出来</strong></p>
+<p>最新一篇还是 11 月 20 日那批。</p>
+<p>来源：arXiv</p>
+<h2>业内新闻</h2>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<p>大 V 们这 2 小时里没发 serving 相关的内容。</p>
+<p>Reddit 和 HN 也没翻出新的讨论。</p>
+<p>机器之心和量子位同样安静。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的。</p>
+<p>都是增量修补和收尾工作。</p>
+<p>没有新论文，也没有深度文章。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-23-0300/">03点版</a></p></body></html>
