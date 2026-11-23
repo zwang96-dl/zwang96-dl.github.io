@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月23日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-23"/>
+<meta name="doc-ts" content="2026-11-23T17:01:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-23（09点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-23（09点版）</h1>
+<p>这轮 GitHub 一共合入 15 条。</p>
+<p>vLLM 5 条，SGLang 1 条。</p>
+<p>llama.cpp 7 条，Dynamo 1 条，Mooncake 1 条。</p>
+<p>TRT-LLM、LMDeploy、TGI、FlashInfer 挂零。</p>
+<p>没有新版本发布。</p>
+<p>arXiv 周一批还没挂出来。</p>
+<p>最新还是上周五那批。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照还是 b12651。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：滑窗模型的读题在 AMD 卡上快了一大截</strong></p>
+<p>滑窗注意力只看最近一小段上下文。</p>
+<p>以前读题时，窗口外的 KV 块也要读一遍。</p>
+<p>纯属白干活，还占带宽。</p>
+<p>现在直接跳过这些块不读。</p>
+<p>32K 上下文、512 窗口时，核函数时间最多快 38 倍。</p>
+<p>首字时间：Zephyr-7B 快 1.69 倍，Gemma-3-1B 快 2.21 倍。</p>
+<p>GLM-5.2 和 5.3 配 DSpark 草稿时，每步解码也快约 1.4 倍。</p>
+<p>只改 ROCm 那条路，CUDA 不动。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63867">https://github.com/vllm-project/vllm/pull/63867</a></p>
+<p><strong>vLLM：推测解码支持 NVFP4 的 Hy4 了</strong></p>
+<p>DFly 是 vLLM 里的一种推测解码。</p>
+<p>Hy4 是腾讯 770B 的多模态大模型。</p>
+<p>以前 DFly 只认特定量化格式。</p>
+<p>现在 NVFP4 压缩的 Hy4 目标模型也能用。</p>
+<p>NVFP4 是一种 4 位浮点量化。</p>
+<p>草稿层还是 BF16 或 FP8。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69274">https://github.com/vllm-project/vllm/pull/69274</a></p>
+<p><strong>vLLM：NIXL 传 KV 修了个静默传错字节的 bug</strong></p>
+<p>NIXL 是传 KV 缓存的组件。</p>
+<p>P/D 解耦就靠它在读题和解码节点之间搬 KV。</p>
+<p>问题出在两边块大小不一致时。</p>
+<p>内核用的块比 NIXL 的大，注册就会错位。</p>
+<p>轻则直接报错，重则悄悄传错字节。</p>
+<p>现在按实际布局注册成密页。</p>
+<p>对不上的直接给个能看懂的报错。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/59586">https://github.com/vllm-project/vllm/pull/59586</a></p>
+<p><strong>vLLM：睡眠模式多了个扩展点</strong></p>
+<p>睡眠模式是让引擎休眠、释放显存。</p>
+<p>这次只是把分配器的取用收成一个钩子。</p>
+<p>下游能自己接别的分配器。</p>
+<p>内置行为一点没变。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69412">https://github.com/vllm-project/vllm/pull/69412</a></p>
+<p><strong>vLLM：Qwen3-ASR 的配置别名修了个小问题</strong></p>
+<p>Qwen3-ASR 是通义的语音识别模型。</p>
+<p>老版文本配置的别名没对齐。</p>
+<p>现在统一归一化。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69226">https://github.com/vllm-project/vllm/pull/69226</a></p>
+<p><strong>SGLang：Ling-3.2-air 有了官方 cookbook</strong></p>
+<p>Ling-3.2-air 是 inclusionAI 的新模型。</p>
+<p>cookbook 里有部署、用法和 MTP 说明。</p>
+<p>MTP 是多 token 预测的草稿头。</p>
+<p>还附了 2 张 B200 和 4 张 GB300 的实测。</p>
+<p>长上下文那档也写进去了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52598">https://github.com/sgl-project/sglang/pull/52598</a></p>
+<p><strong>llama.cpp：7 条里 5 条是界面</strong></p>
+<p>折叠块、代码字号、Agent 回复分组这些。</p>
+<p>剩下 2 条是正经活。</p>
+<p>Metal 支持 BF16 和 F32 做矩阵乘。</p>
+<p>iPhone 上默认命令缓冲加多了。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32677、https://github.com/ggml-org/llama.cpp/pull/31815、https://github.com/ggml-org/llama.cpp/pull/32879、https://github.com/ggml-org/llama.cpp/pull/32894、https://github.com/ggml-org/llama.cpp/pull/32892、https://github.com/ggml-org/llama.cpp/pull/32881">https://github.com/ggml-org/llama.cpp/pull/32677、https://github.com/ggml-org/llama.cpp/pull/31815、https://github.com/ggml-org/llama.cpp/pull/32879、https://github.com/ggml-org/llama.cpp/pull/32894、https://github.com/ggml-org/llama.cpp/pull/32892、https://github.com/ggml-org/llama.cpp/pull/32881</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/32738">https://github.com/ggml-org/llama.cpp/pull/32738</a></p>
+<p><strong>Dynamo：自动调参的 API 默认开了</strong></p>
+<p>DGDR 是 Dynamo 里自动找最优部署配置的那套。</p>
+<p>以前要开开关才有。</p>
+<p>现在 Request、Run、Candidate 三个 API 默认可用。</p>
+<p>但功能还没做完。</p>
+<p>实时重调还是关着的。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18313">https://github.com/ai-dynamo/dynamo/pull/18313</a></p>
+<p><strong>Mooncake：打包改用稳定 ABI</strong></p>
+<p>核心轮子改用 CPython 稳定接口来编。</p>
+<p>一个轮子能装到更多 Python 版本上。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5664">https://github.com/kvcache-ai/Mooncake/pull/5664</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周一批还没挂出来</strong></p>
+<p>最新还是 11 月 20 日 18:58 UTC 那批。</p>
+<p>来源：arXiv</p>
+<p><strong>DICE：推测解码先偷看一眼随机数，再决定草稿往哪写</strong></p>
+<p>这是上周五那批里最贴你方向的一篇。</p>
+<p>推测解码就是小模型先打草稿。</p>
+<p>大模型一次性验算，猜中的留下。</p>
+<p>草稿树的预算有限，往哪长是个问题。</p>
+<p>这篇发现一个被忽略的信息：验证用的随机数。</p>
+<p>它可以提前抽好，不用等大模型跑完。</p>
+<p>抽好了就知道哪些候选更容易被接受。</p>
+<p>草稿树就往容易中的方向长。</p>
+<p>不用重训，不改采样分布，结果完全一样。</p>
+<p>16 组模型对全赢，最多快 24.6%。</p>
+<p>Qwen3.8-27B 配 EAGLE-4，vLLM 上快 20.9%。</p>
+<p>并发 64 时对手都掉到比逐字生成还慢。</p>
+<p>DICE 还比逐字生成快 1.2 倍。</p>
+<p>异步预取那档，缓存命中率从约 46%–68% 涨到约 70%–81%。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.27891">https://arxiv.org/abs/2611.27891</a></p>
+<p><strong>Isonomy：前缀缓存共享，会不会泄露别人的提示词</strong></p>
+<p>前缀缓存就是草稿纸复用。</p>
+<p>命中了首字来得快。</p>
+<p>别人能从快慢猜出你写了啥。</p>
+<p>这篇默认每人隔离。</p>
+<p>只在显式共享组里复用。</p>
+<p>还能藏住跨组命中，吞吐基本不掉。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.27596">https://arxiv.org/abs/2611.27596</a></p>
+<p><strong>MemOnce：长对话的记忆不用每层都存</strong></p>
+<p>标准 Transformer 每层都存 KV。</p>
+<p>越聊越占显存，算起来还是平方级。</p>
+<p>这篇只在最后一层存一小份压缩记忆。</p>
+<p>用的时候再解码回各层去。</p>
+<p>盯的是长对话和持续交互的场景。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.27973">https://arxiv.org/abs/2611.27973</a></p>
+<p><strong>LongCat Recall：稀疏注意力找 KV 太慢，它给索引分了页</strong></p>
+<p>稀疏注意力只挑一小部分 KV 算。</p>
+<p>但挑之前要把整个历史翻一遍。</p>
+<p>越长越慢，检索成了新瓶颈。</p>
+<p>这篇把序列切成时间桶。</p>
+<p>桶里再分组打包成页，增量维护就行。</p>
+<p>检索不用全扫了。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.27233">https://arxiv.org/abs/2611.27233</a></p>
+<h2>业内新闻</h2>
+<p><strong>苹果 M6 上跑树形推测解码，Qwen3.8-27B 快了一成</strong></p>
+<p>这是 HF 博客上一篇新鲜实测。</p>
+<p>Qwen3.8-27B 跑在苹果 M6 上。</p>
+<p>神经网络引擎 ANE 负责打草稿。</p>
+<p>GPU 负责验算，分工很干净。</p>
+<p>树形验证比链式快 8.5% 和 10.2%。</p>
+<p>跟你刚定的 M6 有关：32GB 内存那台就能跑。</p>
+<p>来源：<a href="https://huggingface.co/blog/anemll/tree-speculative-decoding-apple-m6">https://huggingface.co/blog/anemll/tree-speculative-decoding-apple-m6</a></p>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<p>机器之心和量子位这轮没出推理 serving 的新稿。</p>
+<p>sotaaz 那篇换引擎实测 11 月 22 日已做过深读。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<h2>值得深入学</h2>
+<p><strong>DICE：推测解码的草稿树，按随机数来长</strong></p>
+<p>这篇直接贴着你的推测解码评估。</p>
+<p>不用重训就能提速，SGLang 和 vLLM 都测了。</p>
+<p>温度越高、并发越高，优势越明显。</p>
+<p>精读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261123-dice/">DICE：推测解码的草稿树，按随机数来长</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-23-0900/">09点版</a></p></body></html>
