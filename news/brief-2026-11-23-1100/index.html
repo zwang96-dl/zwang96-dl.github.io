@@ -1,0 +1,146 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月23日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-23"/>
+<meta name="doc-ts" content="2026-11-23T19:03:42"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-23（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-23（11点版）</h1>
+<p>这轮 GitHub 一共合入 23 条。</p>
+<p>vLLM 6 条，TRT-LLM 6 条。</p>
+<p>FlashInfer 6 条，Dynamo 3 条。</p>
+<p>llama.cpp 2 条。</p>
+<p>SGLang、LMDeploy、TGI、Mooncake 挂零。</p>
+<p>没有新版本发布。</p>
+<p>arXiv 周一批还没挂出来。</p>
+<p>最新还是上周五那批。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照还是 b12651。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：MLA 解码核换了个排班，H100 上最快 1.71 倍</strong></p>
+<p>MLA 是 DeepSeek 那种压缩版注意力。</p>
+<p>解码时每个查询头都要读同一份 KV。</p>
+<p>以前排班先按请求分，同一份 KV 反复进出 L2。</p>
+<p>现在同一份 KV 的头块排在一起跑。</p>
+<p>L2 命中率从 55% 涨到 74%。</p>
+<p>H100 上长上下文大批量最快 1.71 倍。</p>
+<p>A100 最高 1.47 倍，L40S 最高 1.38 倍。</p>
+<p>注意这只是核函数跑分。</p>
+<p>整机实测用的小模型，基本没变化。</p>
+<p>大模型端到端能快多少，还没人测。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69029">https://github.com/vllm-project/vllm/pull/69029</a></p>
+<p><strong>vLLM：Hy4 的闪电版在 B200 上快了 3 倍多</strong></p>
+<p>Hy4 是腾讯 770B 的多模态大模型。</p>
+<p>闪电版是它的 FP8 轻量变体。</p>
+<p>单并发时每秒 43.9 个词涨到 147.5 个。</p>
+<p>首字从 378 毫秒压到 226 毫秒。</p>
+<p>32 并发时也快了 2.46 倍。</p>
+<p>精度基本没动，gsm8k 只掉了半个点。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68770">https://github.com/vllm-project/vllm/pull/68770</a></p>
+<p><strong>vLLM：MLA 修了个跨块算错注意力的竞态</strong></p>
+<p>上下文切成块算时，合并那步会抢跑。</p>
+<p>后一块可能盖掉前一块还没读完的中间值。</p>
+<p>结果就是注意力算错，答案悄悄变味。</p>
+<p>现在先复制一份再合并。</p>
+<p>测试在主线上次次失败，打上补丁全过。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69433">https://github.com/vllm-project/vllm/pull/69433</a></p>
+<p><strong>vLLM：另外三条一句话带过</strong></p>
+<p>TorchAO 量化后端开始走弃用流程。</p>
+<p>以后量化别再往这条路上靠了。</p>
+<p>剩下两条是压测启动计时和决策接口的小修补。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69066、https://github.com/vllm-project/vllm/pull/69076">https://github.com/vllm-project/vllm/pull/69066、https://github.com/vllm-project/vllm/pull/69076</a> 和 <a href="https://github.com/vllm-project/vllm/pull/68037">https://github.com/vllm-project/vllm/pull/68037</a></p>
+<p><strong>TRT-LLM：6 条里没大活</strong></p>
+<p>两条是性能小优化，剩下是修测试和清代码。</p>
+<p>一条是 DSA 调度跳过没用的全窗口排程。</p>
+<p>DSA 是 DeepSeek 的稀疏注意力。</p>
+<p>省的是排程准备的活，还没上卡实测。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22643、https://github.com/NVIDIA/TensorRT-LLM/pull/22809、https://github.com/NVIDIA/TensorRT-LLM/pull/22732、https://github.com/NVIDIA/TensorRT-LLM/pull/22646、https://github.com/NVIDIA/TensorRT-LLM/pull/22528">https://github.com/NVIDIA/TensorRT-LLM/pull/22643、https://github.com/NVIDIA/TensorRT-LLM/pull/22809、https://github.com/NVIDIA/TensorRT-LLM/pull/22732、https://github.com/NVIDIA/TensorRT-LLM/pull/22646、https://github.com/NVIDIA/TensorRT-LLM/pull/22528</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21207">https://github.com/NVIDIA/TensorRT-LLM/pull/21207</a></p>
+<p><strong>FlashInfer：6 条里 5 条是测试</strong></p>
+<p>剩下一条是 NVFP4 量化省了个填零步骤。</p>
+<p>NVFP4 是一种 4 位浮点量化。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8815">https://github.com/flashinfer-ai/flashinfer/pull/8815</a></p>
+<p><strong>Dynamo：路由分类器多了个信号</strong></p>
+<p>现在能知道一条回复是不是以工具调用结尾。</p>
+<p>剩下两条是修测试。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19231、https://github.com/ai-dynamo/dynamo/pull/19339">https://github.com/ai-dynamo/dynamo/pull/19231、https://github.com/ai-dynamo/dynamo/pull/19339</a> 和 <a href="https://github.com/ai-dynamo/dynamo/pull/19301">https://github.com/ai-dynamo/dynamo/pull/19301</a></p>
+<p><strong>llama.cpp：量化能自动挑精度凑目标体积</strong></p>
+<p>以前压模型要自己一个个试精度组合。</p>
+<p>现在给个目标体积或每权重比特数。</p>
+<p>它自动挑误差最小的那套组合。</p>
+<p>另一条是给 FLASH_ATTN_EXT 精简偏置。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/15550">https://github.com/ggml-org/llama.cpp/pull/15550</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/32740">https://github.com/ggml-org/llama.cpp/pull/32740</a></p>
+<p><strong>SGLang、LMDeploy、TGI、Mooncake：挂零</strong></p>
+<p>这轮四家都没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周一批还没挂出来</strong></p>
+<p>最新还是 11 月 20 日 18:58 UTC 那批。</p>
+<p>来源：arXiv</p>
+<h2>业内新闻</h2>
+<p><strong>Uni3Sim：推理部署先在电脑里彩排一遍</strong></p>
+<p>这是无问芯穹和清华刚开源的仿真平台。</p>
+<p>大模型推理越做越大，部署前不知道瓶颈在哪。</p>
+<p>它把模型、负载和硬件配置放进虚拟环境里跑。</p>
+<p>不用真买卡，就能先看到瓶颈、比方案。</p>
+<p>支持 vLLM 和 SGLang 两条 serving 路径。</p>
+<p>CPU 上就能跑例子，不用权重也不用卡。</p>
+<p>仓库刚建 12 天，只有 47 个星。</p>
+<p>论文发在 IEEE 计算机体系结构快报上。</p>
+<p>来源：<a href="https://github.com/thu-nics/uni3sim">https://github.com/thu-nics/uni3sim</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<p>机器之心除了 Uni3Sim 那篇，没出推理 serving 的新稿。</p>
+<p>llm-d 那篇 SGLang 实测今早 07点版已做过深读。</p>
+<h2>值得深读</h2>
+<p><strong>这轮没有新内容够得上深读</strong></p>
+<p>llm-d 的 SGLang 分层缓存实测今早已精读过。</p>
+<p>想看直接点 07点版那篇笔记。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-23-1100/">11点版</a></p></body></html>
