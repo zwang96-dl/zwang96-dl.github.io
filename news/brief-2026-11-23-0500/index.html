@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月23日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-23"/>
+<meta name="doc-ts" content="2026-11-23T13:00:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-23（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-23（05点版）</h1>
+<p>这轮 GitHub 一共合入 12 条。</p>
+<p>vLLM 6 条，SGLang 2 条。</p>
+<p>TRT-LLM 2 条，llama.cpp 和 Dynamo 各 1 条。</p>
+<p>LMDeploy、Mooncake、TGI、FlashInfer 挂零。</p>
+<p>没有新版本发布。</p>
+<p>llama.cpp 快照还是 b12651。</p>
+<p>arXiv 下一批要到周一 16 点后。</p>
+<p>X、Reddit、HN、中文媒体这轮都没新东西。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照还是 b12651。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：HY4 的推测解码跑分松了绑</strong></p>
+<p>推测解码就是先让小模型打草稿。</p>
+<p>大模型再批量验算，猜对就直接用。</p>
+<p>这次是给 HY4 Flash 的长上下文跑分开的口子。</p>
+<p>128K 输入、512 输出那档基准能跑了。</p>
+<p>用的是合成接受率，不用真跑草稿模型。</p>
+<p>只影响跑分工具，不动生产环境。</p>
+<p>生产环境的 P/D 解耦保护还在。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68651">https://github.com/vllm-project/vllm/pull/68651</a></p>
+<p><strong>vLLM：AMD 卡多了个 Step-5 的部署菜谱</strong></p>
+<p>Step-5 是阶跃星辰的预览版模型。</p>
+<p>这次是验证过的 ROCm 部署配方。</p>
+<p>4 块 MI325X 或 4 块 MI355X 都能跑。</p>
+<p>走张量并行，接口直接能调通。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67443">https://github.com/vllm-project/vllm/pull/67443</a></p>
+<p><strong>vLLM：剩下 4 条是修 bug 和杂活</strong></p>
+<p>一条修了 ROCm 上 OCR 抢占的数值漂移。</p>
+<p>OCR 就是图片里的文字识别。</p>
+<p>一条修了弹性扩缩容的路径前缀。</p>
+<p>剩下两条是 CI 和代码负责人名单。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69108、https://github.com/vllm-project/vllm/pull/69285、https://github.com/vllm-project/vllm/pull/69140">https://github.com/vllm-project/vllm/pull/69108、https://github.com/vllm-project/vllm/pull/69285、https://github.com/vllm-project/vllm/pull/69140</a> 和 <a href="https://github.com/vllm-project/vllm/pull/69397">https://github.com/vllm-project/vllm/pull/69397</a></p>
+<p><strong>SGLang：2 条都是内部整理</strong></p>
+<p>一条清了运行时的静默失败和死代码。</p>
+<p>一条修了 NPU 测试的配置。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50803、https://github.com/sgl-project/sglang/pull/52545">https://github.com/sgl-project/sglang/pull/50803、https://github.com/sgl-project/sglang/pull/52545</a></p>
+<p><strong>TRT-LLM：P/D 解耦部署能写进声明了</strong></p>
+<p>P/D 解耦就是 prefill 和 decode 分开跑。</p>
+<p>这次是新版建模流程里的声明能力。</p>
+<p>部署结构能写清楚：哪边做 prefill。</p>
+<p>哪边做 decode，各几台机器。</p>
+<p>还能声明跨节点的成员。</p>
+<p>目前只是测试流程里的表达能力。</p>
+<p>还没动到真正跑起来的 serving 逻辑。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22344">https://github.com/NVIDIA/TensorRT-LLM/pull/22344</a></p>
+<p><strong>TRT-LLM：另一条只是格式整理</strong></p>
+<p>GDN 多 token 预测回放的设计文档。</p>
+<p>改的都是 import 格式，没有行为变化。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/19586">https://github.com/NVIDIA/TensorRT-LLM/pull/19586</a></p>
+<p><strong>llama.cpp：构建脚本的小修补</strong></p>
+<p>这次是把 kleidiai 相关文件标为内置。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32605">https://github.com/ggml-org/llama.cpp/pull/32605</a></p>
+<p><strong>Dynamo：测试依赖的小修补</strong></p>
+<p>Redis 版本上限卡在 8.2 以下。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19376">https://github.com/ai-dynamo/dynamo/pull/19376</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批周一 16 点后才挂出来</strong></p>
+<p>最新一篇还是 11 月 20 日那批。</p>
+<p>来源：arXiv</p>
+<h2>业内新闻</h2>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<p>大 V 们这 2 小时里没发 serving 相关的内容。</p>
+<p>Reddit 和 HN 也没翻出新的讨论。</p>
+<p>机器之心和量子位同样安静。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的。</p>
+<p>都是增量修补和内部整理。</p>
+<p>没有新论文，也没有深度文章。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-23-0500/">05点版</a></p></body></html>
