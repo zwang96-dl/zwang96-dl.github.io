@@ -1,0 +1,201 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月23日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-23"/>
+<meta name="doc-ts" content="2026-11-23T15:11:01"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-23（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-23（07点版）</h1>
+<p>这轮 GitHub 一共合入 16 条。</p>
+<p>vLLM 4 条，SGLang 5 条。</p>
+<p>TRT-LLM 1 条，llama.cpp 6 条。</p>
+<p>LMDeploy、Dynamo、TGI 挂零。</p>
+<p>FlashInfer、Mooncake 也挂零。</p>
+<p>没有新版本发布。</p>
+<p>llama.cpp 快照还是 b12651。</p>
+<p>arXiv 下一批要到周一 16 点后。</p>
+<p>X、Reddit、HN、中文媒体这轮都没新东西。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照还是 b12651。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：模型加载器多了三个钩子</strong></p>
+<p>sleep 和 wake 是让引擎休眠和唤醒。</p>
+<p>休眠时会释放 GPU 显存。</p>
+<p>现在自定义加载器能收到通知。</p>
+<p>睡前收到一个，醒后收到一个。</p>
+<p>还能自己实现原地重载权重。</p>
+<p>不用走默认的重载流程。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/57011">https://github.com/vllm-project/vllm/pull/57011</a></p>
+<p><strong>vLLM：混合量化修了个加载失败</strong></p>
+<p>moe_wna16 是一种混合量化。</p>
+<p>检查点里有些专家本来就不量化。</p>
+<p>以前 vLLM 照单全收，全给上了量化方法。</p>
+<p>结果 MTP 草稿加载时直接报错。</p>
+<p>MTP 是多 token 预测的草稿头。</p>
+<p>现在按检查点自己的规则来。</p>
+<p>不该量化的专家保持原样。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67413">https://github.com/vllm-project/vllm/pull/67413</a></p>
+<p><strong>vLLM：ERNIE 4.5 搬到 Transformers 后端</strong></p>
+<p>ERNIE 4.5 是百度的模型。</p>
+<p>这次把它从原生实现搬过去。</p>
+<p>PaddleOCR-VL 那个多模态模型也跟着走。</p>
+<p>还顺手修了 ERNIE 草稿头的 RoPE 布局。</p>
+<p>RoPE 是一种位置编码。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69087">https://github.com/vllm-project/vllm/pull/69087</a></p>
+<p><strong>vLLM：剩下 1 条是 CI</strong></p>
+<p>采样和 LoRA 测试改用统一的测试运行器。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68884">https://github.com/vllm-project/vllm/pull/68884</a></p>
+<p><strong>SGLang：AMD 上 Qwen3.8 的稀疏解码更快了</strong></p>
+<p>QSA 是 Qwen3.8 的稀疏注意力。</p>
+<p>以前解码要分两步走。</p>
+<p>先把选中的 KV 拷到一块临时地方。</p>
+<p>再逐行算注意力。</p>
+<p>32K 上下文加 MTP 时，这步占解码约 9.4% 的时间。</p>
+<p>每层约 120 微秒。</p>
+<p>现在换成 AITER 的融合核。</p>
+<p>一步到位，不用中间拷贝。</p>
+<p>只在 MI355X 那代卡上用。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/45196">https://github.com/sgl-project/sglang/pull/45196</a></p>
+<p><strong>SGLang：同一方向，MQA 的打分核也提速了</strong></p>
+<p>MQA 是多查询注意力。</p>
+<p>以前的核在长上下文上串行走太久。</p>
+<p>混合批次里一次调用要 243 微秒。</p>
+<p>改了启动方式后只要 89 微秒。</p>
+<p>每步解码要调 13 次。</p>
+<p>一共能省约 2 毫秒。</p>
+<p>只改 ROCm 那条路，CUDA 不动。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48649">https://github.com/sgl-project/sglang/pull/48649</a></p>
+<p><strong>SGLang：P/D 拆分那边的 linker 修了两处</strong></p>
+<p>linker 是 SGLang 里负责传 KV 的组件。</p>
+<p>P/D 解耦就是读题和解码分开跑。</p>
+<p>第一处是预取的 KV 差点被提前清掉。</p>
+<p>会话感知的淘汰以为它没人要。</p>
+<p>其实请求还在排队等着用。</p>
+<p>现在预取完立刻挂到请求的会话上。</p>
+<p>第二处是少等一道前向。</p>
+<p>算槽位位置不用等上一轮算完。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49467、https://github.com/sgl-project/sglang/pull/49463">https://github.com/sgl-project/sglang/pull/49467、https://github.com/sgl-project/sglang/pull/49463</a></p>
+<p><strong>SGLang：Grok-1 的路由器修了个 NaN</strong></p>
+<p>softcapping 是给路由打分加个上限。</p>
+<p>算式里有个指数运算。</p>
+<p>分数一大就溢出成无穷大。</p>
+<p>无穷大除以无穷大就成了 NaN。</p>
+<p>结果 top-k 选错了专家。</p>
+<p>现在把输入先夹到正负 20 以内。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51138">https://github.com/sgl-project/sglang/pull/51138</a></p>
+<p><strong>TRT-LLM：这条只是测试</strong></p>
+<p>Kimi K3 的四节点无推测解码性能测试。</p>
+<p>之前被豁免了，现在恢复执行。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22775">https://github.com/NVIDIA/TensorRT-LLM/pull/22775</a></p>
+<p><strong>llama.cpp：6 条里 3 条是界面</strong></p>
+<p>PWA 的名字跟着构建环境走。</p>
+<p>折叠块的高度变化更顺滑。</p>
+<p>出错时发送按钮描红边。</p>
+<p>剩下 3 条是正经活。</p>
+<p>OpenVINO 那边修了 CI，加了两个新模型。</p>
+<p>RPC 那边统一了请求校验。</p>
+<p>CUDA 的 MMQ 量化修了全零块的除零。</p>
+<p>全零块以前会算出 NaN。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32890、https://github.com/ggml-org/llama.cpp/pull/32873、https://github.com/ggml-org/llama.cpp/pull/32856、https://github.com/ggml-org/llama.cpp/pull/32861、https://github.com/ggml-org/llama.cpp/pull/32651">https://github.com/ggml-org/llama.cpp/pull/32890、https://github.com/ggml-org/llama.cpp/pull/32873、https://github.com/ggml-org/llama.cpp/pull/32856、https://github.com/ggml-org/llama.cpp/pull/32861、https://github.com/ggml-org/llama.cpp/pull/32651</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/32566">https://github.com/ggml-org/llama.cpp/pull/32566</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批周一 16 点后才挂出来</strong></p>
+<p>最新一篇还是 11 月 20 日那批。</p>
+<p>来源：arXiv</p>
+<p><strong>补报：SGLang 的专家预取，11 月 21 日合入</strong></p>
+<p>这条是 11 月 21 日合入的，之前几期漏报了。</p>
+<p>MoE 模型每层都要挑专家。</p>
+<p>以前是等当前层路由结果出来才去搬。</p>
+<p>搬运卡在解码的关键路径上。</p>
+<p>现在一边算当前层，一边把下一层可能要用的专家先搬好。</p>
+<p>猜错了也没事，按实际路由再补。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51279">https://github.com/sgl-project/sglang/pull/51279</a></p>
+<h2>业内新闻</h2>
+<p><strong>llm-d：SGLang 成了一等公民，GLM-5.2 的缓存分三层</strong></p>
+<p>llm-d 是 K8s 上的推理编排层。</p>
+<p>以前它主推 vLLM。</p>
+<p>现在 SGLang 也能直接插进去。</p>
+<p>换引擎只换部署配置。</p>
+<p>GLM-5.2 的 Wide-EP 各 rank 都是独立端点。</p>
+<p>路由器能直接找到热前缀在哪块卡上。</p>
+<p>KV 缓存分了三层。</p>
+<p>显存、主机内存、共享存储。</p>
+<p>128 并发下，主机内存把首字从 174 秒压到 20 秒。</p>
+<p>输出从 319 涨到 1257 词每秒。</p>
+<p>32 卡多副本首字只要 3.43 秒。</p>
+<p>删掉一个读题池，共享存储找回 99.94% 的前缀。</p>
+<p>深读笔记已写好，数字和四张图都在里面。</p>
+<p>来源：<a href="https://llm-d.ai/blog/serving-glm-5-2-sglang-tiered-kv-cache-on-llm-d">https://llm-d.ai/blog/serving-glm-5-2-sglang-tiered-kv-cache-on-llm-d</a></p>
+<p><strong>补报：单卡 A100 上调参，vLLM 解码快了 4 倍</strong></p>
+<p>这是 11 月 21 日的文章，之前没报过。</p>
+<p>作者用爬山法自动调参。</p>
+<p>337 次试验，跑了 41 小时。</p>
+<p>单张 A100，vLLM 0.34.0 对 SGLang 0.5.23。</p>
+<p>单人解码从 23.4 涨到 94.8 词每秒。</p>
+<p>SGLang 那边是 74.4。</p>
+<p>多轮对话的首字从 114 秒压到 1 秒左右。</p>
+<p>成本从每百万词 0.9 美元降到 0.41 美元。</p>
+<p>划重点：默认配置会浪费不少算力。</p>
+<p>调参这件事本身就值一个自动化工具。</p>
+<p>来源：<a href="https://simpleprog.com/news/hill-climbing-vllm-and-sglang-configs-on-a-single-a100-1b3cdd51">https://simpleprog.com/news/hill-climbing-vllm-and-sglang-configs-on-a-single-a100-1b3cdd51</a></p>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<p>Ling-3.1-flash 之前几期报过。</p>
+<p>AWS 那套缓存和 Dynamo 的消息也是旧闻。</p>
+<p>sotaaz 那篇换引擎实测 11 月 22 日已做过深读。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<h2>值得深入学</h2>
+<p><strong>llm-d 上跑 SGLang：GLM-5.2 的分层 KV 缓存实测</strong></p>
+<p>这篇直接贴着你的研究方向。</p>
+<p>P/D 解耦怎么在 K8s 上落地。</p>
+<p>分层缓存的收益和代价各是多少。</p>
+<p>数字和图都齐了。</p>
+<p>精读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261123-llm-d-sglang-glm-5-2-kv/">llm-d-SGLang-GLM-5.2-分层KV缓存-精读</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-23-0700/">07点版</a></p></body></html>
