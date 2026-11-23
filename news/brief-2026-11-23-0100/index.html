@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月23日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-23"/>
+<meta name="doc-ts" content="2026-11-23T09:00:29"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-23（01点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-23（01点版）</h1>
+<p>这轮 GitHub 一共合入 18 条。</p>
+<p>vLLM 4 条，SGLang 2 条。</p>
+<p>TRT-LLM 6 条，LMDeploy 1 条。</p>
+<p>FlashInfer 1 条，llama.cpp 3 条。</p>
+<p>Mooncake 1 条，TGI 和 Dynamo 挂零。</p>
+<p>没有新版本发布。</p>
+<p>llama.cpp 快照到了 b12651。</p>
+<p>arXiv 下一批要到周一 16 点后。</p>
+<p>X、Reddit、HN、中文媒体这轮都没新东西。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12651。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：MiniMax 跑通了 P/D 解耦</strong></p>
+<p>P/D 解耦就是 prefill 和 decode 分工。</p>
+<p>prefill 只管读提示词，decode 只管往外吐字。</p>
+<p>像流水线分两道工序，各干各的。</p>
+<p>这次是 MiniMax-M3.1-Flash 的部署配方。</p>
+<p>配方从 MoRI-IO 换成了 Mooncake 传 KV。</p>
+<p>KV 就是模型记下来的上下文草稿。</p>
+<p>12 张 MI355X 上跑。</p>
+<p>1 组 prefill 加 2 组 decode。</p>
+<p>每组都是 4 卡并行。</p>
+<p>并发从 40 拉到 80，单卡吞吐跟着涨。</p>
+<p>40 并发时单卡 25852 token 每秒。</p>
+<p>80 并发时单卡 50212 token 每秒。</p>
+<p>首字等待 90 分位在 1.28 到 3.26 秒之间。</p>
+<p>GSM8K 数学题准确率 96% 上下。</p>
+<p>这条跟你正在看的 P/D 解耦直接相关。</p>
+<p>MI355X 是 MI350X 的下一代。</p>
+<p>Mooncake 传 KV 的路子值得你留心。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67857">https://github.com/vllm-project/vllm/pull/67857</a></p>
+<p><strong>vLLM：Engram 池子能用 Grace 的扩展显存了</strong></p>
+<p>Engram 是 vLLM 里管 KV 跨卡共享的池子。</p>
+<p>以前它只能住在 HBM 里。</p>
+<p>HBM 就是显卡上那块高速显存。</p>
+<p>现在能借 Grace 芯片的扩展显存兜底。</p>
+<p>DeepSeek-V4.1-Flash 的两张表。</p>
+<p>在 4 张 GB200 上每卡占 47.21 GiB。</p>
+<p>这是 GB200 专属的路子。</p>
+<p>你的 H100 和 MI350X 用不上。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68685">https://github.com/vllm-project/vllm/pull/68685</a></p>
+<p><strong>vLLM：剩下 2 条是修 bug</strong></p>
+<p>一条修 KV 卸载的漏存。</p>
+<p>一部分 CPU 命中的块没存下来。</p>
+<p>现在补上了。</p>
+<p>另一条修崩溃时的堆栈打印。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69048、https://github.com/vllm-project/vllm/pull/68924">https://github.com/vllm-project/vllm/pull/69048、https://github.com/vllm-project/vllm/pull/68924</a></p>
+<p><strong>SGLang：2 条都是边角料</strong></p>
+<p>一条是 NPU 测试的日志收集。</p>
+<p>一条是 AMD 上 QK 归一化的回退。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52484、https://github.com/sgl-project/sglang/pull/52234">https://github.com/sgl-project/sglang/pull/52484、https://github.com/sgl-project/sglang/pull/52234</a></p>
+<p><strong>TRT-LLM：Rubin 上有了 MXFP8 融合算子</strong></p>
+<p>MXFP8 是一种 8 位浮点量化格式。</p>
+<p>数字压得更小，算得更快。</p>
+<p>这次把 MoE 的两层全连接并成一个算子。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>只在 Rubin 那代新卡上用。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21589">https://github.com/NVIDIA/TensorRT-LLM/pull/21589</a></p>
+<p><strong>TRT-LLM：Mistral 原生服务补齐了</strong></p>
+<p>分词器修了，引导解码也接上了。</p>
+<p>引导解码就是强制按指定格式出答案。</p>
+<p>覆盖 Mistral-Large-3 这些原生检查点。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22185">https://github.com/NVIDIA/TensorRT-LLM/pull/22185</a></p>
+<p><strong>TRT-LLM：剩下 4 条也偏内部</strong></p>
+<p>一条对齐 GLM 的路由和检查点布局。</p>
+<p>一条修引导解码测试的状态初始化。</p>
+<p>一条调 MQA 注意力核的显存加载顺序。</p>
+<p>一条修 GLM-5.2 的专家并行屏障。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22691、https://github.com/NVIDIA/TensorRT-LLM/pull/22345、https://github.com/NVIDIA/TensorRT-LLM/pull/21851">https://github.com/NVIDIA/TensorRT-LLM/pull/22691、https://github.com/NVIDIA/TensorRT-LLM/pull/22345、https://github.com/NVIDIA/TensorRT-LLM/pull/21851</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21847">https://github.com/NVIDIA/TensorRT-LLM/pull/21847</a></p>
+<p><strong>LMDeploy：昇腾 A3 挪进原生后端</strong></p>
+<p>A3 是华为昇腾的新卡。</p>
+<p>支持从老后端迁到 PyTorch 原生后端。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5134">https://github.com/InternLM/lmdeploy/pull/5134</a></p>
+<p><strong>FlashInfer 和 Mooncake：各 1 条小活</strong></p>
+<p>FlashInfer 给追踪工具加了包管理。</p>
+<p>Mooncake 让存储层跑在 TENT 总线上。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9476">https://github.com/flashinfer-ai/flashinfer/pull/9476</a> 和 <a href="https://github.com/kvcache-ai/Mooncake/pull/5703">https://github.com/kvcache-ai/Mooncake/pull/5703</a></p>
+<p><strong>llama.cpp：快照到了 b12651</strong></p>
+<p>这轮合入 3 条。</p>
+<p>一条改进 Inkling 的解析器。</p>
+<p>一条给模型加载加了取消按钮。</p>
+<p>一条是 WebGPU 的 ROLL 支持。</p>
+<p>来源：GitHub releases</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：下一批周一 16 点后才挂出来</strong></p>
+<p>最新一篇还是 11 月 20 日那批。</p>
+<p>来源：arXiv</p>
+<h2>业内新闻</h2>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<p>大 V 们这 2 小时里没发 serving 相关的内容。</p>
+<p>Reddit 和 HN 也没翻出新的讨论。</p>
+<p>机器之心和量子位同样安静。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<h2>值得深入学</h2>
+<p>本轮没有值得深读的。</p>
+<p>MiniMax 那条 P/D 解耦的配方。</p>
+<p>想法和数字都在上面讲清了。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-23-0100/">01点版</a></p></body></html>
