@@ -1,0 +1,137 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-24T17:03:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（09点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（09点版）</h1>
+<p>这轮 GitHub 一共合入 25 条。</p>
+<p>vLLM 8 条，llama.cpp 8 条。</p>
+<p>SGLang 2 条。</p>
+<p>Dynamo 和 FlashInfer 各 3 条。</p>
+<p>TRT-LLM 1 条。</p>
+<p>LMDeploy、TGI、Mooncake 挂零。</p>
+<p>版本水位一处都没动。</p>
+<p>论文那边有 5 篇新预印本。</p>
+<p>其中一篇跟你的 MoE 评估直接相关。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6rc2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 还是 b12676。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：注意力核和新模型支持</strong></p>
+<p>#69170 把 Triton 注意力的 KV 分块读取向量化了。</p>
+<p>KV 就是模型记下来的上下文草稿。</p>
+<p>读得更快，解码那一步就更省时间。</p>
+<p>#69689 让后端从形状里认出 MLA。</p>
+<p>MLA 是一种省显存的注意力结构。</p>
+<p>顺手支持了 Youtu-LLM 这个新模型。</p>
+<p>#69673 让 MoE 的门控留在原来的精度里。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>#66342 改了压缩张量量化的加载规则。</p>
+<p>剩下 4 条是路由核修补、安全加固和 CI。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69170、https://github.com/vllm-project/vllm/pull/69689、https://github.com/vllm-project/vllm/pull/69673">https://github.com/vllm-project/vllm/pull/69170、https://github.com/vllm-project/vllm/pull/69689、https://github.com/vllm-project/vllm/pull/69673</a> 和 <a href="https://github.com/vllm-project/vllm/pull/66342">https://github.com/vllm-project/vllm/pull/66342</a></p>
+<p><strong>SGLang：KV 事件重放加了重试</strong></p>
+<p>#48114 让 KV 事件在反压下重试重放。</p>
+<p>KV 事件就是缓存变化的通知。</p>
+<p>反压就是下游接不住时顶回来。</p>
+<p>这跟 PD 解耦里传 KV 那一环直接相关。</p>
+<p>#46633 让 GDN 的验证流水线级数可配。</p>
+<p>GDN 是一种不用注意力的序列结构。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48114">https://github.com/sgl-project/sglang/pull/48114</a> 和 <a href="https://github.com/sgl-project/sglang/pull/46633">https://github.com/sgl-project/sglang/pull/46633</a></p>
+<p><strong>llama.cpp：多模态转换修补</strong></p>
+<p>#32941 修了 Qwen3-Omni 的模型转换。</p>
+<p>Qwen3-Omni 是能听能看的多模态模型。</p>
+<p>#32064 让 MCP 工具结果能带图片和音频。</p>
+<p>MCP 是模型调外部工具的那套协议。</p>
+<p>#32378 拦住了没有 OpenMP 时 CPU 的空转轮询。</p>
+<p>#32142 和 #30867 是 ARM 的核优化。</p>
+<p>剩下 3 条是 UI 小修。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32941、https://github.com/ggml-org/llama.cpp/pull/32064、https://github.com/ggml-org/llama.cpp/pull/32378、https://github.com/ggml-org/llama.cpp/pull/32142">https://github.com/ggml-org/llama.cpp/pull/32941、https://github.com/ggml-org/llama.cpp/pull/32064、https://github.com/ggml-org/llama.cpp/pull/32378、https://github.com/ggml-org/llama.cpp/pull/32142</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/30867">https://github.com/ggml-org/llama.cpp/pull/30867</a></p>
+<p><strong>Dynamo、FlashInfer：各 3 条小修</strong></p>
+<p>Dynamo 3 条全是压测、指标和 CI。</p>
+<p>FlashInfer 的 #9716 值得看一眼。</p>
+<p>它给 cake_sage 砍了 host 侧耗时。</p>
+<p>GB300 上 FP8 块稀疏注意力的延迟回来了。</p>
+<p>#9974 修了 cake_gdp 的预填表复用。</p>
+<p>#9468 让 DeepGEMM 报错不再直接退出进程。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9716、https://github.com/flashinfer-ai/flashinfer/pull/9974">https://github.com/flashinfer-ai/flashinfer/pull/9716、https://github.com/flashinfer-ai/flashinfer/pull/9974</a> 和 <a href="https://github.com/flashinfer-ai/flashinfer/pull/9468">https://github.com/flashinfer-ai/flashinfer/pull/9468</a></p>
+<p><strong>TRT-LLM：1 条基建</strong></p>
+<p>#21229 是单节点多卡覆盖率的收集。</p>
+<p><strong>LMDeploy、TGI、Mooncake：这轮挂零</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>五篇预印本同一天出，都冲着推理成本来</strong></p>
+<p>Hanging Context 今天汇总了 5 篇新预印本。</p>
+<p>主题全是让同一个模型跑得更便宜。</p>
+<p>GC-MoE K3 是其中跟你最相关的一篇。</p>
+<p>它把 Kimi K3 整层前馈排进一张 CUDA 图。</p>
+<p>GB200 上比 SGLang 同轮快 1.13 倍。</p>
+<p>比 vLLM 的历史数据快 1.37 倍。</p>
+<p>注意：vLLM 那组不是同轮重测。</p>
+<p>OnCache 给扩散模型做动态缓存调度。</p>
+<p>FLUX.1-dev 上号称快将近 3 倍。</p>
+<p>Muted Distillation 让智能体少吐一半 token。</p>
+<p>FOLD 是免训练的推测解码新法。</p>
+<p>长上下文 256K 内最快 4.22 倍。</p>
+<p>CC-Gittins 是给多模型选型省评测钱的算法。</p>
+<p>5 篇全是预印本，数字都是作者自报。</p>
+<p>来源：<a href="https://hangingcontext.com/stories/2026-11-24/inference-costs-attacked-on-five-fronts/">https://hangingcontext.com/stories/2026-11-24/inference-costs-attacked-on-five-fronts/</a> 和 <a href="https://arxiv.org/abs/2611.30542">https://arxiv.org/abs/2611.30542</a></p>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下批在 11 月 25 日 00:00 UTC。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>llm-d 的 SGLang 那篇是旧闻。</p>
+<p>11 月 23 日 07点版已经做过深读。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>X、Reddit、HN、中文媒体这轮也没新东西。</p>
+<h2>值得深读</h2>
+<p><strong>GC-MoE K3：Kimi K3 解码一张图跑完</strong></p>
+<p>这篇能帮你把 MoE 解码的延迟账算得更细。</p>
+<p>它直接拿 SGLang 和 vLLM 当基线比。</p>
+<p>角色图和分区思路能抄进你的 PD 评估清单。</p>
+<p>精读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261124-gc-moe-k3-kimi-k3-moe/">GC-MoE-K3-Kimi-K3-MoE解码-精读</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-0900/">09点版</a></p></body></html>
