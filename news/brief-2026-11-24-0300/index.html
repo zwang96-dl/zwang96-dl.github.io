@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-24T10:59:10"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（03点版）</h1>
+<p>这轮 GitHub 一共合入 23 条。</p>
+<p>vLLM 11 条，SGLang 4 条。</p>
+<p>剩下 8 条分在 5 个仓库。</p>
+<p>版本水位只动了一处。</p>
+<p>llama.cpp 快照到了 b12675。</p>
+<p>其他 8 个仓库都没动。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了一处</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6rc2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12675。</p>
+<p>上一版还是 b12674。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：11 条里 3 条值得看</strong></p>
+<p>#69589 修了权重传输的死锁。</p>
+<p>权重传输就是把新权重同步到推理卡上。</p>
+<p>RL 训练时同步权重会卡住，现在修了。</p>
+<p>#68922 让 glm5_next 的开发者消息正常渲染。</p>
+<p>glm5_next 是智谱新模型的一个版本。</p>
+<p>#66052 给 DSA 索引器每步换新内存。</p>
+<p>DSA 是 DeepSeek 用的稀疏注意力。</p>
+<p>剩下 8 条是 CI、文档和 Rust 前端小修。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69589、https://github.com/vllm-project/vllm/pull/68922">https://github.com/vllm-project/vllm/pull/69589、https://github.com/vllm-project/vllm/pull/68922</a> 和 <a href="https://github.com/vllm-project/vllm/pull/66052">https://github.com/vllm-project/vllm/pull/66052</a></p>
+<p><strong>SGLang：采样参数复用和视频注意力各一处</strong></p>
+<p>#52570 让采样参数能复用。</p>
+<p>同一批请求没变，就别重复算参数。</p>
+<p>省的是调度那点小开销。</p>
+<p>#47918 修了 Qwen2.5-VL 的视频注意力。</p>
+<p>现在按每帧单独切分来算。</p>
+<p>剩下 2 条是 CI 和 NPU 相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52570">https://github.com/sgl-project/sglang/pull/52570</a> 和 <a href="https://github.com/sgl-project/sglang/pull/47918">https://github.com/sgl-project/sglang/pull/47918</a></p>
+<p><strong>LMDeploy：SSM 模型多了回放加速</strong></p>
+<p>#5028 加了 ReplaySSM。</p>
+<p>给 GDN 和 KDA 这类模型用的。</p>
+<p>SSM 是一类不用注意力的序列模型。</p>
+<p>#5189 让 Qwen3-Next 的缓存层数自动推导。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5028">https://github.com/InternLM/lmdeploy/pull/5028</a> 和 <a href="https://github.com/InternLM/lmdeploy/pull/5189">https://github.com/InternLM/lmdeploy/pull/5189</a></p>
+<p><strong>llama.cpp：提示缓存查找修了</strong></p>
+<p>#28992 修了服务端提示缓存查找跳过的问题。</p>
+<p>提示缓存就是把算过的提示存起来复用。</p>
+<p>剩下 2 条是聊天界面重构和 CI。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/28992">https://github.com/ggml-org/llama.cpp/pull/28992</a></p>
+<p><strong>TRT-LLM、Dynamo、FlashInfer：各 1 条小修</strong></p>
+<p>TRT-LLM 是 NVFP4 稀疏卸载的精度对齐。</p>
+<p>NVFP4 是一种 4 位量化格式。</p>
+<p>Dynamo 是算子环境变量顺序保留。</p>
+<p>FlashInfer 是 FP8 DeepGEMM 的小性能优化。</p>
+<p>TGI 和 Mooncake 这轮挂零。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22666、https://github.com/ai-dynamo/dynamo/pull/15376">https://github.com/NVIDIA/TensorRT-LLM/pull/22666、https://github.com/ai-dynamo/dynamo/pull/15376</a> 和 <a href="https://github.com/flashinfer-ai/flashinfer/pull/9885">https://github.com/flashinfer-ai/flashinfer/pull/9885</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下批在 11 月 25 日 00:00 UTC。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>Spheron 那组跑分是 11 月 23 日 20 点版报过的。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>X、Reddit、HN、中文媒体这轮也没新东西。</p>
+<h2>值得深读</h2>
+<p>这轮没有够格的内容。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-0300/">03点版</a></p></body></html>
