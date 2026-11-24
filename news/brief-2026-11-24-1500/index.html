@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-24T23:07:41"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（15点版）</h1>
+<p>这轮 GitHub 一共合入 23 条新东西。</p>
+<p>vLLM 7 条，SGLang 5 条。</p>
+<p>Dynamo 5 条，TRT-LLM 4 条。</p>
+<p>FlashInfer 2 条新合入。</p>
+<p>llama.cpp、LMDeploy、TGI、Mooncake 挂零。</p>
+<p>版本水位只动了一处。</p>
+<p>llama.cpp 快照到了 b12686。</p>
+<p>vLLM-GR 出了 0.30.0。</p>
+<p>文心 5.5 Flash 也开源了。</p>
+<p>这轮没有新的深读。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了一处</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6rc2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12686。</p>
+<p>上一版还是 b12681。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：语音转写模型能跑了</strong></p>
+<p>#69683 让 OmniASR 走 Transformers 后端。</p>
+<p>OmniASR 是个 300M 的语音转写模型。</p>
+<p>说话转文字，就是它干的活。</p>
+<p>以前要手动指定后端才能加载。</p>
+<p>现在默认就能跑。</p>
+<p>#68820 修了 HiSparse 的缓存排序。</p>
+<p>HiSparse 是稀疏注意力的缓存管家。</p>
+<p>请求跑完后，显存里的干净页会留下来。</p>
+<p>以前这些副本比旧前缀活得久。</p>
+<p>结果新请求来了，旧前缀的索引块没了。</p>
+<p>副本再快也没用，等于白留。</p>
+<p>现在先复用副本，索引块不会被提前挤掉。</p>
+<p>#62004 给 Gated DeltaNet 的解码提速。</p>
+<p>Gated DeltaNet 是一种循环结构模型。</p>
+<p>跟 Mamba 一类，不用传统注意力。</p>
+<p>ReplaySSM 会把状态空间模型的输入缓存下来。</p>
+<p>解码时少算一遍，速度就上来了。</p>
+<p>这是 ReplaySSM 的第二块拼图。</p>
+<p>第一块 Mamba2 早就合入了。</p>
+<p>#69564 砍掉了 LM Format Enforcer 后端。</p>
+<p>这是个结构化输出的老后端。</p>
+<p>用的人少了，直接移除。</p>
+<p>#64163 让集成显卡走更快的 MoE 路径。</p>
+<p>多 token 的批量推理也能用排序融合版。</p>
+<p>#53377 是 MNNVL 集合通信的修补。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69683、https://github.com/vllm-project/vllm/pull/68820、https://github.com/vllm-project/vllm/pull/62004、https://github.com/vllm-project/vllm/pull/69564、https://github.com/vllm-project/vllm/pull/64163">https://github.com/vllm-project/vllm/pull/69683、https://github.com/vllm-project/vllm/pull/68820、https://github.com/vllm-project/vllm/pull/62004、https://github.com/vllm-project/vllm/pull/69564、https://github.com/vllm-project/vllm/pull/64163</a> 和 <a href="https://github.com/vllm-project/vllm/pull/53377">https://github.com/vllm-project/vllm/pull/53377</a></p>
+<p><strong>SGLang：KV 缓存能跨机柜走 NVLink 了</strong></p>
+<p>#51416 给 Mooncake Store 加了新池子。</p>
+<p>Mooncake 是 SGLang 的 KV 缓存跨机传输层。</p>
+<p>KV 缓存就是解码时的草稿纸。</p>
+<p>新池子用 EGM 撑腰。</p>
+<p>EGM 是跨机柜共享内存的技术。</p>
+<p>一台机器的 GPU 能直接读写另一机柜的内存。</p>
+<p>HiCache 的三级缓存页可以放过去。</p>
+<p>对 P/D 解耦部署很友好。</p>
+<p>prefill 和 decode 分开跑时，缓存不用绕远路。</p>
+<p>#47578 把 KV 分片的分配器改成批量操作。</p>
+<p>一页一页拿改成一批一批拿。</p>
+<p>分配和释放都省了来回。</p>
+<p>#47576 是上下文并行的元数据上传优化。</p>
+<p>一次固定内存拷贝就搞定。</p>
+<p>#51631 是 AMD 的表更新。</p>
+<p>给 gfx1250 的 TP2 和 TP4 配了新表。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51416、https://github.com/sgl-project/sglang/pull/47578、https://github.com/sgl-project/sglang/pull/47576">https://github.com/sgl-project/sglang/pull/51416、https://github.com/sgl-project/sglang/pull/47578、https://github.com/sgl-project/sglang/pull/47576</a> 和 <a href="https://github.com/sgl-project/sglang/pull/51631">https://github.com/sgl-project/sglang/pull/51631</a></p>
+<p><strong>TRT-LLM：FLUX 图像生成少等了</strong></p>
+<p>#22657 给 VisualGen 的 FLUX 瘦身。</p>
+<p>FLUX 是个文生图模型。</p>
+<p>以前每步都要跟 CPU 同步一次。</p>
+<p>像每跑一步就停下来打个报告。</p>
+<p>现在这步同步砍掉了。</p>
+<p>不变的文本和位置编码也缓存下来复用。</p>
+<p>#22848 修了并行 JIT 探测的张量释放。</p>
+<p>#22794 是 MXFP8 的调优日志。</p>
+<p>#22399 是测试重构。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22657、https://github.com/NVIDIA/TensorRT-LLM/pull/22848、https://github.com/NVIDIA/TensorRT-LLM/pull/22794">https://github.com/NVIDIA/TensorRT-LLM/pull/22657、https://github.com/NVIDIA/TensorRT-LLM/pull/22848、https://github.com/NVIDIA/TensorRT-LLM/pull/22794</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22399">https://github.com/NVIDIA/TensorRT-LLM/pull/22399</a></p>
+<p><strong>Dynamo：滚动升级不断供了</strong></p>
+<p>#18586 修了滚动升级时的 503。</p>
+<p>滚动升级就是新老版本交替上线。</p>
+<p>以前新 decode 起不来时，老 prefill 先被缩到零。</p>
+<p>请求进来直接 503。</p>
+<p>现在老 prefill 会留着站岗。</p>
+<p>直到新一代 worker 真能接活才撤。</p>
+<p>做 P/D 解耦部署的人最吃这颗定心丸。</p>
+<p>#18899 把 vLLM 核心升到 v0.34.0。</p>
+<p>#18061 让 GLM 的 JSON 流式输出更早开始。</p>
+<p>#18166 是快照恢复的环境变量刷新。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18586、https://github.com/ai-dynamo/dynamo/pull/18899、https://github.com/ai-dynamo/dynamo/pull/18061">https://github.com/ai-dynamo/dynamo/pull/18586、https://github.com/ai-dynamo/dynamo/pull/18899、https://github.com/ai-dynamo/dynamo/pull/18061</a> 和 <a href="https://github.com/ai-dynamo/dynamo/pull/18166">https://github.com/ai-dynamo/dynamo/pull/18166</a></p>
+<p><strong>FlashInfer：预填和矩阵乘法的小提速</strong></p>
+<p>#9989 给 SM90 的预填做了热身拆分。</p>
+<p>一次调用只发一次核函数。</p>
+<p>#9731 给 Trellis 的稠密矩阵乘法加了 split-K。</p>
+<p>split-K 就是把大矩阵乘法拆成多份并行算。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9989">https://github.com/flashinfer-ai/flashinfer/pull/9989</a> 和 <a href="https://github.com/flashinfer-ai/flashinfer/pull/9731">https://github.com/flashinfer-ai/flashinfer/pull/9731</a></p>
+<p><strong>llama.cpp、LMDeploy、TGI、Mooncake：这轮挂零</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下批在 11 月 25 日 00:00 UTC。</p>
+<p>五篇推理降本的论文在 09点版报过。</p>
+<p>GC-MoE K3 还做了深读。</p>
+<h2>业内新闻</h2>
+<p><strong>vLLM-GR 0.30.0：给推荐模型用的 vLLM</strong></p>
+<p>vLLM 家出了个新框架。</p>
+<p>专门跑生成式推荐模型。</p>
+<p>推荐模型就是猜你接下来想点什么。</p>
+<p>它一次请求要返回一堆候选物品。</p>
+<p>用束搜索一次探索多条候选路径。</p>
+<p>束搜索就像同时追好几条线索。</p>
+<p>vLLM-GR 把这套搜索直接做到引擎里。</p>
+<p>提示词的 KV 缓存还能跨束共享。</p>
+<p>官方报的 P99 延迟比 SGLang Beam 低不少。</p>
+<p>H20 上束宽 256、批量 8 时是 369 毫秒。</p>
+<p>SGLang Beam 同档是 1280 毫秒。</p>
+<p>数字是官方自报，没独立复现。</p>
+<p>支持 NVIDIA 卡和昇腾 NPU。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm-gr/releases/tag/v0.30.0">https://github.com/vllm-project/vllm-gr/releases/tag/v0.30.0</a></p>
+<p><strong>文心 5.5 Flash Preview 开源了</strong></p>
+<p>百度把文心 5.5 Flash 预览版开源了。</p>
+<p>Apache 2.0 协议，随便用。</p>
+<p>2800 亿参数，每次只激活 140 亿。</p>
+<p>权重上了 Hugging Face 和 ModelScope。</p>
+<p>vLLM 和 SGLang 都能直接部署。</p>
+<p>11月23日 19点版报过 vLLM 的支持。</p>
+<p>这次是权重本身正式开源。</p>
+<p>来源：<a href="https://www.aidb.live/news/detail?id=75308">https://www.aidb.live/news/detail?id=75308</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>X、Reddit、中文媒体这轮也没新东西。</p>
+<h2>值得深读</h2>
+<p><strong>这轮没有新的深读</strong></p>
+<p>vLLM-GR 跟你的多模态方向关系不大。</p>
+<p>先记一笔，等它出多模态推荐的料再说。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-1500/">15点版</a></p></body></html>
