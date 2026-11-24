@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月23日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-23"/>
+<meta name="doc-ts" content="2026-11-24T07:07:27"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-23（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-23（23点版）</h1>
+<p>这轮 GitHub 一共合入 32 条。</p>
+<p>vLLM 6 条，SGLang 11 条。</p>
+<p>TRT-LLM 7 条，FlashInfer 2 条。</p>
+<p>Mooncake 4 条，Dynamo 1 条。</p>
+<p>llama.cpp 1 条，LMDeploy 和 TGI 挂零。</p>
+<p>llama.cpp 快照到了 b12670。</p>
+<p>没有新正式版发布。</p>
+<p>另外补报三条之前漏掉的内容。</p>
+<p>两篇论文，一条 RL 动态。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了一处</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12670。</p>
+<p>上一版还是 b12669。</p>
+<p>来源：GitHub releases</p>
+<p><strong>TGI 仓库已经归档了</strong></p>
+<p>这不是今天的新消息，是顺手核实的状态。</p>
+<p>GitHub 上 TGI 仓库显示已归档。</p>
+<p>最后一次推送停在 2026 年 3 月。</p>
+<p>HF 官方现在推荐 vLLM 或 SGLang。</p>
+<p>还在用 TGI 的话，该考虑迁了。</p>
+<p>来源：<a href="https://github.com/huggingface/text-generation-inference">https://github.com/huggingface/text-generation-inference</a></p>
+<p><strong>vLLM：Qwen4Exp 的瘦矩阵有新方案了</strong></p>
+<p>#69529 给 SM100 加了 TP=2 和 TP=8 的瘦矩阵计划。</p>
+<p>瘦矩阵就是又瘦又长的矩阵乘法。</p>
+<p>解码时经常遇到，通用核跑不快。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69529">https://github.com/vllm-project/vllm/pull/69529</a></p>
+<p><strong>vLLM：GDN 的预填检查点只写用到的</strong></p>
+<p>#69401，循环模型 GDN 的预填检查点。</p>
+<p>GDN 是循环模型里的门控状态机制。</p>
+<p>以前全写，现在只写用到的状态。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69401">https://github.com/vllm-project/vllm/pull/69401</a></p>
+<p><strong>vLLM：剩下 4 条是修补</strong></p>
+<p>一条修编译缓存键。</p>
+<p>一条修 Conch 的 W4A16 量化。</p>
+<p>一条修 DeepSeek-V4 的 CPU 调度。</p>
+<p>一条是 CI。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69475、https://github.com/vllm-project/vllm/pull/62268、https://github.com/vllm-project/vllm/pull/65365">https://github.com/vllm-project/vllm/pull/69475、https://github.com/vllm-project/vllm/pull/62268、https://github.com/vllm-project/vllm/pull/65365</a> 和 <a href="https://github.com/vllm-project/vllm/pull/69503">https://github.com/vllm-project/vllm/pull/69503</a></p>
+<p><strong>SGLang：上下文并行的预填图能重放了</strong></p>
+<p>#51721，zigzag 预填的上下文并行图能在流水线阶段重放。</p>
+<p>上下文并行是把超长输入拆到多卡上。</p>
+<p>各管一段，再拼起来。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51721">https://github.com/sgl-project/sglang/pull/51721</a></p>
+<p><strong>SGLang：AMD 的 MLA 又快了两处</strong></p>
+<p>#49347 和 #48154，都是 gfx1250 的 MLA 优化。</p>
+<p>MLA 是 DeepSeek 用的压缩注意力。</p>
+<p>一份改融合算子，少启动一次核。</p>
+<p>一份换上更快的 RoPE 和归一化路径。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49347">https://github.com/sgl-project/sglang/pull/49347</a> 和 <a href="https://github.com/sgl-project/sglang/pull/48154">https://github.com/sgl-project/sglang/pull/48154</a></p>
+<p><strong>SGLang：Kimi K3 的工具选择修了</strong></p>
+<p>#52635，没带工具时也显式渲染 tool_choice=&quot;none&quot;。</p>
+<p>其余 7 条里，两条值得一提。</p>
+<p>一条修 benchmark 的 MoE 接口。</p>
+<p>一条修路由器的缓存参数。</p>
+<p>剩下 5 条是文档和 CI。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52635、https://github.com/sgl-project/sglang/pull/52111、https://github.com/sgl-project/sglang/pull/48940、https://github.com/sgl-project/sglang/pull/51251、https://github.com/sgl-project/sglang/pull/51951、https://github.com/sgl-project/sglang/pull/52754、https://github.com/sgl-project/sglang/pull/52753">https://github.com/sgl-project/sglang/pull/52635、https://github.com/sgl-project/sglang/pull/52111、https://github.com/sgl-project/sglang/pull/48940、https://github.com/sgl-project/sglang/pull/51251、https://github.com/sgl-project/sglang/pull/51951、https://github.com/sgl-project/sglang/pull/52754、https://github.com/sgl-project/sglang/pull/52753</a> 和 <a href="https://github.com/sgl-project/sglang/pull/52535">https://github.com/sgl-project/sglang/pull/52535</a></p>
+<p><strong>TRT-LLM：MegaMoE 的权重可以就近放了</strong></p>
+<p>#21978，MegaMoE 加了可选的权重本地化。</p>
+<p>MoE 专家权重放离算力近的地方。</p>
+<p>其余 6 条是修补和杂事。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21978、https://github.com/NVIDIA/TensorRT-LLM/pull/21850、https://github.com/NVIDIA/TensorRT-LLM/pull/21971、https://github.com/NVIDIA/TensorRT-LLM/pull/22825、https://github.com/NVIDIA/TensorRT-LLM/pull/22822、https://github.com/NVIDIA/TensorRT-LLM/pull/22821">https://github.com/NVIDIA/TensorRT-LLM/pull/21978、https://github.com/NVIDIA/TensorRT-LLM/pull/21850、https://github.com/NVIDIA/TensorRT-LLM/pull/21971、https://github.com/NVIDIA/TensorRT-LLM/pull/22825、https://github.com/NVIDIA/TensorRT-LLM/pull/22822、https://github.com/NVIDIA/TensorRT-LLM/pull/22821</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22829">https://github.com/NVIDIA/TensorRT-LLM/pull/22829</a></p>
+<p><strong>FlashInfer：NVFP4 预填又快了</strong></p>
+<p>#9876，QToken 的 NVFP4 预填。</p>
+<p>另一条同步了 SM120 的兼容修补。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9876">https://github.com/flashinfer-ai/flashinfer/pull/9876</a> 和 <a href="https://github.com/flashinfer-ai/flashinfer/pull/9651">https://github.com/flashinfer-ai/flashinfer/pull/9651</a></p>
+<p><strong>Mooncake：副本放哪台机器，现在按 fabric 排了</strong></p>
+<p>#5646，加了物理位置和 fabric 安全的副本分配。</p>
+<p>KV 缓存放哪台机器，直接影响取数速度。</p>
+<p>其余 3 条是传输引擎的优化。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5646、https://github.com/kvcache-ai/Mooncake/pull/5153、https://github.com/kvcache-ai/Mooncake/pull/5676">https://github.com/kvcache-ai/Mooncake/pull/5646、https://github.com/kvcache-ai/Mooncake/pull/5153、https://github.com/kvcache-ai/Mooncake/pull/5676</a> 和 <a href="https://github.com/kvcache-ai/Mooncake/pull/5757">https://github.com/kvcache-ai/Mooncake/pull/5757</a></p>
+<p><strong>Dynamo：路由器的拒绝阈值提前预热了</strong></p>
+<p>#19433，拒绝阈值的负载在调用方任务上提前准备。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19433">https://github.com/ai-dynamo/dynamo/pull/19433</a></p>
+<p><strong>llama.cpp：OpenCL 修了个 GDN 偏移</strong></p>
+<p>#32747。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32747">https://github.com/ggml-org/llama.cpp/pull/32747</a></p>
+<h2>新技术与论文</h2>
+<p><strong>SGLang 和 Miles：RL 的采样和训练终于数得一模一样了</strong></p>
+<p>@lmsysorg 11 月 23 日发的。</p>
+<p>RL 训练有个老毛病。</p>
+<p>采样引擎和训练器算同一批 token 的概率，对不上。</p>
+<p>差一点点，训练就慢慢跑偏。</p>
+<p>以前靠截断重要性权重来兜底。</p>
+<p>这回两边共用一套数值约定。</p>
+<p>每个算子在采样和训练侧行为完全一致。</p>
+<p>采样出的 token，训练器算出的概率分毫不差。</p>
+<p>DeepSeek-V4、GLM-5、Qwen3 三家都验证了。</p>
+<p>异步 RL 也能放开重要性权重上限了。</p>
+<p>不用再截断，训练还稳得住。</p>
+<p>代价不大：64 张 H200 上整步吞吐是标准训练的 0.90 到 0.93 倍。</p>
+<p>DeepSeek-V4.1-Flash 的接入不到 8 小时就跑通了。</p>
+<p>来源：<a href="https://aitop.news/item/63363">https://aitop.news/item/63363</a></p>
+<p><strong>TideCache：混合模型的缓存，终于不用死板分区了</strong></p>
+<p>MIT 宋汉组的新论文，11 月 19 日上 arXiv。</p>
+<p>混合模型一半是全局注意力层。</p>
+<p>一半是滑窗或循环层，状态大小固定。</p>
+<p>两边的缓存需求不一样，还天天变。</p>
+<p>这篇做了三件事。</p>
+<p>透明缓存池：虚拟地址不动，只换底下的物理页。</p>
+<p>缓存流式器：解码算循环层时，顺手把下一层要的前缀从内存取回来。</p>
+<p>请求调度器：按队列情况决定走常驻还是流式。</p>
+<p>7 组配置上，智能体轮次最多涨到 2.04 倍。</p>
+<p>每词延迟降 20% 到 59%。</p>
+<p>首字时间最多快 3.05 倍。</p>
+<p>这篇标了「值得深读」，笔记在下面。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.26619">https://arxiv.org/abs/2611.26619</a></p>
+<p><strong>XM-Sparse：稀疏注意力的索引缓存也搬出显存了</strong></p>
+<p>DeepSeek 的新论文，11 月 17 日上 arXiv。</p>
+<p>之前漏报了，这轮补上。</p>
+<p>长上下文服务里，卡住的不只是 KV 缓存。</p>
+<p>索引 key 的缓存也占显存。</p>
+<p>这篇把两个缓存都搬到扩容内存池上。</p>
+<p>各配各的取数办法。</p>
+<p>DeepSeek-V3.2 和 GLM-5.3 上，解码吞吐最高是 PCIe 方案的 4.98 倍。</p>
+<p>是 HiSparse 的 4.52 倍。</p>
+<p>16K 到 1M 上下文都有效。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.22280">https://arxiv.org/abs/2611.22280</a></p>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下批在 11 月 25 日 00:00 UTC。</p>
+<h2>业内新闻</h2>
+<p>这轮没有新消息。</p>
+<p>TGI 归档那条在上面框架更新里说了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<h2>值得深读</h2>
+<p><strong>TideCache：混合架构 LLM 的缓存调度（arXiv:2611.26619，2026-11-19）</strong></p>
+<p>混合模型的缓存分两类，需求天天变。</p>
+<p>这篇把动态分池和逐层流式一次讲清。</p>
+<p>数字都在 GB300 和 GH200 上实测过。</p>
+<p>跟你研究的 KV 缓存和 SGLang 评估直接相关。</p>
+<p>笔记：<a href="https://zwang96-dl.github.io/news/deep-20261124-tidecache/">TideCache：混合架构的缓存调度，智能体轮次最多涨 2 倍</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-23-2300/">23点版</a></p></body></html>
