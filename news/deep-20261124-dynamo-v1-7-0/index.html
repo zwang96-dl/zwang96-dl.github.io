@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · Dynamo v1.7.0 正式版：跨池子路由和实时重调"/>
+<meta name="doc-description" content="- 原文：Dynamo v1.7.0 - Release Notes"/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-24T09:02:23"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Dynamo v1.7.0 正式版：跨池子路由和实时重调</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>Dynamo v1.7.0 正式版：跨池子路由和实时重调</h1>
+<ul><li>原文：Dynamo v1.7.0 - Release Notes</li><li>作者：NVIDIA Dynamo 团队</li><li>发布：2026-11-24，GitHub Release</li><li>原文链接：<a href="https://github.com/ai-dynamo/dynamo/releases/tag/v1.7.0">https://github.com/ai-dynamo/dynamo/releases/tag/v1.7.0</a></li><li>说明：这是功能发布说明，不是跑分论文。</li><li>全文没有一张性能对比图。</li><li>关键数字已抄录在下面。</li><li>763 个 PR、150 个贡献者是官方统计。</li></ul>
+<h2>一句话</h2>
+<p>Dynamo 是管多引擎推理集群的编排层。</p>
+<p>这版把调度从一个池子做到多个池子。</p>
+<p>还给排队、重调和故障迁移都加了新机制。</p>
+<h2>人话解读</h2>
+<p>先说 Dynamo 是什么。</p>
+<p>它坐在 vLLM、SGLang 和 TRT-LLM 上面。</p>
+<p>像个总调度，管路由、管缓存、管扩缩容。</p>
+<p>一个 Dynamo 部署里有好几个池子。</p>
+<p>每个池子是一组跑同一模型的引擎。</p>
+<p>以前一个前端只管自己那个池子。</p>
+<p>池子之间互不通气。</p>
+<p>一个池子排队，另一个池子空着也没办法。</p>
+<p>这版加了 Global Router。</p>
+<p>多个池子挂到同一个前端下面。</p>
+<p>前端看各池子的负载分流。</p>
+<p>同一个会话还粘在同一个池子上。</p>
+<p>好比以前每个食堂窗口各排各的队。</p>
+<p>现在一个总入口按人流量分窗口。</p>
+<p>熟客还固定去常去的窗口。</p>
+<p>Planner 也升级了。</p>
+<p>它以前管扩缩容和 GPU 预算。</p>
+<p>这版加了批量排产和池子优先级。</p>
+<p>还加了一个实验性的实时重调循环。</p>
+<p>它会回放真实 trace，试不同的配置。</p>
+<p>找到更优的就换上。</p>
+<p>这就像调度员先拿历史录像排练。</p>
+<p>排练出最优方案再上岗。</p>
+<p>Router 的排队也变聪明了。</p>
+<p>以前按先到先得。</p>
+<p>这版按截止时间排队。</p>
+<p>快过期的请求先走。</p>
+<p>过期了还没轮到，直接拒掉。</p>
+<p>KV 抓取也加了提示。</p>
+<p>只从同组里的机器上取。</p>
+<p>跨组取数慢，还占带宽。</p>
+<p>Sidecar 是另一条主线。</p>
+<p>它让 Dynamo 贴在原装引擎旁边跑。</p>
+<p>引擎不用改启动命令。</p>
+<p>这版 Sidecar 能顶多节点引擎了。</p>
+<p>引擎挂了，正在跑的请求能迁到别的 worker。</p>
+<p>Sidecar 自己重启，再重新注册。</p>
+<p>多模态也补了一块。</p>
+<p>SGLang 的 worker 现在能接图、视频和音频。</p>
+<p>TRT-LLM 的 Sidecar 也一样。</p>
+<p>前端还加了两个接口。</p>
+<p>语音转文字走 /v1/audio/transcriptions。</p>
+<p>批量推理走 /v1/files 和 /v1/batches。</p>
+<h2>核心方法</h2>
+<ul><li>Global Router：发现服务登记池子和路由。</li><li>前端按负载选池子，会话亲和粘住。</li><li>每个池子的请求、错误、首字节都进 /metrics。</li><li>K8s 上用 DynamoPoolRelay 部署中继。</li><li>Planner：批量排产算安全副本数。</li><li>池子之间换 GPU 预算，按优先级决定谁让谁拿。</li><li>预算、SLA 和阈值改配置不用重启。</li><li>实验性重调循环回放 trace 找更优配置。</li><li>Router：按截止时间排队，过期直接拒。</li><li>kv.fetch 提示只找同传输岛里的源。</li><li>选 worker 和选 KV 源合成一个决定。</li><li>dynamo-sticky-min-load 把会话钉在最闲的 worker 上。</li><li>Sidecar：多节点引擎配 leader 和 worker 模板。</li><li>引擎死后前端迁移在途请求。</li><li>Sidecar 自动重启并重新注册。</li><li>前端：语音转文字走专用 vLLM worker。</li><li>批量接口走 /v1/files 和 /v1/batches。</li><li>V2 工具调用和推理解析成六个模型家族的默认。</li><li>多模态：图片编辑走 /v1/images/edits。</li><li>Cosmos3 Nano 的文生图、文生视频、图生视频是实验工作流。</li><li>SGLang worker 接图像、视频、音频输入。</li></ul>
+<h2>关键数据</h2>
+<ul><li>763 个 PR，150 个贡献者。</li><li>其中 55 个来自 NVIDIA 之外。</li><li>38 个是第一次贡献。</li><li>这是第 20 个功能版本。</li></ul>
+<p>依赖版本表：</p>
+<table><thead><tr><th>组件</th><th>版本</th></tr></thead><tbody><tr><td>Dynamo</td><td>v1.7.0</td></tr><tr><td>SGLang</td><td>v0.5.23</td></tr><tr><td>TensorRT-LLM</td><td>v1.4.0rc2</td></tr><tr><td>vLLM</td><td>v0.33.0</td></tr><tr><td>NIXL</td><td>v1.5.0 / v1.5.2</td></tr><tr><td>UCX</td><td>v1.22.0</td></tr></tbody></table>
+<p>注意：vLLM 钉在 v0.33.0。</p>
+<p>比最新正式版 v0.34.0 低一档。</p>
+<p>TRT-LLM 还是 rc 版，不是正式版。</p>
+<h2>升级注意</h2>
+<ul><li>跨 minor 升级会被拦住。</li><li>从 v1.5.x 不能直接跳到 v1.7.x。</li><li>要一级一级升，或者显式放行。</li><li>Grove 必须升到 v0.2.0-beta1。</li><li>Python 3.10 不再支持，至少要 3.11。</li><li>KVBM 整个删了，改走 dynamo.vllm.pd_connector。</li><li>/health 默认只回状态，不再列实例。</li><li>要实例列表得加 ?instances=true。</li><li>Sidecar 到引擎的 gRPC 连接默认从 8 条涨到 32 条。</li><li>并发高了，旧默认值会卡 token 速率。</li></ul>
+<h2>跟研究方向的关联</h2>
+<ul><li>你正在评估 SGLang 的 PD 解耦。</li><li>Dynamo 是 PD 解耦上面那层调度。</li><li>跨池子路由能抄进评估清单。</li><li>读题池子和解码池子可以分开看负载。</li><li>kv.fetch 提示就是传 KV 的那一层。</li><li>同传输岛里取，跨岛取，代价分开报。</li><li>实时重调循环跟自动调参方向撞上。</li><li>它回放 trace 找配置，跟你想要的调参系统同路。</li><li>截止时间排队能抄进 SLO 那档。</li><li>首字达标和过期拒绝一起报。</li><li>Sidecar 的故障迁移是生产必答题。</li><li>引擎挂了请求不丢，这条要进验收清单。</li><li>但这版发布说明几乎没有跑分数字。</li><li>想抄数字得等官方博客或自己测。</li></ul>
+<h2>术语表</h2>
+<ul><li>Dynamo：NVIDIA 的分布式推理编排平台。</li><li>Global Router：跨多个推理池子路由的前端。</li><li>Planner：管扩缩容和 GPU 预算的组件。</li><li>Sidecar：贴在原装引擎旁边跑的 Dynamo 进程。</li><li>传输岛：同一组高速互连的机器。</li><li>Velo：Dynamo 的可选响应传输面。</li><li>Grove：Dynamo 用的 K8s 资源编排器。</li><li>LPX：Dynamo 里的一种引擎部署形态。</li></ul>
+<h2>原文链接</h2>
+<ul><li>Release：<a href="https://github.com/ai-dynamo/dynamo/releases/tag/v1.7.0">https://github.com/ai-dynamo/dynamo/releases/tag/v1.7.0</a></li></ul></body></html>

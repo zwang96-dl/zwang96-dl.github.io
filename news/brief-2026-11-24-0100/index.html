@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-24T09:01:21"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（01点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（01点版）</h1>
+<p>这轮 GitHub 一共合入 36 条。</p>
+<p>vLLM 10 条，SGLang 12 条。</p>
+<p>TRT-LLM 5 条，llama.cpp 5 条。</p>
+<p>Mooncake 4 条，LMDeploy 和 TGI 挂零。</p>
+<p>Dynamo 和 FlashInfer 也挂零。</p>
+<p>但版本水位动了三处。</p>
+<p>Dynamo 出了 v1.7.0 正式版。</p>
+<p>FlashInfer 到了 v0.7.6rc2。</p>
+<p>llama.cpp 快照到了 b12674。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：三处动了</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>不过 v0.34.1rc0 的 tag 已经挂出来了。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0rc4 的 tag 也挂出来了。</p>
+<p>FlashInfer 预发布到了 v0.7.6rc2。</p>
+<p>上一版还是 rc1。</p>
+<p>Dynamo 正式版到了 v1.7.0。</p>
+<p>上一版还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12674。</p>
+<p>上一版还是 b12670。</p>
+<p>来源：GitHub releases</p>
+<p><strong>Dynamo v1.7.0：跨池子路由来了</strong></p>
+<p>这是今晚的头条。</p>
+<p>763 个 PR，150 个贡献者。</p>
+<p>最大的一件是 Global Router。</p>
+<p>一个前端能同时管多个推理池子。</p>
+<p>发现服务先把池子和路由都登记上。</p>
+<p>前端按负载分流，会话还粘在同一个池子上。</p>
+<p>说白了，以前一个调度器只管自己那一亩三分地。</p>
+<p>现在一个入口能跨池子调人了。</p>
+<p>Planner 也加了新本事。</p>
+<p>批量排产、池子优先级、实时重调都来了。</p>
+<p>重调是实验功能，会回放 trace 找更优配置。</p>
+<p>Router 加了按截止时间排队。</p>
+<p>快过期的请求先走，过期了直接拒。</p>
+<p>KV 抓取也加了提示，只找同组里的源。</p>
+<p>Sidecar 终于能顶多节点引擎了。</p>
+<p>引擎挂了，正在跑的请求能迁走。</p>
+<p>Sidecar 自己重启再注册。</p>
+<p>前端还加了语音转文字和批量接口。</p>
+<p>多模态那边，SGLang 的 worker 能接图、视频和音频了。</p>
+<p>引擎版本有三档。</p>
+<p>SGLang 是 v0.5.23。</p>
+<p>TRT-LLM 是 v1.4.0rc2。</p>
+<p>vLLM 是 v0.33.0。</p>
+<p>注意 vLLM 钉在 v0.33.0，比最新版低一档。</p>
+<p>这篇标了「值得深读」，笔记在下面。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/releases/tag/v1.7.0">https://github.com/ai-dynamo/dynamo/releases/tag/v1.7.0</a></p>
+<p><strong>vLLM：MoE 和稀疏注意力各进一步</strong></p>
+<p>#66749 给 Hopper 加了新 MoE 后端。</p>
+<p>用 FlashInfer 的 CuTe-DSL 写的，不量化。</p>
+<p>MoE 就是专家混合模型，一次只请几个专家干活。</p>
+<p>#68321 给两个模型开了新核。</p>
+<p>HYV4 和 V4-Flash 都能用。</p>
+<p>核是小头的 FlashMLA，跑在 SM90 上。</p>
+<p>FlashMLA 是 DeepSeek 的 MLA 加速核。</p>
+<p>MLA 是 DeepSeek 用的压缩注意力。</p>
+<p>SM90 就是 Hopper 这一代。</p>
+<p>#69332 修了 DSA 索引器的预填问题。</p>
+<p>DSA 是 DeepSeek 用的稀疏注意力。</p>
+<p>#69132 是 KV 卸载的修补。</p>
+<p>P2P 搬运里去掉空转的写任务。</p>
+<p>写量统计也不再虚高。</p>
+<p>#63805 和 #59371 都是 RL 方向的。</p>
+<p>一个加了 Connex 权重传输后端。</p>
+<p>权重传输就是把新权重发到推理卡上。</p>
+<p>一个在权重更新完时先对一遍基线。</p>
+<p>#67021 让 Kimi K3 的工具参数边来边吐。</p>
+<p>不用等整段攒齐再给。</p>
+<p>剩下 3 条是文档和 XPU 相关。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66749、https://github.com/vllm-project/vllm/pull/68321、https://github.com/vllm-project/vllm/pull/69332、https://github.com/vllm-project/vllm/pull/69132、https://github.com/vllm-project/vllm/pull/63805、https://github.com/vllm-project/vllm/pull/59371">https://github.com/vllm-project/vllm/pull/66749、https://github.com/vllm-project/vllm/pull/68321、https://github.com/vllm-project/vllm/pull/69332、https://github.com/vllm-project/vllm/pull/69132、https://github.com/vllm-project/vllm/pull/63805、https://github.com/vllm-project/vllm/pull/59371</a> 和 <a href="https://github.com/vllm-project/vllm/pull/67021">https://github.com/vllm-project/vllm/pull/67021</a></p>
+<p><strong>SGLang：H20 的 MoE 配置和草稿 KV 各一处</strong></p>
+<p>#50928 给 H20-3e 加了新配置。</p>
+<p>fused MoE 的 Triton 版，按真实路由调过。</p>
+<p>#49466 和 #49465 都是 linker 方向的。</p>
+<p>linker 是跨节点传 KV 的那一层。</p>
+<p>一份让 DSpark 的草稿 KV 跟着最后几层一起传。</p>
+<p>DSpark 是 SGLang 的推测解码草稿头。</p>
+<p>一份把可恢复前缀的掩码一次写完。</p>
+<p>#52491 把圆整 SiLU 查表也搬到 Hopper 上。</p>
+<p>SiLU 是一种激活函数。</p>
+<p>#51702 修了 Humming 的 MoE 收尾溢出。</p>
+<p>#52196 修了 AsyncPP 的 logprob 搬运。</p>
+<p>剩下 6 条是文档、CI 和一次 NPU 重构。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50928、https://github.com/sgl-project/sglang/pull/49466、https://github.com/sgl-project/sglang/pull/49465、https://github.com/sgl-project/sglang/pull/52491、https://github.com/sgl-project/sglang/pull/51702">https://github.com/sgl-project/sglang/pull/50928、https://github.com/sgl-project/sglang/pull/49466、https://github.com/sgl-project/sglang/pull/49465、https://github.com/sgl-project/sglang/pull/52491、https://github.com/sgl-project/sglang/pull/51702</a> 和 <a href="https://github.com/sgl-project/sglang/pull/52196">https://github.com/sgl-project/sglang/pull/52196</a></p>
+<p><strong>TRT-LLM：稀疏 MLA 预编译进了预热</strong></p>
+<p>#22274 是稀疏 MLA 的预热优化。</p>
+<p>PrimTS 的核在解码预热时先编好。</p>
+<p>用时直接复用解码视图。</p>
+<p>剩下 4 条是杂事和基建。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22274、https://github.com/NVIDIA/TensorRT-LLM/pull/22834、https://github.com/NVIDIA/TensorRT-LLM/pull/22680、https://github.com/NVIDIA/TensorRT-LLM/pull/22379">https://github.com/NVIDIA/TensorRT-LLM/pull/22274、https://github.com/NVIDIA/TensorRT-LLM/pull/22834、https://github.com/NVIDIA/TensorRT-LLM/pull/22680、https://github.com/NVIDIA/TensorRT-LLM/pull/22379</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21622">https://github.com/NVIDIA/TensorRT-LLM/pull/21622</a></p>
+<p><strong>llama.cpp：5 条都是小修补</strong></p>
+<p>两条改聊天界面。</p>
+<p>一条让 RPC 复用上下文。</p>
+<p>一条改了 ggml 的数学函数。</p>
+<p>一条给 Vulkan 的 SSM 扫描加了新尺寸。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32922、https://github.com/ggml-org/llama.cpp/pull/32920、https://github.com/ggml-org/llama.cpp/pull/32896、https://github.com/ggml-org/llama.cpp/pull/32655">https://github.com/ggml-org/llama.cpp/pull/32922、https://github.com/ggml-org/llama.cpp/pull/32920、https://github.com/ggml-org/llama.cpp/pull/32896、https://github.com/ggml-org/llama.cpp/pull/32655</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/32162">https://github.com/ggml-org/llama.cpp/pull/32162</a></p>
+<p><strong>Mooncake：传输引擎的开销又降了</strong></p>
+<p>#5782，批量注册时查表和快照的开销降了。</p>
+<p>#5787，tebench 的轮询退避改成可选项。</p>
+<p>#5598，独立客户端能用 SSD 预取了。</p>
+<p>剩下 1 条是 HTTP 元数据的小修补。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5782、https://github.com/kvcache-ai/Mooncake/pull/5787、https://github.com/kvcache-ai/Mooncake/pull/5598">https://github.com/kvcache-ai/Mooncake/pull/5782、https://github.com/kvcache-ai/Mooncake/pull/5787、https://github.com/kvcache-ai/Mooncake/pull/5598</a> 和 <a href="https://github.com/kvcache-ai/Mooncake/pull/5691">https://github.com/kvcache-ai/Mooncake/pull/5691</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下批在 11 月 25 日 00:00 UTC。</p>
+<h2>业内新闻</h2>
+<p><strong>GLM-5.4：同一组层跑两遍，号称越级打怪</strong></p>
+<p>智谱 11 月 23 日发的旗舰模型。</p>
+<p>750B 参数，28 层循环跑两遍。</p>
+<p>Loop Transformer 就是同一组层重复用。</p>
+<p>参数不涨，网络变相加深。</p>
+<p>官方说能对标 2 到 3T 级别的模型。</p>
+<p>这是厂商自报，还没独立验证。</p>
+<p>上下文 1M token，输出最多 128K。</p>
+<p>先只给 Coding Plan、ZCode 和 Z.ai Chat 用。</p>
+<p>API 和开源权重都还在等安全评估。</p>
+<p>跟推理有关的一点：第二遍复用第一遍的 KV。</p>
+<p>还复用稀疏注意力的索引，不用重算。</p>
+<p>来源：<a href="https://venturebeat.com/technology/z-ais-glm-5-4-aims-to-match-models-up-to-four-times-its-size-by-running-28-layers-twice">https://venturebeat.com/technology/z-ais-glm-5-4-aims-to-match-models-up-to-four-times-its-size-by-running-28-layers-twice</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<p>Uni3Sim 是 11 月 23 日 11点版报过的。</p>
+<p>HyperPod 加 Dynamo 是 11 月 18 日的旧闻。</p>
+<p>Ling-3.2-air 是 11 月 23 日 09点版报过的。</p>
+<h2>值得深读</h2>
+<p><strong>Dynamo v1.7.0 正式版：跨池子路由和实时重调（GitHub Release，2026-11-24）</strong></p>
+<p>Dynamo 是管多引擎推理集群的编排层。</p>
+<p>这版把调度从单池子做到跨池子。</p>
+<p>还加了按截止时间排队和引擎挂了能迁请求。</p>
+<p>跟你研究的 PD 解耦评估直接相关。</p>
+<p>跨池子路由、KV 抓取提示、实时重调都能抄进清单。</p>
+<p>笔记：<a href="https://zwang96-dl.github.io/news/deep-20261124-dynamo-v1-7-0/">Dynamo v1.7.0 正式版：跨池子路由和实时重调</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-0100/">01点版</a></p></body></html>
