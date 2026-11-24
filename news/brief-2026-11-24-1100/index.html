@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-24T19:10:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（11点版）</h1>
+<p>这轮 GitHub 一共合入 32 条。</p>
+<p>vLLM 12 条，Dynamo 7 条。</p>
+<p>FlashInfer 5 条，TRT-LLM 4 条。</p>
+<p>llama.cpp 3 条，SGLang 1 条。</p>
+<p>LMDeploy、TGI、Mooncake 挂零。</p>
+<p>版本水位只动了一处。</p>
+<p>llama.cpp 快照到了 b12680。</p>
+<p>论文那边补报三篇 KV 缓存的。</p>
+<p>业内还有一单大收购。</p>
+<p>其中一篇做了深读。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了一处</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6rc2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12680。</p>
+<p>上一版还是 b12676。</p>
+<p>v0.34.1rc0 的 tag 在 01点版报过。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：前缀缓存和 Hy4 上 ROCm</strong></p>
+<p>#68934 让前缀匹配回退时直接报错。</p>
+<p>前缀缓存就是复用以前算过的上下文。</p>
+<p>以前是默默退回整块匹配。</p>
+<p>现在是宁可报错，也不悄悄降级。</p>
+<p>#68839 让 Hy4 和 Hy4-Flash 上 ROCm。</p>
+<p>Hy4 是腾讯 770B 的多模态旗舰。</p>
+<p>#68747 让 HiSparse 多节点共用 host 池。</p>
+<p>HiSparse 是稀疏注意力的那套东西。</p>
+<p>#68912 让 Rust 前端对付不了的多模态模型，启动就报错。</p>
+<p>剩下 8 条是清理、CI 和修补。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68934、https://github.com/vllm-project/vllm/pull/68839、https://github.com/vllm-project/vllm/pull/68747">https://github.com/vllm-project/vllm/pull/68934、https://github.com/vllm-project/vllm/pull/68839、https://github.com/vllm-project/vllm/pull/68747</a> 和 <a href="https://github.com/vllm-project/vllm/pull/68912">https://github.com/vllm-project/vllm/pull/68912</a></p>
+<p><strong>SGLang：这轮只有 1 条 CI</strong></p>
+<p>#52810 是扩散测试的稳定工作。</p>
+<p>没有功能变化。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52810">https://github.com/sgl-project/sglang/pull/52810</a></p>
+<p><strong>TRT-LLM：推测解码采样和 KV 容量</strong></p>
+<p>#22057 给单模型推测 worker 加了词表并行采样。</p>
+<p>推测解码就是先让草稿模型猜，再让大模型验。</p>
+<p>采样那步并行了，草稿跑得更快。</p>
+<p>#22795 让引擎上报实测的 KV 缓存容量预算。</p>
+<p>KV 预算就是缓存能装多少上下文。</p>
+<p>这个数能直接进容量规划。</p>
+<p>#22814 给 MiniMax-H3 加了静态 FP8 配置。</p>
+<p>#22682 是回复处理的重构。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22057、https://github.com/NVIDIA/TensorRT-LLM/pull/22795、https://github.com/NVIDIA/TensorRT-LLM/pull/22814">https://github.com/NVIDIA/TensorRT-LLM/pull/22057、https://github.com/NVIDIA/TensorRT-LLM/pull/22795、https://github.com/NVIDIA/TensorRT-LLM/pull/22814</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22682">https://github.com/NVIDIA/TensorRT-LLM/pull/22682</a></p>
+<p><strong>Dynamo：KV 路由清单和 v1.7.0 转正</strong></p>
+<p>#19312 让路由器在引擎退出时清掉 vLLM 的 KV 清单。</p>
+<p>KV 清单就是路由手里那张缓存位置表。</p>
+<p>引擎都退出了，表还留着就会指错路。</p>
+<p>这跟 PD 解耦里 KV 路由那一环有关。</p>
+<p>#19137 把 TRT-LLM 升到 v1.4.0rc4。</p>
+<p>#19478 把 v1.7.0 的文档标为当前版。</p>
+<p>#19476 把 NIXL 升到 1.5.0。</p>
+<p>NIXL 是跨节点传 KV 的那一层。</p>
+<p>剩下 3 条是 CI、容器和重构。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19312、https://github.com/ai-dynamo/dynamo/pull/19137、https://github.com/ai-dynamo/dynamo/pull/19478">https://github.com/ai-dynamo/dynamo/pull/19312、https://github.com/ai-dynamo/dynamo/pull/19137、https://github.com/ai-dynamo/dynamo/pull/19478</a> 和 <a href="https://github.com/ai-dynamo/dynamo/pull/19476">https://github.com/ai-dynamo/dynamo/pull/19476</a></p>
+<p><strong>FlashInfer：预填加了状态池</strong></p>
+<p>#9991 给 cake_gdp 的预填加了状态池。</p>
+<p>预填就是读提示、建缓存的那一步。</p>
+<p>还加了 BF16/FP16 状态和随机舍入。</p>
+<p>#9817 恢复了 MoE 的离线 profile。</p>
+<p>剩下 3 条是测试。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9991">https://github.com/flashinfer-ai/flashinfer/pull/9991</a> 和 <a href="https://github.com/flashinfer-ai/flashinfer/pull/9817">https://github.com/flashinfer-ai/flashinfer/pull/9817</a></p>
+<p><strong>llama.cpp：3 条小修</strong></p>
+<p>#32182 修了 SpacemiT 的注意力。</p>
+<p>#32968 把部分 CI 换到 gb10 runner。</p>
+<p>#32928 是 cmake 的头文件修补。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32182">https://github.com/ggml-org/llama.cpp/pull/32182</a></p>
+<p><strong>LMDeploy、TGI、Mooncake：这轮挂零</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>补报：五篇论文围攻 KV 缓存</strong></p>
+<p>Hanging Context 今天 12:45 有一篇汇总。</p>
+<p>五篇全是冲着 KV 缓存来的。</p>
+<p>之前几期漏了，这轮补上。</p>
+<p>其中三篇是新的。</p>
+<p>4-bit KV 解码核跑到峰值带宽的 67% 到 75%。</p>
+<p>测的是 H200。</p>
+<p>比 FlashInfer 的 FP8 路径快 1.12 到 2.2 倍。</p>
+<p>Gossamer 给推理模型做定额 KV 压缩。</p>
+<p>端到端吞吐最高 16.7 倍。</p>
+<p>精度还贴着不压的上限走。</p>
+<p>Mosaic 把 CPU 和 GPU 的活协调起来。</p>
+<p>每词耗时最多好 3.7 倍。</p>
+<p>另外两篇之前报过。</p>
+<p>DisSparse 在 11 月 23 日 19点版做了深读。</p>
+<p>IndexerStage 同期也报过。</p>
+<p>5 篇全是预印本，数字都是作者自报。</p>
+<p>来源：<a href="https://hangingcontext.com/stories/2026-11-24/kv-cache-squeeze/、https://arxiv.org/abs/2611.30027、https://arxiv.org/abs/2611.29497">https://hangingcontext.com/stories/2026-11-24/kv-cache-squeeze/、https://arxiv.org/abs/2611.30027、https://arxiv.org/abs/2611.29497</a> 和 <a href="https://arxiv.org/abs/2605.07719">https://arxiv.org/abs/2605.07719</a></p>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下批在 11 月 25 日 00:00 UTC。</p>
+<h2>业内新闻</h2>
+<p><strong>亚马逊 75 亿美元买下 Decart 的优化栈</strong></p>
+<p>亚马逊周一早上宣布了这笔交易。</p>
+<p>买的是 Decart 优化栈的技术和团队。</p>
+<p>Decart 优化栈是让模型在各种芯片上跑得更快的软件。</p>
+<p>传闻价约 75 亿美元。</p>
+<p>亚马逊没公开具体金额。</p>
+<p>目标是给自家的 Trainium 芯片提速。</p>
+<p>Trainium 是亚马逊自研的 AI 芯片。</p>
+<p>亚马逊正准备对外卖这款芯片。</p>
+<p>这笔交易之前简报没报过。</p>
+<p>来源：<a href="https://techcrunch.com/2026/11/23/amazon-snaps-up-decarts-ai-optimization-tech-for-7-5b-as-it-prepares-to-sell-trainium-chips/">https://techcrunch.com/2026/11/23/amazon-snaps-up-decarts-ai-optimization-tech-for-7-5b-as-it-prepares-to-sell-trainium-chips/</a> 和 <a href="https://techcrunch.com/2026/11/24/amazons-decart-acquisition-is-a-bet-on-using-software-to-narrow-the-gap-with-nvidia-in-the-ai-chip-race/">https://techcrunch.com/2026/11/24/amazons-decart-acquisition-is-a-bet-on-using-software-to-narrow-the-gap-with-nvidia-in-the-ai-chip-race/</a></p>
+<p><strong>llm-d 的 SGLang 那篇是旧闻</strong></p>
+<p>11 月 23 日 07点版已经做过深读。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>X、Reddit、HN、中文媒体这轮也没新东西。</p>
+<h2>值得深读</h2>
+<p><strong>Gossamer：KV 缓存预算卡死也能跑</strong></p>
+<p>这篇能帮你把 KV 压缩的账算得更细。</p>
+<p>它按每个 token 的价值选动作。</p>
+<p>量化、合并、扔掉三选一。</p>
+<p>相似度计算塞进注意力里白嫖。</p>
+<p>跟 PD 解耦直接相关：传 KV 之前先压一压。</p>
+<p>精读笔记：<a href="https://zwang96-dl.github.io/news/deep-20261124-gossamer-kv/">Gossamer：KV 缓存预算卡死也能跑</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-1100/">11点版</a></p></body></html>
