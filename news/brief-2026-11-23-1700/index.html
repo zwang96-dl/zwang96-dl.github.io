@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月23日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-23"/>
+<meta name="doc-ts" content="2026-11-24T01:15:26"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-23（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-23（17点版）</h1>
+<p>这轮 GitHub 一共合入 21 条。</p>
+<p>vLLM 6 条，SGLang 7 条。</p>
+<p>FlashInfer 1 条，llama.cpp 3 条。</p>
+<p>TRT-LLM、Dynamo、LMDeploy 挂零。</p>
+<p>TGI、Mooncake 也挂零。</p>
+<p>没有新版本发布。</p>
+<p>arXiv 周一批还没进索引。</p>
+<p>业内新闻很热闹：黄仁勋复职、AMD 机架点亮。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>1.4.0 还是 rc4。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>llama.cpp 快照到了 b12658。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>Mooncake 仓库地址纠正了</strong></p>
+<p>真实地址是 kvcache-ai/Mooncake。</p>
+<p>之前用的 moonshotai/Mooncake 已 404。</p>
+<p>以后按新地址查。</p>
+<p>NPU 补丁版 15点版已报过。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake">https://github.com/kvcache-ai/Mooncake</a></p>
+<p><strong>vLLM：MXFP8 的 MoE 专家层跑通快路</strong></p>
+<p>MXFP8 是 8 位微缩放量化。</p>
+<p>模型压得更小，跑得更快。</p>
+<p>以前 MXFP8 的专家层走不了 DeepEP 低延迟后端。</p>
+<p>现在能在 SM100 和 SM103 上跑了。</p>
+<p>还能走 NIXL EP 分发。</p>
+<p>像给专家并行换了条专用快车道。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66456">https://github.com/vllm-project/vllm/pull/66456</a></p>
+<p><strong>vLLM：HiSparse 预填卡住修了</strong></p>
+<p>HiSparse 是管 KV 缓存热页的组件。</p>
+<p>分块预填时，热页占着不放。</p>
+<p>下一块分不到地方，整个就卡住。</p>
+<p>改成先回收再分配。</p>
+<p>流式续跑也不卡了。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67185">https://github.com/vllm-project/vllm/pull/67185</a></p>
+<p><strong>vLLM：剩下 4 条一句话带过</strong></p>
+<p>两条是 CI 小修补。</p>
+<p>一条清掉量化里的死代码。</p>
+<p>一条是解码 top-k 宽度校验。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69497、https://github.com/vllm-project/vllm/pull/69483、https://github.com/vllm-project/vllm/pull/69056">https://github.com/vllm-project/vllm/pull/69497、https://github.com/vllm-project/vllm/pull/69483、https://github.com/vllm-project/vllm/pull/69056</a> 和 <a href="https://github.com/vllm-project/vllm/pull/60961">https://github.com/vllm-project/vllm/pull/60961</a></p>
+<p><strong>SGLang：P/D 解耦修了个释放时序 bug</strong></p>
+<p>P/D 解耦是把读题和写词分到不同机器。</p>
+<p>流水线并行时，每一节都要在同一步放掉请求。</p>
+<p>以前 PP0 节点判得太早。</p>
+<p>一节还在传 KV，另一节已经把页放了。</p>
+<p>放掉的页还被传输线程读着，就会踩坏。</p>
+<p>现在等所有节都确认完再放。</p>
+<p>跟你研究的 P/D 解耦直接相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47618">https://github.com/sgl-project/sglang/pull/47618</a></p>
+<p><strong>SGLang：Muse Spark 支持专家张量并行</strong></p>
+<p>Muse Spark 是 Meta 的新模型。</p>
+<p>NVFP4 检查点以前只能专家并行等于张量并行。</p>
+<p>现在能用 --ep-size 1 了。</p>
+<p>每块卡存全部专家，只切专家的中间维度。</p>
+<p>专家负载不均的问题小了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50065">https://github.com/sgl-project/sglang/pull/50065</a></p>
+<p><strong>SGLang：自动调优结果换了个存处</strong></p>
+<p>FlashInfer 自动调优会给每个核挑最快的打法。</p>
+<p>结果以前各存各的 JSON 文件。</p>
+<p>现在单卡服务统一进 v2 托管库。</p>
+<p>目标模型和草稿模型共用一份。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51512">https://github.com/sgl-project/sglang/pull/51512</a></p>
+<p><strong>SGLang：剩下 4 条一句话带过</strong></p>
+<p>QSA 做了个小性能优化。</p>
+<p>sgl-router 升了个安全补丁版本。</p>
+<p>剩下两条是 CI 小修补。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50622、https://github.com/sgl-project/sglang/pull/52663、https://github.com/sgl-project/sglang/pull/52652">https://github.com/sgl-project/sglang/pull/50622、https://github.com/sgl-project/sglang/pull/52663、https://github.com/sgl-project/sglang/pull/52652</a> 和 <a href="https://github.com/sgl-project/sglang/pull/52687">https://github.com/sgl-project/sglang/pull/52687</a></p>
+<p><strong>FlashInfer：修了个 Blackwell 参数校验</strong></p>
+<p>MoE 专家并行在 Blackwell 上。</p>
+<p>非法的分阶段参数现在直接拒掉。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9819">https://github.com/flashinfer-ai/flashinfer/pull/9819</a></p>
+<p><strong>llama.cpp：GDN 改用重放，不用回滚了</strong></p>
+<p>GDN 是一种门控循环层。</p>
+<p>它是注意力的一种省显存替代品。</p>
+<p>推测解码验算时，猜错要回退状态。</p>
+<p>以前每步都给循环状态拍快照。</p>
+<p>现在只留待定输入，错了重放一遍。</p>
+<p>7 个循环状态时，每序列从 1197MB 降到 177MB。</p>
+<p>省了 85%。</p>
+<p>32 个序列一起跑，37.4GB 降到 5.5GB。</p>
+<p>速度还略快，批量验证最多快 34.5%。</p>
+<p>预填基本没变。</p>
+<p>这篇标了「值得深读」，笔记在下面。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31669">https://github.com/ggml-org/llama.cpp/pull/31669</a></p>
+<p><strong>llama.cpp：剩下 2 条是小修补</strong></p>
+<p>一条修 CI 失败。</p>
+<p>一条把量化代码里的常量改成静态。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32914">https://github.com/ggml-org/llama.cpp/pull/32914</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/32902">https://github.com/ggml-org/llama.cpp/pull/32902</a></p>
+<p><strong>TRT-LLM、Dynamo、LMDeploy 挂零</strong></p>
+<p>TGI、Mooncake 也挂零。</p>
+<p>这轮五家都没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv：周一批还没进索引</strong></p>
+<p>API 最新仍是 11 月 20 日那批。</p>
+<p>下一批进了再报。</p>
+<h2>业内新闻</h2>
+<p><strong>黄仁勋复职英伟达 CEO</strong></p>
+<p>董事会周一全票通过，立即生效。</p>
+<p>离 11 月 12 日辞任只隔 11 天。</p>
+<p>NVDA 当天涨约 31%。</p>
+<p>路透、华尔街日报、CNN 三线确认。</p>
+<p>董事会调查还没做完就复职。</p>
+<p>公司治理的争议还在。</p>
+<p>来源：<a href="https://www.reuters.com/technology/nvidia-reinstates-jensen-huang-ceo-2026-11-23/">https://www.reuters.com/technology/nvidia-reinstates-jensen-huang-ceo-2026-11-23/</a></p>
+<p><strong>AMD Helios 机架在微软 Azure 点亮</strong></p>
+<p>首个 72 卡 MI455X 机架开始跑早期负载验证。</p>
+<p>这是 AMD 的新一代机架方案。</p>
+<p>Anthropic、Meta、OpenAI、甲骨文云也已拿到首批机架。</p>
+<p>商用时间、价格、实测数都还没公布。</p>
+<p>来源：<a href="https://windowsforum.com/news/microsoft-tests-first-amd-helios-72-gpu-rack-for-azure-nd-mi455x-v7.453810/">https://windowsforum.com/news/microsoft-tests-first-amd-helios-72-gpu-rack-for-azure-nd-mi455x-v7.453810/</a></p>
+<p><strong>AMD 收购 Taalas 落定</strong></p>
+<p>最高 29 亿美元，11 月 17 日已完成。</p>
+<p>Taalas 把模型权重直接烧进芯片。</p>
+<p>宣称 Llama 3.1 8B 单用户 17000 词每秒。</p>
+<p>数字是厂商自测，按通稿口径看。</p>
+<p>来源：<a href="https://itdaily.com/news/business/amd-taalas-acquisition-ai-inference/">https://itdaily.com/news/business/amd-taalas-acquisition-ai-inference/</a></p>
+<p><strong>Marlowe 融了 2.77 亿美元</strong></p>
+<p>做非英伟达芯片的推理云。</p>
+<p>首站 12 月上线，跑 Etched 的芯片。</p>
+<p>目标是大模型编程业务。</p>
+<p>来源：<a href="https://ventureburn.com/marlowe-raises-277-million-challenge-nvidia-ai-hardware/">https://ventureburn.com/marlowe-raises-277-million-challenge-nvidia-ai-hardware/</a></p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<p>Thaw 是 11 月 12 日报过的，不重复。</p>
+<h2>值得深读</h2>
+<p><strong>llama.cpp GDN 重放（#31669）</strong></p>
+<p>混合模型省显存的硬数字。</p>
+<p>Qwen3-Next 这类带循环层的模型都用得上。</p>
+<p>笔记：<a href="https://zwang96-dl.github.io/news/deep-20261124-gdn/">GDN 重放代替回滚：循环状态不用拍快照了</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-23-1700/">17点版</a></p></body></html>
