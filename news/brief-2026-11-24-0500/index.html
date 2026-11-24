@@ -1,0 +1,121 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-24T12:59:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（05点版）</h1>
+<p>这轮 GitHub 一共合入 30 条。</p>
+<p>vLLM 11 条，llama.cpp 9 条。</p>
+<p>SGLang 5 条，TRT-LLM 4 条。</p>
+<p>LMDeploy 1 条，剩下 4 个仓库挂零。</p>
+<p>版本水位一处都没动。</p>
+<p>llama.cpp 的新快照还没挂出来。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6rc2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 还是 b12675。</p>
+<p>不过主分支又进了 9 条。</p>
+<p>新快照估计快来了。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：11 条里 Rust 前端占了 7 条</strong></p>
+<p>#68969 让 DeepSeek V4 的补全后缀能用。</p>
+<p>补全后缀就是续写时给模型的收尾提示。</p>
+<p>#66581 加了 Granite Docling 模型。</p>
+<p>这是 IBM 的文档理解模型。</p>
+<p>#66156 让响应模板支持推理内容和拼接。</p>
+<p>推理内容就是模型边想边写的那部分。</p>
+<p>#63002 让 DeepSeek-V4-Pro 在 AMD 卡上能独立跑。</p>
+<p>#69602 把 token ID 提示按词表收紧。</p>
+<p>token ID 就是直接传数字编号的提示。</p>
+<p>多模态输入不受这个限制。</p>
+<p>#69601 让 Mistral v11 以上的工具调用能解析。</p>
+<p>剩下 4 条是检查点解析、调度指标和写任务取消的小修。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68969、https://github.com/vllm-project/vllm/pull/66581、https://github.com/vllm-project/vllm/pull/66156、https://github.com/vllm-project/vllm/pull/63002、https://github.com/vllm-project/vllm/pull/69602">https://github.com/vllm-project/vllm/pull/68969、https://github.com/vllm-project/vllm/pull/66581、https://github.com/vllm-project/vllm/pull/66156、https://github.com/vllm-project/vllm/pull/63002、https://github.com/vllm-project/vllm/pull/69602</a> 和 <a href="https://github.com/vllm-project/vllm/pull/69601">https://github.com/vllm-project/vllm/pull/69601</a></p>
+<p><strong>SGLang：NPU 缓存越界和 AMD 大序列各一处</strong></p>
+<p>#51787 修了 GLM-5.3-Flash 在 NPU 上的缓存越界写。</p>
+<p>缓存越界就是写内存时写过了头。</p>
+<p>#49566 把 AMD 大序列的位置编码和 KV 写入拼成一块算。</p>
+<p>位置编码就是告诉模型词在第几位。</p>
+<p>KV 就是模型记下来的上下文草稿。</p>
+<p>#44194 修了 GDN 变长预填的输出分块。</p>
+<p>剩下 2 条是测试桩。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51787、https://github.com/sgl-project/sglang/pull/49566">https://github.com/sgl-project/sglang/pull/51787、https://github.com/sgl-project/sglang/pull/49566</a> 和 <a href="https://github.com/sgl-project/sglang/pull/44194">https://github.com/sgl-project/sglang/pull/44194</a></p>
+<p><strong>llama.cpp：NVFP4 反量化和分词提速</strong></p>
+<p>#32875 让 NVFP4 反量化更快了。</p>
+<p>NVFP4 是一种 4 位量化格式。</p>
+<p>反量化就是把压过的权重还原回来算。</p>
+<p>#32859 让 BPE 分词提速了。</p>
+<p>BPE 是一种分词算法。</p>
+<p>#32940 给 inkling2 的视觉部分接上了归一化。</p>
+<p>剩下 6 条是 CUDA、HIP 和 WebGPU 的小修。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32875、https://github.com/ggml-org/llama.cpp/pull/32859">https://github.com/ggml-org/llama.cpp/pull/32875、https://github.com/ggml-org/llama.cpp/pull/32859</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/32940">https://github.com/ggml-org/llama.cpp/pull/32940</a></p>
+<p><strong>TRT-LLM：精度用例补回来了</strong></p>
+<p>#22514 把超时修复后丢掉的两个精度用例补回来了。</p>
+<p>#19729 给词嵌入偏置加了缓存。</p>
+<p>#22785 是 PLE 表改从 CPU 填充。</p>
+<p>剩下 1 条是流水线权限加固。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22514、https://github.com/NVIDIA/TensorRT-LLM/pull/19729">https://github.com/NVIDIA/TensorRT-LLM/pull/22514、https://github.com/NVIDIA/TensorRT-LLM/pull/19729</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22785">https://github.com/NVIDIA/TensorRT-LLM/pull/22785</a></p>
+<p><strong>LMDeploy：引导解码少算一步</strong></p>
+<p>#5167 改了引导解码的接受逻辑。</p>
+<p>引导解码就是按格式约束着生成。</p>
+<p>没算完的预填块，不再提前接受 token。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5167">https://github.com/InternLM/lmdeploy/pull/5167</a></p>
+<p><strong>Dynamo、FlashInfer、TGI、Mooncake：这轮挂零</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下批在 11 月 25 日 00:00 UTC。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>llm-d 的 SGLang 那篇是旧闻。</p>
+<p>11 月 23 日 07点版已经做过深读。</p>
+<p>单卡调参那篇也是 11 月 23 日 07点版报过的。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>X、Reddit、HN、中文媒体这轮也没新东西。</p>
+<h2>值得深读</h2>
+<p>这轮没有够格的内容。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-0500/">05点版</a></p></body></html>
