@@ -1,0 +1,128 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月23日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-23"/>
+<meta name="doc-ts" content="2026-11-24T05:01:43"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-23（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-23（21点版）</h1>
+<p>这轮 GitHub 一共合入 9 条。</p>
+<p>vLLM 2 条，SGLang 3 条。</p>
+<p>TRT-LLM 2 条，FlashInfer 2 条。</p>
+<p>LMDeploy、llama.cpp、Dynamo 挂零。</p>
+<p>TGI、Mooncake 也挂零。</p>
+<p>没有新版本发布。</p>
+<p>arXiv 没有新批次。</p>
+<p>但 vLLM 官方博客发了一篇实测。</p>
+<p>KV 缓存放 NVMe 上，跟内存一样快。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照还是 b12669。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：2 条都是小修补</strong></p>
+<p>一条把启动时的重型导入挪走。</p>
+<p>不走编译路径时，启动能快一点。</p>
+<p>一条是 XPU 的 CI 测试。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69520、https://github.com/vllm-project/vllm/pull/69509">https://github.com/vllm-project/vllm/pull/69520、https://github.com/vllm-project/vllm/pull/69509</a></p>
+<p><strong>SGLang：AMD 的 MoE 兜底修了</strong></p>
+<p>gfx1250 上 FP8 和 BF16 专家层。</p>
+<p>跑不动就回退到 Triton 实现。</p>
+<p>其余 2 条是文档和 CI。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52644、https://github.com/sgl-project/sglang/pull/52488">https://github.com/sgl-project/sglang/pull/52644、https://github.com/sgl-project/sglang/pull/52488</a> 和 <a href="https://github.com/sgl-project/sglang/pull/52411">https://github.com/sgl-project/sglang/pull/52411</a></p>
+<p><strong>TRT-LLM：Qwen3.8 新模型能跑了</strong></p>
+<p>Qwen3.8-Flash-Next 的建模接进来。</p>
+<p>支持 sm_107，NVFP4 双卡并行。</p>
+<p>另一条是 DSA 的小性能优化。</p>
+<p>DSA 是 DeepSeek 用的稀疏注意力。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22552">https://github.com/NVIDIA/TensorRT-LLM/pull/22552</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22645">https://github.com/NVIDIA/TensorRT-LLM/pull/22645</a></p>
+<p><strong>FlashInfer：v0.7.6 又进一步</strong></p>
+<p>一条 cherry-pick 进了发布分支。</p>
+<p>一条给 chunk_gated_delta_product 加预填后端。</p>
+<p>跑在 SM100a 和 SM103a 上。</p>
+<p>GDN 是循环模型的门控状态机制。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9951">https://github.com/flashinfer-ai/flashinfer/pull/9951</a> 和 <a href="https://github.com/flashinfer-ai/flashinfer/pull/9917">https://github.com/flashinfer-ai/flashinfer/pull/9917</a></p>
+<h2>新技术与论文</h2>
+<p><strong>KV 缓存放 NVMe 上，跟内存一样快</strong></p>
+<p>vLLM 官方博客今天刚发。</p>
+<p>智能体多轮对话要反复发长前缀。</p>
+<p>前缀越长，KV 缓存越占地方。</p>
+<p>KV 缓存就是解码时留的草稿纸。</p>
+<p>显存先满，内存接着满。</p>
+<p>这篇干脆跳过内存层，直接放 NVMe 硬盘上。</p>
+<p>Kimi-K3 在 16 张 AMD MI355X 上跑。</p>
+<p>1.8TB 的 NVMe 池子，跟同等内存池子比。</p>
+<p>48、70、96 并发下，吞吐都在 1% 以内。</p>
+<p>命中率只差 0.08 个百分点。</p>
+<p>池子放大到 4.6TB，70 并发下是 1TB 内存池子的 5.1 倍。</p>
+<p>命中率 93% 对 52%。</p>
+<p>划重点：命中率每涨 1 个点，吞吐涨约 10%。</p>
+<p>42 次跑分里，命中率能解释 96% 的吞吐变化。</p>
+<p>账也算得明白：存一天的 KV，NVMe 约 5.9 万美元。</p>
+<p>内存要 350 万美元。</p>
+<p>但有个短板：硬盘会写坏。</p>
+<p>Kimi-K3 一天写 83TB，两块盘 5 个半月就到寿命。</p>
+<p>这篇标了「值得深读」，笔记在下面。</p>
+<p>来源：<a href="https://vllm.ai/blog/2026-11-23-skip-the-dram-tier">https://vllm.ai/blog/2026-11-23-skip-the-dram-tier</a></p>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下批在 11 月 25 日 00:00 UTC。</p>
+<p>19点版报过的三篇仍是最新。</p>
+<h2>业内新闻</h2>
+<p>这轮没有新消息。</p>
+<p>SGLang 联盟是 11 月 12 日的旧闻。</p>
+<p>Rubin 那个 6.5 倍也是 11 月 11 日的旧闻。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<h2>值得深读</h2>
+<p><strong>KV 缓存放 NVMe：vLLM 官方实测（vLLM Blog，2026-11-23）</strong></p>
+<p>智能体 serving 的 KV 缓存瓶颈。</p>
+<p>这篇把三层账一次算清：速度、留存、成本。</p>
+<p>命中率、留存时间、硬盘磨损都有实测数。</p>
+<p>跟你研究的 KV 缓存方向直接相关。</p>
+<p>笔记：<a href="https://zwang96-dl.github.io/news/deep-20261124-nvme-kv-vllm/">KV 缓存放 NVMe：vLLM 官方实测，1.8TB 池子跟内存打平</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-23-2100/">21点版</a></p></body></html>
