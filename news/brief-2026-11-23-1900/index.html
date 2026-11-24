@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月23日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-23"/>
+<meta name="doc-ts" content="2026-11-24T03:10:39"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-23（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-23（19点版）</h1>
+<p>这轮 GitHub 一共合入 18 条。</p>
+<p>vLLM 5 条，SGLang 6 条。</p>
+<p>TRT-LLM 3 条，FlashInfer 1 条。</p>
+<p>Mooncake 1 条，Dynamo 1 条。</p>
+<p>llama.cpp 1 条，LMDeploy 和 TGI 挂零。</p>
+<p>没有新版本发布。</p>
+<p>arXiv 周一批进了索引。</p>
+<p>有两篇稀疏注意力新论文。</p>
+<p>业内新闻不多。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：基本没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>FlashInfer 还是 v0.7.5.post1。</p>
+<p>预发布还是 v0.7.6rc1。</p>
+<p>Dynamo 还是 v1.6.2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>llama.cpp 快照到了 b12669。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：AMD 卡上的稀疏注意力调快了</strong></p>
+<p>QSA 是一种稀疏注意力打法。</p>
+<p>只算关键 token，省显存带宽。</p>
+<p>这次给 Qwen4Exp 的稀疏注意力调了参数。</p>
+<p>目标是 MI300X 和 MI355X 这两代 AMD 卡。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65474">https://github.com/vllm-project/vllm/pull/65474</a></p>
+<p><strong>vLLM：ERNIE 5.5 Flash 预览版能跑了</strong></p>
+<p>配方更新，支持百度的 ERNIE 新模型。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69425">https://github.com/vllm-project/vllm/pull/69425</a></p>
+<p><strong>vLLM：剩下 3 条是 CI 小修补</strong></p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69513、https://github.com/vllm-project/vllm/pull/69510">https://github.com/vllm-project/vllm/pull/69513、https://github.com/vllm-project/vllm/pull/69510</a> 和 <a href="https://github.com/vllm-project/vllm/pull/64796">https://github.com/vllm-project/vllm/pull/64796</a></p>
+<p><strong>SGLang：FlashInfer 的 KDA 预填能上 SM107 了</strong></p>
+<p>KDA 是 FlashInfer 的一个预填核。</p>
+<p>SM107 是 Blackwell 这一代的小核心。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52643">https://github.com/sgl-project/sglang/pull/52643</a></p>
+<p><strong>SGLang：Mooncake 的分组元数据改用 numpy 生成</strong></p>
+<p>加载范围元数据算得更快了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49462">https://github.com/sgl-project/sglang/pull/49462</a></p>
+<p><strong>SGLang：符号链接目录的缓存失效修了</strong></p>
+<p>缓存目录是软链接时，以前一直命中不了。</p>
+<p>现在修好了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46177">https://github.com/sgl-project/sglang/pull/46177</a></p>
+<p><strong>SGLang：剩下 3 条是 CI 小修补</strong></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52710、https://github.com/sgl-project/sglang/pull/52706">https://github.com/sgl-project/sglang/pull/52710、https://github.com/sgl-project/sglang/pull/52706</a> 和 <a href="https://github.com/sgl-project/sglang/pull/52690">https://github.com/sgl-project/sglang/pull/52690</a></p>
+<p><strong>TRT-LLM：张量并行各 rank 共享融合策略了</strong></p>
+<p>mHC 的融合策略以前各 rank 各算一份。</p>
+<p>现在算一份大家共用。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22777">https://github.com/NVIDIA/TensorRT-LLM/pull/22777</a></p>
+<p><strong>TRT-LLM：剩下 2 条一句话带过</strong></p>
+<p>一条是 FlashInfer 原语升级。</p>
+<p>一条修 MiniMax-H3 分支的 CPU 单测。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22819">https://github.com/NVIDIA/TensorRT-LLM/pull/22819</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22823">https://github.com/NVIDIA/TensorRT-LLM/pull/22823</a></p>
+<p><strong>FlashInfer：D512 的 GQA 解码更快了</strong></p>
+<p>GQA 是分组查询注意力。</p>
+<p>解码头维度 512 时，NVFP4 和 FP8 KV 都更快了。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9771">https://github.com/flashinfer-ai/flashinfer/pull/9771</a></p>
+<p><strong>Mooncake：传输引擎批量准备并行化了</strong></p>
+<p>TENT 是传输引擎的一种模式。</p>
+<p>批量准备和提交现在分片并行做。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5680">https://github.com/kvcache-ai/Mooncake/pull/5680</a></p>
+<p><strong>llama.cpp：OpenCL 的推测验证加了个核</strong></p>
+<p>q6_k 的协同 GEMM，n 不超过 8 时用。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32909">https://github.com/ggml-org/llama.cpp/pull/32909</a></p>
+<p><strong>Dynamo：1 条是测试清理</strong></p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19018">https://github.com/ai-dynamo/dynamo/pull/19018</a></p>
+<h2>新技术与论文</h2>
+<p><strong>DisSparse：稀疏注意力终于能进 vLLM 了</strong></p>
+<p>长上下文推理卡在 KV 缓存上。</p>
+<p>KV 缓存就是解码时留的草稿纸。</p>
+<p>只读关键 token 能省带宽。</p>
+<p>以前大家用固定 top-k 选 token。</p>
+<p>可每个头的注意力分布不一样。</p>
+<p>固定数量要么多算，要么漏关键内容。</p>
+<p>top-p 是按累计概率动态选。</p>
+<p>更贴合实际，但一直难进生产系统。</p>
+<p>这篇把它完整接进了 vLLM。</p>
+<p>选块比同类方法快 1.17 到 1.8 倍。</p>
+<p>同等显存下，批量能开到 8 倍大。</p>
+<p>精度基本没掉。</p>
+<p>这篇标了「值得深读」，笔记在下面。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.28522">https://arxiv.org/abs/2611.28522</a></p>
+<p><strong>IndexerStage：DeepSeek 稀疏注意力的索引态搬出显存了</strong></p>
+<p>DeepSeek 稀疏注意力要留一份索引状态。</p>
+<p>用来挑每层该读哪些 token。</p>
+<p>这份状态每层每步都要全扫一遍。</p>
+<p>显存顶不住，索性挪到别的卡上。</p>
+<p>在 SGLang 里实现的，16 张管推理加 16 张管搬运。</p>
+<p>批量大了 12% 到 23%。</p>
+<p>解码吞吐快了 1.08 到 1.14 倍。</p>
+<p>长短请求混跑时最快到 1.31 倍。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.28625">https://arxiv.org/abs/2611.28625</a></p>
+<p><strong>多智能体 serving 底座也来了一次横评</strong></p>
+<p>这篇的英文标题很长。</p>
+<p>《The Evaluation Substrate Matters》。</p>
+<p>比的是多智能体 serving 的几种底座。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.28671">https://arxiv.org/abs/2611.28671</a></p>
+<h2>业内新闻</h2>
+<p><strong>英伟达收盘续涨：复职消息落袋，股价收在 165.05 美元</strong></p>
+<p>17点版报过董事会复职的消息。</p>
+<p>收盘价现在有了：涨 31.48%，收 165.05 美元。</p>
+<p>是 23 年来最大单日涨幅。</p>
+<p>市值一天回来近 1 万亿美元。</p>
+<p>纳指涨 6.5%，标普涨 4.7%。</p>
+<p>来源：<a href="https://www.asktraders.com/analysis/nvidia-soars-as-board-reinstates-jensen-huang-lifting-us-chip-stocks/">https://www.asktraders.com/analysis/nvidia-soars-as-board-reinstates-jensen-huang-lifting-us-chip-stocks/</a></p>
+<p><strong>llm-d 的 SGLang、Lambda 的 GPU：都是报过的旧闻</strong></p>
+<p>llm-d 那篇 SGLang 实测今早 07点版已做过深读。</p>
+<p>Lambda 上 GPU 是 11 月 18 日的消息。</p>
+<p>这轮不重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>最新单集仍是讲 Linear 的那期。</p>
+<p>来源：<a href="https://latent.space/pods/">https://latent.space/pods/</a></p>
+<p><strong>X、Reddit、HN、中文媒体：这轮没新东西</strong></p>
+<h2>值得深读</h2>
+<p><strong>DisSparse：top-p 稀疏注意力进 vLLM（arXiv:2611.28522）</strong></p>
+<p>稀疏注意力省带宽的老难题。</p>
+<p>这篇第一次把它完整接进生产级 vLLM。</p>
+<p>批量能开到 8 倍，精度基本不掉。</p>
+<p>跟你研究的 KV 缓存方向直接相关。</p>
+<p>笔记：<a href="https://zwang96-dl.github.io/news/deep-20261124-dissparse/">DisSparse：top-p 稀疏注意力进 vLLM，批量开到 8 倍</a></p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-23-1900/">19点版</a></p></body></html>
