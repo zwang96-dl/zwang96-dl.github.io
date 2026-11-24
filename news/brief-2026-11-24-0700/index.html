@@ -1,0 +1,121 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-24T14:59:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（07点版）</h1>
+<p>这轮 GitHub 一共合入 24 条。</p>
+<p>vLLM 7 条，llama.cpp 9 条。</p>
+<p>SGLang 4 条，Dynamo 2 条。</p>
+<p>TRT-LLM 和 FlashInfer 各 1 条。</p>
+<p>LMDeploy、TGI、Mooncake 挂零。</p>
+<p>版本水位只动了一处。</p>
+<p>llama.cpp 快照到了 b12676。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：只动了一处</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6rc2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12676。</p>
+<p>上一版还是 b12675。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：视觉编码器和异步渲染各一处</strong></p>
+<p>#69136 给 MiniCPM-V 的视觉编码器换了变长注意力。</p>
+<p>变长注意力就是按实际长度算，不垫空位。</p>
+<p>看图那部分算得更省了。</p>
+<p>MiniCPM-V 是个开源多模态模型。</p>
+<p>#69041 让异步渲染默认开 4 个工人。</p>
+<p>渲染器就是接请求、吐 token 的那一层。</p>
+<p>人多了，并发请求排队更短。</p>
+<p>#69098 给每条提示的媒体预处理加了上限。</p>
+<p>媒体预处理就是先把图、视频转成模型能吃的格式。</p>
+<p>防的是有人一次塞太多图把服务拖垮。</p>
+<p>#69613 让多模态报错带上原始原因。</p>
+<p>#69321 让 AMD RDNA 卡的预填核用更小的块。</p>
+<p>剩下 2 条是分类头修补和 XPU 的 8192 上下文默认值。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69136、https://github.com/vllm-project/vllm/pull/69041、https://github.com/vllm-project/vllm/pull/69098、https://github.com/vllm-project/vllm/pull/69613">https://github.com/vllm-project/vllm/pull/69136、https://github.com/vllm-project/vllm/pull/69041、https://github.com/vllm-project/vllm/pull/69098、https://github.com/vllm-project/vllm/pull/69613</a> 和 <a href="https://github.com/vllm-project/vllm/pull/69321">https://github.com/vllm-project/vllm/pull/69321</a></p>
+<p><strong>SGLang：MoE 解码的 FP8 联合算子</strong></p>
+<p>#50685 把 FP8 的路由和池化 GEMM 拼成一个算子。</p>
+<p>GEMM 就是矩阵乘法，模型里最重的活。</p>
+<p>拼在一起，解码和验证都少跑一趟内存。</p>
+<p>#49468 让 Mooncake 各层组的范围读取先建好再算。</p>
+<p>Mooncake 是跨节点传 KV 的那一层。</p>
+<p>#44415 让 GLM-5.3-Flash 的 MoE 修正偏置留在 fp32。</p>
+<p>剩下 1 条是 NPU 的 CI。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50685、https://github.com/sgl-project/sglang/pull/49468">https://github.com/sgl-project/sglang/pull/50685、https://github.com/sgl-project/sglang/pull/49468</a> 和 <a href="https://github.com/sgl-project/sglang/pull/44415">https://github.com/sgl-project/sglang/pull/44415</a></p>
+<p><strong>llama.cpp：CUDA 融合和提示缓存重试</strong></p>
+<p>#32500 把 RMSNorm、乘法和旋转位置编码融成一个核。</p>
+<p>融合就是几步算并成一步，少搬几次内存。</p>
+<p>#30997 让服务端提示缓存恢复失败后能重试。</p>
+<p>提示缓存就是把算过的提示存起来复用。</p>
+<p>#32721 给 Vulkan 加了分块 GDN 回放。</p>
+<p>GDN 是一种不用注意力的序列结构。</p>
+<p>#32855 是 Inkling 2 Mini 的混合权重修补。</p>
+<p>剩下 5 条是 Metal、UI 和构建小修。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32500、https://github.com/ggml-org/llama.cpp/pull/30997、https://github.com/ggml-org/llama.cpp/pull/32721">https://github.com/ggml-org/llama.cpp/pull/32500、https://github.com/ggml-org/llama.cpp/pull/30997、https://github.com/ggml-org/llama.cpp/pull/32721</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/32855">https://github.com/ggml-org/llama.cpp/pull/32855</a></p>
+<p><strong>Dynamo：HTTP 服务改走专用服务器</strong></p>
+<p>#19039 把 HTTP 服务改走 dynamo-http-server。</p>
+<p>#18804 让运行时能直接找到已注册的 worker。</p>
+<p>都是内部 plumbing，接口没变。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19039">https://github.com/ai-dynamo/dynamo/pull/19039</a> 和 <a href="https://github.com/ai-dynamo/dynamo/pull/18804">https://github.com/ai-dynamo/dynamo/pull/18804</a></p>
+<p><strong>TRT-LLM、FlashInfer：各 1 条小修</strong></p>
+<p>TRT-LLM 是测试工作流的权限加固。</p>
+<p>FlashInfer 是 MXFP8 的 CuTe-DSL 条目重调。</p>
+<p>MXFP8 是一种 8 位浮点量化格式。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22849">https://github.com/NVIDIA/TensorRT-LLM/pull/22849</a> 和 <a href="https://github.com/flashinfer-ai/flashinfer/pull/9892">https://github.com/flashinfer-ai/flashinfer/pull/9892</a></p>
+<p><strong>LMDeploy、TGI、Mooncake：这轮挂零</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下批在 11 月 25 日 00:00 UTC。</p>
+<h2>业内新闻</h2>
+<p><strong>这轮没新东西</strong></p>
+<p>llm-d 的 SGLang 那篇是旧闻。</p>
+<p>11 月 23 日 07点版已经做过深读。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<p>X、Reddit、HN、中文媒体这轮也没新东西。</p>
+<h2>值得深读</h2>
+<p>这轮没有够格的内容。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-0700/">07点版</a></p></body></html>
