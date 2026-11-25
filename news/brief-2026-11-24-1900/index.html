@@ -1,0 +1,237 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-25T03:08:55"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（19点版）</h1>
+<p>这轮 GitHub 一共合入 25 条新东西。</p>
+<p>vLLM 11 条，SGLang 5 条。</p>
+<p>FlashInfer 4 条，LMDeploy 2 条。</p>
+<p>Dynamo、Mooncake、TRT-LLM 各 1 条。</p>
+<p>llama.cpp 和 TGI 挂零。</p>
+<p>版本水位基本没动。</p>
+<p>llama.cpp 快照到了 b12704。</p>
+<p>FlashInfer 代码里版本号升到 0.7.6。</p>
+<p>arXiv 新批次出来了。</p>
+<p>3 篇相关，再补 3 篇之前漏掉的。</p>
+<p>深读 1 篇：P/D 解耦何时划算。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>不过 v0.34.1rc0 的标签已出。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6rc2。</p>
+<p>代码里版本号已升到 0.7.6。</p>
+<p>正式 release 还没挂出来。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12704。</p>
+<p>上一版还是 b12686。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：Muse Spark 那边解码提速了</strong></p>
+<p>#67306 让 MoE 解码走原生路线。</p>
+<p>Muse Spark 是 AMD 的新卡。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>#67382 把 DSpark 的采样步骤融成一个核。</p>
+<p>DSpark 是并行投机解码的一种。</p>
+<p>投机解码就是先让小模型打草稿再让大模型改。</p>
+<p>采样步骤少了，延迟跟着下来。</p>
+<p>#67039 给 MiniMax-M3.1 配了 FP4 通信。</p>
+<p>FP4 是 4 位浮点量化。</p>
+<p>张量并行里传数据直接减半。</p>
+<p>#66969 让 HF3FS 的 KV 连接器上非 CUDA 设备。</p>
+<p>HF3FS 是华为的分布式文件系统。</p>
+<p>KV 连接器就是跨机器传草稿纸的模块。</p>
+<p>#69461 是安全修补。</p>
+<p>同步拉取多模态内容时加了上限。</p>
+<p>防恶意链接把服务拖垮。</p>
+<p>#69383 和 #68841 是 Rust 前端收尾。</p>
+<p>编译因素和可选功能开关收紧了。</p>
+<p>#69186 让 XPU 上的 lm_head 走 torch.mm。</p>
+<p>XPU 是英特尔的加速卡。</p>
+<p>lm_head 就是最后算词表概率的那层。</p>
+<p>#69729 是文档构建瘦身。</p>
+<p>#66327 升了 fastokens。</p>
+<p>#69707 是 CI。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67306、https://github.com/vllm-project/vllm/pull/67382、https://github.com/vllm-project/vllm/pull/67039、https://github.com/vllm-project/vllm/pull/66969、https://github.com/vllm-project/vllm/pull/69461、https://github.com/vllm-project/vllm/pull/69383、https://github.com/vllm-project/vllm/pull/68841、https://github.com/vllm-project/vllm/pull/69186、https://github.com/vllm-project/vllm/pull/69729、https://github.com/vllm-project/vllm/pull/66327">https://github.com/vllm-project/vllm/pull/67306、https://github.com/vllm-project/vllm/pull/67382、https://github.com/vllm-project/vllm/pull/67039、https://github.com/vllm-project/vllm/pull/66969、https://github.com/vllm-project/vllm/pull/69461、https://github.com/vllm-project/vllm/pull/69383、https://github.com/vllm-project/vllm/pull/68841、https://github.com/vllm-project/vllm/pull/69186、https://github.com/vllm-project/vllm/pull/69729、https://github.com/vllm-project/vllm/pull/66327</a> 和 <a href="https://github.com/vllm-project/vllm/pull/69707">https://github.com/vllm-project/vllm/pull/69707</a></p>
+<p><strong>SGLang：投机解码先拦一道</strong></p>
+<p>#50299 拒绝不支持的步数配置。</p>
+<p>DFLASH 和 DSpark 都是并行投机解码。</p>
+<p>以前配错了可能悄悄跑歪。</p>
+<p>现在启动就报错。</p>
+<p>#52952 修了 InternLM 的工具调用。</p>
+<p>拆开的开始标记留到第一次调用之后。</p>
+<p>剩下 3 条是文档和 CI。</p>
+<p>#52851、#51609、#51484。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50299、https://github.com/sgl-project/sglang/pull/52952、https://github.com/sgl-project/sglang/pull/52851、https://github.com/sgl-project/sglang/pull/51609">https://github.com/sgl-project/sglang/pull/50299、https://github.com/sgl-project/sglang/pull/52952、https://github.com/sgl-project/sglang/pull/52851、https://github.com/sgl-project/sglang/pull/51609</a> 和 <a href="https://github.com/sgl-project/sglang/pull/51484">https://github.com/sgl-project/sglang/pull/51484</a></p>
+<p><strong>LMDeploy：长上下文分卡通信更省了</strong></p>
+<p>#5172 把 DCP 扩展到 GQA。</p>
+<p>DCP 是分布式上下文并行。</p>
+<p>GQA 是分组查询注意力。</p>
+<p>长上下文分卡算的时候通信更省。</p>
+<p>#5149 保住了 DP1 的 CUDA 图里的 MoE 路由。</p>
+<p>MoE 路由就是 token 该去哪个专家。</p>
+<p>以前进图就丢了。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5172">https://github.com/InternLM/lmdeploy/pull/5172</a> 和 <a href="https://github.com/InternLM/lmdeploy/pull/5149">https://github.com/InternLM/lmdeploy/pull/5149</a></p>
+<p><strong>FlashInfer：0.7.6 正式版快来了</strong></p>
+<p>#9788 把版本号升到 0.7.6。</p>
+<p>正式 release 还没挂出来。</p>
+<p>rc2 还是最新的 release。</p>
+<p>剩下 3 条是 CI。</p>
+<p>#10006、#10005、#9334。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9788、https://github.com/flashinfer-ai/flashinfer/pull/10006、https://github.com/flashinfer-ai/flashinfer/pull/10005">https://github.com/flashinfer-ai/flashinfer/pull/9788、https://github.com/flashinfer-ai/flashinfer/pull/10006、https://github.com/flashinfer-ai/flashinfer/pull/10005</a> 和 <a href="https://github.com/flashinfer-ai/flashinfer/pull/9334">https://github.com/flashinfer-ai/flashinfer/pull/9334</a></p>
+<p><strong>Dynamo、Mooncake、TRT-LLM：各 1 条小修补</strong></p>
+<p>Dynamo #18957 让前端指标走 OTLP 出去。</p>
+<p>OTLP 是可观测性的标准协议。</p>
+<p>Mooncake #5767 修了元数据重注册的锁定问题。</p>
+<p>TRT-LLM #22854 是纯 infra。</p>
+<p>机器人工作流加固。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18957、https://github.com/kvcache-ai/Mooncake/pull/5767">https://github.com/ai-dynamo/dynamo/pull/18957、https://github.com/kvcache-ai/Mooncake/pull/5767</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22854">https://github.com/NVIDIA/TensorRT-LLM/pull/22854</a></p>
+<p><strong>llama.cpp、TGI：这轮挂零</strong></p>
+<p>快照到了 b12704，见版本水位。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新批次出来了</strong></p>
+<p>11 月 25 日 00:00 UTC 那批。</p>
+<p>3 篇跟推理 serving 相关。</p>
+<p>另外补 3 篇之前漏掉的。</p>
+<p>都是 11 月 23 日前后那批的。</p>
+<p><strong>Wavefront：并行草稿先看清整块再下笔</strong></p>
+<p>并行投机解码一次吐一整块 token。</p>
+<p>毛病是块里的 token 互相看不见。</p>
+<p>DSpark 用一个修正头串行补。</p>
+<p>但这个头会盖掉大部分底座预测。</p>
+<p>底座那套大 lm_head 白算了。</p>
+<p>Wavefront 换了个思路。</p>
+<p>底座缩成一个低秩小头。</p>
+<p>修正头一次看完整块前缀。</p>
+<p>再用几步并行迭代收尾。</p>
+<p>整步打进一张 CUDA 图。</p>
+<p>Qwen3-8B 上比 DSpark 快 10.7%。</p>
+<p>比 DFlash 快 23.6%。</p>
+<p>长上下文上优势更大。</p>
+<p>比 DSpark 快 14.3%，比 DFlash 快 28.9%。</p>
+<p>Qwen3.8-27B 上也全赢。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.31638">https://arxiv.org/abs/2611.31638</a></p>
+<p><strong>GreenDynaMix：显卡发热了，精度来补位</strong></p>
+<p>推理跑久了显卡发热。</p>
+<p>发热就降频，降频就掉速。</p>
+<p>以前温控和吞吐各管各的。</p>
+<p>这篇把两者绑在一起调。</p>
+<p>MoE 路由器告诉它哪个专家重要。</p>
+<p>重要的专家保高精度。</p>
+<p>不重要的降精度顶上去。</p>
+<p>GPU 老化速率降 25–33%。</p>
+<p>吞吐基本保住。</p>
+<p>困惑度只涨 0.9–1.6%。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.31737">https://arxiv.org/abs/2611.31737</a></p>
+<p><strong>P/D 解耦啥时才划算：实测给了答案</strong></p>
+<p>拆分不一定是优化。</p>
+<p>同一批 4 张 A100。</p>
+<p>同个 Qwen3-8B，同个 SGLang。</p>
+<p>5 种搭法，150 组条件实测。</p>
+<p>短对话和长输出，4 个独立副本最快。</p>
+<p>32K 长上下文，流水线首字快 58–59%。</p>
+<p>静态 TP2+TP2 的 P/D 拆分没赢过副本。</p>
+<p>压力下两种死法完全不同。</p>
+<p>B 是半边闲着半边堵。</p>
+<p>E 是全卡跑满还排长队。</p>
+<p>全文见深读笔记。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.29104">https://arxiv.org/abs/2611.29104</a></p>
+<p><strong>Exact on Paper：省事的开关也会悄悄改答案</strong></p>
+<p>引擎文档说这些功能是精确的。</p>
+<p>但精度是平均数。</p>
+<p>平均数没变，不等于每道题都没变。</p>
+<p>9 种配置、3380 道题、5 个榜单实测。</p>
+<p>7 个精确功能各翻 1.47% 到 1.78% 的题。</p>
+<p>但都在重排请求的噪声范围内。</p>
+<p>FP8 的 KV 缓存翻 3.36%。</p>
+<p>跟 FP8 权重一个量级。</p>
+<p>用批量不变核，7 个精确功能一字不差。</p>
+<p>FP8 的 KV 缓存还是翻 3.91%。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.29663">https://arxiv.org/abs/2611.29663</a></p>
+<p><strong>One Million Tokens in 20GB：M6 就能跑 100 万 token</strong></p>
+<p>Inkling-2-Mini 是个 26.4B 的循环 MoE 模型。</p>
+<p>原生上下文就是 100 万 token。</p>
+<p>但在 M6 Mac mini 上跑到 64K 就爆显存了。</p>
+<p>这篇用 2 位 KV 压缩救回来。</p>
+<p>100 万 token 时峰值显存 19.49GB。</p>
+<p>每秒 9.52 个 token。</p>
+<p>32GB 的 M6 就能跑。</p>
+<p>你刚定的 M6 正好对上。</p>
+<p>3.06 位时困惑度基本不掉。</p>
+<p>2.06 位时只涨 0.130。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.29092">https://arxiv.org/abs/2611.29092</a></p>
+<p><strong>Optical Context Compression：把文档画成图，未必省钱</strong></p>
+<p>把长文档画成图喂给视觉模型。</p>
+<p>输入 token 是少了。</p>
+<p>但推理模型会想更久。</p>
+<p>解码长度涨 1.5 到 3.5 倍。</p>
+<p>算上输出价，图输入反而更贵。</p>
+<p>5 个模型里有 2 个就是这样。</p>
+<p>压缩比至少 1.6 才划算。</p>
+<p>只把压缩比够高的送去画图。</p>
+<p>账单能省 6–14%。</p>
+<p>精度只掉 0.3 到 1.2 个点。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.30130">https://arxiv.org/abs/2611.30130</a></p>
+<h2>业内新闻</h2>
+<p><strong>X、Reddit、HN、中文媒体这轮没新东西</strong></p>
+<p>llm-d 的 SGLang 是旧闻。</p>
+<p>11 月 23 日 07点版做过深读。</p>
+<p>GLM-5.4 在 01点版报过。</p>
+<p>Megakernel-Zoo 在 13点版报过。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<h2>值得深读</h2>
+<p><strong>P/D 解耦何时划算，一篇</strong></p>
+<p>拆分不一定是优化。</p>
+<p>这篇直接给了实测答案。</p>
+<p>跟你的 P/D 解耦评估对得上。</p>
+<p>首字和端到端分开报。</p>
+<p>压力测试要看队列。</p>
+<p>失败分两种死法。</p>
+<p>全文见深读笔记。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-1900/">19点版</a></p></body></html>
