@@ -1,0 +1,162 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月25日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-25"/>
+<meta name="doc-ts" content="2026-11-25T13:01:15"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-25（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-25（05点版）</h1>
+<p>这轮 GitHub 一共合入 18 条。</p>
+<p>vLLM 4 条，SGLang 3 条。</p>
+<p>llama.cpp 7 条，TRT-LLM 2 条。</p>
+<p>Dynamo 和 FlashInfer 各 1 条。</p>
+<p>LMDeploy、TGI、Mooncake 挂零。</p>
+<p>版本水位全没动。</p>
+<p>最值得看的是 Dynamo 一条。</p>
+<p>它让前端能直连引擎跑服务。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照还是 b12722。</p>
+<p>主分支有新提交，快照还没挂出。</p>
+<p>来源：GitHub releases</p>
+<p><strong>Dynamo：前端能直连引擎了</strong></p>
+<p>#18789 让前端直接托管引擎。</p>
+<p>以前引擎旁边要放个边车进程。</p>
+<p>边车就是帮忙传话的小程序。</p>
+<p>现在前端自己拨号连引擎。</p>
+<p>中间少了一跳。</p>
+<p>缓存路由和解耦照常工作。</p>
+<p>解耦就是把预填和生成分开跑。</p>
+<p>但这条还没有命令行开关。</p>
+<p>开关在另一条改动里，还没合入。</p>
+<p>验证也只有 CPU 上的假引擎测试。</p>
+<p>先记一笔，等真机数字再说。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18789">https://github.com/ai-dynamo/dynamo/pull/18789</a></p>
+<p><strong>vLLM：一种低精度缓存能用了</strong></p>
+<p>#69738 修了 Nemotron 的缓存。</p>
+<p>NVFP4 是英伟达的 4 位浮点格式。</p>
+<p>以前这种缓存一启动就报错。</p>
+<p>原因是依赖的转换函数没合入。</p>
+<p>现在换了 FlashInfer 的新接口。</p>
+<p>每个请求只转换一次。</p>
+<p>以前每一行都要转一遍。</p>
+<p>少转就是少干重复活。</p>
+<p>数值跟老办法保持一致。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69738">https://github.com/vllm-project/vllm/pull/69738</a></p>
+<p><strong>vLLM：AMD 共享专家补齐了</strong></p>
+<p>#67283 给 AMD 卡补了个功能。</p>
+<p>MoE 模型里有共享专家。</p>
+<p>共享专家就是人人都要用的那位。</p>
+<p>现在通用后端也能融合它了。</p>
+<p>融合就是跟其他专家一起算。</p>
+<p>但作者手头没有 AMD 卡。</p>
+<p>验证靠的是持续集成。</p>
+<p>真机输出还没人亲测过。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67283">https://github.com/vllm-project/vllm/pull/67283</a></p>
+<p><strong>SGLang、TRT-LLM：以修补为主</strong></p>
+<p>SGLang 3 条没有生产改动。</p>
+<p>一条是文档，一条是测试修补。</p>
+<p>还有一条是 NPU 文档更新。</p>
+<p>TRT-LLM #22479 修了预热问题。</p>
+<p>MiniMax 模型预填编译会失败。</p>
+<p>现在按批次类型只编译一次。</p>
+<p>剩下 1 条是测试豁免。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22479">https://github.com/NVIDIA/TensorRT-LLM/pull/22479</a></p>
+<p><strong>llama.cpp、FlashInfer：小事几件</strong></p>
+<p>llama.cpp 7 条多是界面和 CI。</p>
+<p>一条修了 Windows 干净关机。</p>
+<p>FlashInfer 1 条是恢复测试任务。</p>
+<p>快照还是 b12722，见版本水位。</p>
+<p><strong>LMDeploy、TGI、Mooncake：这轮挂零</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下一批是 11 月 26 日 00:00 UTC。</p>
+<p>下面补报 11 月 24 日那批漏掉的。</p>
+<p><strong>补报：给草稿调个温度就更快</strong></p>
+<p>推测解码就是先打草稿再核对。</p>
+<p>草稿模型常常不够自信。</p>
+<p>说白了，它猜对了但不敢肯定。</p>
+<p>这篇给草稿分布调了温度。</p>
+<p>温度就是控制自信程度的旋钮。</p>
+<p>调完后接受长度涨了约一成。</p>
+<p>几乎没有额外成本。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.33111">https://arxiv.org/abs/2611.33111</a></p>
+<p><strong>补报：闲置服务先睡，卡借给别人</strong></p>
+<p>ModelLess 是蚂蚁的无服务器系统。</p>
+<p>没人用的服务先进入睡眠。</p>
+<p>权重留在内存里，不占显卡。</p>
+<p>释放约 1 秒，唤醒约 4 秒。</p>
+<p>冷启动要四分多钟。</p>
+<p>空出的卡借给低优先级任务。</p>
+<p>回放一周记录估算了一下。</p>
+<p>约 38% 的卡时能借出去。</p>
+<p>但这是理想上限，不是实测。</p>
+<p>暂停请求比直接重排多产两成。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.32634">https://arxiv.org/abs/2611.32634</a></p>
+<p><strong>补报：4 位量化配方不能照抄</strong></p>
+<p>这篇对比了几种 4 位格式。</p>
+<p>结论是配方看格式下菜。</p>
+<p>一种格式管用的招，另一种未必。</p>
+<p>激活用 6 位、权重用 4 位时。</p>
+<p>精度基本能追回未量化水平。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.32873">https://arxiv.org/abs/2611.32873</a></p>
+<h2>业内新闻</h2>
+<p><strong>网页、X、HN 这轮没新东西</strong></p>
+<p>Reddit 和中文媒体也没新东西。</p>
+<p>vLLM-GR 在 23点版报过。</p>
+<p>llm-d 的 SGLang 是旧闻。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<h2>值得深读</h2>
+<p><strong>这轮没有值得单独深读的</strong></p>
+<p>最值得留意的是 Dynamo 那条。</p>
+<p>直连模式跟你的解耦评估相关。</p>
+<p>但它还没有开关和真机数字。</p>
+<p>ModelLess 也先放着看。</p>
+<p>等它有端到端实测再深读。</p></body></html>
