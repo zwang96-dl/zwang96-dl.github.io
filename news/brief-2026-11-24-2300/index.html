@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-25T06:59:47"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（23点版）</h1>
+<p>这轮 GitHub 合入 27 条。</p>
+<p>vLLM 10 条，SGLang 9 条。</p>
+<p>TRT-LLM 6 条，llama.cpp 1 条。</p>
+<p>FlashInfer 1 条。</p>
+<p>LMDeploy、TGI、Dynamo、Mooncake 挂零。</p>
+<p>头条是 FlashInfer v0.7.6 正式版。</p>
+<p>等了几天的正式 release 终于挂出来了。</p>
+<p>另外 vLLM 官宣了一个新分支 vLLM-GR。</p>
+<p>蚂蚁还开源了 124B 的多模态模型 Ling-3.2-air。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：FlashInfer 正式版来了</strong></p>
+<p>FlashInfer 从 v0.7.6rc2 升到 v0.7.6。</p>
+<p>正式版今天 06:18 UTC 发布。</p>
+<p>内容主要是修补合集。</p>
+<p>没有大功能，胜在稳定。</p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12720。</p>
+<p>上一版是 b12716。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：多模态缓存和解码各进一步</strong></p>
+<p>#67030 加了 encoder 缓存事件。</p>
+<p>encoder 就是处理图片、视频的那段。</p>
+<p>它的缓存现在能对外发事件。</p>
+<p>方便上层监控和联动。</p>
+<p>#69584 修了 Kimi-K3 的图文顺序。</p>
+<p>图片和文字混排时按请求顺序渲染。</p>
+<p>以前顺序会乱。</p>
+<p>#69736 给 Qwen3 系列做了瘦 GEMM 方案。</p>
+<p>GEMM 就是矩阵乘法。</p>
+<p>针对 SM100、SM103 的解码投影。</p>
+<p>Qwen3 系列的 MoE 解码都受益。</p>
+<p>#67340 让 FP8 的 DSpark 走投机配置。</p>
+<p>DSpark 是并行投机解码的一种。</p>
+<p>投机解码就是先让小模型打草稿再让大模型改。</p>
+<p>这次是在 AMD 的 Muse Spark 卡上。</p>
+<p>#69604 修了多模态占位符重叠的问题。</p>
+<p>重叠的占位符现在只留 Omni 共享的那段。</p>
+<p>#64881、#68248、#69816、#69605 是小修补和 XPU 支持。</p>
+<p>#69794 清掉了 xformers 的残留引用。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67030、https://github.com/vllm-project/vllm/pull/69584、https://github.com/vllm-project/vllm/pull/69736、https://github.com/vllm-project/vllm/pull/67340">https://github.com/vllm-project/vllm/pull/67030、https://github.com/vllm-project/vllm/pull/69584、https://github.com/vllm-project/vllm/pull/69736、https://github.com/vllm-project/vllm/pull/67340</a> 和 <a href="https://github.com/vllm-project/vllm/pull/69604">https://github.com/vllm-project/vllm/pull/69604</a></p>
+<p><strong>SGLang：P/D 解耦的状态更新修了个竞态</strong></p>
+<p>#52976 把 disaggregation 的状态更新改成原子操作。</p>
+<p>disaggregation 就是 P/D 解耦。</p>
+<p>prefill 和 decode 分到不同机器上跑。</p>
+<p>以前读改写三步不是原子的。</p>
+<p>并发一高就可能互相踩。</p>
+<p>现在一次改完，不怕插队。</p>
+<p>#47278 给 AMD gfx950 做了 split-K 解码方案。</p>
+<p>针对 64 头 FP8 稀疏 MLA。</p>
+<p>MLA 就是多头潜在注意力。</p>
+<p>split-K 是把大矩阵乘法拆开并行算。</p>
+<p>#51885 降了 MoE humming 的 host 开销。</p>
+<p>#52776 是 kimi-k3 的性能小修补。</p>
+<p>#52747 修了 hunyuan 模型按 batch 形状重复编译核的问题。</p>
+<p>#50804 是模型层的清理和死代码删除。</p>
+<p>#51506 优化了 HiSparse 的拷贝核交换。</p>
+<p>#50643、#50753 是路由和测试。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52976、https://github.com/sgl-project/sglang/pull/47278">https://github.com/sgl-project/sglang/pull/52976、https://github.com/sgl-project/sglang/pull/47278</a> 和 <a href="https://github.com/sgl-project/sglang/pull/51885">https://github.com/sgl-project/sglang/pull/51885</a></p>
+<p><strong>TRT-LLM：DeepSeek-R1 的专家负载均衡</strong></p>
+<p>#22282 给 DeepSeek-R1 加了静态 EPLB。</p>
+<p>EPLB 就是专家并行负载均衡。</p>
+<p>MoE 模型里专家分得不均会拖慢整体。</p>
+<p>静态版提前排好，省掉运行时调度。</p>
+<p>#19098 加了按池子的 KV 缓存利用率日志。</p>
+<p>KV cache 就是存中间结果的草稿纸。</p>
+<p>现在能看到每个池子用了多少。</p>
+<p>#21982、#22838、#22874、#22599 是测试和 infra。</p>
+<p>另外补一条 21 点版漏掉的。</p>
+<p>#22561 把多模态 embedding 挂到 KV 缓存复用上。</p>
+<p>图片的 embedding 也能复用了。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22282、https://github.com/NVIDIA/TensorRT-LLM/pull/19098">https://github.com/NVIDIA/TensorRT-LLM/pull/22282、https://github.com/NVIDIA/TensorRT-LLM/pull/19098</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22561">https://github.com/NVIDIA/TensorRT-LLM/pull/22561</a></p>
+<p><strong>FlashInfer：正式版之外还有一颗轮子</strong></p>
+<p>#10021 给 0.7.6 发布分支补了 Python 3.11 的轮子。</p>
+<p>JIT 缓存的 wheel。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/10021">https://github.com/flashinfer-ai/flashinfer/pull/10021</a></p>
+<p><strong>llama.cpp：加了个 agent 模式开关</strong></p>
+<p>#33004 加了 --ui-agent。</p>
+<p>不用 server tools 和 MCP 代理的 agent 模式。</p>
+<p>快照到了 b12720。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/33004">https://github.com/ggml-org/llama.cpp/pull/33004</a></p>
+<p><strong>LMDeploy、TGI、Dynamo、Mooncake：这轮挂零</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下一批是 11 月 26 日 00:00 UTC。</p>
+<h2>业内新闻</h2>
+<p><strong>vLLM-GR：vLLM 长了个推荐分支</strong></p>
+<p>vLLM 官宣了 vLLM-GR 0.30.0。</p>
+<p>专门给生成式推荐用的分支。</p>
+<p>推荐模型直接生成商品的语义 ID。</p>
+<p>语义 ID 就是一串代表商品的 token。</p>
+<p>一次要出一批候选，不是单个答案。</p>
+<p>它把 beam search 做到了加速卡上。</p>
+<p>beam search 就是同时追踪多条候选路径。</p>
+<p>多条路径共享同一份 prompt 的 KV 缓存。</p>
+<p>再加目录约束，只出真实在售的商品。</p>
+<p>项目方报的数：H20 上 beam 宽 256。</p>
+<p>batch 8 时 P99 延迟 369 毫秒。</p>
+<p>SGLang 同场是 1280 毫秒。</p>
+<p>NVIDIA 的 SID-GR 是 428 毫秒。</p>
+<p>先别急着下结论。</p>
+<p>数字是项目方自报的。</p>
+<p>SGLang 那边候选池按 2 倍 beam 宽算。</p>
+<p>工作量本来就多一倍，对比不完全对等。</p>
+<p>仓库在 vllm-project 名下。</p>
+<p>基于 vLLM 0.30.0，支持英伟达和昇腾。</p>
+<p>示例模型是快手的 OneRec-1.7B。</p>
+<p>来源：<a href="https://alphasignal.ai/news/vllm-gr-beats-sglang-by-3-5x-on-wide-beam-ai-recommendation-serving">https://alphasignal.ai/news/vllm-gr-beats-sglang-by-3-5x-on-wide-beam-ai-recommendation-serving</a></p>
+<p><strong>Ling-3.2-air：蚂蚁开源 124B 多模态模型</strong></p>
+<p>蚂蚁开源了 Ling-3.2-air。</p>
+<p>124B 参数的 MoE 模型。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>每 token 只激活 5.5B。</p>
+<p>主打办公场景：自动处理流程、读长文档。</p>
+<p>文本、图片、视频都能进。</p>
+<p>MIT 协议，随便用。</p>
+<p>上下文 256K。</p>
+<p>SGLang 和 vLLM 首日就支持了。</p>
+<p>来源：<a href="https://i10x.ai/news/ant-ling-3-2-air-open-weights-124b-workflow-automation">https://i10x.ai/news/ant-ling-3-2-air-open-weights-124b-workflow-automation</a></p>
+<h2>值得深读</h2>
+<p><strong>这轮没有值得单独深读的</strong></p>
+<p>最值得留意的是两件事。</p>
+<p>SGLang #52976，P/D 解耦的状态竞态修补。</p>
+<p>跟你研究的 P/D 解耦直接相关。</p>
+<p>等它有更多实测再深读。</p>
+<p>另一件是 vLLM-GR。</p>
+<p>推荐 serving 是个新方向。</p>
+<p>等社区跑出独立实测再看。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-2300/">23点版</a></p></body></html>
