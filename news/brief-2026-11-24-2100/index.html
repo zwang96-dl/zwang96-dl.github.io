@@ -1,0 +1,132 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-25T04:57:54"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（21点版）</h1>
+<p>这轮窗口只有约 1 小时。</p>
+<p>GitHub 新合入 7 条。</p>
+<p>vLLM 2 条，TRT-LLM 4 条。</p>
+<p>FlashInfer 1 条。</p>
+<p>SGLang、LMDeploy、Dynamo 这轮挂零。</p>
+<p>版本水位基本没动。</p>
+<p>llama.cpp 快照到了 b12716。</p>
+<p>FlashInfer 的 v0.7.6 标签已出。</p>
+<p>但正式 release 还没挂出来。</p>
+<p>arXiv 没有新批次。</p>
+<p>下一批是 11 月 26 日 00:00 UTC。</p>
+<p>网页、X、HN 这轮也没新东西。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6rc2。</p>
+<p>不过 v0.7.6 的标签已经打出来了。</p>
+<p>正式 release 还没挂，估计就在这几天。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12716。</p>
+<p>上一版还是 b12711。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：流水线并行别让空步占着队</strong></p>
+<p>#68614 改了流水线并行的调度。</p>
+<p>流水线并行就是把模型切成几段。</p>
+<p>每段放在一张卡上接力算。</p>
+<p>以前空跑的步骤会占着批队列。</p>
+<p>新请求到了也得排队等。</p>
+<p>现在空步不再挡路。</p>
+<p>新请求能直接插进来。</p>
+<p>另外 prefill 的微批次也改了。</p>
+<p>prefill 就是处理输入提示词那段。</p>
+<p>积压的 prefill 按流水线段数切块。</p>
+<p>轻量任务也能摊满每个 stage。</p>
+<p>不用一段一段慢慢过。</p>
+<p>只在流水线并行时生效。</p>
+<p>作者在 4 张 GB200 上测了 MiniMax-M2.7。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>#62631 是 XPU 的小众支持。</p>
+<p>MXFP4 的 MoE LoRA 走 XPU 的融合核。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>LoRA 是轻量微调方法。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68614">https://github.com/vllm-project/vllm/pull/68614</a> 和 <a href="https://github.com/vllm-project/vllm/pull/62631">https://github.com/vllm-project/vllm/pull/62631</a></p>
+<p><strong>SGLang、LMDeploy、Dynamo、TGI、Mooncake：这轮挂零</strong></p>
+<p>SGLang 上一轮的 6 条都已报过。</p>
+<p>这轮没有新合入。</p>
+<p><strong>TRT-LLM：4 条都是测试和工具</strong></p>
+<p>#22791 让压测客户端别再空转轮询。</p>
+<p>trtllm-bench 是英伟达自家的压测工具。</p>
+<p>异步客户端以前忙等结果，白白烧 CPU。</p>
+<p>现在改成等通知再醒。</p>
+<p>压测本身更干净了。</p>
+<p>#22787 是 GLM-5.2 的测试阈值放宽。</p>
+<p>#22862 恢复了 6 个取消用例的 CPU 覆盖。</p>
+<p>#22870 是流水线 infra 的用例豁免。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22791、https://github.com/NVIDIA/TensorRT-LLM/pull/22787、https://github.com/NVIDIA/TensorRT-LLM/pull/22862">https://github.com/NVIDIA/TensorRT-LLM/pull/22791、https://github.com/NVIDIA/TensorRT-LLM/pull/22787、https://github.com/NVIDIA/TensorRT-LLM/pull/22862</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22870">https://github.com/NVIDIA/TensorRT-LLM/pull/22870</a></p>
+<p><strong>FlashInfer：修了一个容易读错的输入</strong></p>
+<p>#10013 是个正确性修补。</p>
+<p>decode 时跨卡规约的旧版输入格式。</p>
+<p>以前会被悄悄误读。</p>
+<p>现在直接标记废弃，不再猜。</p>
+<p>#10019 把它 cherry-pick 进 0.7.6 发布分支。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/10013">https://github.com/flashinfer-ai/flashinfer/pull/10013</a> 和 <a href="https://github.com/flashinfer-ai/flashinfer/pull/10019">https://github.com/flashinfer-ai/flashinfer/pull/10019</a></p>
+<p><strong>llama.cpp：快照到了 b12716</strong></p>
+<p>本轮唯一的新合入 #32948。</p>
+<p>20 点版已经报过。</p>
+<p>Inkling 2 的图算子精简。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32948">https://github.com/ggml-org/llama.cpp/pull/32948</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>最新还是 11 月 25 日 00:00 UTC 那批。</p>
+<p>19 点版已经报过。</p>
+<p>下一批 11 月 26 日 00:00 UTC。</p>
+<h2>业内新闻</h2>
+<p><strong>网页、X、HN 这轮没新东西</strong></p>
+<p>llm-d 的 SGLang 还是旧闻。</p>
+<p>20 点版已经提过。</p>
+<h2>值得深读</h2>
+<p><strong>这轮没有值得单独深读的</strong></p>
+<p>都是小修补和测试。</p>
+<p>最值得留意的是 vLLM #68614。</p>
+<p>流水线并行的调度这块值得跟踪。</p>
+<p>等它有更多实测数据再深读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-2100/">21点版</a></p></body></html>
