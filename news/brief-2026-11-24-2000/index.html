@@ -1,0 +1,143 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 20:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-25T04:19:15"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（20点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（20点版）</h1>
+<p>这轮窗口是 6 小时。</p>
+<p>但 19 点版已经报到 03:00Z。</p>
+<p>所以真正新的只有最后 1 小时多。</p>
+<p>GitHub 一共合入 83 条。</p>
+<p>其中 19 点版后新的约 20 条。</p>
+<p>大多是小修补和 CI。</p>
+<p>版本水位基本没动。</p>
+<p>llama.cpp 快照到了 b12711。</p>
+<p>FlashInfer 0.7.6 正式版还没挂出来。</p>
+<p>arXiv 没有新批次。</p>
+<p>下一批是 11 月 26 日 00:00 UTC。</p>
+<p>网页这轮也没新东西。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6rc2。</p>
+<p>代码里版本号已升到 0.7.6。</p>
+<p>正式 release 还没挂出来。</p>
+<p>本轮又多了一个 cherry-pick。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12711。</p>
+<p>上一版还是 b12704。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：DeepSeek-V4.1 在 MI355X 上又快了一点</strong></p>
+<p>#65742 给 DSv4.1 换了单核 top-k。</p>
+<p>top-k 就是 MoE 里挑专家的那步。</p>
+<p>以前要多个核接力，现在一个核搞定。</p>
+<p>只在 ROCm gfx950 上，也就是 MI355X。</p>
+<p>#69135 把 GDN 的 prefill 卷积融成一个核。</p>
+<p>GDN 是门控 DeltaNet，一种混合模型。</p>
+<p>prefill 就是处理输入提示词那段。</p>
+<p>核少了，启动开销跟着下来。</p>
+<p>#66466 是多模态的小优化。</p>
+<p>视频元数据复用 OpenCV 的 capture。</p>
+<p>不用每次重新打开视频文件。</p>
+<p>#68308 是 XPU 的 FP8 线性层。</p>
+<p>N 维输入先拍平再算。</p>
+<p>#65079 和 #61691 是调度和指标。</p>
+<p>前者先用本地缓存命中再走远程准入。</p>
+<p>后者给迭代指标加了工作负载快照。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65742、https://github.com/vllm-project/vllm/pull/69135、https://github.com/vllm-project/vllm/pull/66466、https://github.com/vllm-project/vllm/pull/68308、https://github.com/vllm-project/vllm/pull/65079">https://github.com/vllm-project/vllm/pull/65742、https://github.com/vllm-project/vllm/pull/69135、https://github.com/vllm-project/vllm/pull/66466、https://github.com/vllm-project/vllm/pull/68308、https://github.com/vllm-project/vllm/pull/65079</a> 和 <a href="https://github.com/vllm-project/vllm/pull/61691">https://github.com/vllm-project/vllm/pull/61691</a></p>
+<p><strong>SGLang：P/D 传输的中断处理补了一块</strong></p>
+<p>#52654 修了 PD 传输的边界情况。</p>
+<p>PD 就是 prefill 和 decode 拆开部署。</p>
+<p>传输已经排空成功了。</p>
+<p>这时中断信号才姗姗来迟。</p>
+<p>以前会把成功状态冲掉。</p>
+<p>现在保住成功结果。</p>
+<p>#52947 是 Mooncake 的兜底。</p>
+<p>EGM 池子的 NUMA 探测失败时。</p>
+<p>自动回退到 auto，不再直接报错。</p>
+<p>#52975 在 NPU 上重新打开 DSpark。</p>
+<p>DSpark 是并行投机解码。</p>
+<p>#45808 是路由器的重构。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52654、https://github.com/sgl-project/sglang/pull/52947、https://github.com/sgl-project/sglang/pull/52975">https://github.com/sgl-project/sglang/pull/52654、https://github.com/sgl-project/sglang/pull/52947、https://github.com/sgl-project/sglang/pull/52975</a> 和 <a href="https://github.com/sgl-project/sglang/pull/45808">https://github.com/sgl-project/sglang/pull/45808</a></p>
+<p><strong>TRT-LLM：多模态的 KV 缓存复用更准了</strong></p>
+<p>#22561 给贴上的多模态 embedding 加键。</p>
+<p>以前多模态内容进 KV 缓存可能撞键。</p>
+<p>现在按 embedding 内容区分。</p>
+<p>复用更准，不会张冠李戴。</p>
+<p>对视觉模型 serving 是好事。</p>
+<p>#22869 是 Kimi K3.1 的 Helix Top-K。</p>
+<p>写行掩码和分页索引。</p>
+<p>#22322 保住 Kimi 在 SM107 上的 FP32 split-K 累加。</p>
+<p>剩下是测试和 infra。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22561、https://github.com/NVIDIA/TensorRT-LLM/pull/22869">https://github.com/NVIDIA/TensorRT-LLM/pull/22561、https://github.com/NVIDIA/TensorRT-LLM/pull/22869</a> 和 <a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22322">https://github.com/NVIDIA/TensorRT-LLM/pull/22322</a></p>
+<p><strong>FlashInfer、Dynamo、llama.cpp：小步快走</strong></p>
+<p>FlashInfer #10019 是 v0.7.6 的 cherry-pick。</p>
+<p>正式版还没挂出来。</p>
+<p>Dynamo #19494 只是 CI 文档堆调整。</p>
+<p>llama.cpp 快照到了 b12711。</p>
+<p>本轮合入 #32971 和 #32948。</p>
+<p>前者给 OpenCL 加了 MoE 的 coopmat 核。</p>
+<p>覆盖 q4、q5、q6 和 mxfp4 量化。</p>
+<p>后者精简了 Inkling 2 的图算子。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/10019、https://github.com/ggml-org/llama.cpp/pull/32971">https://github.com/flashinfer-ai/flashinfer/pull/10019、https://github.com/ggml-org/llama.cpp/pull/32971</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/32948">https://github.com/ggml-org/llama.cpp/pull/32948</a></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>最新还是 11 月 25 日 00:00 UTC 那批。</p>
+<p>19 点版已经报过。</p>
+<p>下一批 11 月 26 日 00:00 UTC。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没新东西</strong></p>
+<p>sotaaz 的 SGLang 对比和 simpleprog 的爬山调参。</p>
+<p>1413 那轮已经收过。</p>
+<p>llm-d 的 SGLang 也是旧闻。</p>
+<p>23 日 07 点版做过深读。</p>
+<p>AMD 每日深读是 11 月 22 日的旧 PR 回顾。</p>
+<h2>值得深读</h2>
+<p><strong>这轮没有值得单独深读的</strong></p>
+<p>都是小修补，没有新论文。</p>
+<p>最值得留意的是 TRT-LLM #22561。</p>
+<p>多模态 KV 缓存复用这块值得跟踪。</p>
+<p>等它有实测数据再深读。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-2000/">20点版</a></p></body></html>
