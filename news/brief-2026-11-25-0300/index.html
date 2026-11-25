@@ -1,0 +1,172 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月25日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-25"/>
+<meta name="doc-ts" content="2026-11-25T10:59:20"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-25（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-25（03点版）</h1>
+<p>这轮 GitHub 一共合入 30 条。</p>
+<p>vLLM 16 条，SGLang 2 条。</p>
+<p>llama.cpp 4 条，Mooncake 3 条。</p>
+<p>LMDeploy 2 条，剩下各 1 条。</p>
+<p>TGI 这轮挂零。</p>
+<p>版本水位基本没动。</p>
+<p>llama.cpp 快照到了 b12722。</p>
+<p>最值得看的是 vLLM 两条。</p>
+<p>一条让跨机缓存少存几份。</p>
+<p>一条讲清了前缀缓存怎么保住。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12722。</p>
+<p>上一版是 b12721。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：跨机时缓存只存一份就够</strong></p>
+<p>#69677 改了 MLA 的 KV 卸载。</p>
+<p>KV cache 就是存中间结果的草稿纸。</p>
+<p>MLA 是一种省显存的注意力。</p>
+<p>以前每张卡在 CPU 上各存一份。</p>
+<p>现在每台机器只存一份共享。</p>
+<p>8 卡分两台机器时更明显。</p>
+<p>8 份副本变成 2 份。</p>
+<p>作者用双机 H100 测了。</p>
+<p>同样 16 MiB 内存装了 512 块。</p>
+<p>以前只能装 256 块。</p>
+<p>正好翻了一倍。</p>
+<p>这跟 P/D 解耦直接相关。</p>
+<p>解耦就是把预填和生成分开跑。</p>
+<p>跨机传缓存时少存就是省内存。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69677">https://github.com/vllm-project/vllm/pull/69677</a></p>
+<p><strong>vLLM：删一句旧对话，缓存就废了</strong></p>
+<p>#66683 补了一篇前缀缓存文档。</p>
+<p>前缀缓存就是复用算过的开头。</p>
+<p>智能体常会删旧对话省上下文。</p>
+<p>删掉开头一句，麻烦就来了。</p>
+<p>后面每块的指纹全变了。</p>
+<p>缓存命中率从 99.2% 掉到 9%。</p>
+<p>首字延迟从 0.11 秒涨到 1.27 秒。</p>
+<p>说白了，压缩上下文别动开头。</p>
+<p>新内容往后接，缓存才能命中。</p>
+<p>这条对做智能体的人很实用。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66683">https://github.com/vllm-project/vllm/pull/66683</a></p>
+<p><strong>vLLM：多模态和长上下文各进一步</strong></p>
+<p>#69676 给 HY4 开了数据并行编码。</p>
+<p>编码就是处理图片、视频那段。</p>
+<p>以前每张卡把整批图都算一遍。</p>
+<p>现在按图分工，每卡只算一份。</p>
+<p>#65555 优化了 AMD 卡的长上下文。</p>
+<p>测的是 DeepSeek-V4.1。</p>
+<p>100 万上下文时首字快了 20%。</p>
+<p>换个配置能快 48%。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>#69864 给 Qwen3-VL 定了视频上限。</p>
+<p>每条请求最多 32 个视频。</p>
+<p>以前 Rust 前端能收 999 个。</p>
+<p>跟 Python 版对齐了。</p>
+<p>#69848、#68962 是卸载的指标和调度。</p>
+<p>剩下几条是修补和测试。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69676、https://github.com/vllm-project/vllm/pull/65555">https://github.com/vllm-project/vllm/pull/69676、https://github.com/vllm-project/vllm/pull/65555</a> 和 <a href="https://github.com/vllm-project/vllm/pull/69864">https://github.com/vllm-project/vllm/pull/69864</a></p>
+<p><strong>SGLang：Kimi 专家能在线搬家了</strong></p>
+<p>#53050 给 Kimi-K3 开了在线 EPLB。</p>
+<p>EPLB 就是专家负载均衡。</p>
+<p>MoE 模型里专家忙闲不均。</p>
+<p>忙的专家会拖慢整体速度。</p>
+<p>以前 K3 只能启动时排好专家。</p>
+<p>现在跑着也能重新搬。</p>
+<p>作者在 16 张 GB300 上测了。</p>
+<p>搬一次要 3.9 到 5 秒。</p>
+<p>解码速度基本没变。</p>
+<p>52.7 毫秒对 52.0 毫秒。</p>
+<p>#53082 更新了 Ling 的 MTP 数据。</p>
+<p>MTP 就是一次猜多个 token。</p>
+<p>单请求从 279 涨到 355 token 每秒。</p>
+<p>16 并发从 2011 涨到 2328。</p>
+<p>数字是项目方自报的。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53050">https://github.com/sgl-project/sglang/pull/53050</a> 和 <a href="https://github.com/sgl-project/sglang/pull/53082">https://github.com/sgl-project/sglang/pull/53082</a></p>
+<p><strong>LMDeploy：修了个精度小坑</strong></p>
+<p>#5188 修了 RMSNorm 的缩放。</p>
+<p>RMSNorm 就是一种归一化。</p>
+<p>Qwen3.5 的权重是相对 1 的偏移。</p>
+<p>在低精度里加 1 会把小偏移吞掉。</p>
+<p>现在先转高精度再加。</p>
+<p>剩下 1 条是 ROCm 兼容修补。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5188">https://github.com/InternLM/lmdeploy/pull/5188</a></p>
+<p><strong>llama.cpp：Mac 上解码少等一会儿</strong></p>
+<p>#32947 改了 Metal 的提交方式。</p>
+<p>以前先交一小段，再等整段编完。</p>
+<p>GPU 干完小段就干等着。</p>
+<p>现在编一段交一段，边编边跑。</p>
+<p>小模型解码从 263 涨到约 277。</p>
+<p>大模型基本没变。</p>
+<p>快照到了 b12722，见版本水位。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32947">https://github.com/ggml-org/llama.cpp/pull/32947</a></p>
+<p><strong>FlashInfer、TRT-LLM、Mooncake、Dynamo</strong></p>
+<p>FlashInfer #9395 让核编译能并行。</p>
+<p>稀疏 MLA 的编译改成按需再编。</p>
+<p>启动时少等一会儿。</p>
+<p>TRT-LLM 1 条是测试精简。</p>
+<p>Mooncake 3 条是日志和心跳修补。</p>
+<p>Dynamo 1 条是 CI 文档。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9395">https://github.com/flashinfer-ai/flashinfer/pull/9395</a></p>
+<p><strong>TGI：这轮挂零</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>最新还是 11 月 24 日那批。</p>
+<h2>业内新闻</h2>
+<p><strong>网页、X、HN 这轮没新东西</strong></p>
+<p>Reddit 和中文媒体也没新东西。</p>
+<p>搜到的都是前几天的对比文。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<h2>值得深读</h2>
+<p><strong>这轮没有值得单独深读的</strong></p>
+<p>最值得留意的是 vLLM 两条。</p>
+<p>#69677 管跨机时缓存怎么存。</p>
+<p>跟你评估的解耦部署直接相关。</p>
+<p>#66683 那组数字值得记住。</p>
+<p>删旧对话会让缓存命中崩掉。</p>
+<p>等 #69677 有更多实测再深读。</p></body></html>
