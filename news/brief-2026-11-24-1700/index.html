@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月24日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-24"/>
+<meta name="doc-ts" content="2026-11-25T01:08:11"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-24（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-24（17点版）</h1>
+<p>这轮 GitHub 一共合入 25 条新东西。</p>
+<p>vLLM 6 条，SGLang 14 条。</p>
+<p>TRT-LLM 1 条，Dynamo 2 条。</p>
+<p>llama.cpp 2 条。</p>
+<p>LMDeploy、TGI、FlashInfer 挂零。</p>
+<p>Mooncake 也挂零。</p>
+<p>版本水位没动。</p>
+<p>arXiv 新批次还没出来。</p>
+<p>先把上一批漏掉的 4 篇论文补上。</p>
+<p>深读 1 篇：RAPID。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：全都没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6rc2。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照还是 b12686。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：AMD 新卡的新模型预设到了</strong></p>
+<p>#69752 给 V4.1-Flash 配了 MI355X 预设。</p>
+<p>DeepSeek-V4.1-Flash 是个新推理模型。</p>
+<p>MI355X 是 AMD 的新卡。</p>
+<p>预设就是开箱即用的张量并行和数据并行配置。</p>
+<p>#69749 给 Kimi-K3.1-Pro 配了 MI355X 镜像。</p>
+<p>还带了 FlyDSL 的草稿注意力。</p>
+<p>FlyDSL 是写草稿模型注意力的工具。</p>
+<p>跟 Kimi K3.1 Pro 的投机解码有关。</p>
+<p>#69636 和 #69500 给解析器提速。</p>
+<p>解析器就是把模型输出拆成工具调用的模块。</p>
+<p>流式参数增量现在跳过不算。</p>
+<p>词法器排空改成线性时间。</p>
+<p>结构化输出和工具调用的延迟会下来。</p>
+<p>#69698 给 CuTeDSL 的矩阵乘法收尾瘦身。</p>
+<p>CuTeDSL 是英伟达写核函数的新写法。</p>
+<p>收尾写显存时不再占 L1 缓存。</p>
+<p>#68728 把 SarvamMLA 和 SarvamMoE 迁到通用后端。</p>
+<p>Sarvam 是印度的模型系列。</p>
+<p>以后走 Transformers 后端统一维护。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69752、https://github.com/vllm-project/vllm/pull/69749、https://github.com/vllm-project/vllm/pull/69698、https://github.com/vllm-project/vllm/pull/69636、https://github.com/vllm-project/vllm/pull/69500">https://github.com/vllm-project/vllm/pull/69752、https://github.com/vllm-project/vllm/pull/69749、https://github.com/vllm-project/vllm/pull/69698、https://github.com/vllm-project/vllm/pull/69636、https://github.com/vllm-project/vllm/pull/69500</a> 和 <a href="https://github.com/vllm-project/vllm/pull/68728">https://github.com/vllm-project/vllm/pull/68728</a></p>
+<p><strong>SGLang：流式工具调用修了一串</strong></p>
+<p>#50615、#43544、#41039、#36691。</p>
+<p>四处都在修流式工具调用。</p>
+<p>流式工具调用就是模型边吐字边调工具。</p>
+<p>以前有的调用会被吞掉或错位。</p>
+<p>这回按块对齐。</p>
+<p>DeepSeek V3 和 V3.1 占一处。</p>
+<p>Qwen 2.5 占一处，MiniMax-M2 占一处。</p>
+<p>还有一处是通用逻辑。</p>
+<p>#50609 是配套测试，覆盖各种分块边界。</p>
+<p>#52929 给扩散服务加了 API key 门槛。</p>
+<p>扩散模型就是文生图和视频那类模型。</p>
+<p>权重、LoRA、显存、性能分析接口都要管理员 key。</p>
+<p>#52904 修了统一内存请求的解码上限。</p>
+<p>#50709 是请求结构的小修补。</p>
+<p>#50546 是环境变量校验：非法值直接拒绝。</p>
+<p>#47978 和 #47959 是路由层的小重构。</p>
+<p>#52934、#52925、#52924 是 CI 和监控文档。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50615、https://github.com/sgl-project/sglang/pull/43544、https://github.com/sgl-project/sglang/pull/41039、https://github.com/sgl-project/sglang/pull/36691、https://github.com/sgl-project/sglang/pull/50609、https://github.com/sgl-project/sglang/pull/52929、https://github.com/sgl-project/sglang/pull/52904、https://github.com/sgl-project/sglang/pull/50709、https://github.com/sgl-project/sglang/pull/50546、https://github.com/sgl-project/sglang/pull/47978、https://github.com/sgl-project/sglang/pull/47959、https://github.com/sgl-project/sglang/pull/52934、https://github.com/sgl-project/sglang/pull/52925">https://github.com/sgl-project/sglang/pull/50615、https://github.com/sgl-project/sglang/pull/43544、https://github.com/sgl-project/sglang/pull/41039、https://github.com/sgl-project/sglang/pull/36691、https://github.com/sgl-project/sglang/pull/50609、https://github.com/sgl-project/sglang/pull/52929、https://github.com/sgl-project/sglang/pull/52904、https://github.com/sgl-project/sglang/pull/50709、https://github.com/sgl-project/sglang/pull/50546、https://github.com/sgl-project/sglang/pull/47978、https://github.com/sgl-project/sglang/pull/47959、https://github.com/sgl-project/sglang/pull/52934、https://github.com/sgl-project/sglang/pull/52925</a> 和 <a href="https://github.com/sgl-project/sglang/pull/52924">https://github.com/sgl-project/sglang/pull/52924</a></p>
+<p><strong>TRT-LLM：logits_bias 能跟投机解码合用了</strong></p>
+<p>#22581 支持了 logits_bias 加投机解码。</p>
+<p>logits_bias 就是给某些 token 加分或减分。</p>
+<p>以前两者合用有限制。</p>
+<p>现在可以一起开。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22581">https://github.com/NVIDIA/TensorRT-LLM/pull/22581</a></p>
+<p><strong>Dynamo：推理完再定输出格式</strong></p>
+<p>#18513 让 response_format 在推理后才开始。</p>
+<p>response_format 就是要求输出 JSON 这类格式。</p>
+<p>以前 vLLM 引擎没推理器时，格式会抢跑。</p>
+<p>现在等推理结束再开始。</p>
+<p>#19412 是依赖升级：pyo3 升到 0.30。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18513">https://github.com/ai-dynamo/dynamo/pull/18513</a> 和 <a href="https://github.com/ai-dynamo/dynamo/pull/19412">https://github.com/ai-dynamo/dynamo/pull/19412</a></p>
+<p><strong>llama.cpp：OpenCL 也能跑 MoE 核了</strong></p>
+<p>#32971 给 OpenCL 加了 MoE 的 coopmat 核。</p>
+<p>MoE 就是专家混合模型。</p>
+<p>覆盖 q4_0 到 mxfp4 好几种量化格式。</p>
+<p>#32870 是测试构建修补。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32971">https://github.com/ggml-org/llama.cpp/pull/32971</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/32870">https://github.com/ggml-org/llama.cpp/pull/32870</a></p>
+<p><strong>LMDeploy、TGI、FlashInfer、Mooncake：这轮挂零</strong></p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 新批次还没出来</strong></p>
+<p>11 月 24 日提交的论文，API 里还是 0 条。</p>
+<p>按惯例批次在 00:00 UTC 公布。</p>
+<p>这轮先把上一批漏掉的 4 篇补上。</p>
+<p>上一批是 11 月 24 日 00:00 UTC 那批。</p>
+<p>09点版报过其中 5 篇。</p>
+<p>11点版报过 4-bit KV 那篇。</p>
+<p><strong>LiveLoRA：换 LoRA 补丁不用重算历史</strong></p>
+<p>Agent 跑久了要换 LoRA。</p>
+<p>LoRA 是给大模型打的小补丁。</p>
+<p>以前换补丁要把整段对话重算一遍。</p>
+<p>越跑越久，这个账越贵。</p>
+<p>LiveLoRA 只重算最后一块。</p>
+<p>前面的 KV 缓存直接搬过来。</p>
+<p>KV 缓存就是解码时的草稿纸。</p>
+<p>32 个会话、8K token 时比全量重算快约 69 倍。</p>
+<p>解码只多 4.8% 的开销。</p>
+<p>多占的会话存储也少了 3.42 倍。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.31105">https://arxiv.org/abs/2611.31105</a></p>
+<p><strong>CPA：并行草稿先回头看一眼</strong></p>
+<p>并行投机解码一次吐一整块 token。</p>
+<p>投机解码就是先让小模型打草稿再让大模型改。</p>
+<p>毛病是前面错一个，后面全作废。</p>
+<p>CPA 让每个候选先看前面的选择再定。</p>
+<p>每轮比 DSpark 多确认 13–15% 的 token。</p>
+<p>比 DFlash 多 25–26%。</p>
+<p>Qwen3-4B 和 8B 上贪心解码快 3.35 倍。</p>
+<p>采样解码快 2.86 倍。</p>
+<p>在昇腾 NPU 上测的。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.31112">https://arxiv.org/abs/2611.31112</a></p>
+<p><strong>RAPID：长视频先省解码时间，再谈模型</strong></p>
+<p>视频语言模型能看一小时视频。</p>
+<p>但解码视频有时比模型读题还慢。</p>
+<p>RAPID 专治这个瓶颈。</p>
+<p>它拿压缩视频自带的信息跳帧。</p>
+<p>只解关键帧，剩下的并行解。</p>
+<p>H.264 视频上解码快 3.7 倍。</p>
+<p>首字时间快 4.9 倍。</p>
+<p>精度基本没掉。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.30557">https://arxiv.org/abs/2611.30557</a></p>
+<p><strong>SLP：多模态题先看两遍再答</strong></p>
+<p>视觉语言模型有个先天毛病。</p>
+<p>先出现的模态看不到后面的内容。</p>
+<p>图在前，问题在后，图就看不到问题。</p>
+<p>SLP 把图文对在输入里重复一遍。</p>
+<p>第二遍每个 token 都能看到全文。</p>
+<p>不用训练，12 个榜单全涨。</p>
+<p>Gemini 3 Flash 涨了 5.6 分。</p>
+<p>在 MATH-Vision 榜单上。</p>
+<p>9 个开源模型和 3 个闭源模型都涨。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.30909">https://arxiv.org/abs/2611.30909</a></p>
+<h2>业内新闻</h2>
+<p><strong>X、Reddit、HN、中文媒体这轮没新东西</strong></p>
+<p>SGLang 峰会是 11 月 12–13 日的事。</p>
+<p>23 日报过，不再重复。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<h2>值得深读</h2>
+<p><strong>RAPID 一篇</strong></p>
+<p>长视频理解的瓶颈不在模型，在解码。</p>
+<p>这篇直接对上你的多模态方向。</p>
+<p>解码快 3.7 倍，首字时间快 4.9 倍。</p>
+<p>方法能抄进视频推理管线。</p>
+<p>全文见深读笔记。</p>
+<p>全文：<a href="https://zwang96-dl.github.io/news/brief-2026-11-24-1700/">17点版</a></p></body></html>
