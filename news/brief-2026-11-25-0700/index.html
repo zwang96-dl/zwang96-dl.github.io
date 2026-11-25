@@ -1,0 +1,159 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月25日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-25"/>
+<meta name="doc-ts" content="2026-11-25T15:07:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-25（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-25（07点版）</h1>
+<p>这轮 GitHub 一共合入 11 条。</p>
+<p>vLLM 3 条，SGLang 2 条。</p>
+<p>llama.cpp 5 条，Dynamo 1 条。</p>
+<p>剩下 5 家全挂零。</p>
+<p>版本水位基本没动。</p>
+<p>llama.cpp 快照到了 b12726。</p>
+<p>最值得看的是 SGLang 一条。</p>
+<p>它把大批量读缓存的带宽救回来了。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照到了 b12726。</p>
+<p>上一版是 b12722。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：大批量读缓存不再变慢</strong></p>
+<p>#52906 改了 Mooncake 的读取方式。</p>
+<p>Mooncake 是存 KV 缓存的仓库。</p>
+<p>KV cache 就是存中间结果的草稿纸。</p>
+<p>以前一次读请求能越滚越大。</p>
+<p>读得越大，带宽掉得越狠。</p>
+<p>现在每次读取封顶 4096 个区间。</p>
+<p>大批量拆成多次小读。</p>
+<p>读什么、放哪里都没变。</p>
+<p>作者在 B300 上测了 PD 部署。</p>
+<p>PD 就是预填和生成分开跑。</p>
+<p>恢复带宽涨了 43% 和 58%。</p>
+<p>大批量时从约 16 涨到约 43。</p>
+<p>单位是每卡 GB 每秒。</p>
+<p>六轮里每轮都更快。</p>
+<p>请求速度平均涨 5.6%。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52906">https://github.com/sgl-project/sglang/pull/52906</a></p>
+<p><strong>SGLang：修了个会报错的旧参数</strong></p>
+<p>#53107 删掉一个过期参数。</p>
+<p>它会让草稿预填直接报错。</p>
+<p>草稿就是推测解码先猜的那份。</p>
+<p>删掉后测试恢复正常。</p>
+<p><strong>vLLM：老模型 Mamba1 下线了</strong></p>
+<p>#68177 移除了 Mamba1 全家。</p>
+<p>包括 Mamba 和 Jamba 几个模型。</p>
+<p>它们支持到 v0.34.0 为止。</p>
+<p>再加载会给出明确报错。</p>
+<p>Mamba2 不受影响，照常能用。</p>
+<p>家里还跑老模型的要注意。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68177">https://github.com/vllm-project/vllm/pull/68177</a></p>
+<p><strong>vLLM：概率字段不再出现负数</strong></p>
+<p>#69329 修了 Clef 的概率输出。</p>
+<p>以前关掉激活时会返回原始分数。</p>
+<p>概率里会出现负数。</p>
+<p>置信度也跟着变成负的。</p>
+<p>现在概率恢复正常范围。</p>
+<p>#62691 是个小修补。</p>
+<p>截断提示词后，回显文本跟着更新。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69329">https://github.com/vllm-project/vllm/pull/69329</a></p>
+<p><strong>Dynamo、llama.cpp：小事几件</strong></p>
+<p>Dynamo #19353 重整了路由接口。</p>
+<p>请求路径的行为没有变化。</p>
+<p>llama.cpp 5 条多是界面修补。</p>
+<p>一条修了长模型名的报错。</p>
+<p>快照到了 b12726，见版本水位。</p>
+<p><strong>五家挂零</strong></p>
+<p>TRT-LLM 和 LMDeploy 没动静。</p>
+<p>TGI 和 FlashInfer 也没动静。</p>
+<p>Mooncake 这轮同样挂零。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下一批是 11 月 26 日 00:00 UTC。</p>
+<p>下面补报 11 月 24 日那批漏掉的。</p>
+<p><strong>补报：KV 缓存无损压小三成</strong></p>
+<p>LoomKV 把缓存压到 0.71。</p>
+<p>压完值一个不变。</p>
+<p>这叫无损压缩。</p>
+<p>有损压缩会改数值。</p>
+<p>无损就不用重验精度。</p>
+<p>它压两处：硬盘层和显存池。</p>
+<p>压缩层等于 1.4 倍大的原层。</p>
+<p>容量悬崖处收益最大。</p>
+<p>有效吞吐涨 2.7 到 3.6 倍。</p>
+<p>首字时间降到约三分之一。</p>
+<p>容量够时现代价至多 2.2%。</p>
+<p>建在没改过的 vLLM 上。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.32954">https://arxiv.org/abs/2611.32954</a></p>
+<p><strong>补报：缓存位置随长度换档</strong></p>
+<p>Norn 管单卡上的卸载推理。</p>
+<p>卸载就是把权重和缓存放内存。</p>
+<p>上下文越长，最优放法越不同。</p>
+<p>它提前算好几套方案。</p>
+<p>解码时按长度自动切换。</p>
+<p>作者自报最快 16.8 倍。</p>
+<p>对比的是流水线分片方案。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.32295">https://arxiv.org/abs/2611.32295</a></p>
+<h2>业内新闻</h2>
+<p><strong>网页、X、HN 这轮没新东西</strong></p>
+<p>Reddit 和中文媒体也没新东西。</p>
+<p>vLLM-GR 在 23点版报过。</p>
+<p>llm-d 的 SGLang 是旧闻。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<h2>值得深读</h2>
+<p><strong>LoomKV：无损压缩这一档值得看</strong></p>
+<p>精读笔记已生成。</p>
+<p>它跟你的缓存评估直接对口。</p>
+<p>无损不用重验精度。</p>
+<p>容量按等效值报，这招能抄。</p>
+<p>悬崖处收益暴涨，评估要扫容量。</p>
+<p>SGLang #52906 也先记一笔。</p>
+<p>它跟解耦部署直接相关。</p>
+<p>等更多实测再考虑深读。</p></body></html>
