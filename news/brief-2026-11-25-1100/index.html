@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月25日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-25"/>
+<meta name="doc-ts" content="2026-11-25T19:01:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-25（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-25（11点版）</h1>
+<p>这轮 GitHub 一共合入 15 条。</p>
+<p>vLLM 4 条，llama.cpp 4 条。</p>
+<p>TRT-LLM、FlashInfer、Dynamo 各 2 条。</p>
+<p>SGLang 1 条。</p>
+<p>剩下 3 家全挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照还是 b12728。</p>
+<p>最值得看的是 vLLM 一条。</p>
+<p>它修了 AMD 解耦部署的精度崩塌。</p>
+<p>解耦就是预填和生成分开跑。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照还是 b12728。</p>
+<p>主分支有新合入，快照还没挂出。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：AMD 解耦时缓存被误擦，修了</strong></p>
+<p>#67074 修了 ROCm 上的一个竞态。</p>
+<p>竞态就是两件事抢着跑、顺序乱了。</p>
+<p>场景是解耦部署加异步调度。</p>
+<p>异步就是不等上一步跑完就接着排。</p>
+<p>预填机把缓存传给生成机。</p>
+<p>生成机却把新块先清零了。</p>
+<p>顺序没排好，收到的缓存就丢了。</p>
+<p>只在混合精度缓存时才会中招。</p>
+<p>混合精度就是不同层用不同精度。</p>
+<p>修法分两步走。</p>
+<p>要被覆盖的块不再清零。</p>
+<p>有待办拷贝时先等拷贝跑完。</p>
+<p>作者在 MI355X 上测了精度。</p>
+<p>DeepSeek-V4-Flash 从 0.600 涨到 0.954。</p>
+<p>这是 GSM8K 的分数。</p>
+<p>没接连接器时是 0.955。</p>
+<p>Qwen3-32B 从 0.056 涨到 0.923。</p>
+<p>速度基本没变，误差在 0.3% 内。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>这跟你的 AMD 解耦评估直接相关。</p>
+<p>说白了，精度掉先查缓存顺序。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67074">https://github.com/vllm-project/vllm/pull/67074</a></p>
+<p><strong>vLLM：新增首个正文时间指标</strong></p>
+<p>#56914 加了个新计时。</p>
+<p>它测首个正文 token 的时间。</p>
+<p>正文就是真正回答的那部分。</p>
+<p>思考过程和工具调用不算。</p>
+<p>以前只有首 token 时间。</p>
+<p>思考模型会先想很久才开口。</p>
+<p>两个时间混在一起会误判。</p>
+<p>新指标只在流式输出时有。</p>
+<p>非流式时这个值是空的。</p>
+<p>做 SLA 评估时值得分开看。</p>
+<p>SLA 就是服务质量的及格线。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/56914">https://github.com/vllm-project/vllm/pull/56914</a></p>
+<p><strong>Dynamo：模拟器别再低估解耦成本</strong></p>
+<p>#19475 给模拟器加了带宽字段。</p>
+<p>模拟器就是先算账再真跑的工具。</p>
+<p>解耦时缓存要跨机传一遍。</p>
+<p>以前模拟器默认传输不要时间。</p>
+<p>这样解耦方案会被高估。</p>
+<p>首字时间算少了，吞吐算高了。</p>
+<p>现在可以填真实传输带宽。</p>
+<p>没填带宽时会给出警告。</p>
+<p>这跟你的解耦评估直接相关。</p>
+<p>算账时别把传输时间当零。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/19475">https://github.com/ai-dynamo/dynamo/pull/19475</a></p>
+<p><strong>FlashInfer：MoE 解码的收尾快了</strong></p>
+<p>#9848 优化了 MoE 的一段收尾计算。</p>
+<p>MoE 就是多专家分工的模型。</p>
+<p>收尾就是算完再打包结果那步。</p>
+<p>以前每块都要算满 128 行。</p>
+<p>空行也跟着一起算，浪费算力。</p>
+<p>现在只算有活的行。</p>
+<p>作者在 GB300 上测了。</p>
+<p>整层 MoE 快了约 1.2 到 1.5 倍。</p>
+<p>有效行的结果逐位不变。</p>
+<p>只支持英伟达新架构的卡。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9848">https://github.com/flashinfer-ai/flashinfer/pull/9848</a></p>
+<p><strong>llama.cpp：两个新模型能跑了</strong></p>
+<p>#32960 加了腾讯 Hy4 的精简版。</p>
+<p>它有 220B 参数，每次激活 12B。</p>
+<p>文字和图片都能处理。</p>
+<p>长上下文时解码偏慢。</p>
+<p>107k 时是 17.1 token 每秒。</p>
+<p>存储池子的另一方案是 73.6。</p>
+<p>#32176 加了 Raon-1 mini 预览版。</p>
+<p>它是 30B 的 MoE 模型。</p>
+<p>每次激活约 4B 参数。</p>
+<p>#33053 给 Inkling 2 换了快路。</p>
+<p>但目前没有后端支持这条快路。</p>
+<p>所以还是走老路，显存吃得多。</p>
+<p>快照还是 b12728，见版本水位。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32960、https://github.com/ggml-org/llama.cpp/pull/32176">https://github.com/ggml-org/llama.cpp/pull/32960、https://github.com/ggml-org/llama.cpp/pull/32176</a> 和 <a href="https://github.com/ggml-org/llama.cpp/pull/33053">https://github.com/ggml-org/llama.cpp/pull/33053</a></p>
+<p><strong>SGLang、vLLM：剩下的小事</strong></p>
+<p>SGLang #53150 是个接口修补。</p>
+<p>它把验证用的字段还了回去。</p>
+<p>验证就是草稿核对那一步。</p>
+<p>目前只有 CPU 单元测试。</p>
+<p>还没在真卡上跑过服务。</p>
+<p>vLLM 剩下 2 条是内部整理。</p>
+<p>一条拆了模型文件的依赖。</p>
+<p>一条让 MoE 融合更灵活。</p>
+<p><strong>TRT-LLM、Dynamo：小事几件</strong></p>
+<p>TRT-LLM 2 条都是测试维护。</p>
+<p>一条是格式整理。</p>
+<p>一条是暂时跳过 5 个失败用例。</p>
+<p>Dynamo 另一条是权限放宽。</p>
+<p>部署时少改一个开关。</p>
+<p>在线重调本身还是要手动开。</p>
+<p><strong>三家挂零</strong></p>
+<p>LMDeploy 和 TGI 没动静。</p>
+<p>Mooncake 这轮也没动静。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>下一批是 11 月 26 日 00:00 UTC。</p>
+<p>下面补报 11 月 24 日那批漏掉的。</p>
+<p><strong>补报：长视频只编码一次就够</strong></p>
+<p>FCA 管长视频和长文本的理解。</p>
+<p>老办法要把片段反复编码。</p>
+<p>每问一次，就重算一遍。</p>
+<p>FCA 把输入只编码一次。</p>
+<p>编码结果存进 KV 缓存。</p>
+<p>KV cache 就是存中间结果的草稿纸。</p>
+<p>之后各片段共用这份缓存。</p>
+<p>长视频的分数涨了约 10 个点。</p>
+<p>长小说涨了 9 到 14 个点。</p>
+<p>追问时最快只要老办法十分之一时间。</p>
+<p>不用重新训练模型。</p>
+<p>数字是作者自报，没独立复现。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.32423">https://arxiv.org/abs/2611.32423</a></p>
+<p><strong>补报：草稿树只留会被采纳的枝</strong></p>
+<p>Pando 管边缘设备的推测解码。</p>
+<p>推测解码就是先打草稿再核对。</p>
+<p>它给草稿搭了动态的树。</p>
+<p>剪枝时先看目标模型的随机数。</p>
+<p>随机数决定最后采纳哪个词。</p>
+<p>这样留下的枝更容易被采纳。</p>
+<p>接受长度最多涨了 8.4%。</p>
+<p>边缘设备上快了 5.3 倍。</p>
+<p>对比的是普通逐词解码。</p>
+<p>这是模拟和边缘场景的数据。</p>
+<p>跟服务器部署的关系还要再看。</p>
+<p>来源：<a href="https://arxiv.org/abs/2611.32269">https://arxiv.org/abs/2611.32269</a></p>
+<h2>业内新闻</h2>
+<p><strong>网页、X、HN 这轮没新东西</strong></p>
+<p>Reddit 和中文媒体也没新东西。</p>
+<p>社交平台只有入门科普帖。</p>
+<p>搜到的都是前几天的旧闻。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 还是 11 月 19 日那期</strong></p>
+<h2>值得深读</h2>
+<p><strong>这轮没有值得单独深读的</strong></p>
+<p>最值得留意的是 vLLM #67074。</p>
+<p>它跟你的 AMD 解耦评估直接相关。</p>
+<p>精度崩塌的根因很具体。</p>
+<p>评估时可以照着排查一遍。</p>
+<p>Dynamo #19475 也先记一笔。</p>
+<p>算解耦账时别漏传输时间。</p>
+<p>等有更多真机数据再深读。</p></body></html>
