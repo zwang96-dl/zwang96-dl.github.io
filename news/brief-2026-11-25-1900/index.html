@@ -1,0 +1,245 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月25日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-25"/>
+<meta name="doc-ts" content="2026-11-26T03:01:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-25（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-25（19点版）</h1>
+<p>这轮 GitHub 合入 20 条。</p>
+<p>SGLang 9 条，vLLM 4 条。</p>
+<p>FlashInfer 2 条，Mooncake 2 条。</p>
+<p>llama.cpp 2 条，LMDeploy 1 条。</p>
+<p>剩下 3 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12754。</p>
+<p>最值得看的是两条解耦新货。</p>
+<p>一条是 SGLang 的跨卡传缓存。</p>
+<p>一条是新论文 RankCast。</p>
+<p>两条都正对上你的解耦评估。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照从 b12751 涨到 b12754。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：解耦两边切法不用对齐了</strong></p>
+<p>#51234 打通了跨切法传缓存。</p>
+<p>读题侧用 2 份切分。</p>
+<p>生成侧用 1 份切分。</p>
+<p>切分就是把模型切开跑。</p>
+<p>以前两边切法要对齐。</p>
+<p>现在缓存能跨切法传。</p>
+<p>传的是 NVFP4 缓存。</p>
+<p>NVFP4 就是 4 位量化格式。</p>
+<p>主缓存按页行切头传。</p>
+<p>头就是注意力的小组。</p>
+<p>索引缓存只发一份。</p>
+<p>草稿缓存只传尾巴一段。</p>
+<p>尾巴就是窗口加两页。</p>
+<p>开了基数缓存就全传。</p>
+<p>基数缓存就是前缀复用树。</p>
+<p>这条没有性能数字。</p>
+<p>基础测试还没跑完。</p>
+<p>你做解耦选型时记一笔。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51234">https://github.com/sgl-project/sglang/pull/51234</a></p>
+<p><strong>SGLang：稀疏核子改成开机先编译</strong></p>
+<p>#52451 把编译挪到开机时。</p>
+<p>以前第一次用才编译。</p>
+<p>一次冷编译要几十秒。</p>
+<p>整批请求都得等它。</p>
+<p>读题服务器最容易中招。</p>
+<p>现在开机先全编译好。</p>
+<p>热缓存时不到 1 秒。</p>
+<p>冷缓存最长约 11 分钟。</p>
+<p>编译完扫一遍零新增。</p>
+<p>输出和以前逐位相同。</p>
+<p>测的是 GB300。</p>
+<p>整机启动对比还没做。</p>
+<p>这事跟首字尾延迟有关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52451">https://github.com/sgl-project/sglang/pull/52451</a></p>
+<p><strong>SGLang：Kimi 双卡组也能走快路</strong></p>
+<p>#53196 放开了双卡注意力组。</p>
+<p>以前双卡只能走慢路。</p>
+<p>慢路就是通用通信库。</p>
+<p>现在能走专用通信路。</p>
+<p>每步从 70.7 降到 67.7。</p>
+<p>单位是毫秒。</p>
+<p>并发更高时降到 73.2。</p>
+<p>原来是 77.9。</p>
+<p>测的是 16 张 GB300。</p>
+<p>每组只跑了一轮。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53196">https://github.com/sgl-project/sglang/pull/53196</a></p>
+<p><strong>SGLang：昇腾上补了新模型支持</strong></p>
+<p>#50205 给昇腾 A3 加了支持。</p>
+<p>模型是 DeepSeek 新版。</p>
+<p>量化用 8 位权重 8 位激活。</p>
+<p>草稿解码也一并接了。</p>
+<p>这条没给速度数字。</p>
+<p>真机复测还没做完。</p>
+<p>解耦传输也没复测。</p>
+<p>先记一笔，别当已验证。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50205">https://github.com/sgl-project/sglang/pull/50205</a></p>
+<p><strong>vLLM：图片缓存被挤掉也能再发</strong></p>
+<p>#65123 修了编码缓存的坑。</p>
+<p>编码缓存就是图片的中间结果。</p>
+<p>重复图片本该直接复用。</p>
+<p>主机那层被挤掉后出事。</p>
+<p>新消费者拿不到地址。</p>
+<p>地址就是去哪取缓存。</p>
+<p>现在会重新发布一份。</p>
+<p>不用把图片再编码一遍。</p>
+<p>真机测了两张 GB200。</p>
+<p>4 条回归测试全过。</p>
+<p>多模态解耦时留意这条。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65123">https://github.com/vllm-project/vllm/pull/65123</a></p>
+<p><strong>vLLM：位置表不再被偷偷降精度</strong></p>
+<p>#63078 保住了高精度位置表。</p>
+<p>位置表就是位置编码的表。</p>
+<p>以前会被换成低精度版。</p>
+<p>草稿的键算得更粗。</p>
+<p>误差从 2.36 降到 0.25。</p>
+<p>单位是最小精度步。</p>
+<p>分数从 0.9454 到 0.9500。</p>
+<p>这个差距不算显著。</p>
+<p>缓存少了约万分之七。</p>
+<p>这跟评测一致性相关。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/63078">https://github.com/vllm-project/vllm/pull/63078</a></p>
+<p><strong>FlashInfer：H100 上状态池省一截</strong></p>
+<p>#10039 给 H100 加了半精度池。</p>
+<p>状态池就是循环状态的仓库。</p>
+<p>半精度就是 16 位浮点。</p>
+<p>多数形状都更快。</p>
+<p>最快档约 1.21 倍。</p>
+<p>也有少数形状更慢。</p>
+<p>最慢约 0.94 倍。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/10039">https://github.com/flashinfer-ai/flashinfer/pull/10039</a></p>
+<p><strong>Mooncake：传输超时终于能调了</strong></p>
+<p>#4541 把确认超时做成开关。</p>
+<p>以前写死约 67 毫秒。</p>
+<p>网卡一卡顿就误判断线。</p>
+<p>现在能调到约 1.07 秒。</p>
+<p>测的是 MI355X。</p>
+<p>带宽基本没变。</p>
+<p>还是每秒约 38 GB。</p>
+<p>解耦传缓存时用得上。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/4541">https://github.com/kvcache-ai/Mooncake/pull/4541</a></p>
+<p><strong>llama.cpp：英特尔卡又快一点</strong></p>
+<p>两条都改英特尔的核子。</p>
+<p>一条新加了循环核子。</p>
+<p>核子本身快 1.8 到 3.7 倍。</p>
+<p>整机读题快约 4%。</p>
+<p>一条把卷积窗口合并了。</p>
+<p>核子快约 2.3 到 2.5 倍。</p>
+<p>整机最多快约 7%。</p>
+<p>只对英特尔显卡有效。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31762">https://github.com/ggml-org/llama.cpp/pull/31762</a></p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/31355">https://github.com/ggml-org/llama.cpp/pull/31355</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 修了线性注意力的编译。</p>
+<p>新版编译器删了旧写法。</p>
+<p>影响几个线性注意力模型。</p>
+<p>SGLang 还加了新模型支持。</p>
+<p>SGLang 还有两条持续集成改动。</p>
+<p>一条是文档改动。</p>
+<p>vLLM 修了工具名解析。</p>
+<p>带后缀的工具名能对回去了。</p>
+<p>vLLM 还做了一次代码去重。</p>
+<p>FlashInfer 那条是测试守卫。</p>
+<p>LMDeploy 补了追踪依赖。</p>
+<p>Mooncake 那条是文档改动。</p>
+<p><strong>三家挂零</strong></p>
+<p>TRT-LLM 这轮没合入。</p>
+<p>TGI 和 Dynamo 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>RankCast：解耦里专家别挤一台</strong></p>
+<p>这篇检索里这轮才冒出来。</p>
+<p>投稿是 11 月 24 日。</p>
+<p>它讲专家并行怎么不挤。</p>
+<p>专家并行就是专家分卡跑。</p>
+<p>读题时看谁的词最多。</p>
+<p>生成时看谁开的专家最多。</p>
+<p>最忙那台决定整层速度。</p>
+<p>读题侧给忙卡涨价。</p>
+<p>涨价就是少往那派活。</p>
+<p>生成侧关掉便宜专家。</p>
+<p>便宜就是关了损失小。</p>
+<p>最想去的两个专家不动。</p>
+<p>每词还是跑满专家数。</p>
+<p>实现落在 SGLang 里。</p>
+<p>还用了 DeepEP 传消息。</p>
+<p>DeepEP 是专家通信库。</p>
+<p>忙卡多余负载少了七成多。</p>
+<p>读题吞吐最高涨约 19%。</p>
+<p>生成每词快约 6% 到 11%。</p>
+<p>精度最多掉 0.84 个百分点。</p>
+<p>测的是两个大 MoE 模型。</p>
+<p>MoE 就是多专家分工的模型。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="http://arxiv.org/abs/2611.33542v1">http://arxiv.org/abs/2611.33542v1</a></p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>X 和 Reddit 没搜到新帖。</p>
+<p>HN 搜到的都是旧讨论。</p>
+<p>中文媒体也是旧闻重发。</p>
+<p>聚合站的说法没一手来源。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>今天那期 17点版报过了。</p>
+<p>讲软件创作，不讲推理。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>RankCast：解耦里专家别挤一台</strong></p>
+<p>这篇能帮你看解耦的负载问题。</p>
+<p>它把读题和生成分开算账。</p>
+<p>两种堵法各给一个解法。</p>
+<p>还给了吞吐和精度代价。</p>
+<p>深读笔记已生成。</p>
+<p>第二个先记一笔。</p>
+<p>SGLang 跨切法传缓存值得跟。</p>
+<p>它还没给性能数字。</p>
+<p>等测试补齐再深读。</p></body></html>
