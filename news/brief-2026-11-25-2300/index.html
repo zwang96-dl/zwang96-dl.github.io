@@ -1,0 +1,190 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月25日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-25"/>
+<meta name="doc-ts" content="2026-11-26T06:58:19"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-25（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-25（23点版）</h1>
+<p>这轮 GitHub 合入 21 条。</p>
+<p>SGLang 7 条，vLLM 5 条。</p>
+<p>FlashInfer 3 条。</p>
+<p>TRT-LLM 2 条，llama.cpp 2 条。</p>
+<p>Mooncake 2 条。</p>
+<p>剩下 3 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12757。</p>
+<p>最值得看的是两条解耦修复。</p>
+<p>一条省下十几 GB 显存。</p>
+<p>一条让流水线切分能跑通。</p>
+<p>新论文 LiveVAE 也值得看。</p>
+<p>它讲视频编解码的提速。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照从 b12755 涨到 b12757。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：解耦生成侧白占的显存砍掉了</strong></p>
+<p>#44015 修了生成侧的草稿区大小。</p>
+<p>草稿区就是验证草稿的临时地。</p>
+<p>以前按预留位置算大小。</p>
+<p>预留位置是给在途请求的。</p>
+<p>在途请求根本不用这块地。</p>
+<p>结果草稿区白占一大块。</p>
+<p>一个例子里从 19.9 降到 7.2。</p>
+<p>单位是 GB。</p>
+<p>测的是 96GB 的 H20。</p>
+<p>以前显存不够会启动失败。</p>
+<p>现在按实际批次算大小。</p>
+<p>这事跟解耦部署直接相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/44015">https://github.com/sgl-project/sglang/pull/44015</a></p>
+<p><strong>SGLang：流水线切分下缓存不再串层</strong></p>
+<p>#47610 修了稀疏模型的传缓存。</p>
+<p>读题侧切成多段流水线时。</p>
+<p>以前会直接报错停下。</p>
+<p>原因是层对不上号。</p>
+<p>每段只管自己那几层。</p>
+<p>生成侧管全部层。</p>
+<p>按顺序硬对会写错层。</p>
+<p>现在按层号一一对齐。</p>
+<p>两个传输后端都修了。</p>
+<p>实测分数 0.980。</p>
+<p>没修的版本首传就崩。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47610">https://github.com/sgl-project/sglang/pull/47610</a></p>
+<p><strong>vLLM：内存里的旧缓存先扔尾巴</strong></p>
+<p>#67952 给内存缓存加了新扔法。</p>
+<p>内存缓存就是放主机内存的缓存。</p>
+<p>以前扔的时候从头扔。</p>
+<p>前缀被扔掉就全废了。</p>
+<p>前缀就是开头那段共用部分。</p>
+<p>现在先扔尾巴保住前缀。</p>
+<p>开关默认关着，要手动开。</p>
+<p>实测命中量涨到 4.2 倍。</p>
+<p>测的是 MI355X。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67952">https://github.com/vllm-project/vllm/pull/67952</a></p>
+<p><strong>vLLM：看图模块走回正道了</strong></p>
+<p>#70044 修了看图的位置表。</p>
+<p>位置表就是标记顺序的表。</p>
+<p>以前绕过了统一的入口。</p>
+<p>现在跟其他看图模型一致。</p>
+<p>这条没有速度数字。</p>
+<p>多模态部署时记一笔。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70044">https://github.com/vllm-project/vllm/pull/70044</a></p>
+<p><strong>FlashInfer：长上下文解码小步快跑</strong></p>
+<p>#10036 跳过了空的分片。</p>
+<p>分片就是把缓存切开算。</p>
+<p>空分片就是没内容的段。</p>
+<p>整体只快了约千分之几。</p>
+<p>短请求受益多一点。</p>
+<p>测的是 B200 和 GB300。</p>
+<p>数字是作者自报。</p>
+<p>先记一笔，别当大升级。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/10036">https://github.com/flashinfer-ai/flashinfer/pull/10036</a></p>
+<p><strong>Mooncake：跨卡地址能直接用了</strong></p>
+<p>#5453 加了全局虚拟地址。</p>
+<p>就是跨卡共用一个地址。</p>
+<p>算子能直接拿地址用。</p>
+<p>不用再多绕一层转换。</p>
+<p>这条没有速度数字。</p>
+<p>解耦传缓存时可能用上。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5453">https://github.com/kvcache-ai/Mooncake/pull/5453</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 把传输层拆干净了。</p>
+<p>这条是重构，没改行为。</p>
+<p>SGLang 还补了昇腾的专家支持。</p>
+<p>vLLM 修了前端的校验问题。</p>
+<p>TRT-LLM 两条都是测试文档。</p>
+<p>llama.cpp 两条是文档清理。</p>
+<p>Mooncake 还修了个测试问题。</p>
+<p><strong>三家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 和 Dynamo 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>LiveVAE：视频编解码不用看全局</strong></p>
+<p>视频生成有个隐藏瓶颈。</p>
+<p>编解码那一步占了大头。</p>
+<p>一个例子里占六成多时间。</p>
+<p>这篇发现只看邻居就够了。</p>
+<p>每个小块只依赖周围邻居。</p>
+<p>于是只算一个小窗口。</p>
+<p>编码快了 5 到 6 倍。</p>
+<p>解码快了 3 倍左右。</p>
+<p>画质还比原版略好。</p>
+<p>测的是 MiniMax 的视频模型。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="http://arxiv.org/abs/2611.34912v1">http://arxiv.org/abs/2611.34912v1</a></p>
+<p><strong>LoopTitan：参数复用基本没用</strong></p>
+<p>这篇给循环专家模型泼冷水。</p>
+<p>循环就是同一层跑好几遍。</p>
+<p>以前说这样涨点很多。</p>
+<p>这篇用对照组拆开算。</p>
+<p>涨点来自形状和缩放。</p>
+<p>复用本身几乎没贡献。</p>
+<p>先记一笔，别当定论。</p>
+<p>来源：<a href="http://arxiv.org/abs/2611.34821v1">http://arxiv.org/abs/2611.34821v1</a></p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>X 和 Reddit 没搜到新帖。</p>
+<p>HN 搜到的都是旧讨论。</p>
+<p>中文媒体也是旧闻重发。</p>
+<p>聚合站的说法没一手来源。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期 17点版报过了。</p>
+<p>讲软件创作，不讲推理。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>LiveVAE：视频编解码不用看全局</strong></p>
+<p>这篇能帮你看多模态的另一头。</p>
+<p>生成模型快了，编解码成瓶颈。</p>
+<p>它把窗口和缓存账算清楚了。</p>
+<p>深读笔记已生成。</p>
+<p>第二个先记一笔。</p>
+<p>SGLang 草稿区那条值得跟。</p>
+<p>它跟解耦显存账直接相关。</p>
+<p>等更多实测再深读。</p></body></html>
