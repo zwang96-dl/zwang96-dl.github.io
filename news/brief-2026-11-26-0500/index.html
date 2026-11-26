@@ -1,0 +1,215 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月26日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-26T12:59:35"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-26（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-26（05点版）</h1>
+<p>这轮 GitHub 合入 25 条。</p>
+<p>vLLM 10 条，SGLang 6 条。</p>
+<p>llama.cpp 5 条。</p>
+<p>剩下几家各 1 条。</p>
+<p>还有 2 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12776。</p>
+<p>最值得看的是单词捷径。</p>
+<p>只要一个词就不用去生成侧。</p>
+<p>读题侧自己答完就行。</p>
+<p>新论文这轮没有。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照从 b12774 涨到 b12776。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：只要一个词不用去生成侧</strong></p>
+<p>#53153 给解耦加了捷径。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>以前只要一个词。</p>
+<p>也要去生成侧走一圈。</p>
+<p>生成侧要先留好缓存。</p>
+<p>缓存还要整包传过去。</p>
+<p>最后答的还是同一个词。</p>
+<p>现在读题侧自己答。</p>
+<p>省掉传缓存这一步。</p>
+<p>也省掉生成侧占位。</p>
+<p>只限正好要一个词。</p>
+<p>要多词会直接报错。</p>
+<p>打分和分类最吃这条。</p>
+<p>查概率也吃这条。</p>
+<p>这条没有速度实测。</p>
+<p>作者自测结果能对齐。</p>
+<p>正式测试还没全跑完。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53153">https://github.com/sgl-project/sglang/pull/53153</a></p>
+<p><strong>vLLM：内存缓存的尾巴补齐了</strong></p>
+<p>#68836 修了缓存外置。</p>
+<p>外置就是缓存放出显卡。</p>
+<p>混合模型有多组注意力。</p>
+<p>以前只存第一组尾巴。</p>
+<p>尾巴就是提示的最后一段。</p>
+<p>内存里查不到完整命中。</p>
+<p>现在每组尾巴都存。</p>
+<p>8 卡例子命中到 89%。</p>
+<p>以前是 0%。</p>
+<p>长例子命中到 90%。</p>
+<p>测的是 MI355X。</p>
+<p>数字是作者自报。</p>
+<p>单组模型没有变化。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68836">https://github.com/vllm-project/vllm/pull/68836</a></p>
+<p><strong>SGLang：大表有了统一保管处</strong></p>
+<p>#46248 给大表加了统一存法。</p>
+<p>大表就是查词用的表。</p>
+<p>以前各模型自己管。</p>
+<p>现在统一放一处管。</p>
+<p>模型只报要查哪几行。</p>
+<p>保管处负责把数据给它。</p>
+<p>先支持一个新模型。</p>
+<p>新模型叫 Qwen4-Exp。</p>
+<p>开关默认关着。</p>
+<p>要手动打开才生效。</p>
+<p>远程存法还没做。</p>
+<p>先记方向就行。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/46248">https://github.com/sgl-project/sglang/pull/46248</a></p>
+<p><strong>vLLM：看图那步能提前录好了</strong></p>
+<p>#64311 给看图加了录图。</p>
+<p>录图就是提前录好步骤。</p>
+<p>重播时少一点开销。</p>
+<p>这次支持的是 OCR 模型。</p>
+<p>OCR 就是认字模型。</p>
+<p>小图延迟降约 9%。</p>
+<p>尾延迟降约 24%。</p>
+<p>大图降幅小一点。</p>
+<p>测的是 5070 Ti。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/64311">https://github.com/vllm-project/vllm/pull/64311</a></p>
+<p><strong>vLLM：草稿不再弄丢格式约束</strong></p>
+<p>#68112 修了草稿边界。</p>
+<p>草稿就是先猜再验的词。</p>
+<p>思考边界被草稿弄乱时。</p>
+<p>格式约束会提前丢掉。</p>
+<p>现在保住第一个边界。</p>
+<p>错的开口会被挡住。</p>
+<p>边界查找也快了很多。</p>
+<p>测的是查找本身。</p>
+<p>不是整机吞吐。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68112">https://github.com/vllm-project/vllm/pull/68112</a></p>
+<p><strong>vLLM：多卡专家计算不再崩</strong></p>
+<p>#68814 修了专家计算排版。</p>
+<p>专家就是分工的小模型块。</p>
+<p>缩放表排版不对。</p>
+<p>多卡时启动就崩。</p>
+<p>现在分发后重新排版。</p>
+<p>以前启动就非法访问。</p>
+<p>现在能启动答题。</p>
+<p>8 道题全答对。</p>
+<p>测的是双 5090。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68814">https://github.com/vllm-project/vllm/pull/68814</a></p>
+<p><strong>LMDeploy：缓存被挤掉能数了</strong></p>
+<p>#4888 加了挤出计数。</p>
+<p>以前只知道命中多少。</p>
+<p>挤掉多少没人报。</p>
+<p>运维看不出缓存打架。</p>
+<p>打架就是挤来挤去。</p>
+<p>现在挤出次数能数了。</p>
+<p>能写挤出率告警。</p>
+<p>只管新那条缓存路。</p>
+<p>旧后端计数还是零。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/4888">https://github.com/InternLM/lmdeploy/pull/4888</a></p>
+<p><strong>vLLM：看图出错分清谁的错</strong></p>
+<p>#70092 分清了出错责任。</p>
+<p>请求写错了回 400。</p>
+<p>服务器出问题回 500。</p>
+<p>以前三处答案不一致。</p>
+<p>同一错误回法不同。</p>
+<p>现在三处统一了。</p>
+<p>排障时少猜一步。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70092">https://github.com/vllm-project/vllm/pull/70092</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 修了草稿面罩大小。</p>
+<p>面罩就是验证用的遮罩。</p>
+<p>有些后端以前会报错。</p>
+<p>现在按行宽来算大小。</p>
+<p>SGLang 还加了昇腾草稿。</p>
+<p>你主用英伟达和 AMD。</p>
+<p>这条先记方向就行。</p>
+<p>llama.cpp 支持了新草稿模型。</p>
+<p>新草稿配 Inkling 2 Mini。</p>
+<p>vLLM 给 HY4 做了融合。</p>
+<p>融合就是把几步合成一步。</p>
+<p>速度变化不大。</p>
+<p>首字时间噪声还很大。</p>
+<p>TRT-LLM 只有测试重构。</p>
+<p>Dynamo 改了配置标记。</p>
+<p>Mooncake 清了旧测试。</p>
+<p><strong>两家挂零</strong></p>
+<p>TGI 这轮没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没有新的</strong></p>
+<p>arXiv 最新还是昨天的。</p>
+<p>23点版已经报过了。</p>
+<p>中文站翻了 10 月旧论文。</p>
+<p>那篇前面深读过了。</p>
+<p>这轮就不重复了。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>X 和 Reddit 没搜到新帖。</p>
+<p>HN 搜到的都是旧讨论。</p>
+<p>中文媒体也是旧闻重发。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期前面报过了。</p>
+<p>讲软件创作，不讲推理。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>这轮没有够格深读的新论文</strong></p>
+<p>单词捷径最值得跟。</p>
+<p>它直接省掉一整段路。</p>
+<p>打分分类这类活最受益。</p>
+<p>等速度实测再深读。</p></body></html>
