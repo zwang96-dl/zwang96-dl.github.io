@@ -1,0 +1,214 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月26日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-26T08:59:58"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-26（01点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-26（01点版）</h1>
+<p>这轮 GitHub 合入 35 条。</p>
+<p>SGLang 19 条，vLLM 9 条。</p>
+<p>TRT-LLM 3 条。</p>
+<p>llama.cpp 2 条，Mooncake 2 条。</p>
+<p>剩下 4 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12760。</p>
+<p>最值得看的是草稿缓存那条。</p>
+<p>解耦少了它会直接报错。</p>
+<p>不再悄悄拖慢草稿。</p>
+<p>编码器取消请求也修了。</p>
+<p>新论文这轮没有。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照从 b12757 涨到 b12760。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：解耦少了草稿缓存会直接报错</strong></p>
+<p>#69870 修了 Mooncake 传缓存。</p>
+<p>Mooncake 是传缓存的工具。</p>
+<p>草稿就是先猜的词。</p>
+<p>读题侧没配草稿模型时。</p>
+<p>以前照样把缓存传过去。</p>
+<p>生成侧拿着残缺草稿开工。</p>
+<p>草稿命中率掉到 4.9%。</p>
+<p>表面还返回成功。</p>
+<p>现在读题侧先检查。</p>
+<p>缺草稿缓存就拒绝交接。</p>
+<p>报错会提醒补上草稿模型。</p>
+<p>这条对解耦评估很关键。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69870">https://github.com/vllm-project/vllm/pull/69870</a></p>
+<p><strong>SGLang：编码器分离时取消请求不再丢</strong></p>
+<p>#51519 修了取消请求的顺序。</p>
+<p>编码器就是先看图的那步。</p>
+<p>请求等图片结果时被取消。</p>
+<p>取消和结果同一拍到达。</p>
+<p>以前取消会被吞掉。</p>
+<p>请求照样跑完整轮生成。</p>
+<p>白占显卡和缓存。</p>
+<p>现在先处理取消。</p>
+<p>再收图片结果。</p>
+<p>多模态分离部署记一笔。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51519">https://github.com/sgl-project/sglang/pull/51519</a></p>
+<p><strong>SGLang：流水线预热不再把调度器弄崩</strong></p>
+<p>#51481 修了动态分块的预热。</p>
+<p>动态分块就是自动切读题。</p>
+<p>流水线并行启动时会试跑。</p>
+<p>试跑请求可能超过缓存池。</p>
+<p>例子里要 5120 行缓存。</p>
+<p>缓存池只有 4096 行。</p>
+<p>以前会漏掉一个请求位。</p>
+<p>调度器随后直接退出。</p>
+<p>现在按空闲缓存封顶。</p>
+<p>试跑 128 个样本全过。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51481">https://github.com/sgl-project/sglang/pull/51481</a></p>
+<p><strong>vLLM：注意力并行不再绑着草稿开关</strong></p>
+<p>#68074 松开了注意力并行。</p>
+<p>以前它绑着 ShardQ 开关。</p>
+<p>ShardQ 是切查询的优化。</p>
+<p>现在条件够就自动开。</p>
+<p>不用新增用户开关。</p>
+<p>长输入延迟降约 3.2%。</p>
+<p>32K 输入降约 3.4%。</p>
+<p>短输入没稳定收益。</p>
+<p>测的是 8 张 H20。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68074">https://github.com/vllm-project/vllm/pull/68074</a></p>
+<p><strong>SGLang：昇腾上缓存能压成 INT8 了</strong></p>
+<p>#49502 给昇腾 A2 加了新存法。</p>
+<p>INT8 就是更省地方的存法。</p>
+<p>稀疏模型的缓存以前存 BF16。</p>
+<p>BF16 是原来的存法。</p>
+<p>每词每层占 1152 字节。</p>
+<p>新存法占 656 字节。</p>
+<p>开关要手动打开。</p>
+<p>还修了两个布局错误。</p>
+<p>一个会悄悄读错缓存。</p>
+<p>一个会让传缓存对错层。</p>
+<p>你主用英伟达和 AMD。</p>
+<p>这条先记方向就行。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/49502">https://github.com/sgl-project/sglang/pull/49502</a></p>
+<p><strong>TRT-LLM：新卡解码路改成手动开</strong></p>
+<p>#22806 改了默认开关。</p>
+<p>新解码路启动时要编译。</p>
+<p>编译慢到拖住启动。</p>
+<p>一个例子启动要 1090 秒。</p>
+<p>不开只要 386 秒。</p>
+<p>现在 B200 那代默认关。</p>
+<p>要手动开才启用。</p>
+<p>更新的卡保持默认开。</p>
+<p>等启动变快再说。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22806">https://github.com/NVIDIA/TensorRT-LLM/pull/22806</a></p>
+<p><strong>vLLM：缓存外置的汇报不再慢一拍</strong></p>
+<p>#70063 撤回了上次的改法。</p>
+<p>外置就是缓存放出显卡。</p>
+<p>上次改法让汇报慢一拍。</p>
+<p>传完的缓存晚一步上报。</p>
+<p>空闲时还要多跑一步。</p>
+<p>现在恢复同一步汇报。</p>
+<p>代价是每步多几次调用。</p>
+<p>这条是短期回退。</p>
+<p>外置缓存部署记一笔。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70063">https://github.com/vllm-project/vllm/pull/70063</a></p>
+<p><strong>vLLM：看图张数算错的问题修了</strong></p>
+<p>#67168 修了 Gemma 4 的看图。</p>
+<p>Gemma 4 是谷歌的模型。</p>
+<p>图片不缩放时要算占位。</p>
+<p>占位就是图片占的词数。</p>
+<p>以前算出 8 个。</p>
+<p>正确应该是 253 个。</p>
+<p>尺寸不对的图会直接拒。</p>
+<p>多模态部署记一笔。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67168">https://github.com/vllm-project/vllm/pull/67168</a></p>
+<p><strong>Mooncake：存缓存的两个小毛病修了</strong></p>
+<p>#5829 让元数据按需分配。</p>
+<p>元数据就是缓存的目录。</p>
+<p>以前每个键都预留一块。</p>
+<p>一亿个键白占约 5.6GB。</p>
+<p>现在用上才分配。</p>
+<p>#5838 修了键名解码。</p>
+<p>键名带符号时存错了。</p>
+<p>清理程序一直清不掉。</p>
+<p>重启的客户端会卡住。</p>
+<p>现在两个问题都修了。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5829">https://github.com/kvcache-ai/Mooncake/pull/5829</a></p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5838">https://github.com/kvcache-ai/Mooncake/pull/5838</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>TRT-LLM 给新卡开了几条解码路。</p>
+<p>实测还没补齐，先不报数字。</p>
+<p>TRT-LLM 还给分支回补了清理。</p>
+<p>失败和超时的请求会回收。</p>
+<p>SGLang 修了专家槽位上限。</p>
+<p>专家太多时不再启动崩。</p>
+<p>vLLM 前端加了新的渲染接口。</p>
+<p>llama.cpp 两条是界面和同步。</p>
+<p><strong>四家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 和 Dynamo 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没有新的</strong></p>
+<p>arXiv 最新还是昨天的。</p>
+<p>23点版已经报过了。</p>
+<p>这轮就不重复了。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>X 和 Reddit 没搜到新帖。</p>
+<p>HN 搜到的都是旧讨论。</p>
+<p>中文媒体也是旧闻重发。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期前面报过了。</p>
+<p>讲软件创作，不讲推理。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>这轮没有够格深读的新论文</strong></p>
+<p>草稿缓存那条最值得跟。</p>
+<p>它直接关系解耦配置。</p>
+<p>配错时从静默变报错。</p>
+<p>等正式版带上再深读。</p></body></html>
