@@ -1,0 +1,223 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月26日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-26T10:58:32"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-26（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-26（03点版）</h1>
+<p>这轮 GitHub 合入 38 条。</p>
+<p>SGLang 12 条，vLLM 11 条。</p>
+<p>TRT-LLM 6 条，llama.cpp 6 条。</p>
+<p>Dynamo 1 条，FlashInfer 1 条。</p>
+<p>Mooncake 1 条，剩下 2 家挂零。</p>
+<p>llama.cpp 出了正式版 v1.1.0。</p>
+<p>其他正式版全没动。</p>
+<p>最值得看的是读题忙碌计数。</p>
+<p>它会算上等传缓存的时间。</p>
+<p>以前只算真正算题的时间。</p>
+<p>调度方容易误判成闲着。</p>
+<p>新论文这轮没有。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：llama.cpp 出正式版</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版出了 v1.1.0。</p>
+<p>快照也涨到了 b12774。</p>
+<p>来源：GitHub releases</p>
+<p><strong>llama.cpp：正式版 v1.1.0 到了</strong></p>
+<p>这版加了 Inkling 2 家族。</p>
+<p>Inkling 2 支持文字和图片。</p>
+<p>还加了 Hy4 flash。</p>
+<p>Hy4 flash 也支持看图。</p>
+<p>语音模型也加了一大批。</p>
+<p>草稿解码拆成了几种方法。</p>
+<p>草稿就是先猜再验的办法。</p>
+<p>旧的批处理接口要退役了。</p>
+<p>新接口已经准备好了。</p>
+<p>本地跑模型的人值得升级。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/releases/tag/v1.1.0">https://github.com/ggml-org/llama.cpp/releases/tag/v1.1.0</a></p>
+<p><strong>SGLang：读题忙不忙终于算准了</strong></p>
+<p>#53147 修了读题忙碌计数。</p>
+<p>读题就是先处理输入那步。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>以前只算真正算题的时间。</p>
+<p>等传缓存的时间全被漏掉。</p>
+<p>等绑定生成侧的时间也漏掉。</p>
+<p>传得越慢，看起来越闲。</p>
+<p>路由会按这个数估排队。</p>
+<p>扩缩容也会看这个数。</p>
+<p>现在按真实忙碌时间算。</p>
+<p>完全闲着的时间才扣掉。</p>
+<p>暂停的时间也扣掉。</p>
+<p>这条对解耦评估很关键。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53147">https://github.com/sgl-project/sglang/pull/53147</a></p>
+<p><strong>SGLang：看图数据传失败不再漏</strong></p>
+<p>#53064 修了共享内存的清理。</p>
+<p>共享内存就是共用的一块地。</p>
+<p>看图数据靠它传给调度器。</p>
+<p>以前发送还没真成功。</p>
+<p>所有权就先交出去了。</p>
+<p>中途失败就会漏掉这块地。</p>
+<p>漏多了进程也清理不掉。</p>
+<p>现在真发出去才交所有权。</p>
+<p>失败就把东西收回来。</p>
+<p>多模态部署记一笔。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53064">https://github.com/sgl-project/sglang/pull/53064</a></p>
+<p><strong>SGLang：请求取消后看图也停</strong></p>
+<p>#52705 给看图加了取消信号。</p>
+<p>用户断开时请求被取消。</p>
+<p>以前看图那步还继续跑。</p>
+<p>跑完也没人看结果。</p>
+<p>白占着一个工作线程。</p>
+<p>现在取消信号能传过去。</p>
+<p>看图那步可以提前停。</p>
+<p>正常请求基本没变化。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52705">https://github.com/sgl-project/sglang/pull/52705</a></p>
+<p><strong>SGLang：长会话的旧缓存会退了</strong></p>
+<p>#52959 修了滑动窗口缓存。</p>
+<p>滑动窗口就是只看最近一段。</p>
+<p>窗口外的旧缓存该退掉。</p>
+<p>长会话一直续着自己的行。</p>
+<p>以前退缓存很少触发。</p>
+<p>缓存就越占越多。</p>
+<p>池子满了请求全排队。</p>
+<p>最后大家一起超时。</p>
+<p>现在续写时也会退旧的。</p>
+<p>窗口内的部分不会动。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52959">https://github.com/sgl-project/sglang/pull/52959</a></p>
+<p><strong>SGLang：共用开头不再反复重算</strong></p>
+<p>#52956 修了外置缓存的缺口。</p>
+<p>外置就是缓存放出显卡。</p>
+<p>两个请求共用长开头。</p>
+<p>后来的那个找不到窗口。</p>
+<p>窗口就是能恢复的那段。</p>
+<p>以前只能把开头重算。</p>
+<p>每个请求都重算一遍。</p>
+<p>现在会把缺的窗口补存。</p>
+<p>最多算两遍就够了。</p>
+<p>这条没有速度实测。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52956">https://github.com/sgl-project/sglang/pull/52956</a></p>
+<p><strong>vLLM：大表搬出显卡省了显存</strong></p>
+<p>#69627 给预载加了搬表功能。</p>
+<p>预载就是提前把模型备好。</p>
+<p>大表以前占着显卡内存。</p>
+<p>现在可以放在主机内存。</p>
+<p>显卡要用时直接去查。</p>
+<p>每张卡从 92.89 降到 69.10。</p>
+<p>单位是 GiB。</p>
+<p>四张卡一共省了 95.16。</p>
+<p>启动时间基本没变慢。</p>
+<p>测的是四张 GB200。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69627">https://github.com/vllm-project/vllm/pull/69627</a></p>
+<p><strong>vLLM：能真测生成还活着没</strong></p>
+<p>#60505 加了新的健康检查。</p>
+<p>新检查会真跑一次生成。</p>
+<p>以前进程活着就算健康。</p>
+<p>生成卡死了也看不出来。</p>
+<p>现在卡死能被查出来。</p>
+<p>还能报出为啥没准备好。</p>
+<p>线上部署时很有用。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/60505">https://github.com/vllm-project/vllm/pull/60505</a></p>
+<p><strong>FlashInfer：自动选路多认了几格</strong></p>
+<p>#10060 扩了自动选路的表。</p>
+<p>自动选路就是自己挑算子。</p>
+<p>算子就是底层计算小件。</p>
+<p>新卡上多认了几种形状。</p>
+<p>形状就是批次和长度组合。</p>
+<p>B200 上快了约 9%。</p>
+<p>GB300 上快了约 7.6%。</p>
+<p>算子本身没有改。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/10060">https://github.com/flashinfer-ai/flashinfer/pull/10060</a></p>
+<p><strong>vLLM：图片原图档位不再报错</strong></p>
+<p>#70001 修了图片细节参数。</p>
+<p>图片细节就是清晰度档位。</p>
+<p>有个档位叫 original。</p>
+<p>以前新前端直接报错。</p>
+<p>整个请求都返回 400。</p>
+<p>现在按高清档处理。</p>
+<p>图片结果跟以前一样。</p>
+<p>多模态部署记一笔。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70001">https://github.com/vllm-project/vllm/pull/70001</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>TRT-LLM 修了最后一行分数。</p>
+<p>请求被结束符停下时。</p>
+<p>最后一行以前会丢掉。</p>
+<p>llama.cpp 让矩阵乘认新格式。</p>
+<p>新格式叫 BF16。</p>
+<p>单个词快了约 12.8%。</p>
+<p>数字是作者自报。</p>
+<p>llama.cpp 还融合了专家计算。</p>
+<p>每词少跑了几个小算子。</p>
+<p>速度变化在噪声里。</p>
+<p>SGLang 调了生成图的上限。</p>
+<p>vLLM 前端修了几处小错。</p>
+<p><strong>两家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 这轮也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没有新的</strong></p>
+<p>arXiv 最新还是昨天的。</p>
+<p>23点版已经报过了。</p>
+<p>这轮就不重复了。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>X 和 Reddit 没搜到新帖。</p>
+<p>中文媒体也是旧闻重发。</p>
+<p>文心那条前面报过了。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期前面报过了。</p>
+<p>讲软件创作，不讲推理。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>这轮没有够格深读的新论文</strong></p>
+<p>读题忙碌计数最值得跟。</p>
+<p>它直接影响路由和扩缩容。</p>
+<p>数算错了，调度就误判。</p>
+<p>等正式版带上再深读。</p></body></html>
