@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月25日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-25"/>
+<meta name="doc-ts" content="2026-11-26T05:04:27"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-25（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-25（21点版）</h1>
+<p>这轮 GitHub 合入 29 条。</p>
+<p>SGLang 10 条，vLLM 8 条。</p>
+<p>TRT-LLM 6 条，llama.cpp 3 条。</p>
+<p>Dynamo 和 Mooncake 各 1 条。</p>
+<p>剩下 3 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12755。</p>
+<p>最值得看的是新论文 VAPOR。</p>
+<p>它讲看图不用每步重算。</p>
+<p>正对你的多模态优化方向。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照从 b12754 涨到 b12755。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：查缓存少跑一趟冤枉路</strong></p>
+<p>#68660 修了跨机查缓存的浪费。</p>
+<p>查缓存就是问对面有没有。</p>
+<p>以前答案会被中途扔掉。</p>
+<p>下一轮又得重新问一遍。</p>
+<p>现在有效的答案会留着。</p>
+<p>忙的时候首字快了约 11%。</p>
+<p>首字就是第一个词出来的时间。</p>
+<p>从 87.5 降到 77.9。</p>
+<p>单位是毫秒。</p>
+<p>闲的时候差别不明显。</p>
+<p>测的是两台 H200。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68660">https://github.com/vllm-project/vllm/pull/68660</a></p>
+<p><strong>SGLang：草稿确认从七步变一步</strong></p>
+<p>#52452 把确认动作合并了。</p>
+<p>草稿解码先让小模型打草稿。</p>
+<p>确认就是核对草稿对不对。</p>
+<p>以前确认要跑七个小步骤。</p>
+<p>现在一步就做完。</p>
+<p>每轮从约 157 降到约 40。</p>
+<p>单位是微秒。</p>
+<p>输出和以前逐位相同。</p>
+<p>测的是单张 GB300。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52452">https://github.com/sgl-project/sglang/pull/52452</a></p>
+<p><strong>SGLang：新模型 Inkling-2-Mini 能跑了</strong></p>
+<p>#51926 加了这个模型的支持。</p>
+<p>它是循环式的多专家模型。</p>
+<p>多专家就是专家分工干活。</p>
+<p>草稿解码也一并接了。</p>
+<p>精度约九成上下。</p>
+<p>测的是 GB300 和 H200。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51926">https://github.com/sgl-project/sglang/pull/51926</a></p>
+<p><strong>TRT-LLM：生成准备动作变轻了</strong></p>
+<p>#22370 瘦身了每步的准备活。</p>
+<p>准备活就是开跑前的杂活。</p>
+<p>每步从 0.97 降到 0.52。</p>
+<p>单位是毫秒。</p>
+<p>输出吞吐涨约 1.5%。</p>
+<p>只对特定新模型生效。</p>
+<p>测试还有没过完的。</p>
+<p>先记一笔，别当已验证。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22370">https://github.com/NVIDIA/TensorRT-LLM/pull/22370</a></p>
+<p><strong>TRT-LLM：视频生成注意力省一截</strong></p>
+<p>#22614 给视频生成加了量化版。</p>
+<p>量化就是用低精度算。</p>
+<p>算错的部分会补回来。</p>
+<p>生成快了约 1.3 倍。</p>
+<p>画质比不补的版本好。</p>
+<p>测的是 GB300 等新卡。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22614">https://github.com/NVIDIA/TensorRT-LLM/pull/22614</a></p>
+<p><strong>llama.cpp：高通芯片又快一大截</strong></p>
+<p>#32582 升级了高通的后端。</p>
+<p>读题速度涨了三到六成。</p>
+<p>生成速度涨约一成。</p>
+<p>只对高通芯片有效。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32582">https://github.com/ggml-org/llama.cpp/pull/32582</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>vLLM 修了几个小毛病。</p>
+<p>一条管缓存布局一致性。</p>
+<p>一条管长工具参数的解析。</p>
+<p>vLLM 还给新显卡加了支持。</p>
+<p>SGLang 补了寒武纪的注意力。</p>
+<p>SGLang 还有几条测试改动。</p>
+<p>Dynamo 把镜像升到新版 vLLM。</p>
+<p>Mooncake 修了备机追赶日志。</p>
+<p>那条还没做真机验证。</p>
+<p><strong>三家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 和 FlashInfer 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>VAPOR：看图不用每步重算</strong></p>
+<p>多模态模型有个浪费。</p>
+<p>每生成一个词。</p>
+<p>都要把整张图重看一遍。</p>
+<p>这篇说看图结果能复用。</p>
+<p>需要新证据时再刷新。</p>
+<p>文字那部分照常更新。</p>
+<p>图片缓存也完整保留。</p>
+<p>解码快了 1.11 到 1.21 倍。</p>
+<p>精度还比全量计算略高。</p>
+<p>测了 12 个推理任务。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="http://arxiv.org/abs/2611.33751v1">http://arxiv.org/abs/2611.33751v1</a></p>
+<p><strong>DFly2：草稿借大模型的稀疏</strong></p>
+<p>这篇讲长上下文的草稿解码。</p>
+<p>草稿以前要自己存一份缓存。</p>
+<p>现在借大模型的那份用。</p>
+<p>能省显存和读题时间。</p>
+<p>来源：<a href="http://arxiv.org/abs/2611.34776v1">http://arxiv.org/abs/2611.34776v1</a></p>
+<p><strong>多轮对话的缓存留多久</strong></p>
+<p>这篇讲智能体的缓存去留。</p>
+<p>多轮对话中间有等待时间。</p>
+<p>缓存留着占地方。</p>
+<p>扔了下轮又得重算。</p>
+<p>它给了留和扔的算账法。</p>
+<p>来源：<a href="http://arxiv.org/abs/2611.34584v1">http://arxiv.org/abs/2611.34584v1</a></p>
+<h2>业内新闻</h2>
+<p><strong>新引擎 Astral 发布</strong></p>
+<p>有团队发了新推理引擎。</p>
+<p>号称单卡比 vLLM 快三成。</p>
+<p>只测了一个模型。</p>
+<p>是厂商自报，没独立复测。</p>
+<p>先记一笔，别当定论。</p>
+<p>来源：<a href="https://www.syntheticmindslab.com/news/introducing-astral-inference-server">https://www.syntheticmindslab.com/news/introducing-astral-inference-server</a></p>
+<p><strong>其余渠道没新东西</strong></p>
+<p>X 这轮没搜到新帖。</p>
+<p>中文媒体也是旧闻重发。</p>
+<p>聚合站的说法没一手来源。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>今天那期 17点版报过了。</p>
+<p>讲软件创作，不讲推理。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>VAPOR：看图不用每步重算</strong></p>
+<p>这篇能帮你看生成侧的浪费。</p>
+<p>它把看图和写字分开算账。</p>
+<p>还给了速度和精度代价。</p>
+<p>深读笔记已生成。</p>
+<p>第二个先记一笔。</p>
+<p>vLLM 查缓存那条值得跟。</p>
+<p>它跟跨机传缓存有关。</p>
+<p>等更多实测再深读。</p></body></html>
