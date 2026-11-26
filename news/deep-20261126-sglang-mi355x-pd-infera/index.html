@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang 在 MI355X 上做 PD 解耦：Infera 路由配方"/>
+<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #52460"/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-26T01:10:17"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang 在 MI355X 上做 PD 解耦：Infera 路由配方</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang 在 MI355X 上做 PD 解耦：Infera 路由配方</h1>
+<ul><li>原文：SGLang 团队，GitHub PR #52460</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/52460">https://github.com/sgl-project/sglang/pull/52460</a></li><li>合入时间：2026-11-25</li><li>说明：这是文档 PR，不是新功能 PR</li><li>数字来自 InferenceX 实测</li></ul>
+<h2>人话解读</h2>
+<p>这篇把一套部署打法写全了。 模型是 GLM-5.2。 权重是 MXFP4 版。 MXFP4 就是 4 位量化格式。 硬件是 AMD 的 MI355X。 读题和生成分开跑。 这就是 PD 解耦。 PD 解耦就是读题生成分开跑。 路由器负责分请求。 它先看谁缓存了前缀。 前缀就是请求开头那段。 谁有缓存，就把读题给谁。 同一会话尽量不换机器。 生成侧再做负载均衡。 这套打法已经跑过实测。 不是纸上方案。</p>
+<h2>核心方法</h2>
+<ul><li>读题侧用四段流水线。</li><li>四段流水线就是 PP4。</li><li>PP4 就是切成四段接力算。</li><li>生成侧有两种摆法。</li><li>一种用 8 张卡生成。</li><li>一种用 4 张卡生成。</li><li>8 卡生成带数据并行注意力。</li><li>数据并行就是多卡各跑一份。</li><li>4 卡生成也带数据并行注意力。</li><li>缓存每段留 250 GB。</li><li>缓存用的是 HiCache。</li><li>HiCache 就是分层缓存。</li><li>分层缓存就是显存外再放一层。</li><li>两边都开 EAGLE 草稿。</li><li>EAGLE 就是先猜词再核对。</li><li>草稿规格是 5-1-6。</li><li>路由器用 Infera。</li><li>Infera 是 AMD 的路由器。</li><li>路由器从 etcd 找机器。</li><li>etcd 就是机器名单服务。</li><li>机器会报告缓存前缀。</li><li>路由器按缓存选读题机。</li><li>会话会钉在同一台读题机。</li><li>生成侧按注意力分片均衡。</li></ul>
+<h2>关键数据</h2>
+<table><thead><tr><th>摆法</th><th>并发</th><th>每卡每秒 token 数</th></tr></thead><tbody><tr><td>4 卡生成</td><td>80</td><td>37644</td></tr><tr><td>4 卡生成</td><td>64</td><td>32668</td></tr><tr><td>8 卡生成</td><td>88</td><td>32327</td></tr><tr><td>8 卡生成</td><td>64</td><td>28883</td></tr><tr><td>8 卡生成</td><td>48</td><td>21229</td></tr><tr><td>8 卡生成</td><td>32</td><td>15791</td></tr></tbody></table>
+<ul><li>每组测了 1200 秒。</li><li>出错请求是 0 个。</li><li>草稿接受率是模拟值。</li><li>模拟值是 3.61。</li><li>精度用真实草稿测过。</li><li>4 卡生成并发 80 时测过。</li><li>GSM8K 是 0.9682。</li><li>这是严格口径。</li><li>灵活口径是 0.9704。</li><li>8 卡生成并发 88 时测过。</li><li>GSM8K 是 0.9697。</li><li>灵活口径也是 0.9704。</li><li>数字是提交方自报。</li><li>没有独立复现。</li></ul>
+<h2>关键图表</h2>
+<p>原文是配方文档。 原文没有配图。 关键表格已抄在上面。 启动顺序也在原文里。 镜像版本钉了摘要。 摘要就是镜像指纹。</p>
+<h2>跟你的研究方向的关联</h2>
+<p>你正在评估 SGLang 解耦。 这篇正好给了对照组。 它不是单机小实验。 它是整套生产摆法。 读题侧切法能直接抄。 生成侧卡数也能直接抄。 路由器选法也能抄。 按缓存前缀选读题机。 这点很关键。 你的评估要单列命中率。 命中率就是缓存用上的比例。 会话钉住也要单列。 钉住能减少重复读题。 生成侧均衡也要单列。 均衡不好会拖尾巴。 尾巴就是最慢那批请求。 草稿接受率要小心。 吞吐数用了模拟接受率。 精度数用了真实接受率。 两组数不能混着看。 你的硬件有 MI350X。 原文硬件是 MI355X。 同属 AMD 这条线。 但卡型不完全一样。 数字只能当参考。 不能直接套到 MI350X。</p>
+<h2>局限与提醒</h2>
+<ul><li>这是文档 PR。</li><li>它没有新增引擎功能。</li><li>它记录的是已跑配置。</li><li>配置来自 InferenceX 提交。</li><li>镜像是 11 月 17 日版。</li><li>镜像没有打补丁。</li><li>驱动版本会影响结果。</li><li>网卡锁定内存也影响结果。</li><li>这些细节原文都写了。</li><li>复现时要逐项对齐。</li></ul>
+<h2>术语表</h2>
+<ul><li>PD 解耦：读题生成分开跑。</li><li>前缀：请求开头那段。</li><li>HiCache：显存外再放一层缓存。</li><li>EAGLE：先猜词再核对。</li><li>etcd：机器名单服务。</li><li>命中率：缓存用上的比例。</li><li>尾巴：最慢那批请求。</li></ul>
+<h2>原文链接</h2>
+<p><a href="https://github.com/sgl-project/sglang/pull/52460">https://github.com/sgl-project/sglang/pull/52460</a></p></body></html>

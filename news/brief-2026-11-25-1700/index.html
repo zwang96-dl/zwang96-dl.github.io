@@ -1,0 +1,261 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月25日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-25"/>
+<meta name="doc-ts" content="2026-11-26T01:11:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-25（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-25（17点版）</h1>
+<p>这轮 GitHub 合入 22 条。</p>
+<p>SGLang 11 条，FlashInfer 7 条。</p>
+<p>vLLM 2 条，TRT-LLM 1 条。</p>
+<p>Dynamo 1 条，剩下 4 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12751。</p>
+<p>最值得看的是 SGLang 的解耦配方。</p>
+<p>它把 AMD 上的打法写全了。</p>
+<p>正对上你的解耦评估。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0，TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 快照从 b12738 涨到 b12751。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：AMD 解耦配方写全了</strong></p>
+<p>#52460 把生产配置写进手册。</p>
+<p>模型是 GLM-5.2 的 MXFP4 版。</p>
+<p>MXFP4 就是 4 位量化格式。</p>
+<p>硬件是 MI355X。</p>
+<p>读题和生成分开跑。</p>
+<p>PD 解耦就是读题生成分开跑。</p>
+<p>路由器用 Infera。</p>
+<p>Infera 是 AMD 的路由器。</p>
+<p>它按缓存前缀选读题机器。</p>
+<p>前缀就是请求开头那段。</p>
+<p>同一会话钉在同一台读题机。</p>
+<p>生成侧再做负载均衡。</p>
+<p>读题侧都是四段流水线。</p>
+<p>生成侧有 8 卡和 4 卡两档。</p>
+<p>缓存每段留 250 GB。</p>
+<p>两边都开 EAGLE 草稿。</p>
+<p>EAGLE 就是先猜词再核对。</p>
+<p>并发 80 时每卡 37644。</p>
+<p>单位是每秒 token 数。</p>
+<p>这是 4 卡生成那档。</p>
+<p>并发 88 时每卡 32327。</p>
+<p>这是 8 卡生成那档。</p>
+<p>草稿接受率是模拟值。</p>
+<p>精度用真实草稿测过。</p>
+<p>GSM8K 约 0.97。</p>
+<p>这份配方能直接抄。</p>
+<p>但别把模拟数当真实数。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52460">https://github.com/sgl-project/sglang/pull/52460</a></p>
+<p><strong>SGLang：缓存行宽不再写串</strong></p>
+<p>#52926 修了请求缓存表。</p>
+<p>表太窄时尾巴会写串。</p>
+<p>写串就是写进别人那行。</p>
+<p>推测解码时更容易中招。</p>
+<p>推测解码就是先猜再核对。</p>
+<p>以前行宽按固定余量算。</p>
+<p>现在按真实写入距离算。</p>
+<p>#53185 把注意力表也改宽。</p>
+<p>表宽改按缓存行宽算。</p>
+<p>长上下文贴边时先查这里。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52926">https://github.com/sgl-project/sglang/pull/52926</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53185">https://github.com/sgl-project/sglang/pull/53185</a></p>
+<p><strong>SGLang：贴边请求不再少给词</strong></p>
+<p>#33814 修了长度边界。</p>
+<p>以前贴边请求少给 2 个词。</p>
+<p>现在能给满请求词数。</p>
+<p>它依赖上一条行宽修复。</p>
+<p>两条一起看才完整。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/33814">https://github.com/sgl-project/sglang/pull/33814</a></p>
+<p><strong>SGLang：流水线入口不再读旧数</strong></p>
+<p>#52627 修了罕见竞态。</p>
+<p>竞态就是抢跑读旧数。</p>
+<p>流水线入口最容易中招。</p>
+<p>旧数偶尔会变成 NaN。</p>
+<p>NaN 就是不是数字的坏值。</p>
+<p>修法是先等上一步写完。</p>
+<p>代价最多约 1%。</p>
+<p>这跟流水线并行相关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52627">https://github.com/sgl-project/sglang/pull/52627</a></p>
+<p><strong>SGLang：长请求不再卡住服务器</strong></p>
+<p>#53068 把大请求挪去后台解。</p>
+<p>以前大请求占着接待线程。</p>
+<p>接待线程就是接请求的工人。</p>
+<p>长提示词会堵住别的流。</p>
+<p>现在大包去阻塞池处理。</p>
+<p>阻塞池就是专门干重活的队列。</p>
+<p>小包还是原地处理。</p>
+<p>外部行为不变。</p>
+<p>测试塞了上百万个输入编号。</p>
+<p>以前流式输出也会被拖住。</p>
+<p>这事跟首字延迟有关。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53068">https://github.com/sgl-project/sglang/pull/53068</a></p>
+<p><strong>SGLang：Kimi 预填少等一截</strong></p>
+<p>#53187 只改一个数字。</p>
+<p>并行小活从 16 块降到 8 块。</p>
+<p>小活占太多计算单元。</p>
+<p>大活就得排队等它。</p>
+<p>改完预填快了约 7%。</p>
+<p>测的是 VR200。</p>
+<p>B300 上只快约 0.5%。</p>
+<p>数字是作者自报。</p>
+<p>这招只对特定模型有效。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53187">https://github.com/sgl-project/sglang/pull/53187</a></p>
+<p><strong>vLLM：多节点解耦少传一份缓存</strong></p>
+<p>#69901 修了多节点传输。</p>
+<p>以前只有第一台机器收货。</p>
+<p>收货就是导入预填缓存。</p>
+<p>第二台机器拿不到主缓存。</p>
+<p>它会继续用旧内容。</p>
+<p>现在每台机器都有收货人。</p>
+<p>收货人就是本机负责人。</p>
+<p>单节点不受影响。</p>
+<p>作者只做了 CPU 测试。</p>
+<p>没有多节点真机验证。</p>
+<p>你跑多节点解耦时要留意。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69901">https://github.com/vllm-project/vllm/pull/69901</a></p>
+<p><strong>vLLM：稀疏注意力能配主机缓存了</strong></p>
+<p>#61277 接通了一条新路。</p>
+<p>以前这条路读不到主机缓存。</p>
+<p>它会读到过期页。</p>
+<p>过期页就是已被挪走的缓存。</p>
+<p>重复跑分会越跑越差。</p>
+<p>现在能读热缓存和暂存区。</p>
+<p>热缓存就是显存里那份。</p>
+<p>GSM8K 三轮约 0.92。</p>
+<p>测的是 8 张 H100。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/61277">https://github.com/vllm-project/vllm/pull/61277</a></p>
+<p><strong>FlashInfer：同批不变又补两块</strong></p>
+<p>#9683 补了两个小功能。</p>
+<p>一个是注意力分数汇总。</p>
+<p>汇总就是每行最后的归一化账。</p>
+<p>一个是注意力沉降点。</p>
+<p>沉降点就是虚拟的空位置。</p>
+<p>以前这两样会被拒绝。</p>
+<p>现在同批结果仍不变。</p>
+<p>同批不变就是换批不换答案。</p>
+<p>开不开汇总都不改输出。</p>
+<p>性能基本没变。</p>
+<p>测的是 B300。</p>
+<p>这跟评测一致性相关。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9683">https://github.com/flashinfer-ai/flashinfer/pull/9683</a></p>
+<p><strong>FlashInfer：4 位专家也能同批不变</strong></p>
+<p>#9901 新增 4 位专家后端。</p>
+<p>专家就是 MoE 里分工的小块。</p>
+<p>MoE 就是多专家分工的模型。</p>
+<p>它支持两种 4 位格式。</p>
+<p>一种是 NVFP4。</p>
+<p>一种是 MXFP4。</p>
+<p>换批后结果仍逐位相同。</p>
+<p>但速度不总是更快。</p>
+<p>解码档多在九成以下。</p>
+<p>预填档有机会反超。</p>
+<p>只支持新架构卡。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9901">https://github.com/flashinfer-ai/flashinfer/pull/9901</a></p>
+<p><strong>FlashInfer：长缓存解码少绕路</strong></p>
+<p>#9998 改了长缓存选路。</p>
+<p>长缓存就是上下文很长。</p>
+<p>以前会选到慢的那条路。</p>
+<p>现在保留快的那条路。</p>
+<p>时间降到原来的七到九成。</p>
+<p>测的是 B200。</p>
+<p>只影响特定注意力形状。</p>
+<p>形状就是头数和维度组合。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9998">https://github.com/flashinfer-ai/flashinfer/pull/9998</a></p>
+<p><strong>FlashInfer：专家小算子又省一点</strong></p>
+<p>#8838 换了便宜算法。</p>
+<p>专家前半段快了约一到四成。</p>
+<p>整段专家最多快约两成。</p>
+<p>测的是 GB200。</p>
+<p>只影响特定激活函数。</p>
+<p>激活函数就是中间那道弯。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/8838">https://github.com/flashinfer-ai/flashinfer/pull/8838</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 还有 4 条小改动。</p>
+<p>一条让错误更早暴露。</p>
+<p>一条是文档改动。</p>
+<p>两条是持续集成改动。</p>
+<p>FlashInfer 还有 3 条小改动。</p>
+<p>一条给通信等待加超时。</p>
+<p>两条是持续集成改动。</p>
+<p>TRT-LLM 那条是测试豁免。</p>
+<p>Dynamo 那条是容器升级。</p>
+<p><strong>四家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>llama.cpp 没合入新 PR。</p>
+<p>TGI 和 Mooncake 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>arXiv 这轮没有新批次</strong></p>
+<p>最新还是 11 月 24 日那批。</p>
+<p>检索里还没看到新批次。</p>
+<p>这轮不硬凑论文。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>X 和 Reddit 没搜到新帖。</p>
+<p>HN 搜到的都是旧讨论。</p>
+<p>中文媒体也是旧闻重发。</p>
+<p>文心和 LoomKV 前面报过。</p>
+<p>vLLM-GR 也在前面报过。</p>
+<p>llm-d 那篇也是旧闻。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 今天有新一期</strong></p>
+<p>新一期讲软件创作。</p>
+<p>不讲推理服务。</p>
+<p>这轮就不展开了。</p>
+<p>来源：<a href="https://open.spotify.com/episode/5uklqAOqrAGHfUww7APFfa?si=L8So2mmaRAueyjsfY7y9sg">https://open.spotify.com/episode/5uklqAOqrAGHfUww7APFfa?si=L8So2mmaRAueyjsfY7y9sg</a></p>
+<h2>值得深读</h2>
+<p><strong>SGLang 的 AMD 解耦配方</strong></p>
+<p>这篇能直接进你的评估清单。</p>
+<p>它给了两种机器摆法。</p>
+<p>还给了并发和吞吐数。</p>
+<p>路由器怎么选机器也写了。</p>
+<p>深读笔记已生成。</p>
+<p>第二个先记一笔。</p>
+<p>FlashInfer 同批不变值得跟。</p>
+<p>它跟评测一致性相关。</p>
+<p>等引擎接上再深读。</p></body></html>
