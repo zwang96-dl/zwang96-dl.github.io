@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月26日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-26T15:00:51"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-26（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-26（07点版）</h1>
+<p>这轮 GitHub 合入 17 条。</p>
+<p>SGLang 7 条，vLLM 6 条。</p>
+<p>llama.cpp 3 条。</p>
+<p>Dynamo 1 条。</p>
+<p>剩下 5 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12777。</p>
+<p>最值得看的是直达硬盘。</p>
+<p>缓存能从显卡直达硬盘。</p>
+<p>读缓存快了一倍多。</p>
+<p>新论文这轮没有。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照从 b12776 涨到 b12777。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：缓存能从显卡直达硬盘</strong></p>
+<p>#66805 给缓存外置加了直达通道。</p>
+<p>外置就是缓存放出显卡。</p>
+<p>直达就是显卡直接读写硬盘。</p>
+<p>以前要绕一圈才到硬盘。</p>
+<p>现在少绕这一圈。</p>
+<p>作者测加载快一倍多。</p>
+<p>测的是 8 卡 H100。</p>
+<p>模型用的是 Llama 8B。</p>
+<p>数字是作者自报。</p>
+<p>缓存放硬盘的场景最吃这条。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/66805">https://github.com/vllm-project/vllm/pull/66805</a></p>
+<p><strong>vLLM：旧对话状态往后排了</strong></p>
+<p>#69626 改了混合模型的缓存排队。</p>
+<p>混合模型每轮留一份状态。</p>
+<p>旧状态堆多了会挤掉新缓存。</p>
+<p>现在两轮前的往后排。</p>
+<p>上一轮的还留着。</p>
+<p>共享开头也留着。</p>
+<p>重算的词少了约一成。</p>
+<p>最多到 13.7%。</p>
+<p>测的是真实对话轨迹。</p>
+<p>数字是作者自报。</p>
+<p>整机吞吐还没测。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69626">https://github.com/vllm-project/vllm/pull/69626</a></p>
+<p><strong>vLLM：存错状态的毛病修了</strong></p>
+<p>#70068 修了状态存错位置。</p>
+<p>请求被打断后位置会对不上。</p>
+<p>以前会把错状态存进缓存。</p>
+<p>后面命中就可能答错。</p>
+<p>现在对不上就不存。</p>
+<p>正确命中不受影响。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70068">https://github.com/vllm-project/vllm/pull/70068</a></p>
+<p><strong>SGLang：高并发解码不再掉慢路</strong></p>
+<p>#53032 抬高了融合计算的上限。</p>
+<p>融合就是把几步合成一步。</p>
+<p>以前超过 1024 行就走慢路。</p>
+<p>现在上限提到 2048 行。</p>
+<p>整机吞吐涨约 1%。</p>
+<p>尾延迟好了约 4%。</p>
+<p>测的是 GB300。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53032">https://github.com/sgl-project/sglang/pull/53032</a></p>
+<p><strong>SGLang：视频生成也用上了录图</strong></p>
+<p>两条都给扩散模型加了录图。</p>
+<p>录图就是提前录好步骤。</p>
+<p>重播时少一点开销。</p>
+<p>一条出片快约 1.7 倍。</p>
+<p>另一条延迟降约三成。</p>
+<p>测的都是 GB300。</p>
+<p>数字是作者自报。</p>
+<p>跟你主线关系不大。</p>
+<p>先记方向就行。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52918">https://github.com/sgl-project/sglang/pull/52918</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52657">https://github.com/sgl-project/sglang/pull/52657</a></p>
+<p><strong>SGLang：格式约束多了一种写法</strong></p>
+<p>#39380 给格式约束加了新写法。</p>
+<p>以前只认一种语法写法。</p>
+<p>现在另一种写法也能认。</p>
+<p>认不出第一种会自动试第二种。</p>
+<p>接口不用改。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/39380">https://github.com/sgl-project/sglang/pull/39380</a></p>
+<p><strong>vLLM：透明图处理对齐了</strong></p>
+<p>#69621 修了透明图的拼底。</p>
+<p>以前透明底会被直接丢掉。</p>
+<p>现在按模型原样拼底。</p>
+<p>只影响 Kimi-K3。</p>
+<p>普通图没有变化。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69621">https://github.com/vllm-project/vllm/pull/69621</a></p>
+<p><strong>vLLM：请求不能乱改分词设置</strong></p>
+<p>#69852 堵了一个安全口子。</p>
+<p>分词就是把话切成词。</p>
+<p>以前请求能覆盖服务器设置。</p>
+<p>现在覆盖会被拒绝。</p>
+<p>普通模板变量还能用。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69852">https://github.com/vllm-project/vllm/pull/69852</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 修了思考内容解析。</p>
+<p>以前有些模板认不出思考段。</p>
+<p>现在能认了。</p>
+<p>Dynamo 让插件共享请求信息。</p>
+<p>请求信息就是长度和优先级。</p>
+<p>行为没有变化。</p>
+<p>llama.cpp 修了显卡识别。</p>
+<p>还加了转图清晰度设置。</p>
+<p>界面提示也跟上主题了。</p>
+<p><strong>五家挂零</strong></p>
+<p>TRT-LLM 这轮没合入。</p>
+<p>LMDeploy 也没合入。</p>
+<p>TGI 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<p>Mooncake 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没有新的</strong></p>
+<p>arXiv 最新还是昨天的。</p>
+<p>23点版已经报过了。</p>
+<p>这轮没有新入库。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>X 和 Reddit 没搜到新帖。</p>
+<p>HN 搜到的都是旧讨论。</p>
+<p>中文媒体也是旧闻重发。</p>
+<p>对比文章都是前两天的。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期是 25 号的。</p>
+<p>前面已经报过了。</p>
+<p>讲软件创作，不讲推理。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>这轮没有够格深读的新论文</strong></p>
+<p>直达硬盘最值得跟。</p>
+<p>缓存放硬盘的场景能提速。</p>
+<p>等更多实测再深读。</p>
+<p>旧状态往后排也值得记。</p>
+<p>它直接少算一成词。</p></body></html>
