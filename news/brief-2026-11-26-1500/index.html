@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月26日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-26T22:59:36"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-26（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-26（15点版）</h1>
+<p>这轮 GitHub 合入 4 条。</p>
+<p>vLLM 2 条。</p>
+<p>SGLang 和 llama.cpp 各 1 条。</p>
+<p>剩下 6 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12798。</p>
+<p>最值得看的是 P/D 那条。</p>
+<p>生成机不用重算整段历史了。</p>
+<p>新论文这轮没有。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照从 b12782 涨到 b12798。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：生成机不再重算整段历史</strong></p>
+<p>#67064 修了 P/D 的缓存对齐。</p>
+<p>P/D 就是读题和生成分开跑。</p>
+<p>问题出在 Mamba 混合模型。</p>
+<p>Mamba 是带记忆状态的层。</p>
+<p>以前读题机算到倒数第二个词。</p>
+<p>它把状态交给生成机。</p>
+<p>这个状态不在缓存格子上。</p>
+<p>缓存格子就是能复用的存档点。</p>
+<p>下一轮追问直达生成机。</p>
+<p>生成机找不到可复用的存档。</p>
+<p>于是整段历史重算一遍。</p>
+<p>旧实测里命中是 0。</p>
+<p>123032 个词一个没命中。</p>
+<p>现在读题机停在存档点。</p>
+<p>生成机只补算最后小尾巴。</p>
+<p>补完后存档就在生成机了。</p>
+<p>下一轮追问能直接命中。</p>
+<p>代价是生成机多算小尾巴。</p>
+<p>尾巴最多不到一个缓存块。</p>
+<p>评论区有一次对照实验。</p>
+<p>直达轮首字从 25.7 秒降到 0.7 秒。</p>
+<p>但 P/D 轮首字变慢了。</p>
+<p>从 0.96 秒涨到 1.48 秒。</p>
+<p>实验只跑了一轮。</p>
+<p>数字先当参考。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67064">https://github.com/vllm-project/vllm/pull/67064</a></p>
+<p><strong>SGLang：AMD 上猜词生成不再崩</strong></p>
+<p>#40872 修了 AMD 侧的崩溃。</p>
+<p>崩的是猜词生成第一步。</p>
+<p>猜词生成就是先猜后面几个词。</p>
+<p>问题出在长度信息对不上。</p>
+<p>显卡算子读过了头。</p>
+<p>算子就是显卡里的小计算程序。</p>
+<p>现在默认走已有快路径。</p>
+<p>旧路径也补齐了长度信息。</p>
+<p>作者在 MI355X 上测过。</p>
+<p>两种设置都不再崩。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/40872">https://github.com/sgl-project/sglang/pull/40872</a></p>
+<p><strong>llama.cpp：核对猜词快了一点</strong></p>
+<p>#33098 给 OpenCL 加了新算子。</p>
+<p>新算子服务于猜词核对。</p>
+<p>猜词核对就是检查猜的词对不对。</p>
+<p>出字从 32.959 涨到 34.280。</p>
+<p>单位是每秒词数。</p>
+<p>猜中比例完全没变。</p>
+<p>还是 41.720%。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/33098">https://github.com/ggml-org/llama.cpp/pull/33098</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>vLLM 还修了一个测试问题。</p>
+<p>只改测试，不改运行行为。</p>
+<p>测的是 AMD 侧的开关组合。</p>
+<p>其余没有新合入。</p>
+<p><strong>六家挂零</strong></p>
+<p>TRT-LLM 这轮没合入。</p>
+<p>LMDeploy 也没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<p>Mooncake 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没有新的</strong></p>
+<p>arXiv 最新还是昨天的。</p>
+<p>前面已经报过了。</p>
+<p>下一批还没入库。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是对比文章。</p>
+<p>对比文章已经报过了。</p>
+<p>社交渠道也没有实质新内容。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期是 25 号的。</p>
+<p>前面已经报过了。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>vLLM 的 P/D 检查点对齐</strong></p>
+<p>这篇正贴你的解耦评估。</p>
+<p>缓存命中要按机器分开算。</p>
+<p>读题机停在哪也要算账。</p>
+<p>生成机补算尾巴也要算账。</p>
+<p>深读笔记已生成。</p></body></html>
