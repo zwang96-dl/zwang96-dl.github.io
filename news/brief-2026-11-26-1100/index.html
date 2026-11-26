@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月26日 11:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-26T18:58:34"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-26（11点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-26（11点版）</h1>
+<p>这轮 GitHub 合入 9 条。</p>
+<p>SGLang 3 条，TRT-LLM 3 条。</p>
+<p>vLLM 2 条。</p>
+<p>llama.cpp 1 条。</p>
+<p>剩下 5 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12780。</p>
+<p>最值得看的是省显存。</p>
+<p>一块显存能多装缓存了。</p>
+<p>新论文这轮没有。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照从 b12778 涨到 b12780。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：省下的显存能多装缓存</strong></p>
+<p>#70178 把一张表改小了。</p>
+<p>这张表是解码时用的。</p>
+<p>以前按全部上下文开表。</p>
+<p>现在只按本卡那份开。</p>
+<p>本卡就是分到这张卡的部分。</p>
+<p>录图占的显存少了。</p>
+<p>每张卡少约 2.19 GiB。</p>
+<p>缓存块多了约 5.9%。</p>
+<p>测的是 Kimi K3.1 Pro。</p>
+<p>用的是 8 张 GB300。</p>
+<p>数字是作者提供的旧实测。</p>
+<p>这条合入没重跑显卡实测。</p>
+<p>长上下文场景最吃这条。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70178">https://github.com/vllm-project/vllm/pull/70178</a></p>
+<p><strong>SGLang：视频编码器占的显存减半</strong></p>
+<p>#52655 改了默认精度。</p>
+<p>编码器就是读文字的那部分。</p>
+<p>以前默认用高精度存它。</p>
+<p>现在默认用低一档精度。</p>
+<p>占的显存从 21.2 降到 10.6。</p>
+<p>单位都是 GiB。</p>
+<p>以前 80G 卡会爆显存。</p>
+<p>现在能装下了。</p>
+<p>画质没做新旧对比。</p>
+<p>作者没给这项数据。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52655">https://github.com/sgl-project/sglang/pull/52655</a></p>
+<p><strong>SGLang：新视频模型能直接跑了</strong></p>
+<p>#35014 加了新模型支持。</p>
+<p>这模型一次生成视频和声音。</p>
+<p>声音不是事后配的。</p>
+<p>两者一起生成。</p>
+<p>总参数约 114B。</p>
+<p>每步只用约 6B。</p>
+<p>只能生成 10 秒片段。</p>
+<p>成片能放大到 1920x1088。</p>
+<p>单卡加载时会爆显存。</p>
+<p>跟你主线关系不大。</p>
+<p>先记方向就行。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/35014">https://github.com/sgl-project/sglang/pull/35014</a></p>
+<p><strong>SGLang：日志不再乱记用户内容</strong></p>
+<p>#51786 收紧了日志记录。</p>
+<p>日志就是系统留的记录。</p>
+<p>日常日志不记提示词了。</p>
+<p>也不记种子和输出位置。</p>
+<p>媒体任务按租户分开了。</p>
+<p>租户就是不同的使用方。</p>
+<p>多方共用服务时更安全。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51786">https://github.com/sgl-project/sglang/pull/51786</a></p>
+<p><strong>TRT-LLM：特殊符号不再把请求弄崩</strong></p>
+<p>#21111 修了一个崩溃问题。</p>
+<p>内容里出现特殊符号时。</p>
+<p>以前会被当成控制符号。</p>
+<p>控制符号就是指挥模型的标记。</p>
+<p>这样编号会超出范围。</p>
+<p>请求就会直接失败。</p>
+<p>现在直接用原编号了。</p>
+<p>数词的结果也对齐了。</p>
+<p>以前会多算 3 个词。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21111">https://github.com/NVIDIA/TensorRT-LLM/pull/21111</a></p>
+<p><strong>vLLM：同名候选不再互相覆盖</strong></p>
+<p>#65741 修了概率记录。</p>
+<p>几个候选会解出空文字。</p>
+<p>以前后来的会盖掉前面的。</p>
+<p>现在保留概率最高的。</p>
+<p>实际选中的那个更准了。</p>
+<p>评测时读数更可信。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65741">https://github.com/vllm-project/vllm/pull/65741</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>TRT-LLM 修了两个测试。</p>
+<p>运行时行为没有变化。</p>
+<p>llama.cpp 改了界面分类。</p>
+<p>一种量化格式归对行了。</p>
+<p>量化就是压缩模型省显存。</p>
+<p><strong>五家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<p>Mooncake 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没有新的</strong></p>
+<p>arXiv 最新还是昨天的。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的都是前几天的。</p>
+<p>对比文章已经报过了。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期是 25 号的。</p>
+<p>前面已经报过了。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>这轮没有够格深读的新论文</strong></p>
+<p>省显存那条最值得记。</p>
+<p>长上下文评估时能参考。</p>
+<p>编码器减半也值得记。</p>
+<p>视频模型部署时能用上。</p></body></html>
