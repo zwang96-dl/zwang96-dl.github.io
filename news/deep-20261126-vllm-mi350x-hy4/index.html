@@ -1,0 +1,103 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM 在 MI350X 上补齐 HY4：读题快两成"/>
+<meta name="doc-description" content="- 原文：vLLM 团队，GitHub PR #70004"/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-26T20:59:38"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM 在 MI350X 上补齐 HY4：读题快两成</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM 在 MI350X 上补齐 HY4：读题快两成</h1>
+<ul><li>原文：vLLM 团队，GitHub PR #70004</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/70004">https://github.com/vllm-project/vllm/pull/70004</a></li><li>合入时间：2026-11-26</li><li>实测硬件：8 张 MI350X</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条把 AMD 侧的缺口补上了。</p>
+<p>以前 HY4 在 AMD 上跑不全。</p>
+<p>英伟达侧有的招，AMD 侧缺三样。</p>
+<p>现在三样都补齐了。</p>
+<p>第一样是缓存格式能用了。</p>
+<p>缓存就是存草稿纸的地方。</p>
+<p>新格式把草稿纸压得更小。</p>
+<p>以前一开就启动失败。</p>
+<p>现在能正常跑了。</p>
+<p>第二样叫 ShardQ。</p>
+<p>它把注意力切开分给各卡。</p>
+<p>切完再拼回整块来算。</p>
+<p>拼对了，显卡就不用等。</p>
+<p>第三样叫序列并行。</p>
+<p>它把输入切开分工算。</p>
+<p>读题就是处理输入那一步。</p>
+<p>三样加起来，读题快了两成。</p>
+<p>生成那一步基本没变。</p>
+<p>精度也基本没掉。</p>
+<h2>核心方法</h2>
+<ul><li>缓存格式叫 fp8_ds_mla。</li><li>它是 8 位浮点存的缓存。</li><li>以前 AMD 侧没传注意力沉降。</li><li>沉降就是给注意力留的锚点。</li><li>没传锚点就直接报错。</li><li>现在把锚点传过去了。</li><li>ShardQ 只在 8 卡时开。</li><li>8 卡时每卡分到的头少。</li><li>头就是注意力的小组。</li><li>头少时拼块能省一半读取。</li><li>2 卡和 4 卡时头多。</li><li>头多时拼块只多一次搬运。</li><li>所以那两档自动关掉。</li><li>序列并行默认打开。</li><li>输入按段切给各卡。</li><li>每段算完再汇总。</li><li>只对 HY4 生效。</li><li>别的模型不受影响。</li></ul>
+<h2>关键数据</h2>
+<p>ShardQ 开关对比，8 卡：</p>
+<table><thead><tr><th>输入长度</th><th>关</th><th>开</th><th>比值</th></tr></thead><tbody><tr><td>8K</td><td>0.429 秒</td><td>0.424 秒</td><td>0.988</td></tr><tr><td>32K</td><td>1.753 秒</td><td>1.604 秒</td><td>0.915</td></tr><tr><td>128K</td><td>8.112 秒</td><td>6.543 秒</td><td>0.807</td></tr></tbody></table>
+<p>序列并行开关对比，8 卡：</p>
+<table><thead><tr><th>输入长度</th><th>关</th><th>开</th><th>比值</th></tr></thead><tbody><tr><td>8K</td><td>0.527 秒</td><td>0.424 秒</td><td>0.803</td></tr><tr><td>32K</td><td>2.043 秒</td><td>1.604 秒</td><td>0.785</td></tr><tr><td>128K</td><td>8.307 秒</td><td>6.542 秒</td><td>0.788</td></tr></tbody></table>
+<ul><li>生成速度基本没变。</li><li>比值是 0.997 到 1.000。</li><li>新缓存能装 1.76 倍的词。</li><li>旧的是 387 万词。</li><li>新的是 679 万词。</li><li>数学题分数基本没变。</li><li>原版是 96.82 分。</li><li>新版是 96.66 分。</li><li>差了 0.15 个点。</li><li>误差范围是 0.32 个点。</li><li>差值在误差范围里。</li><li>每组测了两次。</li><li>两次顺序还对调过。</li><li>波动最大只有 0.11%。</li></ul>
+<h2>关键图表</h2>
+<p>原文是代码合并说明。</p>
+<p>原文没有配图。</p>
+<p>关键表格已抄在上面。</p>
+<p>启动命令也在原文里。</p>
+<h2>跟你的研究方向的关联</h2>
+<p>你手里有 MI350X。</p>
+<p>实测用的正是同款卡。</p>
+<p>这点很少见。</p>
+<p>多数实测用的是英伟达卡。</p>
+<p>你的评估能直接对账。</p>
+<p>读题和生成要分开算。</p>
+<p>这条正好给了分开的数。</p>
+<p>读题快两成，生成没变。</p>
+<p>解耦评估时这点很关键。</p>
+<p>读题侧的账能单列。</p>
+<p>缓存容量也要单列。</p>
+<p>新格式多装 1.76 倍词。</p>
+<p>但只对这个模型生效。</p>
+<p>你常用的模型吃不到。</p>
+<p>别把这个数套到别的模型。</p>
+<p>卡数不同，结论也不同。</p>
+<p>8 卡开，2 卡关。</p>
+<p>你的评估要按卡数分档测。</p>
+<h2>局限与提醒</h2>
+<ul><li>只测了 HY4 一个模型。</li><li>只测了 8 张 MI350X。</li><li>数字是作者自报。</li><li>没有独立复现。</li><li>延迟数是合并前测的。</li><li>合并前又改过几处小地方。</li><li>作者说模型代码没变。</li><li>生成速度没涨。</li><li>只涨了读题那一步。</li></ul>
+<h2>术语表</h2>
+<ul><li>读题：处理输入那一步。</li><li>缓存：存草稿纸的地方。</li><li>沉降：给注意力留的锚点。</li><li>头：注意力的小组。</li><li>序列并行：切开输入分工算。</li></ul>
+<h2>原文链接</h2>
+<p><a href="https://github.com/vllm-project/vllm/pull/70004">https://github.com/vllm-project/vllm/pull/70004</a></p></body></html>

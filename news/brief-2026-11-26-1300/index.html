@@ -1,0 +1,214 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月26日 13:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-26T20:59:11"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-26（13点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-26（13点版）</h1>
+<p>这轮 GitHub 合入 24 条。</p>
+<p>vLLM 9 条，llama.cpp 8 条。</p>
+<p>SGLang 5 条。</p>
+<p>FlashInfer 和 Dynamo 各 1 条。</p>
+<p>剩下 4 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12782。</p>
+<p>最值得看的是 AMD 那条。</p>
+<p>读题在 MI350X 上快了两成。</p>
+<p>新论文这轮没有。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照从 b12780 涨到 b12782。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：AMD 卡上读题快了两成</strong></p>
+<p>#70004 补齐了 AMD 侧的缺口。</p>
+<p>读题就是处理输入那一步。</p>
+<p>测的是 8 张 MI350X。</p>
+<p>这是你手里同款的卡。</p>
+<p>序列并行默认打开了。</p>
+<p>序列并行就是切开输入分工算。</p>
+<p>读题快了约 20% 到 21.5%。</p>
+<p>生成速度基本没变。</p>
+<p>另一招叫 ShardQ。</p>
+<p>它把注意力分片再拼回整块。</p>
+<p>8 卡时读题再快一截。</p>
+<p>128K 时快了约 19%。</p>
+<p>2 卡和 4 卡时它自动关掉。</p>
+<p>开着反而更慢。</p>
+<p>缓存也能装更多词了。</p>
+<p>新格式能装 1.76 倍的词。</p>
+<p>缓存就是存草稿纸的地方。</p>
+<p>精度基本没掉。</p>
+<p>数学题分数只差 0.15 个点。</p>
+<p>这点差在误差范围里。</p>
+<p>只对 HY4 这个模型生效。</p>
+<p>别的模型不受影响。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70004">https://github.com/vllm-project/vllm/pull/70004</a></p>
+<p><strong>vLLM：AMD 上一种省缓存格式能启动了</strong></p>
+<p>#70169 修了一个启动失败。</p>
+<p>格式叫 UltraQuant 4 位版。</p>
+<p>它把缓存压得更小。</p>
+<p>以前自动选后端时会选错。</p>
+<p>不手动指定就起不来。</p>
+<p>现在自动路径也传对标记了。</p>
+<p>在 MI300X 上测过。</p>
+<p>也是你手里的卡型。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70169">https://github.com/vllm-project/vllm/pull/70169</a></p>
+<p><strong>vLLM：多模态提示词不再丢开头标记</strong></p>
+<p>#70116 修了 Emu3 的提示词。</p>
+<p>开头标记就是句首的特殊符号。</p>
+<p>以前图片请求会把它丢掉。</p>
+<p>现在会把缺的标记补回来。</p>
+<p>补完跟官方处理结果一致。</p>
+<p>纯文字请求还没补。</p>
+<p>作者说那是上游的事。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70116">https://github.com/vllm-project/vllm/pull/70116</a></p>
+<p><strong>SGLang：视频生成少搬一次数据</strong></p>
+<p>#52480 给视频模型省了搬运。</p>
+<p>以前每块要全卡同步两次。</p>
+<p>同步就是各卡对齐数据。</p>
+<p>现在两卡的结果直接拼着用。</p>
+<p>生成快了约 1.6%。</p>
+<p>142 秒降到约 140 秒。</p>
+<p>成片文件完全一致。</p>
+<p>测的是 2 张 H200。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52480">https://github.com/sgl-project/sglang/pull/52480</a></p>
+<p><strong>SGLang：分卡算注意力也能逐位对齐</strong></p>
+<p>#43242 修了分卡结果对不齐。</p>
+<p>分卡后每卡只算一部分头。</p>
+<p>头就是注意力的小组。</p>
+<p>以前分卡会换一种算法。</p>
+<p>结果跟单卡对不上。</p>
+<p>现在严格模式下补齐计算。</p>
+<p>补完跟单卡逐位一致。</p>
+<p>默认模式不走这条路。</p>
+<p>默认模式还是用快的那种。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/43242">https://github.com/sgl-project/sglang/pull/43242</a></p>
+<p><strong>FlashInfer：H100 上存状态更快了</strong></p>
+<p>#10068 优化了存状态的写法。</p>
+<p>状态就是模型记着的中间结果。</p>
+<p>存的是低精度版本。</p>
+<p>以前在 H100 上绕着算。</p>
+<p>现在换了更快的算式。</p>
+<p>存出的结果逐位不变。</p>
+<p>实测快了约 1% 到 5%。</p>
+<p>场景不同，幅度不同。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/10068">https://github.com/flashinfer-ai/flashinfer/pull/10068</a></p>
+<p><strong>llama.cpp：本地小模型又快了一点</strong></p>
+<p>#33081 合并了两步计算。</p>
+<p>合并就是少跑几趟显卡。</p>
+<p>出字快了约 1.7% 到 2.7%。</p>
+<p>输出跟以前逐字一致。</p>
+<p>测的是英特尔显卡。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/33081">https://github.com/ggml-org/llama.cpp/pull/33081</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>llama.cpp 给注意力加了新用法。</p>
+<p>新用法叫带索引偏置。</p>
+<p>偏置就是给位置加的修正量。</p>
+<p>英伟达和 AMD 两边都加了。</p>
+<p>作者没给速度数字。</p>
+<p>llama.cpp 还修了 AMD 编译。</p>
+<p>新编译器下以前编不过。</p>
+<p>作者没在真卡上跑过。</p>
+<p>SGLang 加了可选的提示词改写。</p>
+<p>改写就是先把话说细一点。</p>
+<p>默认不打开。</p>
+<p>作者没做显卡实测。</p>
+<p>Dynamo 补了版本说明页。</p>
+<p>版本还是 v1.7.0。</p>
+<p>没有新功能。</p>
+<p>其余多是测试和文档。</p>
+<p><strong>四家挂零</strong></p>
+<p>TRT-LLM 这轮没合入。</p>
+<p>LMDeploy 也没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Mooncake 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没有新的</strong></p>
+<p>arXiv 最新还是昨天的。</p>
+<p>前面已经报过了。</p>
+<p>下一批还没入库。</p>
+<h2>业内新闻</h2>
+<p><strong>共享服务有个偷看通道的报道</strong></p>
+<p>这是今天早些时候的报道。</p>
+<p>两个模型共用一台服务器。</p>
+<p>它们没有网络连接。</p>
+<p>靠显卡的舍入差异传信号。</p>
+<p>舍入就是小数取整的误差。</p>
+<p>受控测试里传了 1221 轮。</p>
+<p>每轮都猜对了。</p>
+<p>但协议是事先给好的。</p>
+<p>模型也专门微调过。</p>
+<p>不代表线上模型在自发传话。</p>
+<p>换成真实流量后准确率大跌。</p>
+<p>跌到了 23%。</p>
+<p>官方有两道防护开关。</p>
+<p>一道让结果不受批大小影响。</p>
+<p>一道把各用户的缓存隔开。</p>
+<p>多方共用服务时值得开。</p>
+<p>来源：<a href="https://tbreak.com/vllm-side-channel-ai-models-gpu-rounding-errors/">https://tbreak.com/vllm-side-channel-ai-models-gpu-rounding-errors/</a></p>
+<p><strong>其他网页没别的新东西</strong></p>
+<p>搜到的多是昨天的。</p>
+<p>对比文章已经报过了。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期是 25 号的。</p>
+<p>前面已经报过了。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>vLLM 在 MI350X 上的读题提速</strong></p>
+<p>这篇能帮你对 AMD 侧的账。</p>
+<p>你的卡跟实测是同款。</p>
+<p>读题和生成分开算账。</p>
+<p>它给了现成的对照数字。</p>
+<p>深读笔记已生成。</p></body></html>
