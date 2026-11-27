@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · Dynamo 混合批次计价对齐：模拟别把一轮算两遍"/>
+<meta name="doc-description" content="- 原文：Dynamo 团队，GitHub PR #18662"/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T00:59:28"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Dynamo 混合批次计价对齐：模拟别把一轮算两遍</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>Dynamo 混合批次计价对齐：模拟别把一轮算两遍</h1>
+<ul><li>原文：Dynamo 团队，GitHub PR #18662</li><li>原文链接：<a href="https://github.com/ai-dynamo/dynamo/pull/18662">https://github.com/ai-dynamo/dynamo/pull/18662</a></li><li>合入时间：2026-11-27</li><li>验证方式：合成模型加合成流量</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条修的是模拟器的账。</p>
+<p>模拟器就是先算一遍再上真机。</p>
+<p>它拿旧流量离线重演。</p>
+<p>重演时要给每轮估时间。</p>
+<p>一轮里常有新有旧。</p>
+<p>新请求刚进来读题。</p>
+<p>读题就是处理输入那一步。</p>
+<p>旧请求还在生成。</p>
+<p>生成就是一个词一个词出。</p>
+<p>以前系统把这轮算两遍。</p>
+<p>读题算一次。</p>
+<p>生成再算一次。</p>
+<p>可真机上它只跑一轮。</p>
+<p>一轮的耗时不是两轮相加。</p>
+<p>于是模拟把等待算长了。</p>
+<p>现在按一轮算一次。</p>
+<p>账就和原版对齐了。</p>
+<h2>核心方法</h2>
+<ul><li>只改离线回放这条路。</li><li>只对拟合模型生效。</li><li>拟合模型就是拿实测拟的公式。</li><li>每轮只问一次价。</li><li>混合轮有自己的价。</li><li>纯读题轮有自己的价。</li><li>纯生成轮也有自己的价。</li><li>别的计价方式没动。</li><li>实时模拟没动。</li><li>路由器的读题估算没动。</li><li>有些配置现在直接拒绝。</li><li>拒绝比给出假数字好。</li><li>比如加速比不是一的配置。</li><li>比如模型缺数据的配置。</li><li>猜词生成开着也拒绝。</li><li>只有一个例外情况。</li></ul>
+<h2>关键数据</h2>
+<p>合成流量共 240 个请求。</p>
+<p>其中 232 次读题和生成同轮。</p>
+<p>同轮就是挤在同一轮里跑。</p>
+<p>合成模型给了三个价。</p>
+<p>纯读题一轮 10 毫秒。</p>
+<p>纯生成一轮 5 毫秒。</p>
+<p>混合一轮 7 毫秒。</p>
+<table><thead><tr><th>方式</th><th>首字平均</th><th>首字九成</th><th>一致请求</th></tr></thead><tbody><tr><td>原版回放</td><td>14.88 毫秒</td><td>17 毫秒</td><td>240/240</td></tr><tr><td>改前</td><td>23.36 毫秒</td><td>25 毫秒</td><td>1/240</td></tr><tr><td>改后</td><td>14.88 毫秒</td><td>17 毫秒</td><td>240/240</td></tr></tbody></table>
+<p>首字平均以前高估 57%。</p>
+<p>改后和原版逐个一致。</p>
+<p>整程时间也对齐了。</p>
+<p>改前是 854.7 毫秒。</p>
+<p>改后是 816.7 毫秒。</p>
+<p>原版也是 816.7 毫秒。</p>
+<h2>跟你的研究有什么关系</h2>
+<p>这条正贴解耦评估。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>评估常先用模拟筛方案。</p>
+<p>模拟账错了，排序就错了。</p>
+<p>混合批次要单独计价。</p>
+<p>不能拿读题加生成凑。</p>
+<p>你的自动调参也一样。</p>
+<p>先让模拟和真机对齐。</p>
+<p>再谈哪个参数更好。</p>
+<p>拒绝配置这点也值得抄。</p>
+<p>宁可明说测不了。</p>
+<p>不要给一个假数字。</p>
+<h2>注意事项</h2>
+<ul><li>这是合成测试。</li><li>不是真实显卡实测。</li><li>模型和流量都是造的。</li><li>只证明两边账对齐了。</li><li>不证明真机就是这个数。</li><li>依赖的库还没发正式包。</li><li>合入时用了本地覆盖。</li><li>正式包出来前要小心。</li></ul>
+<h2>术语表</h2>
+<ul><li>离线回放：拿旧流量重演一遍。</li><li>首字等待：等第一个词的时间。</li><li>混合批次：一轮里读题生成都有。</li><li>拟合模型：拿实测数据拟的公式。</li><li>猜词生成：先猜几个词再核对。</li></ul></body></html>

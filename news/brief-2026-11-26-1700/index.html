@@ -1,0 +1,161 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月26日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-27T00:58:49"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-26（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-26（17点版）</h1>
+<p>这轮 GitHub 合入 7 条。</p>
+<p>SGLang 有 3 条。</p>
+<p>其余四家各 1 条。</p>
+<p>剩下 4 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12800。</p>
+<p>最值得看的是 Dynamo 那条。</p>
+<p>混合批次以前算贵了。</p>
+<p>新论文这轮没有。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照从 b12798 涨到 b12800。</p>
+<p>来源：GitHub releases</p>
+<p><strong>Dynamo：混合批次不再算两遍</strong></p>
+<p>#18662 修了离线回放的计价。</p>
+<p>离线回放就是拿旧流量重演。</p>
+<p>以前一轮里有新有旧。</p>
+<p>新请求在读题。</p>
+<p>旧请求在生成。</p>
+<p>系统把这一轮算了两遍。</p>
+<p>读题算一次。</p>
+<p>生成再算一次。</p>
+<p>现在按一轮算一次。</p>
+<p>合成测试里差别很明显。</p>
+<p>首字等待以前高估 57%。</p>
+<p>改完和原版回放对齐了。</p>
+<p>240 个请求逐个一致。</p>
+<p>注意这是合成模型。</p>
+<p>不是真实显卡实测。</p>
+<p>有些配置现在直接拒绝。</p>
+<p>拒绝比算错更安全。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/ai-dynamo/dynamo/pull/18662">https://github.com/ai-dynamo/dynamo/pull/18662</a></p>
+<p><strong>SGLang：视频解码少跑几步</strong></p>
+<p>#52936 把量化合成了一步。</p>
+<p>量化就是把数字压小存。</p>
+<p>以前要走五六步。</p>
+<p>现在一步做完。</p>
+<p>只对 GB300 那档生效。</p>
+<p>解码从 1.093 秒降到 0.820 秒。</p>
+<p>整片快约 8% 到 10%。</p>
+<p>输出字节完全一致。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52936">https://github.com/sgl-project/sglang/pull/52936</a></p>
+<p><strong>SGLang：缓存表开得更准了</strong></p>
+<p>#53348 修了几处长度对不上。</p>
+<p>有的设置启动就崩。</p>
+<p>有的表开得太窄了。</p>
+<p>现在统一按行宽开。</p>
+<p>行宽就是每行能放多少。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53348">https://github.com/sgl-project/sglang/pull/53348</a></p>
+<p><strong>llama.cpp：Intel 卡选对了路子</strong></p>
+<p>#30606 给生成换了条路。</p>
+<p>只对特定卡和形状生效。</p>
+<p>长上下文生成快了不少。</p>
+<p>一档快 11.9%。</p>
+<p>另一档快 17.8%。</p>
+<p>读题那一步没变。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30606">https://github.com/ggml-org/llama.cpp/pull/30606</a></p>
+<p><strong>FlashInfer：H100 状态池新招</strong></p>
+<p>#10031 给读题加了新状态池。</p>
+<p>读和写分开用槽位。</p>
+<p>状态能存半精度了。</p>
+<p>半精度就是占位更小。</p>
+<p>对旧版快约 5% 到 7%。</p>
+<p>对另一基线快约 7.8 倍。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/10031">https://github.com/flashinfer-ai/flashinfer/pull/10031</a></p>
+<p><strong>vLLM：多模态参数不再丢</strong></p>
+<p>#69842 修了参数传递。</p>
+<p>参数管图片怎么读进来。</p>
+<p>以前聊天路径会覆盖它。</p>
+<p>现在两条路统一了。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69842">https://github.com/vllm-project/vllm/pull/69842</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 还加了一个测试。</p>
+<p>测的是小插件装对没有。</p>
+<p>只改测试，不改运行行为。</p>
+<p><strong>四家挂零</strong></p>
+<p>TRT-LLM 这轮没合入。</p>
+<p>LMDeploy 也没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Mooncake 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没有新的</strong></p>
+<p>arXiv 最新还是昨天的。</p>
+<p>前面已经报过了。</p>
+<p>下一批还没入库。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是对比文章。</p>
+<p>对比文章已经报过了。</p>
+<p>社交渠道也没有实质新内容。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期是 25 号的。</p>
+<p>前面已经报过了。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>Dynamo 的混合批次计价</strong></p>
+<p>这篇正贴你的解耦评估。</p>
+<p>模拟先对齐再谈调参。</p>
+<p>混合批次要单独计价。</p>
+<p>深读笔记已生成。</p></body></html>
