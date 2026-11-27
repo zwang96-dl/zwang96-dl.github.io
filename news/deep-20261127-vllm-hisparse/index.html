@@ -1,0 +1,98 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM 解耦导入：两边卡数和摆法都能不一样"/>
+<meta name="doc-description" content="- 原文：vLLM 团队，GitHub PR #66502"/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T04:59:08"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM 解耦导入：两边卡数和摆法都能不一样</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM 解耦导入：两边卡数和摆法都能不一样</h1>
+<ul><li>原文：vLLM 团队，GitHub PR #66502</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/66502">https://github.com/vllm-project/vllm/pull/66502</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条让解耦更灵活了。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>读题机先算一遍输入。</p>
+<p>生成机接着往外写字。</p>
+<p>中间要搬一份缓存。</p>
+<p>缓存就是算好的草稿纸。</p>
+<p>以前两边摆法要一样。</p>
+<p>摆法不一样就被拒绝。</p>
+<p>现在摆法能不一样了。</p>
+<p>卡数也能不一样。</p>
+<p>八卡读题能配十六卡生成。</p>
+<p>搬完结果完全一致。</p>
+<h2>核心方法</h2>
+<ul><li>读题机用普通摆法。</li><li>两份缓存放在一组里。</li><li>生成机用分开摆法。</li><li>一份缓存放内存里。</li><li>另一份放显卡里。</li><li>内存就是主机的大仓库。</li><li>以前这种组合会被拒绝。</li><li>现在按层逐个对号。</li><li>每组只补没命中的尾巴。</li><li>尾巴就是最后缺的那段。</li><li>共享内存池只让一卡登记。</li><li>登记就是负责申请写入。</li><li>其余卡只管显卡那份。</li><li>卡数不同走已有规则。</li><li>只去掉等宽这个限制。</li><li>没有加新的搬运格式。</li></ul>
+<h2>适用范围</h2>
+<ul><li>只支持稀疏注意力模型。</li><li>稀疏就是只看关键位置。</li><li>只支持单段流水线。</li><li>两边块大小要一致。</li><li>块就是缓存的最小格子。</li><li>物理页不能被拆开。</li><li>卡数要能整除对齐。</li><li>比如八卡配十六卡。</li><li>缺的页必须是连续尾巴。</li><li>中间有洞的还不支持。</li><li>窗口裁掉的也不支持。</li></ul>
+<h2>关键数据</h2>
+<p>测试模型是 GLM-5.2。</p>
+<p>精度用的是 FP8。</p>
+<p>FP8 就是低精度数字格式。</p>
+<p>第一组两边都是八卡。</p>
+<p>机器用了十六张 H200。</p>
+<table><thead><tr><th>项目</th><th>结果</th></tr></thead><tbody><tr><td>冷导入长度</td><td>129 到 1025 词</td></tr><tr><td>结果差异</td><td>0</td></tr><tr><td>搬运字节</td><td>924936192</td></tr><tr><td>搬运失败</td><td>0</td></tr></tbody></table>
+<p>第二组八卡配十六卡。</p>
+<p>机器用了二十四张 H200。</p>
+<table><thead><tr><th>项目</th><th>结果</th></tr></thead><tbody><tr><td>搬运字节</td><td>12235788288</td></tr><tr><td>搬运描述数</td><td>53328</td></tr><tr><td>搬运失败</td><td>0</td></tr></tbody></table>
+<p>单元测试也跑了。</p>
+<p>一百二十六项通过。</p>
+<p>二十二项被跳过。</p>
+<p>注意没有速度数字。</p>
+<p>没有首字等待数字。</p>
+<p>也没有吞吐数字。</p>
+<p>这条只证明搬得对。</p>
+<h2>跟你的研究有什么关系</h2>
+<p>这条正贴解耦评估。</p>
+<p>两边卡数能分开选。</p>
+<p>读题池和生成池不用等宽。</p>
+<p>缓存摆法也能分开选。</p>
+<p>生成机能把大份放内存。</p>
+<p>显卡只留小份索引。</p>
+<p>索引就是查位置的小表。</p>
+<p>评估时要分开算账。</p>
+<p>命中长度要按组分开算。</p>
+<p>每组尾巴长度可能不同。</p>
+<p>中间有洞的场景要单测。</p>
+<p>那种场景现在还不支持。</p>
+<p>速度收益要自己实测。</p>
+<p>原文没有给速度结论。</p>
+<h2>注意事项</h2>
+<ul><li>数字全是作者自报。</li><li>没有独立复测。</li><li>只测了一个模型。</li><li>只测了 H200。</li><li>AMD 卡还没测。</li><li>只用了慢速执行模式。</li><li>慢速就是没开快速图。</li><li>没有速度对比。</li><li>范围限制比较多。</li><li>中间有洞还不支持。</li></ul>
+<h2>术语表</h2>
+<ul><li>解耦：读题生成分开跑。</li><li>缓存：算好的草稿纸。</li><li>读题机：先算输入的机器。</li><li>生成机：接着写字的机器。</li><li>索引：查位置的小表。</li><li>尾巴：最后缺的那段。</li></ul></body></html>
