@@ -1,0 +1,104 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM 解耦：读题缓存漏释放修好了"/>
+<meta name="doc-description" content="- 原文：vLLM 团队，GitHub PR #67218"/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T08:59:13"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM 解耦：读题缓存漏释放修好了</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM 解耦：读题缓存漏释放修好了</h1>
+<ul><li>原文：vLLM 团队，GitHub PR #67218</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/67218">https://github.com/vllm-project/vllm/pull/67218</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条修了一个解耦的坑。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>读题机先把题算完。</p>
+<p>算好的缓存交出去。</p>
+<p>生成机接着出字。</p>
+<p>生成机有时提前放手。</p>
+<p>比如请求还没排上就被丢。</p>
+<p>读题机还在算题。</p>
+<p>等它算完。</p>
+<p>没人通知它释放缓存。</p>
+<p>缓存就一直占着。</p>
+<p>缓存就是算好的草稿纸。</p>
+<p>占着不放会越积越多。</p>
+<p>占满了新请求就进不来。</p>
+<p>严重时要重启才清掉。</p>
+<p>现在算完会收到通知。</p>
+<p>缓存能正常释放了。</p>
+<h2>核心方法</h2>
+<ul><li>出问题的是写入模式。</li><li>写入模式就是读题机主动写。</li><li>它把缓存写给生成机。</li><li>第一种漏法是放手太早。</li><li>生成机在读题中途放手。</li><li>释放通知到得太早。</li><li>读题机还没算完。</li><li>通知就被丢掉了。</li><li>第二种漏法是编号复用。</li><li>新请求用了旧请求的编号。</li><li>旧编号在已结束名单里。</li><li>新请求的写入被拒绝。</li><li>它的缓存也释放不了。</li><li>现在每条请求都会收到报告。</li><li>报告就是通知它释放的信。</li><li>排队中的请求也覆盖了。</li><li>中途放弃的请求不受影响。</li><li>它仍按超时正常过期。</li><li>超时就是等太久自动作废。</li></ul>
+<h2>关键数据</h2>
+<p>机器用了两张 MI355X。</p>
+<p>一台只负责读题。</p>
+<p>一台负责生成。</p>
+<p>中间用 MoRIIO 搬运。</p>
+<p>MoRIIO 就是搬缓存的工具。</p>
+<p>漏释放测试用了小模型。</p>
+<table><thead><tr><th>场景</th><th>修前</th><th>修后</th></tr></thead><tbody><tr><td>读题中途被放手</td><td>三十二条全占住</td><td>零条占住</td></tr><tr><td>缓存占用</td><td>21.3%</td><td>0%</td></tr><tr><td>复用旧编号</td><td>八条占住</td><td>零条占住</td></tr><tr><td>请求完成数</td><td>全完成，无报错</td><td>全完成，无报错</td></tr></tbody></table>
+<p>占用卡了六十二秒没降。</p>
+<p>修后占用直接降回零。</p>
+<p>数学题用了大一号模型。</p>
+<p>一共一千三百一十九道题。</p>
+<p>写入模式修前 0.872。</p>
+<p>修后是 0.876。</p>
+<p>不用解耦时是 0.878。</p>
+<p>分数基本没变。</p>
+<p>注意没有速度数字。</p>
+<p>没有吞吐数字。</p>
+<p>这条只证明不漏了。</p>
+<h2>跟你的研究有什么关系</h2>
+<p>这条正贴你的解耦评估。</p>
+<p>你在 AMD 卡上评估解耦。</p>
+<p>这条正是在 AMD 卡上测的。</p>
+<p>生成机提前放手要单测。</p>
+<p>比如请求被取消时。</p>
+<p>比如排队超时被丢时。</p>
+<p>编号复用也要单测。</p>
+<p>测完要看缓存占用。</p>
+<p>占用不降回零就是漏了。</p>
+<p>漏了不会立刻报错。</p>
+<p>它会慢慢把缓存占满。</p>
+<p>评估时要跑久一点。</p>
+<p>短测可能看不出来。</p>
+<p>还要看占用曲线。</p>
+<p>跑完不回零就要查。</p>
+<h2>注意事项</h2>
+<ul><li>数字全是作者自报。</li><li>没有独立复测。</li><li>只测了 AMD 卡。</li><li>只测了两个小模型。</li><li>多模态负载没测。</li><li>只管写入模式。</li><li>放手场景是人工模拟的。</li><li>真实流量还没测。</li><li>没有速度数字。</li></ul>
+<h2>术语表</h2>
+<ul><li>解耦：读题生成分开跑。</li><li>读题机：先算题的机器。</li><li>生成机：接着出字的机器。</li><li>缓存：算好的草稿纸。</li><li>写入模式：读题机主动写。</li><li>编号复用：新请求用旧编号。</li><li>完成报告：通知释放的信。</li></ul></body></html>
