@@ -1,0 +1,130 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM：专家排班搬出主进程"/>
+<meta name="doc-description" content="- 原文：vLLM 团队，GitHub PR #68606"/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T10:58:14"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM：专家排班搬出主进程</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM：专家排班搬出主进程</h1>
+<ul><li>原文：vLLM 团队，GitHub PR #68606</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/68606">https://github.com/vllm-project/vllm/pull/68606</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条修了一个排班堵车问题。</p>
+<p>排班就是给专家分活。</p>
+<p>专家就是模型里的分工模块。</p>
+<p>混合专家模型有很多专家。</p>
+<p>每个词只找几个专家算。</p>
+<p>专家忙闲不均会拖慢。</p>
+<p>所以要定期重新排班。</p>
+<p>排班计算以前在主进程。</p>
+<p>主进程还要喂显卡干活。</p>
+<p>两边抢同一把锁。</p>
+<p>锁就是同一时间只能一个干。</p>
+<p>排班算得久时。</p>
+<p>显卡就干等着。</p>
+<p>现在排班去子进程算。</p>
+<p>子进程就是单独的小帮手。</p>
+<p>主进程能专心喂显卡。</p>
+<p>读题尾部等待降了大半。</p>
+<p>尾部就是最慢的那批请求。</p>
+<h2>核心方法</h2>
+<ul><li>只搬排班计算这一步。</li><li>负载统计还留在原地。</li><li>负载统计就是数谁忙谁闲。</li><li>专家搬运也还留在原地。</li><li>搬运就是把专家换卡。</li><li>结果提交也还留在原地。</li><li>每个工作进程配一个子进程。</li><li>子进程会被反复复用。</li><li>复用就是不用反复新建。</li><li>子进程出错会报协调错误。</li><li>协调错误就是几张卡一起停。</li><li>关停时会回收子进程。</li><li>回收就是把小帮手关掉。</li><li>同步排班保持原样。</li><li>同步就是算完再接着干。</li><li>性能剖析也保持原样。</li><li>剖析就是查哪里慢。</li><li>没有新增配置选项。</li><li>异步排班是默认路径。</li><li>异步就是边算边干别的。</li></ul>
+<h2>关键数据</h2>
+<p>实测用了较早的提交。</p>
+<p>作者说核心路径没变。</p>
+<p>后面只加固了异常处理。</p>
+<h3>短题实测</h3>
+<p>机器用了两张 H20。</p>
+<p>模型是三百五十亿参数。</p>
+<p>每词只激活三十亿。</p>
+<p>输入一百二十八个词。</p>
+<p>输出只要一个词。</p>
+<p>同时十六个请求在跑。</p>
+<p>吞吐从 52.15 涨到 54.95。</p>
+<p>单位是每秒请求数。</p>
+<p>涨幅约 5.4%。</p>
+<p>首字尾部从 477 降到 383。</p>
+<p>单位是毫秒。</p>
+<p>降幅约 20%。</p>
+<p>显卡干等中位降约 71%。</p>
+<p>中位就是排中间的那个。</p>
+<h3>读题机实测</h3>
+<p>这组模拟解耦读题机。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>机器用了八张 H20。</p>
+<p>输入二百五十六个词。</p>
+<p>输出只要一个词。</p>
+<p>不含缓存搬运时间。</p>
+<p>也不含生成时间。</p>
+<p>首字尾部从 314 降到 132。</p>
+<p>单位是毫秒。</p>
+<p>降幅约 58%。</p>
+<p>闭环吞吐只涨约 1.2%。</p>
+<p>闭环就是发完再发下一批。</p>
+<p>显卡干等中位降约 96%。</p>
+<h3>结果一致性</h3>
+<p>排班结果和原来逐项相同。</p>
+<p>这是固定负载下的对照。</p>
+<p>真实跑批时首字有差异。</p>
+<p>八千多条里对上约九成。</p>
+<p>异步排班时机不同。</p>
+<p>结果不完全逐字等。</p>
+<p>这点评估时要留意。</p>
+<h2>跟你的研究方向的关联</h2>
+<p>你正在评估解耦方案。</p>
+<p>读题机尾部等待很关键。</p>
+<p>排班堵车会污染测量。</p>
+<p>污染就是测到的不是真本事。</p>
+<p>你测首字时间时。</p>
+<p>要先排除排班干扰。</p>
+<p>这条给了一个检查项。</p>
+<p>看显卡有没有干等。</p>
+<p>干等可能来自中央处理器。</p>
+<p>中央处理器就是主机芯片。</p>
+<p>不一定是显卡算力不够。</p>
+<p>做自动调参时也要注意。</p>
+<p>调参就是自动找最优参数。</p>
+<p>排班开关会影响尾部。</p>
+<p>只看平均吞吐会误判。</p>
+<h2>术语表</h2>
+<ul><li>专家：模型里的分工模块。</li><li>排班：给专家重新分活。</li><li>主进程：喂显卡干活的程序。</li><li>子进程：单独干活的小帮手。</li><li>尾部等待：最慢请求的等待。</li><li>首字时间：等第一个字的时间。</li><li>吞吐：每秒能处理多少。</li><li>缓存：算好的草稿纸。</li></ul>
+<h2>原文链接</h2>
+<p><a href="https://github.com/vllm-project/vllm/pull/68606">https://github.com/vllm-project/vllm/pull/68606</a></p>
+<p>原文是合并说明。</p>
+<p>没有配图。</p>
+<p>关键表格已抄录在上文。</p></body></html>

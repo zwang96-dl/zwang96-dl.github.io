@@ -1,0 +1,203 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月27日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T10:57:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-27（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-27（03点版）</h1>
+<p>这轮 GitHub 合入 26 条。</p>
+<p>vLLM 有 12 条。</p>
+<p>llama.cpp 有 5 条。</p>
+<p>SGLang 有 4 条。</p>
+<p>其余几家共 5 条。</p>
+<p>剩下 3 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照还是 b12810。</p>
+<p>最值得看的是 vLLM 那条。</p>
+<p>专家排班搬出主进程了。</p>
+<p>读题尾部等待降了大半。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照还是 b12810。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：专家排班搬出主进程</strong></p>
+<p>#68606 把排班计算搬走了。</p>
+<p>排班就是给专家分活。</p>
+<p>专家就是模型里的分工模块。</p>
+<p>以前排班在主进程里算。</p>
+<p>主进程忙时显卡会等。</p>
+<p>现在排班去子进程算。</p>
+<p>子进程就是单独的小帮手。</p>
+<p>短题实测吞吐涨约 5.4%。</p>
+<p>读题尾部等待降约 58%。</p>
+<p>尾部就是最慢的那批请求。</p>
+<p>机器用了 H20。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68606">https://github.com/vllm-project/vllm/pull/68606</a></p>
+<p><strong>SGLang：解耦首字时机可选了</strong></p>
+<p>#53293 加了首字发送选项。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>读题机先算出第一个字。</p>
+<p>以前要等生成机出字。</p>
+<p>两个字一起发出去。</p>
+<p>现在可以刚接手就发。</p>
+<p>刚接手就是生成机收下请求。</p>
+<p>两种发法字不会更早算好。</p>
+<p>只是发送时刻不一样。</p>
+<p>默认还是原来的发法。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53293">https://github.com/sgl-project/sglang/pull/53293</a></p>
+<p><strong>vLLM：图片数据不再赖着内存</strong></p>
+<p>#70166 修了图片数据的滞留。</p>
+<p>滞留就是用完还占着内存。</p>
+<p>请求里的图片数据很大。</p>
+<p>以前会互相牵着不释放。</p>
+<p>内存峰值降到约十九分之一。</p>
+<p>峰值就是最高占用。</p>
+<p>整机实测吞吐涨约 3.6%。</p>
+<p>空闲后内存少占约 4.2G。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70166">https://github.com/vllm-project/vllm/pull/70166</a></p>
+<p><strong>vLLM：看图模型能导出中间状态</strong></p>
+<p>#69064 修了中间状态导出。</p>
+<p>中间状态就是模型算到一半的数据。</p>
+<p>它用来训练猜词小模型。</p>
+<p>猜词就是先猜再核对。</p>
+<p>以前某类看图模型起不来。</p>
+<p>现在能正常导出了。</p>
+<p>双图分段读题结果一致。</p>
+<p>分段就是把长题切开算。</p>
+<p>实测用了一张 H100。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69064">https://github.com/vllm-project/vllm/pull/69064</a></p>
+<p><strong>vLLM：读文档模型的词数对齐了</strong></p>
+<p>#68623 对齐了图片词数。</p>
+<p>词数就是图片占多少位置。</p>
+<p>以前算少了会报错。</p>
+<p>预算太小也会爆内存。</p>
+<p>预算就是预留的空间。</p>
+<p>现在按处理器口径算。</p>
+<p>长视频以前会爆内存。</p>
+<p>现在能正常跑了。</p>
+<p>缓存空间少了约 5.5%。</p>
+<p>缓存就是算好的草稿纸。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68623">https://github.com/vllm-project/vllm/pull/68623</a></p>
+<p><strong>SGLang：缓存池占用能看准了</strong></p>
+<p>#52957 加了缓存占用指标。</p>
+<p>指标就是监控用的数字。</p>
+<p>两类缓存共用一个池子。</p>
+<p>以前各算各的占用。</p>
+<p>加起来会低估真实占用。</p>
+<p>现在按字节算总占用。</p>
+<p>字节就是内存大小单位。</p>
+<p>只对特定池子生效。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52957">https://github.com/sgl-project/sglang/pull/52957</a></p>
+<p><strong>Mooncake：权重换布局不用重载</strong></p>
+<p>#5851 支持原地换布局。</p>
+<p>布局就是权重怎么分卡。</p>
+<p>同一组卡换分法时。</p>
+<p>以前要重新加载权重。</p>
+<p>现在直接在卡间搬。</p>
+<p>十二个方向测了八个更快。</p>
+<p>最快停顿少约 36%。</p>
+<p>停顿就是切换时等的时间。</p>
+<p>四个方向反而稍慢。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5851">https://github.com/kvcache-ai/Mooncake/pull/5851</a></p>
+<p><strong>FlashInfer：小批量生成略快了</strong></p>
+<p>#10088 优化了小批量生成。</p>
+<p>生成就是一个个出字。</p>
+<p>受影响形状快约 5% 到 6%。</p>
+<p>形状就是不同的批量组合。</p>
+<p>整体平均只快约 0.2%。</p>
+<p>实测用了一张 H100。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/10088">https://github.com/flashinfer-ai/flashinfer/pull/10088</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>vLLM 修了新前台的报错细节。</p>
+<p>新前台就是收请求的入口。</p>
+<p>LMDeploy 保留了思考历史。</p>
+<p>思考历史就是模型想的过程。</p>
+<p>llama.cpp 修了专家缓存崩溃。</p>
+<p>llama.cpp 还修了越界读取。</p>
+<p>越界就是读了不该读的内存。</p>
+<p>Mooncake 优化了搬数据调度。</p>
+<p>其余多是测试和流水线。</p>
+<p><strong>三家挂零</strong></p>
+<p>TRT-LLM 这轮没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>arXiv 最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库的。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>对比文前面已经报过了。</p>
+<p>社区渠道也没核到新帖。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期还是昨天的。</p>
+<p>讲的是销售话题。</p>
+<p>和推理没什么关系。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>vLLM 的专家排班子进程</strong></p>
+<p>这篇正贴你的解耦评估。</p>
+<p>读题机尾部等待降了大半。</p>
+<p>排班别堵住主进程。</p>
+<p>这个教训很值得记。</p>
+<p>深读笔记已生成。</p></body></html>
