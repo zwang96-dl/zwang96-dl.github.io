@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月27日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T15:01:08"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-27（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-27（07点版）</h1>
+<p>这轮 GitHub 合入 19 条。</p>
+<p>llama.cpp 有 7 条。</p>
+<p>vLLM 有 5 条。</p>
+<p>SGLang 有 5 条。</p>
+<p>其余两家共 2 条。</p>
+<p>剩下 4 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照涨到 b12815。</p>
+<p>最值得看的是 vLLM 那条。</p>
+<p>解耦能带猜词一起跑了。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照从 b12811 涨到 b12815。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：解耦能带猜词一起跑</strong></p>
+<p>#70300 给 HY4 解锁了两样。</p>
+<p>一样是流水线分工。</p>
+<p>流水线就是分段接力算。</p>
+<p>另一样是解耦带猜词。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>猜词就是先猜再核对。</p>
+<p>以前这两样都会被拒。</p>
+<p>现在一读一生成能跑。</p>
+<p>两种搬缓存方式都行。</p>
+<p>数学题分数基本没变。</p>
+<p>缓存搬运零失败。</p>
+<p>这条没给速度数字。</p>
+<p>机器用了 GB200。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70300">https://github.com/vllm-project/vllm/pull/70300</a></p>
+<p><strong>vLLM：冷启动不再卡几秒</strong></p>
+<p>#69452 修了读题重编译。</p>
+<p>重编译就是现场再编一次。</p>
+<p>新长度会触发重编译。</p>
+<p>重编译时请求全卡住。</p>
+<p>最慢首字从七秒半降下。</p>
+<p>现在只要零点八秒。</p>
+<p>十六并发尾部也降半。</p>
+<p>尾部就是最慢那批请求。</p>
+<p>核本身速度基本没变。</p>
+<p>输出逐字保持一致。</p>
+<p>机器用了 H200。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69452">https://github.com/vllm-project/vllm/pull/69452</a></p>
+<p><strong>SGLang：小批量专家活更顺</strong></p>
+<p>几条一起优化小批量。</p>
+<p>小批量就是一次词很少。</p>
+<p>专家就是分工小模块。</p>
+<p>路由这步快了一倍多。</p>
+<p>路由就是决定派给谁。</p>
+<p>四位格式也快了一点。</p>
+<p>八位格式在新卡分档。</p>
+<p>单字时才用新路子。</p>
+<p>多字时退回稳妥路子。</p>
+<p>退回后不再慢百分之五。</p>
+<p>输出逐位保持一致。</p>
+<p>机器用了 GB10。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53557">https://github.com/sgl-project/sglang/pull/53557</a></p>
+<p><strong>FlashInfer：新专家后端先试用</strong></p>
+<p>#9995 加了实验后端。</p>
+<p>实验就是先试用别默认。</p>
+<p>它只管四位专家活。</p>
+<p>专家活就是分工计算。</p>
+<p>新卡上平均快约一成。</p>
+<p>最高快约五成半。</p>
+<p>默认不会自动选它。</p>
+<p>要手动列进去才用。</p>
+<p>机器用了 B200。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9995">https://github.com/flashinfer-ai/flashinfer/pull/9995</a></p>
+<p><strong>llama.cpp：循环核快了两成</strong></p>
+<p>#32860 优化了循环核。</p>
+<p>循环核就是带记忆的核。</p>
+<p>长档测速快约两成。</p>
+<p>整机只快约百分之零点八。</p>
+<p>作者明说了这点。</p>
+<p>机器用了 5090。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32860">https://github.com/ggml-org/llama.cpp/pull/32860</a></p>
+<p><strong>vLLM：检查点口径统一了</strong></p>
+<p>#70289 统一了检查点口径。</p>
+<p>检查点就是中途存的进度。</p>
+<p>以前有两套说法。</p>
+<p>现在只留一套说法。</p>
+<p>几类模型都对齐了。</p>
+<p>这条没给速度数字。</p>
+<p>测试过了两百多项。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70289">https://github.com/vllm-project/vllm/pull/70289</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>TRT-LLM 那条没可信提速。</p>
+<p>评审说速度在波动内。</p>
+<p>还有一条结果对不上。</p>
+<p>llama.cpp 支持四位直通。</p>
+<p>四位直通就是不转格式。</p>
+<p>其余多是测试和文档。</p>
+<p><strong>四家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>Mooncake 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>arXiv 最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库的。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>社区渠道也没核到新帖。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期还是昨天的。</p>
+<p>讲的是销售话题。</p>
+<p>和推理没什么关系。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>vLLM 的解耦带猜词</strong></p>
+<p>这篇正贴你的解耦评估。</p>
+<p>解耦和猜词能叠着用。</p>
+<p>搬缓存零失败很关键。</p>
+<p>配方可以直接抄清单。</p>
+<p>深读笔记已生成。</p></body></html>

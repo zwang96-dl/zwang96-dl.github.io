@@ -1,0 +1,128 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM：HY4 解耦能带猜词一起跑"/>
+<meta name="doc-description" content="- 原文：vLLM 团队，GitHub PR #70300"/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T15:02:19"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM：HY4 解耦能带猜词一起跑</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM：HY4 解耦能带猜词一起跑</h1>
+<ul><li>原文：vLLM 团队，GitHub PR #70300</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/70300">https://github.com/vllm-project/vllm/pull/70300</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条解锁了两样组合。</p>
+<p>模型叫 HY4 Flash。</p>
+<p>第一样是流水线分工。</p>
+<p>流水线就是分段接力算。</p>
+<p>以前一开流水线就被拒。</p>
+<p>现在多段接力能跑了。</p>
+<p>第二样是解耦带猜词。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>猜词就是先猜再核对。</p>
+<p>猜词模块叫 DFly。</p>
+<p>以前解耦时猜词被拒。</p>
+<p>现在一读一生成能跑。</p>
+<p>两种搬缓存方式都行。</p>
+<p>一种叫 NIXL 搬运。</p>
+<p>另一种叫 Mooncake 搬运。</p>
+<p>搬运就是把缓存送过去。</p>
+<p>缓存就是算好的草稿纸。</p>
+<p>实测分数基本没变。</p>
+<p>缓存搬运零失败。</p>
+<p>但没给速度数字。</p>
+<h2>核心方法</h2>
+<ul><li>流水线每段只管自己层。</li><li>每段自己算编号哈希。</li><li>哈希就是给片段编指纹。</li><li>中间结果随流水线传递。</li><li>不在段内的层不加载。</li><li>猜词借用模型最后几层。</li><li>猜词层要放在最后一段。</li><li>两段平分时正好满足。</li><li>放不对位置会直接报错。</li><li>猜词和模型共用缓存。</li><li>生成机直接用搬来的缓存。</li><li>猜词不用再多搬一次。</li><li>读题生成用同一猜词配置。</li><li>两边配置要保持一致。</li></ul>
+<h2>关键数据</h2>
+<h3>流水线分工的分数</h3>
+<p>机器用了 GB200。</p>
+<p>模型用了八位版。</p>
+<p>八位就是低精度格式。</p>
+<p>数学题测了九十道。</p>
+<p>看图题测了一千道。</p>
+<table><thead><tr><th>配置</th><th>数学题</th><th>看图题</th></tr></thead><tbody><tr><td>四卡分工</td><td>0.9778</td><td>835</td></tr><tr><td>四卡分工加猜词</td><td>1.0000</td><td>831</td></tr><tr><td>两卡分工</td><td>0.9889</td><td>839</td></tr><tr><td>两卡分工加猜词</td><td>0.9889</td><td>833</td></tr><tr><td>两乘两流水线</td><td>0.9778</td><td>835</td></tr><tr><td>两乘两加猜词</td><td>0.9778</td><td>837</td></tr></tbody></table>
+<p>猜词接受率约四成。</p>
+<p>接受率就是猜中比例。</p>
+<p>所有请求零报错。</p>
+<h3>解耦带猜词的分数</h3>
+<p>摆法是一读一生成。</p>
+<p>每边都用四卡分工。</p>
+<p>数学题测了全部一千多道。</p>
+<table><thead><tr><th>配置</th><th>数学题甲</th><th>数学题乙</th><th>看图题</th></tr></thead><tbody><tr><td>四卡分工</td><td>0.934</td><td>0.9778</td><td>837</td></tr><tr><td>四卡分工加猜词</td><td>0.9371</td><td>0.9778</td><td>837</td></tr><tr><td>一读一生成</td><td>0.9356</td><td>1.0000</td><td>835</td></tr><tr><td>一读一生成加猜词</td><td>0.9393</td><td>1.0000</td><td>834</td></tr><tr><td>月饼搬运加猜词</td><td>0.9385</td><td>0.9667</td><td>834</td></tr></tbody></table>
+<p>猜词接受率约四成多。</p>
+<p>最高一组约四成六。</p>
+<p>所有请求零报错。</p>
+<p>缓存搬运零失败。</p>
+<h3>测试情况</h3>
+<p>流水线对齐测试过了。</p>
+<p>对齐就是结果逐位一致。</p>
+<p>模型测试过了五十八项。</p>
+<p>还有三十四项跳过了。</p>
+<h2>跟你的研究方向的关联</h2>
+<p>这条正贴你的解耦评估。</p>
+<p>解耦和猜词能叠着用。</p>
+<p>以前两者只能二选一。</p>
+<p>现在组合配方有了。</p>
+<p>一读一生成摆法可抄。</p>
+<p>两种搬运都测过了。</p>
+<p>搬运零失败要单列。</p>
+<p>只看分数会漏掉这点。</p>
+<p>猜词接受率要单列。</p>
+<p>它决定猜词值不值。</p>
+<p>两边猜词配置要一致。</p>
+<p>不一致可能直接出问题。</p>
+<p>流水线分工也可叠加。</p>
+<p>卡不够时能分段接力。</p>
+<p>但速度账还没人算。</p>
+<p>吞吐和首字都要补测。</p>
+<h2>注意事项</h2>
+<p>数字全是作者自报。</p>
+<p>只测了 GB200 机器。</p>
+<p>你的卡是 H100 和 MI350X。</p>
+<p>数字不能直接套过来。</p>
+<p>原文没给速度数字。</p>
+<p>没测吞吐涨了多少。</p>
+<p>没测首字快了多少。</p>
+<p>猜词值不值还没定论。</p>
+<p>只测了一个模型。</p>
+<p>换模型要重新验证。</p>
+<p>猜词层位置有硬要求。</p>
+<p>放错段会启动失败。</p>
+<h2>术语表</h2>
+<ul><li><strong>解耦</strong>：读题和生成分开跑。</li><li><strong>猜词</strong>：先猜几个词再核对。</li><li><strong>DFly</strong>：这条用的猜词模块。</li><li><strong>流水线分工</strong>：分段接力算模型。</li><li><strong>缓存</strong>：算好的草稿纸。</li><li><strong>搬运</strong>：把缓存送到生成机。</li><li><strong>接受率</strong>：猜中的比例。</li><li><strong>一读一生成</strong>：一台读题一台生成。</li></ul>
+<h2>原文链接</h2>
+<p><a href="https://github.com/vllm-project/vllm/pull/70300">https://github.com/vllm-project/vllm/pull/70300</a></p>
+<p>原文是合并说明，无配图，关键表格已抄录。</p></body></html>
