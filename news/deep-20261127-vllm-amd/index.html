@@ -1,0 +1,122 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM：AMD 卡上短行挑词不再拖慢整批"/>
+<meta name="doc-description" content="- 原文：vLLM 团队，GitHub PR #65427"/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T17:01:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM：AMD 卡上短行挑词不再拖慢整批</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM：AMD 卡上短行挑词不再拖慢整批</h1>
+<ul><li>原文：vLLM 团队，GitHub PR #65427</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/65427">https://github.com/vllm-project/vllm/pull/65427</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条修了生成时的一步。</p>
+<p>这步叫挑词。</p>
+<p>挑词就是选最相关的词。</p>
+<p>模型每步都要挑一次。</p>
+<p>挑的数量有个上限。</p>
+<p>上限就是最多挑几个。</p>
+<p>题比上限还短的时候。</p>
+<p>结果其实就是题本身。</p>
+<p>以前短题也要走全流程。</p>
+<p>全流程就是拆开再合并。</p>
+<p>拆合要花上百微秒。</p>
+<p>一批请求一起跑的时候。</p>
+<p>整批等最慢的那一行。</p>
+<p>一短行拖慢整批请求。</p>
+<p>现在短行跳过拆合。</p>
+<p>这步只要五到十微秒。</p>
+<p>短题整机快了两成上下。</p>
+<p>长题基本没有变化。</p>
+<h2>核心方法</h2>
+<ul><li>先看这一行有多长。</li><li>行长不超过上限就跳过。</li><li>跳过拆开和合并两步。</li><li>直接返回这一行本身。</li><li>判断在显卡上做。</li><li>长度变了图也不用重录。</li><li>图就是录好的执行计划。</li><li>长行多读一次长度。</li><li>多读只要半微秒上下。</li><li>输出约定没有变。</li><li>约定就是结果格式不变。</li></ul>
+<h2>关键数据</h2>
+<h3>挑词这一步</h3>
+<p>机器用了 MI325X。</p>
+<p>短行以前四十三到一百四十微秒。</p>
+<p>现在只要五到十微秒。</p>
+<p>另一台 MI355X 上也测了。</p>
+<p>正好等长时快两到三倍。</p>
+<p>混合批次最高快两倍半。</p>
+<p>混合就是长短行混一起。</p>
+<h3>整机实测</h3>
+<p>模型用了 Mistral Large 4。</p>
+<p>八张 MI325X 一起跑。</p>
+<p>上下文开了二十六万。</p>
+<p>短题输入一千词。</p>
+<table><thead><tr><th>并发</th><th>出词间隔变化</th><th>吞吐变化</th></tr></thead><tbody><tr><td>1</td><td>降约 27%</td><td>涨约 36%</td></tr><tr><td>2</td><td>降约 26%</td><td>涨约 34%</td></tr><tr><td>4</td><td>降约 24%</td><td>涨约 30%</td></tr><tr><td>8</td><td>降约 21%</td><td>涨约 25%</td></tr><tr><td>32</td><td>降约 15%</td><td>涨约 17%</td></tr></tbody></table>
+<p>出词间隔就是出词的间隔。</p>
+<p>长题输入八千词。</p>
+<p>长题结果基本没变。</p>
+<p>差距在半个百分点内。</p>
+<p>数学题分数没有变。</p>
+<p>没有哪组慢过百分之三。</p>
+<p>H200 上也测了。</p>
+<p>等长行快三到四倍。</p>
+<h2>跟你的研究方向的关联</h2>
+<p>这条正贴你的 AMD 卡。</p>
+<p>你手里有 MI350X。</p>
+<p>实测卡是同代的亲戚。</p>
+<p>短题和长题要分开测。</p>
+<p>混在一起会看走眼。</p>
+<p>长题没变也是结论。</p>
+<p>说明收益只在短题。</p>
+<p>整批等最慢一行。</p>
+<p>这点跟解耦评估相通。</p>
+<p>尾部拖慢要单独看。</p>
+<p>尾部就是最慢那批请求。</p>
+<p>并发越高收益越小。</p>
+<p>三十二并发只剩一成半。</p>
+<p>调参时按并发分档。</p>
+<h2>注意事项</h2>
+<p>数字全是作者自报。</p>
+<p>只测了一个模型。</p>
+<p>这模型用了稀疏挑词。</p>
+<p>稀疏就是只挑一部分词。</p>
+<p>别的模型未必走这条路。</p>
+<p>实测卡不是 MI350X 本人。</p>
+<p>数字不能直接套过来。</p>
+<p>长题完全没有收益。</p>
+<p>你的负载若多是长题。</p>
+<p>这条就帮不上忙。</p>
+<p>短题组只跑了一次。</p>
+<p>重复性要自己再验。</p>
+<h2>术语表</h2>
+<ul><li><strong>挑词</strong>：每步选最相关的词。</li><li><strong>短行</strong>：比挑词上限还短的行。</li><li><strong>拆合</strong>：拆开算再合并结果。</li><li><strong>出词间隔</strong>：出两个词的间隔。</li><li><strong>尾部</strong>：最慢那批请求。</li><li><strong>稀疏</strong>：只挑一部分来算。</li></ul>
+<h2>原文链接</h2>
+<p><a href="https://github.com/vllm-project/vllm/pull/65427">https://github.com/vllm-project/vllm/pull/65427</a></p>
+<p>原文是合并说明，无配图，关键表格已抄录。</p></body></html>

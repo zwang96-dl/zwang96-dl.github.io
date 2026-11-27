@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月27日 09:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T17:00:50"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-27（09点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-27（09点版）</h1>
+<p>这轮 GitHub 合入 12 条。</p>
+<p>TRT-LLM 有 4 条。</p>
+<p>vLLM 有 3 条。</p>
+<p>SGLang 有 2 条。</p>
+<p>FlashInfer 有 2 条。</p>
+<p>llama.cpp 有 1 条。</p>
+<p>剩下 4 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照还是 b12815。</p>
+<p>最值得看的是 vLLM 那条。</p>
+<p>AMD 卡上短题生成快了。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照还是 b12815。</p>
+<p>新快照还没切出来。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：AMD 卡上短题生成快了</strong></p>
+<p>#65427 修了挑词这一步。</p>
+<p>挑词就是每步选最相关的词。</p>
+<p>短行以前也要走全流程。</p>
+<p>全流程就是拆开再合并。</p>
+<p>一短行拖慢整批请求。</p>
+<p>现在短行直接跳过拆合。</p>
+<p>这一步从上百微秒降下。</p>
+<p>现在只要五到十微秒。</p>
+<p>整机出词间隔降一成多。</p>
+<p>出词间隔就是出词的间隔。</p>
+<p>吞吐最高涨约三成半。</p>
+<p>长题基本没有变化。</p>
+<p>数学题分数没有变。</p>
+<p>机器用了 AMD 的卡。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/65427">https://github.com/vllm-project/vllm/pull/65427</a></p>
+<p><strong>SGLang：缓存没搬完不再报空闲</strong></p>
+<p>#52437 修了空闲判断。</p>
+<p>空闲就是以为没活干了。</p>
+<p>缓存还在往内存搬时。</p>
+<p>调度器以前会报空闲。</p>
+<p>报空闲后能清缓存。</p>
+<p>清缓存可能赶在搬完前。</p>
+<p>现在先等搬完再报。</p>
+<p>等搬完就是等拷贝结束。</p>
+<p>测试过了一千多项。</p>
+<p>机器用了 H200。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52437">https://github.com/sgl-project/sglang/pull/52437</a></p>
+<p><strong>FlashInfer：新卡自动选对后端</strong></p>
+<p>#10093 改了自动选择表。</p>
+<p>自动选择就是替你挑后端。</p>
+<p>后端就是干活的那套核。</p>
+<p>带特殊标记时以前选不到。</p>
+<p>现在能选上更快的后端。</p>
+<p>平均快约两成半。</p>
+<p>核本身没有改动。</p>
+<p>机器用了 B200。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/10093">https://github.com/flashinfer-ai/flashinfer/pull/10093</a></p>
+<p><strong>TRT-LLM：题目打包再发</strong></p>
+<p>#22727 把题目打包发送。</p>
+<p>打包就是几道题拼一包。</p>
+<p>以前一道题发一次消息。</p>
+<p>现在按包一起发过去。</p>
+<p>八卡吞吐涨约百分之七。</p>
+<p>四卡涨约百分之五点六。</p>
+<p>作者说是部分恢复。</p>
+<p>机器用了 B300。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22727">https://github.com/NVIDIA/TensorRT-LLM/pull/22727</a></p>
+<p><strong>尺寸不对不再算错不吭声</strong></p>
+<p>一款模型尺寸有点特殊。</p>
+<p>尺寸不是二百五十六倍数。</p>
+<p>以前会算错还不报错。</p>
+<p>数学题只剩一成七分。</p>
+<p>补齐尺寸后有九成。</p>
+<p>现在直接报错拦下来。</p>
+<p>两家一起修了这事。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/9367">https://github.com/flashinfer-ai/flashinfer/pull/9367</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>vLLM 让外部平台登记专家。</p>
+<p>专家就是分工小模块。</p>
+<p>vLLM 修了截断回显。</p>
+<p>回显就是把题目发回去。</p>
+<p>SGLang 修了一款模型启动。</p>
+<p>llama.cpp 改了表格样式。</p>
+<p>其余多是文档和测试。</p>
+<p><strong>四家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>Mooncake 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>arXiv 最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库的。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>社区渠道多是科普帖。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期还是昨天的。</p>
+<p>讲的是销售话题。</p>
+<p>和推理没什么关系。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>vLLM 的 AMD 短行提速</strong></p>
+<p>这篇正贴你的 AMD 卡。</p>
+<p>短题和长题分开算账。</p>
+<p>长题没变也要看。</p>
+<p>配方可以直接抄清单。</p>
+<p>深读笔记已生成。</p></body></html>
