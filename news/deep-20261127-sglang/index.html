@@ -1,11 +1,11 @@
 <!DOCTYPE html><html lang="zh-CN"><head>
-<meta name="doc-title" content="深读 · SGLang 弹性并行不停机缩容：退卡不用停服务"/>
-<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #33111"/>
+<meta name="doc-title" content="深读 · SGLang：读题编码器逐层上卡，不用常驻"/>
+<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #53452"/>
 <meta name="doc-date" content="2026-11-27"/>
-<meta name="doc-ts" content="2026-11-27T02:59:19"/>
+<meta name="doc-ts" content="2026-11-27T19:00:29"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SGLang 弹性并行不停机缩容：退卡不用停服务</title><style>
+<title>SGLang：读题编码器逐层上卡，不用常驻</title><style>
 body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
 line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
 h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
@@ -41,60 +41,73 @@ img{border-color:#30363d}
 </style>
 </head><body>
 <div class="backlink"><a href="..">← 全部资讯</a></div>
-<h1>SGLang 弹性并行不停机缩容：退卡不用停服务</h1>
-<ul><li>原文：SGLang 团队，GitHub PR #33111</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/33111">https://github.com/sgl-project/sglang/pull/33111</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h1>SGLang：读题编码器逐层上卡，不用常驻</h1>
+<ul><li>原文：SGLang 团队，GitHub PR #53452</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/53452">https://github.com/sgl-project/sglang/pull/53452</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
 <h2>人话解读</h2>
-<p>这条给服务加了退卡能力。</p>
-<p>弹性并行就是专家分工那套。</p>
-<p>专家并行就是把专家分到多卡。</p>
-<p>以前这套只能加卡。</p>
-<p>也能救掉线的卡。</p>
-<p>但不能主动退卡。</p>
-<p>流量低了也占着卡。</p>
-<p>现在能把活卡退掉。</p>
-<p>退的时候服务不停。</p>
-<p>手里的请求先跑完。</p>
-<p>退完会明确报一声。</p>
-<p>调度器才敢真关卡。</p>
-<p>调度器就是管资源的系统。</p>
+<p>这条改了一个视频模型。</p>
+<p>模型叫 MAGI-2。</p>
+<p>它先读文字说明。</p>
+<p>读说明的部件叫编码器。</p>
+<p>编码器就是先读题的。</p>
+<p>这个编码器参数很多。</p>
+<p>有二百七十亿个参数。</p>
+<p>以前它在处理器上跑。</p>
+<p>处理器就是电脑的主芯片。</p>
+<p>读一遍要二十多秒。</p>
+<p>一条视频总共三百多秒。</p>
+<p>读题占了约百分之七。</p>
+<p>为什么不放显卡上。</p>
+<p>每张卡要占 48 GB。</p>
+<p>两台大模型已经占着卡。</p>
+<p>现在改成逐层送。</p>
+<p>送一层算一层。</p>
+<p>算完就把这层放下。</p>
+<p>显卡不用一直留着它。</p>
+<p>读题降到不到一秒。</p>
 <h2>核心方法</h2>
-<ul><li>用一张名单管在岗的卡。</li><li>名单就是谁还在干活。</li><li>加卡退卡都改这张名单。</li><li>退卡分几步走。</li><li>先准备。</li><li>再等请求跑完。</li><li>再断开搬运通道。</li><li>再改名单。</li><li>留下的卡重组队伍。</li><li>退出的卡清理后走人。</li><li>等请求跑完要全队同意。</li><li>一张卡没同意就不走。</li><li>退卡前先同步显卡。</li><li>同步就是等活干完。</li><li>避免搬到一半断开。</li></ul>
+<ul><li>编码器换成自家实现。</li><li>自家实现能逐层搬运。</li><li>默认就是逐层搬运模式。</li><li>只有一张卡负责读题。</li><li>其他卡不存这份权重。</li><li>权重就是模型的参数。</li><li>读题卡不进折叠组。</li><li>折叠组就是分工小组。</li><li>不进组就不会干等。</li><li>权重文件格式也兼容了。</li><li>兼容就是旧文件能读。</li></ul>
 <h2>关键数据</h2>
-<p>测试用的是小号模型。</p>
-<p>模型是 DeepSeek-V3-Lite。</p>
-<p>精度用的是 FP8。</p>
-<p>FP8 就是低精度数字格式。</p>
-<p>机器是一台 H100 节点。</p>
-<p>同时跑 8 条请求流。</p>
-<p>四卡退到三卡。</p>
-<table><thead><tr><th>指标</th><th>改前</th><th>改后</th></tr></thead><tbody><tr><td>出字间隔中位</td><td>64.3 毫秒</td><td>8.9 毫秒</td></tr><tr><td>最长卡顿</td><td>5075 毫秒</td><td>13 毫秒</td></tr><tr><td>稳到新宽度</td><td>37.1 秒</td><td>4.1 秒</td></tr></tbody></table>
-<p>改前是全程慢速模式。</p>
-<p>改后开了快速图模式。</p>
-<p>快速图就是预录的执行图。</p>
-<p>所以差距不全是缩容的功劳。</p>
-<p>精度也测了。</p>
-<p>四退三前后都是 65.62%。</p>
-<p>八退四从 65.62% 到 70.31%。</p>
-<p>作者说在波动范围内。</p>
-<p>另一组测试看停机时间。</p>
-<table><thead><tr><th>指标</th><th>重启</th><th>缩容</th></tr></thead><tbody><tr><td>停机</td><td>101 秒</td><td>0.74 秒</td></tr><tr><td>全部耗时</td><td>101 秒</td><td>13.9 秒</td></tr></tbody></table>
-<p>这组用的是 BF16 精度。</p>
-<p>BF16 也是低精度格式。</p>
-<h2>跟你的研究有什么关系</h2>
-<p>这条正贴解耦评估。</p>
-<p>解耦就是读题生成分开跑。</p>
-<p>两个池子大小要动态调。</p>
-<p>读题池忙时要加卡。</p>
-<p>闲时要能退卡。</p>
-<p>以前退卡等于重启。</p>
-<p>重启就是停机一百秒。</p>
-<p>现在退卡几乎不停。</p>
-<p>评估时要算这笔账。</p>
-<p>池子切换的代价变小了。</p>
-<p>动态调参就更划算。</p>
-<p>自动调参也用得上。</p>
-<p>参数变了不用重启。</p>
+<p>机器用了四张 B200。</p>
+<p>测的是第二条请求。</p>
+<table><thead><tr><th>项目</th><th>改前</th><th>改后</th></tr></thead><tbody><tr><td>读题</td><td>26.7 秒</td><td>0.85 秒</td></tr><tr><td>整条</td><td>352.6 秒</td><td>326.5 秒</td></tr><tr><td>显存峰值</td><td>137.5 GB</td><td>139.1 GB</td></tr></tbody></table>
+<p>整条快了约百分之七。</p>
+<p>显存峰值略涨一点。</p>
+<p>启动预热也快了一半。</p>
+<p>预热从三分钟降到一分半。</p>
+<p>精度也对过了。</p>
+<p>和显卡原版逐位一致。</p>
+<p>逐位一致就是每个数都一样。</p>
+<p>和处理器版比画面。</p>
+<p>场景构图动作都没变。</p>
+<h2>跟你的研究方向的关联</h2>
+<p>这条正贴多模态读题。</p>
+<p>读题部件可以不常驻。</p>
+<p>逐层送也能跑得快。</p>
+<p>这就是资源分离的一种。</p>
+<p>资源分离就是分开放置。</p>
+<p>你的评估可以加一档。</p>
+<p>一档常驻一档逐层送。</p>
+<p>比显存和读题耗时。</p>
+<p>只有一张卡读题。</p>
+<p>其他卡不存权重。</p>
+<p>这点也能抄进清单。</p>
+<p>读题耗时要单列。</p>
+<p>占整条百分之七。</p>
+<p>不单列就会看走眼。</p>
 <h2>注意事项</h2>
-<ul><li>数字全是作者自报。</li><li>没有独立复测。</li><li>模型是小号版本。</li><li>大模型还没测。</li><li>改前改后模式不同。</li><li>改前没开快速图。</li><li>差距被放大了。</li><li>只测了 H100。</li><li>AMD 卡还没测。</li></ul>
+<p>数字全是作者自报。</p>
+<p>只测了一个视频模型。</p>
+<p>只测了一条说明文字。</p>
+<p>说明有一千八百多词。</p>
+<p>机器是四张 B200。</p>
+<p>你的卡还没测过。</p>
+<p>逐层送要占主机内存。</p>
+<p>主机内存就是电脑内存。</p>
+<p>读题卡主机内存 54 GB。</p>
+<p>显存峰值还略涨了。</p>
+<p>省的是常驻那 48 GB。</p>
 <h2>术语表</h2>
-<ul><li>专家并行：专家分到多张卡。</li><li>弹性并行：卡数能动态变。</li><li>出字间隔：两词之间的等待。</li><li>缩容：主动退掉几张卡。</li><li>调度器：管资源的系统。</li></ul></body></html>
+<ul><li><strong>编码器</strong>：先读题的部件。</li><li><strong>逐层送</strong>：一层层送上卡算。</li><li><strong>常驻</strong>：一直占着显存。</li><li><strong>权重</strong>：模型的参数。</li><li><strong>折叠组</strong>：分工计算的小组。</li><li><strong>逐位一致</strong>：每个数都一样。</li></ul>
+<h2>原文链接</h2>
+<p><a href="https://github.com/sgl-project/sglang/pull/53452">https://github.com/sgl-project/sglang/pull/53452</a></p>
+<p>原文是合并说明，无配图，关键表格已抄录。</p></body></html>
