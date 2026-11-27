@@ -1,0 +1,130 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · Mooncake：搬数据别给没上车的包裹盖章"/>
+<meta name="doc-description" content="- 原文：Mooncake 团队，GitHub PR #5879"/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T13:01:40"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Mooncake：搬数据别给没上车的包裹盖章</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>Mooncake：搬数据别给没上车的包裹盖章</h1>
+<ul><li>原文：Mooncake 团队，GitHub PR #5879</li><li>原文链接：<a href="https://github.com/kvcache-ai/Mooncake/pull/5879">https://github.com/kvcache-ai/Mooncake/pull/5879</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条修了一个搬运白干活问题。</p>
+<p>Mooncake 是搬缓存的工具。</p>
+<p>缓存就是算好的草稿纸。</p>
+<p>解耦时缓存要跨机器搬。</p>
+<p>搬数据走的是网卡直达。</p>
+<p>直达就是不绕处理器。</p>
+<p>搬之前要给包裹盖章。</p>
+<p>盖章就是写收货信息。</p>
+<p>以前排队包裹每轮全盖章。</p>
+<p>每轮只有前面几个能上车。</p>
+<p>上车就是真正发出去。</p>
+<p>后面的包裹反复盖章。</p>
+<p>盖了也发不出去。</p>
+<p>下一轮还要再盖一遍。</p>
+<p>排队越长白干越多。</p>
+<p>盖章量最高是需要的 33 倍。</p>
+<p>盖章还耽误了收回执。</p>
+<p>回执就是对方的确认。</p>
+<p>现在上车时才盖章。</p>
+<p>没上车的包裹不盖章。</p>
+<p>最大批量带宽涨约 26%。</p>
+<h2>核心方法</h2>
+<ul><li>盖章挪到组装包裹时做。</li><li>组装就是拼好要发的包裹。</li><li>发车前一刻才盖章。</li><li>工作量只跟上车数挂钩。</li><li>不再跟排队长度挂钩。</li><li>令牌只读一次就够。</li><li>令牌就是身份凭证。</li><li>沿用已经拿着的锁。</li><li>锁就是同一时间只能一个干。</li><li>排队顺序保持原样。</li><li>回执节奏保持原样。</li><li>重试行为保持原样。</li><li>每个包裹都带最新信息。</li><li>过期信息会被覆盖掉。</li><li>没有新增配置选项。</li><li>公开接口也没有变。</li></ul>
+<h2>关键数据</h2>
+<h3>白干活有多严重</h3>
+<p>包裹大小固定 16KB。</p>
+<p>排队十三万个时最严重。</p>
+<p>每发一个要盖 33 次章。</p>
+<p>修完每发一个盖 1 次章。</p>
+<p>负责盖章的人忙到 54%。</p>
+<p>这个忙碌度只算盖章那人。</p>
+<p>不是整机的时间占比。</p>
+<table><thead><tr><th>排队包裹数</th><th>盖章倍数（改前）</th><th>盖章倍数（改后）</th></tr></thead><tbody><tr><td>65536</td><td>18.28×</td><td>1.00×</td></tr><tr><td>65536（4 线程）</td><td>30.71×</td><td>1.00×</td></tr><tr><td>131072</td><td>21.97×</td><td>1.00×</td></tr><tr><td>131072（4 线程）</td><td>33.12×</td><td>1.00×</td></tr></tbody></table>
+<h3>带宽涨了多少</h3>
+<p>机器用了两台 H20。</p>
+<p>每台一张显卡一张网卡。</p>
+<p>测的是显存到显存直搬。</p>
+<p>每组重复测了三次。</p>
+<p>排队十三万时涨得最多。</p>
+<p>单线程涨约 20%。</p>
+<p>四线程涨约 26%。</p>
+<p>排队少时基本没变化。</p>
+<p>有个别档位略降。</p>
+<p>最大回落约 7%。</p>
+<p>小消息反而快了两成。</p>
+<p>作者说省了固定开销。</p>
+<table><thead><tr><th>排队包裹数</th><th>线程</th><th>带宽变化</th></tr></thead><tbody><tr><td>4096</td><td>0</td><td>-0.73%</td></tr><tr><td>4096</td><td>4</td><td>-1.08%</td></tr><tr><td>8192</td><td>0</td><td>+5.22%</td></tr><tr><td>16384</td><td>0</td><td>-7.43%</td></tr><tr><td>32768</td><td>0</td><td>+7.46%</td></tr><tr><td>65536</td><td>4</td><td>+3.68%</td></tr><tr><td>131072</td><td>0</td><td>+20.00%</td></tr><tr><td>131072</td><td>4</td><td>+26.36%</td></tr></tbody></table>
+<h3>测试情况</h3>
+<p>单元测试全过了。</p>
+<p>三种构建都过了 29 项。</p>
+<p>开拥塞控制时过了 30 项。</p>
+<p>拥塞控制就是堵车时减速。</p>
+<h2>跟你的研究方向的关联</h2>
+<p>这条正贴你的解耦评估。</p>
+<p>解耦搬缓存正用得上。</p>
+<p>读题机算完要搬缓存。</p>
+<p>搬运慢会拖住生成机。</p>
+<p>排队越长白干越多。</p>
+<p>这点要进你的评估清单。</p>
+<p>测搬运别只测小批量。</p>
+<p>大批量才暴露这个坑。</p>
+<p>搬运线程的忙碌度要单列。</p>
+<p>它忙不等于显卡忙。</p>
+<p>带宽没跑满先查这里。</p>
+<p>也许是盖章堵住了发车。</p>
+<p>回执轮询也可能被耽误。</p>
+<p>轮询就是反复问好了没。</p>
+<h2>注意事项</h2>
+<p>数字全是作者自报。</p>
+<p>只测了 H20 两台机器。</p>
+<p>测的是搬运层裸带宽。</p>
+<p>裸带宽就是不带业务的测法。</p>
+<p>没测真实解耦整链路。</p>
+<p>你的卡是 H100 和 MI350X。</p>
+<p>网卡型号也可能不同。</p>
+<p>数字不能直接套过来。</p>
+<p>个别档位还有小幅回落。</p>
+<p>改动只动经典搬运路径。</p>
+<p>新路径不受影响。</p>
+<h2>术语表</h2>
+<ul><li><strong>RDMA</strong>：网卡直达搬运，不绕处理器。</li><li><strong>WR</strong>：发给网卡的一张工单。</li><li><strong>QP</strong>：网卡的发送通道。</li><li><strong>CQ</strong>：网卡的回执队列。</li><li><strong>描述符</strong>：描述一个包裹的单子。</li><li><strong>盖章</strong>：给包裹写收货信息。</li><li><strong>令牌</strong>：包裹带的身份凭证。</li><li><strong>轮询</strong>：反复问好了没有。</li><li><strong>裸带宽</strong>：不带业务测的带宽。</li></ul>
+<h2>原文链接</h2>
+<p><a href="https://github.com/kvcache-ai/Mooncake/pull/5879">https://github.com/kvcache-ai/Mooncake/pull/5879</a></p>
+<p>原文是合并说明，无配图，关键表格已抄录。</p></body></html>

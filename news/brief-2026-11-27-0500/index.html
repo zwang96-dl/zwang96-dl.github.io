@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月27日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T13:00:23"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-27（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-27（05点版）</h1>
+<p>这轮 GitHub 合入 15 条。</p>
+<p>vLLM 有 5 条。</p>
+<p>SGLang 有 5 条。</p>
+<p>llama.cpp 有 2 条。</p>
+<p>Mooncake 有 2 条。</p>
+<p>TRT-LLM 有 1 条。</p>
+<p>剩下 4 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照涨到 b12811。</p>
+<p>最值得看的是 Mooncake 那条。</p>
+<p>搬数据不再白盖章了。</p>
+<p>带宽涨了两成多。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照从 b12810 涨到 b12811。</p>
+<p>来源：GitHub releases</p>
+<p><strong>Mooncake：搬数据不再白盖章</strong></p>
+<p>#5879 改了搬数据的盖章时机。</p>
+<p>盖章就是给包裹写收货信息。</p>
+<p>以前排队包裹每轮全盖章。</p>
+<p>只有前面几个能上车。</p>
+<p>后面的反复盖章白费力。</p>
+<p>盖章量最高是需要的 33 倍。</p>
+<p>现在上车时才盖章。</p>
+<p>最大批量带宽涨约 26%。</p>
+<p>小消息也快了两成上下。</p>
+<p>机器用了两台 H20。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5879">https://github.com/kvcache-ai/Mooncake/pull/5879</a></p>
+<p><strong>SGLang：某些模型不再算错不吭声</strong></p>
+<p>#51967 修了注意力后端的选择。</p>
+<p>注意力就是模型看上下文的机制。</p>
+<p>默认核只认特定尺寸。</p>
+<p>尺寸不对以前会越界读。</p>
+<p>越界就是读了不该读的内存。</p>
+<p>有的还会算错不报错。</p>
+<p>涉及几款小模型。</p>
+<p>现在自动换稳妥后端。</p>
+<p>手动指定仍按你的来。</p>
+<p>A100 上实测修好了。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51967">https://github.com/sgl-project/sglang/pull/51967</a></p>
+<p><strong>vLLM：视频占位按实际帧数算</strong></p>
+<p>#68583 修了视频占位的算法。</p>
+<p>占位就是给视频预留的位置。</p>
+<p>抽帧后占位还按原视频算。</p>
+<p>抽帧就是从视频挑帧。</p>
+<p>占位和特征对不上就报错。</p>
+<p>四个看图模型都中招。</p>
+<p>现在按抽帧结果算。</p>
+<p>测试从 50 个挂到全过。</p>
+<p>默认行为没有变。</p>
+<p>机器用了 DGX Spark。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68583">https://github.com/vllm-project/vllm/pull/68583</a></p>
+<p><strong>SGLang：昇腾上读题能多卡分工</strong></p>
+<p>#51185 给读题加了交错分工。</p>
+<p>交错分工就是多卡轮流切题。</p>
+<p>读题等待降约 10%。</p>
+<p>读题吞吐涨约 11%。</p>
+<p>八张昇腾卡实测。</p>
+<p>每题六万五千个词。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51185">https://github.com/sgl-project/sglang/pull/51185</a></p>
+<p><strong>llama.cpp：循环状态不再抄来抄去</strong></p>
+<p>#30139 去掉了状态复制。</p>
+<p>循环状态就是模型记着的进度。</p>
+<p>以前每出一个字先抄一份。</p>
+<p>现在直接读原地数据。</p>
+<p>生成速度涨约 2% 到 3%。</p>
+<p>并行越多涨得越多。</p>
+<p>最多涨约 16%。</p>
+<p>机器用了 5090。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/30139">https://github.com/ggml-org/llama.cpp/pull/30139</a></p>
+<p><strong>Mooncake：删掉的对象真腾地方了</strong></p>
+<p>#5711 修了硬盘清理。</p>
+<p>以前删对象只删目录。</p>
+<p>硬盘上的数据还留着。</p>
+<p>删掉一半一点没腾。</p>
+<p>现在会定期核对清理。</p>
+<p>只清全删光的整桶。</p>
+<p>半删的桶先不动。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5711">https://github.com/kvcache-ai/Mooncake/pull/5711</a></p>
+<p><strong>SGLang：画图模型少算重复活</strong></p>
+<p>#52855 复用了文字条件。</p>
+<p>文字条件就是画图的提示。</p>
+<p>以前每一步都重算一遍。</p>
+<p>现在算一次留着用。</p>
+<p>整图快约 7%。</p>
+<p>输出逐像素没有变。</p>
+<p>机器用了 GB300。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52855">https://github.com/sgl-project/sglang/pull/52855</a></p>
+<p><strong>vLLM：解耦缓存命中口径对齐了</strong></p>
+<p>#70333 调了测试期望。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>读题机停在检查点处。</p>
+<p>检查点就是中途存的进度。</p>
+<p>命中数比以前少一格。</p>
+<p>测试期望跟着下调。</p>
+<p>只改测试不改功能。</p>
+<p>MI350X 上验证过。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70333">https://github.com/vllm-project/vllm/pull/70333</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>vLLM 挪了媒体默认值的位置。</p>
+<p>vLLM 日志加上了设备名。</p>
+<p>TRT-LLM 只动了测试。</p>
+<p>其余多是测试和流水线。</p>
+<p><strong>四家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>arXiv 最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库的。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>对比文前面已经报过了。</p>
+<p>社区渠道也没核到新帖。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期还是昨天的。</p>
+<p>讲的是销售话题。</p>
+<p>和推理没什么关系。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>Mooncake 的搬运盖章</strong></p>
+<p>这篇正贴你的解耦评估。</p>
+<p>解耦搬缓存正用得上。</p>
+<p>排队越长白干越多。</p>
+<p>这个坑很值得记。</p>
+<p>深读笔记已生成。</p></body></html>
