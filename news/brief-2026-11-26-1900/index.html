@@ -1,0 +1,197 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月26日 19:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-27T02:58:44"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-26（19点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-26（19点版）</h1>
+<p>这轮 GitHub 合入 27 条。</p>
+<p>SGLang 有 14 条。</p>
+<p>vLLM 有 5 条。</p>
+<p>FlashInfer 有 3 条。</p>
+<p>其余几家共 5 条。</p>
+<p>剩下 2 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12803。</p>
+<p>最值得看的是 SGLang 缩容那条。</p>
+<p>服务不用停就能退卡了。</p>
+<p>新论文这轮没有。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照从 b12800 涨到 b12803。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：不停服务也能退卡</strong></p>
+<p>#33111 给弹性并行加了缩容。</p>
+<p>弹性并行就是专家分工那套。</p>
+<p>以前只能加卡和救卡。</p>
+<p>现在能把活着的卡退掉。</p>
+<p>退卡时请求先跑完。</p>
+<p>退完会明确报一声。</p>
+<p>调度器才敢真关卡。</p>
+<p>实测四卡退到三卡。</p>
+<p>出字间隔中位 8.9 毫秒。</p>
+<p>最长卡顿只有 13 毫秒。</p>
+<p>四秒多就稳到新宽度。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/33111">https://github.com/sgl-project/sglang/pull/33111</a></p>
+<p><strong>SGLang：AMD 上读题快了一截</strong></p>
+<p>#39595 加了新的读题后端。</p>
+<p>后端就是干活的那条路。</p>
+<p>只对 AMD 新卡生效。</p>
+<p>读题批次快 1.4 到 1.74 倍。</p>
+<p>生成那步还是走旧路。</p>
+<p>猜词核对也走旧路。</p>
+<p>缓存开着时也能用。</p>
+<p>缓存就是复用旧计算。</p>
+<p>精度只差一题。</p>
+<p>两百题里差一题。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/39595">https://github.com/sgl-project/sglang/pull/39595</a></p>
+<p><strong>vLLM：图片数据改走快递</strong></p>
+<p>#68477 让多模态张量走对象存储。</p>
+<p>张量就是图片算完的数据。</p>
+<p>以前数据塞在请求里。</p>
+<p>请求体有一到三十二兆。</p>
+<p>现在只发一个小引用。</p>
+<p>请求体降到几十千字节。</p>
+<p>路由器不用再搬大件了。</p>
+<p>路由器就是分发请求的人。</p>
+<p>小图时吞吐涨到 1.36 倍。</p>
+<p>大图时只涨约 2%。</p>
+<p>大图瓶颈在显卡那边。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68477">https://github.com/vllm-project/vllm/pull/68477</a></p>
+<p><strong>SGLang：内存缓存不再被旧状态挤掉</strong></p>
+<p>#50954 修了状态上限的算法。</p>
+<p>状态就是模型记着的东西。</p>
+<p>以前上限只数显卡那份。</p>
+<p>内存那份不算数。</p>
+<p>旧状态在内存里越堆越多。</p>
+<p>新缓存被挤出去。</p>
+<p>命中率就往下掉。</p>
+<p>现在两份一起算。</p>
+<p>挤压场景命中率涨了。</p>
+<p>从 81.4% 涨到 90.7%。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50954">https://github.com/sgl-project/sglang/pull/50954</a></p>
+<p><strong>SGLang：解耦换了搬运工</strong></p>
+<p>#53365 让昇腾卡改用 Mooncake。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>Mooncake 就是搬缓存的工具。</p>
+<p>以前昇腾要用另一套。</p>
+<p>现在两边统一了。</p>
+<p>长输入首字快了一点。</p>
+<p>从 9469 毫秒降到 9201 毫秒。</p>
+<p>只快约 3%。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53365">https://github.com/sgl-project/sglang/pull/53365</a></p>
+<p><strong>FlashInfer：读题算子又快了</strong></p>
+<p>#10069 优化了新卡的读题。</p>
+<p>只对两款新卡生效。</p>
+<p>和官方库比快约 1.84 倍。</p>
+<p>和上一版比快约 1.11 倍。</p>
+<p>这是几何平均。</p>
+<p>就是把所有场景平均了。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/flashinfer-ai/flashinfer/pull/10069">https://github.com/flashinfer-ai/flashinfer/pull/10069</a></p>
+<p><strong>LMDeploy：猜词结果能复现了</strong></p>
+<p>#5193 修了猜词采样的随机数。</p>
+<p>猜词就是先猜再核对。</p>
+<p>以前随机数是全局共用的。</p>
+<p>别的请求会搅乱结果。</p>
+<p>现在按请求种子算。</p>
+<p>同一种子结果一致。</p>
+<p>采样还变快了。</p>
+<p>中位从 195.7 微秒降到 119.6 微秒。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/InternLM/lmdeploy/pull/5193">https://github.com/InternLM/lmdeploy/pull/5193</a></p>
+<p><strong>TRT-LLM：新卡采样调好了</strong></p>
+<p>#22550 给 Rubin 新卡调了采样。</p>
+<p>采样就是挑下一个词。</p>
+<p>新卡对旧卡快约 1.46 倍。</p>
+<p>这是新旧硬件一起比的。</p>
+<p>不全是代码的功劳。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22550">https://github.com/NVIDIA/TensorRT-LLM/pull/22550</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 还修了缓存清理同步。</p>
+<p>多阶段清理不再互相等死。</p>
+<p>vLLM 修了读题缓存读错。</p>
+<p>只在带填充时才出错。</p>
+<p>Dynamo 修了断开后不取消。</p>
+<p>对方挂了请求能及时停。</p>
+<p>llama.cpp 给昇腾加了新路。</p>
+<p>其余多是测试和流水线。</p>
+<p><strong>两家挂零</strong></p>
+<p>TGI 这轮没合入。</p>
+<p>Mooncake 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没有新的</strong></p>
+<p>arXiv 最新还是昨天的。</p>
+<p>前面已经报过了。</p>
+<p>下一批还没入库。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是对比文章。</p>
+<p>对比文章已经报过了。</p>
+<p>社交渠道多是科普帖。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 有新一期</strong></p>
+<p>讲的是销售智能体。</p>
+<p>跟推理服务关系不大。</p>
+<p>这轮就不展开了。</p>
+<p>来源：<a href="https://latent.space/p/how_clay_builds_gtm_agents_jeff_barg_head_of_ai/">https://latent.space/p/how_clay_builds_gtm_agents_jeff_barg_head_of_ai/</a></p>
+<h2>值得深读</h2>
+<p><strong>SGLang 的不停机缩容</strong></p>
+<p>这篇正贴你的解耦评估。</p>
+<p>池子大小以后能动态调。</p>
+<p>退卡代价有了实测数。</p>
+<p>深读笔记已生成。</p></body></html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang 弹性并行不停机缩容：退卡不用停服务"/>
+<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #33111"/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T02:59:19"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang 弹性并行不停机缩容：退卡不用停服务</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang 弹性并行不停机缩容：退卡不用停服务</h1>
+<ul><li>原文：SGLang 团队，GitHub PR #33111</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/33111">https://github.com/sgl-project/sglang/pull/33111</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条给服务加了退卡能力。</p>
+<p>弹性并行就是专家分工那套。</p>
+<p>专家并行就是把专家分到多卡。</p>
+<p>以前这套只能加卡。</p>
+<p>也能救掉线的卡。</p>
+<p>但不能主动退卡。</p>
+<p>流量低了也占着卡。</p>
+<p>现在能把活卡退掉。</p>
+<p>退的时候服务不停。</p>
+<p>手里的请求先跑完。</p>
+<p>退完会明确报一声。</p>
+<p>调度器才敢真关卡。</p>
+<p>调度器就是管资源的系统。</p>
+<h2>核心方法</h2>
+<ul><li>用一张名单管在岗的卡。</li><li>名单就是谁还在干活。</li><li>加卡退卡都改这张名单。</li><li>退卡分几步走。</li><li>先准备。</li><li>再等请求跑完。</li><li>再断开搬运通道。</li><li>再改名单。</li><li>留下的卡重组队伍。</li><li>退出的卡清理后走人。</li><li>等请求跑完要全队同意。</li><li>一张卡没同意就不走。</li><li>退卡前先同步显卡。</li><li>同步就是等活干完。</li><li>避免搬到一半断开。</li></ul>
+<h2>关键数据</h2>
+<p>测试用的是小号模型。</p>
+<p>模型是 DeepSeek-V3-Lite。</p>
+<p>精度用的是 FP8。</p>
+<p>FP8 就是低精度数字格式。</p>
+<p>机器是一台 H100 节点。</p>
+<p>同时跑 8 条请求流。</p>
+<p>四卡退到三卡。</p>
+<table><thead><tr><th>指标</th><th>改前</th><th>改后</th></tr></thead><tbody><tr><td>出字间隔中位</td><td>64.3 毫秒</td><td>8.9 毫秒</td></tr><tr><td>最长卡顿</td><td>5075 毫秒</td><td>13 毫秒</td></tr><tr><td>稳到新宽度</td><td>37.1 秒</td><td>4.1 秒</td></tr></tbody></table>
+<p>改前是全程慢速模式。</p>
+<p>改后开了快速图模式。</p>
+<p>快速图就是预录的执行图。</p>
+<p>所以差距不全是缩容的功劳。</p>
+<p>精度也测了。</p>
+<p>四退三前后都是 65.62%。</p>
+<p>八退四从 65.62% 到 70.31%。</p>
+<p>作者说在波动范围内。</p>
+<p>另一组测试看停机时间。</p>
+<table><thead><tr><th>指标</th><th>重启</th><th>缩容</th></tr></thead><tbody><tr><td>停机</td><td>101 秒</td><td>0.74 秒</td></tr><tr><td>全部耗时</td><td>101 秒</td><td>13.9 秒</td></tr></tbody></table>
+<p>这组用的是 BF16 精度。</p>
+<p>BF16 也是低精度格式。</p>
+<h2>跟你的研究有什么关系</h2>
+<p>这条正贴解耦评估。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>两个池子大小要动态调。</p>
+<p>读题池忙时要加卡。</p>
+<p>闲时要能退卡。</p>
+<p>以前退卡等于重启。</p>
+<p>重启就是停机一百秒。</p>
+<p>现在退卡几乎不停。</p>
+<p>评估时要算这笔账。</p>
+<p>池子切换的代价变小了。</p>
+<p>动态调参就更划算。</p>
+<p>自动调参也用得上。</p>
+<p>参数变了不用重启。</p>
+<h2>注意事项</h2>
+<ul><li>数字全是作者自报。</li><li>没有独立复测。</li><li>模型是小号版本。</li><li>大模型还没测。</li><li>改前改后模式不同。</li><li>改前没开快速图。</li><li>差距被放大了。</li><li>只测了 H100。</li><li>AMD 卡还没测。</li></ul>
+<h2>术语表</h2>
+<ul><li>专家并行：专家分到多张卡。</li><li>弹性并行：卡数能动态变。</li><li>出字间隔：两词之间的等待。</li><li>缩容：主动退掉几张卡。</li><li>调度器：管资源的系统。</li></ul></body></html>
