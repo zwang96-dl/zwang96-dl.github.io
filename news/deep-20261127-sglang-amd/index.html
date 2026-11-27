@@ -1,0 +1,138 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang：AMD 卡上计算和汇总并成一步"/>
+<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #43480"/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T21:00:30"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang：AMD 卡上计算和汇总并成一步</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang：AMD 卡上计算和汇总并成一步</h1>
+<ul><li>原文：SGLang 团队，GitHub PR #43480</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/43480">https://github.com/sgl-project/sglang/pull/43480</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条改了一个模型层。</p>
+<p>模型是 DeepSeek-V4.1-Flash。</p>
+<p>这一层先算矩阵乘法。</p>
+<p>矩阵乘法就是大批量乘加。</p>
+<p>算完还要卡间汇总。</p>
+<p>汇总就是把结果对齐。</p>
+<p>以前两步排队做。</p>
+<p>算完才开始送数据。</p>
+<p>现在边算边送。</p>
+<p>算好一块送一块。</p>
+<p>送活交给搬运引擎。</p>
+<p>搬运引擎就是专管送数据的。</p>
+<p>它不用等整层算完。</p>
+<p>这就像边炒边上菜。</p>
+<p>不用等整桌炒完。</p>
+<p>只在 AMD 新卡上开。</p>
+<p>新卡代号叫 gfx950。</p>
+<p>代号就是芯片的代称。</p>
+<p>只管读题不管生成。</p>
+<p>读题就是先读输入。</p>
+<p>生成就是逐词输出。</p>
+<h2>核心方法</h2>
+<ul><li>融合开关默认关着。</li><li>开了才走融合路子。</li><li>不合适的直接走老路。</li><li>老路就是原来的做法。</li><li>生成阶段不走融合。</li><li>小批量也不走融合。</li><li>批量就是一次算多少。</li><li>出错就自己关掉。</li><li>关掉后走老路。</li><li>不会直接报错停机。</li><li>汇总后半段照常算。</li><li>融的只是前半段。</li><li>还有个更快开关。</li><li>它把数据压小再送。</li><li>压小就是用更少位数。</li><li>位数少会损精度。</li><li>损精度就是答案会变。</li><li>这个开关默认关着。</li><li>融合要占一块显存。</li><li>显存就是显卡的内存。</li><li>这块约五百多兆。</li><li>开了要调低显存占比。</li><li>显存占比就是留多少给模型。</li></ul>
+<h2>关键数据</h2>
+<p>机器是 MI355X。</p>
+<p>测了两卡和四卡。</p>
+<p>输入一万六千多词。</p>
+<p>输出六十四词。</p>
+<p>同时只跑一条请求。</p>
+<table><thead><tr><th>开关</th><th>两卡首字</th><th>四卡首字</th></tr></thead><tbody><tr><td>只开融合</td><td>快 2.4%</td><td>快 2.0%</td></tr><tr><td>再开压小送</td><td>快 5.8%</td><td>快 7.0%</td></tr></tbody></table>
+<p>首字就是第一个词出来。</p>
+<p>只开融合的代价较小。</p>
+<p>结果偏差约千分之八。</p>
+<p>偏差就是和老路差多少。</p>
+<p>再开压小送偏差更大。</p>
+<p>偏差约百分之二。</p>
+<p>快的那半更伤精度。</p>
+<p>作者把这点写明了。</p>
+<p>下游质量没测过。</p>
+<p>下游就是最终答得好不好。</p>
+<p>测法值得注意。</p>
+<p>每组开了六台新服务。</p>
+<p>两组轮流交替测。</p>
+<p>一共四十八台。</p>
+<p>二十四对全同方向。</p>
+<p>同方向就是都变快了。</p>
+<p>作者还撤回过一句话。</p>
+<p>原先说结果逐位一致。</p>
+<p>逐位一致就是每个数都一样。</p>
+<p>复测发现并不一致。</p>
+<p>作者公开撤回了。</p>
+<h2>跟你的研究方向的关联</h2>
+<p>这条正贴你的 AMD 卡。</p>
+<p>你的卡同属这一代。</p>
+<p>读题首字能快一点。</p>
+<p>你的评估可以加一档。</p>
+<p>一档开融合一档不开。</p>
+<p>压小送那档单独测。</p>
+<p>它快但会损精度。</p>
+<p>精度要单独验收。</p>
+<p>验收就是查答得对不对。</p>
+<p>测法可以直接抄。</p>
+<p>效果小就交替测。</p>
+<p>每组开多台新服务。</p>
+<p>取中间值再比。</p>
+<p>中间值就是排中间的数。</p>
+<p>只测一对会看走眼。</p>
+<p>作者三对时测出没变化。</p>
+<p>六对才测出真效果。</p>
+<p>逐层计时别乱用。</p>
+<p>它会把结论弄反。</p>
+<p>作者特意没报逐层数。</p>
+<h2>注意事项</h2>
+<p>数字全是作者自报。</p>
+<p>只测了一个模型。</p>
+<p>实测卡是 MI355X。</p>
+<p>你的卡还没测过。</p>
+<p>只测了一条并发。</p>
+<p>并发就是同时跑几条。</p>
+<p>输入长度是固定的。</p>
+<p>下游质量没测过。</p>
+<p>压小送那档要小心。</p>
+<p>它默认关着是有原因的。</p>
+<p>融合要占一块显存。</p>
+<p>显存占比要跟着调。</p>
+<p>测试脚本没随文附上。</p>
+<p>随文就是跟着原文一起。</p>
+<h2>术语表</h2>
+<ul><li><strong>融合</strong>：两步并成一步做。</li><li><strong>汇总</strong>：卡间把结果对齐。</li><li><strong>搬运引擎</strong>：专管送数据的部件。</li><li><strong>读题</strong>：先读输入的阶段。</li><li><strong>生成</strong>：逐词输出的阶段。</li><li><strong>偏差</strong>：和老路差多少。</li><li><strong>显存</strong>：显卡的内存。</li><li><strong>逐位一致</strong>：每个数都一样。</li></ul>
+<h2>原文链接</h2>
+<p><a href="https://github.com/sgl-project/sglang/pull/43480">https://github.com/sgl-project/sglang/pull/43480</a></p>
+<p>原文是合并说明，无配图，关键表格已抄录。</p></body></html>
