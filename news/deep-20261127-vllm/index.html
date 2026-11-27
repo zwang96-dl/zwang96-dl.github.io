@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM 编码分离：两个视频帧数不一样不再挂"/>
+<meta name="doc-description" content="- 原文：vLLM 团队，GitHub PR #70167"/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T07:01:55"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM 编码分离：两个视频帧数不一样不再挂</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM 编码分离：两个视频帧数不一样不再挂</h1>
+<ul><li>原文：vLLM 团队，GitHub PR #70167</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/70167">https://github.com/vllm-project/vllm/pull/70167</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条修了一个多视频的坑。</p>
+<p>编码分离就是看图单独跑。</p>
+<p>一台机器只负责看视频。</p>
+<p>另一台负责读题和生成。</p>
+<p>看完的结果要搬过去。</p>
+<p>搬运靠缓存编号对号。</p>
+<p>编号就是每份结果的门牌号。</p>
+<p>一个请求带两个视频。</p>
+<p>两个视频抽帧数不一样。</p>
+<p>以前两个都按第一个抽。</p>
+<p>编号就对不上号了。</p>
+<p>请求等两分钟后失败。</p>
+<p>现在按位置各抽各的。</p>
+<p>请求能正常跑完。</p>
+<p>结果和直连完全一致。</p>
+<h2>核心方法</h2>
+<ul><li>代理负责把请求拆开。</li><li>代理就是中间分发的人。</li><li>以前整张帧数表都发过去。</li><li>每个子请求拿到全表。</li><li>子请求只有一个视频。</li><li>它就只看表里第一项。</li><li>现在按原位置切表。</li><li>第一个视频拿第一项。</li><li>第二个视频拿第二项。</li><li>图片子请求不受影响。</li><li>单个数字的设置不受影响。</li><li>只动视频的缓存编号。</li><li>图片编号保持原样。</li><li>列表太短会提前报错。</li><li>不会等到半路才失败。</li><li>新开关默认是关的。</li><li>开之前要两边都支持。</li></ul>
+<h2>关键数据</h2>
+<p>测试模型是 Qwen3-VL-8B。</p>
+<p>机器用了两张 H100。</p>
+<p>一台只负责看视频。</p>
+<p>一台负责读题和生成。</p>
+<p>中间用 Mooncake 搬运。</p>
+<p>Mooncake 就是搬缓存的工具。</p>
+<table><thead><tr><th>请求</th><th>直连</th><th>修前代理</th><th>修后代理</th></tr></thead><tbody><tr><td>两视频帧数十六和三十二</td><td>成功，四千九百三十九词</td><td>失败，一百二十一秒</td><td>成功，词数一致</td></tr><tr><td>两视频帧率二和四</td><td>成功，四千五百三十一词</td><td>失败，一百二十一秒</td><td>成功，词数一致</td></tr><tr><td>一图加两视频</td><td>成功，五千一百四十六词</td><td>失败，一百二十一秒</td><td>成功，词数一致</td></tr><tr><td>单值和图片类请求</td><td>成功</td><td>成功</td><td>成功，逐字一致</td></tr></tbody></table>
+<p>十五个真实用例全跑通了。</p>
+<p>修后全是成功返回。</p>
+<p>生成文字和直连一致。</p>
+<p>输入词数也完全一致。</p>
+<p>没有再出现搬运超时。</p>
+<p>代理单元测试一百三十六项通过。</p>
+<p>注意没有速度数字。</p>
+<p>没有首字等待数字。</p>
+<p>也没有吞吐数字。</p>
+<p>这条只证明修对了。</p>
+<h2>跟你的研究有什么关系</h2>
+<p>这条正贴多模态评估。</p>
+<p>编码分离是你的方向之一。</p>
+<p>多视频请求要单独测。</p>
+<p>帧数不同是最容易漏的。</p>
+<p>缓存编号要两边对齐。</p>
+<p>对不齐不是答错题。</p>
+<p>对不齐是整单超时失败。</p>
+<p>评估时要加混合用例。</p>
+<p>一图加两视频要测。</p>
+<p>暖缓存重复请求也要测。</p>
+<p>暖缓存就是缓存里已有结果。</p>
+<p>开关只能两边一起开。</p>
+<p>一边开一边不开还会错。</p>
+<h2>注意事项</h2>
+<ul><li>数字全是作者自报。</li><li>没有独立复测。</li><li>只测了一个模型。</li><li>只测了 H100。</li><li>AMD 卡还没测。</li><li>只管请求里带的列表。</li><li>服务器预设的列表不管。</li><li>别的抽帧参数也不管。</li><li>视频缓存编号可能变。</li><li>旧缓存可能暂时命中不了。</li><li>模型侧测试用了旧运行时。</li><li>完整主线测试还没跑完。</li><li>九个失败旧版也有。</li><li>作者说明用了 AI 辅助。</li></ul>
+<h2>术语表</h2>
+<ul><li>编码分离：看图单独跑。</li><li>代理：中间分发的人。</li><li>缓存编号：结果的门牌号。</li><li>抽帧：从视频里挑画面。</li><li>暖缓存：缓存里已有结果。</li><li>搬运超时：等结果等太久。</li></ul></body></html>

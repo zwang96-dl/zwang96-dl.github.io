@@ -1,0 +1,232 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月26日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-26"/>
+<meta name="doc-ts" content="2026-11-27T07:01:42"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-26（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-26（23点版）</h1>
+<p>这轮 GitHub 合入 34 条。</p>
+<p>SGLang 有 17 条。</p>
+<p>vLLM 有 8 条。</p>
+<p>其余几家共 9 条。</p>
+<p>剩下 3 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>llama.cpp 快照涨到 b12808。</p>
+<p>最值得看的是 vLLM 看视频那条。</p>
+<p>两个视频帧数不一样会挂。</p>
+<p>现在修好了。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照从 b12805 涨到 b12808。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：两个视频帧数不同不再挂</strong></p>
+<p>#70167 修了编码分离的帧数问题。</p>
+<p>编码分离就是看图单独跑。</p>
+<p>看图机先把视频算完。</p>
+<p>后面机器再接着答题。</p>
+<p>一个请求带两个视频。</p>
+<p>两个视频帧数不一样。</p>
+<p>以前两个都按第一个算。</p>
+<p>缓存对不上号。</p>
+<p>缓存就是算好的草稿纸。</p>
+<p>请求等两分钟后失败。</p>
+<p>现在按各自位置切开。</p>
+<p>第一个视频抽十六帧。</p>
+<p>第二个视频抽三十二帧。</p>
+<p>实测两张 H100。</p>
+<p>修完和直连结果一致。</p>
+<p>文字和词数都一样。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70167">https://github.com/vllm-project/vllm/pull/70167</a></p>
+<p><strong>vLLM：预渲染图片不再挤掉缓存</strong></p>
+<p>#69392 修了图片缓存的串扰。</p>
+<p>串扰就是两边账本对不上。</p>
+<p>上游先把图片算好。</p>
+<p>算好的数据直接发过来。</p>
+<p>接收方却把数据存进缓存。</p>
+<p>缓存满了会挤掉旧的。</p>
+<p>后面请求以为缓存里有。</p>
+<p>实际去拿却拿不到。</p>
+<p>请求就报错了。</p>
+<p>现在这类数据不进缓存。</p>
+<p>新算的图片照常进缓存。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69392">https://github.com/vllm-project/vllm/pull/69392</a></p>
+<p><strong>vLLM：索引精度开关生效了</strong></p>
+<p>#69838 修了 Kimi 的索引开关。</p>
+<p>索引就是挑关键位置的表。</p>
+<p>以前开关设了也不生效。</p>
+<p>内部一直用高精度算。</p>
+<p>现在能换成低精度了。</p>
+<p>低精度就是数字存得粗些。</p>
+<p>实测用了三十二张新卡。</p>
+<p>吞吐涨了约 3.8%。</p>
+<p>首字等待尾部降约 25%。</p>
+<p>默认设置没有变化。</p>
+<p>作者提醒要补测长文精度。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69838">https://github.com/vllm-project/vllm/pull/69838</a></p>
+<p><strong>vLLM：新卡算子快了端到端没快多少</strong></p>
+<p>#70187 优化了新卡的注意力。</p>
+<p>注意力就是看上下文那步。</p>
+<p>只对新卡生效。</p>
+<p>算子本身快 1.07 到 1.92 倍。</p>
+<p>算子就是一小段计算程序。</p>
+<p>端到端出字间隔只降约 1%。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70187">https://github.com/vllm-project/vllm/pull/70187</a></p>
+<p><strong>vLLM：旧卡也能跑上一代模型</strong></p>
+<p>#69960 让上一代模型支持旧卡。</p>
+<p>以前旧卡直接报错。</p>
+<p>现在 A100 能跑了。</p>
+<p>单流每秒约一百一十词。</p>
+<p>三十二路每秒约两千一百词。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69960">https://github.com/vllm-project/vllm/pull/69960</a></p>
+<p><strong>SGLang：缓存备份不再被误丢</strong></p>
+<p>#52954 修了缓存备份的误丢。</p>
+<p>备份就是把缓存存到硬盘。</p>
+<p>父节点还在往硬盘写。</p>
+<p>这时节点被分叉切开。</p>
+<p>子节点以前会被丢掉。</p>
+<p>后面的子孙也一起丢。</p>
+<p>硬盘越慢丢得越多。</p>
+<p>现在在途的也算数。</p>
+<p>在途就是还在路上没到。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52954">https://github.com/sgl-project/sglang/pull/52954</a></p>
+<p><strong>SGLang：量化版新模型能启动了</strong></p>
+<p>#51143 修了量化模型的启动。</p>
+<p>量化就是把数字压小存。</p>
+<p>出问题的是 Gemma 4。</p>
+<p>以前启动时直接报错。</p>
+<p>因为激活函数对不上。</p>
+<p>激活函数就是中间一步计算。</p>
+<p>现在能正常启动了。</p>
+<p>数学题分数约 0.945。</p>
+<p>未量化版是 0.950。</p>
+<p>这条没测速度。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51143">https://github.com/sgl-project/sglang/pull/51143</a></p>
+<p><strong>SGLang：画图两路合成一路快一倍</strong></p>
+<p>#52121 把画图两路合成一路。</p>
+<p>画图模型太大装不下显卡。</p>
+<p>权重只能边用边搬。</p>
+<p>以前每步搬两遍权重。</p>
+<p>现在两路一起算。</p>
+<p>权重只搬一遍。</p>
+<p>实测快了约一倍。</p>
+<p>七十四秒降到三十七秒。</p>
+<p>模型常驻时不走这条路。</p>
+<p>图片和原来不完全一样。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52121">https://github.com/sgl-project/sglang/pull/52121</a></p>
+<p><strong>Mooncake：新汇总方式只赢自家旧款</strong></p>
+<p>#5099 加了新的汇总方式。</p>
+<p>汇总就是各卡结果合一起。</p>
+<p>中等大小时快了约一半。</p>
+<p>四兆消息延迟降约 53%。</p>
+<p>大消息还是旧方式快。</p>
+<p>英伟达通信库还是更快。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5099">https://github.com/kvcache-ai/Mooncake/pull/5099</a></p>
+<p><strong>TRT-LLM：修了可能算错的同步</strong></p>
+<p>#21848 修了两处同步问题。</p>
+<p>同步就是各组等齐再走。</p>
+<p>一组可能提前释放内存。</p>
+<p>另一组还没读完结果。</p>
+<p>极端情况下会算错。</p>
+<p>实测故意拖慢后必错。</p>
+<p>修完二十轮全对。</p>
+<p>现行配置本来就掩盖了。</p>
+<p>这条没给速度数字。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21848">https://github.com/NVIDIA/TensorRT-LLM/pull/21848</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 画图图段从五十三段降到三段。</p>
+<p>那条端到端快了约 11%。</p>
+<p>SGLang 视频模型组件能常驻显卡了。</p>
+<p>那条快了约 2% 到 7%。</p>
+<p>SGLang 修了长上下文启动失败。</p>
+<p>FlashInfer 修了小批量编号串位。</p>
+<p>编号串位可能让请求卡住。</p>
+<p>这条还没在显卡上复现。</p>
+<p>vLLM 还加了新卡配方。</p>
+<p>配方就是现成的启动参数。</p>
+<p>Mooncake 修了删除中断的重试。</p>
+<p>其余多是测试和流水线。</p>
+<p><strong>三家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>arXiv 接口这轮限流了。</p>
+<p>网页搜索也没看到新论文。</p>
+<p>最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>对比文前面已经报过了。</p>
+<p>社交渠道多是科普帖。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期还是昨天的。</p>
+<p>前面已经报过了。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>vLLM 的编码分离帧数修复</strong></p>
+<p>这篇正贴你的多模态方向。</p>
+<p>编码分离时帧数会串位。</p>
+<p>缓存对不上就整单失败。</p>
+<p>深读笔记已生成。</p></body></html>
