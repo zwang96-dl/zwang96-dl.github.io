@@ -1,11 +1,11 @@
 <!DOCTYPE html><html lang="zh-CN"><head>
-<meta name="doc-title" content="深读 · SGLang：读题编码器逐层上卡，不用常驻"/>
-<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #53452"/>
+<meta name="doc-title" content="深读 · SGLang：解耦搬运先打包再送"/>
+<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #47920"/>
 <meta name="doc-date" content="2026-11-27"/>
-<meta name="doc-ts" content="2026-11-27T19:00:29"/>
+<meta name="doc-ts" content="2026-11-27T22:59:22"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SGLang：读题编码器逐层上卡，不用常驻</title><style>
+<title>SGLang：解耦搬运先打包再送</title><style>
 body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
 line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
 h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
@@ -41,73 +41,94 @@ img{border-color:#30363d}
 </style>
 </head><body>
 <div class="backlink"><a href="..">← 全部资讯</a></div>
-<h1>SGLang：读题编码器逐层上卡，不用常驻</h1>
-<ul><li>原文：SGLang 团队，GitHub PR #53452</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/53452">https://github.com/sgl-project/sglang/pull/53452</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h1>SGLang：解耦搬运先打包再送</h1>
+<ul><li>原文：SGLang 团队，GitHub PR #47920</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/47920">https://github.com/sgl-project/sglang/pull/47920</a></li><li>合入时间：2026-11-27</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
 <h2>人话解读</h2>
-<p>这条改了一个视频模型。</p>
-<p>模型叫 MAGI-2。</p>
-<p>它先读文字说明。</p>
-<p>读说明的部件叫编码器。</p>
-<p>编码器就是先读题的。</p>
-<p>这个编码器参数很多。</p>
-<p>有二百七十亿个参数。</p>
-<p>以前它在处理器上跑。</p>
-<p>处理器就是电脑的主芯片。</p>
-<p>读一遍要二十多秒。</p>
-<p>一条视频总共三百多秒。</p>
-<p>读题占了约百分之七。</p>
-<p>为什么不放显卡上。</p>
-<p>每张卡要占 48 GB。</p>
-<p>两台大模型已经占着卡。</p>
-<p>现在改成逐层送。</p>
-<p>送一层算一层。</p>
-<p>算完就把这层放下。</p>
-<p>显卡不用一直留着它。</p>
-<p>读题降到不到一秒。</p>
+<p>这条修解耦搬运慢。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>读题机算完草稿纸。</p>
+<p>草稿纸就是缓存数据。</p>
+<p>然后要送给生成机。</p>
+<p>以前按小片一片片送。</p>
+<p>小片就是一小块数据。</p>
+<p>两边摆法不一样时。</p>
+<p>小片数量会爆炸。</p>
+<p>送一次要发很多小包。</p>
+<p>小包多就拖慢首字。</p>
+<p>首字就是第一个词出来。</p>
+<p>现在先在显卡上打包。</p>
+<p>打包就是拼成大块再送。</p>
+<p>送到后直接写进缓存。</p>
+<p>这就像快递先装箱。</p>
+<p>装好箱再整箱发走。</p>
+<p>不用一件一件寄。</p>
 <h2>核心方法</h2>
-<ul><li>编码器换成自家实现。</li><li>自家实现能逐层搬运。</li><li>默认就是逐层搬运模式。</li><li>只有一张卡负责读题。</li><li>其他卡不存这份权重。</li><li>权重就是模型的参数。</li><li>读题卡不进折叠组。</li><li>折叠组就是分工小组。</li><li>不进组就不会干等。</li><li>权重文件格式也兼容了。</li><li>兼容就是旧文件能读。</li></ul>
+<ul><li>先拼再送是核心。</li><li>拼在读题机的显卡上。</li><li>拼完一次送过去。</li><li>收到后直接落位。</li><li>落位就是写到该写的地方。</li><li>拼包的临时空间有上限。</li><li>每台搬运工限六十四兆。</li><li>兆就是内存大小单位。</li><li>没送完不许复用空间。</li><li>送失败就隔离那块空间。</li><li>隔离就是先不用它。</li><li>读题还能整专家分工。</li><li>整专家就是不切碎专家。</li><li>专家就是分工的小块。</li><li>以前这种分工会被拒。</li><li>现在和切题分工能共存。</li><li>切题就是把长题切开分工。</li><li>老路子还留着兜底。</li><li>兜底就是不行就退回去。</li></ul>
 <h2>关键数据</h2>
-<p>机器用了四张 B200。</p>
-<p>测的是第二条请求。</p>
-<table><thead><tr><th>项目</th><th>改前</th><th>改后</th></tr></thead><tbody><tr><td>读题</td><td>26.7 秒</td><td>0.85 秒</td></tr><tr><td>整条</td><td>352.6 秒</td><td>326.5 秒</td></tr><tr><td>显存峰值</td><td>137.5 GB</td><td>139.1 GB</td></tr></tbody></table>
-<p>整条快了约百分之七。</p>
-<p>显存峰值略涨一点。</p>
-<p>启动预热也快了一半。</p>
-<p>预热从三分钟降到一分半。</p>
-<p>精度也对过了。</p>
-<p>和显卡原版逐位一致。</p>
-<p>逐位一致就是每个数都一样。</p>
-<p>和处理器版比画面。</p>
-<p>场景构图动作都没变。</p>
+<p>机器是四张 H200。</p>
+<p>读题用两张卡。</p>
+<p>生成用两张卡。</p>
+<p>同时跑十条请求。</p>
+<p>每条输入六万多词。</p>
+<p>每条输出一千词。</p>
+<p>每轮一百条请求。</p>
+<p>一共跑了两轮。</p>
+<table><thead><tr><th>场景</th><th>打包前首字</th><th>打包后首字</th></tr></thead><tbody><tr><td>多为缓存命中</td><td>46206 毫秒</td><td>1062 毫秒</td></tr><tr><td>没有缓存命中</td><td>49545 毫秒</td><td>4990 毫秒</td></tr></tbody></table>
+<p>毫秒就是千分之一秒。</p>
+<p>命中场景快约四十三倍。</p>
+<p>没命中场景快约十倍。</p>
+<p>读题吞吐涨约四倍。</p>
+<p>吞吐就是每秒读多少词。</p>
+<p>但每词间隔变慢了。</p>
+<p>每词间隔就是出词快慢。</p>
+<p>命中时慢约三成。</p>
+<p>没命中时慢约八成。</p>
+<p>作者把这点也报了。</p>
+<p>数学题分数基本没变。</p>
+<p>两百题对了一百九十五题。</p>
+<p>打包后对了一百九十六题。</p>
+<p>这个差距在噪声里。</p>
+<p>噪声就是测量的小波动。</p>
+<p>两边都关了预录图。</p>
+<p>预录图就是提前录的计划。</p>
+<p>关了是为了比得公平。</p>
 <h2>跟你的研究方向的关联</h2>
-<p>这条正贴多模态读题。</p>
-<p>读题部件可以不常驻。</p>
-<p>逐层送也能跑得快。</p>
-<p>这就是资源分离的一种。</p>
-<p>资源分离就是分开放置。</p>
-<p>你的评估可以加一档。</p>
-<p>一档常驻一档逐层送。</p>
-<p>比显存和读题耗时。</p>
-<p>只有一张卡读题。</p>
-<p>其他卡不存权重。</p>
-<p>这点也能抄进清单。</p>
-<p>读题耗时要单列。</p>
-<p>占整条百分之七。</p>
-<p>不单列就会看走眼。</p>
+<p>这篇正贴解耦评估。</p>
+<p>搬运慢先查小包数。</p>
+<p>别只看网络带宽。</p>
+<p>带宽就是网能送多快。</p>
+<p>小包多时带宽没用满。</p>
+<p>首字慢也可能怪它。</p>
+<p>你的清单可以加一条。</p>
+<p>两边摆法不同时单测。</p>
+<p>摆法就是卡怎么分工。</p>
+<p>首字和每词间隔分开报。</p>
+<p>这篇就是反例教材。</p>
+<p>首字快了很多倍。</p>
+<p>每词间隔却变慢了。</p>
+<p>只报一个会误判。</p>
+<p>打包空间上限也记下。</p>
+<p>上限太小会反复拼包。</p>
+<p>失败隔离也要验。</p>
+<p>验就是查它真生效。</p>
 <h2>注意事项</h2>
 <p>数字全是作者自报。</p>
-<p>只测了一个视频模型。</p>
-<p>只测了一条说明文字。</p>
-<p>说明有一千八百多词。</p>
-<p>机器是四张 B200。</p>
+<p>只测了一个模型。</p>
+<p>实测卡是 H200。</p>
 <p>你的卡还没测过。</p>
-<p>逐层送要占主机内存。</p>
-<p>主机内存就是电脑内存。</p>
-<p>读题卡主机内存 54 GB。</p>
-<p>显存峰值还略涨了。</p>
-<p>省的是常驻那 48 GB。</p>
+<p>倍数看着很吓人。</p>
+<p>病根是老路太碎。</p>
+<p>老路碎就是小包太多。</p>
+<p>换个摆法未必有这倍数。</p>
+<p>每词间隔变慢要留意。</p>
+<p>长输出时更要留意。</p>
+<p>预录图两边都关了。</p>
+<p>开着测结果可能不同。</p>
+<p>只测了十条并发。</p>
+<p>并发就是同时跑几条。</p>
+<p>更高并发没测过。</p>
 <h2>术语表</h2>
-<ul><li><strong>编码器</strong>：先读题的部件。</li><li><strong>逐层送</strong>：一层层送上卡算。</li><li><strong>常驻</strong>：一直占着显存。</li><li><strong>权重</strong>：模型的参数。</li><li><strong>折叠组</strong>：分工计算的小组。</li><li><strong>逐位一致</strong>：每个数都一样。</li></ul>
+<ul><li><strong>解耦</strong>：读题生成分开跑。</li><li><strong>草稿纸</strong>：缓存数据的俗称。</li><li><strong>打包</strong>：拼成大块再送。</li><li><strong>首字</strong>：第一个词出来。</li><li><strong>每词间隔</strong>：出词的快慢。</li><li><strong>吞吐</strong>：每秒处理多少。</li><li><strong>预录图</strong>：提前录的执行计划。</li><li><strong>并发</strong>：同时跑几条。</li></ul>
 <h2>原文链接</h2>
-<p><a href="https://github.com/sgl-project/sglang/pull/53452">https://github.com/sgl-project/sglang/pull/53452</a></p>
+<p><a href="https://github.com/sgl-project/sglang/pull/47920">https://github.com/sgl-project/sglang/pull/47920</a></p>
 <p>原文是合并说明，无配图，关键表格已抄录。</p></body></html>

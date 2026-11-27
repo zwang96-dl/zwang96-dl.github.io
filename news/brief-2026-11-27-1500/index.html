@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月27日 15:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-27T22:58:51"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-27（15点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-27（15点版）</h1>
+<p>这轮 GitHub 合入 23 条。</p>
+<p>SGLang 有 14 条。</p>
+<p>vLLM 有 6 条。</p>
+<p>TRT-LLM 有 2 条。</p>
+<p>Mooncake 有 1 条。</p>
+<p>剩下 5 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照还是 b12818。</p>
+<p>最值得看的是 SGLang 那条。</p>
+<p>解耦搬运打包后快很多。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照还是 b12818。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：解耦搬运先打包再送</strong></p>
+<p>#47920 修了搬运慢的问题。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>读题算完要送草稿纸。</p>
+<p>草稿纸就是缓存数据。</p>
+<p>以前按小片一片片送。</p>
+<p>小片多到拖慢首字。</p>
+<p>首字就是第一个词出来。</p>
+<p>现在先在显卡上打包。</p>
+<p>打包就是拼成大块再送。</p>
+<p>每台搬运工限六十四兆。</p>
+<p>兆就是内存大小单位。</p>
+<p>有缓存时首字快约四十三倍。</p>
+<p>没缓存时快约十倍。</p>
+<p>但每词间隔变慢了。</p>
+<p>每词间隔就是出词快慢。</p>
+<p>分数基本没有变化。</p>
+<p>机器用了四张 H200。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/47920">https://github.com/sgl-project/sglang/pull/47920</a></p>
+<p><strong>SGLang：搬运小核改成整批搬</strong></p>
+<p>#39236 改了搬运小核。</p>
+<p>小核就是干活的小程序。</p>
+<p>以前一个数一个数搬。</p>
+<p>现在对齐后整批搬。</p>
+<p>对齐就是地址排整齐。</p>
+<p>不对齐就走老路子。</p>
+<p>结果和老路完全一致。</p>
+<p>散开那步快约三成。</p>
+<p>收拢那步快约百分之六。</p>
+<p>这只是小核自己的账。</p>
+<p>没算网络和排队时间。</p>
+<p>机器测的是 GB300。</p>
+<p>你的卡还没测过。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/39236">https://github.com/sgl-project/sglang/pull/39236</a></p>
+<p><strong>SGLang：解耦带猜词不再崩</strong></p>
+<p>#52551 修了启动就崩。</p>
+<p>猜词就是先猜再验。</p>
+<p>以前生成机一开就崩。</p>
+<p>崩在第一批请求上。</p>
+<p>现在补上了缺的那块。</p>
+<p>还把题目喂给猜词本。</p>
+<p>猜词本就是存旧词的本子。</p>
+<p>不喂就猜不到题目里的词。</p>
+<p>喂了猜中长度涨三倍多。</p>
+<p>这条不改正常速度。</p>
+<p>只修崩溃和猜不到。</p>
+<p>机器用了两张 A100。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52551">https://github.com/sgl-project/sglang/pull/52551</a></p>
+<p><strong>TRT-LLM：看图读题也能预录</strong></p>
+<p>#21333 给看图模型加预录。</p>
+<p>预录就是提前录好执行计划。</p>
+<p>录好后读题直接重放。</p>
+<p>重放就是照录像跑一遍。</p>
+<p>以前看图请求用不上。</p>
+<p>现在文字和图片都能用。</p>
+<p>对不上形状就走老路。</p>
+<p>老路就是现算现跑。</p>
+<p>作者初测首字快一到七成。</p>
+<p>初测就是先粗测一遍。</p>
+<p>启动会多花几秒钟。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/21333">https://github.com/NVIDIA/TensorRT-LLM/pull/21333</a></p>
+<p><strong>SGLang：看图模型开机先热身</strong></p>
+<p>#53294 改了开机热身。</p>
+<p>热身就是先空跑一遍。</p>
+<p>以前解耦读题机只热文字。</p>
+<p>看图部件开机没热过。</p>
+<p>第一批图片请求要现编。</p>
+<p>现编就是现场编译程序。</p>
+<p>现在热身带一张图。</p>
+<p>解耦读题机也带图热。</p>
+<p>稳态速度没有变化。</p>
+<p>稳态就是跑顺之后。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53294">https://github.com/sgl-project/sglang/pull/53294</a></p>
+<p><strong>vLLM：同题混跑答案不变了</strong></p>
+<p>#70234 修了开机就挂。</p>
+<p>同题混跑就是拼批跑。</p>
+<p>以前换个拼法答案就变。</p>
+<p>现在换了个稳的后端。</p>
+<p>后端就是干活的模块。</p>
+<p>单跑混跑答案完全一致。</p>
+<p>机器用了一张 H100。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70234">https://github.com/vllm-project/vllm/pull/70234</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 读题额度自动跟上。</p>
+<p>额度就是一次能读多少。</p>
+<p>以前要手写两遍才对。</p>
+<p>现在改一处就够了。</p>
+<p>SGLang 还加了缓存计数。</p>
+<p>计数就是数命中多少。</p>
+<p>路由器能直接看到。</p>
+<p>路由器就是分活的部件。</p>
+<p>视频模型多了快步版。</p>
+<p>快步就是少走几步出片。</p>
+<p>vLLM 升级了 AMD 底座。</p>
+<p>底座就是驱动那一层。</p>
+<p>还改了缓存精度测试。</p>
+<p>测试就是查答案变没变。</p>
+<p>vLLM 还加了新卡小核。</p>
+<p>新卡小核只给新卡用。</p>
+<p>Mooncake 只改了测试。</p>
+<p><strong>五家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>llama.cpp 也没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>arXiv 最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库的。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期还是昨天的。</p>
+<p>讲的是销售话题。</p>
+<p>和推理没什么关系。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>SGLang 的解耦打包搬运</strong></p>
+<p>这篇正贴你的解耦评估。</p>
+<p>搬运慢的病根讲清了。</p>
+<p>打包的代价也写了。</p>
+<p>深读笔记已生成。</p></body></html>
