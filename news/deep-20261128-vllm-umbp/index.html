@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM：查缓存先问一台机器"/>
+<meta name="doc-description" content="- 原文：vLLM 团队，GitHub PR #67943"/>
+<meta name="doc-date" content="2026-11-28"/>
+<meta name="doc-ts" content="2026-11-28T15:06:24"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM：查缓存先问一台机器</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM：查缓存先问一台机器</h1>
+<ul><li>原文：vLLM 团队，GitHub PR #67943</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/67943">https://github.com/vllm-project/vllm/pull/67943</a></li><li>合入时间：2026-11-28</li><li>验证方式：作者自报测试</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条讲查缓存堵调度的问题。</p>
+<p>缓存就是存好的草稿纸。</p>
+<p>草稿纸存在主机内存里。</p>
+<p>仓库名字叫 UMBP。</p>
+<p>新请求先查有没有现成的。</p>
+<p>查到就能少算一大段。</p>
+<p>查的办法是挨个问机器。</p>
+<p>以前每台机器都要全问。</p>
+<p>长题一次问几万个编号。</p>
+<p>编号就是查缓存的钥匙。</p>
+<p>多数编号其实查不到。</p>
+<p>查不到也要挨个问完。</p>
+<p>问完之前调度只能干等。</p>
+<p>调度就是安排请求干活的。</p>
+<p>现在先只问第一台机器。</p>
+<p>第一台有的才问其他台。</p>
+<p>结果和以前一模一样。</p>
+<p>问的编号少了大半。</p>
+<h2>核心方法</h2>
+<ul><li>第一步只问第一台机器。</li><li>第一台就是编号最小的那台。</li><li>问它全部编号有没有。</li><li>第二步只问命中的编号。</li><li>命中的才去问其他台。</li><li>其他台全有才算真命中。</li><li>有一台没有就是没命中。</li><li>第一台答不上来就标未知。</li><li>未知就是先不下结论。</li><li>每台的编号数各算各的。</li><li>复制组一组只存一个编号。</li><li>复制组就是几台存同一份。</li><li>分片组每台各存一个。</li><li>懒卸载检查还走老办法。</li><li>懒卸载就是晚点再存仓库。</li><li>那条路必须先确认全在。</li><li>它问的编号本来就少。</li></ul>
+<h2>关键数据</h2>
+<ul><li>八台时编号约剩八分之一。</li><li>前提是多数编号查不到。</li><li>单机实测吞吐涨 2.7%。</li><li>单机就是一台 MI355X。</li><li>这数是跟另外两条合测的。</li><li>单独拆开看涨 4.8%。</li><li>拆开那组换了机器测。</li><li>解耦实测涨了 7.9%。</li><li>解耦就是读题生成分开跑。</li><li>读题一台生成一台。</li><li>首字尾部从 50 秒降到 24 秒。</li><li>首字就是第一个词出来。</li><li>尾部就是最慢那批请求。</li><li>命中率两边基本一样。</li><li>前四十分钟两边也一样。</li><li>重负载时差距才拉开。</li><li>每种跑法只测了一遍。</li><li>数字是作者自报。</li></ul>
+<h2>为什么查缓存能堵住调度</h2>
+<ul><li>同步查要等全部问完。</li><li>同步就是问完才继续。</li><li>每台机器挨个问过去。</li><li>等待时间是几台相加。</li><li>一千个编号约 0.6 毫秒。</li><li>八台各一千约 5 毫秒。</li><li>长题编号能有几万个。</li><li>等待会一点点攒起来。</li><li>调度停住整台都干等。</li><li>首字尾部就被拖长了。</li></ul>
+<h2>跟你的研究方向的关联</h2>
+<ul><li>你正在评估解耦部署。</li><li>解耦时读题机要查仓库。</li><li>查仓库慢会拖长首字。</li><li>拖长的多半是尾部。</li><li>只看平均会看不出来。</li><li>评估时要单列查仓库时间。</li><li>命中率一样不代表没堵。</li><li>这条命中率就没变。</li><li>变的只是问法。</li><li>你的卡同属这个架构。</li><li>实测卡是 MI355X。</li><li>同属就是同为 gfx950。</li><li>长题越多这条越重要。</li><li>编号数随题长涨。</li></ul>
+<h2>原文关键图表</h2>
+<p>原文没有图片。</p>
+<p>关键数字都在表格里。</p>
+<p>下面把表格数字抄下来。</p>
+<h2>术语表</h2>
+<ul><li>缓存：存好的草稿纸。</li><li>仓库：主机内存里的缓存池。</li><li>编号：查缓存的钥匙。</li><li>调度：安排请求干活的。</li><li>首字：第一个词出来。</li><li>尾部：最慢那批请求。</li><li>命中率：查到现成的比例。</li><li>解耦：读题生成分开跑。</li></ul>
+<h2>注意事项</h2>
+<ul><li>解耦实测每种只跑一遍。</li><li>一遍就是只测一次。</li><li>单机那组混了另外两条。</li><li>拆开那组换了机器。</li><li>换机器会混进机器差异。</li><li>前四十分钟没有差距。</li><li>差距只在重负载出现。</li><li>只测了 Kimi 两款模型。</li><li>你的模型没测过。</li><li>懒卸载那条路没改。</li><li>数字是作者自报。</li></ul>
+<h2>原文关键数据抄录</h2>
+<ul><li>单机模型：Kimi-K3.1-Pro。</li><li>单机机器：一台 MI355X。</li><li>合测前：每卡每秒 17403 词。</li><li>合测后：每卡每秒 17874 词。</li><li>合测涨幅：2.7%。</li><li>拆开前：每卡每秒 16824 词。</li><li>拆开后：每卡每秒 17639 词。</li><li>拆开涨幅：4.8%。</li><li>解耦模型：Kimi K3。</li><li>解耦摆法：读题生成各一台。</li><li>解耦前：每卡每秒 12047 词。</li><li>解耦后：每卡每秒 13000 词。</li><li>解耦涨幅：7.9%。</li><li>首字尾部前：50.0 秒。</li><li>首字尾部后：24.0 秒。</li><li>首字中位前：7.6 秒。</li><li>首字中位后：5.3 秒。</li><li>命中率前：95.3%。</li><li>命中率后：95.4%。</li><li>统计停摆前：360 到 570 秒。</li><li>统计停摆后：180 秒。</li><li>一千编号一台：0.6 毫秒。</li><li>一千编号八台：5 毫秒。</li></ul></body></html>

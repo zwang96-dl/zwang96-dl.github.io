@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月28日 07:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-28"/>
+<meta name="doc-ts" content="2026-11-28T15:06:04"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-28（07点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-28（07点版）</h1>
+<p>这轮 GitHub 合入 8 条新动态。</p>
+<p>vLLM 有 3 条。</p>
+<p>SGLang 有 2 条。</p>
+<p>TRT-LLM 有 1 条。</p>
+<p>llama.cpp 有 2 条。</p>
+<p>剩下 5 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照从 b12828 走到 b12833。</p>
+<p>最值得看的是 vLLM 那条。</p>
+<p>它把查缓存的活砍了大半。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照走到 b12833。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：查缓存先问一台机器</strong></p>
+<p>#67943 改了查缓存的问法。</p>
+<p>UMBP 是主机内存里的缓存仓库。</p>
+<p>查缓存就是找存好的草稿纸。</p>
+<p>以前每台机器都要全问一遍。</p>
+<p>长题一次要问几万个钥匙。</p>
+<p>钥匙就是查缓存用的编号。</p>
+<p>问完之前调度只能干等。</p>
+<p>调度就是安排请求干活的。</p>
+<p>现在先只问第一台机器。</p>
+<p>第一台有的才去问其他台。</p>
+<p>没命中的位置就不用问了。</p>
+<p>八台时钥匙约剩八分之一。</p>
+<p>实测用一台读题一台生成。</p>
+<p>首字尾部从 50 秒降到 24 秒。</p>
+<p>首字就是第一个词出来。</p>
+<p>尾部就是最慢那批请求。</p>
+<p>整段吞吐涨了 7.9%。</p>
+<p>吞吐就是每秒出多少词。</p>
+<p>两边命中率基本一样。</p>
+<p>每种跑法只测了一遍。</p>
+<p>机器测的是 MI355X。</p>
+<p>你的卡同属这个架构。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/67943">https://github.com/vllm-project/vllm/pull/67943</a></p>
+<p><strong>vLLM：MiniMax 在 AMD 卡上接通缓存仓库</strong></p>
+<p>#68646 让两款模型接通仓库。</p>
+<p>模型是 MiniMax 的 M3 两款。</p>
+<p>仓库就是上面说的缓存仓库。</p>
+<p>以前这种生成路接不上仓库。</p>
+<p>现在只接能原样恢复的仓库。</p>
+<p>恢复就是把草稿纸拿回来用。</p>
+<p>接不上的仓库照样拒绝。</p>
+<p>四张 MI350X 上测过。</p>
+<p>每题三万多词测了两遍。</p>
+<p>第二遍九成九的词从仓库取回。</p>
+<p>显存缓存是故意清空测的。</p>
+<p>取回失败一次都没有。</p>
+<p>答题几乎全对。</p>
+<p>有一遍错了一道。</p>
+<p>这条测的是不解耦的跑法。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68646">https://github.com/vllm-project/vllm/pull/68646</a></p>
+<p><strong>SGLang：缓存带宽以前少报一半</strong></p>
+<p>#50948 修了带宽的算法。</p>
+<p>带宽就是每秒搬多少数据。</p>
+<p>缓存每页有两份数据。</p>
+<p>以前只按一份算带宽。</p>
+<p>报出来的数只有真实一半。</p>
+<p>现在按实际搬的字节算。</p>
+<p>字节就是数据的计量单位。</p>
+<p>搬运本身一点没变快。</p>
+<p>报表从 15.4 涨到 28.3 GB/s。</p>
+<p>你比带宽时要小心。</p>
+<p>老数字可能少报了一半。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50948">https://github.com/sgl-project/sglang/pull/50948</a></p>
+<p><strong>vLLM：Gemma 4 在工作站卡上快了</strong></p>
+<p>#62666 给注意力补了大尺寸。</p>
+<p>注意力就是回头看前文的算法。</p>
+<p>大尺寸就是每头看得更宽。</p>
+<p>只测了工作站 AMD 卡。</p>
+<p>你的服务器卡没测过。</p>
+<p>八轮长对话测的。</p>
+<p>小模型快了 1.7 到 2.8 倍。</p>
+<p>大模型快了 1.6 到 2.5 倍。</p>
+<p>开关要自己手动打开。</p>
+<p>题目是人工合成的。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/62666">https://github.com/vllm-project/vllm/pull/62666</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>TRT-LLM 删了旧的兼容入口。</p>
+<p>旧写法现在会直接报错。</p>
+<p>旧存档文件也可能打不开。</p>
+<p>SGLang 给国产卡分了核心。</p>
+<p>核心就是处理器的干活单元。</p>
+<p>还没在真卡上测过。</p>
+<p>llama.cpp 让 AMD 求和快了一点。</p>
+<p>求和就是把一排数加起来。</p>
+<p>老服务器卡上测的。</p>
+<p>快的也就百分之五左右。</p>
+<p>有的档位还略慢一点。</p>
+<p>llama.cpp 还补了多模态测试。</p>
+<p>这条只是补测试。</p>
+<p><strong>五家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>Mooncake 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库的。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新的访谈</strong></p>
+<p>最新一期还是上一期报的。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>vLLM 的查缓存那条</strong></p>
+<p>解耦时查缓存会堵住调度。</p>
+<p>这篇把堵点和解法讲清了。</p>
+<p>跟你的解耦评估直接相关。</p>
+<p>深读笔记已生成。</p></body></html>
