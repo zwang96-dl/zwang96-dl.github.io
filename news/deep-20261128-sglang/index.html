@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang：单请求慢在主机那头"/>
+<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #50032"/>
+<meta name="doc-date" content="2026-11-28"/>
+<meta name="doc-ts" content="2026-11-28T02:59:15"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang：单请求慢在主机那头</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang：单请求慢在主机那头</h1>
+<ul><li>原文：SGLang 团队，GitHub PR #50032</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/50032">https://github.com/sgl-project/sglang/pull/50032</a></li><li>合入时间：2026-11-28</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条讲单请求为什么慢。</p>
+<p>单请求就是一次一条。</p>
+<p>场景是猜词解码。</p>
+<p>猜词就是先猜再验。</p>
+<p>步子已经很快了。</p>
+<p>每步约二点五毫秒。</p>
+<p>显卡干完活了。</p>
+<p>主机还没安排完。</p>
+<p>主机就是调度那台机器。</p>
+<p>它每步重算不变的值。</p>
+<p>重算就是白忙活。</p>
+<p>现在算一次就留着。</p>
+<p>留着下步直接用。</p>
+<p>这就像点菜别重念菜单。</p>
+<p>常客的单子记本上就行。</p>
+<h2>核心方法</h2>
+<ul><li>每步先拍一张快照。</li><li>快照就是存下当前状态。</li><li>以前逐个字段去读。</li><li>现在一次整批读完。</li><li>每步还读几十个开关。</li><li>开关就是环境设置项。</li><li>现在启动时读一次。</li><li>之后直接用记下的值。</li><li>采样信息每步复制一份。</li><li>以前复制走慢路子。</li><li>现在整批一起复制。</li><li>词数以前从显卡读回。</li><li>读回要发好几次命令。</li><li>现在主机自己有数。</li><li>直接把数填进去就行。</li><li>图的切片以前每步重切。</li><li>现在切好就留着复用。</li><li>没用的上传也跳过了。</li><li>只有真用时才上传。</li></ul>
+<h2>关键数据</h2>
+<ul><li>普通栈每步快约百分之一。</li><li>每步少约二十四微秒。</li><li>微秒就是百万分之一秒。</li><li>更快栈快约百分之七点六。</li><li>每步少约二百一十微秒。</li><li>每词间隔少约零点一毫秒。</li><li>输出和老版逐位一致。</li><li>逐位一致就是一模一样。</li><li>五十六条提示全对上。</li><li>分数和老版完全一样。</li><li>机器测的是 GB300。</li><li>测的是 DeepSeek 新模型。</li><li>数字是作者自报。</li></ul>
+<h2>为什么两种测法差很多</h2>
+<ul><li>关键看谁更慢。</li><li>主机比显卡慢一点。</li><li>砍活只能快一点。</li><li>砍完就轮到显卡慢了。</li><li>主机比显卡慢很多。</li><li>砍多少就快多少。</li><li>这就像堵车看瓶颈。</li><li>瓶颈不在这段就不堵。</li><li>步子越慢收益越小。</li><li>作者明说这点没测。</li></ul>
+<h2>跟你的研究方向的关联</h2>
+<ul><li>你在测吞吐上限。</li><li>慢可能不在显卡。</li><li>主机调度也算一头。</li><li>两头要分开测。</li><li>只看显卡会误判。</li><li>单请求时最明显。</li><li>批量大了就摊薄了。</li><li>自动调参要记主机时间。</li><li>不记就会调错方向。</li></ul>
+<h2>术语表</h2>
+<ul><li>猜词解码：先猜几个词。</li><li>猜完再让大模型验。</li><li>主机：跑调度程序的机器。</li><li>步：生成一轮的动作。</li><li>快照：存下当前状态。</li><li>逐位一致：结果一模一样。</li></ul>
+<h2>注意事项</h2>
+<ul><li>只测了一个模型。</li><li>只测了单请求场景。</li><li>机器是 GB300。</li><li>你的卡还没测过。</li><li>更快栈还没全开源。</li><li>数字是作者自报。</li><li>原文没有配图。</li><li>关键表格已抄录如下。</li></ul>
+<h2>原文关键数据抄录</h2>
+<ul><li>普通栈：每步 2566.6 微秒。</li><li>改后：每步 2542.2 微秒。</li><li>差值：少 24.4 微秒。</li><li>更快栈：每步 2770.6 微秒。</li><li>改后：每步 2560.8 微秒。</li><li>差值：少 209.9 微秒。</li><li>分数：0.975 对 0.975。</li><li>输出：五十六条全对上。</li></ul></body></html>
