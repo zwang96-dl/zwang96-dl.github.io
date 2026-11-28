@@ -1,0 +1,130 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · vLLM：MI300X 开机崩修好了"/>
+<meta name="doc-description" content="- 原文：vLLM 团队，GitHub PR #68806"/>
+<meta name="doc-date" content="2026-11-28"/>
+<meta name="doc-ts" content="2026-11-28T00:58:36"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>vLLM：MI300X 开机崩修好了</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>vLLM：MI300X 开机崩修好了</h1>
+<ul><li>原文：vLLM 团队，GitHub PR #68806</li><li>原文链接：<a href="https://github.com/vllm-project/vllm/pull/68806">https://github.com/vllm-project/vllm/pull/68806</a></li><li>合入时间：2026-11-28</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条修开机就崩。</p>
+<p>崩的是 MiniMax 新模型。</p>
+<p>机器是 MI300X。</p>
+<p>这是你手里的卡。</p>
+<p>以前有个旧路子。</p>
+<p>旧路子就是备用走法。</p>
+<p>它专给这张卡留的。</p>
+<p>新版草稿纸换了格式。</p>
+<p>草稿纸就是缓存数据。</p>
+<p>旧路子没认新格式。</p>
+<p>它照老格式往里写。</p>
+<p>写错地方就崩了。</p>
+<p>开机热身时就崩。</p>
+<p>热身就是先空跑一遍。</p>
+<p>现在直接删掉旧路子。</p>
+<p>删掉后走新路子。</p>
+<p>新路子就是融合走法。</p>
+<p>融合就是几步合成一步。</p>
+<p>开机不再崩了。</p>
+<p>这就像拆掉坏桥。</p>
+<p>车改走新桥就行。</p>
+<h2>核心方法</h2>
+<ul><li>病根是格式没对上。</li><li>旧路子假设老格式。</li><li>新后端用新格式。</li><li>后端就是干活的模块。</li><li>旧路子没查格式就写。</li><li>写错就直接崩溃。</li><li>作者也试了修旧路子。</li><li>修好后能跑但很慢。</li><li>慢是因为多绕一步。</li><li>绕一步就是多搬一次。</li><li>旧路子当初为躲崩溃留的。</li><li>那个崩溃现在复现不了。</li><li>复现就是重现问题。</li><li>所以作者删了旧路子。</li><li>只删这张卡的开关。</li><li>开关就是控制走哪条路。</li><li>别家卡不受影响。</li></ul>
+<h2>关键数据</h2>
+<p>机器是 MI300X。</p>
+<p>模型是 MiniMax 新版。</p>
+<p>跑的是八十条请求。</p>
+<table><thead><tr><th>版本</th><th>能否开机</th><th>出词速度</th><th>每词间隔</th></tr></thead><tbody><tr><td>删旧路子后</td><td>能</td><td>588 词每秒</td><td>13.0 毫秒</td></tr><tr><td>旧版参照</td><td>能</td><td>607 词每秒</td><td>12.8 毫秒</td></tr><tr><td>修旧路子版</td><td>能</td><td>388 词每秒</td><td>19.9 毫秒</td></tr></tbody></table>
+<p>毫秒就是千分之一秒。</p>
+<p>出词就是逐词输出。</p>
+<p>删后速度回到正常。</p>
+<p>和旧版参照差不多。</p>
+<p>修旧路子版慢很多。</p>
+<p>每词要近二十毫秒。</p>
+<p>数学题分数基本没变。</p>
+<p>删后对约百分之九十四。</p>
+<p>旧版也对约百分之九十四。</p>
+<p>修旧路子版略低一点。</p>
+<p>单测也跑过了。</p>
+<p>单测就是小范围测试。</p>
+<p>一百七十个测试全过。</p>
+<p>还测了八卡场景。</p>
+<p>八卡就是八张卡一起跑。</p>
+<p>两百多条请求零出错。</p>
+<p>出错就是请求失败。</p>
+<h2>跟你的研究方向的关联</h2>
+<p>这篇正贴你的 AMD 卡。</p>
+<p>你有 MI300X 和 MI350X。</p>
+<p>跑新模型先查这条。</p>
+<p>开机崩先看格式对齐。</p>
+<p>格式就是数据怎么摆。</p>
+<p>新旧路子混用最危险。</p>
+<p>混用就是一半新一半旧。</p>
+<p>崩溃未必是卡的问题。</p>
+<p>先查走的是哪条路。</p>
+<p>这篇还有个测法可抄。</p>
+<p>作者把两种修法都测了。</p>
+<p>删路子和修路子都报。</p>
+<p>只报一种会误判。</p>
+<p>修好能跑不等于好。</p>
+<p>慢五成的修法没用。</p>
+<p>你的清单可以加一条。</p>
+<p>修崩溃时顺手测速度。</p>
+<p>别只看能不能开机。</p>
+<h2>注意事项</h2>
+<p>数字全是作者自报。</p>
+<p>只测了一个模型。</p>
+<p>实测卡是 MI300X。</p>
+<p>你的 MI350X 没测过。</p>
+<p>旧崩溃复现不了。</p>
+<p>这是作者自己的说法。</p>
+<p>删路子靠这个前提。</p>
+<p>前提错了可能复发。</p>
+<p>复发就是崩溃再出现。</p>
+<p>八卡场景只测了出错率。</p>
+<p>速度账没细报。</p>
+<p>单卡账报得比较细。</p>
+<p>单卡就是一张卡跑。</p>
+<p>换模型要重测一遍。</p>
+<h2>术语表</h2>
+<ul><li><strong>旧路子</strong>：备用走法。</li><li><strong>草稿纸</strong>：缓存数据的俗称。</li><li><strong>融合</strong>：几步合成一步。</li><li><strong>热身</strong>：先空跑一遍。</li><li><strong>每词间隔</strong>：出词的快慢。</li><li><strong>单测</strong>：小范围测试。</li><li><strong>后端</strong>：干活的模块。</li></ul>
+<h2>原文链接</h2>
+<p><a href="https://github.com/vllm-project/vllm/pull/68806">https://github.com/vllm-project/vllm/pull/68806</a></p>
+<p>原文是合并说明，无配图，关键表格已抄录。</p></body></html>

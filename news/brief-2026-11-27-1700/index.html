@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月27日 17:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-28T00:57:55"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-27（17点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-27（17点版）</h1>
+<p>这轮 GitHub 合入 20 条。</p>
+<p>SGLang 有 11 条。</p>
+<p>vLLM 有 6 条。</p>
+<p>TRT-LLM 有 3 条。</p>
+<p>剩下 6 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照涨到 b12821。</p>
+<p>最值得看的是 vLLM 那条。</p>
+<p>你的 AMD 卡开机崩修好了。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照从 b12818 涨到 b12821。</p>
+<p>来源：GitHub releases</p>
+<p><strong>vLLM：MI300X 开机崩修好了</strong></p>
+<p>#68806 修了开机就崩。</p>
+<p>崩的是 MiniMax 新模型。</p>
+<p>旧路子在你的卡上会崩。</p>
+<p>旧路子就是备用走法。</p>
+<p>它没认新版草稿纸格式。</p>
+<p>草稿纸就是缓存数据。</p>
+<p>现在直接删掉旧路子。</p>
+<p>删掉后开机不再崩。</p>
+<p>八十条请求全跑完了。</p>
+<p>出词速度也回到正常。</p>
+<p>每词约十三毫秒。</p>
+<p>出词就是逐词输出。</p>
+<p>留着旧路子会慢很多。</p>
+<p>每词要近二十毫秒。</p>
+<p>分数基本没有变化。</p>
+<p>机器测的是 MI300X。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/68806">https://github.com/vllm-project/vllm/pull/68806</a></p>
+<p><strong>vLLM：两步并一步，出词快一点</strong></p>
+<p>#69778 把两步并成一步。</p>
+<p>以前先算激活再压精度。</p>
+<p>激活就是中间那步计算。</p>
+<p>压精度就是转低精度存。</p>
+<p>现在一步直接做完。</p>
+<p>少跑一个小程序。</p>
+<p>小程序就是干活的核。</p>
+<p>单请求出词快约百分之四。</p>
+<p>八请求快约百分之二点四。</p>
+<p>换台新卡也快一点。</p>
+<p>分数变化在噪声里。</p>
+<p>噪声就是测不准的抖动。</p>
+<p>机器测的是 B200。</p>
+<p>你的卡还没测过。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69778">https://github.com/vllm-project/vllm/pull/69778</a></p>
+<p><strong>SGLang：题目太长不再悄悄砍</strong></p>
+<p>#53454 统一了长度规矩。</p>
+<p>以前各处规矩不一样。</p>
+<p>题目太长会悄悄截断。</p>
+<p>截断就是砍掉尾巴。</p>
+<p>现在超长直接报错。</p>
+<p>带图题目更不会砍。</p>
+<p>砍图会把图砍碎。</p>
+<p>猜词预留也算进额度。</p>
+<p>猜词就是先猜再验。</p>
+<p>额度就是一次能读多少。</p>
+<p>太长想砍可以开开关。</p>
+<p>开了就砍到刚好够。</p>
+<p>这条不改正常速度。</p>
+<p>只改超长时的处理。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53454">https://github.com/sgl-project/sglang/pull/53454</a></p>
+<p><strong>TRT-LLM：一个核干两个核的活</strong></p>
+<p>#22967 把两步合成一步。</p>
+<p>以前收尾要跑两个核。</p>
+<p>现在一个核全干完。</p>
+<p>只管八个词以内。</p>
+<p>八个词就是一小步输出。</p>
+<p>解耦场景也测了。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>六词一步快约百分之三点六。</p>
+<p>八词一步快约百分之三点三。</p>
+<p>四词一步基本没差。</p>
+<p>分数只差两道题。</p>
+<p>机器测的是 GB300。</p>
+<p>你的卡还没测过。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22967">https://github.com/NVIDIA/TensorRT-LLM/pull/22967</a></p>
+<p><strong>SGLang：出视频少占两成内存</strong></p>
+<p>#48890 改了权重存放。</p>
+<p>权重就是模型的参数。</p>
+<p>以前合并后还留原件。</p>
+<p>原件就是没合并的底稿。</p>
+<p>现在合并完就放掉。</p>
+<p>主机内存峰值降两成。</p>
+<p>峰值就是最高占用量。</p>
+<p>画面结果完全一致。</p>
+<p>速度基本没有变化。</p>
+<p>机器用了八张 5090。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48890">https://github.com/sgl-project/sglang/pull/48890</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 重构了猜词流程。</p>
+<p>重构就是换写法不换功能。</p>
+<p>输出和老版逐位一致。</p>
+<p>SGLang 还对齐了图片处理。</p>
+<p>对齐就是结果一模一样。</p>
+<p>那条是给训练用的。</p>
+<p>vLLM 其余多是流水线。</p>
+<p>流水线就是自动测试那套。</p>
+<p>TRT-LLM 改了编译共享。</p>
+<p>编译就是现编小程序。</p>
+<p>同机多卡不用重复编。</p>
+<p><strong>六家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>llama.cpp 也没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<p>Mooncake 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>arXiv 最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库的。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有新一期</strong></p>
+<p>最新一期还是昨天的。</p>
+<p>讲的是销售话题。</p>
+<p>和推理没什么关系。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>vLLM 的 MI300X 崩溃修复</strong></p>
+<p>这篇正贴你的 AMD 卡。</p>
+<p>崩的原因讲得很清。</p>
+<p>删旧路子的账也算了。</p>
+<p>深读笔记已生成。</p></body></html>
