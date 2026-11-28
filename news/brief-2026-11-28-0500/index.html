@@ -1,0 +1,153 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月28日 05:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-28"/>
+<meta name="doc-ts" content="2026-11-28T13:00:36"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-28（05点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-28（05点版）</h1>
+<p>这轮 GitHub 合入 14 条新动态。</p>
+<p>SGLang 有 3 条。</p>
+<p>TRT-LLM 有 1 条。</p>
+<p>llama.cpp 有 8 条。</p>
+<p>Mooncake 有 2 条。</p>
+<p>剩下 5 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照从 b12823 走到 b12828。</p>
+<p>最值得看的是量化那条。</p>
+<p>它讲模型悄悄答错的事。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照走到 b12828。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：老卡默认关掉融合汇总</strong></p>
+<p>#51146 改了默认开关。</p>
+<p>汇总就是多卡结果合起来。</p>
+<p>融合就是几步合成一步。</p>
+<p>以前老卡默认开融合。</p>
+<p>老卡指 H200 那一代。</p>
+<p>实测发现融合并不更快。</p>
+<p>低并发时慢约 4.9%。</p>
+<p>低并发就是同时没几条请求。</p>
+<p>大模型高并发慢 8.2%。</p>
+<p>现在老卡默认不开了。</p>
+<p>新卡默认照旧开着。</p>
+<p>新卡指 B200 那一代。</p>
+<p>想开还能手动打开。</p>
+<p>机器测的是 H200。</p>
+<p>你的 AMD 卡不受影响。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51146">https://github.com/sgl-project/sglang/pull/51146</a></p>
+<p><strong>SGLang：量化模型不再悄悄答错</strong></p>
+<p>#52304 和 #52305 修了个坑。</p>
+<p>量化就是把模型压小。</p>
+<p>压小后有些层不该压。</p>
+<p>不该压的层写在清单里。</p>
+<p>清单用的是拆开的名字。</p>
+<p>框架里这些层是合起来的。</p>
+<p>名字对不上就误判了。</p>
+<p>误判后权重被悄悄跳过。</p>
+<p>权重就是模型学到的数。</p>
+<p>模型答题直接变胡话。</p>
+<p>分数一度是零分。</p>
+<p>现在按拆开名字核对。</p>
+<p>对不上就当场报错。</p>
+<p>报错就是启动时停下来。</p>
+<p>修好后分数回到九成多。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52304">https://github.com/sgl-project/sglang/pull/52304</a></p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52305">https://github.com/sgl-project/sglang/pull/52305</a></p>
+<p><strong>llama.cpp：家用 AMD 卡小批加速</strong></p>
+<p>#32224 给小批加了新核心。</p>
+<p>核心就是显卡上算的程序。</p>
+<p>小批就是一次没几条请求。</p>
+<p>只对家用 AMD 卡生效。</p>
+<p>家用卡就是消费级显卡。</p>
+<p>八行时快了约三成。</p>
+<p>行就是一次算的词数。</p>
+<p>八行正对验算批次。</p>
+<p>验算就是检查猜词对不对。</p>
+<p>机器测的是 Radeon 8060S。</p>
+<p>你的服务器卡用不上。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/ggml-org/llama.cpp/pull/32224">https://github.com/ggml-org/llama.cpp/pull/32224</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>TRT-LLM 只改了文档。</p>
+<p>文档讲新版建模设计。</p>
+<p>Mooncake 补了分片写回。</p>
+<p>分片就是把数据切开写。</p>
+<p>写回就是把结果存回去。</p>
+<p>llama.cpp 修了单卡分工。</p>
+<p>单卡分工就是只用一张卡。</p>
+<p>其余多是测试和整理。</p>
+<p><strong>五家挂零</strong></p>
+<p>vLLM 这轮没合入。</p>
+<p>LMDeploy 也没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库的。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新的访谈</strong></p>
+<p>最新一期还是上一期报的。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>SGLang 的量化修复那条</strong></p>
+<p>测分数前先查权重加载。</p>
+<p>悄悄跳过权重会毁掉结论。</p>
+<p>这篇跟你的评估方法相关。</p>
+<p>深读笔记已生成。</p></body></html>
