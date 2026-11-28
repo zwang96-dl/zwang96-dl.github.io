@@ -1,0 +1,178 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月27日 21:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-28T04:58:25"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-27（21点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-27（21点版）</h1>
+<p>这轮 GitHub 合入 14 条。</p>
+<p>SGLang 有 9 条。</p>
+<p>vLLM 有 3 条。</p>
+<p>TRT-LLM 有 1 条。</p>
+<p>Mooncake 有 1 条。</p>
+<p>剩下 5 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照还是 b12823。</p>
+<p>最值得看的是 SGLang 那条。</p>
+<p>缓存分片能用快核心了。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照还是 b12823。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：缓存分片能用快核心了</strong></p>
+<p>#53553 解了分片的限制。</p>
+<p>分片就是缓存分开存。</p>
+<p>以前分片只能用慢核心。</p>
+<p>慢核心就是旧的那套。</p>
+<p>快核心缺一个查号功能。</p>
+<p>查号就是查存哪台机。</p>
+<p>缺了它备份会存错位。</p>
+<p>存错位就是放错机器。</p>
+<p>现在快核心补上了查号。</p>
+<p>分片默认改用快核心。</p>
+<p>解耦分片测试跑通了。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>机器测的是四张 B300。</p>
+<p>你的卡还没测过。</p>
+<p>这条没给速度数字。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53553">https://github.com/sgl-project/sglang/pull/53553</a></p>
+<p><strong>SGLang：解耦搬运认对层了</strong></p>
+<p>#52863 给解耦补了认层。</p>
+<p>认层就是对号送缓存。</p>
+<p>缓存就是存好的草稿纸。</p>
+<p>读题多台一起算。</p>
+<p>每台只管一部分层。</p>
+<p>以前另一条路没认对。</p>
+<p>现在借用现成的对照表。</p>
+<p>对照表就是层号对应关系。</p>
+<p>每台送到对的层去。</p>
+<p>猜词缓存只由末台送。</p>
+<p>猜词就是先猜再验。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52863">https://github.com/sgl-project/sglang/pull/52863</a></p>
+<p><strong>SGLang：多路猜词快了六成多</strong></p>
+<p>#53659 给多路猜词加预录。</p>
+<p>预录就是提前录好计划。</p>
+<p>多路就是同时留几条路。</p>
+<p>以前每步现发命令。</p>
+<p>现发就是主机逐个发。</p>
+<p>现在照录像整批重放。</p>
+<p>单请求快约百分之六十七。</p>
+<p>八请求快约百分之二十三。</p>
+<p>结果和老版逐位一致。</p>
+<p>逐位一致就是一模一样。</p>
+<p>开关默认是关着的。</p>
+<p>机器测的是 B300。</p>
+<p>你的卡还没测过。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53659">https://github.com/sgl-project/sglang/pull/53659</a></p>
+<p><strong>SGLang：带图请求堵住内网偷访</strong></p>
+<p>#51738 堵了图片链接的洞。</p>
+<p>洞就是能偷访内网。</p>
+<p>以前链接能指内网地址。</p>
+<p>内网就是自家机器那头。</p>
+<p>连云端钥匙地址也能指。</p>
+<p>现在内网地址全拦下。</p>
+<p>正常公开链接不受影响。</p>
+<p>想放行内网要开开关。</p>
+<p>这条不改出词速度。</p>
+<p>只改安全那条路。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51738">https://github.com/sgl-project/sglang/pull/51738</a></p>
+<p><strong>Mooncake：大块搬运先切小块</strong></p>
+<p>#5873 修了大块搬运出错。</p>
+<p>搬运就是送缓存数据。</p>
+<p>以前超大块悄悄截断。</p>
+<p>截断就是砍掉尾巴。</p>
+<p>砍掉的部分会搬错。</p>
+<p>现在超大块先切小块。</p>
+<p>跨界的搬运也切开送。</p>
+<p>切开就是分段发出去。</p>
+<p>默认上限还是一太字节。</p>
+<p>太字节就是很大的单位。</p>
+<p>不设新开关就不切。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/kvcache-ai/Mooncake/pull/5873">https://github.com/kvcache-ai/Mooncake/pull/5873</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 搬运代码换了摆法。</p>
+<p>换摆法就是只整理代码。</p>
+<p>搬运结果完全不变。</p>
+<p>SGLang 还修了几处小错。</p>
+<p>多是测试和工具那边。</p>
+<p>vLLM 新前端补了接口。</p>
+<p>接口就是对外问答口。</p>
+<p>TRT-LLM 出图模型加新路。</p>
+<p>新路默认还是关着的。</p>
+<p><strong>五家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>llama.cpp 也没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>arXiv 最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库的。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>Latent Space 这轮没有更新的</strong></p>
+<p>最新一期还是上一期报的。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>SGLang 的缓存分片那条</strong></p>
+<p>这篇正贴你的解耦评估。</p>
+<p>分片和备份的坑讲清了。</p>
+<p>两种核心都测了数。</p>
+<p>深读笔记已生成。</p></body></html>

@@ -1,11 +1,11 @@
 <!DOCTYPE html><html lang="zh-CN"><head>
-<meta name="doc-title" content="深读 · SGLang：单请求慢在主机那头"/>
-<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #50032"/>
+<meta name="doc-title" content="深读 · SGLang：缓存分片能用快核心了"/>
+<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #53553"/>
 <meta name="doc-date" content="2026-11-28"/>
-<meta name="doc-ts" content="2026-11-28T02:59:15"/>
+<meta name="doc-ts" content="2026-11-28T04:58:51"/>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SGLang：单请求慢在主机那头</title><style>
+<title>SGLang：缓存分片能用快核心了</title><style>
 body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
 line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
 h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
@@ -41,35 +41,38 @@ img{border-color:#30363d}
 </style>
 </head><body>
 <div class="backlink"><a href="..">← 全部资讯</a></div>
-<h1>SGLang：单请求慢在主机那头</h1>
-<ul><li>原文：SGLang 团队，GitHub PR #50032</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/50032">https://github.com/sgl-project/sglang/pull/50032</a></li><li>合入时间：2026-11-28</li><li>验证方式：作者自报实测</li><li>数字来自作者自报</li></ul>
+<h1>SGLang：缓存分片能用快核心了</h1>
+<ul><li>原文：SGLang 团队，GitHub PR #53553</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/53553">https://github.com/sgl-project/sglang/pull/53553</a></li><li>合入时间：2026-11-28</li><li>验证方式：作者自报测试</li><li>数字来自作者自报</li></ul>
 <h2>人话解读</h2>
-<p>这条讲单请求为什么慢。</p>
-<p>单请求就是一次一条。</p>
-<p>场景是猜词解码。</p>
-<p>猜词就是先猜再验。</p>
-<p>步子已经很快了。</p>
-<p>每步约二点五毫秒。</p>
-<p>显卡干完活了。</p>
-<p>主机还没安排完。</p>
-<p>主机就是调度那台机器。</p>
-<p>它每步重算不变的值。</p>
-<p>重算就是白忙活。</p>
-<p>现在算一次就留着。</p>
-<p>留着下步直接用。</p>
-<p>这就像点菜别重念菜单。</p>
-<p>常客的单子记本上就行。</p>
+<p>这条讲缓存分片的限制。</p>
+<p>分片就是缓存分开存。</p>
+<p>分开存就是多台分着管。</p>
+<p>以前开分片有个限制。</p>
+<p>只能用旧的那套核心。</p>
+<p>核心就是管缓存的部件。</p>
+<p>新核心其实更利索。</p>
+<p>但它缺一个查号功能。</p>
+<p>查号就是查存哪台机。</p>
+<p>备份时要按号存。</p>
+<p>备份就是存一份副本。</p>
+<p>没号就会存错机器。</p>
+<p>存错机器就会出问题。</p>
+<p>现在新核心补上了查号。</p>
+<p>分片默认改用新核心。</p>
+<p>这就像仓库换新管理员。</p>
+<p>新管理员得先认货架号。</p>
+<p>认号了才能接手管货。</p>
 <h2>核心方法</h2>
-<ul><li>每步先拍一张快照。</li><li>快照就是存下当前状态。</li><li>以前逐个字段去读。</li><li>现在一次整批读完。</li><li>每步还读几十个开关。</li><li>开关就是环境设置项。</li><li>现在启动时读一次。</li><li>之后直接用记下的值。</li><li>采样信息每步复制一份。</li><li>以前复制走慢路子。</li><li>现在整批一起复制。</li><li>词数以前从显卡读回。</li><li>读回要发好几次命令。</li><li>现在主机自己有数。</li><li>直接把数填进去就行。</li><li>图的切片以前每步重切。</li><li>现在切好就留着复用。</li><li>没用的上传也跳过了。</li><li>只有真用时才上传。</li></ul>
+<ul><li>新核心加上查号功能。</li><li>查号返回两个数相加。</li><li>一个是轮转的起点号。</li><li>轮转就是轮流分着存。</li><li>一个是这段缓存多长。</li><li>长短按页来数。</li><li>页就是缓存的计量块。</li><li>根节点查号返回空。</li><li>根节点就是最开头那段。</li><li>没分片的也返回空。</li><li>去掉旧核心的强制指定。</li><li>分片启动改用默认核心。</li><li>默认核心就是新核心。</li><li>核心要先报支持轮转。</li><li>不报支持的会被拒绝。</li><li>按能力查不按名字查。</li></ul>
 <h2>关键数据</h2>
-<ul><li>普通栈每步快约百分之一。</li><li>每步少约二十四微秒。</li><li>微秒就是百万分之一秒。</li><li>更快栈快约百分之七点六。</li><li>每步少约二百一十微秒。</li><li>每词间隔少约零点一毫秒。</li><li>输出和老版逐位一致。</li><li>逐位一致就是一模一样。</li><li>五十六条提示全对上。</li><li>分数和老版完全一样。</li><li>机器测的是 GB300。</li><li>测的是 DeepSeek 新模型。</li><li>数字是作者自报。</li></ul>
-<h2>为什么两种测法差很多</h2>
-<ul><li>关键看谁更慢。</li><li>主机比显卡慢一点。</li><li>砍活只能快一点。</li><li>砍完就轮到显卡慢了。</li><li>主机比显卡慢很多。</li><li>砍多少就快多少。</li><li>这就像堵车看瓶颈。</li><li>瓶颈不在这段就不堵。</li><li>步子越慢收益越小。</li><li>作者明说这点没测。</li></ul>
+<ul><li>新核心单测九百七十九个。</li><li>单测就是小范围测试。</li><li>全部通过了。</li><li>页大小测了三种。</li><li>起点号测了两个值。</li><li>相关单测一千七百多个。</li><li>全部通过了。</li><li>解耦分片测试跑通了。</li><li>解耦就是读题生成分开跑。</li><li>机器用了四张 B300。</li><li>读题两卡还开了分片。</li><li>生成用了两卡。</li><li>两条测试都通过了。</li><li>数学题分数是零点七九。</li><li>及格线是零点七零。</li><li>重问时命中四千多词。</li><li>命中就是用上存好的。</li><li>两种核心结果完全一致。</li><li>没补查号时直接崩掉。</li><li>数字是作者自报。</li></ul>
+<h2>为什么以前会崩</h2>
+<ul><li>备份要存到主机上。</li><li>主机就是调度那台机器。</li><li>存哪台要看归属号。</li><li>归属号就是查号结果。</li><li>新核心以前返回空号。</li><li>空号就是没查到归属。</li><li>备份拿不到归属就乱存。</li><li>乱存会被检查拦下来。</li><li>拦下来就直接报错崩。</li><li>补上查号就不再崩。</li></ul>
 <h2>跟你的研究方向的关联</h2>
-<ul><li>你在测吞吐上限。</li><li>慢可能不在显卡。</li><li>主机调度也算一头。</li><li>两头要分开测。</li><li>只看显卡会误判。</li><li>单请求时最明显。</li><li>批量大了就摊薄了。</li><li>自动调参要记主机时间。</li><li>不记就会调错方向。</li></ul>
+<ul><li>你在评估解耦分片。</li><li>分片默认核心变了。</li><li>旧配置要重新核一遍。</li><li>备份归属是隐藏的坑。</li><li>坑就是容易踩的错。</li><li>测分片要带备份一起测。</li><li>只测分片会漏掉这坑。</li><li>重问命中要单独记数。</li><li>两种核心要对一遍结果。</li><li>对齐了才算真没问题。</li></ul>
 <h2>术语表</h2>
-<ul><li>猜词解码：先猜几个词。</li><li>猜完再让大模型验。</li><li>主机：跑调度程序的机器。</li><li>步：生成一轮的动作。</li><li>快照：存下当前状态。</li><li>逐位一致：结果一模一样。</li></ul>
+<ul><li>分片：缓存分开存。</li><li>核心：管缓存的部件。</li><li>查号：查存哪台机。</li><li>轮转：轮流分着存。</li><li>备份：存一份副本。</li><li>命中：用上存好的。</li></ul>
 <h2>注意事项</h2>
-<ul><li>只测了一个模型。</li><li>只测了单请求场景。</li><li>机器是 GB300。</li><li>你的卡还没测过。</li><li>更快栈还没全开源。</li><li>数字是作者自报。</li><li>原文没有配图。</li><li>关键表格已抄录如下。</li></ul>
+<ul><li>这条没给速度数字。</li><li>只证明能跑通了。</li><li>机器测的是 B300。</li><li>你的卡还没测过。</li><li>只测了一个小模型。</li><li>数字是作者自报。</li><li>原文没有配图。</li><li>关键表格已抄录如下。</li></ul>
 <h2>原文关键数据抄录</h2>
-<ul><li>普通栈：每步 2566.6 微秒。</li><li>改后：每步 2542.2 微秒。</li><li>差值：少 24.4 微秒。</li><li>更快栈：每步 2770.6 微秒。</li><li>改后：每步 2560.8 微秒。</li><li>差值：少 209.9 微秒。</li><li>分数：0.975 对 0.975。</li><li>输出：五十六条全对上。</li></ul></body></html>
+<ul><li>新核心单测：979 个通过。</li><li>相关单测：1740 个通过。</li><li>解耦分片测试：2 条通过。</li><li>数学题分数：0.79。</li><li>及格线：0.70。</li><li>重问命中：4928 个词。</li><li>旧核心命中：4928 个词。</li><li>新核心命中：4928 个词。</li><li>没补查号：读题直接崩。</li><li>输出结果：两种核心一致。</li></ul></body></html>
