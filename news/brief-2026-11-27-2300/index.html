@@ -1,0 +1,180 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月27日 23:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-27"/>
+<meta name="doc-ts" content="2026-11-28T06:59:09"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-27（23点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-27（23点版）</h1>
+<p>这轮 GitHub 合入 17 条。</p>
+<p>SGLang 有 13 条。</p>
+<p>vLLM 有 3 条。</p>
+<p>Mooncake 有 1 条。</p>
+<p>剩下 6 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照还是 b12823。</p>
+<p>最值得看的是 SGLang 那条。</p>
+<p>解耦搬运按层号对号了。</p>
+<p>论文源这轮被限流了。</p>
+<p>新论文没能核到。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照还是 b12823。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：解耦搬运按层号对号了</strong></p>
+<p>#48874 修了搬运认层。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>读题机分两段管层。</p>
+<p>生成机一台管全部层。</p>
+<p>以前按位置切清单。</p>
+<p>切错就会送错层。</p>
+<p>现在每层带上层号。</p>
+<p>按层号对号送过去。</p>
+<p>压缩状态也打包一起送。</p>
+<p>打包就是跟着缓存走。</p>
+<p>实测分数约九成一。</p>
+<p>机器测的是国产卡。</p>
+<p>你的卡还没测过。</p>
+<p>速度数字是旧版测的。</p>
+<p>新版还没重测过。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48874">https://github.com/sgl-project/sglang/pull/48874</a></p>
+<p><strong>SGLang：多路搜索少等主机了</strong></p>
+<p>#53660 砍了主机等待。</p>
+<p>多路就是同时留几条路。</p>
+<p>显卡以前常空等主机。</p>
+<p>主机就是调度那台机器。</p>
+<p>现在提前备好下一轮。</p>
+<p>纯多路批次跳过采样。</p>
+<p>采样就是挑下一个词。</p>
+<p>默认路结果一模一样。</p>
+<p>快路在旧卡上快两成。</p>
+<p>快路结果不完全一样。</p>
+<p>首选一致约九成三到九成七。</p>
+<p>你的卡还没测过。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53660">https://github.com/sgl-project/sglang/pull/53660</a></p>
+<p><strong>SGLang：采样参数一次写好</strong></p>
+<p>#52565 把参数存成表。</p>
+<p>参数就是温度这类设置。</p>
+<p>以前每步重发一遍。</p>
+<p>重发要搬五次数据。</p>
+<p>现在进门时写一次。</p>
+<p>稳态每步搬运变零次。</p>
+<p>速度基本没变。</p>
+<p>输出和老版一模一样。</p>
+<p>机器测的是 B300。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52565">https://github.com/sgl-project/sglang/pull/52565</a></p>
+<p><strong>SGLang：定版模式切题对齐了</strong></p>
+<p>#53691 修了切题不对齐。</p>
+<p>定版就是每次结果一样。</p>
+<p>读题分段切开算。</p>
+<p>切口不在格子上。</p>
+<p>结果就会跟着变。</p>
+<p>现在切口对齐格子。</p>
+<p>六十次测试零失败。</p>
+<p>以前七次会失败。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53691">https://github.com/sgl-project/sglang/pull/53691</a></p>
+<p><strong>vLLM：猜词验窗变宽了</strong></p>
+<p>#70253 把验窗加宽了。</p>
+<p>猜词就是先猜再验。</p>
+<p>验窗就是一次验几个。</p>
+<p>以前最多验九个。</p>
+<p>现在能验十六个。</p>
+<p>出词快约百分之一到三。</p>
+<p>机器测的是旧显卡。</p>
+<p>你的卡还没测过。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70253">https://github.com/vllm-project/vllm/pull/70253</a></p>
+<p><strong>SGLang：外部缓存能热插拔</strong></p>
+<p>#44526 给缓存加了开关。</p>
+<p>外部缓存就是外存草稿纸。</p>
+<p>以前断开要停服务。</p>
+<p>现在空闲时能断开。</p>
+<p>断开期间照常服务。</p>
+<p>接回时自动补登记。</p>
+<p>补登记就是补上编号。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/44526">https://github.com/sgl-project/sglang/pull/44526</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 还加了调度仪表。</p>
+<p>仪表就是看排队状态。</p>
+<p>调参时能看见积压了。</p>
+<p>Mooncake 仪表按来源合并。</p>
+<p>vLLM 修了专家装载错。</p>
+<p>其余多是测试和整理。</p>
+<p><strong>六家挂零</strong></p>
+<p>TRT-LLM 这轮没合入。</p>
+<p>LMDeploy 也没合入。</p>
+<p>llama.cpp 也没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>论文源这轮被限流了</strong></p>
+<p>arXiv 这轮返回限流。</p>
+<p>限流就是请求太多了。</p>
+<p>新论文没能核到。</p>
+<p>这轮就不报论文了。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新的访谈</strong></p>
+<p>最新一期还是上一期报的。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>SGLang 的解耦认层那条</strong></p>
+<p>这篇正贴你的解耦评估。</p>
+<p>两边摆法不同时最易错。</p>
+<p>层号对号的坑讲清了。</p>
+<p>深读笔记已生成。</p></body></html>
