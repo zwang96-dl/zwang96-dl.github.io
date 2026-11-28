@@ -1,0 +1,83 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang：AMD 连接层三步合成一步"/>
+<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #48648"/>
+<meta name="doc-date" content="2026-11-28"/>
+<meta name="doc-ts" content="2026-11-28T10:59:10"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang：AMD 连接层三步合成一步</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang：AMD 连接层三步合成一步</h1>
+<ul><li>原文：SGLang 团队，GitHub PR #48648</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/48648">https://github.com/sgl-project/sglang/pull/48648</a></li><li>合入时间：2026-11-28</li><li>验证方式：作者自报测试</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条讲生成段的连接层优化。</p>
+<p>生成段就是逐词出词那段。</p>
+<p>连接层就是汇合支路那层。</p>
+<p>支路就是并行算的几条路。</p>
+<p>以前每处要跑三步。</p>
+<p>先把数值拉回标准范围。</p>
+<p>拉回范围就是归一那步。</p>
+<p>再把几条支路合起来。</p>
+<p>合起来就是混合那步。</p>
+<p>最后把结果送回去。</p>
+<p>送回去就是注入那步。</p>
+<p>三步分开跑要启动三次。</p>
+<p>启动就是让显卡开工一次。</p>
+<p>批次小时启动显得很贵。</p>
+<p>就像送三件快递跑三趟。</p>
+<p>现在三步合成一步了。</p>
+<p>合完还顺手算好平方和。</p>
+<p>平方和就是下一层要的数。</p>
+<p>下一层不用再算一遍。</p>
+<h2>核心方法</h2>
+<ul><li>新核心把三步折进混合里。</li><li>核心就是显卡上算的程序。</li><li>归一折进混合那步。</li><li>注入也折进混合那步。</li><li>合并变成一个小核心。</li><li>小核心顺手返回平方和。</li><li>下一处混合直接用平方和。</li><li>第一层没有平方和可用。</li><li>没有时就现场算。</li><li>只在 AMD 新架构上用。</li><li>架构代号是 gfx950。</li><li>只管一百二十八行以内。</li><li>行就是一次算的词数。</li><li>大批还走老路。</li><li>老路就是原来的算法。</li><li>形状不支持就走老路。</li><li>形状就是尺寸组合。</li><li>开关默认是关着的。</li><li>编译模式下也跳过新路。</li><li>编译模式就是提前编译。</li></ul>
+<h2>关键数据</h2>
+<ul><li>机器测的是 MI355X 单卡。</li><li>模型是 Qwen3.8-Flash-Next。</li><li>一行时快 3.0 倍。</li><li>二十四行时快 2.0 倍。</li><li>九十六行时快 1.7 倍。</li><li>一百二十八行时快 1.4 倍。</li><li>整机吞吐多约 5.6%。</li><li>吞吐就是每秒出的词数。</li><li>每用户速度快约 14.9%。</li><li>出词间隔降约 13.0%。</li><li>出词间隔就是两词之间等待。</li><li>首字反而慢约 3.6%。</li><li>首字就是第一个词出来。</li><li>分数从 96.6% 降到 96.3%。</li><li>分数是数学题得分。</li><li>数字是作者自报。</li></ul>
+<h2>为什么小批更划算</h2>
+<ul><li>小批时真正计算很少。</li><li>启动次数显得更贵。</li><li>三步分开要启动三次。</li><li>合成一步只启动一次。</li><li>批次越小省得越多。</li><li>一行时省得最多。</li><li>批次变大后省得变少。</li><li>大批时计算本身占大头。</li><li>所以大批还走老路。</li><li>一百二十九行就切回老路。</li><li>切回老路结果逐位一样。</li><li>逐位一样就是一模一样。</li></ul>
+<h2>跟你的研究方向的关联</h2>
+<ul><li>你的卡同属这个架构。</li><li>MI350X 也在这个架构里。</li><li>生成段是你的评估重点。</li><li>解耦后生成机常跑小批。</li><li>小批空转会拖慢出词。</li><li>空转就是卡在等小活。</li><li>这条正对小批空转。</li><li>测速要分开看批次。</li><li>只测大批会低估收益。</li><li>首字和出词要分开报。</li><li>这条首字反而变慢了。</li><li>只报吞吐会看漏首字。</li><li>开关默认关着要手动开。</li><li>评估时要记开关状态。</li><li>分数降了 0.3 个百分点。</li><li>做评估时要复测分数。</li></ul>
+<h2>原文关键图表</h2>
+<p>原文没有图片。</p>
+<p>关键数字都在表格里。</p>
+<p>下面把表格数字抄下来。</p>
+<h2>术语表</h2>
+<ul><li>生成段：逐词出词那段。</li><li>连接层：汇合支路那层。</li><li>归一：把数值拉回范围。</li><li>混合：把几条支路合起来。</li><li>注入：把结果送回去。</li><li>核心：显卡上算的程序。</li><li>吞吐：每秒出的词数。</li><li>首字：第一个词出来。</li></ul>
+<h2>注意事项</h2>
+<ul><li>只对 AMD 这个架构生效。</li><li>英伟达卡不受影响。</li><li>只管一百二十八行以内。</li><li>大批还走老路。</li><li>开关默认是关着的。</li><li>结果不是逐位一样。</li><li>误差在一格以内。</li><li>一格就是最小刻度。</li><li>只测了一个模型。</li><li>整机只测了单卡。</li><li>首字反而变慢了。</li><li>数字是作者自报。</li></ul>
+<h2>原文关键数据抄录</h2>
+<ul><li>一行旧版：38.2 微秒。</li><li>一行新版：12.7 微秒。</li><li>二十四行旧版：34.3 微秒。</li><li>二十四行新版：17.1 微秒。</li><li>九十六行旧版：41.8 微秒。</li><li>九十六行新版：24.5 微秒。</li><li>一百二十八行旧版：41.6 微秒。</li><li>一百二十八行新版：29.3 微秒。</li><li>吞吐旧版：108512 词每秒。</li><li>吞吐新版：114575 词每秒。</li><li>每用户旧版：53.90 词每秒。</li><li>每用户新版：61.95 词每秒。</li><li>出词间隔旧版：18.56 毫秒。</li><li>出词间隔新版：16.14 毫秒。</li><li>首字旧版：1073.1 毫秒。</li><li>首字新版：1111.4 毫秒。</li><li>分数旧版：96.6%。</li><li>分数新版：96.3%。</li><li>并发：24。</li><li>时长：3600 秒。</li></ul></body></html>
