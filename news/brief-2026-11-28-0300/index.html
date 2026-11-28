@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月28日 03:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-28"/>
+<meta name="doc-ts" content="2026-11-28T10:58:02"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-28（03点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-28（03点版）</h1>
+<p>这轮 GitHub 合入 18 条新动态。</p>
+<p>SGLang 有 11 条。</p>
+<p>vLLM 有 4 条。</p>
+<p>TRT-LLM 有 1 条。</p>
+<p>llama.cpp 有 2 条。</p>
+<p>剩下 5 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照还是 b12823。</p>
+<p>最值得看的是 SGLang 那条。</p>
+<p>它正对你的 AMD 卡架构。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照还是 b12823。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：AMD 连接层三步合成一步</strong></p>
+<p>#48648 把三步合成一步。</p>
+<p>连接层就是汇合支路那层。</p>
+<p>以前归一混合注入分开跑。</p>
+<p>归一就是把数值拉回范围。</p>
+<p>混合就是把几条支路合起来。</p>
+<p>注入就是把结果送回去。</p>
+<p>现在融合进一个核心。</p>
+<p>核心就是显卡上算的程序。</p>
+<p>只管一百二十八行以内。</p>
+<p>行就是一次算的词数。</p>
+<p>大批还走老路。</p>
+<p>开关默认是关着的。</p>
+<p>每处快了 1.4 到 3.0 倍。</p>
+<p>整机出词多约 5.6%。</p>
+<p>每用户快约 14.9%。</p>
+<p>出词间隔降约 13.0%。</p>
+<p>首字反而慢约 3.6%。</p>
+<p>首字就是第一个词出来。</p>
+<p>分数从 96.6% 降到 96.3%。</p>
+<p>机器测的是 MI355X 单卡。</p>
+<p>你的卡同属这个架构。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/48648">https://github.com/sgl-project/sglang/pull/48648</a></p>
+<p><strong>SGLang：AMD 猜词验算少跑两步</strong></p>
+<p>#44416 给猜词验算瘦身。</p>
+<p>猜词就是先猜再验。</p>
+<p>验算就是检查猜得对不对。</p>
+<p>路由以前要跑三步。</p>
+<p>路由就是给词挑专家。</p>
+<p>现在一步就做完了。</p>
+<p>另一处把活摊得更开。</p>
+<p>摊开就是让更多单元干活。</p>
+<p>每步从 9.98 降到 9.46 毫秒。</p>
+<p>每词从 1.98 降到 1.75 毫秒。</p>
+<p>并发一时快 5.8%。</p>
+<p>并发四时快 6.5%。</p>
+<p>分数只测了一遍。</p>
+<p>机器测的是 MI355X 四卡。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/44416">https://github.com/sgl-project/sglang/pull/44416</a></p>
+<p><strong>SGLang：只答一词不用找生成机</strong></p>
+<p>#53321 让读题机直接答短题。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>只答一个词时不用找生成机。</p>
+<p>以前还要白跑一趟生成机。</p>
+<p>现在读题机答完就结束。</p>
+<p>开关默认是关着的。</p>
+<p>老引擎会自动走老路。</p>
+<p>这条还没上真卡测过。</p>
+<p>只过了单元测试。</p>
+<p>单元测试就是小块自检。</p>
+<p>没有速度数字。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/53321">https://github.com/sgl-project/sglang/pull/53321</a></p>
+<p><strong>SGLang：解耦搬运补了新通道</strong></p>
+<p>#52858 给解耦搬运补新通道。</p>
+<p>搬运就是读题机送缓存。</p>
+<p>缓存就是存好的草稿纸。</p>
+<p>新通道按页送索引缓存。</p>
+<p>页就是缓存切的小块。</p>
+<p>索引就是挑重点用的目录。</p>
+<p>每台读题机送对位置。</p>
+<p>原文只写了一句话。</p>
+<p>这条没有速度数字。</p>
+<p>基础测试这轮被跳过了。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/52858">https://github.com/sgl-project/sglang/pull/52858</a></p>
+<p><strong>vLLM：长题不用切成两步读</strong></p>
+<p>#69244 让长题少跑一步。</p>
+<p>以前长题要切成两步读。</p>
+<p>切开是因为要存检查点。</p>
+<p>检查点就是中途存的进度。</p>
+<p>现在一步里顺手存好。</p>
+<p>冷启动首字快 16.4%。</p>
+<p>冷启动就是没缓存时。</p>
+<p>机器测的是 MI355X 八卡。</p>
+<p>英伟达八卡快 29.2%。</p>
+<p>代价是缓存少 4.7%。</p>
+<p>缓存少就是能存的词变少。</p>
+<p>解耦场景还没测过。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/69244">https://github.com/vllm-project/vllm/pull/69244</a></p>
+<p><strong>vLLM：看图的位置表存起来复用</strong></p>
+<p>#70136 给看图那块存现成结果。</p>
+<p>看图那块就是视觉编码器。</p>
+<p>编码器就是把图变数字。</p>
+<p>位置表以前每遍重算。</p>
+<p>位置表就是告诉模型位置。</p>
+<p>现在算好就存起来复用。</p>
+<p>每处省约 0.4 毫秒。</p>
+<p>结果和老版逐位一样。</p>
+<p>逐位一样就是一模一样。</p>
+<p>机器测的是国产加速卡。</p>
+<p>你的卡还没测过。</p>
+<p>没有整机速度数字。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70136">https://github.com/vllm-project/vllm/pull/70136</a></p>
+<p><strong>vLLM：提问向量也跟着压小</strong></p>
+<p>#70349 让提问向量也压小。</p>
+<p>提问向量就是查缓存那串数。</p>
+<p>缓存压小时提问也压小。</p>
+<p>读题每层快 2.6 到 3.9 倍。</p>
+<p>八千词读题省约 10.8%。</p>
+<p>分数基本没变。</p>
+<p>只对英伟达卡生效。</p>
+<p>AMD 那条路没改。</p>
+<p>你的卡用不上这条。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70349">https://github.com/vllm-project/vllm/pull/70349</a></p>
+<p><strong>TRT-LLM：画图模型分块回放了</strong></p>
+<p>#22587 给画图模型分块加速。</p>
+<p>以前整图录成一段回放。</p>
+<p>回放就是把动作录好重放。</p>
+<p>录死后就没法跳块了。</p>
+<p>跳块就是省掉不用算的块。</p>
+<p>现在每块单独录一段。</p>
+<p>跳不跳在块间决定。</p>
+<p>低精度时快 1.36 倍。</p>
+<p>另一种注意力快 1.98 倍。</p>
+<p>新版模型快约 2.09 倍。</p>
+<p>结果和老版逐位一样。</p>
+<p>机器测的是 B200。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22587">https://github.com/NVIDIA/TensorRT-LLM/pull/22587</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>vLLM 修了新卡专家计算。</p>
+<p>新卡就是下一代英伟达卡。</p>
+<p>SGLang 修了几处小错。</p>
+<p>包括滑动窗口的遮罩读取。</p>
+<p>遮罩就是挡住不该看的位置。</p>
+<p>llama.cpp 修了新模型细节。</p>
+<p>其余多是整理和测试。</p>
+<p><strong>五家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<p>Mooncake 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库的。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新的访谈</strong></p>
+<p>最新一期还是上一期报的。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>SGLang 的 AMD 连接那条</strong></p>
+<p>这篇正对你的 AMD 卡。</p>
+<p>生成段小批最怕空转。</p>
+<p>空转就是卡在等小活。</p>
+<p>三步合成一步讲清了。</p>
+<p>深读笔记已生成。</p></body></html>
