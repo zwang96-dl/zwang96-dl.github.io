@@ -1,0 +1,175 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="多模态推理简报 · 11月28日 01:00"/>
+<meta name="doc-description" content=""/>
+<meta name="doc-date" content="2026-11-28"/>
+<meta name="doc-ts" content="2026-11-28T08:57:53"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>多模态大模型推理服务简报 · 2026-11-28（01点版）</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>多模态大模型推理服务简报 · 2026-11-28（01点版）</h1>
+<p>这轮 GitHub 合入 20 条新动态。</p>
+<p>SGLang 有 13 条。</p>
+<p>vLLM 有 2 条。</p>
+<p>TRT-LLM 有 2 条。</p>
+<p>Mooncake 有 2 条。</p>
+<p>llama.cpp 有 1 条。</p>
+<p>剩下 4 家挂零。</p>
+<p>正式版水位全没动。</p>
+<p>快照还是 b12823。</p>
+<p>最值得看的是 SGLang 那条。</p>
+<p>它正对你的 AMD 卡架构。</p>
+<p>新论文这轮没核到新的。</p>
+<h2>框架更新</h2>
+<p><strong>版本水位：正式版全没动</strong></p>
+<p>vLLM 还是 v0.34.0。</p>
+<p>SGLang 还是 v0.5.23。</p>
+<p>TRT-LLM 还是 v1.3.0。</p>
+<p>Dynamo 还是 v1.7.0。</p>
+<p>FlashInfer 还是 v0.7.6。</p>
+<p>LMDeploy 还是 v0.18.0。</p>
+<p>TGI 还是 v3.3.7。</p>
+<p>Mooncake 还是 v0.3.14。</p>
+<p>llama.cpp 正式版还是 v1.1.0。</p>
+<p>快照还是 b12823。</p>
+<p>来源：GitHub releases</p>
+<p><strong>SGLang：AMD 小批生成少干活了</strong></p>
+<p>#41871 给生成段瘦身。</p>
+<p>生成段就是逐词出词那段。</p>
+<p>小批就是一次没几条请求。</p>
+<p>专家层以前要跑五步。</p>
+<p>专家层就是分工算的那层。</p>
+<p>排序和压缩占了一半时间。</p>
+<p>排序就是按专家分组。</p>
+<p>压缩就是把数压小再算。</p>
+<p>现在小批直接读原数。</p>
+<p>不用排序也不用压缩。</p>
+<p>五步变两步了。</p>
+<p>稍大批次也少一步。</p>
+<p>每层耗时降到约七成。</p>
+<p>机器测的是 MI355X 四卡。</p>
+<p>你的卡同属这个架构。</p>
+<p>并发四时出词快 4.6%。</p>
+<p>并发十六时快 1.0%。</p>
+<p>分数基本没变。</p>
+<p>数字是作者自报。</p>
+<p>这条已做深读笔记。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/41871">https://github.com/sgl-project/sglang/pull/41871</a></p>
+<p><strong>TRT-LLM：生成机缓存能放主机了</strong></p>
+<p>#22410 给解耦加了外存。</p>
+<p>解耦就是读题生成分开跑。</p>
+<p>缓存就是存好的草稿纸。</p>
+<p>稀疏缓存先放主机内存。</p>
+<p>主机就是显卡外那台机器。</p>
+<p>生成时再按需取回。</p>
+<p>取回就是用到哪块拿哪块。</p>
+<p>缓存放大六倍时最好。</p>
+<p>并发多约三成。</p>
+<p>出词多约一成。</p>
+<p>尾部延迟还是变高了。</p>
+<p>尾部就是最慢那批请求。</p>
+<p>机器测的是 GB300。</p>
+<p>你的卡还没测过。</p>
+<p>只支持单路生成。</p>
+<p>猜词模式还不能用。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/NVIDIA/TensorRT-LLM/pull/22410">https://github.com/NVIDIA/TensorRT-LLM/pull/22410</a></p>
+<p><strong>SGLang：看图那块不随分工变了</strong></p>
+<p>#51940 修了看图结果漂移。</p>
+<p>看图那块就是视觉编码器。</p>
+<p>编码器就是把图变数字。</p>
+<p>以前按卡数分工看图。</p>
+<p>卡数变了结果就变。</p>
+<p>图片结果差约 6.35%。</p>
+<p>视频结果差约 7.21%。</p>
+<p>现在每张卡看整张图。</p>
+<p>结果和单卡一模一样。</p>
+<p>代价是每卡多占内存。</p>
+<p>多占约一百八十九兆。</p>
+<p>机器测的是 H200。</p>
+<p>这条没给速度数字。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/51940">https://github.com/sgl-project/sglang/pull/51940</a></p>
+<p><strong>vLLM：新模型链条快了一点</strong></p>
+<p>#70329 优化了连接链条。</p>
+<p>连接链条就是层间传话那段。</p>
+<p>只对新款英伟达卡生效。</p>
+<p>出词快约百分之二。</p>
+<p>分数基本没变。</p>
+<p>机器测的是 B300。</p>
+<p>你的卡用不上这条。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/vllm-project/vllm/pull/70329">https://github.com/vllm-project/vllm/pull/70329</a></p>
+<p><strong>SGLang：缓存搬运换了新通道</strong></p>
+<p>#50889 给缓存搬运换通道。</p>
+<p>搬运就是主机显卡间送缓存。</p>
+<p>只对国产加速卡生效。</p>
+<p>首字时间降了约两成。</p>
+<p>你的卡用不上这条。</p>
+<p>数字是作者自报。</p>
+<p>来源：<a href="https://github.com/sgl-project/sglang/pull/50889">https://github.com/sgl-project/sglang/pull/50889</a></p>
+<p><strong>剩下的小事</strong></p>
+<p>SGLang 还优化了小模型。</p>
+<p>小模型只对消费级显卡。</p>
+<p>Mooncake 修了测试竞态。</p>
+<p>竞态就是抢着跑出错。</p>
+<p>llama.cpp 修了显卡选择。</p>
+<p>其余多是测试和整理。</p>
+<p><strong>四家挂零</strong></p>
+<p>LMDeploy 这轮没合入。</p>
+<p>TGI 也没合入。</p>
+<p>Dynamo 也没合入。</p>
+<p>FlashInfer 也没合入。</p>
+<h2>新技术与论文</h2>
+<p><strong>新论文这轮没核到新的</strong></p>
+<p>最新还是二十五号那批。</p>
+<p>前面已经报过了。</p>
+<p>这轮没有新入库的。</p>
+<h2>业内新闻</h2>
+<p><strong>网页这轮没别的新东西</strong></p>
+<p>搜到的多是旧闻和对比文。</p>
+<p>这轮就不硬凑了。</p>
+<h2>访谈与深度</h2>
+<p><strong>这轮没有新的访谈</strong></p>
+<p>最新一期还是上一期报的。</p>
+<p>这轮就不重复了。</p>
+<h2>值得深读</h2>
+<p><strong>SGLang 的 AMD 生成那条</strong></p>
+<p>这篇正对你的 AMD 卡。</p>
+<p>小批生成最容易空转。</p>
+<p>空转就是卡在等小活。</p>
+<p>五步变两步讲清了。</p>
+<p>深读笔记已生成。</p></body></html>

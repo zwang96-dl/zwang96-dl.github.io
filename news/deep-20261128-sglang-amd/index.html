@@ -1,0 +1,86 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta name="doc-title" content="深读 · SGLang：AMD 小批生成少干活了"/>
+<meta name="doc-description" content="- 原文：SGLang 团队，GitHub PR #41871"/>
+<meta name="doc-date" content="2026-11-28"/>
+<meta name="doc-ts" content="2026-11-28T08:58:10"/>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGLang：AMD 小批生成少干活了</title><style>
+body{font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+line-height:1.75;color:#1c1c1e;background:#fff;max-width:760px;margin:0 auto;padding:20px 18px 60px;font-size:16px}
+h1{font-size:22px;line-height:1.4;border-bottom:2px solid #f0f0f0;padding-bottom:12px}
+h2{font-size:18px;margin-top:32px;color:#111}
+h3{font-size:16px;margin-top:24px;color:#333}
+img{max-width:100%;height:auto;display:block;margin:18px auto;border:1px solid #eee;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:16px 0;display:block;overflow-x:auto}
+th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;white-space:nowrap}
+th{background:#f7f7f8}
+code{background:#f4f4f5;padding:2px 6px;border-radius:4px;font-size:14px}
+a{color:#0a58ca}
+.figcap{background:#f7f7f8;border-left:3px solid #0a58ca;padding:10px 14px;margin:-6px 0 22px;font-size:14.5px;color:#333}
+blockquote{border-left:3px solid #ddd;margin:16px 0;padding:8px 14px;color:#555;background:#fafafa}
+</style><style>
+.backlink{max-width:760px;margin:0 auto 8px;padding:10px 2px;font-size:14px}
+.backlink a{color:#0a58ca;text-decoration:none}
+
+@media (prefers-color-scheme: dark){
+body{background:#0d1117;color:#e6edf3}
+h1,h2{color:#f0f6fc;border-color:#21262d}
+h3{color:#e6edf3}
+a{color:#79c0ff}
+code{background:#161b22}
+blockquote{background:#161b22;border-color:#30363d;color:#9aa4b2}
+table{color:#e6edf3}
+th{background:#161b22}
+th,td{border-color:#30363d}
+.figcap{background:#161b22;border-color:#1f6feb;color:#9aa4b2}
+img{border-color:#30363d}
+.backlink{border-color:#30363d;background:#161b22}
+.backlink a{color:#79c0ff}
+}
+</style>
+</head><body>
+<div class="backlink"><a href="..">← 全部资讯</a></div>
+<h1>SGLang：AMD 小批生成少干活了</h1>
+<ul><li>原文：SGLang 团队，GitHub PR #41871</li><li>原文链接：<a href="https://github.com/sgl-project/sglang/pull/41871">https://github.com/sgl-project/sglang/pull/41871</a></li><li>合入时间：2026-11-28</li><li>验证方式：作者自报测试</li><li>数字来自作者自报</li></ul>
+<h2>人话解读</h2>
+<p>这条讲生成段的小批优化。</p>
+<p>生成段就是逐词出词那段。</p>
+<p>小批就是一次没几条请求。</p>
+<p>请求少时每步活也少。</p>
+<p>活少就怕准备动作太多。</p>
+<p>专家层以前要跑五步。</p>
+<p>专家层就是分工算的那层。</p>
+<p>先按专家把词分组。</p>
+<p>分组就是排序那一步。</p>
+<p>再把数压小两次。</p>
+<p>压小就是量化那一步。</p>
+<p>最后才真正算两遍。</p>
+<p>排序和压缩占了一半时间。</p>
+<p>就像做饭先摆半天盘。</p>
+<p>真正下锅反而没多久。</p>
+<p>现在小批直接读原数。</p>
+<p>原数就是没压过的数。</p>
+<p>不用排序也不用压缩。</p>
+<p>五步变两步了。</p>
+<p>稍大批次也少一步。</p>
+<p>排序时顺手把数压好。</p>
+<p>这样少跑一次压缩。</p>
+<h2>核心方法</h2>
+<ul><li>小批走现成的小批核心。</li><li>核心就是显卡上算的那段程序。</li><li>小批核心直接读原数。</li><li>原数不用先分组。</li><li>原数也不用先压缩。</li><li>新核心只加一个形状。</li><li>形状就是尺寸组合。</li><li>每卡中间层是 512。</li><li>专家槽位是 8 或 9 个。</li><li>槽位就是每个词选的专家位。</li><li>生成批次最多到 16。</li><li>更大批次还走老路。</li><li>老路就是原来的算法。</li><li>排序顺手写好压缩结果。</li><li>结果和老路逐位一样。</li><li>逐位一样就是一模一样。</li><li>这条路管批次 17 到 32。</li><li>隐藏尺寸要能被 2048 整除。</li><li>隐藏尺寸就是每层宽度。</li><li>开关可以关掉小批核心。</li><li>其他显卡不受影响。</li></ul>
+<h2>关键数据</h2>
+<ul><li>机器测的是 MI355X 四卡。</li><li>模型是 GLM-5.3-Flash。</li><li>每层以前跑五步。</li><li>每层现在跑两步。</li><li>每层从 35.52 微秒降到 25.04。</li><li>微秒就是百万分之一秒。</li><li>一共是 42 层。</li><li>并发四时出词快 4.6%。</li><li>并发十六时快 1.0%。</li><li>出词间隔从 8.73 降到 8.33 毫秒。</li><li>出词间隔就是两词之间等待。</li><li>分数从 0.971 降到 0.967。</li><li>分数只测了一遍。</li><li>一遍分不清是真降还是波动。</li><li>数字是作者自报。</li></ul>
+<h2>为什么小批更划算</h2>
+<ul><li>小批时真正计算很少。</li><li>准备动作显得更贵。</li><li>排序要扫一遍所有词。</li><li>压缩要再扫两遍。</li><li>扫的次数比算的还多。</li><li>直接读原数省掉扫的活。</li><li>批次变大后就不一样了。</li><li>大批时压缩能省更多时间。</li><li>所以大批还走老路。</li><li>中间批次只省一步。</li></ul>
+<h2>跟你的研究方向的关联</h2>
+<ul><li>你的卡同属这个架构。</li><li>架构代号是 gfx950。</li><li>MI350X 也在这个架构里。</li><li>生成段是你的评估重点。</li><li>解耦后生成机常跑小批。</li><li>小批空转会拖慢出词。</li><li>空转就是卡在等小活。</li><li>测速要分开看批次。</li><li>只测大批会高估收益。</li><li>只测小批也会高估收益。</li><li>排序那条路还没实测速度。</li><li>实测只覆盖小批那条路。</li><li>排序路只过了正确性测试。</li><li>做评估时要分开记。</li><li>开关关掉能做对照组。</li><li>对照组就是关掉新法的那组。</li></ul>
+<h2>原文关键图表</h2>
+<p>原文没有图片。</p>
+<p>关键数字都在表格里。</p>
+<p>下面把表格数字抄下来。</p>
+<h2>术语表</h2>
+<ul><li>生成段：逐词出词那段。</li><li>小批：一次没几条请求。</li><li>专家层：分工算的那层。</li><li>排序：按专家分组。</li><li>压缩：把数压小再算。</li><li>核心：显卡上算的程序。</li><li>槽位：每个词选的专家位。</li></ul>
+<h2>注意事项</h2>
+<ul><li>只对 AMD 这个架构生效。</li><li>英伟达卡不受影响。</li><li>其他 AMD 卡也不受影响。</li><li>只管生成段那部分。</li><li>读题段不在这条里。</li><li>排序路速度还没实测。</li><li>分数只测了一遍。</li><li>基线用了旧版镜像。</li><li>镜像就是打包好的运行环境。</li><li>数字是作者自报。</li></ul>
+<h2>原文关键数据抄录</h2>
+<ul><li>每层旧版：35.52 微秒。</li><li>每层新版：25.04 微秒。</li><li>旧版步数：5 步。</li><li>新版步数：2 步。</li><li>排序旧版：4.40 微秒。</li><li>两次压缩：各 3.88 微秒。</li><li>并发四旧版：8.73 毫秒。</li><li>并发四新版：8.33 毫秒。</li><li>并发十六旧版：10.68 毫秒。</li><li>并发十六新版：10.57 毫秒。</li><li>输入长度：70000 个词。</li><li>输出长度：300 个词。</li><li>分数旧版：0.971。</li><li>分数新版：0.967。</li></ul></body></html>
